@@ -201,7 +201,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -244,6 +248,10 @@
                         "Ability": "Found city"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Found City: Pay 1 action",
+                    "Player1: Found city: Gain city B6"
                   ]
                 },
                 {
@@ -274,6 +282,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete City Founder using City Founder/Resistance"
                   ]
                 }
               ]
@@ -284,15 +295,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Found City: Pay 1 action",
-      "Player1: Found city: Gain city B6"
-    ],
-    [
-      "Player1: Complete Objectives: Complete City Founder using City Founder/Resistance"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 1,
   "round": 1,

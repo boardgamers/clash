@@ -246,7 +246,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -311,6 +315,9 @@
                         "Ability": "Increase Happiness"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Increase Happiness: Pay 1 action, City C2 became Neutral, City B3 became Happy, Pay 5 mood tokens"
                   ]
                 }
               ]
@@ -321,11 +328,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Increase Happiness: Pay 1 action, City C2 became Neutral, City B3 became Happy, Pay 5 mood tokens"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,

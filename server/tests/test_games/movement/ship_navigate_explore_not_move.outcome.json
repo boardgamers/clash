@@ -336,7 +336,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -348,7 +352,10 @@
                         "destination": "F2"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Move: sailed 1 ship from B3 to F2"
+                  ]
                 }
               ]
             }
@@ -358,11 +365,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player2: Move: sailed 1 ship from B3 to F2"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 0,
   "round": 3,

@@ -200,7 +200,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -269,6 +273,12 @@
                         "Incident": 44
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Anarchy",
+                    "Player1: Anarchy: Lose 1 government advances due to Anarchy - adding 1 victory points"
                   ]
                 }
               ]
@@ -279,16 +289,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Anarchy",
-      "Player1: Anarchy: Lose 1 government advances due to Anarchy - adding 1 victory points"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 2,

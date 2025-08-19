@@ -165,7 +165,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -223,6 +227,11 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Vulcan"
                   ]
                 },
                 {
@@ -287,61 +296,11 @@
                       "origin": {
                         "Incident": 29
                       }
-                    },
-                    {
-                      "player": 0,
-                      "Structure": {
-                        "structure": {
-                          "Building": "Fortress"
-                        },
-                        "balance": "Loss",
-                        "position": "C2"
-                      },
-                      "origin": {
-                        "Incident": 29
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Structure": {
-                        "structure": {
-                          "Building": "Temple"
-                        },
-                        "balance": "Loss",
-                        "position": "C2"
-                      },
-                      "origin": {
-                        "Incident": 29
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Structure": {
-                        "structure": {
-                          "Wonder": "Pyramids"
-                        },
-                        "balance": "Loss",
-                        "position": "C2"
-                      },
-                      "origin": {
-                        "Incident": 29
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Units": {
-                        "units": {
-                          "settlers": 4,
-                          "infantry": 2,
-                          "cavalry": 1,
-                          "elephants": 1
-                        },
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Incident": 29
-                      }
                     }
+                  ],
+                  "log": [
+                    "Player1: Vulcan: Selected city C2 to be destroyed, Lose Fortress at C2, Gain 2 points for the Fortress at C2, Lose Temple at C2, Lose Pyramids at C2, Gain 0 points for the Pyramids at C2, Gain 2 points for the city center at C2, Lost 4 settlers, 2 infantry, 1 cavalry and 1 elephant at C2",
+                    "Player2: Vulcan: Gain 2 points for the Temple at C2"
                   ]
                 }
               ]
@@ -352,19 +311,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Vulcan"
-    ],
-    [
-      "Player1: Vulcan: Selected city C2 to be destroyed, Lose Fortress at C2, Gain 2 points for the Fortress at C2, Lose Temple at C2, Lose Pyramids at C2, Gain 0 points for the Pyramids at C2, Gain 2 points for the city center at C2, Lost 4 settlers, 2 infantry, 1 cavalry and 1 elephant at C2",
-      "Player2: Vulcan: Gain 2 points for the Temple at C2"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

@@ -319,14 +319,7 @@
     }
   ],
   "log_index": 3,
-  "log": [
-    [
-      "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city A1, Pay 1 action"
-    ],
-    [
-      "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens",
-      "Player1: Build Wonder: Play Pyramids, Gain Pyramids at A1"
-    ],
+
     [
       "Player1: Complete Objectives: Complete Magnificent Culture using Magnificent Culture/Outpost"
     ]

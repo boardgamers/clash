@@ -278,7 +278,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -293,7 +297,14 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units",
+                    "Player2: Combat: Defending with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units",
+                    "Player1: Choose Casualties: Remove 2 of their attacking units"
+                  ]
                 }
               ]
             }
@@ -303,17 +314,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units",
-      "Player2: Combat: Defending with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units",
-      "Player1: Choose Casualties: Remove 2 of their attacking units"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 1,
   "round": 1,

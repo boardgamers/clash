@@ -210,7 +210,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -268,6 +272,12 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Great Artist",
+                    "Player1: Great Artist: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Cannot afford to buy Great Artist"
                   ]
                 },
                 {
@@ -308,17 +318,25 @@
                         "Incident": 19
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Great Artist: Pay 2 culture tokens, Gain Great Artist from the current event"
                   ]
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 2 actions left"
+                  ]
                 }
               ]
             },
             {
-              "index": 1
+              "turn_type": {
+                "Player": 1
+              }
             }
           ]
         }
@@ -326,25 +344,6 @@
     }
   ],
   "log_index": 0,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Great Artist",
-      "Player1: Great Artist: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Cannot afford to buy Great Artist"
-    ],
-    [
-      "Player2: Great Artist: Pay 2 culture tokens, Gain Great Artist from the current event"
-    ],
-    [
-      "Player1: End Turn: 2 actions left"
-    ],
-    [
-      "It's Player2's turn"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 3,
   "round": 1,

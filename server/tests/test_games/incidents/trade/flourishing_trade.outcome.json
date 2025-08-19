@@ -190,7 +190,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -272,6 +276,14 @@
                         "Incident": 46
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Flourishing Trade",
+                    "Player1: Flourishing Trade: Base effect: Pirates spawn, No valid positions for Pirate Ship, Gain 1 gold",
+                    "Player2: Flourishing Trade: Gain 1 gold",
+                    "Player2: Waste: Could not store 1 gold"
                   ]
                 }
               ]
@@ -282,18 +294,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Flourishing Trade",
-      "Player1: Flourishing Trade: Base effect: Pirates spawn, No valid positions for Pirate Ship, Gain 1 gold",
-      "Player2: Flourishing Trade: Gain 1 gold",
-      "Player2: Waste: Could not store 1 gold"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 2,

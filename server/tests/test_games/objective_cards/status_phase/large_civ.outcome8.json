@@ -577,13 +577,7 @@
     }
   ],
   "log_index": 9,
-  "log": [
-    [
-      "Player2: End Turn: 2 actions left"
-    ],
-    [
-      "The game has entered the 1st status phase"
-    ],
+
     [
       "Player1: Complete Objectives: Complete Advanced Culture using Advanced Culture/Warmonger"
     ],

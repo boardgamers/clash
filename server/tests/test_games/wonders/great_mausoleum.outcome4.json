@@ -387,14 +387,7 @@
     }
   ],
   "log_index": 5,
-  "log": [
-    [
-      "Player1: Elder Statesman: Pay 1 action",
-      "Player1: Action Card: Play Elder Statesman"
-    ],
-    [
-      "Player1: Great Mausoleum: Draw Inspiration/Peltasts from the discard pile, Gain Inspiration/Peltasts from discard pile"
-    ],
+
     [
       "Player1: Great Mausoleum: Draw an action card"
     ],

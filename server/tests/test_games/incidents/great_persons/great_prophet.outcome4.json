@@ -269,7 +269,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -327,6 +331,12 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Great Prophet",
+                    "Player1: Great Prophet: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
                   ]
                 },
                 {
@@ -367,6 +377,9 @@
                         "Incident": 20
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Prophet: Pay 1 culture token, Gain Great Prophet from the current event"
                   ]
                 },
                 {
@@ -423,6 +436,11 @@
                         "CivilCard": 120
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Prophet: Pay 1 action, Gain Myths without taking an event token",
+                    "Player1: Action Card: Play Great Prophet",
+                    "Player1: Myths: Gain 1 mood token"
                   ]
                 },
                 {
@@ -432,7 +450,10 @@
                         "C1"
                       ]
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Great Prophet: Decided to build a Temple at C1"
+                  ]
                 },
                 {
                   "action": {
@@ -475,6 +496,10 @@
                         "CivilCard": 120
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Construct Building: Pay 2 gold with State Religion",
+                    "Player1: Great Prophet: Gain Temple at C1"
                   ]
                 }
               ]
@@ -485,31 +510,6 @@
     }
   ],
   "log_index": 5,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Great Prophet",
-      "Player1: Great Prophet: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
-    ],
-    [
-      "Player1: Great Prophet: Pay 1 culture token, Gain Great Prophet from the current event"
-    ],
-    [
-      "Player1: Great Prophet: Pay 1 action, Gain Myths without taking an event token",
-      "Player1: Action Card: Play Great Prophet",
-      "Player1: Myths: Gain 1 mood token"
-    ],
-    [
-      "Player1: Great Prophet: Decided to build a Temple at C1"
-    ],
-    [
-      "Player1: Construct Building: Pay 2 gold with State Religion",
-      "Player1: Great Prophet: Gain Temple at C1"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 1,
   "round": 1,

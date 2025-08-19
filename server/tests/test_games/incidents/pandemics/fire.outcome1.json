@@ -209,7 +209,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -279,6 +283,12 @@
                         "Ability": "Gold deposits"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Fire",
+                    "Player1: Gold deposits: Gain 2 gold"
                   ]
                 },
                 {
@@ -326,44 +336,12 @@
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
-                    {
-                      "player": 0,
-                      "MoodChange": {
-                        "city": "C2",
-                        "mood": "Angry"
-                      },
-                      "origin": {
-                        "Incident": 53
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "MoodChange": {
-                        "city": "A1",
-                        "mood": "Neutral"
-                      },
-                      "origin": {
-                        "Incident": 53
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ObjectiveCard": 29
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": {
-                          "CompleteObjective": "Terror Regime"
-                        }
-                      },
-                      "origin": {
-                        "Ability": "Complete Objectives"
-                      }
                     }
+                  ],
+                  "log": [
+                    "Player1: Fire: City C2 became Angry",
+                    "Player2: Fire: City A1 became Neutral",
+                    "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
                   ]
                 }
               ]
@@ -374,21 +352,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Fire",
-      "Player1: Gold deposits: Gain 2 gold"
-    ],
-    [
-      "Player1: Fire: City C2 became Angry",
-      "Player2: Fire: City A1 became Neutral",
-      "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

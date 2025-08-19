@@ -233,7 +233,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -253,6 +257,9 @@
                         "SpecialAdvance": "ImperialArmy"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Imperial Army: Pay 1 action, Start action"
                   ]
                 },
                 {
@@ -263,7 +270,10 @@
                         4
                       ]
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Imperial Army: Convert infantry at C2, settler at B4"
+                  ]
                 }
               ]
             }
@@ -273,17 +283,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1 ended the movement action"
-    ],
-    [
-      "Player1: Imperial Army: Pay 1 action, Start action"
-    ],
-    [
-      "Player1: Imperial Army: Convert infantry at C2, settler at B4"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

@@ -433,16 +433,7 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player2 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: Great Explorer",
-      "Player2 exhausted the land in position E8"
-    ]
-  ],
+
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

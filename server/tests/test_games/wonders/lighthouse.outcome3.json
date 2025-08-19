@@ -336,14 +336,7 @@
     }
   ],
   "log_index": 4,
-  "log": [
-    [
-      "Player1: Build Wonder: Play the wonder card Great Lighthouse, Decided to build Great Lighthouse in city A1, Pay 1 action"
-    ],
-    [
-      "Player1: Great Lighthouse: Pay 3 food, 5 wood, 4 ore and 5 culture tokens",
-      "Player1: Build Wonder: Play Great Lighthouse, Gain Great Lighthouse at A1"
-    ],
+
     [
       "Player1: Great Lighthouse: Start action"
     ],

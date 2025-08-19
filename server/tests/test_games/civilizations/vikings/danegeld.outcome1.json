@@ -256,7 +256,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -276,6 +280,9 @@
                         "LeaderAbility": "Danegeld"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Danegeld: Pay 1 action, Start action"
                   ]
                 },
                 {
@@ -309,6 +316,10 @@
                         "Ability": "Danegeld"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Danegeld: Gain 4 food, City E2 became Neutral",
+                    "Player1: Waste: Could not store 4 food"
                   ]
                 }
               ]
@@ -319,15 +330,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Danegeld: Pay 1 action, Start action"
-    ],
-    [
-      "Player1: Danegeld: Gain 4 food, City E2 became Neutral",
-      "Player1: Waste: Could not store 4 food"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

@@ -264,14 +264,7 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player2: Raze city: Did not raze a city"
-    ],
-    [
-      "Player1: Change Government: Pay nothing, Keep current government"
-    ]
-  ],
+
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

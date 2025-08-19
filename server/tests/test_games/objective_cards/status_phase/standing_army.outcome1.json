@@ -308,13 +308,7 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player2: End Turn: 1 actions left"
-    ],
-    [
-      "The game has entered the 1st status phase"
-    ],
+
     [
       "Player1: Complete Objectives: Complete Standing Army using Food Supplies/Standing Army"
     ]

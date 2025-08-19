@@ -326,7 +326,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -338,7 +342,10 @@
                         "destination": "C5"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Move: sailed 1 ship from D5 to C5, Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water"
+                  ]
                 }
               ]
             }
@@ -348,11 +355,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player2: Move: sailed 1 ship from D5 to C5, Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 3,

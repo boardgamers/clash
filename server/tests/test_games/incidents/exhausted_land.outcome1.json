@@ -237,7 +237,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -269,6 +273,11 @@
                         "Ability": "Free Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Storage: Gain 1 mood token",
+                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
+                    "A new game event has been triggered: An awesome year"
                   ]
                 },
                 {
@@ -304,6 +313,11 @@
                         "Incident": 13
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: An awesome year: Exhausted the land in position B2, Gain 2 food",
+                    "Player2: An awesome year: Gain 2 food",
+                    "Player2: Waste: Could not store 1 food"
                   ]
                 }
               ]
@@ -314,20 +328,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
-    ],
-    [
-      "A new game event has been triggered: An awesome year"
-    ],
-    [
-      "Player1: An awesome year: Exhausted the land in position B2, Gain 2 food",
-      "Player2: An awesome year: Gain 2 food",
-      "Player2: Waste: Could not store 1 food"
-    ]
-  ],
   "undo_limit": 2,
   "actions_left": 3,
   "round": 1,

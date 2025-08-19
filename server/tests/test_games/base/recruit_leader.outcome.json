@@ -262,7 +262,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -314,6 +318,9 @@
                         "Ability": "Recruit"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Recruit: Pay 1 action, Pay 1 mood token and 1 culture token, Gain Augustus at A1"
                   ]
                 }
               ]
@@ -324,11 +331,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Recruit: Pay 1 action, Pay 1 mood token and 1 culture token, Gain Augustus at A1"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,

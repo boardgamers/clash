@@ -371,7 +371,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -391,6 +395,9 @@
                         "LeaderAbility": "Master"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Master: Pay 1 action, Start action, Pay 1 mood token"
                   ]
                 },
                 {
@@ -469,6 +476,10 @@
                         "Ability": "Master"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Master: Pay 1 mood token, Gain Writing and take an event token (1 left)",
+                    "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
                   ]
                 }
               ]
@@ -479,15 +490,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Master: Pay 1 action, Start action, Pay 1 mood token"
-    ],
-    [
-      "Player1: Master: Pay 1 mood token, Gain Writing and take an event token (1 left)",
-      "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
-    ]
-  ],
   "undo_limit": 2,
   "actions_left": 2,
   "round": 1,

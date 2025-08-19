@@ -309,15 +309,7 @@
     }
   ],
   "log_index": 3,
-  "log": [
-    [
-      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry",
-      "Player2: Combat: Defending with 2 infantry"
-    ],
+
     [
       "Player1: Tactics: Play an action card face down, Reveal Tactics Card Archers",
       "Player2: Archers: Rolled a 6 and scored a hit"
