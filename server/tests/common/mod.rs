@@ -366,7 +366,7 @@ pub(crate) fn to_json(game: &Game) -> String {
     // strip data that only make the tests hard to compare
     for a in &mut data.action_log {
         for r in &mut a.rounds {
-            for p in &mut r.players {
+            for p in &mut r.turns {
                 for i in &mut p.actions {
                     i.undo.clear();
                 }

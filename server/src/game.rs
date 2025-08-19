@@ -10,10 +10,7 @@ use crate::content::persistent_events::{
 };
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
-use crate::log::{
-    ActionLogAge, add_player_log, add_round_log, current_player_turn_log,
-    current_player_turn_log_mut,
-};
+use crate::log::{ActionLogAge, add_turn_log, add_round_log, current_player_turn_log, current_player_turn_log_mut, TurnType};
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
 use crate::player::{CostTrigger, end_turn};
@@ -364,11 +361,10 @@ impl Game {
 
     pub(crate) fn start_turn(&mut self) {
         let player = self.current_player_index;
-        add_player_log(self, player);
+        add_turn_log(self, TurnType::Player(player));
         self.action_log_index = 0;
         self.undo_limit = 0;
 
-        self.add_info_log_group(format!("It's {}'s turn", self.player_name(player)));
         self.actions_left = ACTIONS;
         let lost_action = self
             .permanent_effects
