@@ -350,7 +350,6 @@ fn execute_regular_action(
 }
 
 pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
-    player.log(game, "Gain 1 action");
     game.actions_left += 1;
     add_action_log_item(
         game,
@@ -359,16 +358,17 @@ pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
         player.origin.clone(),
         vec![],
     );
+    player.log(game, "Gain 1 action");
 }
 
 pub(crate) fn lose_action(game: &mut Game, player: &EventPlayer) {
-    player.log(game, "Lose 1 action");
     subtract_action(game, player);
+    player.log(game, "Lose 1 action");
 }
 
 pub(crate) fn pay_action(game: &mut Game, player: &EventPlayer) {
-    player.log(game, "Pay 1 action");
     subtract_action(game, player);
+    player.log(game, "Pay 1 action");
 }
 
 fn subtract_action(game: &mut Game, player: &EventPlayer) {

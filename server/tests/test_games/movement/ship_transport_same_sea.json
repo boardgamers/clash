@@ -246,23 +246,21 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 0
+          "turns": [ { "turn_type": { "Player": 0 }
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
+  "log_index": 0,
+
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

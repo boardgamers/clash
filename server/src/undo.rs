@@ -51,7 +51,7 @@ pub(crate) fn to_serde_value(game: &Game) -> Value {
 }
 
 pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
-    let copy = current_turn_log(game).action(game).clone();
+    let copy = current_turn_log(game).last_action(game).clone();
     game.log_index += 1;
 
     let a = copy.action;

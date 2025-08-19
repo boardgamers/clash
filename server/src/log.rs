@@ -67,7 +67,7 @@ impl ActionLogTurn {
         }
     }
 
-    pub(crate) fn action(&self, game: &Game) -> &ActionLogAction {
+    pub(crate) fn last_action(&self, game: &Game) -> &ActionLogAction {
         &self.actions[game.log_index]
     }
 
@@ -253,7 +253,12 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
 fn remove_redo_actions(l: &mut Vec<ActionLogAction>, action_log_index: usize) {
     if action_log_index < l.len() {
         // remove items from undo
-        l.drain(action_log_index..);
+        for i in l.len()..action_log_index {
+            let item = l.get(i).expect("should have action");
+            if item.action != Action::StartTurn {
+                l.pop();
+            }
+        }
     }
 }
 
@@ -264,13 +269,17 @@ pub(crate) fn add_action_log_item(
     origin: EventOrigin,
     modifiers: Vec<EventOrigin>,
 ) {
-    let p = current_turn_log_mut(game);
-    if p.actions.is_empty() {
-        p.actions.push(ActionLogAction::new(Action::StartTurn));
-    }
     current_action_log_mut(game)
         .items
         .push(ActionLogItem::new(player, entry, origin, modifiers));
+}
+
+pub(crate) fn add_start_turn_action_if_needed(game: &mut Game) {
+    let p = current_turn_log_mut(game);
+    if p.actions.is_empty() {
+        p.actions.push(ActionLogAction::new(Action::StartTurn));
+        game.log_index += 1;
+    }
 }
 
 #[must_use]

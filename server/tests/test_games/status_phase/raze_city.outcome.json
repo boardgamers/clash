@@ -216,15 +216,13 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "actions": [
                 {
                   "action": {
@@ -267,7 +265,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "log_index": 1,
   "log": [
     [
       "Player1: Raze city: Lose city A1, Gain 1 gold"

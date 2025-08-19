@@ -220,15 +220,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -237,7 +239,10 @@
                         "action": "AbsolutePower"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Absolute Power: Start action, Pay 2 mood tokens"
+                  ]
                 },
                 {
                   "action": {
@@ -271,6 +276,9 @@
                         "Ability": "Absolute Power"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Absolute Power: Pay 2 mood tokens, Gain 1 action"
                   ]
                 }
               ]
@@ -280,15 +288,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Absolute Power: Start action, Pay 2 mood tokens"
-    ],
-    [
-      "Player1: Absolute Power: Pay 2 mood tokens, Gain 1 action"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 1,

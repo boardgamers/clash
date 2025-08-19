@@ -183,15 +183,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -208,7 +210,10 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Arts: Pay 1 culture token"
+                  ]
                 },
                 {
                   "action": {
@@ -259,6 +264,10 @@
                         "Advance": "Arts"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Arts: Pay 1 culture token, Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6), Gain Fortress at C2",
+                    "Player1: Arts: Lose Fortress at C2"
                   ]
                 }
               ]
@@ -268,16 +277,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player2: Arts: Pay 1 culture token"
-    ],
-    [
-      "Player2: Arts: Pay 1 culture token, Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6), Gain Fortress at C2",
-      "Player1: Arts: Lose Fortress at C2"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 2,
   "actions_left": 3,
   "successful_cultural_influence": true,

@@ -203,15 +203,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -235,6 +237,10 @@
                         "Ability": "Action Card"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Action Card: Play Negotiations/Scout",
+                    "Player1: Negotiations: Pay 1 culture token"
                   ]
                 },
                 {
@@ -260,22 +266,39 @@
                         "CivilCard": 23
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Negotiations: Pay 1 culture token, Started negotiations with Player2"
                   ]
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 3 actions left"
+                  ]
                 }
               ]
             },
             {
-              "index": 1,
+              "turn_type": {
+                "Player": 1
+              },
               "actions": [
+                {
+                  "action": "StartTurn",
+                  "log": [
+                    "Player2: Negotiations: May not attack Player1 this turn."
+                  ]
+                },
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player2: End Turn: 3 actions left"
+                  ]
                 }
               ]
             }
@@ -283,10 +306,18 @@
         },
         {
           "round": 2,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
+                {
+                  "action": "StartTurn",
+                  "log": [
+                    "Player1: Negotiations: May attack Player2 again."
+                  ]
+                },
                 {
                   "action": {
                     "Movement": {
@@ -357,6 +388,15 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched 1 infantry from C2 to B1, Pay 1 action",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
+                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B1",
+                    "Player1: Choose Casualties: Remove all attacking units",
+                    "Player2: Choose Casualties: Remove all defending units",
+                    "Battle ends in a draw"
                   ]
                 }
               ]
@@ -366,45 +406,8 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Action Card: Play Negotiations/Scout",
-      "Player1: Negotiations: Pay 1 culture token"
-    ],
-    [
-      "Player1: Negotiations: Pay 1 culture token, Started negotiations with Player2"
-    ],
-    [
-      "Player1: End Turn: 3 actions left"
-    ],
-    [
-      "It's Player2's turn",
-      "Player2: Negotiations: May not attack Player1 this turn."
-    ],
-    [
-      "Player2: End Turn: 3 actions left"
-    ],
-    [
-      "Round 2/3"
-    ],
-    [
-      "It's Player1's turn",
-      "Player1: Negotiations: May attack Player2 again."
-    ],
-    [
-      "Player1: Move: marched 1 infantry from C2 to B1, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
-      "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B1",
-      "Player1: Choose Casualties: Remove all attacking units",
-      "Player2: Choose Casualties: Remove all defending units",
-      "Battle ends in a draw"
-    ]
-  ],
-  "undo_limit": 1,
+  "log_index": 2,
+  "undo_limit": 2,
   "actions_left": 2,
   "round": 2,
   "age": 1,

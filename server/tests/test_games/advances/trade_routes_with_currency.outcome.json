@@ -414,20 +414,25 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 3 actions left"
+                  ]
                 }
               ]
             }
@@ -435,28 +440,24 @@
         },
         {
           "round": 3,
-          "players": [
+          "turns": [
             {
-              "index": 1
+              "turn_type": {
+                "Player": 1
+              },
+              "actions": [
+                {
+                  "action": "StartTurn"
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [
-    [
-      "Player1: End Turn: 3 actions left"
-    ],
-    [
-      "Round 3/3"
-    ],
-    [
-      "It's Player2's turn"
-    ]
-  ],
-  "undo_limit": 0,
+  "log_index": 1,
+  "undo_limit": 1,
   "actions_left": 3,
   "round": 3,
   "age": 2,

@@ -258,15 +258,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -326,6 +328,10 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 1 food and 1 gold, Gain Draft and take an event token (1 left)",
+                    "Player1: Draft: Gain 1 culture token"
                   ]
                 },
                 {
@@ -362,31 +368,10 @@
                       "origin": {
                         "Advance": "FreeEducation"
                       }
-                    },
-                    {
-                      "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "ideas": 1
-                        },
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Advance": "FreeEducation"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "mood_tokens": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Advance": "FreeEducation"
-                      }
                     }
+                  ],
+                  "log": [
+                    "Player1: Free Education: Pay 1 idea, Gain 1 mood token"
                   ]
                 }
               ]
@@ -396,16 +381,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 1 food and 1 gold, Gain Draft and take an event token (1 left)",
-      "Player1: Draft: Gain 1 culture token"
-    ],
-    [
-      "Player1: Free Education: Pay 1 idea, Gain 1 mood token"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 0,
   "round": 6,

@@ -189,15 +189,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -225,7 +227,10 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Free Economy: Pay 1 mood token"
+                  ]
                 },
                 {
                   "action": {
@@ -263,6 +268,11 @@
                         "Advance": "FreeEconomy"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Free Economy: Pay 1 mood token, Use city C2, Gain 1 ore and 1 gold",
+                    "Player1: Metallurgy: Convert 1 ore to 1 gold",
+                    "Player1: Waste: Could not store 1 ore and 1 gold"
                   ]
                 }
               ]
@@ -272,17 +282,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Free Economy: Pay 1 mood token"
-    ],
-    [
-      "Player1: Free Economy: Pay 1 mood token, Use city C2, Gain 1 ore and 1 gold",
-      "Player1: Metallurgy: Convert 1 ore to 1 gold",
-      "Player1: Waste: Could not store 1 ore and 1 gold"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 3,
   "round": 2,

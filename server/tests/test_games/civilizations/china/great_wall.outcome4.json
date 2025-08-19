@@ -366,15 +366,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -437,6 +439,10 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Engineering and take an event token (1 left)",
+                    "Player1: Great Wall: Gain Great Wall from Player2"
                   ]
                 },
                 {
@@ -444,7 +450,10 @@
                     "Playing": {
                       "WonderCard": "GreatWall"
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Build Wonder: Play the wonder card Great Wall, Decided to build Great Wall in city D1"
+                  ]
                 },
                 {
                   "action": {
@@ -508,12 +517,19 @@
                         "Ability": "Build Wonder"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall, Reduce the cost of Great Wall by 2 culture tokens, Great Wall can be built in the leader city as a free action",
+                    "Player1: Build Wonder: Play Great Wall, Gain Great Wall at D1"
                   ]
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 0 actions left"
+                  ]
                 }
               ]
             }
@@ -521,10 +537,18 @@
         },
         {
           "round": 2,
-          "players": [
+          "turns": [
             {
-              "index": 1,
+              "turn_type": {
+                "Player": 1
+              },
               "actions": [
+                {
+                  "action": "StartTurn",
+                  "log": [
+                    "Player2: Wonder replacement: Draw a replacement wonder card"
+                  ]
+                },
                 {
                   "action": {
                     "Response": {
@@ -547,6 +571,9 @@
                         "Ability": "Draw Wonder Card"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Draw Wonder Card: Gain Pyramids from the public area"
                   ]
                 }
               ]
@@ -556,34 +583,8 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Engineering and take an event token (1 left)",
-      "Player1: Great Wall: Gain Great Wall from Player2"
-    ],
-    [
-      "Player1: Build Wonder: Play the wonder card Great Wall, Decided to build Great Wall in city D1"
-    ],
-    [
-      "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall, Reduce the cost of Great Wall by 2 culture tokens, Great Wall can be built in the leader city as a free action",
-      "Player1: Build Wonder: Play Great Wall, Gain Great Wall at D1"
-    ],
-    [
-      "Player1: End Turn: 0 actions left"
-    ],
-    [
-      "Round 2/3"
-    ],
-    [
-      "It's Player2's turn",
-      "Player2: Wonder replacement: Draw a replacement wonder card"
-    ],
-    [
-      "Player2: Draw Wonder Card: Gain Pyramids from the public area"
-    ]
-  ],
-  "undo_limit": 0,
+  "log_index": 2,
+  "undo_limit": 1,
   "actions_left": 3,
   "round": 2,
   "age": 1,

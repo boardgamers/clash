@@ -222,15 +222,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -239,7 +241,10 @@
                         "action": "ForcedLabor"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Forced Labor: Start action, Pay 1 mood token"
+                  ]
                 },
                 {
                   "action": {
@@ -264,6 +269,9 @@
                         "Advance": "ForcedLabor"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Forced Labor: Pay 1 mood token, Treating Angry cities as neutral"
                   ]
                 },
                 {
@@ -314,6 +322,10 @@
                         "Ability": "Collect"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Collect: Pay 1 action, Use city A1, Gain 1 food and 1 wood",
+                    "Player1: Waste: Could not store 1 food and 1 wood"
                   ]
                 }
               ]
@@ -323,19 +335,7 @@
       ]
     }
   ],
-  "action_log_index": 3,
-  "log": [
-    [
-      "Player1: Forced Labor: Start action, Pay 1 mood token"
-    ],
-    [
-      "Player1: Forced Labor: Pay 1 mood token, Treating Angry cities as neutral"
-    ],
-    [
-      "Player1: Collect: Pay 1 action, Use city A1, Gain 1 food and 1 wood",
-      "Player1: Waste: Could not store 1 food and 1 wood"
-    ]
-  ],
+  "log_index": 3,
   "undo_limit": 0,
   "actions_left": 0,
   "round": 1,

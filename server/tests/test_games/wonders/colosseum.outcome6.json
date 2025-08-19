@@ -190,15 +190,13 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "actions": [
                 {
                   "action": {
@@ -488,7 +486,7 @@
       ]
     }
   ],
-  "action_log_index": 7,
+  "log_index": 7,
   "log": [
     [
       "Player1: Build Wonder: Play the wonder card Colosseum, Decided to build Colosseum in city A1, Pay 1 action"

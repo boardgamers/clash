@@ -187,15 +187,13 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "actions": [
                 {
                   "action": {
@@ -343,7 +341,7 @@
       ]
     }
   ],
-  "action_log_index": 4,
+  "log_index": 4,
   "log": [
     [
       "Player1: Move: marched 1 infantry from C2 to C1"

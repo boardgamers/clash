@@ -332,15 +332,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -376,6 +378,9 @@
                         }
                       ]
                     }
+                  ],
+                  "log": [
+                    "Player2: Move: marched 1 settler from D8 to F7 on roads for 1 food and 1 ore, Pay 1 food and 1 ore with Roads"
                   ]
                 }
               ]
@@ -385,12 +390,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2: Move: marched 1 settler from D8 to F7 on roads for 1 food and 1 ore, Pay 1 food and 1 ore with Roads"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 0,
   "round": 1,

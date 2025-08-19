@@ -183,15 +183,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -227,6 +229,10 @@
                         "CivilCard": 9
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Action Card: Play Ideas/High Ground",
+                    "Player1: Ideas: Gain 1 idea"
                   ]
                 }
               ]
@@ -236,13 +242,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Action Card: Play Ideas/High Ground",
-      "Player1: Ideas: Gain 1 idea"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 3,
   "round": 2,

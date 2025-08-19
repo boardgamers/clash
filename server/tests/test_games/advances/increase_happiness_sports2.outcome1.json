@@ -242,15 +242,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -271,6 +273,9 @@
                         "Advance": "Sports"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Sports: Pay 1 action, Start action in city C2"
                   ]
                 },
                 {
@@ -306,6 +311,9 @@
                         "Ability": "Sports"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Sports: Pay 2 culture tokens, City C2 became Happy"
                   ]
                 }
               ]
@@ -315,15 +323,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Sports: Pay 1 action, Start action in city C2"
-    ],
-    [
-      "Player1: Sports: Pay 2 culture tokens, City C2 became Happy"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,
