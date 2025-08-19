@@ -109,8 +109,7 @@ impl LogDialog {
                 // The next player's log_index is also the last entry before their turn
                 // So their turn starts at next_log_index + 1
                 // Which means current player's entries end at next_log_index + 1 (exclusive)
-                let next_log_index_before_turn = player_log_ranges[i + 1].3;
-                next_log_index_before_turn + 1
+                player_log_ranges[i + 1].3 + 1
             } else {
                 // This is the last player, so include everything to the end
                 rc.game.log.len()

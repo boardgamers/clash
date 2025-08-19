@@ -20,7 +20,6 @@ use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use crate::log::add_round_log;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum StatusPhaseState {
@@ -72,7 +71,6 @@ pub fn get_status_phase(game: &Game) -> Option<&StatusPhaseState> {
 }
 
 pub(crate) fn enter_status_phase(game: &mut Game) {
-    add_round_log(game, 4);
     game.add_info_log_group(format!(
         "The game has entered the {} status phase",
         utils::ordinal_number(game.age)
