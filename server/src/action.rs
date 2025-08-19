@@ -15,9 +15,7 @@ use crate::game::GameState;
 use crate::game::{Game, GameContext};
 use crate::game_setup::execute_choose_civ;
 use crate::incident::{on_choose_incident, on_trigger_incident};
-use crate::log::{
-    ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action, current_turn_log_mut,
-};
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action, current_turn_log_mut};
 use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
 use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -39,6 +37,7 @@ pub enum Action {
     Undo,
     Redo,
     StartTurn, // created for trade routes
+    Setup, // Game setup
     ChooseCivilization(String),
 }
 
@@ -96,7 +95,7 @@ pub fn try_execute_action(
     if old_player != new_player {
         game.player_changed();
     } else if add_undo && game.can_undo() {
-        let i = game.action_log_index - 1;
+        let i = game.log_index - 1;
         current_turn_log_mut(&mut game).actions[i].undo = clean_patch(patch.0);
     }
     Ok(game)
@@ -111,7 +110,6 @@ pub fn execute_without_undo(
     action: Action,
     player_index: usize,
 ) -> Result<(), String> {
-    current_turn_log_mut(game).log.push(vec![]);
     if matches!(action, Action::Redo) {
         if !game.can_redo() {
             return Err("action can't be redone".to_string());

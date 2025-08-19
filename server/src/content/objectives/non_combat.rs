@@ -103,7 +103,7 @@ pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogAct
 }
 
 fn last_round(game: &Game) -> Vec<&ActionLogTurn> {
-    game.action_log
+    game.log
         .last()
         .and_then(|a| a.rounds.last())
         .iter()

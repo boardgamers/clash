@@ -11,7 +11,7 @@ use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
-use crate::log::{ActionLogAge, ActionLogRound, ActionLogTurn, TurnType};
+use crate::log::{ActionLogAction, ActionLogAge, ActionLogRound, ActionLogTurn, TurnType};
 use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
@@ -160,8 +160,8 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         map,
         starting_player_index: starting_player,
         current_player_index: starting_player,
-        action_log: Vec::new(),
-        action_log_index: 0,
+        log: Vec::new(),
+        log_index: 0,
         undo_limit: 0,
         actions_left: ACTIONS,
         successful_cultural_influence: false,
@@ -192,9 +192,11 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
 fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
     let mut age = ActionLogAge::new(0);
     let mut round = ActionLogRound::new(0);
-    round.turns.push(ActionLogTurn::new(TurnType::Setup));
+    let mut turn = ActionLogTurn::new(TurnType::Setup);
+    turn.actions.push(ActionLogAction::new(Action::Setup));
+    round.turns.push(turn);
     age.rounds.push(round);
-    game.action_log.push(age);
+    game.log.push(age);
 
     for player_index in 0..setup.player_amount {
         let origin = setup_event_origin();

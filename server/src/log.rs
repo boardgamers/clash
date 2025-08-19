@@ -53,7 +53,6 @@ pub enum TurnType {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogTurn {
     pub turn_type: TurnType,
-    pub log: Vec<Vec<String>>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub actions: Vec<ActionLogAction>,
@@ -65,12 +64,11 @@ impl ActionLogTurn {
         Self {
             actions: Vec::new(),
             turn_type,
-            log: Vec::new(),
         }
     }
 
     pub(crate) fn action(&self, game: &Game) -> &ActionLogAction {
-        &self.actions[game.action_log_index]
+        &self.actions[game.log_index]
     }
 
     pub(crate) fn clear_undo(&mut self) {
@@ -92,6 +90,9 @@ pub struct ActionLogAction {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub items: Vec<ActionLogItem>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub log: Vec<String>,
 }
 
 impl ActionLogAction {
@@ -102,6 +103,7 @@ impl ActionLogAction {
             undo: Vec::new(),
             combat_stats: None,
             items: Vec::new(),
+            log: Vec::new(),
         }
     }
 }
@@ -227,7 +229,7 @@ pub struct LogSliceOptions {
 }
 
 pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
-    game.action_log
+    game.log
         .iter()
         .flat_map(|age| {
             age.rounds.iter().flat_map(|round| {
@@ -241,11 +243,11 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
 }
 
 pub(crate) fn add_log_action(game: &mut Game, item: Action) {
-    let i = game.action_log_index;
+    let i = game.log_index;
     let l = &mut current_turn_log_mut(game).actions;
     remove_redo_actions(l, i);
     l.push(ActionLogAction::new(item));
-    game.action_log_index += 1;
+    game.log_index += 1;
 }
 
 fn remove_redo_actions(l: &mut Vec<ActionLogAction>, action_log_index: usize) {
@@ -266,7 +268,7 @@ pub(crate) fn add_action_log_item(
     if p.actions.is_empty() {
         p.actions.push(ActionLogAction::new(Action::StartTurn));
     }
-    current_log_action_mut(game)
+    current_action_log_mut(game)
         .items
         .push(ActionLogItem::new(player, entry, origin, modifiers));
 }
@@ -274,7 +276,7 @@ pub(crate) fn add_action_log_item(
 #[must_use]
 pub(crate) fn current_turn_log_without_redo(game: &Game) -> ActionLogTurn {
     let mut log = current_turn_log(game).clone();
-    remove_redo_actions(&mut log.actions, game.action_log_index);
+    remove_redo_actions(&mut log.actions, game.log_index);
     log
 }
 
@@ -283,7 +285,7 @@ pub(crate) fn current_turn_log_without_redo(game: &Game) -> ActionLogTurn {
 /// Panics if the log entry does not exist
 #[must_use]
 pub(crate) fn current_turn_log(game: &Game) -> &ActionLogTurn {
-    game.action_log
+    game.log
         .last()
         .expect("state should exist")
         .rounds
@@ -298,7 +300,7 @@ pub(crate) fn current_turn_log(game: &Game) -> &ActionLogTurn {
 /// # Panics
 /// Panics if the log entry does not exist
 pub fn current_turn_log_mut(game: &mut Game) -> &mut ActionLogTurn {
-    game.action_log
+    game.log
         .last_mut()
         .expect("age log should exist")
         .rounds
@@ -309,7 +311,7 @@ pub fn current_turn_log_mut(game: &mut Game) -> &mut ActionLogTurn {
         .expect("player log should exist")
 }
 
-pub(crate) fn current_log_action_mut(game: &mut Game) -> &mut ActionLogAction {
+pub(crate) fn current_action_log_mut(game: &mut Game) -> &mut ActionLogAction {
     current_turn_log_mut(game)
         .actions
         .last_mut()
@@ -317,7 +319,7 @@ pub(crate) fn current_log_action_mut(game: &mut Game) -> &mut ActionLogAction {
 }
 
 pub(crate) fn add_round_log(game: &mut Game, round: u32) {
-    game.action_log
+    game.log
         .last_mut()
         .expect("action log should exist")
         .rounds
@@ -325,7 +327,7 @@ pub(crate) fn add_round_log(game: &mut Game, round: u32) {
 }
 
 pub(crate) fn add_turn_log(game: &mut Game, turn_type: TurnType) {
-    game.action_log
+    game.log
         .last_mut()
         .expect("action log should exist")
         .rounds

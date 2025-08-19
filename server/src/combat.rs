@@ -219,7 +219,7 @@ pub fn initiate_combat(
 }
 
 pub(crate) fn log_round(game: &mut Game, c: &Combat) {
-    game.add_info_log_group(format!("Combat round {}", c.stats.round));
+    game.add_info_log_item(&format!("Combat round {}", c.stats.round));
     let origin = &combat_event_origin();
     game.log(
         c.attacker(),

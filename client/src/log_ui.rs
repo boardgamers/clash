@@ -2,13 +2,25 @@ use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, State, StateUpd
 use crate::layout_ui::bottom_center_texture;
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
+use server::log::TurnType;
 
 #[derive(Clone, Debug)]
 pub(crate) struct LogEntry {
-    pub age: u32,
-    pub round: u32,
-    pub player_name: String,
+    pub age: Option<String>,
+    pub round: Option<String>,
+    pub name: String,
     pub message: String,
+}
+
+impl LogEntry {
+    pub(crate) fn new(age: Option<u32>, round: Option<u32>, name: &str, message: String) -> Self {
+        LogEntry {
+            age: age.map(|a| a.to_string()),
+            round: round.map(|r| r.to_string()),
+            name: name.to_string(),
+            message,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -26,92 +38,43 @@ impl LogDialog {
         // Build structured log entries with age, round, player, and message
         let mut log_entries = Vec::new();
 
-        // Create a list of all player log entries with their ranges
-        let mut player_log_ranges = Vec::new();
-
-        // Iterate over action log to collect all player entries and their log ranges
-        for action_log_age in &rc.game.action_log {
-            for action_log_round in &action_log_age.rounds {
-                for action_log_player in &action_log_round.turns {
-                    player_log_ranges.push((
-                        action_log_age.age,
-                        action_log_round.round,
-                        action_log_player.index,
-                        action_log_player.log_index,
-                    ));
-                }
-            }
-        }
-
-        // Sort by log_index to ensure proper ordering
-        player_log_ranges.sort_by_key(|(_, _, _, log_index)| *log_index);
-
-        // Helper function to determine if a message should skip player name
-        fn should_skip_player_name(message: &str) -> bool {
-            message.starts_with("Age ") && message.contains(" has started")
-                || message == "The game has started"
-                || message.starts_with("Round ") && message.contains("/3")
-                || message.starts_with( "The game has entered")
-                || message.starts_with( " ") // multi-line messages
-                || message.contains("Play as ") // Setup round civilization messages
-        }
-
-        // Helper function to process log entries for a given range
-        let mut process_log_entries = |start_index: usize,
-                                       end_index: usize,
-                                       age: u32,
-                                       round: u32,
-                                       player_name: &str| {
-            for log_index in start_index..end_index {
-                if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
-                    for message in log_entries_for_turn {
-                        // Simulate multiline labels to get accurate line count
-                        multiline_label(rc.state, message, Self::max_width(rc), |label: &str| {
-                            log_entries.push(LogEntry {
-                                age,
-                                round,
-                                player_name: if should_skip_player_name(label) {
-                                    String::new()
-                                } else {
-                                    player_name.to_string()
+        for age in &rc.game.log {
+            for round in &age.rounds {
+                for turn in &round.turns {
+                    for action in &turn.actions {
+                        for message in &action.log {
+                            // Simulate multiline labels to get accurate line count
+                            multiline_label(
+                                rc.state,
+                                message,
+                                Self::max_width(rc),
+                                |label: &str| {
+                                    log_entries.push(match turn.turn_type {
+                                        TurnType::Player(p) => LogEntry::new(
+                                            Some(age.age),
+                                            Some(round.round),
+                                            &rc.game.player_name(p),
+                                            label.to_string(),
+                                        ),
+                                        TurnType::Setup => LogEntry::new(
+                                            None,
+                                            None,
+                                            "Game Started",
+                                            label.to_string(),
+                                        ),
+                                        TurnType::StatusPhase => LogEntry::new(
+                                            None,
+                                            Some(round.round),
+                                            "Status Phase",
+                                            label.to_string(),
+                                        ),
+                                    });
                                 },
-                                message: label.to_string(),
-                            });
-                        });
+                            );
+                        }
                     }
                 }
             }
-        };
-
-        // Handle log entries before the first player turn (age 0)
-        let first_player_log_index = player_log_ranges
-            .first()
-            .map(|(_, _, _, log_index)| *log_index)
-            .unwrap_or(rc.game.log.len());
-
-        process_log_entries(0, first_player_log_index, 0, 0, "Setup");
-
-        // Process each player's log range
-        for i in 0..player_log_ranges.len() {
-            let (age, round, player_index, log_index_before_turn) = player_log_ranges[i];
-
-            // The log_index from server represents the last log entry BEFORE this player's turn starts
-            // So the actual start of this player's entries is log_index + 1
-            let start_log_index = log_index_before_turn + 1;
-
-            // Find the end index - this should be the start of the NEXT player's turn
-            let end_log_index = if i + 1 < player_log_ranges.len() {
-                // The next player's log_index is also the last entry before their turn
-                // So their turn starts at next_log_index + 1
-                // Which means current player's entries end at next_log_index + 1 (exclusive)
-                player_log_ranges[i + 1].3 + 1
-            } else {
-                // This is the last player, so include everything to the end
-                rc.game.log.len()
-            };
-
-            let player_name = rc.game.player(player_index).get_name();
-            process_log_entries(start_log_index, end_log_index, age, round, &player_name);
         }
 
         let total_lines = log_entries.len();
@@ -156,62 +119,11 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     y += 1.5; // Add some space after headers
 
     // Track previous values to only show when they change
-    let mut prev_age: Option<u32> = None;
-    let mut prev_round: Option<u32> = None;
-    let mut prev_player: Option<String> = None;
+    let mut prev_age: Option<String> = None;
+    let mut prev_round: Option<String> = None;
+    let mut prev_name: Option<String> = None;
 
-    for (i, entry) in d.log_entries[start..end].iter().enumerate() {
-        let is_first_entry = i == 0;
-        let is_status_phase = entry.message.starts_with("The game has entered");
-        let is_setup = entry.age == 0;
-
-        // Determine what to display for each column
-        let age_text = if is_setup {
-            if is_first_entry || prev_age != Some(entry.age) {
-                "Setup".to_string()
-            } else {
-                String::new()
-            }
-        } else {
-            if is_first_entry || prev_age != Some(entry.age) {
-                entry.age.to_string()
-            } else {
-                String::new()
-            }
-        };
-
-        let round_text = if is_setup || is_status_phase {
-            if is_status_phase
-                && (is_first_entry
-                    || prev_round != Some(entry.round)
-                    || prev_age != Some(entry.age))
-            {
-                "Status Phase".to_string()
-            } else {
-                String::new()
-            }
-        } else {
-            if is_first_entry || prev_round != Some(entry.round) || prev_age != Some(entry.age) {
-                entry.round.to_string()
-            } else {
-                String::new()
-            }
-        };
-
-        let player_text = if is_setup || is_status_phase {
-            String::new()
-        } else {
-            if is_first_entry
-                || prev_player.as_ref() != Some(&entry.player_name)
-                || prev_round != Some(entry.round)
-                || prev_age != Some(entry.age)
-            {
-                entry.player_name.clone()
-            } else {
-                String::new()
-            }
-        };
-
+    for entry in d.log_entries[start..end].iter() {
         let message_text = &entry.message;
 
         // Calculate positions for each column
@@ -221,15 +133,21 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         let message_pos = vec2(280., y * 25. + 20.);
 
         // Draw each column
-        rc.draw_text(&age_text, age_pos.x, age_pos.y);
-        rc.draw_text(&round_text, round_pos.x, round_pos.y);
-        rc.draw_text(&player_text, player_pos.x, player_pos.y);
+        if let Some(age) = &entry.age && entry.age != prev_age {
+            rc.draw_text(&age, age_pos.x, age_pos.y);
+        }
+        if let Some(round) = &entry.round && entry.round != prev_round {
+            rc.draw_text(&round, round_pos.x, round_pos.y);
+        }
+        if Some(&entry.name) != prev_name.as_ref() {
+            rc.draw_text(&entry.name, player_pos.x, player_pos.y);
+        }
         rc.draw_text(message_text, message_pos.x, message_pos.y);
 
         // Update previous values
-        prev_age = Some(entry.age);
-        prev_round = Some(entry.round);
-        prev_player = Some(entry.player_name.clone());
+        prev_age = entry.age.clone();
+        prev_round = entry.round.clone();
+        prev_name = Some(entry.name.clone());
 
         y += 1.;
     }
