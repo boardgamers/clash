@@ -1,16 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{do_advance, gain_advance_without_payment, remove_advance, Advance};
+use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
 use crate::city::raze_city;
 use crate::consts::AGES;
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
-    trigger_persistent_event_with_listener, AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest,
-    PersistentEventType, PlayerRequest, PositionRequest,
-    TriggerPersistentEventParams,
+    AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType,
+    PlayerRequest, PositionRequest, TriggerPersistentEventParams,
+    trigger_persistent_event_with_listener,
 };
 use crate::events::{EventOrigin, EventPlayer};
-use crate::log::{add_turn_log, TurnType};
+use crate::log::{TurnType, add_turn_log};
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };

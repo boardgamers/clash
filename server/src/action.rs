@@ -15,7 +15,9 @@ use crate::game::GameState;
 use crate::game::{Game, GameContext};
 use crate::game_setup::execute_choose_civ;
 use crate::incident::{on_choose_incident, on_trigger_incident};
-use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action, current_turn_log_mut};
+use crate::log::{
+    ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action, current_turn_log_mut,
+};
 use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
 use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -37,7 +39,7 @@ pub enum Action {
     Undo,
     Redo,
     StartTurn, // created for trade routes
-    Setup, // Game setup
+    Setup,     // Game setup
     ChooseCivilization(String),
 }
 
