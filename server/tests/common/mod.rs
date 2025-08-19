@@ -8,7 +8,7 @@ use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::{EventResponse, SelectedStructure};
 use server::game::{Game, GameContext};
 use server::game_data::GameData;
-use server::log::current_player_turn_log_mut;
+use server::log::current_turn_log_mut;
 use server::movement::MoveUnits;
 use server::movement::MovementAction::Move;
 use server::playing_actions::PlayingAction::{Advance, InfluenceCultureAttempt};
@@ -398,7 +398,7 @@ fn undo_redo(
     let game = game_api::execute(game, Action::Undo, player_index);
     if compare_json {
         let mut trimmed_game = game.clone();
-        current_player_turn_log_mut(&mut trimmed_game).actions.pop();
+        current_turn_log_mut(&mut trimmed_game).actions.pop();
         assert_eq_game_json(
             &original_game,
             &to_json(&trimmed_game),

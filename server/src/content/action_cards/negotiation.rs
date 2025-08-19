@@ -10,7 +10,7 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, encircled, high_ground, martyr, scout,
 };
 use crate::game::Game;
-use crate::log::current_player_turn_log_without_redo;
+use crate::log::current_turn_log_without_redo;
 use crate::playing_actions::PlayingAction;
 use crate::utils::remove_element_by;
 
@@ -35,7 +35,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         This turn, you may not attack that player. In their next turn, they may not attack you.",
         |c| c.free_action().culture_tokens(1),
         move |game, _player, _| {
-            !current_player_turn_log_without_redo(game)
+            !current_turn_log_without_redo(game)
                 .actions
                 .iter()
                 .any(|i| match &i.action {

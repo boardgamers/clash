@@ -10,7 +10,9 @@ use crate::content::persistent_events::{
 };
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
-use crate::log::{ActionLogAge, add_turn_log, add_round_log, current_player_turn_log, current_player_turn_log_mut, TurnType};
+use crate::log::{
+    ActionLogAge, TurnType, add_round_log, add_turn_log, current_turn_log, current_turn_log_mut,
+};
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
 use crate::player::{CostTrigger, end_turn};
@@ -114,7 +116,6 @@ pub struct Game {
     pub action_log: Vec<ActionLogAge>,
     // index for the next action log
     pub action_log_index: usize,
-    pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
@@ -227,7 +228,7 @@ impl Game {
     fn lock_undo(&mut self) {
         if self.context != GameContext::AI {
             self.undo_limit = self.action_log_index;
-            current_player_turn_log_mut(self).clear_undo();
+            current_turn_log_mut(self).clear_undo();
         }
     }
 
@@ -310,7 +311,7 @@ impl Game {
     #[must_use]
     pub fn can_redo(&self) -> bool {
         self.context != GameContext::AI
-            && self.action_log_index < current_player_turn_log(self).actions.len()
+            && self.action_log_index < current_turn_log(self).actions.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
@@ -337,18 +338,20 @@ impl Game {
     }
 
     pub fn add_info_log_group(&mut self, info: String) {
-        self.log.push(vec![info]);
+        current_turn_log_mut(self).log.push(vec![info]);
     }
 
     pub fn add_info_log_item(&mut self, info: &str) {
-        let last_item_index = self.log.len() - 1;
-        self.log[last_item_index].push(info.to_string());
+        let log = &mut current_turn_log_mut(self).log;
+        let last_item_index = log.len() - 1;
+        log[last_item_index].push(info.to_string());
     }
 
     pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
         let prefix = format!("{}: {}: ", self.player_name(player), origin.name(self));
-        let last_item_index = self.log.len() - 1;
-        let current = &mut self.log[last_item_index];
+        let log = &mut current_turn_log_mut(self).log;
+        let last_item_index = log.len() - 1;
+        let current = &mut log[last_item_index];
         for c in current.iter_mut() {
             if c.starts_with(&prefix) {
                 use std::fmt::Write as _;
@@ -462,7 +465,7 @@ impl Game {
 
     pub fn next_turn(&mut self) {
         end_turn(self, self.current_player_index);
-        for i in &mut current_player_turn_log_mut(self).actions {
+        for i in &mut current_turn_log_mut(self).actions {
             i.undo.clear();
         }
         check_for_waste(self);

@@ -8,7 +8,7 @@ use crate::content::custom_actions::CustomActionType::{
 };
 use crate::content::persistent_events::PositionRequest;
 use crate::game::GameOptions;
-use crate::log::current_player_turn_log_without_redo;
+use crate::log::current_turn_log_without_redo;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
@@ -115,7 +115,7 @@ fn free_economy() -> AdvanceBuilder {
             }
             PlayingActionType::Custom(i)
                 if *i == FreeEconomyCollect
-                    && current_player_turn_log_without_redo(game)
+                    && current_turn_log_without_redo(game)
                         .actions
                         .iter()
                         .any(|item| {

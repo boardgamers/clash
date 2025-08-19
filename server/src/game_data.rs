@@ -51,7 +51,6 @@ pub struct GameData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub action_log: Vec<ActionLogAge>,
     action_log_index: usize,
-    log: Vec<Vec<String>>,
     undo_limit: usize,
     actions_left: u32,
     #[serde(default)]
@@ -119,7 +118,6 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         successful_cultural_influence: data.successful_cultural_influence,
         action_log: data.action_log,
         action_log_index: data.action_log_index,
-        log: data.log,
         undo_limit: data.undo_limit,
         round: data.round,
         age: data.age,
@@ -162,7 +160,6 @@ pub fn data(game: Game) -> GameData {
         current_player_index: game.current_player_index,
         action_log: game.action_log,
         action_log_index: game.action_log_index,
-        log: game.log,
         undo_limit: game.undo_limit,
         actions_left: game.actions_left,
         successful_cultural_influence: game.successful_cultural_influence,
@@ -198,7 +195,6 @@ pub fn cloned_data(game: &Game) -> GameData {
         current_player_index: game.current_player_index,
         action_log: game.action_log.clone(),
         action_log_index: game.action_log_index,
-        log: game.log.clone(),
         undo_limit: game.undo_limit,
         actions_left: game.actions_left,
         successful_cultural_influence: game.successful_cultural_influence,

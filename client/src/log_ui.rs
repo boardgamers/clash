@@ -66,23 +66,18 @@ impl LogDialog {
                 if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
                     for message in log_entries_for_turn {
                         // Simulate multiline labels to get accurate line count
-                        multiline_label(
-                            rc.state,
-                            message,
-                            Self::max_width(rc),
-                            |label: &str| {
-                                log_entries.push(LogEntry {
-                                    age,
-                                    round,
-                                    player_name: if should_skip_player_name(label) {
-                                        String::new()
-                                    } else {
-                                        player_name.to_string()
-                                    },
-                                    message: label.to_string(),
-                                });
-                            },
-                        );
+                        multiline_label(rc.state, message, Self::max_width(rc), |label: &str| {
+                            log_entries.push(LogEntry {
+                                age,
+                                round,
+                                player_name: if should_skip_player_name(label) {
+                                    String::new()
+                                } else {
+                                    player_name.to_string()
+                                },
+                                message: label.to_string(),
+                            });
+                        });
                     }
                 }
             }
@@ -186,7 +181,11 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         };
 
         let round_text = if is_setup || is_status_phase {
-            if is_status_phase && (is_first_entry || prev_round != Some(entry.round) || prev_age != Some(entry.age)) {
+            if is_status_phase
+                && (is_first_entry
+                    || prev_round != Some(entry.round)
+                    || prev_age != Some(entry.age))
+            {
                 "Status Phase".to_string()
             } else {
                 String::new()
@@ -202,7 +201,11 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         let player_text = if is_setup || is_status_phase {
             String::new()
         } else {
-            if is_first_entry || prev_player.as_ref() != Some(&entry.player_name) || prev_round != Some(entry.round) || prev_age != Some(entry.age) {
+            if is_first_entry
+                || prev_player.as_ref() != Some(&entry.player_name)
+                || prev_round != Some(entry.round)
+                || prev_age != Some(entry.age)
+            {
                 entry.player_name.clone()
             } else {
                 String::new()
