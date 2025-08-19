@@ -485,7 +485,6 @@ impl Game {
             enter_status_phase(self);
             return;
         }
-        self.add_info_log_group(format!("Round {}/3", self.round));
         add_round_log(self, self.round);
         self.start_turn();
     }
@@ -494,9 +493,7 @@ impl Game {
         self.age += 1;
         self.round = 0;
         self.current_player_index = self.starting_player_index;
-        let m = format!("Age {} has started", self.age);
-        self.add_message(&m);
-        self.add_info_log_group(m);
+        self.add_message(&format!("Age {} has started", self.age));
         self.action_log.push(ActionLogAge::new(self.age));
         self.next_round();
     }
