@@ -11,7 +11,7 @@ use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
-use crate::log::{add_player_log, ActionLogAge, ActionLogRound};
+use crate::log::{add_player_log, add_round_log, ActionLogAge, ActionLogRound};
 use crate::map::{get_map_setup, Map, MapSetup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{gain_unit, Player};
@@ -194,9 +194,8 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
 }
 
 fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
-    let mut age = ActionLogAge::new(0);
-    age.rounds.push(ActionLogRound::new(0));
-    game.action_log.push(age);
+    game.next_age();
+    add_round_log(game, 0);
 
     for player_index in 0..setup.player_amount {
         add_player_log(game, player_index);
@@ -223,7 +222,6 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&Ma
             gain_unit(game, player, position, UnitType::Settler);
         }
     }
-    game.next_age();
 }
 
 pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
