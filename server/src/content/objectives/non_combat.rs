@@ -89,10 +89,14 @@ pub(crate) fn magnificent_culture() -> Objective {
 pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogAction> {
     last_round(game)
         .iter()
-        .filter(|p| if let TurnType::Player(i) = p.turn_type && i == player {
-            true
-        } else {
-            false
+        .filter(|p| {
+            if let TurnType::Player(i) = p.turn_type
+                && i == player
+            {
+                true
+            } else {
+                false
+            }
         })
         .flat_map(|p| p.actions.iter())
         .collect()

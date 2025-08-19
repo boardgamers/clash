@@ -1,9 +1,9 @@
 use crate::action::Action;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{do_advance, Advance};
+use crate::advance::{Advance, do_advance};
 use crate::cache::Cache;
 use crate::city;
-use crate::city::{set_city_mood, City, MoodState};
+use crate::city::{City, MoodState, set_city_mood};
 use crate::civilization::Civilization;
 use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION};
 use crate::content::ability;
@@ -12,9 +12,9 @@ use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
 use crate::log::{ActionLogAge, ActionLogRound, ActionLogTurn, TurnType};
-use crate::map::{get_map_setup, Map, MapSetup};
+use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{gain_unit, Player};
+use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
@@ -162,10 +162,6 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         current_player_index: starting_player,
         action_log: Vec::new(),
         action_log_index: 0,
-        log: [String::from("The game has started")]
-            .iter()
-            .map(|s| vec![s.clone()])
-            .collect(),
         undo_limit: 0,
         actions_left: ACTIONS,
         successful_cultural_influence: false,
@@ -196,7 +192,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
 fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
     let mut age = ActionLogAge::new(0);
     let mut round = ActionLogRound::new(0);
-    round.turns.push(ActionLogTurn::new(TurnType::Setup, 0));
+    round.turns.push(ActionLogTurn::new(TurnType::Setup));
     age.rounds.push(round);
     game.action_log.push(age);
 

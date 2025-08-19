@@ -1,26 +1,26 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
+use crate::advance::{do_advance, gain_advance_without_payment, remove_advance, Advance};
 use crate::city::raze_city;
 use crate::consts::AGES;
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
-    AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType,
-    PlayerRequest, PositionRequest, TriggerPersistentEventParams,
-    trigger_persistent_event_with_listener,
+    trigger_persistent_event_with_listener, AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest,
+    PersistentEventType, PlayerRequest, PositionRequest,
+    TriggerPersistentEventParams,
 };
 use crate::events::{EventOrigin, EventPlayer};
+use crate::log::{add_turn_log, TurnType};
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::wonder::Wonder;
-use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
+use crate::{game::Game, player::Player, resource_pile::ResourcePile};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use crate::log::{add_turn_log, TurnType};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum StatusPhaseState {

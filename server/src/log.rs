@@ -47,13 +47,13 @@ impl ActionLogRound {
 pub enum TurnType {
     Player(usize),
     Setup,
-    StatusPhase
+    StatusPhase,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogTurn {
     pub turn_type: TurnType,
-    pub log_index: usize,
+    pub log: Vec<Vec<String>>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub actions: Vec<ActionLogAction>,
@@ -61,11 +61,11 @@ pub struct ActionLogTurn {
 
 impl ActionLogTurn {
     #[must_use]
-    pub(crate) fn new(turn_type: TurnType, log_index: usize) -> Self {
+    pub(crate) fn new(turn_type: TurnType) -> Self {
         Self {
             actions: Vec::new(),
             turn_type,
-            log_index,
+            log: Vec::new(),
         }
     }
 
@@ -242,7 +242,7 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
 
 pub(crate) fn add_log_action(game: &mut Game, item: Action) {
     let i = game.action_log_index;
-    let l = &mut current_player_turn_log_mut(game).actions;
+    let l = &mut current_turn_log_mut(game).actions;
     remove_redo_actions(l, i);
     l.push(ActionLogAction::new(item));
     game.action_log_index += 1;
@@ -262,7 +262,7 @@ pub(crate) fn add_action_log_item(
     origin: EventOrigin,
     modifiers: Vec<EventOrigin>,
 ) {
-    let p = current_player_turn_log_mut(game);
+    let p = current_turn_log_mut(game);
     if p.actions.is_empty() {
         p.actions.push(ActionLogAction::new(Action::StartTurn));
     }
@@ -272,8 +272,8 @@ pub(crate) fn add_action_log_item(
 }
 
 #[must_use]
-pub(crate) fn current_player_turn_log_without_redo(game: &Game) -> ActionLogTurn {
-    let mut log = current_player_turn_log(game).clone();
+pub(crate) fn current_turn_log_without_redo(game: &Game) -> ActionLogTurn {
+    let mut log = current_turn_log(game).clone();
     remove_redo_actions(&mut log.actions, game.action_log_index);
     log
 }
@@ -282,7 +282,7 @@ pub(crate) fn current_player_turn_log_without_redo(game: &Game) -> ActionLogTurn
 /// # Panics
 /// Panics if the log entry does not exist
 #[must_use]
-pub(crate) fn current_player_turn_log(game: &Game) -> &ActionLogTurn {
+pub(crate) fn current_turn_log(game: &Game) -> &ActionLogTurn {
     game.action_log
         .last()
         .expect("state should exist")
@@ -297,7 +297,7 @@ pub(crate) fn current_player_turn_log(game: &Game) -> &ActionLogTurn {
 ///
 /// # Panics
 /// Panics if the log entry does not exist
-pub fn current_player_turn_log_mut(game: &mut Game) -> &mut ActionLogTurn {
+pub fn current_turn_log_mut(game: &mut Game) -> &mut ActionLogTurn {
     game.action_log
         .last_mut()
         .expect("age log should exist")
@@ -310,7 +310,7 @@ pub fn current_player_turn_log_mut(game: &mut Game) -> &mut ActionLogTurn {
 }
 
 pub(crate) fn current_log_action_mut(game: &mut Game) -> &mut ActionLogAction {
-    current_player_turn_log_mut(game)
+    current_turn_log_mut(game)
         .actions
         .last_mut()
         .expect("actions empty")
@@ -332,5 +332,5 @@ pub(crate) fn add_turn_log(game: &mut Game, turn_type: TurnType) {
         .last_mut()
         .expect("round should exist")
         .turns
-        .push(ActionLogTurn::new(turn_type, game.log.len()));
+        .push(ActionLogTurn::new(turn_type));
 }
