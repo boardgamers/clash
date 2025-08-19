@@ -364,7 +364,7 @@ fn assert_illegal_action(game: Game, player: usize, action: Action) {
 pub(crate) fn to_json(game: &Game) -> String {
     let mut data = game.cloned_data();
     // strip data that only make the tests hard to compare
-    for a in &mut data.action_log {
+    for a in &mut data.log {
         for r in &mut a.rounds {
             for p in &mut r.turns {
                 for i in &mut p.actions {

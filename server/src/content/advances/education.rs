@@ -51,7 +51,7 @@ fn writing() -> AdvanceBuilder {
         1,
         |game, (), (), p| {
             if game.is_update_patch() {
-                let count = log::current_log_action_mut(game)
+                let count = log::current_action_log_mut(game)
                     .items
                     .iter()
                     .filter(|item| {

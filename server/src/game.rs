@@ -10,9 +10,7 @@ use crate::content::persistent_events::{
 };
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
-use crate::log::{
-    ActionLogAge, TurnType, add_round_log, add_turn_log, current_turn_log, current_turn_log_mut,
-};
+use crate::log::{ActionLogAge, TurnType, add_round_log, add_turn_log, current_turn_log, current_turn_log_mut, current_action_log_mut};
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
 use crate::player::{CostTrigger, end_turn};
@@ -28,7 +26,6 @@ use crate::{city::City, game_data, map::Map, player::Player, position::Position}
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::vec;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
 pub enum CivSetupOption {
@@ -113,9 +110,9 @@ pub struct Game {
     pub map: Map,
     pub starting_player_index: usize,
     pub current_player_index: usize,
-    pub action_log: Vec<ActionLogAge>,
+    pub log: Vec<ActionLogAge>,
     // index for the next action log
-    pub action_log_index: usize,
+    pub log_index: usize,
     pub undo_limit: usize,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
@@ -227,7 +224,7 @@ impl Game {
 
     fn lock_undo(&mut self) {
         if self.context != GameContext::AI {
-            self.undo_limit = self.action_log_index;
+            self.undo_limit = self.log_index;
             current_turn_log_mut(self).clear_undo();
         }
     }
@@ -305,13 +302,13 @@ impl Game {
 
     #[must_use]
     pub fn can_undo(&self) -> bool {
-        self.context != GameContext::AI && self.undo_limit < self.action_log_index
+        self.context != GameContext::AI && self.undo_limit < self.log_index
     }
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
         self.context != GameContext::AI
-            && self.action_log_index < current_turn_log(self).actions.len()
+            && self.log_index < current_turn_log(self).actions.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
@@ -337,35 +334,27 @@ impl Game {
         })
     }
 
-    pub fn add_info_log_group(&mut self, info: String) {
-        current_turn_log_mut(self).log.push(vec![info]);
-    }
-
     pub fn add_info_log_item(&mut self, info: &str) {
-        let log = &mut current_turn_log_mut(self).log;
-        let last_item_index = log.len() - 1;
-        log[last_item_index].push(info.to_string());
+        current_action_log_mut(self).log.push(info.to_string());
     }
 
     pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
         let prefix = format!("{}: {}: ", self.player_name(player), origin.name(self));
-        let log = &mut current_turn_log_mut(self).log;
-        let last_item_index = log.len() - 1;
-        let current = &mut log[last_item_index];
-        for c in current.iter_mut() {
+        let log = &mut current_action_log_mut(self).log;
+        for c in log.iter_mut() {
             if c.starts_with(&prefix) {
                 use std::fmt::Write as _;
                 let _ = write!(c, ", {message}");
                 return;
             }
         }
-        current.push(format!("{prefix}{message}"));
+        log.push(format!("{prefix}{message}"));
     }
 
     pub(crate) fn start_turn(&mut self) {
         let player = self.current_player_index;
         add_turn_log(self, TurnType::Player(player));
-        self.action_log_index = 0;
+        self.log_index = 0;
         self.undo_limit = 0;
 
         self.actions_left = ACTIONS;
@@ -494,7 +483,7 @@ impl Game {
         self.round = 0;
         self.current_player_index = self.starting_player_index;
         self.add_message(&format!("Age {} has started", self.age));
-        self.action_log.push(ActionLogAge::new(self.age));
+        self.log.push(ActionLogAge::new(self.age));
         self.next_round();
     }
 
@@ -509,7 +498,7 @@ impl Game {
         let winner_name = self.player_name(winner_player_index);
         let m = format!("The game has ended. {winner_name} has won");
         self.add_message(&m);
-        self.add_info_log_group(m);
+        self.add_info_log_item(&m);
         self.state = GameState::Finished;
     }
 

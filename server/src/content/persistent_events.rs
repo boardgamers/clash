@@ -410,7 +410,7 @@ where
         .is_none_or(|s| s.event_type != current_event_type)
     {
         if let Some(log) = params.log {
-            game.add_info_log_group(log.to_string());
+            game.add_info_log_item(&log);
         }
         game.events.push(PersistentEventState::new(
             players[0],
