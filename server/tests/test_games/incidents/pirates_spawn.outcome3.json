@@ -311,7 +311,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -343,6 +347,12 @@
                         "Ability": "Free Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Storage: Gain 1 mood token",
+                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
+                    "A new game event has been triggered: A successful year",
+                    "Player1: A successful year: Base effect: Pirates spawn"
                   ]
                 },
                 {
@@ -352,7 +362,10 @@
                         7
                       ]
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: A successful year: Removed a Pirate Ships at D1"
+                  ]
                 },
                 {
                   "action": {
@@ -375,6 +388,9 @@
                         "Incident": 54
                       }
                     }
+                  ],
+                  "log": [
+                    "Pirates: A successful year: Gain 1 ship at A2"
                   ]
                 },
                 {
@@ -397,19 +413,11 @@
                       "origin": {
                         "Incident": 54
                       }
-                    },
-                    {
-                      "player": 2,
-                      "Units": {
-                        "units": {
-                          "ships": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Incident": 54
-                      }
                     }
+                  ],
+                  "log": [
+                    "Pirates: A successful year: Gain 1 ship at D2",
+                    "Player1: A successful year: Must pay 1 resource or token to bribe the pirates"
                   ]
                 }
               ]
@@ -420,26 +428,6 @@
     }
   ],
   "log_index": 4,
-  "log": [
-    [
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
-    ],
-    [
-      "A new game event has been triggered: A successful year",
-      "Player1: A successful year: Base effect: Pirates spawn"
-    ],
-    [
-      "Player1: A successful year: Removed a Pirate Ships at D1"
-    ],
-    [
-      "Pirates: A successful year: Gain 1 ship at A2"
-    ],
-    [
-      "Pirates: A successful year: Gain 1 ship at D2",
-      "Player1: A successful year: Must pay 1 resource or token to bribe the pirates"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

@@ -214,7 +214,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -297,6 +301,13 @@
                         "Incident": 40
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Envoy",
+                    "Player1: Envoy: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Gain 1 idea and 1 culture token, Pyramids is now available to be taken by anyone",
+                    "Player2: Envoy: Gain 1 culture token"
                   ]
                 }
               ]
@@ -307,17 +318,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Envoy",
-      "Player1: Envoy: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Gain 1 idea and 1 culture token, Pyramids is now available to be taken by anyone",
-      "Player2: Envoy: Gain 1 culture token"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

@@ -361,13 +361,7 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: End Turn: 0 actions left"
-    ],
-    [
-      "The game has entered the 2nd status phase"
-    ],
+
     [
       "Player2: Storage: Gain 1 mood token",
       "Player2: Free Advance: Gain Storage and take an event token (2 left)"

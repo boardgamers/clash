@@ -242,7 +242,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -286,6 +290,9 @@
                         "LeaderAbility": "Statesman"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Statesman: City A1 became Neutral, Pay 2 mood tokens"
                   ]
                 }
               ]
@@ -296,11 +303,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Statesman: City A1 became Neutral, Pay 2 mood tokens"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,

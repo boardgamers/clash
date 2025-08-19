@@ -293,15 +293,7 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry",
-      "Player2: Combat: Defending with 2 infantry"
-    ],
+
     [
       "Player1: Tactics: Play an action card face down, Reveal Tactics Card Wedge Formation",
       "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 9 and gets 1 hits against defending units, Combat modifiers: Wedge Formation added 2 combat value, Lost 1 infantry at C2",

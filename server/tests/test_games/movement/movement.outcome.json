@@ -192,7 +192,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -204,7 +208,10 @@
                         "destination": "B3"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Move: marched 1 settler from B2 to B3"
+                  ]
                 }
               ]
             }
@@ -214,11 +221,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched 1 settler from B2 to B3"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 1,
   "round": 1,

@@ -351,13 +351,7 @@
     }
   ],
   "log_index": 3,
-  "log": [
-    [
-      "Player1: Great Library: Start action"
-    ],
-    [
-      "Player1: Great Library: Use Engineering for the turn"
-    ],
+
     [
       "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2, Pay 1 action"
     ]

@@ -284,15 +284,7 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry",
-      "Player2: Combat: Defending with 2 infantry"
-    ],
+
     [
       "Player1: Tactics: Play an action card face down, Reveal Tactics Card Flanking",
       "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units, Combat modifiers: Flanking added 1 extra die, Lost 1 infantry at C2",

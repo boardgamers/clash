@@ -243,7 +243,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -396,6 +400,20 @@
                         "Incident": 28
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Storage: Gain 1 mood token",
+                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
+                    "A new game event has been triggered: Population Boom",
+                    "Player1: Population Boom: Base effect: Barbarians move, Barbarians move from B2 to C2: 2 infantry and 1 elephant, Gain 1 settler at A1, Player2 was selected to gain 1 settler.",
+                    "Combat round 1",
+                    "Barbarians: Combat: Attacking with 2 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units, Lost 1 elephant at B2, Kill 4 settlers of Player1, Gain city C2",
+                    "Player1: Combat: Defending with 4 settlers, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 4 settlers at C2, Lose city C2",
+                    "Barbarians: Choose Casualties: Remove 1 of their attacking units",
+                    "Attacker wins",
+                    "Player1: Place Settler: Gain 1 settler at A1",
+                    "Barbarians: Population Boom: Gain 1 infantry at C2",
+                    "Player2: Population Boom: Gain 1 settler at C1"
                   ]
                 }
               ]
@@ -406,27 +424,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
-    ],
-    [
-      "A new game event has been triggered: Population Boom",
-      "Player1: Population Boom: Base effect: Barbarians move, Barbarians move from B2 to C2: 2 infantry and 1 elephant"
-    ],
-    [
-      "Combat round 1",
-      "Barbarians: Combat: Attacking with 2 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units, Lost 1 elephant at B2, Kill 4 settlers of Player1, Gain city C2",
-      "Player1: Combat: Defending with 4 settlers, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 4 settlers at C2, Lose city C2",
-      "Barbarians: Choose Casualties: Remove 1 of their attacking units",
-      "Attacker wins",
-      "Player1: Place Settler: Gain 1 settler at A1",
-      "Barbarians: Population Boom: Gain 1 infantry at C2",
-      "Player1: Population Boom: Gain 1 settler at A1, Player2 was selected to gain 1 settler.",
-      "Player2: Population Boom: Gain 1 settler at C1"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

@@ -241,11 +241,7 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Raze city: Did not raze a city"
-    ]
-  ],
+
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

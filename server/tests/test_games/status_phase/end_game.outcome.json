@@ -287,13 +287,7 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: End Turn: 0 actions left"
-    ],
-    [
-      "The game has entered the 6th status phase"
-    ],
+
     [
       "The game has ended. Player2 has won"
     ]

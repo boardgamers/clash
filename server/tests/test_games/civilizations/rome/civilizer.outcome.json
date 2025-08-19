@@ -354,7 +354,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -423,6 +427,15 @@
                         "Ability": "Barbarian battle"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched Sulla from E8 to D8, Pay 1 action",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with Sulla, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Sulla adds 2 combat value",
+                    "Barbarians: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8",
+                    "Barbarians: Choose Casualties: Remove all defending units",
+                    "Attacker wins",
+                    "Player1: Barbarian battle: Gain 1 gold"
                   ]
                 }
               ]
@@ -433,19 +446,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched Sulla from E8 to D8, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with Sulla, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Sulla adds 2 combat value",
-      "Barbarians: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8",
-      "Barbarians: Choose Casualties: Remove all defending units",
-      "Attacker wins",
-      "Player1: Barbarian battle: Gain 1 gold"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

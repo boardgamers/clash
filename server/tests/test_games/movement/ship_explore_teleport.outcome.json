@@ -312,7 +312,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -324,7 +328,10 @@
                         "destination": "C4"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Move: sailed 1 ship from C5 to C4, Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren, Teleported ship from C4 to D4"
+                  ]
                 }
               ]
             }
@@ -334,11 +341,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player2: Move: sailed 1 ship from C5 to C4, Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren, Teleported ship from C4 to D4"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 3,

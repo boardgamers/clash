@@ -338,7 +338,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              }
             }
           ]
         }
@@ -346,7 +350,6 @@
     }
   ],
   "log_index": 0,
-
   "undo_limit": 0,
   "actions_left": 2,
   "round": 3,

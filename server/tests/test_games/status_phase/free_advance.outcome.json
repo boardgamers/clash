@@ -325,14 +325,7 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: End Turn: 0 actions left"
-    ],
-    [
-      "The game has entered the 2nd status phase"
-    ]
-  ],
+
   "undo_limit": 1,
   "actions_left": 0,
   "round": 4,

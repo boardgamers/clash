@@ -243,7 +243,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -311,6 +315,11 @@
                         "Ability": "Recruit"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Recruit: Pay 1 action, Pay 1 culture token with Draft, Sparta, City A1 became Neutral, Gain 1 infantry at A1",
+                    "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
+                    "Player1: Sparta: Can pay the Draft cost as culture tokens"
                   ]
                 },
                 {
@@ -342,6 +351,9 @@
                         "SpecialAdvance": "CityStates"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: City States: City B3 became Neutral, City A1 became Happy"
                   ]
                 }
               ]
@@ -352,16 +364,6 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player1: Recruit: Pay 1 action, Pay 1 culture token with Draft, Sparta, City A1 became Neutral, Gain 1 infantry at A1",
-      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
-      "Player1: Sparta: Can pay the Draft cost as culture tokens"
-    ],
-    [
-      "Player1: City States: City B3 became Neutral, City A1 became Happy"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

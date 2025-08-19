@@ -383,12 +383,19 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 3 actions left"
+                  ]
                 }
               ]
             }
@@ -396,17 +403,61 @@
         },
         {
           "round": 3,
-          "turns": [ { "turn_type": { "Player": 1 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 1
+              },
               "actions": [
+                {
+                  "action": "StartTurn",
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Market"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    }
+                  ],
+                  "log": [
+                    "Player1: Market: Gain 1 gold",
+                    "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6, Gain 2 food",
+                    "Player2: Raiding: Raided Player1 at D6",
+                    "Player2: Waste: Could not store 1 food"
+                  ]
+                },
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player2: End Turn: 3 actions left"
+                  ]
                 }
               ]
             },
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -431,6 +482,9 @@
                         "Ability": "Viking Raids"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Viking Raids: Pay 1 food, Lose 1 food"
                   ]
                 }
               ]
@@ -441,30 +495,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: End Turn: 3 actions left"
-    ],
-    [
-      "Round 3/3"
-    ],
-    [
-      "It's Player2's turn",
-      "Player1: Market: Gain 1 gold",
-      "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6, Gain 2 food",
-      "Player2: Raiding: Raided Player1 at D6",
-      "Player2: Waste: Could not store 1 food"
-    ],
-    [
-      "Player2: End Turn: 3 actions left"
-    ],
-    [
-      "It's Player1's turn"
-    ],
-    [
-      "Player1: Viking Raids: Pay 1 food, Lose 1 food"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 3,
   "round": 3,

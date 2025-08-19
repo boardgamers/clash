@@ -373,15 +373,7 @@
     }
   ],
   "log_index": 3,
-  "log": [
-    [
-      "Player1: Recruit: Pay 1 action, Pay 1 mood token with Draft, Gain 1 infantry at A1",
-      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
-    ],
-    [
-      "Player1: Recruit: Pay 1 action, Pay 1 mood token with Draft, City A1 became Neutral, Gain 1 infantry at A1",
-      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
-    ],
+
     [
       "Player1: Complete Objectives: Complete Draft using Large Civilization/Draft"
     ]

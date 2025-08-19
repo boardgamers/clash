@@ -206,7 +206,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -264,6 +268,11 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Pestilence"
                   ]
                 },
                 {
@@ -289,6 +298,9 @@
                         "Advance": "Myths"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Myths: Pay 1 mood token, Avoid mood change"
                   ]
                 },
                 {
@@ -310,6 +322,9 @@
                         "Incident": 1
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Pestilence: City A1 became Neutral"
                   ]
                 },
                 {
@@ -335,6 +350,9 @@
                         "Advance": "Myths"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Myths: Pay 1 mood token, Avoid mood change"
                   ]
                 }
               ]
@@ -345,24 +363,6 @@
     }
   ],
   "log_index": 4,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Pestilence"
-    ],
-    [
-      "Player1: Myths: Pay 1 mood token, Avoid mood change"
-    ],
-    [
-      "Player1: Pestilence: City A1 became Neutral"
-    ],
-    [
-      "Player2: Myths: Pay 1 mood token, Avoid mood change"
-    ]
-  ],
   "undo_limit": 4,
   "actions_left": 2,
   "round": 1,

@@ -200,7 +200,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -258,6 +262,12 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Great Seer",
+                    "Player1: Great Seer: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
                 },
                 {
@@ -298,6 +308,9 @@
                         "Incident": 58
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Seer: Pay 1 culture token, Gain Great Seer from the current event"
                   ]
                 },
                 {
@@ -331,6 +344,10 @@
                         "Ability": "Action Card"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Seer: Pay 1 action",
+                    "Player1: Action Card: Play Great Seer"
                   ]
                 },
                 {
@@ -374,6 +391,10 @@
                         "CivilCard": 158
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Seer: Placed a card from the draw pile in the Great Seer",
+                    "Player2: Great Seer: Placed a card from the draw pile in the Great Seer"
                   ]
                 },
                 {
@@ -464,6 +485,10 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Writing and take an event token (2 left)",
+                    "Player1: Writing: Draw an action card, Gain an objective card from Great Seer, Gain 1 culture token"
                   ]
                 }
               ]
@@ -474,31 +499,6 @@
     }
   ],
   "log_index": 5,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Great Seer",
-      "Player1: Great Seer: Base effect: Pirates spawn, No valid positions for Pirate Ship"
-    ],
-    [
-      "Player1: Great Seer: Pay 1 culture token, Gain Great Seer from the current event"
-    ],
-    [
-      "Player1: Great Seer: Pay 1 action",
-      "Player1: Action Card: Play Great Seer"
-    ],
-    [
-      "Player1: Great Seer: Placed a card from the draw pile in the Great Seer",
-      "Player2: Great Seer: Placed a card from the draw pile in the Great Seer"
-    ],
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Writing and take an event token (2 left)",
-      "Player1: Writing: Draw an action card, Gain an objective card from Great Seer, Gain 1 culture token"
-    ]
-  ],
   "undo_limit": 5,
   "actions_left": 0,
   "round": 2,

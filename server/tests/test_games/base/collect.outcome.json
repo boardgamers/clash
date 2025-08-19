@@ -191,7 +191,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -242,6 +246,11 @@
                         "Ability": "Collect"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 idea",
+                    "Player1: Public Education: Gain 1 idea",
+                    "Player1: Waste: Could not store 1 ore"
                   ]
                 }
               ]
@@ -252,13 +261,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 idea",
-      "Player1: Public Education: Gain 1 idea",
-      "Player1: Waste: Could not store 1 ore"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 2,

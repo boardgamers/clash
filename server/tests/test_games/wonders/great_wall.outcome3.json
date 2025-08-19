@@ -513,18 +513,7 @@
     }
   ],
   "log_index": 2,
-  "log": [
-    [
-      "Player2: Move: marched 2 infantry from B1 to A1, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player2: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units, Lost 2 infantry at B1",
-      "Player1: Combat: Defending with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units, Combat modifiers: Great Wall gives -2 combat value in the first round, Lost 1 infantry and 1 cavalry at A1",
-      "Player2: Choose Casualties: Remove all attacking units",
-      "Player1: Choose Casualties: Remove all defending units",
-      "Battle ends in a draw"
-    ],
+
     [
       "Player2: End Turn: 1 actions left"
     ],

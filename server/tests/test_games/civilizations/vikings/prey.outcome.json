@@ -269,7 +269,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -377,6 +381,14 @@
                         "Ability": "Place Settler"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched Ragnar Lodbrok from E2 to D1, Pay 1 action",
+                    "Player1: Combat: Gain 1 gold, Gain city D1, City D1 became Angry",
+                    "Player2: Combat: Lose city D1",
+                    "Player1: Prey: Gain 2 gold",
+                    "Player2: Place Settler: Gain 1 settler at B2",
+                    "Player1: Waste: Could not store 1 gold"
                   ]
                 }
               ]
@@ -387,16 +399,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched Ragnar Lodbrok from E2 to D1, Pay 1 action",
-      "Player1: Combat: Gain 1 gold, Gain city D1, City D1 became Angry",
-      "Player2: Combat: Lose city D1",
-      "Player1: Prey: Gain 2 gold",
-      "Player2: Place Settler: Gain 1 settler at B2",
-      "Player1: Waste: Could not store 1 gold"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

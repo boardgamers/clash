@@ -279,15 +279,7 @@
     }
   ],
   "log_index": 0,
-  "log": [
-    [
-      "The game has started"
-    ],
-    [
-      "Player1 is playing as Maya",
-      "Player1 gained an action card from the pile",
-      "Player1 gained an objective card from the pile"
-    ],
+
     [
       "Player2 is playing as Rome",
       "Player2 gained an action card from the pile",

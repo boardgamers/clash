@@ -240,7 +240,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -284,6 +288,13 @@
                         "Incident": 54
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Storage: Gain 1 mood token",
+                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
+                    "A new game event has been triggered: A successful year",
+                    "Player1: A successful year: Base effect: Pirates spawn, No valid positions for Pirate Ship",
+                    "Player2: A successful year: Gain 1 food"
                   ]
                 }
               ]
@@ -294,17 +305,6 @@
     }
   ],
   "log_index": 1,
-  "log": [
-    [
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
-    ],
-    [
-      "A new game event has been triggered: A successful year",
-      "Player1: A successful year: Base effect: Pirates spawn, No valid positions for Pirate Ship",
-      "Player2: A successful year: Gain 1 food"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,
