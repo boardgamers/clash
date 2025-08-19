@@ -11,7 +11,7 @@ use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
-use crate::log::{add_player_log, add_round_log, ActionLogAge, ActionLogRound};
+use crate::log::{ActionLogAge, ActionLogRound, ActionLogTurn, TurnType};
 use crate::map::{get_map_setup, Map, MapSetup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{gain_unit, Player};
@@ -194,12 +194,13 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
 }
 
 fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
-    game.next_age();
-    add_round_log(game, 0);
+    let mut age = ActionLogAge::new(0);
+    let mut round = ActionLogRound::new(0);
+    round.turns.push(ActionLogTurn::new(TurnType::Setup, 0));
+    age.rounds.push(round);
+    game.action_log.push(age);
 
     for player_index in 0..setup.player_amount {
-        add_player_log(game, player_index);
-
         let origin = setup_event_origin();
         let player = &EventPlayer::from_player(player_index, game, origin.clone());
         player.log(
@@ -222,6 +223,7 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&Ma
             gain_unit(game, player, position, UnitType::Settler);
         }
     }
+    game.next_age();
 }
 
 pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {

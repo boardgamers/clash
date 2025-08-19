@@ -32,7 +32,7 @@ impl LogDialog {
         // Iterate over action log to collect all player entries and their log ranges
         for action_log_age in &rc.game.action_log {
             for action_log_round in &action_log_age.rounds {
-                for action_log_player in &action_log_round.players {
+                for action_log_player in &action_log_round.turns {
                     player_log_ranges.push((
                         action_log_age.age,
                         action_log_round.round,
@@ -160,10 +160,55 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
 
     y += 1.5; // Add some space after headers
 
-    for entry in &d.log_entries[start..end] {
-        let age_text = entry.age.to_string();
-        let round_text = entry.round.to_string();
-        let player_text = &entry.player_name;
+    // Track previous values to only show when they change
+    let mut prev_age: Option<u32> = None;
+    let mut prev_round: Option<u32> = None;
+    let mut prev_player: Option<String> = None;
+
+    for (i, entry) in d.log_entries[start..end].iter().enumerate() {
+        let is_first_entry = i == 0;
+        let is_status_phase = entry.message.starts_with("The game has entered");
+        let is_setup = entry.age == 0;
+
+        // Determine what to display for each column
+        let age_text = if is_setup {
+            if is_first_entry || prev_age != Some(entry.age) {
+                "Setup".to_string()
+            } else {
+                String::new()
+            }
+        } else {
+            if is_first_entry || prev_age != Some(entry.age) {
+                entry.age.to_string()
+            } else {
+                String::new()
+            }
+        };
+
+        let round_text = if is_setup || is_status_phase {
+            if is_status_phase && (is_first_entry || prev_round != Some(entry.round) || prev_age != Some(entry.age)) {
+                "Status Phase".to_string()
+            } else {
+                String::new()
+            }
+        } else {
+            if is_first_entry || prev_round != Some(entry.round) || prev_age != Some(entry.age) {
+                entry.round.to_string()
+            } else {
+                String::new()
+            }
+        };
+
+        let player_text = if is_setup || is_status_phase {
+            String::new()
+        } else {
+            if is_first_entry || prev_player.as_ref() != Some(&entry.player_name) || prev_round != Some(entry.round) || prev_age != Some(entry.age) {
+                entry.player_name.clone()
+            } else {
+                String::new()
+            }
+        };
+
         let message_text = &entry.message;
 
         // Calculate positions for each column
@@ -175,8 +220,13 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         // Draw each column
         rc.draw_text(&age_text, age_pos.x, age_pos.y);
         rc.draw_text(&round_text, round_pos.x, round_pos.y);
-        rc.draw_text(player_text, player_pos.x, player_pos.y);
+        rc.draw_text(&player_text, player_pos.x, player_pos.y);
         rc.draw_text(message_text, message_pos.x, message_pos.y);
+
+        // Update previous values
+        prev_age = Some(entry.age);
+        prev_round = Some(entry.round);
+        prev_player = Some(entry.player_name.clone());
 
         y += 1.;
     }
