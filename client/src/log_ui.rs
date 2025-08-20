@@ -2,23 +2,31 @@ use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, State, StateUpd
 use crate::layout_ui::bottom_center_texture;
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
-use server::log::TurnType;
+use server::log::{
+    ActionLogAge, ActionLogEntry, ActionLogItem, ActionLogRound, ActionLogTurn, TurnType,
+};
+
+#[derive(Clone, Debug)]
+pub(crate) enum LogBody {
+    Message(String),
+    Item(ActionLogItem),
+}
 
 #[derive(Clone, Debug)]
 pub(crate) struct LogEntry {
     pub age: Option<String>,
     pub round: Option<String>,
     pub name: String,
-    pub message: String,
+    pub body: LogBody,
 }
 
 impl LogEntry {
-    pub(crate) fn new(age: Option<u32>, round: Option<u32>, name: &str, message: String) -> Self {
+    pub(crate) fn new(age: Option<u32>, round: Option<u32>, name: &str, body: LogBody) -> Self {
         LogEntry {
             age: age.map(|a| a.to_string()),
             round: round.map(|r| r.to_string()),
             name: name.to_string(),
-            message,
+            body,
         }
     }
 }
@@ -43,32 +51,28 @@ impl LogDialog {
                 for turn in &round.turns {
                     for action in &turn.actions {
                         for message in &action.log {
+                            for item in &action.items {
+                                log_entries.push(Self::new_log_entry(
+                                    &rc,
+                                    age,
+                                    round,
+                                    turn,
+                                    LogBody::Item(item.clone()),
+                                ));
+                            }
                             // Simulate multiline labels to get accurate line count
                             multiline_label(
                                 rc.state,
                                 message,
                                 Self::max_width(rc),
                                 |label: &str| {
-                                    log_entries.push(match turn.turn_type {
-                                        TurnType::Player(p) => LogEntry::new(
-                                            Some(age.age),
-                                            Some(round.round),
-                                            &rc.game.player_name(p),
-                                            label.to_string(),
-                                        ),
-                                        TurnType::Setup => LogEntry::new(
-                                            None,
-                                            None,
-                                            "Game Started",
-                                            label.to_string(),
-                                        ),
-                                        TurnType::StatusPhase => LogEntry::new(
-                                            None,
-                                            Some(round.round),
-                                            "Status Phase",
-                                            label.to_string(),
-                                        ),
-                                    });
+                                    log_entries.push(Self::new_log_entry(
+                                        &rc,
+                                        age,
+                                        round,
+                                        turn,
+                                        LogBody::Message(label.to_string()),
+                                    ));
                                 },
                             );
                         }
@@ -89,6 +93,27 @@ impl LogDialog {
             pages,
             current_page: pages - 1,
             log_entries,
+        }
+    }
+
+    fn new_log_entry(
+        rc: &&RenderContext,
+        age: &ActionLogAge,
+        round: &ActionLogRound,
+        turn: &ActionLogTurn,
+        log_body: LogBody,
+    ) -> LogEntry {
+        match turn.turn_type {
+            TurnType::Player(p) => LogEntry::new(
+                Some(age.age),
+                Some(round.round),
+                &rc.game.player_name(p),
+                log_body,
+            ),
+            TurnType::Setup => LogEntry::new(None, None, "Game Started", log_body),
+            TurnType::StatusPhase => {
+                LogEntry::new(None, Some(round.round), "Status Phase", log_body)
+            }
         }
     }
 
@@ -113,7 +138,7 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
 
     rc.draw_text("Age", age_pos.x, age_pos.y);
     rc.draw_text("Round", round_pos.x, round_pos.y);
-    rc.draw_text("Player", player_pos.x, player_pos.y);
+    rc.draw_text("Turn", player_pos.x, player_pos.y);
     rc.draw_text("Message", message_pos.x, message_pos.y);
 
     y += 1.5; // Add some space after headers
@@ -124,29 +149,14 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     let mut prev_name: Option<String> = None;
 
     for entry in &d.log_entries[start..end] {
-        let message_text = &entry.message;
-
-        // Calculate positions for each column
-        let age_pos = vec2(30., y * 25. + 20.);
-        let round_pos = vec2(80., y * 25. + 20.);
-        let player_pos = vec2(140., y * 25. + 20.);
-        let message_pos = vec2(280., y * 25. + 20.);
-
-        // Draw each column
-        if let Some(age) = &entry.age
-            && entry.age != prev_age
-        {
-            rc.draw_text(age, age_pos.x, age_pos.y);
-        }
-        if let Some(round) = &entry.round
-            && entry.round != prev_round
-        {
-            rc.draw_text(round, round_pos.x, round_pos.y);
-        }
-        if Some(&entry.name) != prev_name.as_ref() {
-            rc.draw_text(&entry.name, player_pos.x, player_pos.y);
-        }
-        rc.draw_text(message_text, message_pos.x, message_pos.y);
+        draw_line(
+            rc,
+            y,
+            &mut prev_age,
+            &mut prev_round,
+            &mut prev_name,
+            &entry,
+        );
 
         // Update previous values
         prev_age.clone_from(&entry.age);
@@ -197,6 +207,50 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         return StateUpdate::open_dialog(ActiveDialog::Log(new_dialog));
     }
     NO_UPDATE
+}
+
+fn draw_line(
+    rc: &RenderContext,
+    y: f32,
+    prev_age: &Option<String>,
+    prev_round: &Option<String>,
+    prev_name: &Option<String>,
+    entry: &LogEntry,
+) {
+    // Calculate positions for each column
+    let age_pos = vec2(30., y * 25. + 20.);
+    let round_pos = vec2(80., y * 25. + 20.);
+    let player_pos = vec2(140., y * 25. + 20.);
+    let message_pos = vec2(280., y * 25. + 20.);
+
+    // Draw each column
+    if let Some(age) = &entry.age
+        && entry.age != *prev_age
+    {
+        rc.draw_text(age, age_pos.x, age_pos.y);
+    }
+    if let Some(round) = &entry.round
+        && entry.round != *prev_round
+    {
+        rc.draw_text(round, round_pos.x, round_pos.y);
+    }
+    if Some(&entry.name) != prev_name.as_ref() {
+        rc.draw_text(&entry.name, player_pos.x, player_pos.y);
+    }
+
+    match &entry.body {
+        LogBody::Message(m) => rc.draw_text(m, message_pos.x, message_pos.y),
+        LogBody::Item(item) => match &item.entry {
+            // todo
+            ActionLogEntry::Action { .. } => {}
+            ActionLogEntry::Resources { resources, balance } => {}
+            ActionLogEntry::Advance { .. } => {}
+            ActionLogEntry::Units { .. } => {}
+            ActionLogEntry::Structure { .. } => {}
+            ActionLogEntry::HandCard { .. } => {}
+            ActionLogEntry::MoodChange { .. } => {}
+        },
+    }
 }
 
 pub(crate) fn multiline_label(state: &State, label: &str, len: f32, mut print: impl FnMut(&str)) {

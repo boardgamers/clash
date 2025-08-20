@@ -108,13 +108,13 @@ impl ActionLogAction {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum ActionLogBalance {
     Gain,
     Loss,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum ActionLogEntry {
     Action {
         balance: ActionLogBalance,
@@ -193,7 +193,7 @@ impl ActionLogEntry {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ActionLogItem {
     pub player: usize,
     #[serde(flatten)]
