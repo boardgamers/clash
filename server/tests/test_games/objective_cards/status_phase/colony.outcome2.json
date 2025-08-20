@@ -397,16 +397,30 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 1 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 1
+              }
             },
             {
-              "index": 1,
+              "turn_type": {
+                "Player": 1
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
-                },
+                  },
+                  "log": [
+                    "Player1: End Turn: 3 actions left"
+                  ]
+                }
+              ]
+            },
+            {
+              "turn_type": "StatusPhase",
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -435,6 +449,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Complete Objectives: Complete Colony using Colony/Threat"
                   ]
                 },
                 {
@@ -465,6 +482,10 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Complete Objectives: Complete Outpost using Magnificent Culture/Outpost",
+                    "The game has ended. Player2 has won"
                   ]
                 }
               ]
@@ -474,42 +495,8 @@
       ]
     }
   ],
-  "log_index": 3,
-
-    [
-      "Player2 is playing as Greece",
-      "Player2 gained an action card from the pile",
-      "Player2 gained an objective card from the pile"
-    ],
-    [
-      "Age 1 has started"
-    ],
-    [
-      "Round 1/3"
-    ],
-    [
-      "It's Player2's turn"
-    ],
-    [
-      "It's Player2's turn"
-    ],
-    [
-      "Player1: End Turn: 3 actions left"
-    ],
-    [
-      "The game has entered the 6th status phase"
-    ],
-    [
-      "Player2: Complete Objectives: Complete Colony using Colony/Threat"
-    ],
-    [
-      "Player2: Complete Objectives: Complete Outpost using Magnificent Culture/Outpost"
-    ],
-    [
-      "The game has ended. Player2 has won"
-    ]
-  ],
-  "undo_limit": 1,
+  "log_index": 2,
+  "undo_limit": 0,
   "actions_left": 3,
   "round": 4,
   "age": 6,

@@ -226,14 +226,21 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectPositions": []
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Raze city: Did not raze a city"
+                  ]
                 },
                 {
                   "action": {
@@ -254,6 +261,9 @@
                         "Ability": "Change Government"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Change Government: Pay nothing, Keep current government"
                   ]
                 }
               ]
@@ -264,7 +274,6 @@
     }
   ],
   "log_index": 2,
-
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

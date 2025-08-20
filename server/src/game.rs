@@ -11,8 +11,8 @@ use crate::content::persistent_events::{
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
 use crate::log::{
-    ActionLogAge, TurnType, add_round_log, add_turn_log, current_action_log_mut, current_turn_log,
-    current_turn_log_mut,
+    ActionLogAge, TurnType, add_round_log, add_start_turn_action_if_needed, add_turn_log,
+    current_action_log_mut, current_turn_log, current_turn_log_mut,
 };
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
@@ -356,8 +356,6 @@ impl Game {
     pub(crate) fn start_turn(&mut self) {
         let player = self.current_player_index;
         add_turn_log(self, TurnType::Player(player));
-        self.log_index = 0;
-        self.undo_limit = 0;
 
         self.actions_left = ACTIONS;
         let lost_action = self
@@ -366,6 +364,7 @@ impl Game {
             .position(|e| matches!(e, PermanentEffect::RevolutionLoseAction(p) if *p == player))
             .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
+            add_start_turn_action_if_needed(self);
             lose_action(
                 self,
                 &EventPlayer::from_player(
@@ -500,6 +499,7 @@ impl Game {
         let winner_name = self.player_name(winner_player_index);
         let m = format!("The game has ended. {winner_name} has won");
         self.add_message(&m);
+        add_start_turn_action_if_needed(self);
         self.add_info_log_item(&m);
         self.state = GameState::Finished;
     }

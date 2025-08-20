@@ -310,13 +310,25 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
-                },
+                  },
+                  "log": [
+                    "Player2: End Turn: 2 actions left"
+                  ]
+                }
+              ]
+            },
+            {
+              "turn_type": "StatusPhase",
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -345,6 +357,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Advanced Culture using Advanced Culture/Warmonger"
                   ]
                 },
                 {
@@ -375,6 +390,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete City Planner using City Planner/Great Battle"
                   ]
                 },
                 {
@@ -405,6 +423,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Government using Government/Barbarian Conquest"
                   ]
                 },
                 {
@@ -435,6 +456,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft"
                   ]
                 },
                 {
@@ -465,6 +489,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Large Fleet using Wealth/Large Fleet"
                   ]
                 },
                 {
@@ -495,6 +522,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Religious Fervor using Religious Fervor/General"
                   ]
                 },
                 {
@@ -525,6 +555,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Sea Blockade using Education Lead/Sea Blockade"
                   ]
                 },
                 {
@@ -567,6 +600,10 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Eureka!: Pay 2 ideas for Eureka!",
+                    "Player1: Complete Objectives: Complete Eureka! using Eureka!/Defiance"
                   ]
                 }
               ]
@@ -576,35 +613,8 @@
       ]
     }
   ],
-  "log_index": 9,
-
-    [
-      "Player1: Complete Objectives: Complete Advanced Culture using Advanced Culture/Warmonger"
-    ],
-    [
-      "Player1: Complete Objectives: Complete City Planner using City Planner/Great Battle"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Government using Government/Barbarian Conquest"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Large Fleet using Wealth/Large Fleet"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Religious Fervor using Religious Fervor/General"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Sea Blockade using Education Lead/Sea Blockade"
-    ],
-    [
-      "Player1: Eureka!: Pay 2 ideas for Eureka!",
-      "Player1: Complete Objectives: Complete Eureka! using Eureka!/Defiance"
-    ]
-  ],
-  "undo_limit": 1,
+  "log_index": 8,
+  "undo_limit": 0,
   "actions_left": 2,
   "round": 4,
   "age": 1,

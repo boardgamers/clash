@@ -332,11 +332,6 @@
     }
   ],
   "log_index": 2,
-
-    [
-      "Player2 gained 1 free Settler Unit at B2 for losing a city"
-    ]
-  ],
   "undo_limit": 2,
   "actions_left": 0,
   "round": 6,

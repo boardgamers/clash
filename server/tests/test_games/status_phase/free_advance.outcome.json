@@ -310,23 +310,32 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 0 actions left"
+                  ]
                 }
               ]
+            },
+            {
+              "turn_type": "StatusPhase"
             }
           ]
         }
       ]
     }
   ],
-  "log_index": 1,
-
-  "undo_limit": 1,
+  "log_index": 0,
+  "undo_limit": 0,
   "actions_left": 0,
   "round": 4,
   "age": 2,

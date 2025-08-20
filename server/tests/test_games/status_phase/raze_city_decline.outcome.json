@@ -221,17 +221,26 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+        {
+          "round": 1,
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectPositions": []
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Raze city: Did not raze a city"
+                  ]
                 }
               ]
             }
@@ -241,7 +250,6 @@
     }
   ],
   "log_index": 1,
-
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

@@ -14,6 +14,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
+use crate::log::add_start_turn_action_if_needed;
 use crate::map::{Block, Terrain, block_for_position, capital_city_position};
 use crate::movement::{MoveUnits, move_action_log};
 use crate::player::{Data, Player};
@@ -27,7 +28,6 @@ use crate::victory_points::{
 };
 use itertools::Itertools;
 use std::ops::RangeInclusive;
-use crate::log::add_start_turn_action_if_needed;
 
 pub(crate) fn vikings() -> Civilization {
     Civilization::new(

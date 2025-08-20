@@ -229,14 +229,21 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectPositions": []
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Raze city: Did not raze a city"
+                  ]
                 },
                 {
                   "action": {
@@ -263,6 +270,9 @@
                         "Ability": "Change Government"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Change Government: Pay 1 mood token and 1 culture token"
                   ]
                 },
                 {
@@ -321,6 +331,11 @@
                         "Ability": "Change Government"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Change Government: Player1 changed their government from Democracy to Theocracy, Additional advances: Devotion, Unlock Provinces, Gain Dogma without taking an event token, Gain Devotion without taking an event token",
+                    "Player1: Dogma: Ideas limit reduced to 2",
+                    "Player1: Waste: Could not store 1 idea"
                   ]
                 }
               ]
@@ -331,13 +346,6 @@
     }
   ],
   "log_index": 3,
-
-    [
-      "Player1: Change Government: Player1 changed their government from Democracy to Theocracy, Additional advances: Devotion, Unlock Provinces, Gain Dogma without taking an event token, Gain Devotion without taking an event token",
-      "Player1: Dogma: Ideas limit reduced to 2",
-      "Player1: Waste: Could not store 1 idea"
-    ]
-  ],
   "undo_limit": 3,
   "actions_left": 3,
   "round": 1,
