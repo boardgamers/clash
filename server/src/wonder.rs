@@ -9,7 +9,7 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::{EventOrigin, EventPlayer};
-use crate::log::{add_start_turn_action_if_needed, ActionLogBalance};
+use crate::log::{ActionLogBalance, add_start_turn_action_if_needed};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;

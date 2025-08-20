@@ -272,12 +272,30 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 0 actions left"
+                  ]
+                }
+              ]
+            },
+            {
+              "turn_type": "StatusPhase",
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "log": [
+                    "The game has ended. Player2 has won"
+                  ]
                 }
               ]
             }
@@ -287,11 +305,6 @@
     }
   ],
   "log_index": 1,
-
-    [
-      "The game has ended. Player2 has won"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 0,
   "round": 7,

@@ -263,13 +263,25 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
-                },
+                  },
+                  "log": [
+                    "Player2: End Turn: 1 actions left"
+                  ]
+                }
+              ]
+            },
+            {
+              "turn_type": "StatusPhase",
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -298,6 +310,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Standing Army using Food Supplies/Standing Army"
                   ]
                 }
               ]
@@ -307,13 +322,8 @@
       ]
     }
   ],
-  "log_index": 2,
-
-    [
-      "Player1: Complete Objectives: Complete Standing Army using Food Supplies/Standing Army"
-    ]
-  ],
-  "undo_limit": 1,
+  "log_index": 1,
+  "undo_limit": 0,
   "actions_left": 1,
   "round": 4,
   "age": 1,

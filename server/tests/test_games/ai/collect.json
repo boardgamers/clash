@@ -279,26 +279,6 @@
     }
   ],
   "log_index": 0,
-
-    [
-      "Player2 is playing as Rome",
-      "Player2 gained an action card from the pile",
-      "Player2 gained an objective card from the pile"
-    ],
-    [
-      "Age 1 has started"
-    ],
-    [
-      "Round 1/3"
-    ],
-    [
-      "It's Player1's turn"
-    ],
-    [
-      "It's Player1's turn",
-      "Player gained 1 mood token as advance bonus"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 3,
   "round": 6,

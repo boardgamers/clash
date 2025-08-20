@@ -336,6 +336,8 @@ pub(crate) fn add_round_log(game: &mut Game, round: u32) {
 }
 
 pub(crate) fn add_turn_log(game: &mut Game, turn_type: TurnType) {
+    game.log_index = 0;
+    game.undo_limit = 0;
     game.log
         .last_mut()
         .expect("action log should exist")

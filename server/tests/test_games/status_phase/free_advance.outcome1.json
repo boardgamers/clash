@@ -314,13 +314,25 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
-                },
+                  },
+                  "log": [
+                    "Player1: End Turn: 0 actions left"
+                  ]
+                }
+              ]
+            },
+            {
+              "turn_type": "StatusPhase",
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -351,6 +363,10 @@
                         "Ability": "Free Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Storage: Gain 1 mood token",
+                    "Player2: Free Advance: Gain Storage and take an event token (2 left)"
                   ]
                 }
               ]
@@ -360,14 +376,8 @@
       ]
     }
   ],
-  "log_index": 2,
-
-    [
-      "Player2: Storage: Gain 1 mood token",
-      "Player2: Free Advance: Gain Storage and take an event token (2 left)"
-    ]
-  ],
-  "undo_limit": 2,
+  "log_index": 1,
+  "undo_limit": 1,
   "actions_left": 0,
   "round": 4,
   "age": 2,

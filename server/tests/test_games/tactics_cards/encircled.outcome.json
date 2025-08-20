@@ -255,7 +255,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -278,6 +282,12 @@
                         "Ability": "Move"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 1 infantry",
+                    "Player2: Combat: Defending with 2 infantry"
                   ]
                 }
               ]
@@ -288,7 +298,6 @@
     }
   ],
   "log_index": 1,
-
   "undo_limit": 0,
   "actions_left": 2,
   "round": 2,

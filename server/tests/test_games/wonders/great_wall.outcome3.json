@@ -234,7 +234,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -311,12 +315,24 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Move: marched 2 infantry from B1 to A1, Pay 1 action",
+                    "Combat round 1",
+                    "Player2: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units, Lost 2 infantry at B1",
+                    "Player1: Combat: Defending with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units, Combat modifiers: Great Wall gives -2 combat value in the first round, Lost 1 infantry and 1 cavalry at A1",
+                    "Player2: Choose Casualties: Remove all attacking units",
+                    "Player1: Choose Casualties: Remove all defending units",
+                    "Battle ends in a draw"
                   ]
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player2: End Turn: 1 actions left"
+                  ]
                 }
               ]
             }
@@ -324,7 +340,11 @@
         },
         {
           "round": 2,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -469,6 +489,18 @@
                         "Incident": 40
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 ideas, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Envoy",
+                    "Player1: Envoy: Base effect: Barbarians move, Barbarians move from A2 to A1: 1 infantry and 1 elephant, Gain 1 idea and 1 culture token, No wonders left to draw as public wonder card",
+                    "Player1: Great Wall: Automatic win against Barbarians",
+                    "Barbarians: Combat: Lost 1 infantry and 1 elephant at A2",
+                    "Player1: Barbarian battle: Gain 1 gold",
+                    "Barbarians: Envoy: Gain 1 infantry at B3",
+                    "No Wonders left to draw",
+                    "Player2: Envoy: Gain 1 culture token"
                   ]
                 },
                 {
@@ -503,6 +535,10 @@
                         "CivilCard": 5
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Action Card: Play Hero General/Wedge Formation",
+                    "Player1: Hero General: City C2 became Neutral"
                   ]
                 }
               ]
@@ -513,35 +549,6 @@
     }
   ],
   "log_index": 2,
-
-    [
-      "Player2: End Turn: 1 actions left"
-    ],
-    [
-      "Round 2/3"
-    ],
-    [
-      "It's Player1's turn"
-    ],
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 ideas, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Envoy",
-      "Player1: Envoy: Base effect: Barbarians move, Barbarians move from A2 to A1: 1 infantry and 1 elephant, Gain 1 idea and 1 culture token, No wonders left to draw as public wonder card",
-      "Player1: Great Wall: Automatic win against Barbarians",
-      "Barbarians: Combat: Lost 1 infantry and 1 elephant at A2",
-      "Player1: Barbarian battle: Gain 1 gold",
-      "Barbarians: Envoy: Gain 1 infantry at B3",
-      "No Wonders left to draw",
-      "Player2: Envoy: Gain 1 culture token"
-    ],
-    [
-      "Player1: Action Card: Play Hero General/Wedge Formation",
-      "Player1: Hero General: City C2 became Neutral"
-    ]
-  ],
   "undo_limit": 1,
   "actions_left": 2,
   "round": 2,

@@ -12,12 +12,12 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::{Game, GameOptions};
+use crate::log::add_start_turn_action_if_needed;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::{ResourceType, gain_resources};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use itertools::Itertools;
-use crate::log::add_start_turn_action_if_needed;
 
 pub(crate) fn economy(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(

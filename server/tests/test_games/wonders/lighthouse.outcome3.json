@@ -207,7 +207,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -225,6 +229,9 @@
                         "Ability": "Build Wonder"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Build Wonder: Play the wonder card Great Lighthouse, Decided to build Great Lighthouse in city A1, Pay 1 action"
                   ]
                 },
                 {
@@ -284,6 +291,10 @@
                         "Ability": "Build Wonder"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Lighthouse: Pay 3 food, 5 wood, 4 ore and 5 culture tokens",
+                    "Player1: Build Wonder: Play Great Lighthouse, Gain Great Lighthouse at A1"
                   ]
                 },
                 {
@@ -293,7 +304,10 @@
                         "action": "GreatLighthouse"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Great Lighthouse: Start action"
+                  ]
                 },
                 {
                   "action": {
@@ -326,6 +340,9 @@
                         "Ability": "Great Lighthouse"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Lighthouse: City A1 became Neutral, Gain 1 ship at C3"
                   ]
                 }
               ]
@@ -336,14 +353,6 @@
     }
   ],
   "log_index": 4,
-
-    [
-      "Player1: Great Lighthouse: Start action"
-    ],
-    [
-      "Player1: Great Lighthouse: City A1 became Neutral, Gain 1 ship at C3"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 1,

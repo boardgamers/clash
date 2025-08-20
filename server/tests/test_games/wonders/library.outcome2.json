@@ -307,7 +307,11 @@
       "rounds": [
         {
           "round": 1,
-          "turns": [ { "turn_type": { "Player": 0 }
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -316,14 +320,20 @@
                         "action": "GreatLibrary"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Great Library: Start action"
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Engineering"
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Great Library: Use Engineering for the turn"
+                  ]
                 },
                 {
                   "action": {
@@ -341,6 +351,9 @@
                         "Ability": "Build Wonder"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2, Pay 1 action"
                   ]
                 }
               ]
@@ -351,11 +364,6 @@
     }
   ],
   "log_index": 3,
-
-    [
-      "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2, Pay 1 action"
-    ]
-  ],
   "undo_limit": 0,
   "actions_left": 0,
   "round": 1,
