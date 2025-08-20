@@ -1,10 +1,14 @@
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, State, StateUpdate};
-use crate::layout_ui::bottom_center_texture;
+use crate::layout_ui::{bottom_center_texture, draw_scaled_icon};
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
+use macroquad::prelude::Texture2D;
 use server::log::{
-    ActionLogAge, ActionLogEntry, ActionLogItem, ActionLogRound, ActionLogTurn, TurnType,
+    ActionLogAge, ActionLogBalance, ActionLogEntry, ActionLogItem, ActionLogRound, ActionLogTurn,
+    TurnType,
 };
+use server::resource::ResourceType;
+use server::structure::Structure;
 
 #[derive(Clone, Debug)]
 pub(crate) enum LogBody {
@@ -238,18 +242,144 @@ fn draw_line(
         rc.draw_text(&entry.name, player_pos.x, player_pos.y);
     }
 
+    // todo player, origin, modifiers
     match &entry.body {
         LogBody::Message(m) => rc.draw_text(m, message_pos.x, message_pos.y),
-        LogBody::Item(item) => match &item.entry {
-            // todo
-            ActionLogEntry::Action { .. } => {}
-            ActionLogEntry::Resources { resources, balance } => {}
-            ActionLogEntry::Advance { .. } => {}
-            ActionLogEntry::Units { .. } => {}
-            ActionLogEntry::Structure { .. } => {}
-            ActionLogEntry::HandCard { .. } => {}
-            ActionLogEntry::MoodChange { .. } => {}
-        },
+        LogBody::Item(item) => {
+            let mut current_x = message_pos.x;
+
+            let mut draw_balance_prefix = |balance: &ActionLogBalance| {
+                if *balance == ActionLogBalance::Loss {
+                    rc.draw_text("-", current_x, message_pos.y);
+                    current_x += 15.0;
+                }
+            };
+
+            let mut draw_resource = |rc: &RenderContext,
+                                     resource_type: ResourceType,
+                                     amount: u8| {
+                if let Some(texture) = rc.assets().resources.get(&resource_type) {
+                    draw_scaled_icon(rc, texture, "", vec2(current_x, message_pos.y - 15.0), 20.0);
+                    current_x += 25.0;
+                    rc.draw_text(&amount.to_string(), current_x, message_pos.y);
+                    current_x += 25.0;
+                }
+            };
+
+            match &item.entry {
+                ActionLogEntry::Action { balance } => {
+                    draw_balance_prefix(balance);
+                    // Generic action icon, maybe replace with something better
+                    draw_scaled_icon(
+                        rc,
+                        &rc.assets().end_turn,
+                        "",
+                        vec2(current_x, message_pos.y - 15.0),
+                        20.0,
+                    );
+                }
+                ActionLogEntry::Resources { resources, balance } => {
+                    draw_balance_prefix(balance);
+                    for (resource, amount) in resources.clone().into_iter() {
+                        if amount > 0 {
+                            draw_resource(rc, resource, amount);
+                        }
+                    }
+                }
+                ActionLogEntry::Advance {
+                    advance, balance, ..
+                } => {
+                    draw_balance_prefix(balance);
+                    draw_scaled_icon(
+                        rc,
+                        &rc.assets().advances,
+                        "",
+                        vec2(current_x, message_pos.y - 15.0),
+                        20.0,
+                    );
+                    current_x += 25.0;
+                    rc.draw_text(&advance.name(rc.game), current_x, message_pos.y);
+                }
+                ActionLogEntry::Units { units, balance } => {
+                    draw_balance_prefix(balance);
+                    for (unit, amount) in units.clone().into_iter() {
+                        if amount > 0 {
+                            let texture = rc.assets().unit(unit, rc.shown_player);
+                            draw_scaled_icon(
+                                rc,
+                                texture,
+                                "",
+                                vec2(current_x, message_pos.y - 15.0),
+                                20.0,
+                            );
+                            current_x += 25.0;
+                            rc.draw_text(&amount.to_string(), current_x, message_pos.y);
+                            current_x += 25.0;
+                        }
+                    }
+                }
+                ActionLogEntry::Structure {
+                    structure, balance, ..
+                } => {
+                    draw_balance_prefix(balance);
+                    match structure {
+                        Structure::CityCenter => {
+                            let c = vec2(current_x, message_pos.y - 15.0);
+                            rc.draw_circle(c, 15.0, rc.player_color(item.player));
+                        }
+                        Structure::Building(b) => {
+                            draw_scaled_icon(
+                                rc,
+                                &rc.assets().buildings[b],
+                                "",
+                                vec2(current_x, message_pos.y - 15.0),
+                                20.0,
+                            );
+                        }
+                        Structure::Wonder(w) => {
+                            draw_scaled_icon(
+                                rc,
+                                &rc.assets().wonders[w],
+                                "",
+                                vec2(current_x, message_pos.y - 15.0),
+                                20.0,
+                            );
+                        }
+                    };
+
+                    current_x += 25.0;
+                }
+                ActionLogEntry::HandCard { card, from, to } => {
+                    // // Maybe different icons for discard, etc.
+                    // draw_scaled_icon(
+                    //     rc,
+                    //     &rc.assets().export,
+                    //     "",
+                    //     vec2(current_x, message_pos.y - 15.0),
+                    //     20.0,
+                    // );
+                    // current_x += 25.0;
+                    // rc.draw_text(
+                    //     &format!("{} {}->{}", card.name, from, to),
+                    //     current_x,
+                    //     message_pos.y,
+                    // );
+                }
+                ActionLogEntry::MoodChange { city: _, mood } => {
+                    // let texture = if mood.is_happy() {
+                    //     rc.assets()
+                    //         .resources
+                    //         .get(&ResourceType::MoodTokens)
+                    //         .unwrap()
+                    // } else {
+                    //     &rc.assets().angry
+                    // };
+                    // draw_scaled_icon(rc, texture, "", vec2(current_x, message_pos.y - 15.0), 20.0);
+                    // current_x += 25.0;
+                    // rc.draw_text(&format!("Mood to {}", mood), current_x, message_pos.y);
+                }
+            }
+        }
     }
 }
 
