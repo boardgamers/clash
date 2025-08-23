@@ -3,10 +3,7 @@ use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
-use crate::layout_ui::{
-    ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture, bottom_centered_text,
-    bottom_right_texture, button_pressed, icon_pos, top_center_anchor, top_center_texture,
-};
+use crate::layout_ui::{ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture, bottom_centered_text, bottom_right_texture, button_pressed, icon_pos, top_center_anchor, top_center_texture, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip};
 use crate::log_ui::{MultilineText, multiline_label};
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
@@ -19,7 +16,7 @@ use macroquad::prelude::*;
 use server::action::Action;
 use server::combat_stats::CombatStats;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::content::persistent_events::PersistentEventType;
+use server::content::persistent_events::{PersistentEventType, PlayerRequest};
 use server::game::{Game, GameState};
 use server::map::block_for_position;
 use server::movement::{CurrentMove, MovementAction};
@@ -29,6 +26,7 @@ use server::position::Position;
 use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
 use server::victory_points::victory_points_parts;
+use crate::event_ui::event_help_tooltip;
 
 pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
@@ -462,14 +460,32 @@ fn end_move(game: &Game) -> RenderResult {
 
 pub(crate) fn choose_player_dialog(
     rc: &RenderContext,
-    choices: &[usize],
+    request: &PlayerRequest,
     execute: impl Fn(usize) -> Action,
 ) -> RenderResult {
-    let player = rc.shown_player.index;
-    if rc.can_control_active_player() && choices.contains(&player) {
-        bottom_centered_text(rc, &format!("Select {}", rc.shown_player.get_name()));
-        if ok_button(rc, OkTooltip::Valid("Select".to_string())) {
-            return StateUpdate::execute(execute(player));
+    let choices = &request.choices;
+    let h = -50.;
+    bottom_centered_text_with_offset(
+        rc,
+        &request.description,
+        vec2(0., choices.len() as f32 * h + 50.),
+        &MultilineText::default(),
+    );
+
+    for (i, player) in choices.iter().enumerate() {
+        let offset = vec2(0., i as f32 * h + 35.);
+        let name = rc.game.player_name(*player);
+
+        let tooltip = MultilineText::of(rc, "Click to select");
+        bottom_centered_text_with_offset(rc, &name, offset, &tooltip);
+        if draw_scaled_icon_with_tooltip(
+            rc,
+            &rc.assets().ok,
+            &tooltip,
+            bottom_center_anchor(rc) + offset + vec2(100., -70.),
+            ICON_SIZE,
+        ) {
+            return StateUpdate::execute(execute(*player));
         }
     }
     NO_UPDATE

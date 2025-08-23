@@ -320,7 +320,7 @@ fn bool_answer(answer: bool) -> RenderResult {
 }
 
 pub(crate) fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> RenderResult {
-    choose_player_dialog(rc, &r.choices, |p| {
+    choose_player_dialog(rc, &r, |p| {
         Action::Response(EventResponse::SelectPlayer(p))
     })
 }
