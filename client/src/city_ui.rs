@@ -35,6 +35,7 @@ use server::resource::ResourceType;
 use server::structure::Structure;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
+use server::position::Position;
 
 pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
@@ -345,29 +346,29 @@ pub(crate) fn draw_city(rc: &RenderContext, city: &City) -> RenderResult {
     {
         draw_selected_state(rc, c, 15., h)?;
     } else {
-        draw_mood_state(rc, city, c);
+        let mood = match &(&rc.state).active_dialog {
+            ActiveDialog::IncreaseHappiness(increase) => {
+                let steps = increase
+                    .steps
+                    .iter()
+                    .find(|(p, _)| p == &city.position)
+                    .map_or(&0, |(_, s)| s);
+                &city.mood_state.clone().add(*steps)
+            }
+            _ => &city.mood_state,
+        };
+
+        draw_mood_state(rc, c, mood, city.position);
     }
 
     let i = draw_wonders(rc, city, c, owner, highlighted)?;
     draw_buildings(rc, city, c, highlighted, i)
 }
 
-fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
-    let state = &rc.state;
-    let mood = match &state.active_dialog {
-        ActiveDialog::IncreaseHappiness(increase) => {
-            let steps = increase
-                .steps
-                .iter()
-                .find(|(p, _)| p == &city.position)
-                .map_or(&0, |(_, s)| s);
-            &city.mood_state.clone().add(*steps)
-        }
-        _ => &city.mood_state,
-    };
-    let t = match mood {
+pub(crate) fn draw_mood_state(rc: &RenderContext, c: Vec2, mood_state: &MoodState, position: Position) {
+    let t = match mood_state {
         MoodState::Happy => Some(&rc.assets().resources[&ResourceType::MoodTokens]),
-        MoodState::Neutral => None,
+        MoodState::Neutral => Some(&rc.assets().neutral),
         MoodState::Angry => Some(&rc.assets().angry),
     };
     if let Some(t) = t {
@@ -375,7 +376,7 @@ fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
         draw_scaled_icon(
             rc,
             t,
-            &format!("Happiness: {}", city.mood_state),
+            &format!("Happiness: {}", mood_state),
             c + vec2(-size / 2., -size / 2.),
             size,
         );

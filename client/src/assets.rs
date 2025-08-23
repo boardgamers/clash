@@ -23,6 +23,7 @@ pub(crate) struct Assets {
 
     // mood icons
     pub angry: Texture2D,
+    pub neutral: Texture2D,
 
     // action icons
     pub move_units: Texture2D,
@@ -74,6 +75,7 @@ impl Assets {
             exhausted: load_png(include_bytes!("../assets/cross-svgrepo-com.png")),
 
             angry: load_png(include_bytes!("../assets/angry-svgrepo-com.png")),
+            neutral: load_png(include_bytes!("../assets/neutral-face-svgrepo-com.png")),
             resources: Self::resources(),
             buildings: Self::buildings(),
             civ: Self::new_civ_assets(),
