@@ -201,15 +201,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -218,7 +220,11 @@
                         "action": "Aqueduct"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Aqueduct: Start action",
+                    "Player1: Advance: Pay 2 ideas"
+                  ]
                 },
                 {
                   "action": {
@@ -266,6 +272,11 @@
                         "Ability": "Aqueduct"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 2 food",
+                    "Player1: Sanitation: Gain 1 mood token",
+                    "Player1: Aqueduct: Gain Sanitation and take an event token (2 left)"
                   ]
                 }
               ]
@@ -275,18 +286,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Aqueduct: Start action",
-      "Player1: Advance: Pay 2 ideas"
-    ],
-    [
-      "Player1: Advance: Pay 2 food",
-      "Player1: Sanitation: Gain 1 mood token",
-      "Player1: Aqueduct: Gain Sanitation and take an event token (2 left)"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,

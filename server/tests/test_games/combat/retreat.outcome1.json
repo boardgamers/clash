@@ -189,15 +189,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -209,14 +211,24 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Move: marched 1 infantry from C2 to C1",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units",
+                    "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
+                    "Player1: Retreat: Player1 can retreat"
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "Bool": true
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Retreat: Retreat"
+                  ]
                 }
               ]
             }
@@ -225,21 +237,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Move: marched 1 infantry from C2 to C1"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units",
-      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
-      "Player1: Retreat: Player1 can retreat"
-    ],
-    [
-      "Player1: Retreat: Retreat"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 1,
   "actions_left": 1,
   "round": 1,

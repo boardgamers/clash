@@ -347,15 +347,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -457,6 +459,14 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched Augustus from E8 to D8, Pay 1 action",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with Augustus, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Emperor adds 2 combat value, Gain 2 gold, Gain city D8, City D8 became Angry",
+                    "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8, Lose city D8",
+                    "Player2: Choose Casualties: Remove all defending units",
+                    "Attacker wins"
                   ]
                 }
               ]
@@ -466,19 +476,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched Augustus from E8 to D8, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with Augustus, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Emperor adds 2 combat value, Gain 2 gold, Gain city D8, City D8 became Angry",
-      "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8, Lose city D8",
-      "Player2: Choose Casualties: Remove all defending units",
-      "Attacker wins"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

@@ -197,15 +197,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -297,6 +299,14 @@
                         "Incident": 34
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Migration",
+                    "Player1: Gold deposits: Gain 2 gold",
+                    "Player1: Migration: Player2 was selected to gain 1 settler., City C2 became Neutral",
+                    "Player2: Migration: Gain 1 settler at A4"
                   ]
                 }
               ]
@@ -306,19 +316,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Migration",
-      "Player1: Gold deposits: Gain 2 gold",
-      "Player1: Migration: Player2 was selected to gain 1 settler., City C2 became Neutral",
-      "Player2: Migration: Gain 1 settler at A4"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

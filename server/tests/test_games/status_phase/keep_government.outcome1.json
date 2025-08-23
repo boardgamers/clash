@@ -220,22 +220,27 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectPositions": []
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Raze city: Did not raze a city"
+                  ]
                 },
                 {
                   "action": {
@@ -256,6 +261,9 @@
                         "Ability": "Change Government"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Change Government: Pay nothing, Keep current government"
                   ]
                 }
               ]
@@ -265,15 +273,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player2: Raze city: Did not raze a city"
-    ],
-    [
-      "Player1: Change Government: Pay nothing, Keep current government"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

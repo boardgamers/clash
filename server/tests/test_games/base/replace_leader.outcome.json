@@ -253,15 +253,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -338,6 +340,9 @@
                         "Ability": "Recruit"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Recruit: Pay 1 action, Pay 1 mood token and 1 culture token, Lost Sulla at A1, City A1 became Neutral, Gain Augustus at A1"
                   ]
                 }
               ]
@@ -347,12 +352,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Recruit: Pay 1 action, Pay 1 mood token and 1 culture token, Lost Sulla at A1, City A1 became Neutral, Gain Augustus at A1"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

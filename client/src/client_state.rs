@@ -161,7 +161,7 @@ impl ActiveDialog {
 
     #[must_use]
     pub(crate) fn show_for_other_player(&self) -> bool {
-        self.is_modal() || matches!(self, ActiveDialog::PlayerRequest(_))
+        self.is_modal()
     }
 
     #[must_use]

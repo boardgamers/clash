@@ -10,7 +10,7 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, encircled, high_ground, martyr, scout,
 };
 use crate::game::Game;
-use crate::log::current_player_turn_log_without_redo;
+use crate::log::{add_start_turn_action_if_needed, current_turn_log_without_redo};
 use crate::playing_actions::PlayingAction;
 use crate::utils::remove_element_by;
 
@@ -35,7 +35,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         This turn, you may not attack that player. In their next turn, they may not attack you.",
         |c| c.free_action().culture_tokens(1),
         move |game, _player, _| {
-            !current_player_turn_log_without_redo(game)
+            !current_turn_log_without_redo(game)
                 .actions
                 .iter()
                 .any(|i| match &i.action {
@@ -95,6 +95,7 @@ pub(crate) fn use_negotiations() -> Ability {
                             }
                         }
                     }
+                    add_start_turn_action_if_needed(game);
                     // must be in reverse order to not mess up the indices during deletion
                     for i in delete.iter().rev() {
                         p.log(game, &format!("May attack {partner_name} again.",));
@@ -194,6 +195,7 @@ pub(crate) fn use_assassination() -> Ability {
                 if remove_element_by(&mut game.permanent_effects, |e| is_assassinated(e, p.index))
                     .is_some()
                 {
+                    add_start_turn_action_if_needed(game);
                     lose_action(game, p);
                 }
             },

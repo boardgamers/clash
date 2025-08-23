@@ -230,15 +230,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -270,6 +272,11 @@
                         "Ability": "Free Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Storage: Gain 1 mood token",
+                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
+                    "A new game event has been triggered: An awesome year"
                   ]
                 }
               ]
@@ -279,16 +286,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
-    ],
-    [
-      "A new game event has been triggered: An awesome year"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

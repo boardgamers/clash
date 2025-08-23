@@ -194,15 +194,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -220,6 +222,9 @@
                         "Ability": "Build Wonder"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Build Wonder: Play the wonder card Great Gardens, Decided to build Great Gardens in city A1, Pay 1 action"
                   ]
                 },
                 {
@@ -279,17 +284,26 @@
                         "Ability": "Build Wonder"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Gardens: Pay 5 food, 5 wood, 2 ore and 5 culture tokens",
+                    "Player1: Build Wonder: Play Great Gardens, Gain Great Gardens at A1"
                   ]
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
-                  }
+                  },
+                  "log": [
+                    "Player1: End Turn: 1 actions left"
+                  ]
                 }
               ]
             },
             {
-              "index": 1,
+              "turn_type": {
+                "Player": 1
+              },
               "actions": [
                 {
                   "action": {
@@ -313,6 +327,9 @@
                         "Ability": "Move"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Move: marched 2 infantry from C1 to B1, Pay 1 action"
                   ]
                 }
               ]
@@ -322,25 +339,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Build Wonder: Play the wonder card Great Gardens, Decided to build Great Gardens in city A1, Pay 1 action"
-    ],
-    [
-      "Player1: Great Gardens: Pay 5 food, 5 wood, 2 ore and 5 culture tokens",
-      "Player1: Build Wonder: Play Great Gardens, Gain Great Gardens at A1"
-    ],
-    [
-      "Player1: End Turn: 1 actions left"
-    ],
-    [
-      "It's Player2's turn"
-    ],
-    [
-      "Player2: Move: marched 2 infantry from C1 to B1, Pay 1 action"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 1,

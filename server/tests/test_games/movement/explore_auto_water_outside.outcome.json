@@ -317,15 +317,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -337,7 +339,10 @@
                         "destination": "F5"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Move: marched 1 settler from E6 to F5, Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
+                  ]
                 }
               ]
             }
@@ -346,12 +351,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2: Move: marched 1 settler from E6 to F5, Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 2,
   "round": 3,

@@ -181,15 +181,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -213,6 +215,10 @@
                         "Ability": "Action Card"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Action Card: Play Militia/Wedge Formation",
+                    "Player1: Militia: Pay 1 culture token"
                   ]
                 },
                 {
@@ -250,6 +256,9 @@
                         "CivilCard": 37
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Militia: Pay 1 culture token, Gain 1 infantry at A1"
                   ]
                 }
               ]
@@ -259,16 +268,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Action Card: Play Militia/Wedge Formation",
-      "Player1: Militia: Pay 1 culture token"
-    ],
-    [
-      "Player1: Militia: Pay 1 culture token, Gain 1 infantry at A1"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 3,
   "round": 2,

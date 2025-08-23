@@ -14,6 +14,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
+use crate::log::add_start_turn_action_if_needed;
 use crate::map::{Block, Terrain, block_for_position, capital_city_position};
 use crate::movement::{MoveUnits, move_action_log};
 use crate::player::{Data, Player};
@@ -222,6 +223,7 @@ pub(crate) fn lose_raid_resource() -> Ability {
                 .then_some(vec![PaymentRequest::mandatory(c, "Pay 1 resource")])
         },
         |game, s, ()| {
+            add_start_turn_action_if_needed(game);
             s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )

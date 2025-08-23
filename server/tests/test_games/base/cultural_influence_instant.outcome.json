@@ -179,15 +179,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -239,6 +241,10 @@
                         "Ability": "Influence Culture"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Influence Culture: Pay 1 action, Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6), Gain Fortress at C2",
+                    "Player1: Influence Culture: Lose Fortress at C2"
                   ]
                 }
               ]
@@ -248,13 +254,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2: Influence Culture: Pay 1 action, Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6), Gain Fortress at C2",
-      "Player1: Influence Culture: Lose Fortress at C2"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 2,
   "successful_cultural_influence": true,

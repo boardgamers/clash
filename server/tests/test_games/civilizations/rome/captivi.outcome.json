@@ -202,15 +202,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -269,6 +271,10 @@
                         "Ability": "Construct Building"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 mood token with Captivi, Gain Market at A1",
+                    "Player1: Captivi: May replace resources with mood tokens"
                   ]
                 }
               ]
@@ -278,13 +284,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 mood token with Captivi, Gain Market at A1",
-      "Player1: Captivi: May replace resources with mood tokens"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

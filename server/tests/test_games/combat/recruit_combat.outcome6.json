@@ -244,15 +244,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -314,6 +316,9 @@
                         "Ability": "Recruit"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Recruit: Pay 1 action, Pay 5 wood and 3 gold, City C2 became Neutral, Gain 4 ships at C3"
                   ]
                 },
                 {
@@ -337,6 +342,10 @@
                         "Advance": "Nationalism"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Nationalism: Gain 1 mood token",
+                    "Player1: Waste: Could not store 4 food"
                   ]
                 },
                 {
@@ -421,6 +430,16 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Medicine: Gain 1 gold",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 4 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 24 and gets 2 hits against defending units, Lost 2 ships at C2",
+                    "Pirates: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units, Lost 2 ships at C3",
+                    "Player1: Pirate ship destroyed: Gain 2 gold",
+                    "Player1: Choose Casualties: Remove 2 of their attacking units",
+                    "Pirates: Choose Casualties: Remove all defending units",
+                    "Attacker wins"
                   ]
                 },
                 {
@@ -444,6 +463,9 @@
                         "Ability": "Pirates battle"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Pirates battle: Gain 1 culture token"
                   ]
                 },
                 {
@@ -514,6 +536,16 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: sailed 2 ships from C3 to C4, Pay 1 action",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units",
+                    "Pirates: Combat: Defending with 1 ship, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units, Lost 1 ship at C4",
+                    "Player1: Pirate ship destroyed: Gain 1 gold",
+                    "Pirates: Choose Casualties: Remove all defending units",
+                    "Attacker wins",
+                    "Player1: Waste: Could not store 1 gold"
                   ]
                 },
                 {
@@ -537,6 +569,9 @@
                         "Ability": "Pirates battle"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Pirates battle: Gain 1 culture token"
                   ]
                 },
                 {
@@ -567,6 +602,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Sea Cleansing using High Culture/Sea Cleansing"
                   ]
                 }
               ]
@@ -576,52 +614,7 @@
       ]
     }
   ],
-  "action_log_index": 7,
-  "log": [
-    [
-      "Player1 ended the movement action"
-    ],
-    [
-      "Player1: Recruit: Pay 1 action, Pay 5 wood and 3 gold, City C2 became Neutral, Gain 4 ships at C3"
-    ],
-    [
-      "Player1: Nationalism: Gain 1 mood token",
-      "Player1: Waste: Could not store 4 food"
-    ],
-    [
-      "Player1: Medicine: Gain 1 gold"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 4 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 24 and gets 2 hits against defending units, Lost 2 ships at C2",
-      "Pirates: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units, Lost 2 ships at C3",
-      "Player1: Pirate ship destroyed: Gain 2 gold",
-      "Player1: Choose Casualties: Remove 2 of their attacking units",
-      "Pirates: Choose Casualties: Remove all defending units",
-      "Attacker wins"
-    ],
-    [
-      "Player1: Pirates battle: Gain 1 culture token"
-    ],
-    [
-      "Player1: Move: sailed 2 ships from C3 to C4, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units",
-      "Pirates: Combat: Defending with 1 ship, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units, Lost 1 ship at C4",
-      "Player1: Pirate ship destroyed: Gain 1 gold",
-      "Pirates: Choose Casualties: Remove all defending units",
-      "Attacker wins",
-      "Player1: Waste: Could not store 1 gold"
-    ],
-    [
-      "Player1: Pirates battle: Gain 1 culture token"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Sea Cleansing using High Culture/Sea Cleansing"
-    ]
-  ],
+  "log_index": 7,
   "undo_limit": 5,
   "actions_left": 0,
   "round": 6,

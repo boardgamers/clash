@@ -13,7 +13,7 @@ use crate::content::persistent_events::{
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::{current_player_turn_log_mut, current_player_turn_log_without_redo};
+use crate::log::{current_turn_log_mut, current_turn_log_without_redo};
 use crate::player::Player;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
@@ -169,7 +169,7 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
         && let Some(action_log_index) = combat_requirement_met(game, player_index, id, r)
     {
         satisfying_action = Some(action_log_index);
-        current_player_turn_log_mut(game).actions[action_log_index]
+        current_turn_log_mut(game).actions[action_log_index]
             .combat_stats
             .as_mut()
             .expect("combat stats")
@@ -322,7 +322,7 @@ pub fn combat_requirement_met(
         action_card_id + 1
     };
 
-    current_player_turn_log_without_redo(game)
+    current_turn_log_without_redo(game)
         .actions
         .iter()
         .position(|a| {

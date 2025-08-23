@@ -223,15 +223,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -248,7 +250,10 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Hellenistic Culture: Pay 2 mood tokens"
+                  ]
                 },
                 {
                   "action": {
@@ -299,6 +304,10 @@
                         "SpecialAdvance": "HellenisticCulture"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Hellenistic Culture: Pay 2 mood tokens, Tried to influence the Port in the city at C2 by Player2, Cultural influence succeeded (rolled 6), Gain Port at C2 at the water tile C3",
+                    "Player2: Hellenistic Culture: Lose Port at C2"
                   ]
                 }
               ]
@@ -308,16 +317,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Hellenistic Culture: Pay 2 mood tokens"
-    ],
-    [
-      "Player1: Hellenistic Culture: Pay 2 mood tokens, Tried to influence the Port in the city at C2 by Player2, Cultural influence succeeded (rolled 6), Gain Port at C2 at the water tile C3",
-      "Player2: Hellenistic Culture: Lose Port at C2"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 2,
   "actions_left": 2,
   "successful_cultural_influence": true,

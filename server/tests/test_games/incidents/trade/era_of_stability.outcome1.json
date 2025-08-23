@@ -233,15 +233,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -299,6 +301,12 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Era of Stability",
+                    "Player1: Era of Stability: Exhausted the land in position B1"
                   ]
                 },
                 {
@@ -322,6 +330,9 @@
                         "Incident": 47
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Era of Stability: Gain 1 culture token"
                   ]
                 }
               ]
@@ -331,20 +342,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Era of Stability",
-      "Player1: Era of Stability: Exhausted the land in position B1"
-    ],
-    [
-      "Player1: Era of Stability: Gain 1 culture token"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 2,
   "actions_left": 2,
   "round": 2,

@@ -255,15 +255,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -283,6 +285,9 @@
                         "LeaderAbility": "Legendary Explorer"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Legendary Explorer: Pay 1 action, Start action, Pay 1 culture token"
                   ]
                 },
                 {
@@ -308,6 +313,9 @@
                         "LeaderAbility": "Legendary Explorer"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Legendary Explorer: Pay 1 culture token, Place an explorer token at D2"
                   ]
                 }
               ]
@@ -317,15 +325,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Legendary Explorer: Pay 1 action, Start action, Pay 1 culture token"
-    ],
-    [
-      "Player1: Legendary Explorer: Pay 1 culture token, Place an explorer token at D2"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

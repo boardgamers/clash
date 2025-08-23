@@ -231,15 +231,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -309,6 +311,12 @@
                         "Ability": "Gold deposits"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Fire",
+                    "Player1: Gold deposits: Gain 2 gold"
                   ]
                 }
               ]
@@ -318,17 +326,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Fire",
-      "Player1: Gold deposits: Gain 2 gold"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

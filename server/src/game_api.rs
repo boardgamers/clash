@@ -139,9 +139,9 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
 }
 
 fn strip_log(game: &mut Game, player_index: Option<usize>) {
-    for age in &mut game.action_log {
+    for age in &mut game.log {
         for round in &mut age.rounds {
-            for player in &mut round.players {
+            for player in &mut round.turns {
                 for action in &mut player.actions {
                     strip_action(action, player_index);
                 }

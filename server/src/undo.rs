@@ -1,11 +1,11 @@
 use crate::action::{Action, after_action};
 use crate::game::Game;
-use crate::log::{current_player_turn_log, current_player_turn_log_mut};
+use crate::log::{current_turn_log, current_turn_log_mut};
 use crate::movement::execute_movement_action;
 use json_patch::{PatchOperation, patch};
 use serde_json::Value;
 
-const IGNORE_PATHS: [&str; 3] = ["/action_log/", "/action_log_index", "/log/"];
+const IGNORE_PATHS: [&str; 2] = ["/log/", "/log_index"];
 
 pub(crate) fn clean_patch(mut patch: Vec<PatchOperation>) -> Vec<PatchOperation> {
     patch.retain(|op| {
@@ -17,15 +17,15 @@ pub(crate) fn clean_patch(mut patch: Vec<PatchOperation>) -> Vec<PatchOperation>
 }
 
 pub(crate) fn undo(mut game: Game) -> Result<Game, String> {
-    game.action_log_index -= 1;
-    game.log.remove(game.log.len() - 1);
-
-    let l = &mut current_player_turn_log_mut(&mut game).actions;
+    game.log_index -= 1;
+    let l = &mut current_turn_log_mut(&mut game).actions;
     let Some(i) = l.iter().rposition(|a| !a.undo.is_empty()) else {
         return Err("No undoable action".to_string());
     };
 
     let item = l.get_mut(i).expect("should have undoable action");
+    item.log.clear();
+    item.items.clear();
     let p = std::mem::take(&mut item.undo);
 
     match &item.action {
@@ -51,8 +51,8 @@ pub(crate) fn to_serde_value(game: &Game) -> Value {
 }
 
 pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
-    let copy = current_player_turn_log(game).action(game).clone();
-    game.action_log_index += 1;
+    let copy = current_turn_log(game).last_action(game).clone();
+    game.log_index += 1;
 
     let a = copy.action;
     match a {

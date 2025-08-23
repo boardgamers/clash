@@ -197,15 +197,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -263,6 +265,12 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Great Architect",
+                    "Player1: Great Architect: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
                 },
                 {
@@ -303,6 +311,9 @@
                         "Incident": 55
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Great Architect: Pay 1 culture token, Gain Great Architect from the current event"
                   ]
                 },
                 {
@@ -327,6 +338,10 @@
                         "Ability": "Action Card"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Action Card: Play Great Architect",
+                    "Player1: Build Wonder: Play the wonder card Pyramids"
                   ]
                 },
                 {
@@ -336,7 +351,10 @@
                         "A1"
                       ]
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Build Wonder: Decided to build Pyramids in city A1"
+                  ]
                 },
                 {
                   "action": {
@@ -397,6 +415,10 @@
                         "CivilCard": 155
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
+                    "Player1: Great Architect: Play Pyramids, Gain Pyramids at A1"
                   ]
                 }
               ]
@@ -406,31 +428,7 @@
       ]
     }
   ],
-  "action_log_index": 5,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Great Architect",
-      "Player1: Great Architect: Base effect: Pirates spawn, No valid positions for Pirate Ship"
-    ],
-    [
-      "Player1: Great Architect: Pay 1 culture token, Gain Great Architect from the current event"
-    ],
-    [
-      "Player1: Action Card: Play Great Architect",
-      "Player1: Build Wonder: Play the wonder card Pyramids"
-    ],
-    [
-      "Player1: Build Wonder: Decided to build Pyramids in city A1"
-    ],
-    [
-      "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
-      "Player1: Great Architect: Play Pyramids, Gain Pyramids at A1"
-    ]
-  ],
+  "log_index": 5,
   "undo_limit": 1,
   "actions_left": 2,
   "round": 2,

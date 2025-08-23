@@ -261,15 +261,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -321,6 +323,11 @@
                         "Ability": "Collect"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Collect: Pay 1 action, Use city B3, City B3 became Neutral, Gain 1 food",
+                    "Player1: Husbandry: Can collect 1 resources from 2 land spaces away",
+                    "Player1: Waste: Could not store 1 food"
                   ]
                 }
               ]
@@ -330,14 +337,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Collect: Pay 1 action, Use city B3, City B3 became Neutral, Gain 1 food",
-      "Player1: Husbandry: Can collect 1 resources from 2 land spaces away",
-      "Player1: Waste: Could not store 1 food"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

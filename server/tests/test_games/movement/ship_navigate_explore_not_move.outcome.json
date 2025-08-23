@@ -330,15 +330,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -350,7 +352,10 @@
                         "destination": "F2"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Move: sailed 1 ship from B3 to F2"
+                  ]
                 }
               ]
             }
@@ -359,12 +364,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2: Move: sailed 1 ship from B3 to F2"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 0,
   "round": 3,

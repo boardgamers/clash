@@ -227,15 +227,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -282,6 +284,10 @@
                         }
                       ]
                     }
+                  ],
+                  "log": [
+                    "Player1: Collect: Pay 1 action, Use city B3, Gain 2 food with Irrigation",
+                    "Player1: Rice Cultivation: Added 1 food"
                   ]
                 }
               ]
@@ -291,16 +297,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 ended the movement action"
-    ],
-    [
-      "Player1: Collect: Pay 1 action, Use city B3, Gain 2 food with Irrigation",
-      "Player1: Rice Cultivation: Added 1 food"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

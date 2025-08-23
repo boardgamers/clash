@@ -264,15 +264,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -281,7 +283,10 @@
                         "action": "Theaters"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Theaters: Start action"
+                  ]
                 },
                 {
                   "action": {
@@ -318,6 +323,9 @@
                         "Ability": "Theaters"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Theaters: Pay 1 culture token, Gain 1 mood token"
                   ]
                 }
               ]
@@ -327,15 +335,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Theaters: Start action"
-    ],
-    [
-      "Player1: Theaters: Pay 1 culture token, Gain 1 mood token"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 0,
   "round": 6,

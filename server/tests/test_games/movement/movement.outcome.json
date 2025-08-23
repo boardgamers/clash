@@ -186,15 +186,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -206,7 +208,10 @@
                         "destination": "B3"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Move: marched 1 settler from B2 to B3"
+                  ]
                 }
               ]
             }
@@ -215,12 +220,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched 1 settler from B2 to B3"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 1,

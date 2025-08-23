@@ -309,15 +309,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -375,6 +377,12 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Pandemics",
+                    "Player1: Pandemics: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Lose a total of 2 units, cards, and resources"
                   ]
                 },
                 {
@@ -398,6 +406,9 @@
                         "Incident": 49
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Pandemics: Lost 1 infantry at C2"
                   ]
                 },
                 {
@@ -426,6 +437,10 @@
                         "Incident": 49
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Pandemics: Discard Quick Advance/Peltasts",
+                    "Player2: Pandemics: Lose a total of 1 units, cards, and resources"
                   ]
                 }
               ]
@@ -435,24 +450,7 @@
       ]
     }
   ],
-  "action_log_index": 3,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Pandemics",
-      "Player1: Pandemics: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Lose a total of 2 units, cards, and resources"
-    ],
-    [
-      "Player1: Pandemics: Lost 1 infantry at C2"
-    ],
-    [
-      "Player1: Pandemics: Discard Quick Advance/Peltasts",
-      "Player2: Pandemics: Lose a total of 1 units, cards, and resources"
-    ]
-  ],
+  "log_index": 3,
   "undo_limit": 3,
   "actions_left": 2,
   "round": 1,

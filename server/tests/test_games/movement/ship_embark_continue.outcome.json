@@ -258,15 +258,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -280,7 +282,10 @@
                         "embark_carrier_id": 9
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Move: embarked 2 settlers from B3 to C3"
+                  ]
                 }
               ]
             }
@@ -289,12 +294,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Move: embarked 2 settlers from B3 to C3"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,

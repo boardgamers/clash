@@ -167,15 +167,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -198,6 +200,12 @@
                         "Ability": "Move"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 1 infantry",
+                    "Player2: Combat: Defending with 2 infantry"
                   ]
                 },
                 {
@@ -276,6 +284,14 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Tactics: Play an action card face down, Reveal Tactics Card Flanking",
+                    "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units, Combat modifiers: Flanking added 1 extra die, Lost 1 infantry at C2",
+                    "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units, Lost 2 infantry at C1",
+                    "Player1: Choose Casualties: Remove all attacking units",
+                    "Player2: Choose Casualties: Remove all defending units",
+                    "Battle ends in a draw"
                   ]
                 }
               ]
@@ -285,25 +301,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry",
-      "Player2: Combat: Defending with 2 infantry"
-    ],
-    [
-      "Player1: Tactics: Play an action card face down, Reveal Tactics Card Flanking",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units, Combat modifiers: Flanking added 1 extra die, Lost 1 infantry at C2",
-      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units, Lost 2 infantry at C1",
-      "Player1: Choose Casualties: Remove all attacking units",
-      "Player2: Choose Casualties: Remove all defending units",
-      "Battle ends in a draw"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 2,
   "actions_left": 2,
   "round": 2,

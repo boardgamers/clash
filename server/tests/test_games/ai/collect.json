@@ -262,13 +262,11 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     { "age": 1,
       "rounds": [
         { "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "items": []
             },
             {
@@ -280,35 +278,7 @@
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [
-    [
-      "The game has started"
-    ],
-    [
-      "Player1 is playing as Maya",
-      "Player1 gained an action card from the pile",
-      "Player1 gained an objective card from the pile"
-    ],
-    [
-      "Player2 is playing as Rome",
-      "Player2 gained an action card from the pile",
-      "Player2 gained an objective card from the pile"
-    ],
-    [
-      "Age 1 has started"
-    ],
-    [
-      "Round 1/3"
-    ],
-    [
-      "It's Player1's turn"
-    ],
-    [
-      "It's Player1's turn",
-      "Player gained 1 mood token as advance bonus"
-    ]
-  ],
+  "log_index": 0,
   "undo_limit": 0,
   "actions_left": 3,
   "round": 6,

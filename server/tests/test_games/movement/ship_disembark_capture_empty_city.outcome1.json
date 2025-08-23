@@ -264,15 +264,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -388,6 +390,13 @@
                         "Ability": "Place Settler"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: disembarked 1 cavalry and 1 elephant from C3 to B2",
+                    "Player1: Combat: Gain 2 gold, Gain city B2, Gain Port at B2 at the water tile C3, City B2 became Angry",
+                    "Player2: Combat: Lose city B2, Lose Port at B2",
+                    "Player2: Place Settler: Gain 1 settler at C1",
+                    "Player1: Waste: Could not store 2 gold"
                   ]
                 },
                 {
@@ -418,6 +427,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete Naval Assault using Optimized Storage/Naval Assault"
                   ]
                 }
               ]
@@ -427,19 +439,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Move: disembarked 1 cavalry and 1 elephant from C3 to B2",
-      "Player1: Combat: Gain 2 gold, Gain city B2, Gain Port at B2 at the water tile C3, City B2 became Angry",
-      "Player2: Combat: Lose city B2, Lose Port at B2",
-      "Player2: Place Settler: Gain 1 settler at C1",
-      "Player1: Waste: Could not store 2 gold"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Naval Assault using Optimized Storage/Naval Assault"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,

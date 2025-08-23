@@ -195,15 +195,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -246,6 +248,10 @@
                         "Ability": "Found city"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Found City: Pay 1 action",
+                    "Player1: Found city: Gain city B6"
                   ]
                 },
                 {
@@ -276,6 +282,9 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Complete Objectives: Complete City Founder using City Founder/Resistance"
                   ]
                 }
               ]
@@ -285,16 +294,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Found City: Pay 1 action",
-      "Player1: Found city: Gain city B6"
-    ],
-    [
-      "Player1: Complete Objectives: Complete City Founder using City Founder/Resistance"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 1,

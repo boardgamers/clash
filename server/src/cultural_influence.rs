@@ -8,7 +8,7 @@ use crate::content::custom_actions::custom_action_modifier_event_origin;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, SelectedStructure};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::current_player_turn_log_without_redo;
+use crate::log::current_turn_log_without_redo;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::ActionInfo;
@@ -205,7 +205,7 @@ fn roll_boost_paid(
     payment: &ResourcePile,
     info: &mut InfluenceCultureInfo,
 ) {
-    let a = current_player_turn_log_without_redo(game)
+    let a = current_turn_log_without_redo(game)
         .actions
         .iter()
         .rev()

@@ -350,15 +350,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -416,6 +418,12 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+                    "Player2: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Great Warlord",
+                    "Player2: Great Warlord: Exhausted the land in position E8"
                   ]
                 },
                 {
@@ -456,6 +464,9 @@
                         "Incident": 24
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Great Warlord: Pay 1 culture token, Gain Great Warlord from the current event"
                   ]
                 },
                 {
@@ -512,6 +523,11 @@
                         "CivilCard": 124
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Great Warlord: Pay 1 action, Gain Tactics without taking an event token",
+                    "Player2: Action Card: Play Great Warlord",
+                    "Player2: Tactics: Gain 1 culture token"
                   ]
                 },
                 {
@@ -560,6 +576,14 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Move: marched 1 infantry from D7 to C8",
+                    "Combat round 1",
+                    "Player2: Combat: Attacking with 1 infantry, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Player gets +2 combat value for Great Warlord",
+                    "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at C8",
+                    "Player1: Choose Casualties: Remove all defending units",
+                    "Attacker wins"
                   ]
                 }
               ]
@@ -569,35 +593,7 @@
       ]
     }
   ],
-  "action_log_index": 4,
-  "log": [
-    [
-      "Player2: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-      "Player2: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Great Warlord",
-      "Player2: Great Warlord: Exhausted the land in position E8"
-    ],
-    [
-      "Player2: Great Warlord: Pay 1 culture token, Gain Great Warlord from the current event"
-    ],
-    [
-      "Player2: Great Warlord: Pay 1 action, Gain Tactics without taking an event token",
-      "Player2: Action Card: Play Great Warlord",
-      "Player2: Tactics: Gain 1 culture token"
-    ],
-    [
-      "Player2: Move: marched 1 infantry from D7 to C8"
-    ],
-    [
-      "Combat round 1",
-      "Player2: Combat: Attacking with 1 infantry, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Player gets +2 combat value for Great Warlord",
-      "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at C8",
-      "Player1: Choose Casualties: Remove all defending units",
-      "Attacker wins"
-    ]
-  ],
+  "log_index": 4,
   "undo_limit": 4,
   "actions_left": 1,
   "round": 1,

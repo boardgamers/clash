@@ -314,15 +314,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -349,6 +351,14 @@
                         "Ability": "Combat"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: sailed 2 ships from C3 to D2",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 2 ships, 1 cavalry and 1 elephant, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units, Combat modifiers: WarShips ignore the first hit in the first round of combat, Lost 1 ship at C3",
+                    "Player2: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against attacking units, Combat modifiers: WarShips ignore the first hit in the first round of combat",
+                    "Player1: Choose Casualties: Remove 1 of their attacking units",
+                    "Player1: Retreat: Player1 can retreat"
                   ]
                 }
               ]
@@ -358,19 +368,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Move: sailed 2 ships from C3 to D2"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 2 ships, 1 cavalry and 1 elephant, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units, Combat modifiers: WarShips ignore the first hit in the first round of combat, Lost 1 ship at C3",
-      "Player2: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against attacking units, Combat modifiers: WarShips ignore the first hit in the first round of combat",
-      "Player1: Choose Casualties: Remove 1 of their attacking units",
-      "Player1: Retreat: Player1 can retreat"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 2,
   "round": 6,

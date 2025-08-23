@@ -327,22 +327,27 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
                     "Response": {
                       "ExploreResolution": 3
                     }
-                  }
+                  },
+                  "log": [
+                    "Player2: Explore Resolution: Chose rotation 3, Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain, Ship can't move to the explored tile"
+                  ]
                 }
               ]
             }
@@ -351,12 +356,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2: Explore Resolution: Chose rotation 3, Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain, Ship can't move to the explored tile"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 3,

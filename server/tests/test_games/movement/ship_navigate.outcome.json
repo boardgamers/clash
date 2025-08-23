@@ -300,15 +300,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -346,6 +348,10 @@
                         "Advance": "Cartography"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Move: sailed 1 ship from B5 to A7",
+                    "Player2: Cartography: Gain 1 culture token, Gain 1 idea"
                   ]
                 }
               ]
@@ -355,13 +361,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2: Move: sailed 1 ship from B5 to A7",
-      "Player2: Cartography: Gain 1 culture token, Gain 1 idea"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 0,
   "round": 3,

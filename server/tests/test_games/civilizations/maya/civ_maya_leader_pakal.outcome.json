@@ -322,13 +322,11 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     { "age": 1,
       "rounds": [
         { "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "items": [
                 {
                   "action": {
@@ -365,23 +363,8 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 marched a leader from A1 to B1"
-    ],
-    [
-      "Combat round 1",
-      "Attackers: a leader",
-      "Defenders: no units",
-      "Player1 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
-      "Player1 used the following combat modifiers: Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk",
-      "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
-      "Attacker wins and captured Player2's city at B1",
-      "Player1 gained 5 gold for capturing a city",
-      "Player1 could not store 3 gold"
-    ]
-  ],
+  "log_index": 1,
+
   "undo_limit": 1,
   "actions_left": 0,
   "round": 6,

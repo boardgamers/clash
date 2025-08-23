@@ -242,15 +242,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -273,6 +275,12 @@
                         "Ability": "Move"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action",
+                    "Combat round 1",
+                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
+                    "Player2: Combat: Defending with 1 cavalry, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units"
                   ]
                 },
                 {
@@ -379,6 +387,14 @@
                         "Ability": "Place Settler"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Fireworks: Pay 2 gold, Ignore the first hit",
+                    "Player2: Choose Casualties: Remove all defending units",
+                    "Player2: Combat: Lost 1 cavalry at C1, Lose city C1",
+                    "Attacker wins",
+                    "Player1: Combat: Gain 1 gold, Gain city C1",
+                    "Player2: Place Settler: Gain 1 settler at B2"
                   ]
                 }
               ]
@@ -388,28 +404,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1 ended the movement action"
-    ],
-    [
-      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
-    ],
-    [
-      "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
-      "Player2: Combat: Defending with 1 cavalry, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units"
-    ],
-    [
-      "Player1: Fireworks: Pay 2 gold, Ignore the first hit",
-      "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 1 cavalry at C1, Lose city C1",
-      "Attacker wins",
-      "Player1: Combat: Gain 1 gold, Gain city C1",
-      "Player2: Place Settler: Gain 1 settler at B2"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 1,
   "actions_left": 1,
   "round": 6,

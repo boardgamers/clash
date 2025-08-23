@@ -407,13 +407,11 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     { "age": 1,
       "rounds": [
         { "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "items": [
                 {
                   "action": {
@@ -434,17 +432,8 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player2 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: Great Explorer",
-      "Player2 exhausted the land in position E8"
-    ]
-  ],
+  "log_index": 1,
+
   "undo_limit": 1,
   "actions_left": 2,
   "round": 1,

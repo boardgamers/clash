@@ -240,15 +240,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -313,6 +315,9 @@
                         "Ability": "Increase Happiness"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Increase Happiness: Pay 1 action, City C2 became Neutral, City B3 became Happy, Pay 5 mood tokens"
                   ]
                 }
               ]
@@ -322,12 +327,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Increase Happiness: Pay 1 action, City C2 became Neutral, City B3 became Happy, Pay 5 mood tokens"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,

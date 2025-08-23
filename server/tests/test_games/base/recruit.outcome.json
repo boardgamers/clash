@@ -216,15 +216,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -322,6 +324,10 @@
                         "Ability": "Complete Objectives"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Recruit: Pay 1 action, Pay 1 food, 1 ore and 2 gold, Lost 1 settler at C2, City A1 became Angry, Gain 1 settler and 1 infantry at A1",
+                    "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
                   ]
                 }
               ]
@@ -331,13 +337,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Recruit: Pay 1 action, Pay 1 food, 1 ore and 2 gold, Lost 1 settler at C2, City A1 became Angry, Gain 1 settler and 1 infantry at A1",
-      "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 2,

@@ -202,15 +202,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -234,6 +236,10 @@
                         "Ability": "Action Card"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Action Card: Play Mass Production/Defensive Formation",
+                    "Player1: Mass Production: Can use Mass Production to collect from 2 additional tiles."
                   ]
                 },
                 {
@@ -292,6 +298,9 @@
                         "Ability": "Collect"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 mood token"
                   ]
                 }
               ]
@@ -301,16 +310,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Action Card: Play Mass Production/Defensive Formation",
-      "Player1: Mass Production: Can use Mass Production to collect from 2 additional tiles."
-    ],
-    [
-      "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 mood token"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 2,
   "round": 1,

@@ -12,6 +12,7 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::{Game, GameOptions};
+use crate::log::add_start_turn_action_if_needed;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::{ResourceType, gain_resources};
 use crate::resource_pile::ResourcePile;
@@ -158,7 +159,7 @@ where
             if !p.get(game).can_use_advance(Advance::TradeRoutes) {
                 return None;
             }
-
+            add_start_turn_action_if_needed(game);
             trade_route_reward(game, p).map(|(reward, routes)| {
                 gain_market_bonus(game, &routes);
                 ResourceRewardRequest::new(reward, "Collect trade routes reward".to_string())
@@ -167,6 +168,7 @@ where
         |game, s, _| {
             let (_, routes) = trade_route_reward(game, &s.player()).expect("No trade route reward");
             let log = trade_route_log(game, s.player_index, &routes, s.actively_selected);
+
             for l in &log {
                 s.log(game, l);
             }

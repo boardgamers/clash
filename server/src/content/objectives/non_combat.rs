@@ -3,7 +3,7 @@ use crate::advance::Advance;
 use crate::card::{HandCard, HandCardLocation};
 use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
-use crate::log::{ActionLogAction, ActionLogEntry, ActionLogPlayer};
+use crate::log::{ActionLogAction, ActionLogEntry, ActionLogTurn, TurnType};
 use crate::map::capital_city_position;
 use crate::objective_card::{Objective, objective_is_ready};
 use itertools::Itertools;
@@ -89,16 +89,24 @@ pub(crate) fn magnificent_culture() -> Objective {
 pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogAction> {
     last_round(game)
         .iter()
-        .filter(|p| p.index == player)
+        .filter(|p| {
+            if let TurnType::Player(i) = p.turn_type
+                && i == player
+            {
+                true
+            } else {
+                false
+            }
+        })
         .flat_map(|p| p.actions.iter())
         .collect()
 }
 
-fn last_round(game: &Game) -> Vec<&ActionLogPlayer> {
-    game.action_log
+fn last_round(game: &Game) -> Vec<&ActionLogTurn> {
+    game.log
         .last()
         .and_then(|a| a.rounds.last())
         .iter()
-        .flat_map(|r| r.players.iter())
+        .flat_map(|r| r.turns.iter())
         .collect_vec()
 }

@@ -252,15 +252,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -310,6 +312,9 @@
                         }
                       ]
                     }
+                  ],
+                  "log": [
+                    "Player1: Move: marched 3 settlers, 1 infantry, 1 cavalry and 1 elephant from E2 to A1 on roads for 1 food and 1 ore, Pay 1 action, Pay 1 food and 1 ore with Roman Roads"
                   ]
                 }
               ]
@@ -319,12 +324,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched 3 settlers, 1 infantry, 1 cavalry and 1 elephant from E2 to A1 on roads for 1 food and 1 ore, Pay 1 action, Pay 1 food and 1 ore with Roman Roads"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 6,

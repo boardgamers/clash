@@ -337,15 +337,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -357,7 +359,10 @@
                         "destination": "B2"
                       }
                     }
-                  }
+                  },
+                  "log": [
+                    "Player1: Move: marched 1 settler from C2 to B2, Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
+                  ]
                 }
               ]
             }
@@ -366,12 +371,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Move: marched 1 settler from C2 to B2, Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 1,
   "round": 1,

@@ -250,15 +250,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -316,6 +318,11 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+                    "Player1: Storage: Gain 1 mood token",
+                    "A new game event has been triggered: Pestilence"
                   ]
                 },
                 {
@@ -341,6 +348,9 @@
                         "Advance": "Myths"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Myths: Pay 1 mood token, Avoid mood change"
                   ]
                 },
                 {
@@ -362,6 +372,9 @@
                         "Incident": 1
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Pestilence: City A1 became Neutral"
                   ]
                 }
               ]
@@ -371,22 +384,7 @@
       ]
     }
   ],
-  "action_log_index": 3,
-  "log": [
-    [
-      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: Pestilence"
-    ],
-    [
-      "Player1: Myths: Pay 1 mood token, Avoid mood change"
-    ],
-    [
-      "Player1: Pestilence: City A1 became Neutral"
-    ]
-  ],
+  "log_index": 3,
   "undo_limit": 3,
   "actions_left": 2,
   "round": 1,

@@ -237,15 +237,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -265,6 +267,9 @@
                         "LeaderAbility": "Princeps"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Princeps: Pay 1 action, Start action, Pay 1 culture token"
                   ]
                 },
                 {
@@ -350,6 +355,9 @@
                         "Ability": "Princeps"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Princeps: Pay 1 culture token, Draw an action card, Draw an objective card, Discard Quick Advance/Peltasts, Discard Large Civilization/Draft"
                   ]
                 }
               ]
@@ -359,15 +367,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Princeps: Pay 1 action, Start action, Pay 1 culture token"
-    ],
-    [
-      "Player1: Princeps: Pay 1 culture token, Draw an action card, Draw an objective card, Discard Quick Advance/Peltasts, Discard Large Civilization/Draft"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 2,
   "actions_left": 1,
   "round": 6,
