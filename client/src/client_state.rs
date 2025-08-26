@@ -349,7 +349,9 @@ pub struct State {
     pub(crate) pending_update: Option<PendingUpdate>,
     pub world_camera: Camera2D,
     pub ui_camera: Camera2D,
-    pub screen_size: Vec2,
+    pub ui_scale: f32,
+    pub raw_screen_size: Vec2,
+    pub screen_size: Vec2, // scaled by ui_scale
     pub(crate) mouse_positions: Vec<MousePosition>,
     pub focused_tile: Option<Position>,
     pub show_permanent_effects: bool,
@@ -378,6 +380,8 @@ impl State {
                 ..Default::default()
             },
             ui_camera: Camera2D::default(),
+            ui_scale: 1.0,
+            raw_screen_size: vec2(0., 0.),
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
             focused_tile: None,

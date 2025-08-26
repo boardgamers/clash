@@ -89,7 +89,7 @@ async fn run(mut game: Game, features: &mut Features) {
     state.show_player = game.active_player();
     loop {
         state.control_player = Some(game.active_player());
-        state.screen_size = vec2(screen_width(), screen_height());
+        state.raw_screen_size = vec2(screen_width(), screen_height());
 
         let message = render_and_update(&game, &mut state, &sync_result, features);
         sync_result = GameSyncResult::None;

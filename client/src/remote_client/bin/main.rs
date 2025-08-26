@@ -30,6 +30,11 @@ extern "C" {
 }
 
 #[wasm_bindgen]
+struct Preferences {
+    ui_scale: Option<f32>,
+}
+
+#[wasm_bindgen]
 extern "C" {
     type Control;
 
@@ -38,6 +43,9 @@ extern "C" {
 
     #[wasm_bindgen(method)]
     fn receive_player_index(this: &Control) -> JsValue;
+
+    #[wasm_bindgen(method)]
+    fn receive_preferences(this: &Control) -> Option<Preferences>;
 
     #[wasm_bindgen(method)]
     fn send_move(this: &Control, action: String);
@@ -102,15 +110,22 @@ impl RemoteClient {
     pub async fn run(&mut self) {
         log("running client");
         loop {
-            let p = self.control.receive_player_index().as_f64();
-            if let Some(p) = p {
+            if let Some(p) = self.control.receive_player_index().as_f64() {
                 log(&format!("received player index: {p}"));
                 self.state.control_player = Some(p as usize);
                 self.state.show_player = p as usize;
             }
 
+            if let Some(prefs) = self.control.receive_preferences() {
+                log("received preferences");
+                if let Some(scale) = prefs.ui_scale {
+                    self.state.ui_scale = scale;
+                    log(&format!("set ui scale to {scale}"));
+                }
+            }
+
             let s = self.control.canvas_size();
-            self.state.screen_size = vec2(s.width(), s.height());
+            self.state.raw_screen_size = vec2(s.width(), s.height());
 
             let sync_result = self.update_state();
 

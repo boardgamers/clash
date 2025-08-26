@@ -49,16 +49,16 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
 }
 
 fn set_zoom(state: &mut State) {
-    let w = state.screen_size.x;
-    let h = state.screen_size.y;
+    let w = state.raw_screen_size.x;
+    let h = state.raw_screen_size.y;
     state.world_camera.viewport = Some((0, 0, w as i32, h as i32));
     state.world_camera.zoom.y = state.world_camera.zoom.x * w / h;
 
-    // todo make preference
-    let ui_scale = 0.5;
+    let scale = state.ui_scale;
+    state.screen_size = vec2(w / scale, h / scale);
 
     state.ui_camera = Camera2D {
-        zoom: vec2(2.0 / w * ui_scale, 2.0 / h * ui_scale),
+        zoom: vec2(2.0 / w * scale, 2.0 / h * scale),
         offset: vec2(-1., 1.),
         ..Default::default()
     };
