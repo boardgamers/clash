@@ -20,6 +20,7 @@ console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3.77", features = ["Window"] }
 pyroscope = { version = "0.5.8", optional = true }
 pyroscope_pprofrs = { version = "0.2.10", optional = true }
+serde = { version = "1.0.219", features = ["derive"] }
 
 [features]
 profiling = ["dep:pyroscope", "dep:pyroscope_pprofrs"]

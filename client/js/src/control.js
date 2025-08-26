@@ -5,7 +5,7 @@ export class Control extends EventEmitter {
         super();
         this.state = null;
         this.player_index = null;
-        this.preferences = null;
+        this.preferences = "";
         this._assets_url = null;
 
         this.addListener("state", (data) => {
@@ -23,7 +23,7 @@ export class Control extends EventEmitter {
             this.player_index = player.index;
         });
         this.addListener("preferences", (preferences) => {
-            this.preferences = preferences;
+            this.preferences = JSON.stringify(preferences);
         });
     }
 
@@ -41,7 +41,7 @@ export class Control extends EventEmitter {
     
     receive_preferences() {
         const prefs = this.preferences;
-        this.preferences = null;
+        this.preferences = "";
         return prefs;
     }
 

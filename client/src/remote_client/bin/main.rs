@@ -3,6 +3,7 @@ use server::game::{Game, GameContext};
 use macroquad::prelude::next_frame;
 
 extern crate console_error_panic_hook;
+use serde::{Deserialize, Serialize};
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
 use macroquad::math::vec2;
@@ -30,11 +31,6 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-struct Preferences {
-    ui_scale: Option<f32>,
-}
-
-#[wasm_bindgen]
 extern "C" {
     type Control;
 
@@ -45,7 +41,7 @@ extern "C" {
     fn receive_player_index(this: &Control) -> JsValue;
 
     #[wasm_bindgen(method)]
-    fn receive_preferences(this: &Control) -> Option<Preferences>;
+    fn receive_preferences(this: &Control) -> String;
 
     #[wasm_bindgen(method)]
     fn send_move(this: &Control, action: String);
@@ -73,6 +69,11 @@ struct RemoteClient {
     sync_state: SyncState,
     game: Option<Game>,
     features: Features,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Preferences {
+    ui_scale: Option<f32>,
 }
 
 #[macroquad::main("Clash")]
@@ -116,9 +117,14 @@ impl RemoteClient {
                 self.state.show_player = p as usize;
             }
 
-            if let Some(prefs) = self.control.receive_preferences() {
-                log("received preferences");
-                if let Some(scale) = prefs.ui_scale {
+            let prefs = self.control.receive_preferences();
+            if prefs.len() > 0 {
+                log("received preferences: {prefs}");
+                let p: Preferences = serde_json::from_str(&prefs).expect(
+                    "preferences can't be deserialized",
+                );
+
+                if let Some(scale) = p.ui_scale {
                     self.state.ui_scale = scale;
                     log(&format!("set ui scale to {scale}"));
                 }

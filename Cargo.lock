@@ -291,6 +291,7 @@ dependencies = [
  "macroquad",
  "pyroscope",
  "pyroscope_pprofrs",
+ "serde",
  "serde_json",
  "server",
  "wasm-bindgen",
