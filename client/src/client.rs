@@ -55,7 +55,8 @@ fn set_zoom(state: &mut State) {
     state.world_camera.zoom.y = state.world_camera.zoom.x * w / h;
 
     let scale = state.ui_scale;
-    state.screen_size = vec2(w / scale, h / scale);
+    let adjust = (1.0 - scale) * 250.0; // not sure why this is needed on mobile
+    state.screen_size = vec2((w / scale) - adjust, h / scale - adjust);
 
     state.ui_camera = Camera2D {
         zoom: vec2(2.0 / w * scale, 2.0 / h * scale),
