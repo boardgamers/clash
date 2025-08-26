@@ -3,10 +3,10 @@ use server::game::{Game, GameContext};
 use macroquad::prelude::next_frame;
 
 extern crate console_error_panic_hook;
-use serde::{Deserialize, Serialize};
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
 use macroquad::math::vec2;
+use serde::{Deserialize, Serialize};
 use server::action::Action;
 use server::cache::Cache;
 use server::game_data::GameData;
@@ -119,14 +119,14 @@ impl RemoteClient {
             }
 
             let prefs = self.control.receive_preferences();
-            if prefs.len() > 0 {
+            if !prefs.is_empty() {
                 log("received preferences: {prefs}");
-                let p: Preferences = serde_json::from_str(&prefs).expect(
-                    "preferences can't be deserialized",
-                );
+                let p: Preferences =
+                    serde_json::from_str(&prefs).expect("preferences can't be deserialized");
 
                 if let Some(scale) = p.ui_scale {
-                    self.state.ui_scale = f32::from_str(&scale).expect("ui scale should be a float");
+                    self.state.ui_scale =
+                        f32::from_str(&scale).expect("ui scale should be a float");
                     log(&format!("set ui scale to {scale}"));
                 }
             }
