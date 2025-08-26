@@ -11,6 +11,7 @@ use server::action::Action;
 use server::cache::Cache;
 use server::game_data::GameData;
 use std::panic;
+use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -73,7 +74,7 @@ struct RemoteClient {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Preferences {
-    ui_scale: Option<f32>,
+    ui_scale: Option<String>,
 }
 
 #[macroquad::main("Clash")]
@@ -125,7 +126,7 @@ impl RemoteClient {
                 );
 
                 if let Some(scale) = p.ui_scale {
-                    self.state.ui_scale = scale;
+                    self.state.ui_scale = f32::from_str(&scale).expect("ui scale should be a float");
                     log(&format!("set ui scale to {scale}"));
                 }
             }
@@ -167,7 +168,7 @@ impl RemoteClient {
                 self.control.send_ready();
                 return GameSyncResult::Update;
             } else {
-                log("received state but it was not a string");
+                log(&format!("received state, but it was not a string: {s:?}"));
             }
         }
 
