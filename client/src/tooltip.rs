@@ -5,7 +5,7 @@ use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
 use macroquad::math::{Rect, Vec2, bool, f32, f64, vec2};
-use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
+use macroquad::prelude::{draw_circle, draw_rectangle, get_time, WHITE};
 
 const TOOLTIP_DELAY: f64 = 0.5;
 
@@ -94,7 +94,7 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &MultilineText, origin: Vec2, 
     let y = (tooltip_rect.top() - 10.)
         .max(40.)
         .min(state.screen_size.y - tooltip_rect.h - 40.);
-    draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
+    draw_rectangle(x, y, w, tooltip_rect.size().y + 10., WHITE);
     for (i, line) in tooltip.text.iter().enumerate() {
         state.draw_text(line, x + 5., y + 20. + i as f32 * 20.);
     }
