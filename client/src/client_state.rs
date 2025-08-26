@@ -347,8 +347,11 @@ pub struct State {
     pub show_player: usize,
     pub(crate) active_dialog: ActiveDialog,
     pub(crate) pending_update: Option<PendingUpdate>,
-    pub camera: Camera2D,
-    pub screen_size: Vec2,
+    pub world_camera: Camera2D,
+    pub ui_camera: Camera2D,
+    pub ui_scale: f32,
+    pub raw_screen_size: Vec2,
+    pub screen_size: Vec2, // scaled by ui_scale
     pub(crate) mouse_positions: Vec<MousePosition>,
     pub focused_tile: Option<Position>,
     pub show_permanent_effects: bool,
@@ -371,11 +374,14 @@ impl State {
             assets: Assets::new(features).await,
             control_player: None,
             show_player: 0,
-            camera: Camera2D {
+            world_camera: Camera2D {
                 zoom: vec2(ZOOM, ZOOM),
                 offset: OFFSET,
                 ..Default::default()
             },
+            ui_camera: Camera2D::default(),
+            ui_scale: 1.0,
+            raw_screen_size: vec2(0., 0.),
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
             focused_tile: None,

@@ -2,7 +2,6 @@ use crate::assets::Assets;
 use crate::client_state::{CameraMode, RenderResult, State};
 use crate::layout_ui::{IconBackground, limit_str};
 use crate::payment_ui::Payment;
-use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
 use macroquad::math::{Vec2, bool};
@@ -92,8 +91,8 @@ impl RenderContext<'_> {
 
     fn set_camera(&self, mode: CameraMode) {
         match mode {
-            CameraMode::Screen => set_default_camera(),
-            CameraMode::World => set_camera(&self.state.camera),
+            CameraMode::Screen => set_camera(&self.state.ui_camera),
+            CameraMode::World => set_camera(&self.state.world_camera),
         }
     }
 
@@ -101,7 +100,7 @@ impl RenderContext<'_> {
     pub(crate) fn world_to_screen(&self, point: Vec2) -> Vec2 {
         match self.camera_mode {
             CameraMode::Screen => point,
-            CameraMode::World => self.state.camera.world_to_screen(point),
+            CameraMode::World => self.state.world_camera.world_to_screen(point),
         }
     }
 
@@ -109,7 +108,7 @@ impl RenderContext<'_> {
     pub(crate) fn screen_to_world(&self, point: Vec2) -> Vec2 {
         match self.camera_mode {
             CameraMode::Screen => point,
-            CameraMode::World => self.state.camera.screen_to_world(point),
+            CameraMode::World => self.state.world_camera.screen_to_world(point),
         }
     }
 

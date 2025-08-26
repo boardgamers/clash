@@ -151,6 +151,8 @@ GameInfo.json (for now)
   }
 ```
 
+Also add "script URL" = https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js
+
 
 ## Docs
 

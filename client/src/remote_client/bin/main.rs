@@ -6,10 +6,12 @@ extern crate console_error_panic_hook;
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
 use macroquad::math::vec2;
+use serde::{Deserialize, Serialize};
 use server::action::Action;
 use server::cache::Cache;
 use server::game_data::GameData;
 use std::panic;
+use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -40,6 +42,9 @@ extern "C" {
     fn receive_player_index(this: &Control) -> JsValue;
 
     #[wasm_bindgen(method)]
+    fn receive_preferences(this: &Control) -> String;
+
+    #[wasm_bindgen(method)]
     fn send_move(this: &Control, action: String);
 
     #[wasm_bindgen(method)]
@@ -65,6 +70,11 @@ struct RemoteClient {
     sync_state: SyncState,
     game: Option<Game>,
     features: Features,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Preferences {
+    ui_scale: Option<String>,
 }
 
 #[macroquad::main("Clash")]
@@ -102,15 +112,27 @@ impl RemoteClient {
     pub async fn run(&mut self) {
         log("running client");
         loop {
-            let p = self.control.receive_player_index().as_f64();
-            if let Some(p) = p {
+            if let Some(p) = self.control.receive_player_index().as_f64() {
                 log(&format!("received player index: {p}"));
                 self.state.control_player = Some(p as usize);
                 self.state.show_player = p as usize;
             }
 
+            let prefs = self.control.receive_preferences();
+            if !prefs.is_empty() {
+                log("received preferences: {prefs}");
+                let p: Preferences =
+                    serde_json::from_str(&prefs).expect("preferences can't be deserialized");
+
+                if let Some(scale) = p.ui_scale {
+                    self.state.ui_scale =
+                        f32::from_str(&scale).expect("ui scale should be a float");
+                    log(&format!("set ui scale to {scale}"));
+                }
+            }
+
             let s = self.control.canvas_size();
-            self.state.screen_size = vec2(s.width(), s.height());
+            self.state.raw_screen_size = vec2(s.width(), s.height());
 
             let sync_result = self.update_state();
 
@@ -146,7 +168,7 @@ impl RemoteClient {
                 self.control.send_ready();
                 return GameSyncResult::Update;
             } else {
-                log("received state but it was not a string");
+                log(&format!("received state, but it was not a string: {s:?}"));
             }
         }
 
