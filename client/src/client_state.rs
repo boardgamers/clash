@@ -377,11 +377,7 @@ impl State {
                 offset: OFFSET,
                 ..Default::default()
             },
-            ui_camera: Camera2D {
-                zoom: vec2(2.0 / screen_width(), 2.0 / screen_height()),
-                offset: vec2(-1., 1.),
-                ..Default::default()
-            },
+            ui_camera: Camera2D::default(),
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
             focused_tile: None,

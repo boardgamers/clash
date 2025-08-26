@@ -2,7 +2,6 @@ use crate::assets::Assets;
 use crate::client_state::{CameraMode, RenderResult, State};
 use crate::layout_ui::{IconBackground, limit_str};
 use crate::payment_ui::Payment;
-use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
 use macroquad::math::{Vec2, bool};

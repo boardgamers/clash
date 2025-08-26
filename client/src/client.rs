@@ -39,7 +39,7 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
         map_ui::pan_and_zoom(state);
     }
 
-    set_y_zoom(state);
+    set_zoom(state);
     clear_background(WHITE);
     let () = render(&state.render_context(game, RenderStage::Map), features)
         .expect("all updates should be in Tooltip stage");
@@ -48,11 +48,20 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     render(&state.render_context(game, RenderStage::Tooltip), features)
 }
 
-fn set_y_zoom(state: &mut State) {
+fn set_zoom(state: &mut State) {
     let w = state.screen_size.x;
     let h = state.screen_size.y;
     state.world_camera.viewport = Some((0, 0, w as i32, h as i32));
     state.world_camera.zoom.y = state.world_camera.zoom.x * w / h;
+
+    // todo make preference
+    let ui_scale = 0.5;
+
+    state.ui_camera = Camera2D {
+        zoom: vec2(2.0 / w * ui_scale, 2.0 / h * ui_scale),
+        offset: vec2(-1., 1.),
+        ..Default::default()
+    };
 }
 
 pub(crate) fn mouse_wheel_speed() -> f32 {
