@@ -120,7 +120,7 @@ impl RemoteClient {
 
             let prefs = self.control.receive_preferences();
             if !prefs.is_empty() {
-                log("received preferences: {prefs}");
+                log(&format!("received preferences: {prefs}"));
                 let p: Preferences =
                     serde_json::from_str(&prefs).expect("preferences can't be deserialized");
 
