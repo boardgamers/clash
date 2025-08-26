@@ -51,8 +51,8 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
 fn set_y_zoom(state: &mut State) {
     let w = state.screen_size.x;
     let h = state.screen_size.y;
-    state.camera.viewport = Some((0, 0, w as i32, h as i32));
-    state.camera.zoom.y = state.camera.zoom.x * w / h;
+    state.world_camera.viewport = Some((0, 0, w as i32, h as i32));
+    state.world_camera.zoom.y = state.world_camera.zoom.x * w / h;
 }
 
 pub(crate) fn mouse_wheel_speed() -> f32 {
