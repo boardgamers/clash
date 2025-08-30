@@ -33,6 +33,25 @@ pub(crate) const GREAT_PERSON_DESCRIPTION: &str = "You make take the Event Card 
  hand for 1 culture token. If you pass, any other player (in player order) may take it \
  for 2 culture tokens: Action card: ";
 
+pub(crate) const PUBLIC_GREAT_PERSON_DESCRIPTION: &str = "You make place the Event Card in front \
+ of you 1 culture token. If you pass, any other player (in player order) may do so \
+ for 2 culture tokens: ";
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum GreatPersonType {
+    ActionCard,
+    Public,
+}
+
+impl GreatPersonType {
+    pub fn description(&self) -> &str {
+        match self {
+            GreatPersonType::ActionCard => GREAT_PERSON_DESCRIPTION,
+            GreatPersonType::Public => PUBLIC_GREAT_PERSON_DESCRIPTION,
+        }
+    }
+}
+
 pub(crate) fn great_person_incidents() -> Vec<Incident> {
     vec![
         incident(IncidentBaseEffect::ExhaustedLand, great_explorer(), |b| b),
@@ -130,8 +149,9 @@ fn incident(
     on_gain(b).build()
 }
 
-pub(crate) fn great_person_action_card<F>(
+pub(crate) fn great_person_card<F>(
     incident_id: u8,
+    great_person_type: GreatPersonType,
     name: &str,
     description: &str,
     cost: impl Fn(ActionCostBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
@@ -144,10 +164,11 @@ where
     ActionCard::builder(
         incident_id + GREAT_PERSON_OFFSET,
         name,
-        description,
+        &format!("{}{}", great_person_type.description(), description),
         cost,
         move |game, player, _| can_play(game, player),
     )
+    .public(great_person_type == GreatPersonType::Public)
     .add_advance_request(
         |e| &mut e.play_action_card,
         10,
@@ -169,12 +190,13 @@ where
 
 fn great_artist() -> ActionCard {
     let groups = vec![AdvanceGroup::Culture];
-    great_person_action_card(
+    great_person_card(
         19,
+        GreatPersonType::ActionCard,
         "Great Artist",
         &format!(
             "{} Then, you make one of your cities Happy.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,
@@ -206,12 +228,13 @@ fn great_artist() -> ActionCard {
 
 fn great_prophet() -> ActionCard {
     let groups = vec![AdvanceGroup::Spirituality];
-    great_person_action_card(
+    great_person_card(
         20,
+        GreatPersonType::ActionCard,
         "Great Prophet",
         &format!(
             "{} Then, you build a Temple without activating the city.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,
@@ -293,9 +316,9 @@ fn temple_cost(game: &Game, player: &Player) -> PaymentOptions {
         .cost
 }
 
-pub(crate) fn great_person_description(free_advance_groups: &[AdvanceGroup]) -> String {
+pub(crate) fn tech_great_person_description(free_advance_groups: &[AdvanceGroup]) -> String {
     format!(
-        "{GREAT_PERSON_DESCRIPTION} You may advance \
+        "You may advance \
         in any {} technology for free and without changing the Game Event counter.",
         format_list(
             &free_advance_groups
@@ -310,10 +333,14 @@ pub(crate) fn great_person_description(free_advance_groups: &[AdvanceGroup]) -> 
 
 fn great_philosopher() -> ActionCard {
     let groups = vec![AdvanceGroup::Education];
-    great_person_action_card(
+    great_person_card(
         21,
+        GreatPersonType::ActionCard,
         "Great Philosopher",
-        &format!("{} Then, gain 2 ideas.", great_person_description(&groups)),
+        &format!(
+            "{} Then, gain 2 ideas.",
+            tech_great_person_description(&groups)
+        ),
         |c| c.action().no_resources(),
         groups,
         |_game, _player| true,
@@ -330,12 +357,13 @@ fn great_philosopher() -> ActionCard {
 
 fn great_scientist() -> ActionCard {
     let groups = vec![AdvanceGroup::Science];
-    great_person_action_card(
+    great_person_card(
         22,
+        GreatPersonType::ActionCard,
         "Great Scientist",
         &format!(
             "{} Then, gain 1 idea and 1 Action Card.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,
@@ -357,12 +385,13 @@ fn elder_statesman() -> ActionCard {
         .into_iter()
         .map(|a| a.advance_group)
         .collect_vec();
-    great_person_action_card(
+    great_person_card(
         23,
+        GreatPersonType::ActionCard,
         "Elder Statesman",
         &format!(
             "{} Then, draw 2 Action Cards.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,
@@ -382,12 +411,13 @@ fn elder_statesman() -> ActionCard {
 fn great_merchant() -> ActionCard {
     let groups = vec![AdvanceGroup::Economy];
     economy::add_trade_routes(
-        great_person_action_card(
+        great_person_card(
             25,
+            GreatPersonType::ActionCard,
             "Great Merchant",
             &format!(
                 "{} Then, if you have the Trade Routes advance, gain the Trade Routes income.",
-                great_person_description(&groups)
+                tech_great_person_description(&groups)
             ),
             |c| c.action().no_resources(),
             groups,
@@ -400,12 +430,13 @@ fn great_merchant() -> ActionCard {
 
 fn great_athlete() -> ActionCard {
     let groups = vec![AdvanceGroup::Culture];
-    great_person_action_card(
+    great_person_card(
         56,
+        GreatPersonType::ActionCard,
         "Great Athlete",
         &format!(
             "{} Then, you may convert any amount of culture tokens to mood tokens or vice versa.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,
@@ -475,15 +506,14 @@ fn great_athlete() -> ActionCard {
 }
 
 fn great_seer() -> ActionCard {
-    let mut b = great_person_action_card::<_>(
+    let mut b = great_person_card::<_>(
         58,
+        GreatPersonType::ActionCard,
         "Great Seer",
-        &format!(
-            "{GREAT_PERSON_DESCRIPTION} Draw 1 objective card per player. \
-            Choose one for each player, including yourself. \
-            The next time the player draws an objective card from the pile, \
-            they draw the designated card instead.",
-        ),
+        "Draw 1 objective card per player. \
+        Choose one for each player, including yourself. \
+        The next time the player draws an objective card from the pile, \
+        they draw the designated card instead.",
         |c| c.action().no_resources(),
         vec![],
         |_game, _player| true,

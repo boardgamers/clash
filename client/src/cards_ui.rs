@@ -58,7 +58,7 @@ impl SelectionInfo {
 
 pub(crate) fn show_cards(rc: &RenderContext) -> RenderResult {
     let p = rc.shown_player;
-    let cards = hand_cards(p, &HandCardType::get_all());
+    let cards = hand_cards(p, &HandCardType::get_all_and_public(), rc.game);
     let size = vec2(180., 30.);
 
     let selection = match &rc.state.active_dialog {

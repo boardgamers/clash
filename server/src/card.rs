@@ -14,6 +14,7 @@ use std::fmt::Display;
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum HandCardType {
     Action,
+    Public, // is modeled as an action card with public=true
     Objective,
     Wonder,
 }
@@ -22,9 +23,18 @@ impl HandCardType {
     #[must_use]
     pub fn get_all() -> Vec<HandCardType> {
         vec![
+            HandCardType::Action, // Public is not a real type of card
+            HandCardType::Objective,
+            HandCardType::Wonder,
+        ]
+    }
+    #[must_use]
+    pub fn get_all_and_public() -> Vec<HandCardType> {
+        vec![
             HandCardType::Action,
             HandCardType::Objective,
             HandCardType::Wonder,
+            HandCardType::Public,
         ]
     }
 }
@@ -35,6 +45,7 @@ impl Display for HandCardType {
             HandCardType::Action => write!(f, "an action card"),
             HandCardType::Objective => write!(f, "an objective card"),
             HandCardType::Wonder => write!(f, "a wonder card"),
+            HandCardType::Public => write!(f, "a public action card"),
         }
     }
 }
@@ -159,13 +170,20 @@ pub(crate) fn discard_card(
 }
 
 #[must_use]
-pub fn hand_cards(player: &Player, types: &[HandCardType]) -> Vec<HandCard> {
+pub fn hand_cards(player: &Player, types: &[HandCardType], game: &Game) -> Vec<HandCard> {
     types
         .iter()
         .flat_map(|t| match t {
             HandCardType::Action => player
                 .action_cards
                 .iter()
+                .filter(|id| !game.cache.get_action_card(**id).public)
+                .map(|&id| HandCard::ActionCard(id))
+                .collect_vec(),
+            HandCardType::Public => player
+                .action_cards
+                .iter()
+                .filter(|id| game.cache.get_action_card(**id).public)
                 .map(|&id| HandCard::ActionCard(id))
                 .collect_vec(),
             HandCardType::Objective => player

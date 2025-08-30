@@ -8,6 +8,7 @@ use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_bui
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::game::GameOptions;
 use crate::resource::ResourceType;
+use crate::resource_pile::ResourcePile;
 
 pub(crate) fn science(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
@@ -104,17 +105,21 @@ fn metallurgy() -> AdvanceBuilder {
         "Metallurgy",
         "If you have the Steel Weapons Advance, \
         you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. \
-        If you collect at least 2 ore, replace 1 ore with 1 gold",
+        If you collect at least 2 ore, you may replace 1 ore with 1 gold",
     )
     .with_advance_bonus(CultureToken)
-    .add_transient_event_listener(
-        |event| &mut event.collect_total,
+    .add_bool_request(
+        |event| &mut event.collect,
         0,
-        |i, _, _, p| {
-            if i.total.ore >= 2 {
-                i.total.ore -= 1;
-                i.total.gold += 1;
-                i.info.add_log(p, "Convert 1 ore to 1 gold");
+        |_game, _p, i| {
+            (i.total.ore >= 2).then_some("Do you want to convert 1 ore to 1 gold?".to_string())
+        },
+        move |game, s, _| {
+            if s.choice {
+                s.player().lose_resources(game, ResourcePile::ore(1));
+                s.player().gain_resources(game, ResourcePile::gold(1));
+            } else {
+                s.log(game, "Did not convert ore to gold");
             }
         },
     )

@@ -18,6 +18,7 @@ use crate::{
     utils::Rng,
 };
 use std::cmp::Ordering::*;
+use std::mem;
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
 #[must_use]
@@ -126,11 +127,13 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     game.objective_cards_left.shuffle(&mut game.rng);
     game.seed = String::new();
     game.rng = Rng::default();
-    for (i, player) in game.players.iter_mut().enumerate() {
+    let mut players = mem::take(&mut game.players);
+    for (i, player) in players.iter_mut().enumerate() {
         if player_index != Some(i) {
-            player.strip_secret();
+            player.strip_secret(&game);
         }
     }
+    game.players = players;
     game.map.strip_secret();
     strip_events(&mut game, player_index);
     strip_log(&mut game, player_index);

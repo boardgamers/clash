@@ -327,9 +327,19 @@ impl Player {
         }
     }
 
-    pub fn strip_secret(&mut self) {
+    pub fn strip_secret(&mut self, game: &Game) {
         self.wonder_cards = self.wonder_cards.iter().map(|_| Wonder::Hidden).collect();
-        self.action_cards = self.action_cards.iter().map(|_| 0).collect();
+        self.action_cards = self
+            .action_cards
+            .iter()
+            .map(|id| {
+                if game.cache.get_action_card(*id).public {
+                    *id
+                } else {
+                    0
+                }
+            })
+            .collect();
         self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
         self.secrets = Vec::new();
     }

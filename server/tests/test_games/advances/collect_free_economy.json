@@ -6,9 +6,7 @@
       "resources": {
         "food": 1,
         "wood": 6,
-        "ore": 7,
         "ideas": 5,
-        "gold": 7,
         "mood_tokens": 6,
         "culture_tokens": 7
       },

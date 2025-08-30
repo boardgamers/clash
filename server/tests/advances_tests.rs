@@ -616,12 +616,14 @@ fn test_collect_free_economy() {
             )
             .skip_json(),
             TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1)))
+                .skip_json()
                 .with_post_assert(|game| {
                     // no production focus
                     let result =
                         PlayingActionType::ActionCard(19).is_available(&game, game.active_player());
                     assert!(result.is_err());
                 }),
+            TestAction::undoable(0, Action::Response(EventResponse::Bool(true))),
         ],
     );
 }

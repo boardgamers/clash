@@ -47,15 +47,17 @@ pub struct ActionCard {
     pub id: u8,
     pub civil_card: CivilCard,
     pub tactics_card: Option<TacticsCard>,
+    pub public: bool,
 }
 
 impl ActionCard {
     #[must_use]
-    fn new(id: u8, civil_card: CivilCard, tactics_card: Option<TacticsCard>) -> Self {
+    fn new(id: u8, civil_card: CivilCard, tactics_card: Option<TacticsCard>, public: bool) -> Self {
         Self {
             id,
             civil_card,
             tactics_card,
+            public,
         }
     }
 
@@ -80,6 +82,7 @@ impl ActionCard {
             tactics_card: None,
             action_cost: cost(ActionCostBuilder::new(None)).cost,
             target: CivilCardTarget::ActivePlayer,
+            public: false,
         }
     }
 
@@ -100,12 +103,19 @@ pub struct ActionCardBuilder {
     action_cost: ActionCost,
     can_play: CanPlayCard,
     combat_requirement: Option<CombatRequirement>,
+    public: bool,
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
     target: CivilCardTarget,
 }
 
 impl ActionCardBuilder {
+    #[must_use]
+    pub fn public(mut self, public: bool) -> Self {
+        self.public = public;
+        self
+    }
+
     #[must_use]
     pub fn tactics_card(mut self, tactics_card: TacticsCardFactory) -> Self {
         self.tactics_card = Some(tactics_card(self.id));
@@ -138,6 +148,7 @@ impl ActionCardBuilder {
                 target: self.target,
             },
             self.tactics_card,
+            self.public,
         )
     }
 }
