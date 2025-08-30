@@ -120,12 +120,12 @@ fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
 }
 
 pub(crate) fn pan_and_zoom(state: &mut State) {
-    let new_zoom = state.world_camera.zoom + mouse_wheel_speed() * 0.0006;
+    let new_zoom = state.world_zoom + mouse_wheel_speed() * 0.0006;
     let max = 0.005;
     let min = 0.0005;
-    let x = new_zoom.x.min(max).max(min);
-    if x < max && x > min {
-        state.world_camera.zoom = new_zoom;
+    let zoom = new_zoom.min(max).max(min);
+    if zoom < max && zoom > min {
+        state.world_zoom = new_zoom;
     }
 
     let pan_map = is_mouse_button_down(MouseButton::Left);
