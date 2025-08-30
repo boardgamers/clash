@@ -3,9 +3,9 @@ use crate::consts::STACK_LIMIT;
 use crate::content::action_cards::negotiation::negotiations_partner;
 use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relations_partner};
 use crate::events::EventOrigin;
-use crate::game::Game;
+use crate::game::{Game, GameState};
 use crate::map::Map;
-use crate::movement::move_event_origin;
+use crate::movement::{CurrentMove, move_event_origin};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::position::Position;
@@ -53,7 +53,7 @@ pub(crate) fn move_routes(
         .filter(|&n| game.map.is_inside(*n))
         .map(|&n| MoveRoute::new(n, player, ResourcePile::empty(), vec![]))
         .collect();
-    if player.can_use_advance(Advance::Navigation) {
+    if player.can_use_advance(Advance::Navigation) && !has_current_move(game) {
         base.extend(reachable_with_navigation(player, units, &game.map));
     }
     if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
@@ -62,6 +62,14 @@ pub(crate) fn move_routes(
     add_diplomatic_relations(player, game, &mut base);
     add_negotiations(player, game, &mut base);
     base
+}
+
+fn has_current_move(game: &Game) -> bool {
+    if let GameState::Movement(m) = &game.state {
+        m.current_move != CurrentMove::None
+    } else {
+        false
+    }
 }
 
 fn add_diplomatic_relations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
@@ -250,9 +258,19 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
     if let Some(ship) = ship {
         let perimeter = find_perimeter(map, ship);
         let can_navigate = |p: &Position| *p != ship && (map.is_sea(*p) || map.is_unexplored(*p));
-        // skip the first position as it is the ship's current position
-        let first = perimeter.iter().skip(1).copied().find(can_navigate);
-        let last = perimeter.iter().skip(1).copied().rfind(can_navigate);
+        // skip the current sea of the ship
+        let is_sea = |p: &Position| map.is_sea(*p);
+        let first = perimeter
+            .iter()
+            .copied()
+            .skip_while(is_sea)
+            .find(can_navigate);
+        let last = perimeter
+            .iter()
+            .rev()
+            .copied()
+            .skip_while(is_sea)
+            .find(can_navigate);
 
         return vec![first, last]
             .into_iter()

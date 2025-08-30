@@ -211,18 +211,22 @@ fn test_ship_navigate_coordinates() {
     let mut game = JSON.load_game("ship_navigation_unit_test");
 
     let pairs = [
-        ("B3", "B5"),
-        ("B5", "A7"),
-        ("A7", "F7"),
-        ("G7", "G3"),
-        ("G3", "B3"),
+        ("B3", "B5", true),
+        ("B5", "A7", true),
+        ("A7", "F7", true),
+        ("F7", "G3", false),
+        ("G7", "A7", false),
+        ("G7", "G3", true),
+        ("G3", "B3", true),
     ];
 
-    for pair in pairs {
-        let from = Position::from_offset(pair.0);
-        let to = Position::from_offset(pair.1);
+    for (from, to, back) in pairs {
+        let from = Position::from_offset(from);
+        let to = Position::from_offset(to);
         assert_navigate(&mut game, from, to);
-        assert_navigate(&mut game, to, from);
+        if back {
+            assert_navigate(&mut game, to, from);
+        }
     }
 }
 

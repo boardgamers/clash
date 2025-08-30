@@ -394,7 +394,7 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
         move_state.current_move = current_move;
     }
     if !starting_position.is_neighbor(m.destination) {
-        // roads move ends the current move
+        // roads move and navigation end the current move
         move_state.current_move = CurrentMove::None;
     }
 
