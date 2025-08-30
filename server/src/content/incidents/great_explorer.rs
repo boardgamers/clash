@@ -2,7 +2,9 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::city::{found_city, is_valid_city_terrain};
 use crate::content::advances::AdvanceGroup;
-use crate::content::incidents::great_persons::{great_person_card, tech_great_person_description, GreatPersonType};
+use crate::content::incidents::great_persons::{
+    GreatPersonType, great_person_card, tech_great_person_description,
+};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::events::{EventOrigin, EventPlayer, check_event_origin};
 use crate::explore::move_to_unexplored_block;

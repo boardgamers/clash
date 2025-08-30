@@ -115,7 +115,7 @@ impl ActionCardBuilder {
         self.public = public;
         self
     }
-    
+
     #[must_use]
     pub fn tactics_card(mut self, tactics_card: TacticsCardFactory) -> Self {
         self.tactics_card = Some(tactics_card(self.id));

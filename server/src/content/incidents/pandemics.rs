@@ -63,7 +63,11 @@ fn pandemics() -> Incident {
         |game, p, i| {
             let player = p.get(game);
             Some(HandCardsRequest::new(
-                hand_cards(player, &[HandCardType::Action, HandCardType::Objective], game),
+                hand_cards(
+                    player,
+                    &[HandCardType::Action, HandCardType::Objective],
+                    game,
+                ),
                 PandemicsContributions::range(player, i, 1),
                 "Select cards to lose (or select resources instead later)",
             ))

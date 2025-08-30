@@ -3,7 +3,9 @@ use crate::action_card::ActionCard;
 use crate::combat::CombatModifier;
 use crate::content::ability::Ability;
 use crate::content::advances::AdvanceGroup;
-use crate::content::incidents::great_persons::{great_person_card, tech_great_person_description, GreatPersonType};
+use crate::content::incidents::great_persons::{
+    GreatPersonType, great_person_card, tech_great_person_description,
+};
 use crate::game::GameState;
 use crate::game::GameState::Movement;
 use crate::movement::MoveState;

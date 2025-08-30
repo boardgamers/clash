@@ -2,15 +2,13 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::gain_action;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
-use crate::construct::{available_buildings, ConstructDiscount};
+use crate::construct::{ConstructDiscount, available_buildings};
 use crate::content::ability::Ability;
 use crate::content::advances::AdvanceGroup;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
-use crate::content::incidents::great_persons::{
-    great_person_card, tech_great_person_description,
-};
 use crate::content::incidents::great_persons::GreatPersonType;
+use crate::content::incidents::great_persons::{great_person_card, tech_great_person_description};
 use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
 use crate::player::Player;
@@ -18,7 +16,7 @@ use crate::player_events::CostInfo;
 use crate::playing_actions::PlayingActionType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
-use crate::wonder::{cities_for_wonder, on_play_wonder_card, wonder_cost, Wonder, WonderCardInfo};
+use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = vec![AdvanceGroup::Construction];

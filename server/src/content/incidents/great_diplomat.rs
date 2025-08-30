@@ -2,10 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
-use crate::content::incidents::great_persons::{
-    great_person_card,
-    GreatPersonType,
-};
+use crate::content::incidents::great_persons::{GreatPersonType, great_person_card};
 use crate::game::Game;
 use crate::incident::IncidentBuilder;
 use crate::player_events::IncidentTarget;
