@@ -846,3 +846,15 @@ impl CustomCost {
         }
     }
 }
+
+pub(crate) fn add_unlimited_token_conversion(conversions: &mut Vec<PaymentConversion>) {
+    conversions.push(PaymentConversion::unlimited(
+        ResourcePile::of(ResourceType::MoodTokens, 1),
+        ResourcePile::of(ResourceType::CultureTokens, 1),
+    ));
+    conversions.push(PaymentConversion::unlimited(
+        ResourcePile::of(ResourceType::CultureTokens, 1),
+        ResourcePile::of(ResourceType::MoodTokens, 1),
+    ));
+}
+

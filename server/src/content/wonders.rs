@@ -15,7 +15,7 @@ use crate::incident::draw_and_discard_incident_card_from_pile;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
-use crate::payment::PaymentConversion;
+use crate::payment::{add_unlimited_token_conversion, PaymentConversion};
 use crate::player::{Player, gain_unit};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -406,20 +406,14 @@ fn colosseum() -> WonderInfo {
         |events| &mut events.general_payment_conversions,
         50,
         |conversions, (), (), _| {
-            conversions.push(PaymentConversion::unlimited(
-                ResourcePile::of(ResourceType::MoodTokens, 1),
-                ResourcePile::of(ResourceType::CultureTokens, 1),
-            ));
-            conversions.push(PaymentConversion::unlimited(
-                ResourcePile::of(ResourceType::CultureTokens, 1),
-                ResourcePile::of(ResourceType::MoodTokens, 1),
-            ));
+            add_unlimited_token_conversion(conversions);
         },
     )
     .add_transient_event_listener(
         |events| &mut events.building_cost,
         100,
         |costs, _, _, _| {
+            // why remove this just to add it back in general_payment_conversions?
             let conversions = &mut costs.cost.conversions;
             let conversion = PaymentConversion::unlimited(
                 ResourcePile::of(ResourceType::MoodTokens, 1),
