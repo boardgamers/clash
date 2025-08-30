@@ -3,7 +3,8 @@ use crate::action_card::ActionCard;
 use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::{
-    GREAT_PERSON_DESCRIPTION, great_person_action_card,
+    great_person_card,
+    GreatPersonType,
 };
 use crate::game::Game;
 use crate::incident::IncidentBuilder;
@@ -14,15 +15,14 @@ use serde::{Deserialize, Serialize};
 pub(crate) const DIPLOMAT_ID: u8 = 57;
 
 pub(crate) fn great_diplomat() -> ActionCard {
-    great_person_action_card::<_>(
+    great_person_card::<_>(
         DIPLOMAT_ID,
+        GreatPersonType::Public,
         "Great Diplomat",
-        &format!(
-            "{GREAT_PERSON_DESCRIPTION} Choose another player. \
-                You cannot attack each other, unless you pay 2 culture tokens. \
-                Discard this card if either player attacks the other. \
-                You may discard the card as a regular action.",
-        ),
+        "Choose another player. \
+        You cannot attack each other, unless you pay 2 culture tokens. \
+        Discard this card if either player attacks the other. \
+        You may discard the card as a regular action.",
         // action for ending diplomatic relations
         |c| c.action().no_resources(),
         vec![],

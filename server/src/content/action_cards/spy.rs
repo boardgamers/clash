@@ -52,10 +52,10 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let other = game.player(a.selected_player.expect("player not found"));
 
             let all = HandCardType::get_all();
-            let mut cards = hand_cards(other, &all);
+            let mut cards = hand_cards(other, &all, game);
             for t in all {
-                if !hand_cards(other, &[t]).is_empty() {
-                    cards.extend(hand_cards(p, &[t]));
+                if !hand_cards(other, &[t], game).is_empty() {
+                    cards.extend(hand_cards(p, &[t], game));
                 }
             }
 
@@ -89,7 +89,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 fn players_with_cards(game: &Game, player: usize) -> Vec<usize> {
     game.players
         .iter()
-        .filter(|p| p.index != player && has_any_card(p))
+        .filter(|p| p.index != player && has_any_card(p, game))
         .map(|p| p.index)
         .collect_vec()
 }
@@ -111,8 +111,8 @@ fn swap_spy_cards(
 
     let p = player.get(game);
     let o = game.player(other);
-    let our_card = get_swap_card(swap, p)?;
-    let other_card = get_swap_card(swap, o)?;
+    let our_card = get_swap_card(swap, p, game)?;
+    let other_card = get_swap_card(swap, o, game)?;
 
     let t = match our_card {
         HandCard::ActionCard(id) => {
@@ -222,16 +222,16 @@ fn swap_card<T: PartialEq + Ord + Debug + Copy>(
     );
 }
 
-fn get_swap_card(swap: &[HandCard], p: &Player) -> Result<HandCard, String> {
-    hand_cards(p, &HandCardType::get_all())
+fn get_swap_card(swap: &[HandCard], p: &Player, game: &Game) -> Result<HandCard, String> {
+    hand_cards(p, &HandCardType::get_all(), game)
         .iter()
         .find(|c| swap.contains(c))
         .ok_or("card not found".to_string())
         .cloned()
 }
 
-fn has_any_card(p: &Player) -> bool {
-    !hand_cards(p, &HandCardType::get_all()).is_empty()
+fn has_any_card(p: &Player, game: &Game) -> bool {
+    !hand_cards(p, &HandCardType::get_all(), game).is_empty()
 }
 
 fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
@@ -271,6 +271,7 @@ pub(crate) fn validate_spy_cards(cards: &[HandCard], game: &Game) -> Result<(), 
     let our = hand_cards(
         game.player(game.current_event().player.index),
         &HandCardType::get_all(),
+        game,
     )
     .into_iter()
     .filter(|c| cards.contains(c))

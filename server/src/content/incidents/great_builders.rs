@@ -2,14 +2,15 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::gain_action;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
-use crate::construct::{ConstructDiscount, available_buildings};
+use crate::construct::{available_buildings, ConstructDiscount};
 use crate::content::ability::Ability;
 use crate::content::advances::AdvanceGroup;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
 use crate::content::incidents::great_persons::{
-    GREAT_PERSON_DESCRIPTION, great_person_action_card, great_person_description,
+    great_person_card, tech_great_person_description,
 };
+use crate::content::incidents::great_persons::GreatPersonType;
 use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
 use crate::player::Player;
@@ -17,17 +18,18 @@ use crate::player_events::CostInfo;
 use crate::playing_actions::PlayingActionType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
-use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
+use crate::wonder::{cities_for_wonder, on_play_wonder_card, wonder_cost, Wonder, WonderCardInfo};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = vec![AdvanceGroup::Construction];
-    great_person_action_card(
+    great_person_card(
         26,
+        GreatPersonType::ActionCard,
         "Great Engineer",
         &format!(
             "{} Then, you may build a building in a city \
             without spending an action and without activating it.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,
@@ -118,14 +120,13 @@ pub(crate) fn construct_only() -> Ability {
 }
 
 pub(crate) fn great_architect() -> ActionCard {
-    great_person_action_card::<_>(
+    great_person_card::<_>(
         55,
+        GreatPersonType::Public,
         "Great Architect",
-        &format!(
-            "{GREAT_PERSON_DESCRIPTION} When constructing a wonder, you may ignore \
-                the requirement advances (but not Engineering). \
-                In addition, the cost of constructing the wonder is reduced by 3 culture tokens.",
-        ),
+        "When constructing a wonder, you may ignore \
+        the requirement advances (but not Engineering). \
+        In addition, the cost of constructing the wonder is reduced by 3 culture tokens.",
         |c| c.free_action().no_resources(),
         vec![],
         |game, player| !playable_wonders(game, player).is_empty(),

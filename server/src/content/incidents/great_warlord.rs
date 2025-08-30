@@ -3,9 +3,7 @@ use crate::action_card::ActionCard;
 use crate::combat::CombatModifier;
 use crate::content::ability::Ability;
 use crate::content::advances::AdvanceGroup;
-use crate::content::incidents::great_persons::{
-    great_person_action_card, great_person_description,
-};
+use crate::content::incidents::great_persons::{great_person_card, tech_great_person_description, GreatPersonType};
 use crate::game::GameState;
 use crate::game::GameState::Movement;
 use crate::movement::MoveState;
@@ -13,13 +11,14 @@ use std::mem;
 
 pub(crate) fn great_warlord() -> ActionCard {
     let groups = vec![AdvanceGroup::Warfare];
-    great_person_action_card(
+    great_person_card(
         24,
+        GreatPersonType::ActionCard,
         "Great Warlord",
         &format!(
             "{} Then, gain a Move action. On the first battle you fight, \
             gain 2 combat value in every round.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,
