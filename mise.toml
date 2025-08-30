@@ -21,7 +21,7 @@ dir = "server"
 
 [tasks.update-tests]
 description = "Run server tests and update JSON files"
-run = 'cargo test --jobs 2 {{arg(name="test", default="")}}'
+run = 'cargo test {{arg(name="test", default="")}}'
 env = { UPDATE_EXPECTED = "true", RUSTFLAGS = '' }
 dir = "server"
 

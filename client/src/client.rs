@@ -52,6 +52,7 @@ fn set_zoom(state: &mut State) {
     let w = state.raw_screen_size.x;
     let h = state.raw_screen_size.y;
     state.world_camera.viewport = Some((0, 0, w as i32, h as i32));
+    state.world_camera.zoom.x = state.world_zoom * state.world_zoom_factor;
     state.world_camera.zoom.y = state.world_camera.zoom.x * w / h;
 
     let scale = state.ui_scale;

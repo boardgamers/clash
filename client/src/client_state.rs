@@ -348,6 +348,8 @@ pub struct State {
     pub(crate) active_dialog: ActiveDialog,
     pub(crate) pending_update: Option<PendingUpdate>,
     pub world_camera: Camera2D,
+    pub world_zoom: f32,
+    pub world_zoom_factor: f32,
     pub ui_camera: Camera2D,
     pub ui_scale: f32,
     pub raw_screen_size: Vec2,
@@ -375,12 +377,13 @@ impl State {
             control_player: None,
             show_player: 0,
             world_camera: Camera2D {
-                zoom: vec2(ZOOM, ZOOM),
                 offset: OFFSET,
                 ..Default::default()
             },
             ui_camera: Camera2D::default(),
             ui_scale: 1.0,
+            world_zoom_factor: 1.0,
+            world_zoom: ZOOM,
             raw_screen_size: vec2(0., 0.),
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],

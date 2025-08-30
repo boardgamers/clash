@@ -75,6 +75,7 @@ struct RemoteClient {
 #[derive(Serialize, Deserialize, Debug)]
 struct Preferences {
     ui_scale: Option<String>,
+    map_zoom: Option<String>,
 }
 
 #[macroquad::main("Clash")]
@@ -120,15 +121,7 @@ impl RemoteClient {
 
             let prefs = self.control.receive_preferences();
             if !prefs.is_empty() {
-                log(&format!("received preferences: {prefs}"));
-                let p: Preferences =
-                    serde_json::from_str(&prefs).expect("preferences can't be deserialized");
-
-                if let Some(scale) = p.ui_scale {
-                    self.state.ui_scale =
-                        f32::from_str(&scale).expect("ui scale should be a float");
-                    log(&format!("set ui scale to {scale}"));
-                }
+                self.apply_preferences(&prefs);
             }
 
             let s = self.control.canvas_size();
@@ -147,6 +140,22 @@ impl RemoteClient {
             // async_std::task::sleep(std::time::Duration::from_millis(100)).await;
 
             next_frame().await;
+        }
+    }
+
+    fn apply_preferences(&mut self, prefs: &String) {
+        log(&format!("received preferences: {prefs}"));
+        let p: Preferences =
+            serde_json::from_str(prefs).expect("preferences can't be deserialized");
+
+        if let Some(scale) = p.ui_scale {
+            self.state.ui_scale = f32::from_str(&scale).expect("ui scale should be a float");
+            log(&format!("set ui scale to {scale}"));
+        }
+
+        if let Some(zoom) = p.map_zoom {
+            self.state.world_zoom = f32::from_str(&zoom).expect("map zoom should be a float");
+            log(&format!("set map zoom to {zoom}"));
         }
     }
 
