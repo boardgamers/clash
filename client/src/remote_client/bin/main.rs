@@ -75,7 +75,7 @@ struct RemoteClient {
 #[derive(Serialize, Deserialize, Debug)]
 struct Preferences {
     ui_scale: Option<String>,
-    map_zoom: Option<String>,
+    world_zoom_factor: Option<String>,
 }
 
 #[macroquad::main("Clash")]
@@ -153,9 +153,9 @@ impl RemoteClient {
             log(&format!("set ui scale to {scale}"));
         }
 
-        if let Some(zoom) = p.map_zoom {
-            self.state.world_zoom = f32::from_str(&zoom).expect("map zoom should be a float");
-            log(&format!("set map zoom to {zoom}"));
+        if let Some(zoom) = p.world_zoom_factor {
+            self.state.world_zoom_factor = f32::from_str(&zoom).expect("world zoom factor should be a float");
+            log(&format!("set world zoom factor to {zoom}"));
         }
     }
 
