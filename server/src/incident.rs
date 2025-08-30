@@ -6,13 +6,13 @@ use crate::ability_initializer::{
 use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
-use crate::card::{HandCard, discard_card, draw_card_from_pile};
-use crate::city::{MoodState, decrease_city_mood, is_valid_city_terrain, set_city_mood};
+use crate::card::{discard_card, draw_card_from_pile, HandCard};
+use crate::city::{can_exhaust, decrease_city_mood, set_city_mood, MoodState};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
-    HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, TriggerPersistentEventParams,
-    UnitsRequest, trigger_persistent_event_with_listener,
+    trigger_persistent_event_with_listener, HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest,
+    PositionRequest, ResourceRewardRequest, SelectedStructure, StructuresRequest,
+    TriggerPersistentEventParams, UnitsRequest,
 };
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
@@ -769,7 +769,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                 .filter(|pos| {
                     game.try_get_any_city(*pos).is_none()
                         && !enemy_units_present(game, *pos, p.index)
-                        && game.map.get(*pos).is_some_and(is_valid_city_terrain)
+                        && game.map.get(*pos).is_some_and(can_exhaust)
                 })
                 .collect_vec();
             let needed = 1..=1;

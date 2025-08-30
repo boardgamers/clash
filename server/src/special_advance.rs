@@ -35,6 +35,12 @@ pub enum SpecialAdvance {
     Longships,
     Raiding,
     RuneStones,
+
+    // Egypt
+    Flood,
+    Architecture,
+    Embalmment,
+    Deification,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

@@ -46,7 +46,7 @@ fn irrigation() -> AdvanceBuilder {
     )
     .add_transient_event_listener(
         |event| &mut event.terrain_collect_options,
-        0,
+        2,
         |m, (), (), _| {
             m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
         },

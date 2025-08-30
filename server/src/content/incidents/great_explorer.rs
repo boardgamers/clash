@@ -109,9 +109,10 @@ fn place_city_request(
         p.log(game, "Player cannot afford to build a city");
     }
 
+    let player = p.get(game);
     let choices = positions
         .into_iter()
-        .filter(|p| game.map.get(*p).is_some_and(is_valid_city_terrain))
+        .filter(|p| game.map.get(*p).is_some_and(|t|is_valid_city_terrain(t, player)))
         .collect_vec();
 
     PositionRequest::new(choices, 0..=1, "Place a city for 2 food")

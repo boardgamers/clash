@@ -84,6 +84,7 @@ impl Unit {
             game.map
                 .get(self.position)
                 .expect("The unit should be at a valid position"),
+            player,
         ) {
             return false;
         }

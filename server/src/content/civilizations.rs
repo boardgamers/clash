@@ -2,6 +2,7 @@ pub(crate) mod china;
 pub(crate) mod greece;
 pub(crate) mod maya;
 pub(crate) mod rome;
+pub(crate) mod egypt;
 pub mod vikings;
 
 use crate::civilization::Civilization;
@@ -20,6 +21,7 @@ pub fn get_all_uncached() -> Vec<Civilization> {
         greece::greece(),
         china::china(),
         vikings::vikings(),
+        egypt::egypt(),
         // not finished yet: maya
     ]
 }

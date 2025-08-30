@@ -9,6 +9,7 @@ use crate::events::{EventOrigin, EventPlayer};
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::map::Terrain;
 use crate::player::remove_unit;
+use crate::special_advance::SpecialAdvance;
 use crate::structure::{Structure, log_gain_city, log_lose_city};
 use crate::unit::{UnitType, Units};
 use crate::wonder::destroy_wonder;
@@ -218,7 +219,14 @@ impl Sub<u8> for MoodState {
     }
 }
 
-pub(crate) fn is_valid_city_terrain(t: &Terrain) -> bool {
+pub(crate) fn is_valid_city_terrain(t: &Terrain, player: &Player) -> bool {
+    if matches!(t, Terrain::Barren) {
+        return player.has_special_advance(SpecialAdvance::Flood);
+    }
+    can_exhaust(t)
+}
+
+pub(crate) fn can_exhaust(t: &Terrain) -> bool {
     t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
 }
 
