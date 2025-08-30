@@ -6,9 +6,9 @@
       "resources": {
         "food": 1,
         "wood": 6,
-        "ore": 7,
+        "ore": 1,
         "ideas": 5,
-        "gold": 7,
+        "gold": 1,
         "mood_tokens": 5,
         "culture_tokens": 7
       },
@@ -259,8 +259,7 @@
                       "player": 0,
                       "Resources": {
                         "resources": {
-                          "ore": 1,
-                          "gold": 1
+                          "ore": 2
                         },
                         "balance": "Gain"
                       },
@@ -270,9 +269,43 @@
                     }
                   ],
                   "log": [
-                    "Player1: Free Economy: Pay 1 mood token, Use city C2, Gain 1 ore and 1 gold",
-                    "Player1: Metallurgy: Convert 1 ore to 1 gold",
-                    "Player1: Waste: Could not store 1 ore and 1 gold"
+                    "Player1: Free Economy: Pay 1 mood token, Use city C2, Gain 2 ore"
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Bool": true
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "Metallurgy"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Metallurgy"
+                      }
+                    }
+                  ],
+                  "log": [
+                    "Player1: Metallurgy: Gain 1 gold"
                   ]
                 }
               ]
@@ -282,7 +315,7 @@
       ]
     }
   ],
-  "log_index": 2,
+  "log_index": 3,
   "undo_limit": 0,
   "actions_left": 3,
   "round": 2,
