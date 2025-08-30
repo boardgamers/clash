@@ -154,7 +154,8 @@ impl RemoteClient {
         }
 
         if let Some(zoom) = p.world_zoom_factor {
-            self.state.world_zoom_factor = f32::from_str(&zoom).expect("world zoom factor should be a float");
+            self.state.world_zoom_factor =
+                f32::from_str(&zoom).expect("world zoom factor should be a float");
             log(&format!("set world zoom factor to {zoom}"));
         }
     }
