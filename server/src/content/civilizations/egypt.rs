@@ -12,11 +12,10 @@ pub(crate) fn egypt() -> Civilization {
         vec![flood()],
         vec![],
         Some(Block::new([
-            // todo test
             Terrain::Fertile,
             Terrain::Mountain,
-            Terrain::Forest,
-            Terrain::Forest,
+            Terrain::Barren,
+            Terrain::Barren,
         ])),
     )
 }
@@ -29,8 +28,6 @@ fn flood() -> SpecialAdvanceInfo {
         "Your cities may Collect food or wood from Barren spaces. \
         You may found a city on Barren land.",
     )
-    // todo found city on barren land
-    // todo produce food or wood from barren land
     .add_transient_event_listener(
         |event| &mut event.terrain_collect_options,
         0,
