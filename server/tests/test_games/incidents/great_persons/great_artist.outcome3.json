@@ -225,11 +225,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -241,7 +245,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -263,7 +267,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -272,8 +278,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Great Artist",
                     "Player1: Great Artist: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Cannot afford to buy Great Artist"
                   ]
@@ -288,6 +292,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -295,7 +300,7 @@
                         "resources": {
                           "culture_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 19
@@ -317,16 +322,27 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Great Artist: Pay 2 culture tokens, Gain Great Artist from the current event"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 2 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 2
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -342,11 +358,15 @@
                       "ActionCard": 119
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "CivilCard": 119
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 119
@@ -383,7 +403,7 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Arts",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -402,9 +422,7 @@
                     }
                   ],
                   "log": [
-                    "Player2: Great Artist: Pay 1 action, Unlock Hellenistic Culture, Gain Arts without taking an event token, City A1 became Happy",
-                    "Player2: Action Card: Play Great Artist",
-                    "Player2: Arts: Gain 1 culture token"
+                    "Player2: Great Artist: Unlock Hellenistic Culture"
                   ]
                 }
               ]

@@ -343,8 +343,50 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player2: Move: sailed 1 ship from D5 to C5, Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "start": "D5",
+                        "destination": "C5"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "B5",
+                            "Water"
+                          ],
+                          [
+                            "C5",
+                            "Water"
+                          ],
+                          [
+                            "A5",
+                            "Forest"
+                          ],
+                          [
+                            "B4",
+                            "Forest"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
                   ]
                 }
               ]

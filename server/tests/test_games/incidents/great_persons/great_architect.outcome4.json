@@ -220,11 +220,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -236,7 +240,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -258,7 +262,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -267,8 +273,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Great Architect",
                     "Player1: Great Architect: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
@@ -283,6 +287,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -290,7 +295,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 55
@@ -312,15 +317,17 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Great Architect: Pay 1 culture token, Gain Great Architect from the current event"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 155
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 155
                   },
                   "items": [
                     {
@@ -340,7 +347,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Action Card: Play Great Architect",
                     "Player1: Build Wonder: Play the wonder card Pyramids"
                   ]
                 },
@@ -352,9 +358,11 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Build Wonder: Decided to build Pyramids in city A1"
-                  ]
+                  ],
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -370,6 +378,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -381,7 +390,7 @@
                           "gold": 1,
                           "culture_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Wonder": "Pyramids"
@@ -409,17 +418,15 @@
                           "Wonder": "Pyramids"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "CivilCard": 155
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
-                    "Player1: Great Architect: Play Pyramids, Gain Pyramids at A1"
-                  ]
+                  "active_events": 2
                 }
               ]
             }

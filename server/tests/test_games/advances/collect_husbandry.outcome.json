@@ -291,11 +291,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Collect"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -322,12 +326,22 @@
                       "origin": {
                         "Ability": "Collect"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Collect: Pay 1 action, Use city B3, City B3 became Neutral, Gain 1 food",
-                    "Player1: Husbandry: Can collect 1 resources from 2 land spaces away",
-                    "Player1: Waste: Could not store 1 food"
+                    "Player1: Husbandry: Can collect 1 resources from 2 land spaces away"
                   ]
                 }
               ]

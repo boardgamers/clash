@@ -612,7 +612,8 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -626,7 +627,8 @@
                         "embark_carrier_id": 8
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -639,7 +641,8 @@
                         "embark_carrier_id": 9
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -652,12 +655,14 @@
                         "embark_carrier_id": 9
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
                     "Movement": "Stop"
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -672,7 +677,8 @@
                         "destination": "D5"
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -683,7 +689,8 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -694,7 +701,8 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "player": 0
                 }
               ]
             }

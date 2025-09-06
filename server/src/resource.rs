@@ -1,11 +1,10 @@
 use crate::content::persistent_events::PaymentRequest;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::{fmt, mem};
 
@@ -91,22 +90,7 @@ pub(crate) fn gain_resources_with_modifiers(
     origin: EventOrigin,
     modifiers: Vec<EventOrigin>,
 ) {
-    if modifiers.is_empty() {
-        game.log(player, &origin, &format!("Gain {resources}"));
-    } else {
-        let modifier_names = modifiers
-            .iter()
-            .map(|m| m.name(game))
-            .collect_vec()
-            .join(", ");
-        game.log(
-            player,
-            &origin,
-            &format!("Gain {resources} with {modifier_names}"),
-        );
-    }
     let p = game.player_mut(player);
-
     p.resources += resources.clone();
     apply_resource_limit(p);
     add_action_log_item(
@@ -129,10 +113,9 @@ pub(crate) fn check_for_waste(game: &mut Game) {
         let wasted_resources =
             mem::replace(&mut game.players[p].wasted_resources, ResourcePile::empty());
         if !wasted_resources.is_empty() {
-            game.log(
-                p,
-                &EventOrigin::Ability("Waste".to_string()),
-                &format!("Could not store {wasted_resources}",),
+            EventPlayer::new(p, EventOrigin::Ability("Waste".to_string())).add_action_log_item(
+                game,
+                ActionLogEntry::resources(wasted_resources, ActionLogBalance::Loss),
             );
         }
     }
@@ -144,6 +127,7 @@ pub(crate) fn lose_resources(
     resources: ResourcePile,
     origin: EventOrigin,
     modifiers: Vec<EventOrigin>,
+    balance: ActionLogBalance,
 ) {
     let p = game.player_mut(player);
     assert!(
@@ -155,7 +139,7 @@ pub(crate) fn lose_resources(
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::resources(resources, ActionLogBalance::Loss),
+        ActionLogEntry::resources(resources, balance),
         origin,
         modifiers,
     );
@@ -191,20 +175,6 @@ fn log_payment(game: &mut Game, player: usize, payment: &ResourcePile, cost: &Pa
         payment.clone(),
         cost.origin.clone(),
         cost.modifiers.clone(),
+        ActionLogBalance::Pay,
     );
-    if cost.modifiers.is_empty() {
-        game.log(player, &cost.origin, &format!("Pay {payment}"));
-    } else {
-        let modifiers = cost
-            .modifiers
-            .iter()
-            .map(|m| m.name(game))
-            .collect_vec()
-            .join(", ");
-        game.log(
-            player,
-            &cost.origin,
-            &format!("Pay {payment} with {modifiers}"),
-        );
-    }
 }

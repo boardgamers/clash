@@ -5,7 +5,7 @@ use server::action::Action;
 use server::advance::Advance;
 use server::city_pieces::Building;
 use server::construct::Construct;
-use server::content::custom_actions::CustomActionType;
+use server::content::custom_actions::{CustomActionType, PlayingActionModifier, SpecialAction};
 use server::happiness::IncreaseHappiness;
 use server::movement::{MoveUnits, MovementAction};
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -113,7 +113,9 @@ fn statesman() {
             Action::Playing(PlayingAction::IncreaseHappiness(IncreaseHappiness::new(
                 vec![(Position::from_offset("A1"), 1)],
                 ResourcePile::mood_tokens(2),
-                PlayingActionType::Custom(CustomActionType::StatesmanIncreaseHappiness),
+                PlayingActionType::Special(SpecialAction::Modifier(
+                    PlayingActionModifier::StatesmanIncreaseHappiness,
+                )),
             ))),
         )],
     );

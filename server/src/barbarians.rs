@@ -584,7 +584,7 @@ fn cities_in_land_range(
 #[must_use]
 pub(crate) fn get_barbarians_event_player(game: &Game, origin: &EventOrigin) -> EventPlayer {
     let player = get_barbarians_player(game);
-    EventPlayer::new(player.index, player.get_name(), origin.clone())
+    EventPlayer::new(player.index, origin.clone())
 }
 
 ///

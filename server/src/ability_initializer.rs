@@ -6,7 +6,8 @@ use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::{
-    CustomActionActionExecution, CustomActionExecution, CustomActionInfo,
+    CustomActionActionExecution, PlayingActionModifier, SpecialAction, SpecialActionExecution,
+    SpecialActionInfo,
 };
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
@@ -35,7 +36,6 @@ pub(crate) type AbilityInitializerWithPrioDelta = Arc<dyn Fn(&mut Game, usize, i
 
 pub(crate) struct SelectedChoice<A, C> {
     pub player_index: usize,
-    pub player_name: String,
     pub origin: EventOrigin,
     pub actively_selected: bool,
     pub choices: A,
@@ -46,7 +46,6 @@ impl<A, C> SelectedChoice<A, C> {
     pub fn new(p: &EventPlayer, actively_selected: bool, choices: A, choice: C) -> Self {
         Self {
             player_index: p.index,
-            player_name: p.name.clone(),
             origin: p.origin.clone(),
             actively_selected,
             choices,
@@ -55,15 +54,11 @@ impl<A, C> SelectedChoice<A, C> {
     }
 
     pub fn player(&self) -> EventPlayer {
-        EventPlayer::new(
-            self.player_index,
-            self.player_name.clone(),
-            self.origin.clone(),
-        )
+        EventPlayer::new(self.player_index, self.origin.clone())
     }
 
-    pub fn other_player(&self, player_index: usize, game: &Game) -> EventPlayer {
-        EventPlayer::from_player(player_index, game, self.origin.clone())
+    pub fn other_player(&self, player_index: usize) -> EventPlayer {
+        EventPlayer::new(player_index, self.origin.clone())
     }
 
     pub fn log(&self, game: &mut Game, message: &str) {
@@ -181,7 +176,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             .add_initializer(move |game, player_index, prio_delta| {
                 initializer(
                     game,
-                    &EventPlayer::from_player(player_index, game, key.clone()),
+                    &EventPlayer::new(player_index, key.clone()),
                     prio_delta,
                 );
             });
@@ -194,10 +189,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     {
         let key = self.get_key().clone();
         self.builder().add_deinitializer(move |game, player_index| {
-            deinitializer(
-                game,
-                &EventPlayer::from_player(player_index, game, key.clone()),
-            );
+            deinitializer(game, &EventPlayer::new(player_index, key.clone()));
         });
         self
     }
@@ -209,10 +201,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         let key = self.get_key().clone();
         self.builder()
             .add_once_initializer(move |game, player_index| {
-                initializer(
-                    game,
-                    &EventPlayer::from_player(player_index, game, key.clone()),
-                );
+                initializer(game, &EventPlayer::new(player_index, key.clone()));
             });
         self
     }
@@ -224,10 +213,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         let key = self.get_key().clone();
         self.builder()
             .add_once_deinitializer(move |game, player_index| {
-                deinitializer(
-                    game,
-                    &EventPlayer::from_player(player_index, game, key.clone()),
-                );
+                deinitializer(game, &EventPlayer::new(player_index, key.clone()));
             });
         self
     }
@@ -972,10 +958,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self {
         let name = self.name();
         let desc = self.description();
-        self.add_custom_action_execution(
-            action,
+        self.add_special_action_execution(
+            SpecialAction::Custom(action),
             cost,
-            CustomActionExecution::Action(CustomActionActionExecution::new(
+            SpecialActionExecution::Action(CustomActionActionExecution::new(
                 ability(Ability::builder(&name, &desc)).build(),
                 Arc::new(can_play),
                 None,
@@ -993,10 +979,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self {
         let name = self.name();
         let desc = self.description();
-        self.add_custom_action_execution(
-            action,
+        self.add_special_action_execution(
+            SpecialAction::Custom(action),
             cost,
-            CustomActionExecution::Action(CustomActionActionExecution::new(
+            SpecialActionExecution::Action(CustomActionActionExecution::new(
                 ability(Ability::builder(&name, &desc)).build(),
                 Arc::new(can_play),
                 Some(Arc::new(city_checker)),
@@ -1006,25 +992,29 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_action_modifier(
         self,
-        action: CustomActionType,
+        modifier: PlayingActionModifier,
         info: impl Fn(ActionCostOncePerTurnBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
         base_action: PlayingActionType,
     ) -> Self {
-        self.add_custom_action_execution(action, info, CustomActionExecution::Modifier(base_action))
+        self.add_special_action_execution(
+            SpecialAction::Modifier(modifier),
+            info,
+            SpecialActionExecution::Modifier(base_action),
+        )
     }
 
-    fn add_custom_action_execution(
+    fn add_special_action_execution(
         self,
-        action: CustomActionType,
+        action: SpecialAction,
         cost: impl Fn(ActionCostOncePerTurnBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
-        execution: CustomActionExecution,
+        execution: SpecialActionExecution,
     ) -> Self {
         let deinitializer_action = action;
         let exec = execution.clone();
         self.add_initializer(move |game, player, _prio_delta| {
-            player.get_mut(game).custom_actions.insert(
+            player.get_mut(game).special_actions.insert(
                 action,
-                CustomActionInfo::new(
+                SpecialActionInfo::new(
                     action,
                     exec.clone(),
                     player.origin.clone(),
@@ -1035,7 +1025,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         .add_deinitializer(move |game, player| {
             player
                 .get_mut(game)
-                .custom_actions
+                .special_actions
                 .remove(&deinitializer_action);
         })
     }

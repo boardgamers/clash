@@ -5,7 +5,7 @@ use crate::city::{City, CityData};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::content::ability;
 use crate::content::ability::Ability;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::SpecialAction;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
 use crate::game::{Game, GameContext, GameOptions, GameState, UIElement};
@@ -282,7 +282,7 @@ pub struct PlayerData {
     next_unit_id: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    played_once_per_turn_actions: Vec<CustomActionType>,
+    played_once_per_turn_actions: Vec<SpecialAction>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     #[serde(serialize_with = "sorted_map")]
@@ -382,7 +382,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         completed_objectives: data.completed_objectives,
         captured_leaders: data.captured_leaders,
         special_victory_points: data.special_victory_points,
-        custom_actions: HashMap::new(),
+        special_actions: HashMap::new(),
         wonder_cards: data.wonder_cards,
         action_cards: data.action_cards,
         objective_cards: data.objective_cards,

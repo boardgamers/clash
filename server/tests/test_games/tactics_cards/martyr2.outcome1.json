@@ -517,7 +517,8 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -531,7 +532,8 @@
                         "embark_carrier_id": 8
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -544,7 +546,8 @@
                         "embark_carrier_id": 9
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -557,12 +560,14 @@
                         "embark_carrier_id": 9
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
                     "Movement": "Stop"
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -577,7 +582,8 @@
                         "destination": "D5"
                       }
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -588,7 +594,8 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -599,7 +606,8 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "player": 0
                 },
                 {
                   "action": {
@@ -609,6 +617,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -616,7 +625,8 @@
                         "units": {
                           "leader": "Alexander"
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D4"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -624,9 +634,9 @@
                     }
                   ],
                   "log": [
-                    "Spock: Martyr: Spock sacrifices an Alexander the Great",
-                    "Spock: Combat: Lost Alexander the Great at D4"
-                  ]
+                    "Spock: Martyr: Spock sacrifices an Alexander the Great"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -636,6 +646,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -674,7 +685,8 @@
                         "units": {
                           "leader": "Wu"
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D5"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -686,7 +698,8 @@
                         "units": {
                           "infantry": 3
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D4"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -698,7 +711,8 @@
                         "units": {
                           "infantry": 3
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D5"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -707,13 +721,14 @@
                   ],
                   "log": [
                     "AlphaZero: Martyr: AlphaZero sacrifices a Wu Zetian",
-                    "AlphaZero: Combat: Lost Wu Zetian at D5, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 2 (elephant, no bonus) for combined combat value of 18 and gets 3 hits against attacking units, Combat modifiers: Wu Zetian adds +2 combat value, Lost 3 infantry at D5",
-                    "Spock: Combat: Roll 2 (elephant, no bonus), 5 (infantry, +1 combat value), 5 (infantry, +1 combat value) for combined combat value of 16 and gets 3 hits against defending units, Combat modifiers: Ruler of the World adds 2 combat value, Lost 3 infantry at D4",
+                    "Spock: Combat: Roll 2 (elephant, no bonus), 5 (infantry, +1 combat value), 5 (infantry, +1 combat value) for combined combat value of 16 and gets 3 hits against defending units, Combat modifiers: Ruler of the World adds 2 combat value",
+                    "AlphaZero: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 2 (elephant, no bonus) for combined combat value of 18 and gets 3 hits against attacking units, Combat modifiers: Wu Zetian adds +2 combat value",
                     "Spock: Choose Casualties: Remove all attacking units",
                     "AlphaZero: Fireworks: Not enough resources, no payment made.",
                     "AlphaZero: Choose Casualties: Remove all defending units",
                     "Battle ends in a draw"
-                  ]
+                  ],
+                  "active_events": 1
                 }
               ]
             }

@@ -238,11 +238,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -254,7 +258,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -276,7 +280,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -285,8 +291,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Solar Eclipse",
                     "Player1: Solar Eclipse: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
@@ -307,11 +311,31 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -319,7 +343,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1, Pay 1 action",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
                     "Player2: Combat: Defending with 2 infantry"
@@ -335,6 +358,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -391,7 +415,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -402,7 +427,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -415,7 +441,8 @@
                           "Building": "Temple"
                         },
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -428,7 +455,8 @@
                           "Building": "Temple"
                         },
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -436,13 +464,12 @@
                     }
                   ],
                   "log": [
-                    "Player2: Tactics: Play an action card face down, Reveal Tactics Card Tactical Retreat",
+                    "Player2: Tactics: Reveal Tactics Card Tactical Retreat",
                     "Player2: Tactical Retreat: Player2 withdraws to B1",
                     "Player1: Solar Eclipse: Gain 1 victory point for the Solar Eclipse",
-                    "Attacker wins",
-                    "Player1: Combat: Gain 1 gold, Gain city C1, Gain Temple at C1",
-                    "Player2: Combat: Lose city C1, Lose Temple at C1"
-                  ]
+                    "Attacker wins"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

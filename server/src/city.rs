@@ -4,6 +4,7 @@ use std::ops::{Add, Sub};
 
 use crate::city_pieces::lose_building;
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
+use crate::content::custom_actions::SpecialAction;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
@@ -112,7 +113,10 @@ impl City {
             Happy => self.size() + 1,
             Neutral => self.size(),
             Angry => {
-                if player.played_once_per_turn_actions.contains(&ForcedLabor) {
+                if player
+                    .played_once_per_turn_actions
+                    .contains(&SpecialAction::Custom(ForcedLabor))
+                {
                     self.size()
                 } else {
                     1
@@ -234,7 +238,7 @@ pub(crate) fn execute_found_city_action(
     add_action_log_item(
         game,
         player_index,
-        ActionLogEntry::units(u, ActionLogBalance::Loss),
+        ActionLogEntry::units(u, ActionLogBalance::Pay, settler.position),
         origin.clone(),
         vec![],
     );
@@ -243,7 +247,7 @@ pub(crate) fn execute_found_city_action(
     }
     found_city(
         game,
-        &EventPlayer::from_player(player_index, game, origin),
+        &EventPlayer::new(player_index, origin),
         settler.position,
     );
     Ok(())
@@ -331,12 +335,6 @@ pub(crate) fn set_city_mood(
         return;
     }
     city.mood_state = new_state.clone();
-
-    game.log(
-        player,
-        origin,
-        &format!("City {position} became {new_state}"),
-    );
     add_action_log_item(
         game,
         player,

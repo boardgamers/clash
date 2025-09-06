@@ -230,11 +230,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -246,7 +250,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -268,7 +272,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -277,8 +283,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Great Merchant",
                     "Player1: Great Merchant: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
                   ]
@@ -293,6 +297,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -300,7 +305,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 25
@@ -322,9 +327,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Great Merchant: Pay 1 culture token, Gain Great Merchant from the current event"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -332,11 +335,15 @@
                       "ActionCard": 125
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 125
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 125
@@ -361,17 +368,13 @@
                       "player": 0,
                       "Advance": {
                         "advance": "TradeRoutes",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
                         "CivilCard": 125
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Merchant: Pay 1 action, Gain Trade Routes without taking an event token",
-                    "Player1: Action Card: Play Great Merchant"
                   ]
                 },
                 {
@@ -382,6 +385,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -394,12 +398,24 @@
                       "origin": {
                         "CivilCard": 125
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Great Merchant: Player1 selected trade routes, settler at C2 traded with city A3, Gain 1 gold",
-                    "Player1: Waste: Could not store 1 gold"
-                  ]
+                    "Player1: Great Merchant: Player1 selected trade routes, settler at C2 traded with city A3"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

@@ -219,11 +219,15 @@
                       "WonderCard": "GreatLighthouse"
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "GreatLighthouse"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Build Wonder"
@@ -231,7 +235,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Build Wonder: Play the wonder card Great Lighthouse, Decided to build Great Lighthouse in city A1, Pay 1 action"
+                    "Player1: Build Wonder: Play the wonder card Great Lighthouse, Decided to build Great Lighthouse in city A1"
                   ]
                 },
                 {
@@ -247,6 +251,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -257,7 +262,7 @@
                           "ore": 4,
                           "culture_tokens": 5
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Wonder": "GreatLighthouse"
@@ -285,17 +290,15 @@
                           "Wonder": "GreatLighthouse"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Build Wonder"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Great Lighthouse: Pay 3 food, 5 wood, 4 ore and 5 culture tokens",
-                    "Player1: Build Wonder: Play Great Lighthouse, Gain Great Lighthouse at A1"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -305,9 +308,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Great Lighthouse: Start action"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "GreatLighthouse"
+                  }
                 },
                 {
                   "action": {
@@ -317,6 +321,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -334,16 +339,15 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C3"
                       },
                       "origin": {
                         "Ability": "Great Lighthouse"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Great Lighthouse: City A1 became Neutral, Gain 1 ship at C3"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

@@ -399,6 +399,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "Sea",
@@ -427,8 +431,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "ships": 2
+                        },
+                        "start": "F6",
+                        "destination": "E7"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -440,7 +457,8 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "F6"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -452,7 +470,8 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "E7"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -460,10 +479,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: sailed 2 ships from F6 to E7, Pay 1 action",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with 2 ships, Roll 2 (cavalry, no bonus), 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 ship at F6",
-                    "Player2: Combat: Defending with 1 ship, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against attacking units, Lost 1 ship at E7",
+                    "Player1: Combat: Attacking with 2 ships, Roll 2 (cavalry, no bonus), 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units",
+                    "Player2: Combat: Defending with 1 ship, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against attacking units",
                     "Player1: Choose Casualties: Remove 1 of their attacking units",
                     "Player2: Choose Casualties: Remove all defending units",
                     "Attacker wins"
@@ -479,6 +497,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -498,9 +517,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Scavenger using Trade Focus/Scavenger"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

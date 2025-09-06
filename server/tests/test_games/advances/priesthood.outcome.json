@@ -293,11 +293,15 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -307,7 +311,7 @@
                       "player": 1,
                       "Resources": {
                         "resources": {},
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -334,7 +338,9 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Math",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 2
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -355,10 +361,7 @@
                     }
                   ],
                   "log": [
-                    "Player2: Advance: Pay 1 action, Pay nothing with Priesthood, Gain Math and take an event token (2 left)",
-                    "Player2: Priesthood: Reduce the cost to 0",
-                    "Player2: Math: Gain 1 culture token",
-                    "Player2: Philosophy: Gain 1 idea"
+                    "Player2: Priesthood: Reduce the cost to 0"
                   ]
                 }
               ]

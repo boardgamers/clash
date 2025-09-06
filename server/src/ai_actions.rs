@@ -5,7 +5,7 @@ use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{Collect, available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::{CustomAction, CustomActionType};
+use crate::content::custom_actions::{CustomAction, CustomActionType, SpecialAction};
 use crate::content::persistent_events::{
     EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
     PositionRequest, SelectedStructure, is_selected_structures_valid,
@@ -195,7 +195,8 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     }
 
     for info in game.available_custom_actions(p.index) {
-        if info.action == CustomActionType::ImperialArmy {
+        let t = info.custom_action_type();
+        if t == CustomActionType::ImperialArmy {
             // buggy
             continue;
         }
@@ -212,12 +213,11 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
             vec![None]
         };
 
-        let a = info.action;
         for c in cities {
             actions.push((
-                ActionType::Playing(PlayingActionType::Custom(a)),
+                ActionType::Playing(PlayingActionType::Special(info.action)),
                 vec![Action::Playing(PlayingAction::Custom(CustomAction::new(
-                    a, c,
+                    t, c,
                 )))],
             ));
         }
@@ -497,11 +497,11 @@ fn calculate_increase_happiness(
 fn prefer_custom_action(actions: &[PlayingActionType]) -> PlayingActionType {
     actions
         .iter()
-        .find(|a| matches!(a, PlayingActionType::Custom(_)))
+        .find(|a| matches!(a, PlayingActionType::Special(SpecialAction::Modifier(_))))
         .or_else(|| {
             actions
                 .iter()
-                .find(|a| !matches!(a, PlayingActionType::Custom(_)))
+                .find(|a| !matches!(a, PlayingActionType::Special(SpecialAction::Modifier(_))))
         })
         .cloned()
         .expect("expected at least one action type, either custom or base")

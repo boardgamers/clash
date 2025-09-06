@@ -1,5 +1,6 @@
 use crate::advance::Advance;
 use crate::game::Game;
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::payment::{PaymentOptionsBuilder, RewardBuilder};
 use crate::player::{CostTrigger, Player};
 use crate::resource::{gain_resources, lose_resources};
@@ -7,7 +8,6 @@ use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
@@ -66,25 +66,14 @@ pub fn check_event_origin() -> EventOrigin {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub(crate) struct EventPlayer {
     pub index: usize,
-    pub name: String,
     pub origin: EventOrigin,
 }
 
 impl EventPlayer {
     #[must_use]
-    pub fn new(player_index: usize, player_name: String, origin: EventOrigin) -> Self {
+    pub fn new(player_index: usize, origin: EventOrigin) -> Self {
         Self {
             index: player_index,
-            name: player_name,
-            origin,
-        }
-    }
-
-    #[must_use]
-    pub fn from_player(player: usize, game: &Game, origin: EventOrigin) -> Self {
-        Self {
-            index: player,
-            name: game.player_name(player),
             origin,
         }
     }
@@ -103,15 +92,26 @@ impl EventPlayer {
         gain_resources(game, self.index, resources, self.origin.clone());
     }
 
-    pub fn lose_resources(&self, game: &mut Game, resources: ResourcePile) {
-        lose_resources(game, self.index, resources, self.origin.clone(), vec![]);
+    pub fn lose_resources(
+        &self,
+        game: &mut Game,
+        resources: ResourcePile,
+        balance: ActionLogBalance,
+    ) {
+        lose_resources(
+            game,
+            self.index,
+            resources,
+            self.origin.clone(),
+            vec![],
+            balance,
+        );
     }
 
     #[must_use]
     pub fn with_origin(&self, origin: EventOrigin) -> Self {
         Self {
             index: self.index,
-            name: self.name.clone(),
             origin,
         }
     }
@@ -129,11 +129,14 @@ impl EventPlayer {
     pub fn log(&self, game: &mut Game, message: &str) {
         game.log(self.index, &self.origin, message);
     }
-}
 
-impl Display for EventPlayer {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name)
+    #[must_use]
+    pub fn name(&self, game: &Game) -> String {
+        self.get(game).get_name()
+    }
+
+    pub fn add_action_log_item(&self, game: &mut Game, entry: ActionLogEntry) {
+        add_action_log_item(game, self.index, entry, self.origin.clone(), vec![]);
     }
 }
 
@@ -298,13 +301,13 @@ mod tests {
         event.add_listener_mut(
             |item, constant, _, (), _| *item += constant,
             0,
-            EventPlayer::new(0, String::new(), EventOrigin::Advance(add_constant)),
+            EventPlayer::new(0, EventOrigin::Advance(add_constant)),
         );
         let multiply_value = Advance::Sanitation;
         event.add_listener_mut(
             |item, _, multiplier, (), _| *item *= multiplier,
             -1,
-            EventPlayer::new(0, String::new(), EventOrigin::Advance(multiply_value)),
+            EventPlayer::new(0, EventOrigin::Advance(multiply_value)),
         );
         let no_change = Advance::Bartering;
         event.add_listener_mut(
@@ -313,7 +316,7 @@ mod tests {
                 *item -= 1;
             },
             1,
-            EventPlayer::new(0, String::new(), EventOrigin::Advance(no_change)),
+            EventPlayer::new(0, EventOrigin::Advance(no_change)),
         );
 
         let mut item = 0;

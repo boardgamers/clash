@@ -120,7 +120,7 @@ impl CombatRoundStats {
         );
         let hits = combat_hits.hits();
 
-        let p = EventPlayer::from_player(self.player, game, combat_event_origin());
+        let p = EventPlayer::new(self.player, combat_event_origin());
         p.log(
             game,
             &format!(

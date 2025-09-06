@@ -602,19 +602,10 @@ pub(crate) fn kill_units_without_event(
         .iter()
         .map(|id| p.get_unit(*id).unit_type)
         .collect::<Units>();
-    game.log(
-        player,
-        origin,
-        &format!(
-            "Lost {} at {}",
-            units.to_string(Some(game)),
-            killed_units.position
-        ),
-    );
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::units(units, ActionLogBalance::Loss),
+        ActionLogEntry::units(units, ActionLogBalance::Loss, killed_units.position),
         origin.clone(),
         vec![],
     );

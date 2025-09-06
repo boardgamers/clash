@@ -534,13 +534,13 @@ pub(crate) fn gain_wonder(
     wonder: Wonder,
     city_position: Position,
 ) {
-    player.log(game, &format!("Gain {} at {city_position}", wonder.name()));
     log_structure(
         game,
         player,
         Structure::Wonder(wonder),
         ActionLogBalance::Gain,
         city_position,
+        None,
     );
     let p = player.get_mut(game);
     p.get_city_mut(city_position).pieces.wonders.push(wonder);
@@ -570,13 +570,13 @@ pub(crate) fn lose_wonder(
         "Player does not own the wonder to lose it"
     );
 
-    player.log(game, &format!("Lose {} at {city_position}", wonder.name()));
     log_structure(
         game,
         player,
         Structure::Wonder(wonder),
         ActionLogBalance::Loss,
         city_position,
+        None,
     );
 
     let p = game.player_mut(player.index);
@@ -655,7 +655,7 @@ pub(crate) fn use_draw_replacement_wonder() -> Ability {
         |game, p, ()| {
             let player = p.get_mut(game);
             if player.event_info.remove(DRAW_REPLACEMENT_WONDER).is_some() {
-                add_start_turn_action_if_needed(game);
+                add_start_turn_action_if_needed(game, game.active_player());
                 p.log(game, "Draw a replacement wonder card");
                 draw_wonder_card(game, p);
             }

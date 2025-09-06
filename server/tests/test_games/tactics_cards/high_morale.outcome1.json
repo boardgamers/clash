@@ -199,11 +199,28 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -211,7 +228,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 1 infantry",
                     "Player2: Combat: Defending with 2 infantry"
@@ -227,6 +243,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -275,7 +292,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -287,7 +305,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -295,13 +314,14 @@
                     }
                   ],
                   "log": [
-                    "Player1: Tactics: Play an action card face down, Reveal Tactics Card High Morale",
-                    "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 9 and gets 1 hits against defending units, Combat modifiers: High Morale added 2 combat value, Lost 1 infantry at C2",
-                    "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units, Lost 1 infantry at C1",
+                    "Player1: Tactics: Reveal Tactics Card High Morale",
+                    "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 9 and gets 1 hits against defending units, Combat modifiers: High Morale added 2 combat value",
+                    "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units",
                     "Player1: Choose Casualties: Remove all attacking units",
                     "Player2: Choose Casualties: Remove 1 of their defending units",
                     "Defender wins"
-                  ]
+                  ],
+                  "active_events": 1
                 }
               ]
             }

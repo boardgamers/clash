@@ -263,11 +263,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Recruit"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -279,7 +283,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -309,7 +313,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -317,7 +322,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Recruit: Pay 1 action, Pay 1 culture token with Draft, Sparta, City A1 became Neutral, Gain 1 infantry at A1",
                     "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
                     "Player1: Sparta: Can pay the Draft cost as culture tokens"
                   ]
@@ -330,6 +334,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -352,9 +357,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: City States: City B3 became Neutral, City A1 became Happy"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

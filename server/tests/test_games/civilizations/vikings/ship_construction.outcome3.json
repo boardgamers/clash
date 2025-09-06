@@ -264,11 +264,28 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "start": "E2",
+                        "destination": "D2"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -276,7 +293,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 1 settler from E2 to D2, Pay 1 action",
                     "Player1: Ship Construction: Convert 1 settler to ships"
                   ]
                 },
@@ -293,8 +309,26 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Move: embarked 1 settler and 1 infantry from E2 to D2"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 1,
+                          "infantry": 1
+                        },
+                        "start": "E2",
+                        "destination": "D2",
+                        "embark_carrier_id": 3
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
                   ]
                 },
                 {
@@ -308,19 +342,33 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "start": "D2",
+                        "destination": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Move: disembarked 1 ship from D2 to C2, Pay 1 action"
                   ]
                 },
                 {
@@ -331,9 +379,11 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Ship Construction: Unloaded 1 settler and 1 infantry from ships, Converted 1 ship to 1 settler"
-                  ]
+                  ],
+                  "active_events": 1
                 }
               ]
             }

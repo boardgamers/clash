@@ -385,19 +385,20 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "LeaderAbility": "Master"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "LeaderAbility": "Master"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Master: Pay 1 action, Start action, Pay 1 mood token"
                   ]
                 },
                 {
@@ -410,6 +411,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -417,7 +419,7 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "LeaderAbility": "Master"
@@ -469,7 +471,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Writing",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 1
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -477,10 +481,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Master: Pay 1 mood token, Gain Writing and take an event token (1 left)",
-                    "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

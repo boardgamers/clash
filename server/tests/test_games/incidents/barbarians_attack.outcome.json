@@ -255,6 +255,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "CityWithFortress",
@@ -299,7 +300,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -312,7 +315,8 @@
                         "units": {
                           "elephants": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "B2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -324,7 +328,8 @@
                         "units": {
                           "settlers": 4
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -335,7 +340,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -346,7 +352,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -358,7 +365,8 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Place Settler"
@@ -370,7 +378,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C2"
                       },
                       "origin": {
                         "Incident": 28
@@ -382,7 +391,8 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Incident": 28
@@ -394,7 +404,8 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Incident": 28
@@ -402,19 +413,15 @@
                     }
                   ],
                   "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
                     "A new game event has been triggered: Population Boom",
-                    "Player1: Population Boom: Base effect: Barbarians move, Barbarians move from B2 to C2: 2 infantry and 1 elephant, Gain 1 settler at A1, Player2 was selected to gain 1 settler.",
+                    "Player1: Population Boom: Base effect: Barbarians move, Barbarians move from B2 to C2: 2 infantry and 1 elephant, Player2 was selected to gain 1 settler.",
                     "Combat round 1",
-                    "Barbarians: Combat: Attacking with 2 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units, Lost 1 elephant at B2, Kill 4 settlers of Player1, Gain city C2",
-                    "Player1: Combat: Defending with 4 settlers, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 4 settlers at C2, Lose city C2",
+                    "Barbarians: Combat: Attacking with 2 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units, Kill 4 settlers of Player1",
+                    "Player1: Combat: Defending with 4 settlers, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit",
                     "Barbarians: Choose Casualties: Remove 1 of their attacking units",
-                    "Attacker wins",
-                    "Player1: Place Settler: Gain 1 settler at A1",
-                    "Barbarians: Population Boom: Gain 1 infantry at C2",
-                    "Player2: Population Boom: Gain 1 settler at C1"
-                  ]
+                    "Attacker wins"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

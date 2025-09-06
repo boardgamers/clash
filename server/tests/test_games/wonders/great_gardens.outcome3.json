@@ -212,11 +212,15 @@
                       "WonderCard": "GreatGardens"
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "GreatGardens"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Build Wonder"
@@ -224,7 +228,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Build Wonder: Play the wonder card Great Gardens, Decided to build Great Gardens in city A1, Pay 1 action"
+                    "Player1: Build Wonder: Play the wonder card Great Gardens, Decided to build Great Gardens in city A1"
                   ]
                 },
                 {
@@ -240,6 +244,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -250,7 +255,7 @@
                           "ore": 2,
                           "culture_tokens": 5
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Wonder": "GreatGardens"
@@ -278,24 +283,34 @@
                           "Wonder": "GreatGardens"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Build Wonder"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Great Gardens: Pay 5 food, 5 wood, 2 ore and 5 culture tokens",
-                    "Player1: Build Wonder: Play Great Gardens, Gain Great Gardens at A1"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 1 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -317,19 +332,33 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 1,
+                      "Move": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "start": "C1",
+                        "destination": "B1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Move: marched 2 infantry from C1 to B1, Pay 1 action"
                   ]
                 }
               ]

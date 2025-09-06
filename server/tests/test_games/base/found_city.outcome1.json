@@ -215,11 +215,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Found City"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Found City"
@@ -231,7 +235,8 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay",
+                        "position": "B6"
                       },
                       "origin": {
                         "Ability": "Found city"
@@ -242,16 +247,13 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "B6"
+                        "position": "B6",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Found city"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Found City: Pay 1 action",
-                    "Player1: Found city: Gain city B6"
                   ]
                 },
                 {
@@ -264,6 +266,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -283,9 +286,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete City Founder using City Founder/Resistance"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

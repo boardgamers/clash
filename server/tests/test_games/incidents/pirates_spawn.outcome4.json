@@ -253,6 +253,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -270,7 +271,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -279,11 +282,10 @@
                     }
                   ],
                   "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
                     "A new game event has been triggered: A successful year",
                     "Player1: A successful year: Base effect: Pirates spawn"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -293,9 +295,11 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: A successful year: Removed a Pirate Ships at D1"
-                  ]
+                  ],
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -305,6 +309,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 2,
@@ -312,16 +317,15 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A2"
                       },
                       "origin": {
                         "Incident": 54
                       }
                     }
                   ],
-                  "log": [
-                    "Pirates: A successful year: Gain 1 ship at A2"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -331,6 +335,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 2,
@@ -338,7 +343,8 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "D2"
                       },
                       "origin": {
                         "Incident": 54
@@ -346,9 +352,9 @@
                     }
                   ],
                   "log": [
-                    "Pirates: A successful year: Gain 1 ship at D2",
                     "Player1: A successful year: Must pay 1 resource or token to bribe the pirates"
-                  ]
+                  ],
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -360,6 +366,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -367,7 +374,7 @@
                         "resources": {
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 54
@@ -397,9 +404,10 @@
                     }
                   ],
                   "log": [
-                    "Player1: A successful year: Pay 1 ore, Pirates took 1 ore",
-                    "Player2: A successful year: Must reduce Mood in a city adjacent to pirates, City C1 became Angry, Gain 1 food"
-                  ]
+                    "Player1: A successful year: Pirates took 1 ore",
+                    "Player2: A successful year: Must reduce Mood in a city adjacent to pirates"
+                  ],
+                  "active_events": 2
                 }
               ]
             }

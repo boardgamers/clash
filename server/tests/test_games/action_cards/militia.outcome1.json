@@ -199,6 +199,10 @@
                       "ActionCard": 37
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 37
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -215,10 +219,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Militia/Wedge Formation",
-                    "Player1: Militia: Pay 1 culture token"
                   ]
                 },
                 {
@@ -231,6 +231,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -238,7 +239,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 37
@@ -250,16 +251,15 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "CivilCard": 37
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Militia: Pay 1 culture token, Gain 1 infantry at A1"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

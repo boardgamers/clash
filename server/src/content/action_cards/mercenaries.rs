@@ -8,7 +8,8 @@ use crate::content::civilizations::rome::owner_of_sulla_in_range;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
-use crate::movement::{MoveUnits, move_action_log};
+use crate::log::ActionLogEntry;
+use crate::movement::MoveUnits;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -153,7 +154,8 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                 let units = b.get_units(from).iter().map(|u| u.id).collect_vec();
 
                 let m = MoveUnits::new(units, to, None, ResourcePile::empty());
-                s.log(game, &move_action_log(game, b, &m));
+                s.player()
+                    .add_action_log_item(game, ActionLogEntry::move_units(b, &m));
 
                 move_with_possible_combat(game, barbarian, &m);
             },
@@ -192,7 +194,8 @@ fn barbarian_army_positions_in_range2(
                     .is_some_and(|sulla_owner| player.index != sulla_owner)
                 {
                     log.push(format!(
-                        "{player} cannot move Barbarian army at {p} because Sulla is in range",
+                        "{} cannot move Barbarian army at {p} because Sulla is in range",
+                        player.get_name()
                     ));
                     return false;
                 }

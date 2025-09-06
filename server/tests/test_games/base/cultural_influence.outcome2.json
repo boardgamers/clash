@@ -219,11 +219,15 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Influence Culture"
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Influence Culture"
@@ -231,7 +235,7 @@
                     }
                   ],
                   "log": [
-                    "Player2: Influence Culture: Pay 1 action, Tried to influence the Temple in the city at C2 by Player1 with the city B3 and may pay 1 culture token to boost the range"
+                    "Player2: Influence Culture: Tried to influence the Temple in the city at C2 by Player1 with the city B3 and may pay 1 culture token to boost the range"
                   ]
                 },
                 {
@@ -244,6 +248,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -251,7 +256,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Influence Culture"
@@ -259,8 +264,9 @@
                     }
                   ],
                   "log": [
-                    "Player2: Influence Culture: Pay 1 culture token, Rolled a 1 and now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
-                  ]
+                    "Player2: Influence Culture: Rolled a 1 and now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -272,6 +278,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -279,7 +286,7 @@
                         "resources": {
                           "culture_tokens": 4
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Influence Culture"
@@ -292,7 +299,8 @@
                           "Building": "Temple"
                         },
                         "balance": "Loss",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Influence Culture"
@@ -305,7 +313,8 @@
                           "Building": "Temple"
                         },
                         "balance": "Gain",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Influence Culture"
@@ -313,9 +322,9 @@
                     }
                   ],
                   "log": [
-                    "Player2: Influence Culture: Pay 4 culture tokens, Paying to increase the dice roll, Gain Temple at C2",
-                    "Player1: Influence Culture: Lose Temple at C2"
-                  ]
+                    "Player2: Influence Culture: Paying to increase the dice roll"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

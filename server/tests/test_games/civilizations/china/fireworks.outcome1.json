@@ -265,11 +265,28 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -277,7 +294,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
                     "Player2: Combat: Defending with 1 cavalry, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units"
@@ -293,6 +309,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -323,7 +340,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "SpecialAdvance": "Fireworks"
@@ -335,7 +352,8 @@
                         "units": {
                           "cavalry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -358,7 +376,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -369,7 +388,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -381,7 +401,8 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "B2"
                       },
                       "origin": {
                         "Ability": "Place Settler"
@@ -389,13 +410,11 @@
                     }
                   ],
                   "log": [
-                    "Player1: Fireworks: Pay 2 gold, Ignore the first hit",
+                    "Player1: Fireworks: Ignore the first hit",
                     "Player2: Choose Casualties: Remove all defending units",
-                    "Player2: Combat: Lost 1 cavalry at C1, Lose city C1",
-                    "Attacker wins",
-                    "Player1: Combat: Gain 1 gold, Gain city C1",
-                    "Player2: Place Settler: Gain 1 settler at B2"
-                  ]
+                    "Attacker wins"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

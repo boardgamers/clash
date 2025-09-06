@@ -217,11 +217,15 @@
                       "ActionCard": 17
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 17
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 17
@@ -242,10 +246,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: City Development: Pay 1 action, Pay 1 culture token",
-                    "Player1: Action Card: Play City Development/Tactical Retreat"
                   ]
                 },
                 {
@@ -258,6 +258,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -265,7 +266,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 17
@@ -282,8 +283,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: City Development: Pay 1 culture token, Gain 1 action, You may build a building in a city without spending an action and without paying resources."
-                  ]
+                    "Player1: City Development: You may build a building in a city without spending an action and without paying resources."
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -296,11 +298,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Construct Building"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -310,7 +316,7 @@
                       "player": 0,
                       "Resources": {
                         "resources": {},
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -331,7 +337,8 @@
                           "Building": "Fortress"
                         },
                         "balance": "Gain",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -339,7 +346,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Construct Building: Pay 1 action, Pay nothing with Captivi, Construct Only, Gain Fortress at C2",
                     "Player1: Captivi: May replace resources with mood tokens"
                   ]
                 }

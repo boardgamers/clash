@@ -234,11 +234,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -250,7 +254,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -272,7 +276,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -281,8 +287,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Great Engineer",
                     "Player1: Great Engineer: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
                   ]
@@ -297,6 +301,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -304,7 +309,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 26
@@ -326,9 +331,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Great Engineer: Pay 1 culture token, Gain Great Engineer from the current event"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -336,11 +339,15 @@
                       "ActionCard": 126
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 126
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 126
@@ -361,10 +368,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Engineer: Pay 1 action",
-                    "Player1: Action Card: Play Great Engineer"
                   ]
                 },
                 {
@@ -373,6 +376,7 @@
                       "SelectAdvance": "Engineering"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -393,7 +397,7 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Engineering",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -402,9 +406,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Engineering: Draw a wonder card",
-                    "Player1: Great Engineer: Unlock Aqueduct, Gain Engineering without taking an event token"
-                  ]
+                    "Player1: Great Engineer: Unlock Aqueduct"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -412,6 +416,7 @@
                       "Bool": true
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -424,8 +429,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it., Gain 1 action"
-                  ]
+                    "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it."
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -442,11 +448,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Construct Building"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -460,7 +470,7 @@
                           "wood": 1,
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -481,7 +491,8 @@
                           "Building": "Fortress"
                         },
                         "balance": "Gain",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -489,7 +500,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only, Gain Fortress at C2",
                     "Player1: Captivi: May replace resources with mood tokens"
                   ]
                 }

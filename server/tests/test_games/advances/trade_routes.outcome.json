@@ -393,8 +393,21 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 3 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -411,6 +424,7 @@
               "actions": [
                 {
                   "action": "StartTurn",
+                  "player": 1,
                   "items": [
                     {
                       "player": 0,
@@ -435,12 +449,22 @@
                       "origin": {
                         "Advance": "TradeRoutes"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Market: Gain 1 gold",
-                    "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6, Gain 2 food",
-                    "Player2: Waste: Could not store 1 food"
+                    "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6"
                   ]
                 }
               ]

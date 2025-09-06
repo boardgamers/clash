@@ -111,11 +111,11 @@ impl ActiveDialog {
             ActiveDialog::StructuresRequest(d, r) => {
                 if let Some(b) = d {
                     let v = vec!["Click on a building to influence its culture".to_string()];
-                    if let PlayingActionType::Custom(c) = &b.action_type {
+                    if let PlayingActionType::Special(c) = &b.action_type {
                         let mut r = v.clone();
                         r.extend(event_help(
                             rc,
-                            &rc.shown_player.custom_action_info(*c).event_origin,
+                            &rc.shown_player.special_action_info(c).event_origin,
                         ));
                     }
                     v
@@ -586,17 +586,17 @@ impl State {
     }
 
     pub(crate) fn draw_text(&self, text: &str, x: f32, y: f32) {
-        self.draw_text_with_color(text, x, y, BLACK);
+        self.draw_text_ex(text, x, y, BLACK, FONT_SIZE);
     }
 
-    pub(crate) fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
+    pub(crate) fn draw_text_ex(&self, text: &str, x: f32, y: f32, color: Color, font_size: u16) {
         draw_text_ex(
             text,
             x,
             y,
             TextParams {
                 font: Some(&self.assets.font),
-                font_size: FONT_SIZE,
+                font_size,
                 color,
                 ..Default::default()
             },

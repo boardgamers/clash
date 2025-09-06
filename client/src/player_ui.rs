@@ -27,7 +27,7 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource::ResourceType;
-use server::status_phase::get_status_phase;
+use server::status_phase::{get_status_phase, status_phase_type};
 use server::victory_points::victory_points_parts;
 
 pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
@@ -68,7 +68,7 @@ pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
         }
 
         let tooltip = if rc.state.control_player.is_some_and(|p| p == pl.index) {
-            format!("{pl} (You)")
+            format!("{} (You)", pl.get_name())
         } else {
             pl.get_name()
         };
@@ -185,7 +185,7 @@ pub(crate) fn show_top_left(rc: &RenderContext, painter: &mut ColumnLabelPainter
         _ => painter.label(&format!("Age {}", game.age)),
     }
     if let Some(s) = get_status_phase(game) {
-        painter.label(&format!("Status Phase: {s}"));
+        painter.label(&format!("Status Phase: {}", status_phase_type(s)));
     } else {
         painter.label(&format!("Round {}", game.round));
     }

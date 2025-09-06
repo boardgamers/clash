@@ -345,9 +345,39 @@
                       "ExploreResolution": 3
                     }
                   },
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "F5",
+                            "Fertile"
+                          ],
+                          [
+                            "G5",
+                            "Mountain"
+                          ],
+                          [
+                            "E5",
+                            "Forest"
+                          ],
+                          [
+                            "F4",
+                            "Fertile"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player2: Explore Resolution: Chose rotation 3, Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain, Ship can't move to the explored tile"
-                  ]
+                    "Player2: Explore Resolution: Chose rotation 3, Ship can't move to the explored tile"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

@@ -249,6 +249,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -266,7 +267,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -275,10 +278,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
                     "A new game event has been triggered: An awesome year"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -288,6 +290,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -312,13 +315,24 @@
                       "origin": {
                         "Incident": 13
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: An awesome year: Exhausted the land in position B2, Gain 2 food",
-                    "Player2: An awesome year: Gain 2 food",
-                    "Player2: Waste: Could not store 1 food"
-                  ]
+                    "Player1: An awesome year: Exhausted the land in position B2"
+                  ],
+                  "active_events": 2
                 }
               ]
             }

@@ -1,12 +1,14 @@
 use crate::city::{MoodState, increase_mood_state};
-use crate::content::custom_actions::{CustomActionType, custom_action_modifier_event_origin};
+use crate::content::custom_actions::{
+    PlayingActionModifier, SpecialAction, custom_action_modifier_event_origin,
+};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::leader_position;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
-use crate::playing_actions::{PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{PlayingActionType, base_or_modified_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -36,14 +38,14 @@ impl IncreaseHappiness {
 
 #[must_use]
 pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(game, player, &PlayingActionType::IncreaseHappiness)
+    base_or_modified_available(game, player, &PlayingActionType::IncreaseHappiness)
 }
 
 #[must_use]
 pub fn happiness_city_restriction(player: &Player, action: &PlayingActionType) -> Option<Position> {
     match action {
-        PlayingActionType::Custom(custom)
-            if custom == &CustomActionType::StatesmanIncreaseHappiness =>
+        PlayingActionType::Special(SpecialAction::Modifier(m))
+            if m == &PlayingActionModifier::StatesmanIncreaseHappiness =>
         {
             Some(leader_position(player))
         }

@@ -358,11 +358,15 @@
                       "ActionCard": 21
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "CivilCard": 21
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 21
@@ -383,10 +387,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Explorer: Pay 1 action, Pay 1 culture token",
-                    "Player2: Action Card: Play Explorer/Encircled"
                   ]
                 },
                 {
@@ -399,6 +399,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -406,16 +407,14 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 21
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Explorer: Pay 1 culture token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -425,9 +424,11 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "log": [
                     "Player2: Explorer: Explored B6"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -435,9 +436,39 @@
                       "ExploreResolution": 0
                     }
                   },
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "B6",
+                            "Fertile"
+                          ],
+                          [
+                            "A7",
+                            "Fertile"
+                          ],
+                          [
+                            "C7",
+                            "Fertile"
+                          ],
+                          [
+                            "B7",
+                            "Barren"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player2: Explore Resolution: Chose rotation 0, Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
-                  ]
+                    "Player2: Explore Resolution: Chose rotation 0"
+                  ],
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -447,6 +478,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -454,16 +486,15 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "D8"
                       },
                       "origin": {
                         "CivilCard": 21
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Explorer: Gain 1 settler at D8"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

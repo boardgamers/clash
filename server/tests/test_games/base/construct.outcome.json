@@ -212,11 +212,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Construct Building"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -230,7 +234,7 @@
                           "wood": 1,
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -253,7 +257,8 @@
                           "Building": "Observatory"
                         },
                         "balance": "Gain",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -276,8 +281,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, City C2 became Neutral, Gain Observatory at C2",
-                    "Player1: Observatory: Draw an action card, Observatory gained 1 action card"
+                    "Player1: Observatory: Observatory gained 1 action card"
                   ]
                 }
               ]

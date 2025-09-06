@@ -202,7 +202,9 @@
       ],
       "next_unit_id": 8,
       "played_once_per_turn_actions": [
-        "GreatLibrary"
+        {
+          "Custom": "GreatLibrary"
+        }
       ]
     },
     {
@@ -321,9 +323,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Great Library: Start action"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "GreatLibrary"
+                  }
                 },
                 {
                   "action": {
@@ -331,9 +334,11 @@
                       "SelectAdvance": "Engineering"
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Great Library: Use Engineering for the turn"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -341,11 +346,15 @@
                       "WonderCard": "Pyramids"
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "Pyramids"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Build Wonder"
@@ -353,7 +362,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2, Pay 1 action"
+                    "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2"
                   ]
                 }
               ]

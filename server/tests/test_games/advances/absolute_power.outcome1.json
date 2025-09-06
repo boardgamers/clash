@@ -102,7 +102,9 @@
       ],
       "next_unit_id": 7,
       "played_once_per_turn_actions": [
-        "AbsolutePower"
+        {
+          "Custom": "AbsolutePower"
+        }
       ]
     },
     {
@@ -240,9 +242,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Absolute Power: Start action, Pay 2 mood tokens"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Advance": "AbsolutePower"
+                  }
                 },
                 {
                   "action": {
@@ -254,6 +257,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -261,7 +265,7 @@
                         "resources": {
                           "mood_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "AbsolutePower"
@@ -277,9 +281,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Absolute Power: Pay 2 mood tokens, Gain 1 action"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

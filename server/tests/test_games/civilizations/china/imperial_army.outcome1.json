@@ -89,7 +89,9 @@
       ],
       "next_unit_id": 10,
       "played_once_per_turn_actions": [
-        "ImperialArmy"
+        {
+          "Custom": "ImperialArmy"
+        }
       ]
     },
     {
@@ -247,19 +249,20 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "SpecialAdvance": "ImperialArmy"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "SpecialAdvance": "ImperialArmy"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Imperial Army: Pay 1 action, Start action"
                   ]
                 },
                 {
@@ -271,9 +274,11 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Imperial Army: Convert infantry at C2, settler at B4"
-                  ]
+                  ],
+                  "active_events": 1
                 }
               ]
             }

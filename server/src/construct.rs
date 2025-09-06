@@ -179,7 +179,7 @@ pub(crate) fn construct(
     }
     gain_building(
         game,
-        &EventPlayer::from_player(player, game, origin.clone()),
+        &EventPlayer::new(player, origin.clone()),
         building,
         city_position,
     );
@@ -227,7 +227,7 @@ pub(crate) fn on_construct(game: &mut Game, player_index: usize, info: Construct
         gain_advance_without_payment(
             game,
             b.advance,
-            &EventPlayer::from_player(player_index, game, b.origin),
+            &EventPlayer::new(player_index, b.origin),
             ResourcePile::empty(),
             true,
         );

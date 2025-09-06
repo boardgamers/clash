@@ -220,6 +220,10 @@
                       "ActionCard": 29
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 29
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -238,7 +242,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Action Card: Play Mass Production/Defensive Formation",
                     "Player1: Mass Production: Can use Mass Production to collect from 2 additional tiles."
                   ]
                 },
@@ -274,11 +277,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Collect"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -298,9 +305,6 @@
                         "Ability": "Collect"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 mood token"
                   ]
                 }
               ]

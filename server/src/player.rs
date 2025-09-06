@@ -2,7 +2,9 @@ use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::ability::construct_event_origin;
-use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
+use crate::content::custom_actions::{
+    PlayingActionModifier, SpecialAction, SpecialActionExecution, SpecialActionInfo,
+};
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_setup::all_leaders;
 use crate::leader::Leader;
@@ -23,7 +25,6 @@ use crate::{
     city_pieces::Building::{self},
     civilization::Civilization,
     consts::{BUILDING_COST, CITY_LIMIT, CITY_PIECE_LIMIT, UNIT_LIMIT},
-    content::custom_actions::CustomActionType,
     game::Game,
     leader::LeaderInfo,
     player_events::PlayerEvents,
@@ -35,7 +36,6 @@ use enumset::EnumSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -66,24 +66,18 @@ pub struct Player {
     pub completed_objectives: Vec<CompletedObjective>,
     pub captured_leaders: Vec<Leader>,
     pub special_victory_points: Vec<SpecialVictoryPoints>,
-    pub custom_actions: HashMap<CustomActionType, CustomActionInfo>, // transient
+    pub special_actions: HashMap<SpecialAction, SpecialActionInfo>, // transient
     pub wonder_cards: Vec<Wonder>,
     pub action_cards: Vec<u8>,
     pub objective_cards: Vec<u8>,
     pub next_unit_id: u32,
-    pub played_once_per_turn_actions: Vec<CustomActionType>,
+    pub played_once_per_turn_actions: Vec<SpecialAction>,
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
     pub custom_data: HashMap<String, Data>,
     pub(crate) objective_opportunities: Vec<String>, // transient
     pub(crate) gained_objective: Option<u8>,         // transient
     pub(crate) great_mausoleum_action_cards: u8,     // transient
-}
-
-impl Display for Player {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.get_name())
-    }
 }
 
 #[derive(PartialEq, Eq, Copy, Clone)]
@@ -119,7 +113,7 @@ impl Player {
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
             special_victory_points: Vec::new(),
-            custom_actions: HashMap::new(),
+            special_actions: HashMap::new(),
             wonder_cards: Vec::new(),
             action_cards: Vec::new(),
             objective_cards: Vec::new(),
@@ -506,28 +500,27 @@ impl Player {
     /// # Panics
     /// Panics if the custom action type does not exist for this player
     #[must_use]
-    pub fn custom_action_info(&self, custom_action_type: CustomActionType) -> CustomActionInfo {
-        self.custom_actions
-            .get(&custom_action_type)
+    pub fn special_action_info(&self, a: &SpecialAction) -> SpecialActionInfo {
+        self.special_actions
+            .get(a)
             .cloned()
-            .unwrap_or_else(|| {
-                panic!(
-                    "Custom action {custom_action_type:?} not found for player {}",
-                    self.index
-                )
-            })
+            .unwrap_or_else(|| panic!("Custom action {a:?} not found for player {}", self.index))
     }
 
     #[must_use]
     pub(crate) fn custom_action_modifiers(
         &self,
         base: &PlayingActionType,
-    ) -> Vec<CustomActionType> {
-        self.custom_actions
+    ) -> Vec<PlayingActionModifier> {
+        self.special_actions
             .iter()
             .filter_map(move |(t, c)| {
-                if let CustomActionExecution::Modifier(b) = &c.execution {
-                    (b == base).then_some(*t)
+                if let SpecialActionExecution::Modifier(b) = &c.execution {
+                    (b == base).then_some(if let SpecialAction::Modifier(m) = t {
+                        *m
+                    } else {
+                        unreachable!()
+                    })
                 } else {
                     None
                 }
@@ -583,15 +576,10 @@ pub fn gain_units(
         }
     }
 
-    game.log(
-        player,
-        origin,
-        &format!("Gain {} at {}", units.to_string(Some(game)), position),
-    );
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::units(units, ActionLogBalance::Gain),
+        ActionLogEntry::units(units, ActionLogBalance::Gain, position),
         origin.clone(),
         vec![],
     );

@@ -218,6 +218,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -245,12 +249,28 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
                           "leader": "Caesar"
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -273,7 +293,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -284,21 +305,32 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 2 (elephant, -1 hits, no combat value), 2 (elephant, no bonus), 2 (elephant, no bonus), 1 (leader, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: steel weapons added 2 combat value, Gain 1 gold, Gain city C1",
-                    "Player2: Combat: Defending with Gaius Julius Caesar, Roll 1 (leader, re-roll), 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units, Lost Gaius Julius Caesar at C1, Lose city C1",
+                    "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 2 (elephant, -1 hits, no combat value), 2 (elephant, no bonus), 2 (elephant, no bonus), 1 (leader, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: steel weapons added 2 combat value",
+                    "Player2: Combat: Defending with Gaius Julius Caesar, Roll 1 (leader, re-roll), 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units",
                     "Player2: Choose Casualties: Remove all defending units",
-                    "Attacker wins",
-                    "Player1: Waste: Could not store 1 gold"
+                    "Attacker wins"
                   ]
                 }
               ]

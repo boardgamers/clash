@@ -264,8 +264,26 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player1: Move: marched 1 infantry from C2 to C1",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units",
                     "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",

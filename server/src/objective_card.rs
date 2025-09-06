@@ -330,7 +330,7 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
     {
         s(
             game,
-            &EventPlayer::from_player(player, game, EventOrigin::Objective(objective.to_string())),
+            &EventPlayer::new(player, EventOrigin::Objective(objective.to_string())),
         );
     }
 

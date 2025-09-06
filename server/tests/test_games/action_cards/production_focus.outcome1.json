@@ -221,6 +221,10 @@
                       "ActionCard": 19
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 19
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -239,7 +243,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Action Card: Play Production Focus/Tactical Retreat",
                     "Player1: Production Focus: Production Focus: You may collect multiple times from the same tile."
                   ]
                 },
@@ -275,11 +278,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Collect"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -298,11 +305,19 @@
                       "origin": {
                         "Ability": "Collect"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Collect: Pay 1 action, Use city C2, Gain 2 ore, 1 gold and 2 mood tokens",
-                    "Player1: Waste: Could not store 1 gold"
                   ]
                 }
               ]

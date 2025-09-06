@@ -2,10 +2,10 @@ use crate::assets::Assets;
 use crate::client_state::{CameraMode, RenderResult, State};
 use crate::layout_ui::{IconBackground, limit_str};
 use crate::payment_ui::Payment;
-use macroquad::color::{Color, PINK, YELLOW};
+use macroquad::color::{Color, PINK};
 use macroquad::input::mouse_position;
 use macroquad::math::{Vec2, bool};
-use macroquad::prelude::{BLACK, LIME, Rect, SKYBLUE, WHITE, set_camera};
+use macroquad::prelude::{BLACK, LIME, ORANGE, Rect, SKYBLUE, WHITE, set_camera};
 use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
@@ -159,7 +159,7 @@ impl RenderContext<'_> {
             return BLACK;
         }
         match player_index {
-            0 => YELLOW,
+            0 => ORANGE,
             1 => PINK,
             2 => SKYBLUE,
             3 => LIME,
@@ -187,9 +187,9 @@ impl RenderContext<'_> {
         }
     }
 
-    pub(crate) fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
+    pub(crate) fn draw_text_ex(&self, text: &str, x: f32, y: f32, color: Color, font_size: u16) {
         if self.stage.is_main() {
-            self.state.draw_text_with_color(text, x, y, color);
+            self.state.draw_text_ex(text, x, y, color, font_size);
         }
     }
 

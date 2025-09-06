@@ -332,11 +332,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -348,7 +352,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -370,7 +374,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -379,8 +385,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Pandemics",
                     "Player1: Pandemics: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Lose a total of 2 units, cards, and resources"
                   ]
@@ -393,6 +397,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -400,16 +405,15 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Incident": 49
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Pandemics: Lost 1 infantry at C2"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -421,6 +425,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -439,9 +444,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Pandemics: Discard Quick Advance/Peltasts",
                     "Player2: Pandemics: Lose a total of 1 units, cards, and resources"
-                  ]
+                  ],
+                  "active_events": 1
                 }
               ]
             }

@@ -7,6 +7,7 @@ use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::UnitsRequest;
 use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
+use crate::log::ActionLogBalance;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
@@ -219,7 +220,7 @@ pub(crate) fn famine(
                 // only avoid anger if full amount is paid
                 i.player.payment = ResourcePile::food(lost);
             }
-            player.lose_resources(game, ResourcePile::food(lost));
+            player.lose_resources(game, ResourcePile::food(lost), ActionLogBalance::Loss);
 
             player.log(game, &format!("Lost {lost} food",));
         })

@@ -1,5 +1,5 @@
 use crate::advance::base_advance_cost;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::SpecialAction;
 use crate::events::{EventOrigin, check_event_origin};
 use crate::game::{Game, GameContext};
 use crate::payment::PaymentOptions;
@@ -81,12 +81,12 @@ impl ActionCost {
 }
 
 pub(crate) struct ActionCostOncePerTurnBuilder {
-    action: CustomActionType,
+    action: SpecialAction,
 }
 
 impl ActionCostOncePerTurnBuilder {
     #[must_use]
-    pub fn new(action: CustomActionType) -> Self {
+    pub fn new(action: SpecialAction) -> Self {
         Self { action }
     }
 
@@ -105,19 +105,19 @@ impl ActionCostOncePerTurnBuilder {
     #[must_use]
     pub fn once_per_turn_mutually_exclusive(
         self,
-        mutually_exclusive: CustomActionType,
+        mutually_exclusive: SpecialAction,
     ) -> ActionCostBuilder {
         ActionCostBuilder::new(Some(mutually_exclusive))
     }
 }
 
 pub(crate) struct ActionCostBuilder {
-    once_per_turn: Option<CustomActionType>,
+    once_per_turn: Option<SpecialAction>,
 }
 
 impl ActionCostBuilder {
     #[must_use]
-    pub(crate) fn new(once_per_turn: Option<CustomActionType>) -> Self {
+    pub(crate) fn new(once_per_turn: Option<SpecialAction>) -> Self {
         Self { once_per_turn }
     }
 
@@ -133,13 +133,13 @@ impl ActionCostBuilder {
 }
 
 pub(crate) struct ActionResourceCostBuilder {
-    once_per_turn: Option<CustomActionType>,
+    once_per_turn: Option<SpecialAction>,
     free: bool,
 }
 
 impl ActionResourceCostBuilder {
     #[must_use]
-    fn new(once_per_turn: Option<CustomActionType>, free: bool) -> ActionResourceCostBuilder {
+    fn new(once_per_turn: Option<SpecialAction>, free: bool) -> ActionResourceCostBuilder {
         ActionResourceCostBuilder {
             once_per_turn,
             free,
@@ -187,14 +187,14 @@ impl ActionResourceCostBuilder {
 #[derive(Clone, Debug, PartialEq)]
 pub struct ActionCostOncePerTurn {
     pub cost: ActionCost,
-    pub once_per_turn: Option<CustomActionType>,
+    pub once_per_turn: Option<SpecialAction>,
 }
 
 impl ActionCostOncePerTurn {
     #[must_use]
     pub(crate) fn new(
         free: bool,
-        once_per_turn: Option<CustomActionType>,
+        once_per_turn: Option<SpecialAction>,
         cost: ActionResourceCost,
     ) -> ActionCostOncePerTurn {
         ActionCostOncePerTurn {

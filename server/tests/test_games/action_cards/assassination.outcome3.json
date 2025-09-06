@@ -226,6 +226,10 @@
                       "ActionCard": 27
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 27
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -242,10 +246,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Assassination/High Ground",
-                    "Player1: Assassination: Pay 1 culture token"
                   ]
                 },
                 {
@@ -258,6 +258,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -265,7 +266,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 27
@@ -273,15 +274,29 @@
                     }
                   ],
                   "log": [
-                    "Player1: Assassination: Pay 1 culture token, Assassinated Player2"
-                  ]
+                    "Player1: Assassination: Assassinated Player2"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 3 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -293,6 +308,7 @@
               "actions": [
                 {
                   "action": "StartTurn",
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -303,17 +319,27 @@
                         "Ability": "Assassination"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Assassination: Lose 1 action"
                   ]
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player2: End Turn: 2 actions left"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 2
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]

@@ -323,14 +323,22 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 0 actions left"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  }
                 }
               ]
             },
             {
-              "turn_type": "StatusPhase",
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              }
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "FreeAdvance"
+              },
               "actions": [
                 {
                   "action": {
@@ -338,6 +346,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -355,7 +364,9 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 2
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -363,10 +374,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Storage: Gain 1 mood token",
-                    "Player2: Free Advance: Gain Storage and take an event token (2 left)"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -374,6 +382,7 @@
                       "SelectAdvance": "Philosophy"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -403,13 +412,29 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Philosophy",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 2
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Free Advance"
                       }
-                    },
+                    }
+                  ],
+                  "active_events": 1
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "DrawCards"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1,
+                  "items": [
                     {
                       "player": 1,
                       "HandCard": {
@@ -472,12 +497,19 @@
                     }
                   ],
                   "log": [
-                    "Player1: Philosophy: Gain 1 idea, Gain 1 mood token",
-                    "Player1: Free Advance: Gain Philosophy and take an event token (2 left)",
-                    "Player2: Draw Cards: Draw an action card, Draw an objective card",
-                    "Reshuffling Objective Card pile",
-                    "Player1: Draw Cards: Draw an action card, Draw an objective card"
+                    "Reshuffling Objective Card pile"
                   ]
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "RazeSize1City"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
                 }
               ]
             }
@@ -486,8 +518,8 @@
       ]
     }
   ],
-  "log_index": 2,
-  "undo_limit": 2,
+  "log_index": 1,
+  "undo_limit": 1,
   "actions_left": 0,
   "round": 4,
   "age": 2,

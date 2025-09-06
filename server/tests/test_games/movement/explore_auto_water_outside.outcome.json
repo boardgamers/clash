@@ -340,8 +340,50 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player2: Move: marched 1 settler from E6 to F5, Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "start": "E6",
+                        "destination": "F5"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "F5",
+                            "Mountain"
+                          ],
+                          [
+                            "G5",
+                            "Water"
+                          ],
+                          [
+                            "E5",
+                            "Mountain"
+                          ],
+                          [
+                            "F4",
+                            "Barren"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
                   ]
                 }
               ]

@@ -88,7 +88,9 @@
       "incident_tokens": 2,
       "next_unit_id": 8,
       "played_once_per_turn_actions": [
-        "Bartering"
+        {
+          "Custom": "Bartering"
+        }
       ]
     },
     {
@@ -206,6 +208,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "Bartering"
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -222,9 +228,6 @@
                         "Ability": "Bartering"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Bartering: Start action, Discard Quick Advance/Peltasts"
                   ]
                 },
                 {
@@ -235,6 +238,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -247,12 +251,21 @@
                       "origin": {
                         "Ability": "Bartering"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
-                  "log": [
-                    "Player1: Bartering: Gain 1 gold",
-                    "Player1: Waste: Could not store 1 gold"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

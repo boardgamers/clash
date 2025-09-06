@@ -260,11 +260,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -276,7 +280,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -298,7 +302,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -307,8 +313,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Reformation",
                     "Player1: Reformation: Base effect: Barbarians spawn, Barbarians cannot spawn a new city, Barbarians cannot reinforce, Selected Player3 to execute the event, Pass the event to Player3"
                   ]
@@ -319,6 +323,7 @@
                       "SelectPlayer": 1
                     }
                   },
+                  "player": 2,
                   "items": [
                     {
                       "player": 2,
@@ -327,7 +332,8 @@
                           "Building": "Temple"
                         },
                         "balance": "Loss",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Incident": 48
@@ -340,17 +346,15 @@
                           "Building": "Temple"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Incident": 48
                       }
                     }
                   ],
-                  "log": [
-                    "Player3: Reformation: Lose Temple at A1",
-                    "Player2: Reformation: Gain Temple at A1"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

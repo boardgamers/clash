@@ -345,7 +345,7 @@ pub(crate) fn gain_building(
     position: Position,
 ) {
     if let Some(old) = game.get_any_city(position).pieces.building_owner(building) {
-        let old = EventPlayer::from_player(old, game, player.origin.clone());
+        let old = EventPlayer::new(old, player.origin.clone());
         lose_building(game, &old, building, position);
     }
     game.get_any_city_mut(position)
@@ -360,27 +360,13 @@ pub(crate) fn log_gain_building(
     building: Building,
     position: Position,
 ) {
-    let port_pos = if building == Port {
-        format!(
-            " at the water tile {}",
-            game.get_any_city(position)
-                .port_position
-                .expect("Port must have a port position",)
-        )
-    } else {
-        String::new()
-    };
-
-    player.log(
-        game,
-        &format!("Gain {} at {position}{port_pos}", building.name()),
-    );
     log_structure(
         game,
         player,
         Structure::Building(building),
         ActionLogBalance::Gain,
         position,
+        log_port_position(game, building, position),
     );
 }
 
@@ -390,12 +376,18 @@ pub(crate) fn log_lose_building(
     building: Building,
     position: Position,
 ) {
-    player.log(game, &format!("Lose {} at {}", building.name(), position));
     log_structure(
         game,
         player,
         Structure::Building(building),
         ActionLogBalance::Loss,
         position,
+        log_port_position(game, building, position),
     );
+}
+
+fn log_port_position(game: &Game, building: Building, position: Position) -> Option<Position> {
+    (building == Port)
+        .then_some(game.get_any_city(position).port_position)
+        .flatten()
 }
