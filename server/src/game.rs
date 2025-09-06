@@ -2,7 +2,7 @@ use crate::action::lose_action;
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
-use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
+use crate::content::custom_actions::{SpecialActionExecution, SpecialActionInfo};
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventState, PersistentEventType,
@@ -364,14 +364,10 @@ impl Game {
             .position(|e| matches!(e, PermanentEffect::RevolutionLoseAction(p) if *p == player))
             .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
-            add_start_turn_action_if_needed(self);
+            add_start_turn_action_if_needed(self, player);
             lose_action(
                 self,
-                &EventPlayer::from_player(
-                    player,
-                    self,
-                    EventOrigin::Ability("Revolution".to_string()),
-                ),
+                &EventPlayer::new(player, EventOrigin::Ability("Revolution".to_string())),
             );
         }
         self.successful_cultural_influence = false;
@@ -499,7 +495,7 @@ impl Game {
         let winner_name = self.player_name(winner_player_index);
         let m = format!("The game has ended. {winner_name} has won");
         self.add_message(&m);
-        add_start_turn_action_if_needed(self);
+        add_start_turn_action_if_needed(self, 0);
         self.add_info_log_item(&m);
         self.state = GameState::Finished;
     }
@@ -538,13 +534,13 @@ impl Game {
     }
 
     #[must_use]
-    pub fn available_custom_actions(&self, player_index: usize) -> Vec<CustomActionInfo> {
+    pub fn available_custom_actions(&self, player_index: usize) -> Vec<SpecialActionInfo> {
         self.player(player_index)
-            .custom_actions
+            .special_actions
             .values()
             .filter(|&c| {
-                if matches!(c.execution, CustomActionExecution::Modifier(_)) {
-                    // returned as part of "base_or_custom_available"
+                if matches!(c.execution, SpecialActionExecution::Modifier(_)) {
+                    // returned as part of "base_or_modified_available"
                     return false;
                 }
 

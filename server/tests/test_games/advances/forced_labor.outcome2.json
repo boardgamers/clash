@@ -104,7 +104,9 @@
       ],
       "next_unit_id": 7,
       "played_once_per_turn_actions": [
-        "ForcedLabor"
+        {
+          "Custom": "ForcedLabor"
+        }
       ]
     },
     {
@@ -242,9 +244,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Forced Labor: Start action, Pay 1 mood token"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Advance": "ForcedLabor"
+                  }
                 },
                 {
                   "action": {
@@ -256,6 +259,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -263,7 +267,7 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "ForcedLabor"
@@ -271,8 +275,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Forced Labor: Pay 1 mood token, Treating Angry cities as neutral"
-                  ]
+                    "Player1: Forced Labor: Treating Angry cities as neutral"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -299,11 +304,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Collect"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -321,11 +330,20 @@
                       "origin": {
                         "Ability": "Collect"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Collect: Pay 1 action, Use city A1, Gain 1 food and 1 wood",
-                    "Player1: Waste: Could not store 1 food and 1 wood"
                   ]
                 }
               ]

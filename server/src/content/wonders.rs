@@ -383,7 +383,8 @@ fn colosseum() -> WonderInfo {
                 p.log(
                     game,
                     &format!(
-                        "Combat value is already at maximum, cannot increase combat value for {p}",
+                        "Combat value is already at maximum, cannot increase combat value for {}",
+                        p.name(game)
                     ),
                 );
                 return None;

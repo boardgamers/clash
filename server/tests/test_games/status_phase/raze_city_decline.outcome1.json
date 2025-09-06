@@ -234,9 +234,11 @@
                       "SelectPositions": []
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Raze city: Did not raze a city"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -244,9 +246,33 @@
                       "SelectPositions": []
                     }
                   },
+                  "player": 1,
                   "log": [
                     "Player2: Raze city: Did not raze a city"
-                  ]
+                  ],
+                  "active_events": 1
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "ChangeGovernmentType"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "DetermineFirstPlayer"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
                 }
               ]
             }
@@ -255,8 +281,8 @@
       ]
     }
   ],
-  "log_index": 2,
-  "undo_limit": 2,
+  "log_index": 1,
+  "undo_limit": 1,
   "actions_left": 3,
   "round": 1,
   "age": 1,

@@ -329,8 +329,53 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "start": "C5",
+                        "destination": "C4"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "D4",
+                            "Water"
+                          ],
+                          [
+                            "E4",
+                            "Barren"
+                          ],
+                          [
+                            "C4",
+                            "Forest"
+                          ],
+                          [
+                            "D3",
+                            "Fertile"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player2: Move: sailed 1 ship from C5 to C4, Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren, Teleported ship from C4 to D4"
+                    "Player2: Move: Teleported ship from C4 to D4"
                   ]
                 }
               ]

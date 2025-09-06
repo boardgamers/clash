@@ -264,11 +264,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Recruit"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -280,7 +284,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -292,7 +296,8 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -300,7 +305,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Recruit: Pay 1 action, Pay 2 gold, Gain 1 settler at A1",
                     "Player1: Expansion: Expansion allows to move the settlers at B3, B3, A1"
                   ]
                 }

@@ -259,9 +259,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: New Colonies: Start action"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "LeaderAbility": "New Colonies"
+                  }
                 },
                 {
                   "action": {
@@ -271,13 +272,31 @@
                       ]
                     }
                   },
+                  "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 1,
+                          "infantry": 1,
+                          "leader": "Erik"
+                        },
+                        "start": "D2",
+                        "destination": "D1"
+                      },
+                      "origin": {
+                        "Ability": "New Colonies"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player1: New Colonies: disembarked 1 settler, 1 infantry and Erik the Red from D2 to D1",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 1 settler, 1 infantry and Erik the Red, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 1 hits against defending units",
                     "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units",
                     "Player1: Choose Casualties: Remove 1 of their attacking units"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -287,6 +306,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "Land",
@@ -322,7 +342,8 @@
                         "units": {
                           "leader": "Erik"
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -334,7 +355,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -342,11 +364,10 @@
                     }
                   ],
                   "log": [
-                    "Player1: Combat: Lost Erik the Red at D2",
                     "Player2: Choose Casualties: Remove all defending units",
-                    "Player2: Combat: Lost 1 infantry at D1",
                     "Attacker wins"
-                  ]
+                  ],
+                  "active_events": 2
                 }
               ]
             }

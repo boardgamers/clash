@@ -200,11 +200,15 @@
                       "ActionCard": 41
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 41
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 41
@@ -225,10 +229,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: New Ideas: Pay 1 action",
-                    "Player1: Action Card: Play New Ideas/High Morale"
                   ]
                 },
                 {
@@ -237,9 +237,11 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: New Ideas: Selected Storage as advance for New Ideas."
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -251,6 +253,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -258,7 +261,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -280,7 +283,7 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -300,11 +303,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Advance: Pay 2 food",
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: New Ideas: Gain Storage without taking an event token, Gain 2 ideas"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

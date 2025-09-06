@@ -9,7 +9,7 @@ use crate::combat_listeners::CombatStrength;
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::AdvanceGroup;
 use crate::content::advances::warfare::draft_cost;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionType, PlayingActionModifier, SpecialAction};
 use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
 use crate::events::check_event_origin;
 use crate::game::Game;
@@ -109,11 +109,13 @@ fn hellenistic_culture() -> SpecialAdvanceInfo {
         You may replace the cost of Arts with 2 mood tokens.",
     )
     .add_action_modifier(
-        CustomActionType::HellenisticInfluenceCultureAttempt,
+        PlayingActionModifier::HellenisticInfluenceCultureAttempt,
         |c| {
-            c.once_per_turn_mutually_exclusive(CustomActionType::ArtsInfluenceCultureAttempt)
-                .free_action()
-                .resources(ResourcePile::mood_tokens(2))
+            c.once_per_turn_mutually_exclusive(SpecialAction::Modifier(
+                PlayingActionModifier::ArtsInfluenceCultureAttempt,
+            ))
+            .free_action()
+            .resources(ResourcePile::mood_tokens(2))
         },
         PlayingActionType::InfluenceCultureAttempt,
     )

@@ -286,11 +286,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -302,7 +306,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -324,7 +328,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -333,8 +339,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Great Prophet",
                     "Player1: Great Prophet: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
                   ]
@@ -349,6 +353,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -356,7 +361,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 20
@@ -378,9 +383,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Great Prophet: Pay 1 culture token, Gain Great Prophet from the current event"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -388,11 +391,15 @@
                       "ActionCard": 120
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 120
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 120
@@ -429,18 +436,13 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Myths",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
                         "CivilCard": 120
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Prophet: Pay 1 action, Gain Myths without taking an event token",
-                    "Player1: Action Card: Play Great Prophet",
-                    "Player1: Myths: Gain 1 mood token"
                   ]
                 },
                 {
@@ -451,9 +453,11 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Great Prophet: Decided to build a Temple at C1"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -465,6 +469,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -472,7 +477,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -490,17 +495,15 @@
                           "Building": "Temple"
                         },
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "CivilCard": 120
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Construct Building: Pay 2 gold with State Religion",
-                    "Player1: Great Prophet: Gain Temple at C1"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

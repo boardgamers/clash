@@ -208,11 +208,15 @@
                       "WonderCard": "Colosseum"
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "Colosseum"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Build Wonder"
@@ -220,7 +224,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Build Wonder: Play the wonder card Colosseum, Decided to build Colosseum in city A1, Pay 1 action"
+                    "Player1: Build Wonder: Play the wonder card Colosseum, Decided to build Colosseum in city A1"
                   ]
                 },
                 {
@@ -236,6 +240,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -246,7 +251,7 @@
                           "ore": 5,
                           "culture_tokens": 5
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Wonder": "Colosseum"
@@ -274,17 +279,15 @@
                           "Wonder": "Colosseum"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Build Wonder"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Colosseum: Pay 3 food, 4 wood, 5 ore and 5 culture tokens",
-                    "Player1: Build Wonder: Play Colosseum, Gain Colosseum at A1"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -295,19 +298,20 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "Sports"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Sports"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Sports: Pay 1 action, Start action in city C2"
                   ]
                 },
                 {
@@ -320,6 +324,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -327,7 +332,7 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Sports"
@@ -344,9 +349,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Sports: Pay 1 mood token, City C2 became Happy"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -362,11 +365,30 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -374,7 +396,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1, Pay 1 action",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 4 (elephant, -1 hits, no combat value), 4 (elephant, no bonus), 3 (elephant, no bonus), 2 (elephant, no bonus) for combined combat value of 9 and gets 1 hits against defending units",
                     "Player2: Combat: Defending with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units"
@@ -390,6 +411,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -397,7 +419,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Wonder": "Colosseum"
@@ -405,9 +427,10 @@
                     }
                   ],
                   "log": [
-                    "Player1: Colosseum: Pay 1 culture token, Increase combat value by 1, scoring an extra hit",
+                    "Player1: Colosseum: Increase combat value by 1, scoring an extra hit",
                     "Player1: Choose Casualties: Remove 1 of their attacking units"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -417,6 +440,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -452,7 +476,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -464,7 +489,8 @@
                         "units": {
                           "infantry": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -487,7 +513,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -498,20 +525,31 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Combat: Lost 1 infantry at C2, Gain 1 gold, Gain city C1",
                     "Player2: Choose Casualties: Remove all defending units",
-                    "Player2: Combat: Lost 2 infantry at C1, Lose city C1",
-                    "Attacker wins",
-                    "Player1: Waste: Could not store 1 gold"
-                  ]
+                    "Attacker wins"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

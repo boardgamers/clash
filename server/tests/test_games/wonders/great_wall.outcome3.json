@@ -252,6 +252,10 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -283,8 +287,21 @@
                   "items": [
                     {
                       "player": 1,
+                      "Move": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "start": "B1",
+                        "destination": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -296,7 +313,8 @@
                         "units": {
                           "infantry": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "B1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -309,7 +327,8 @@
                           "infantry": 1,
                           "cavalry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -317,10 +336,9 @@
                     }
                   ],
                   "log": [
-                    "Player2: Move: marched 2 infantry from B1 to A1, Pay 1 action",
                     "Combat round 1",
-                    "Player2: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units, Lost 2 infantry at B1",
-                    "Player1: Combat: Defending with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units, Combat modifiers: Great Wall gives -2 combat value in the first round, Lost 1 infantry and 1 cavalry at A1",
+                    "Player2: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units",
+                    "Player1: Combat: Defending with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units, Combat modifiers: Great Wall gives -2 combat value in the first round",
                     "Player2: Choose Casualties: Remove all attacking units",
                     "Player1: Choose Casualties: Remove all defending units",
                     "Battle ends in a draw"
@@ -330,8 +348,20 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player2: End Turn: 1 actions left"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -356,6 +386,10 @@
                         }
                       }
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
                   },
                   "combat_stats": {
                     "round": 1,
@@ -386,7 +420,7 @@
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -398,7 +432,7 @@
                         "resources": {
                           "ideas": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -420,7 +454,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -434,7 +470,8 @@
                           "infantry": 1,
                           "elephants": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "A2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -458,7 +495,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "B3"
                       },
                       "origin": {
                         "Incident": 40
@@ -491,16 +529,10 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 ideas, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Envoy",
-                    "Player1: Envoy: Base effect: Barbarians move, Barbarians move from A2 to A1: 1 infantry and 1 elephant, Gain 1 idea and 1 culture token, No wonders left to draw as public wonder card",
+                    "Player1: Envoy: Base effect: Barbarians move, Barbarians move from A2 to A1: 1 infantry and 1 elephant, No wonders left to draw as public wonder card",
                     "Player1: Great Wall: Automatic win against Barbarians",
-                    "Barbarians: Combat: Lost 1 infantry and 1 elephant at A2",
-                    "Player1: Barbarian battle: Gain 1 gold",
-                    "Barbarians: Envoy: Gain 1 infantry at B3",
-                    "No Wonders left to draw",
-                    "Player2: Envoy: Gain 1 culture token"
+                    "No Wonders left to draw"
                   ]
                 },
                 {
@@ -508,6 +540,10 @@
                     "Playing": {
                       "ActionCard": 5
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 5
                   },
                   "items": [
                     {
@@ -535,10 +571,6 @@
                         "CivilCard": 5
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Hero General/Wedge Formation",
-                    "Player1: Hero General: City C2 became Neutral"
                   ]
                 }
               ]

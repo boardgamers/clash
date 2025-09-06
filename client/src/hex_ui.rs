@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::layout_ui::draw_scaled_icon;
+use crate::layout_ui::{FONT_SIZE, draw_scaled_icon};
 use crate::render_context::RenderContext;
 use hex2d::{Coordinate, Spacing};
 use macroquad::color::Color;
@@ -58,12 +58,13 @@ pub(crate) fn draw_hex(
         }
         draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, overlay);
         let text_y = c.y - 35.0;
-        rc.draw_text_with_color(&p.to_string(), c.x - 30.0, text_y, text_color);
-        rc.draw_text_with_color(
+        rc.draw_text_ex(&p.to_string(), c.x - 30.0, text_y, text_color, FONT_SIZE);
+        rc.draw_text_ex(
             &block_for_position(rc.game, p).0.to_string(),
             c.x + 10.0,
             text_y,
             text_color,
+            FONT_SIZE,
         );
     }
 

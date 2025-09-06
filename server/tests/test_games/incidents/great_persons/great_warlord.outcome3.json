@@ -373,11 +373,15 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -389,7 +393,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -411,7 +415,9 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -420,8 +426,6 @@
                     }
                   ],
                   "log": [
-                    "Player2: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player2: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Great Warlord",
                     "Player2: Great Warlord: Exhausted the land in position E8"
                   ]
@@ -436,6 +440,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -443,7 +448,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 24
@@ -465,9 +470,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Great Warlord: Pay 1 culture token, Gain Great Warlord from the current event"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -475,11 +478,15 @@
                       "ActionCard": 124
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "CivilCard": 124
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 124
@@ -516,18 +523,13 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Tactics",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
                         "CivilCard": 124
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Great Warlord: Pay 1 action, Gain Tactics without taking an event token",
-                    "Player2: Action Card: Play Great Warlord",
-                    "Player2: Tactics: Gain 1 culture token"
                   ]
                 },
                 {
@@ -540,6 +542,10 @@
                         "destination": "C8"
                       }
                     }
+                  },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
                   },
                   "combat_stats": {
                     "round": 1,
@@ -565,12 +571,26 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "start": "D7",
+                        "destination": "C8"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C8"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -578,10 +598,9 @@
                     }
                   ],
                   "log": [
-                    "Player2: Move: marched 1 infantry from D7 to C8",
                     "Combat round 1",
                     "Player2: Combat: Attacking with 1 infantry, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Player gets +2 combat value for Great Warlord",
-                    "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at C8",
+                    "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
                     "Player1: Choose Casualties: Remove all defending units",
                     "Attacker wins"
                   ]

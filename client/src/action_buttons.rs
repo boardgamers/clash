@@ -11,7 +11,7 @@ use crate::render_context::RenderContext;
 use itertools::Itertools;
 use server::action::Action;
 use server::city::City;
-use server::content::custom_actions::{CustomAction, CustomActionInfo};
+use server::content::custom_actions::{CustomAction, SpecialActionInfo};
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -65,7 +65,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
             &MultilineText::of(rc, "Cultural Influence"),
         )
     {
-        return base_or_custom_action(rc, &influence, "Influence culture", |d| {
+        return base_or_modified_action(rc, &influence, "Influence culture", |d| {
             new_cultural_influence_dialog(rc.game, rc.shown_player.index, d)
         });
     }
@@ -74,7 +74,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
         if let Some(action) = generic_custom_action(rc, &c, None) {
             if bottom_left_texture(
                 rc,
-                &assets.custom_actions[&c.action],
+                &assets.custom_actions[&c.custom_action_type()],
                 icon_pos(i as i8, -1),
                 &event_help_tooltip(rc, &c.event_origin),
             ) {
@@ -103,7 +103,7 @@ pub(crate) fn custom_action_buttons<'a>(
         .filter_map(|c| {
             generic_custom_action(rc, &c, city).map(|action| {
                 IconAction::new(
-                    &rc.assets().custom_actions[&c.action],
+                    &rc.assets().custom_actions[&c.custom_action_type()],
                     false,
                     event_help_tooltip(rc, &c.event_origin),
                     Box::new(move || action.clone()),
@@ -128,10 +128,10 @@ fn global_move(rc: &RenderContext) -> RenderResult {
 
 fn generic_custom_action(
     rc: &RenderContext,
-    c: &CustomActionInfo,
+    c: &SpecialActionInfo,
     city: Option<&City>,
 ) -> Option<RenderResult> {
-    let custom_action_type = c.action;
+    let custom_action_type = c.custom_action_type();
 
     if let Some(city) = city {
         c.is_city_available(rc.game, city)
@@ -147,7 +147,7 @@ fn generic_custom_action(
     }
 }
 
-pub(crate) fn base_or_custom_action(
+pub(crate) fn base_or_modified_action(
     rc: &RenderContext,
     action_types: &[PlayingActionType],
     title: &str,
@@ -158,8 +158,8 @@ pub(crate) fn base_or_custom_action(
         action_types
             .iter()
             .map(|action_type| match action_type {
-                PlayingActionType::Custom(c) => {
-                    let origin = &rc.shown_player.custom_action_info(*c).event_origin;
+                PlayingActionType::Special(s) => {
+                    let origin = &rc.shown_player.special_action_info(s).event_origin;
                     (
                         Some(origin.clone()),
                         execute(BaseOrCustomDialog {

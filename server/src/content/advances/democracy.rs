@@ -3,9 +3,8 @@ use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::{self, MoodState};
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
-use crate::content::custom_actions::CustomActionType::{
-    self, CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
-};
+use crate::content::custom_actions::CustomActionType::{self, CivilLiberties};
+use crate::content::custom_actions::{PlayingActionModifier, SpecialAction};
 use crate::content::persistent_events::PositionRequest;
 use crate::game::GameOptions;
 use crate::log::current_turn_log_without_redo;
@@ -34,7 +33,7 @@ fn voting() -> AdvanceBuilder {
         "As a free action, you may spend 1 mood token to use 'Increase happiness'",
     )
     .add_action_modifier(
-        VotingIncreaseHappiness,
+        PlayingActionModifier::VotingIncreaseHappiness,
         |c| {
             c.any_times()
                 .free_action()
@@ -94,7 +93,7 @@ fn free_economy() -> AdvanceBuilder {
             resources in one city. This must be your only collect action this turn",
     )
     .add_action_modifier(
-        FreeEconomyCollect,
+        PlayingActionModifier::FreeEconomyCollect,
         |c| {
             c.once_per_turn()
                 .free_action()
@@ -109,12 +108,14 @@ fn free_economy() -> AdvanceBuilder {
             PlayingActionType::Collect
                 if p.get(game)
                     .played_once_per_turn_actions
-                    .contains(&FreeEconomyCollect) =>
+                    .contains(&SpecialAction::Modifier(
+                        PlayingActionModifier::FreeEconomyCollect,
+                    )) =>
             {
                 *available = Err("Cannot collect when Free Economy Collect was used".to_string());
             }
-            PlayingActionType::Custom(i)
-                if *i == FreeEconomyCollect
+            PlayingActionType::Special(SpecialAction::Modifier(m))
+                if *m == PlayingActionModifier::FreeEconomyCollect
                     && current_turn_log_without_redo(game)
                         .actions
                         .iter()

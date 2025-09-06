@@ -302,8 +302,53 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "start": "B3",
+                        "destination": "F2"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "F3",
+                            "Forest"
+                          ],
+                          [
+                            "G3",
+                            "Water"
+                          ],
+                          [
+                            "E3",
+                            "Fertile"
+                          ],
+                          [
+                            "F2",
+                            "Forest"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player2: Move: sailed 1 ship from B3 to F2, Explored tiles E3=Fertile, F2=Forest, F3=Forest, G3=Water, Teleported ship from F2 to G3"
+                    "Player2: Move: Teleported ship from F2 to G3"
                   ]
                 }
               ]

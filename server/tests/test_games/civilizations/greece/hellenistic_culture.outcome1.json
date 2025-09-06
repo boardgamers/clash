@@ -63,7 +63,9 @@
       ],
       "next_unit_id": 10,
       "played_once_per_turn_actions": [
-        "ArtsInfluenceCultureAttempt"
+        {
+          "Modifier": "ArtsInfluenceCultureAttempt"
+        }
       ]
     },
     {
@@ -246,14 +248,17 @@
                           }
                         },
                         "action_type": {
-                          "Custom": "HellenisticInfluenceCultureAttempt"
+                          "Special": {
+                            "Modifier": "HellenisticInfluenceCultureAttempt"
+                          }
                         }
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Hellenistic Culture: Pay 2 mood tokens"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "SpecialAdvance": "HellenisticCulture"
+                  }
                 },
                 {
                   "action": {
@@ -265,6 +270,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -272,7 +278,7 @@
                         "resources": {
                           "mood_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "SpecialAdvance": "HellenisticCulture"
@@ -285,7 +291,8 @@
                           "Building": "Port"
                         },
                         "balance": "Loss",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": "C3"
                       },
                       "origin": {
                         "SpecialAdvance": "HellenisticCulture"
@@ -298,7 +305,8 @@
                           "Building": "Port"
                         },
                         "balance": "Gain",
-                        "position": "C2"
+                        "position": "C2",
+                        "port_position": "C3"
                       },
                       "origin": {
                         "SpecialAdvance": "HellenisticCulture"
@@ -306,9 +314,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Hellenistic Culture: Pay 2 mood tokens, Tried to influence the Port in the city at C2 by Player2, Cultural influence succeeded (rolled 6), Gain Port at C2 at the water tile C3",
-                    "Player2: Hellenistic Culture: Lose Port at C2"
-                  ]
+                    "Player1: Hellenistic Culture: Tried to influence the Port in the city at C2 by Player2, Cultural influence succeeded (rolled 6)"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

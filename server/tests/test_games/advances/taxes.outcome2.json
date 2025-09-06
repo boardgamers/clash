@@ -127,7 +127,9 @@
       ],
       "next_unit_id": 10,
       "played_once_per_turn_actions": [
-        "Taxes"
+        {
+          "Custom": "Taxes"
+        }
       ]
     },
     {
@@ -284,19 +286,20 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "Taxes"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Taxes"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Taxes: Pay 1 action, Start action, Pay 1 mood token"
                   ]
                 },
                 {
@@ -309,6 +312,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -316,16 +320,14 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Taxes"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Taxes: Pay 1 mood token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -338,6 +340,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -353,12 +356,21 @@
                       "origin": {
                         "Ability": "Taxes"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
-                  "log": [
-                    "Player1: Taxes: Gain 1 food, 1 wood, 1 ore and 1 gold",
-                    "Player1: Waste: Could not store 1 food"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

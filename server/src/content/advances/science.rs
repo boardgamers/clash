@@ -7,6 +7,7 @@ use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::game::GameOptions;
+use crate::log::ActionLogBalance;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
@@ -116,7 +117,8 @@ fn metallurgy() -> AdvanceBuilder {
         },
         move |game, s, _| {
             if s.choice {
-                s.player().lose_resources(game, ResourcePile::ore(1));
+                s.player()
+                    .lose_resources(game, ResourcePile::ore(1), ActionLogBalance::Pay);
                 s.player().gain_resources(game, ResourcePile::gold(1));
             } else {
                 s.log(game, "Did not convert ore to gold");

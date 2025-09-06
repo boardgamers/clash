@@ -320,14 +320,29 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player2: End Turn: 2 actions left"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 2
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
             },
             {
-              "turn_type": "StatusPhase",
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              },
               "actions": [
                 {
                   "action": {
@@ -339,6 +354,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -358,9 +374,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Advanced Culture using Advanced Culture/Warmonger"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -372,6 +386,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -391,9 +406,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete City Planner using City Planner/Great Battle"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -405,6 +418,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -424,9 +438,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Government using Government/Barbarian Conquest"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -438,6 +450,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -457,9 +470,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -471,6 +482,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -490,9 +502,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Large Fleet using Wealth/Large Fleet"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -504,6 +514,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -523,9 +534,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Religious Fervor using Religious Fervor/General"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -537,6 +546,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -556,9 +566,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Sea Blockade using Education Lead/Sea Blockade"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -570,6 +578,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -577,7 +586,7 @@
                         "resources": {
                           "ideas": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Objective": "Eureka!"
@@ -602,9 +611,20 @@
                     }
                   ],
                   "log": [
-                    "Player1: Eureka!: Pay 2 ideas for Eureka!",
-                    "Player1: Complete Objectives: Complete Eureka! using Eureka!/Defiance"
-                  ]
+                    "Player1: Eureka!: Pay 2 ideas for Eureka!"
+                  ],
+                  "active_events": 2
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "FreeAdvance"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
                 }
               ]
             }
@@ -613,8 +633,8 @@
       ]
     }
   ],
-  "log_index": 8,
-  "undo_limit": 0,
+  "log_index": 1,
+  "undo_limit": 1,
   "actions_left": 2,
   "round": 4,
   "age": 1,

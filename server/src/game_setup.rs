@@ -11,7 +11,9 @@ use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
-use crate::log::{ActionLogAction, ActionLogAge, ActionLogRound, ActionLogTurn, TurnType};
+use crate::log::{
+    ActionLogAge, ActionLogRound, TurnType, add_start_turn_action_if_needed, add_turn_log,
+};
 use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
@@ -191,21 +193,14 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
 
 fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
     let mut age = ActionLogAge::new(0);
-    let mut round = ActionLogRound::new(0);
-    let mut turn = ActionLogTurn::new(TurnType::Setup);
-    turn.actions.push(ActionLogAction::new(Action::Setup));
-    round.turns.push(turn);
-    age.rounds.push(round);
+    age.rounds.push(ActionLogRound::new(0));
     game.log.push(age);
 
     for player_index in 0..setup.player_amount {
+        add_turn_log(game, TurnType::Setup(player_index));
+        add_start_turn_action_if_needed(game, player_index);
         let origin = setup_event_origin();
-        let player = &EventPlayer::from_player(player_index, game, origin.clone());
-        player.log(
-            game,
-            &format!("Play as {}", player.get(game).civilization.name),
-        );
-
+        let player = &EventPlayer::new(player_index, origin.clone());
         player.gain_resources(game, ResourcePile::food(2));
         do_advance(game, Advance::Farming, player, false);
         do_advance(game, Advance::Mining, player, false);
@@ -237,7 +232,8 @@ pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
         .add_block_tiles(&h.position, &home, h.position.rotation);
 }
 
-fn setup_event_origin() -> EventOrigin {
+#[must_use]
+pub fn setup_event_origin() -> EventOrigin {
     EventOrigin::Ability("Setup".to_string())
 }
 
@@ -299,7 +295,7 @@ pub(crate) fn execute_choose_civ(
     player_index: usize,
     action: &Action,
 ) -> Result<(), String> {
-    let player = EventPlayer::from_player(player_index, game, setup_event_origin());
+    let player = EventPlayer::new(player_index, setup_event_origin());
     if let Action::ChooseCivilization(civ) = action {
         game.player_mut(player_index).civilization = game.cache.get_civilization(civ);
         let p = game.player_mut(player_index);
@@ -315,7 +311,7 @@ pub(crate) fn execute_choose_civ(
     }
     player.log(
         game,
-        &format!("Play as {}", game.player(player_index).civilization.name),
+        &format!("Choose {}", game.player(player_index).civilization.name),
     );
     Ok(())
 }

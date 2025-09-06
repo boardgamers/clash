@@ -248,7 +248,7 @@ fn cities_with_adjacent_pirates(player: &Player, game: &Game) -> Vec<Position> {
 #[must_use]
 pub(crate) fn get_pirates_event_player(game: &Game, origin: &EventOrigin) -> EventPlayer {
     let player = get_pirates_player(game);
-    EventPlayer::new(player.index, player.get_name(), origin.clone())
+    EventPlayer::new(player.index, origin.clone())
 }
 
 ///

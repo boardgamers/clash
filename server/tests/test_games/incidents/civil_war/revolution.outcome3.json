@@ -231,11 +231,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -247,7 +251,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -269,7 +273,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -290,10 +296,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
-                    "A new game event has been triggered: Revolution",
-                    "Player1: Gold deposits: Gain 2 gold"
+                    "A new game event has been triggered: Revolution"
                   ]
                 },
                 {
@@ -304,6 +307,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -311,16 +315,15 @@
                         "units": {
                           "elephants": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Incident": 38
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Revolution: Lost 1 elephant at C2"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -328,6 +331,7 @@
                       "SelectUnits": []
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -340,8 +344,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Revolution: Declined to kill units, Lose 1 action"
-                  ]
+                    "Player1: Revolution: Declined to kill units"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -352,12 +357,13 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
                       "Advance": {
                         "advance": "Voting",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Loss"
                       },
                       "origin": {
@@ -368,19 +374,31 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Dogma",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
                         "Incident": 38
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 3
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Revolution: Player1 changed their government from Democracy to Theocracy, Additional advances: none, Unlock Provinces, Gain Dogma without taking an event token",
-                    "Player1: Dogma: Ideas limit reduced to 2",
-                    "Player1: Waste: Could not store 3 ideas"
-                  ]
+                    "Player1: Revolution: Democracy changed their government from Player1 to Theocracy, Additional advances: none, Unlock Provinces",
+                    "Player1: Dogma: Ideas limit reduced to 2"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

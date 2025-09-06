@@ -1,3 +1,4 @@
+use crate::log::ActionLogBalance;
 use crate::objective_card::Objective;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -50,7 +51,7 @@ pub(crate) fn pay_resources(
     )
     .status_phase_check(move |_game, player| player.resources.has_at_least(&want))
     .status_phase_update(move |game, player| {
-        player.lose_resources(game, pay.clone());
+        player.lose_resources(game, pay.clone(), ActionLogBalance::Pay);
         player.log(game, &format!("Pay {pay} for {objective}",));
     })
     .build()

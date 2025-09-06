@@ -360,8 +360,50 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Move: marched 1 settler from C2 to B2, Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "start": "C2",
+                        "destination": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "B3",
+                            "Water"
+                          ],
+                          [
+                            "C3",
+                            "Fertile"
+                          ],
+                          [
+                            "A3",
+                            "Forest"
+                          ],
+                          [
+                            "B2",
+                            "Mountain"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
                   ]
                 }
               ]

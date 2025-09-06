@@ -6,10 +6,10 @@ use crate::card::HandCardLocation;
 use crate::city_pieces::Building;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::PlayingActionModifier;
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::GameOptions;
-use crate::log::{self, ActionLogEntry};
+use crate::log::{ActionLogEntry, current_turn_log_mut};
 use crate::objective_card::draw_objective_card_from_pile;
 use crate::playing_actions::PlayingActionType;
 use crate::resource::gain_resources;
@@ -50,8 +50,10 @@ fn writing() -> AdvanceBuilder {
         |event| &mut event.after_action,
         1,
         |game, (), (), p| {
-            if game.is_update_patch() {
-                let count = log::current_action_log_mut(game)
+            if game.is_update_patch()
+                && let Some(a) = current_turn_log_mut(game).actions.last()
+            {
+                let count = a
                     .items
                     .iter()
                     .filter(|item| {
@@ -64,7 +66,9 @@ fn writing() -> AdvanceBuilder {
                         )
                     })
                     .count();
-                p.gain_resources(game, ResourcePile::ideas(count as u8));
+                if count > 0 {
+                    p.gain_resources(game, ResourcePile::ideas(count as u8));
+                }
             }
         },
     )
@@ -190,7 +194,7 @@ fn philosophy_patched() -> AdvanceBuilder {
     )
     .replaces(Advance::Philosophy)
     .add_action_modifier(
-        CustomActionType::Philosophy,
+        PlayingActionModifier::Philosophy,
         |cost| {
             cost.any_times()
                 .free_action()

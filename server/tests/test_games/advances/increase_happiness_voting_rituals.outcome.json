@@ -274,10 +274,16 @@
                           "gold": 1
                         },
                         "action_type": {
-                          "Custom": "VotingIncreaseHappiness"
+                          "Special": {
+                            "Modifier": "VotingIncreaseHappiness"
+                          }
                         }
                       }
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "Voting"
                   },
                   "items": [
                     {
@@ -309,7 +315,7 @@
                           "ideas": 3,
                           "gold": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Voting"
@@ -322,7 +328,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Voting: Pay 1 mood token, City C2 became Neutral, City B3 became Happy, Pay 1 food, 1 ore, 3 ideas and 1 gold with Rituals",
                     "Player1: Rituals: Can pay with any resource"
                   ]
                 }

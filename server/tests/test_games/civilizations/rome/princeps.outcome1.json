@@ -257,19 +257,20 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "LeaderAbility": "Princeps"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "LeaderAbility": "Princeps"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Princeps: Pay 1 action, Start action, Pay 1 culture token"
                   ]
                 },
                 {
@@ -282,6 +283,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -289,7 +291,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "LeaderAbility": "Princeps"
@@ -356,9 +358,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Princeps: Pay 1 culture token, Draw an action card, Draw an objective card, Discard Quick Advance/Peltasts, Discard Large Civilization/Draft"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

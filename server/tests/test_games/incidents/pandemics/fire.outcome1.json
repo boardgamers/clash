@@ -226,11 +226,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -242,7 +246,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -264,7 +268,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -285,10 +291,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
-                    "A new game event has been triggered: Fire",
-                    "Player1: Gold deposits: Gain 2 gold"
+                    "A new game event has been triggered: Fire"
                   ]
                 },
                 {
@@ -299,6 +302,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -338,11 +342,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Fire: City C2 became Angry",
-                    "Player2: Fire: City A1 became Neutral",
-                    "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

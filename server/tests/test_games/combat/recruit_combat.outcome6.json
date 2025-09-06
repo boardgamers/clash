@@ -271,11 +271,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Recruit"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -288,7 +292,7 @@
                           "wood": 5,
                           "gold": 3
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -310,15 +314,13 @@
                         "units": {
                           "ships": 4
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C3"
                       },
                       "origin": {
                         "Ability": "Recruit"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Recruit: Pay 1 action, Pay 5 wood and 3 gold, City C2 became Neutral, Gain 4 ships at C3"
                   ]
                 },
                 {
@@ -329,6 +331,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -341,12 +344,21 @@
                       "origin": {
                         "Advance": "Nationalism"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 4
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
-                  "log": [
-                    "Player1: Nationalism: Gain 1 mood token",
-                    "Player1: Waste: Could not store 4 food"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -356,6 +368,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "Sea",
@@ -412,7 +425,8 @@
                         "units": {
                           "ships": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -424,7 +438,8 @@
                         "units": {
                           "ships": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C3"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -432,15 +447,14 @@
                     }
                   ],
                   "log": [
-                    "Player1: Medicine: Gain 1 gold",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with 4 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 24 and gets 2 hits against defending units, Lost 2 ships at C2",
-                    "Pirates: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units, Lost 2 ships at C3",
-                    "Player1: Pirate ship destroyed: Gain 2 gold",
+                    "Player1: Combat: Attacking with 4 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 24 and gets 2 hits against defending units",
+                    "Pirates: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units",
                     "Player1: Choose Casualties: Remove 2 of their attacking units",
                     "Pirates: Choose Casualties: Remove all defending units",
                     "Attacker wins"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -450,6 +464,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -464,9 +479,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Pirates battle: Gain 1 culture token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -479,6 +492,10 @@
                         "destination": "C4"
                       }
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
                   },
                   "combat_stats": {
                     "round": 1,
@@ -505,8 +522,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "ships": 2
+                        },
+                        "start": "C3",
+                        "destination": "C4"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -530,22 +560,32 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C4"
                       },
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Move: sailed 2 ships from C3 to C4, Pay 1 action",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units",
-                    "Pirates: Combat: Defending with 1 ship, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units, Lost 1 ship at C4",
-                    "Player1: Pirate ship destroyed: Gain 1 gold",
+                    "Pirates: Combat: Defending with 1 ship, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units",
                     "Pirates: Choose Casualties: Remove all defending units",
-                    "Attacker wins",
-                    "Player1: Waste: Could not store 1 gold"
+                    "Attacker wins"
                   ]
                 },
                 {
@@ -556,6 +596,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -570,9 +611,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Pirates battle: Gain 1 culture token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -584,6 +623,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -603,9 +643,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Sea Cleansing using High Culture/Sea Cleansing"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

@@ -8,7 +8,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{PlayingActionType, base_or_modified_available};
 use crate::position::Position;
 use crate::resource::gain_resources_with_modifiers;
 use crate::resource_pile::ResourcePile;
@@ -164,11 +164,6 @@ pub(crate) fn execute_collect(
     c: &Collect,
 ) -> Result<(), String> {
     let origin = collect_event_origin(&c.action_type, game.player(player_index));
-    game.log(
-        player_index,
-        &origin,
-        &format!("Use city {}", c.city_position),
-    );
 
     let mut i = get_total_collection(
         game,
@@ -368,7 +363,7 @@ pub fn available_collect_actions_for_city(
 
 #[must_use]
 pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(game, player, &PlayingActionType::Collect)
+    base_or_modified_available(game, player, &PlayingActionType::Collect)
 }
 
 pub(crate) fn collect_event_origin(

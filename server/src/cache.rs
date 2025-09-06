@@ -4,7 +4,7 @@ use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo};
-use crate::content::custom_actions::CustomActionExecution;
+use crate::content::custom_actions::SpecialActionExecution;
 use crate::content::{
     ability, action_cards, advances, civilizations, incidents, objective_cards, objectives, wonders,
 };
@@ -13,10 +13,9 @@ use crate::incident::Incident;
 use crate::leader::{Leader, LeaderInfo};
 use crate::objective_card::{Objective, ObjectiveCard};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
-use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
-    StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
-    get_status_phase, may_change_government, use_raze_city,
+    StatusPhaseStateType, complete_objectives, determine_first_player, draw_cards, free_advance,
+    get_status_phase, may_change_government, status_phase_type, use_raze_city,
 };
 use crate::tactics_card::TacticsCard;
 use crate::wonder::{Wonder, WonderInfo};
@@ -27,7 +26,7 @@ use std::collections::HashMap;
 pub struct Cache {
     all_abilities: Vec<Ability>,
     abilities_by_name: HashMap<String, Ability>,
-    status_phase_handlers: HashMap<StatusPhaseState, Ability>,
+    status_phase_handlers: HashMap<StatusPhaseStateType, Ability>,
 
     all_advance_groups: Vec<AdvanceGroupInfo>,
     advance_groups_by_name: HashMap<AdvanceGroup, AdvanceGroupInfo>,
@@ -129,7 +128,7 @@ impl Cache {
 
             all_civilizations: civilizations::get_all_uncached()
                 .into_iter()
-                .filter(super::civilization::Civilization::can_choose)
+                .filter(Civilization::can_choose)
                 .sorted_by_key(|c| c.name.clone())
                 .collect_vec(),
             civilizations_by_name: civilizations::get_all_uncached()
@@ -220,8 +219,8 @@ impl Cache {
             .get(name)
             .map_or_else(
                 || {
-                    for c in game.player(game.active_player()).custom_actions.values() {
-                        if let CustomActionExecution::Action(e) = &c.execution
+                    for c in game.player(game.active_player()).special_actions.values() {
+                        if let SpecialActionExecution::Action(e) = &c.execution
                             && e.ability.name == name
                         {
                             return Some(t(&e.ability));
@@ -229,7 +228,7 @@ impl Cache {
                     }
 
                     if let Some(p) = get_status_phase(game) {
-                        return Some(t(self.status_phase_handler(p)));
+                        return Some(t(self.status_phase_handler(&status_phase_type(p))));
                     }
                     None
                 },
@@ -244,12 +243,8 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn status_phase_handler(&self, p: &StatusPhaseState) -> &Ability {
-        match p {
-            DetermineFirstPlayer(_) => &self.status_phase_handlers[&DetermineFirstPlayer(0)],
-            ChangeGovernmentType(_) => &self.status_phase_handlers[&ChangeGovernmentType(false)],
-            _ => &self.status_phase_handlers[p],
-        }
+    pub fn status_phase_handler(&self, p: &StatusPhaseStateType) -> &Ability {
+        &self.status_phase_handlers[p]
     }
 
     #[must_use]
@@ -371,15 +366,15 @@ impl Cache {
     }
 }
 
-fn status_phase_handlers() -> HashMap<StatusPhaseState, Ability> {
-    use StatusPhaseState::*;
+fn status_phase_handlers() -> HashMap<StatusPhaseStateType, Ability> {
+    use StatusPhaseStateType::*;
 
     HashMap::from([
         (CompleteObjectives, complete_objectives()),
         (FreeAdvance, free_advance()),
         (DrawCards, draw_cards()),
         (RazeSize1City, use_raze_city()),
-        (ChangeGovernmentType(false), may_change_government()),
-        (DetermineFirstPlayer(0), determine_first_player()),
+        (ChangeGovernmentType, may_change_government()),
+        (DetermineFirstPlayer, determine_first_player()),
     ])
 }

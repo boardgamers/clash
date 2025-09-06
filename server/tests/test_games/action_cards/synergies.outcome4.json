@@ -219,11 +219,15 @@
                       "ActionCard": 34
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 34
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 34
@@ -244,10 +248,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Synergies: Pay 1 action",
-                    "Player1: Action Card: Play Synergies/Archers"
                   ]
                 },
                 {
@@ -256,9 +256,11 @@
                       "SelectAdvance": "Fishing"
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Synergies: Selected Fishing as first advance"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -270,6 +272,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -277,7 +280,7 @@
                         "resources": {
                           "ideas": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -299,7 +302,7 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Fishing",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -307,11 +310,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Advance: Pay 2 ideas",
-                    "Player1: Fishing: Gain 1 mood token",
-                    "Player1: Synergies: Gain Fishing without taking an event token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -319,9 +318,11 @@
                       "SelectAdvance": "WarShips"
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Synergies: Selected WarShips as second advance"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -333,6 +334,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -340,7 +342,7 @@
                         "resources": {
                           "ideas": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -350,7 +352,7 @@
                       "player": 0,
                       "Advance": {
                         "advance": "WarShips",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -358,10 +360,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Advance: Pay 2 ideas",
-                    "Player1: Synergies: Gain WarShips without taking an event token"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

@@ -282,17 +282,21 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 0 actions left"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  }
                 }
               ]
             },
             {
-              "turn_type": "StatusPhase",
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              },
               "actions": [
                 {
                   "action": "StartTurn",
+                  "player": 0,
                   "log": [
                     "The game has ended. Player2 has won"
                   ]

@@ -202,6 +202,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "CityWithFortress",
@@ -233,12 +237,27 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1,
+                          "cavalry": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1,
                           "cavalry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -250,7 +269,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -258,10 +278,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 1 infantry and 1 cavalry from C2 to C1",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 1 hits against defending units, Lost 1 infantry and 1 cavalry at C2",
-                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 1 infantry at C1",
+                    "Player1: Combat: Attacking with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 1 hits against defending units",
+                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit",
                     "Player1: Choose Casualties: Remove all attacking units",
                     "Player2: Choose Casualties: Remove all defending units",
                     "Player2 wins the battle because he has a defending fortress"
@@ -279,8 +298,27 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "B1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player1: Move: marched 1 infantry and 1 elephant from C2 to B1",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 1 infantry and 1 elephant, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units",
                     "Player2: Combat: Defending with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units",
@@ -293,12 +331,14 @@
                       "Bool": false
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Retreat: Do not retreat, Player1 can retreat",
                     "Combat round 2",
                     "Player1: Combat: Attacking with 1 infantry and 1 elephant, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units",
                     "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -306,6 +346,7 @@
                       "Bool": false
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 3,
                     "battleground": "Land",
@@ -336,7 +377,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "B1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -347,10 +389,11 @@
                     "Player1: Retreat: Do not retreat",
                     "Combat round 3",
                     "Player1: Combat: Attacking with 1 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 1 (leader, no bonus) for combined combat value of 8 and gets 1 hits against defending units",
-                    "Player2: Combat: Defending with 1 infantry, Roll 3 (elephant, no bonus) for combined combat value of 3 and gets 0 hits against attacking units, Lost 1 infantry at B1",
+                    "Player2: Combat: Defending with 1 infantry, Roll 3 (elephant, no bonus) for combined combat value of 3 and gets 0 hits against attacking units",
                     "Player2: Choose Casualties: Remove all defending units",
                     "Attacker wins"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -362,6 +405,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -381,9 +425,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Warmonger using Coastal Culture/Warmonger"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

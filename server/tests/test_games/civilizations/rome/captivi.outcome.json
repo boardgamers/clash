@@ -229,11 +229,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Construct Building"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -247,7 +251,7 @@
                           "wood": 1,
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -265,7 +269,8 @@
                           "Building": "Market"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -273,7 +278,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 mood token with Captivi, Gain Market at A1",
                     "Player1: Captivi: May replace resources with mood tokens"
                   ]
                 }

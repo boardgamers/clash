@@ -248,6 +248,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -265,7 +266,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -274,10 +277,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
                     "A new game event has been triggered: An awesome year"
-                  ]
+                  ],
+                  "active_events": 1
                 }
               ]
             }

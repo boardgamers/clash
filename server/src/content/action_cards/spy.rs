@@ -237,7 +237,8 @@ fn has_any_card(p: &Player, game: &Game) -> bool {
 fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
     vec![
         format!(
-            "{other} has the following action cards: {}",
+            "{} has the following action cards: {}",
+            other.get_name(),
             other
                 .action_cards
                 .iter()
@@ -245,7 +246,8 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
                 .join(", ")
         ),
         format!(
-            "{other} has the following objective cards: {}",
+            "{} has the following objective cards: {}",
+            other.get_name(),
             other
                 .objective_cards
                 .iter()
@@ -253,7 +255,8 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
                 .join(", ")
         ),
         format!(
-            "{other} has the following wonder cards: {}",
+            "{} has the following wonder cards: {}",
+            other.get_name(),
             other.wonder_cards.iter().map(Wonder::name).join(", ")
         ),
     ]

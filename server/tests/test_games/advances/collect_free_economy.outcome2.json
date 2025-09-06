@@ -91,7 +91,9 @@
       ],
       "next_unit_id": 8,
       "played_once_per_turn_actions": [
-        "FreeEconomyCollect"
+        {
+          "Modifier": "FreeEconomyCollect"
+        }
       ]
     },
     {
@@ -223,14 +225,17 @@
                           }
                         ],
                         "action_type": {
-                          "Custom": "FreeEconomyCollect"
+                          "Special": {
+                            "Modifier": "FreeEconomyCollect"
+                          }
                         }
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Free Economy: Pay 1 mood token"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Advance": "FreeEconomy"
+                  }
                 },
                 {
                   "action": {
@@ -242,6 +247,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -249,7 +255,7 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "FreeEconomy"
@@ -268,9 +274,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Free Economy: Pay 1 mood token, Use city C2, Gain 2 ore"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -278,6 +282,7 @@
                       "Bool": true
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -285,7 +290,7 @@
                         "resources": {
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Metallurgy"
@@ -304,9 +309,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Metallurgy: Gain 1 gold"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

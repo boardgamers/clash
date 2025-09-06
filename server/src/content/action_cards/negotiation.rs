@@ -95,7 +95,7 @@ pub(crate) fn use_negotiations() -> Ability {
                             }
                         }
                     }
-                    add_start_turn_action_if_needed(game);
+                    add_start_turn_action_if_needed(game, p.index);
                     // must be in reverse order to not mess up the indices during deletion
                     for i in delete.iter().rev() {
                         p.log(game, &format!("May attack {partner_name} again.",));
@@ -195,7 +195,7 @@ pub(crate) fn use_assassination() -> Ability {
                 if remove_element_by(&mut game.permanent_effects, |e| is_assassinated(e, p.index))
                     .is_some()
                 {
-                    add_start_turn_action_if_needed(game);
+                    add_start_turn_action_if_needed(game, p.index);
                     lose_action(game, p);
                 }
             },

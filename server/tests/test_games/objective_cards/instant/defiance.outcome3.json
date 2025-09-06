@@ -210,8 +210,26 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player1: Move: marched 1 infantry from C2 to C1",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
                     "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
@@ -224,6 +242,7 @@
                       "Bool": false
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 2,
                     "battleground": "City",
@@ -254,7 +273,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -266,7 +286,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -289,7 +310,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -300,22 +322,35 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
                       }
                     }
                   ],
                   "log": [
                     "Player1: Retreat: Do not retreat",
                     "Player2: Choose Casualties: Remove 1 of their defending units, Remove all defending units",
-                    "Player2: Combat: Lost 1 infantry at C1, Defending with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units, Lost 1 infantry at C1, Lose city C1",
                     "Combat round 2",
-                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Gain 1 gold, Gain city C1",
-                    "Attacker wins",
-                    "Player1: Waste: Could not store 1 gold"
-                  ]
+                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
+                    "Player2: Combat: Defending with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units",
+                    "Attacker wins"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -323,9 +358,11 @@
                       "SelectHandCards": []
                     }
                   },
+                  "player": 0,
                   "log": [
                     "Player1: Select Objective Cards to Complete: No card selected"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -337,6 +374,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -356,9 +394,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Defiance using Eureka!/Defiance"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

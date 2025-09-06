@@ -4,7 +4,7 @@ use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
 };
-use crate::events::{EventOrigin, EventPlayer};
+use crate::events::EventOrigin;
 use crate::player::Player;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
@@ -45,22 +45,22 @@ impl CustomActionActivation {
 }
 
 #[derive(Clone)]
-pub struct CustomActionInfo {
-    pub action: CustomActionType,
-    pub execution: CustomActionExecution,
+pub struct SpecialActionInfo {
+    pub action: SpecialAction,
+    pub execution: SpecialActionExecution,
     pub event_origin: EventOrigin,
     pub cost: ActionCostOncePerTurn,
 }
 
-impl CustomActionInfo {
+impl SpecialActionInfo {
     #[must_use]
     pub fn new(
-        action: CustomActionType,
-        execution: CustomActionExecution,
+        action: SpecialAction,
+        execution: SpecialActionExecution,
         event_origin: EventOrigin,
         cost: ActionCostOncePerTurn,
-    ) -> CustomActionInfo {
-        CustomActionInfo {
+    ) -> SpecialActionInfo {
+        SpecialActionInfo {
             action,
             execution,
             event_origin,
@@ -75,10 +75,34 @@ impl CustomActionInfo {
 
     #[must_use]
     pub fn city_bound(&self) -> Option<&CustomActionCityChecker> {
-        if let CustomActionExecution::Action(a) = &self.execution {
+        if let SpecialActionExecution::Action(a) = &self.execution {
             a.city_checker.as_ref()
         } else {
             None
+        }
+    }
+
+    ///
+    /// # Panics
+    /// Panics if not a modifier action
+    #[must_use]
+    pub fn custom_action_type(&self) -> CustomActionType {
+        if let SpecialAction::Custom(c) = self.action {
+            c
+        } else {
+            panic!("Not a custom action")
+        }
+    }
+
+    ///
+    /// # Panics
+    /// Panics if not a modifier action
+    #[must_use]
+    pub fn modifier_action_type(&self) -> PlayingActionType {
+        if let SpecialAction::Modifier(m) = self.action {
+            m.playing_action_type()
+        } else {
+            panic!("Not a modifier action")
         }
     }
 }
@@ -109,9 +133,51 @@ impl CustomActionActionExecution {
 }
 
 #[derive(Clone)]
-pub enum CustomActionExecution {
+pub enum SpecialActionExecution {
     Modifier(PlayingActionType),
     Action(CustomActionActionExecution),
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
+pub enum SpecialAction {
+    Modifier(PlayingActionModifier),
+    Custom(CustomActionType),
+}
+
+impl SpecialAction {
+    #[must_use]
+    pub fn playing_action_type(&self) -> PlayingActionType {
+        match self {
+            SpecialAction::Modifier(m) => m.playing_action_type(),
+            SpecialAction::Custom(c) => c.playing_action_type(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
+pub enum PlayingActionModifier {
+    // Advances
+    ArtsInfluenceCultureAttempt,
+    FreeEconomyCollect,
+    VotingIncreaseHappiness,
+
+    // Update patch Advances
+    CityPlanning,
+    Philosophy,
+
+    // Civilizations,
+    // Rome
+    StatesmanIncreaseHappiness,
+
+    // Greece
+    HellenisticInfluenceCultureAttempt,
+}
+
+impl PlayingActionModifier {
+    #[must_use]
+    pub fn playing_action_type(&self) -> PlayingActionType {
+        PlayingActionType::Special(SpecialAction::Modifier(*self))
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
@@ -121,16 +187,11 @@ pub enum CustomActionType {
     ForcedLabor,
     CivilLiberties,
     Bartering,
-    ArtsInfluenceCultureAttempt,
-    VotingIncreaseHappiness,
-    FreeEconomyCollect,
     Sports,
     Taxes,
     Theaters,
 
     // Update patch Advances
-    CityPlanning,
-    Philosophy,
     WelfareState,
     ForcedMarch,
     MilitaryState,
@@ -145,10 +206,8 @@ pub enum CustomActionType {
     // Rome
     Aqueduct,
     Princeps,
-    StatesmanIncreaseHappiness,
 
     // Greece
-    HellenisticInfluenceCultureAttempt,
     Idol,
     Master,
 
@@ -166,21 +225,7 @@ pub enum CustomActionType {
 impl CustomActionType {
     #[must_use]
     pub fn playing_action_type(&self) -> PlayingActionType {
-        PlayingActionType::Custom(*self)
-    }
-}
-
-pub(crate) fn log_start_custom_action(game: &mut Game, player_index: usize, action: &CustomAction) {
-    let p = game.player(player_index);
-    let player = EventPlayer::from_player(
-        player_index,
-        game,
-        action.action.playing_action_type().origin(p),
-    );
-    if let Some(city) = action.city {
-        player.log(game, &format!("Start action in city {city}"));
-    } else {
-        player.log(game, "Start action");
+        PlayingActionType::Special(SpecialAction::Custom(*self))
     }
 }
 
@@ -207,8 +252,11 @@ pub(crate) fn custom_action_execution(
     player: &Player,
     action_type: CustomActionType,
 ) -> Option<CustomActionActionExecution> {
-    if let CustomActionExecution::Action(e) =
-        player.custom_actions.get(&action_type)?.execution.clone()
+    if let SpecialActionExecution::Action(e) = player
+        .special_actions
+        .get(&SpecialAction::Custom(action_type))?
+        .execution
+        .clone()
     {
         Some(e)
     } else {
@@ -216,23 +264,23 @@ pub(crate) fn custom_action_execution(
     }
 }
 
-pub(crate) fn can_play_custom_action(
+pub(crate) fn can_play_special_action(
     game: &Game,
     p: &Player,
-    c: CustomActionType,
+    c: SpecialAction,
 ) -> Result<(), String> {
-    if !p.custom_actions.contains_key(&c) {
+    if !p.special_actions.contains_key(&c) {
         return Err("Custom action not available".to_string());
     }
 
-    let info = p.custom_action_info(c);
+    let info = p.special_action_info(&c);
     if let Some(key) = info.cost.once_per_turn
         && p.played_once_per_turn_actions.contains(&key)
     {
         return Err("Custom action already played this turn".to_string());
     }
 
-    if let CustomActionExecution::Action(e) = &info.execution
+    if let SpecialActionExecution::Action(e) = &info.execution
         && !(e.checker)(game, p)
     {
         return Err("Custom action cannot be played".to_string());
@@ -253,8 +301,11 @@ pub(crate) fn is_base_or_modifier(
     base_type: &PlayingActionType,
 ) -> bool {
     match base_type {
-        PlayingActionType::Custom(c) => {
-            if let CustomActionExecution::Modifier(t) = &p.custom_action_info(*c).execution {
+        PlayingActionType::Special(SpecialAction::Modifier(c)) => {
+            if let SpecialActionExecution::Modifier(t) = &p
+                .special_action_info(&SpecialAction::Modifier(*c))
+                .execution
+            {
                 t == action_type
             } else {
                 false
@@ -269,7 +320,7 @@ pub(crate) fn custom_action_modifier_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    if let PlayingActionType::Custom(c) = action_type {
+    if let PlayingActionType::Special(SpecialAction::Modifier(c)) = action_type {
         c.playing_action_type().origin(player)
     } else {
         base_action_origin

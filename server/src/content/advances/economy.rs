@@ -159,7 +159,7 @@ where
             if !p.get(game).can_use_advance(Advance::TradeRoutes) {
                 return None;
             }
-            add_start_turn_action_if_needed(game);
+            add_start_turn_action_if_needed(game, p.index);
             trade_route_reward(game, p).map(|(reward, routes)| {
                 gain_market_bonus(game, &routes);
                 ResourceRewardRequest::new(reward, "Collect trade routes reward".to_string())

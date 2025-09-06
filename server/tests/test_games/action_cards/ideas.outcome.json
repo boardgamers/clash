@@ -201,6 +201,10 @@
                       "ActionCard": 9
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 9
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -229,10 +233,6 @@
                         "CivilCard": 9
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Ideas/High Ground",
-                    "Player1: Ideas: Gain 1 idea"
                   ]
                 }
               ]

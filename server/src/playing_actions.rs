@@ -14,8 +14,8 @@ use crate::content::ability::{
     Ability, advance_event_origin, construct_event_origin, recruit_event_origin,
 };
 use crate::content::custom_actions::{
-    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    log_start_custom_action, on_custom_action,
+    CustomAction, CustomActionActivation, PlayingActionModifier, SpecialAction,
+    can_play_special_action, on_custom_action,
 };
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
@@ -29,6 +29,7 @@ use crate::happiness::{
     IncreaseHappiness, execute_increase_happiness, happiness_base_event_origin,
     happiness_event_origin,
 };
+use crate::log::{ActionLogBalance, ActionLogEntry};
 use crate::movement::move_event_origin;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -48,7 +49,7 @@ pub enum PlayingActionType {
     InfluenceCultureAttempt,
     ActionCard(u8),
     WonderCard(Wonder),
-    Custom(CustomActionType),
+    Special(SpecialAction),
     EndTurn,
 }
 
@@ -67,8 +68,8 @@ impl PlayingActionType {
         let p = game.player(player_index);
 
         match self {
-            PlayingActionType::Custom(c) => {
-                can_play_custom_action(game, p, *c)?;
+            PlayingActionType::Special(c) => {
+                can_play_special_action(game, p, *c)?;
             }
             PlayingActionType::ActionCard(id) => {
                 can_play_civil_card(game, p, *id)?;
@@ -98,9 +99,9 @@ impl PlayingActionType {
     #[must_use]
     pub fn cost(&self, game: &Game, player: usize) -> ActionCost {
         match self {
-            PlayingActionType::Custom(custom_action) => game
+            PlayingActionType::Special(custom_action) => game
                 .player(player)
-                .custom_action_info(*custom_action)
+                .special_action_info(custom_action)
                 .cost
                 .cost
                 .clone(),
@@ -135,11 +136,9 @@ impl PlayingActionType {
             PlayingActionType::InfluenceCultureAttempt => influence_base_origin(),
             PlayingActionType::ActionCard(a) => EventOrigin::CivilCard(*a),
             PlayingActionType::WonderCard(w) => EventOrigin::Wonder(*w),
-            PlayingActionType::Custom(c) => player.custom_action_info(*c).event_origin,
+            PlayingActionType::Special(c) => player.special_action_info(c).event_origin,
             PlayingActionType::MoveUnits => move_event_origin(),
-            PlayingActionType::EndTurn => panic!(
-                "PlayingAction::origin called on an action that does not have an origin: EndTurn",
-            ),
+            PlayingActionType::EndTurn => end_turn_origin(),
         }
     }
 }
@@ -175,7 +174,7 @@ impl PlayingAction {
         if !action_cost.free {
             pay_action(
                 game,
-                &EventPlayer::from_player(player_index, game, playing_action_type.origin(p)),
+                &EventPlayer::new(player_index, playing_action_type.origin(p)),
             );
         }
 
@@ -188,51 +187,19 @@ impl PlayingAction {
         player_index: usize,
     ) -> Result<(), String> {
         // log these before the payment for clarity
-        match &self {
-            PlayingAction::Custom(a) => {
-                log_start_custom_action(game, player_index, a);
-            }
-            PlayingAction::ActionCard(id) => {
-                discard_action_card(
-                    game,
-                    player_index,
-                    *id,
-                    &EventOrigin::Ability("Action Card".to_string()),
-                    HandCardLocation::PlayToDiscard,
-                );
-            }
-            _ => {}
-        }
-
-        let action_type = self.playing_action_type(game.player(player_index));
-        let origin_override = match action_type {
-            PlayingActionType::Custom(c) => {
-                if let Some(key) = &game
-                    .player(player_index)
-                    .custom_action_info(c)
-                    .cost
-                    .once_per_turn
-                {
-                    game.players[player_index]
-                        .played_once_per_turn_actions
-                        .push(*key);
-                }
-                Some(game.player(player_index).custom_action_info(c).event_origin)
-            }
-            PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
-            _ => None,
-        };
-
-        let payment_options = action_type.payment_options(game, player_index);
-        if !payment_options.is_free() {
-            game.log(
+        if let PlayingAction::ActionCard(id) = &self {
+            discard_action_card(
+                game,
                 player_index,
-                &payment_options.origin,
-                &format!("Pay {}", payment_options.default,),
+                *id,
+                &EventOrigin::Ability("Action Card".to_string()),
+                HandCardLocation::PlayToDiscard,
             );
         }
 
-        ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
+        let action_type = self.playing_action_type(game.player(player_index));
+        let override_origin = add_override_origin(game, player_index, &action_type);
+        ActionPayment::new(self).on_pay_action(game, player_index, override_origin)
     }
 
     pub(crate) fn execute_without_cost(
@@ -309,7 +276,7 @@ impl PlayingAction {
             ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
-            PlayingAction::Custom(c) => PlayingActionType::Custom(c.action),
+            PlayingAction::Custom(c) => PlayingActionType::Special(SpecialAction::Custom(c.action)),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
@@ -321,7 +288,7 @@ fn assert_allowed_action_type(
     player: &Player,
 ) -> PlayingActionType {
     match playing_action_type {
-        PlayingActionType::Custom(c) => {
+        PlayingActionType::Special(SpecialAction::Modifier(c)) => {
             assert!(player.custom_action_modifiers(base_type).contains(c));
         }
         _ => {
@@ -332,7 +299,7 @@ fn assert_allowed_action_type(
 }
 
 #[must_use]
-pub(crate) fn base_or_custom_available(
+pub(crate) fn base_or_modified_available(
     game: &Game,
     player: usize,
     base: &PlayingActionType,
@@ -343,7 +310,7 @@ pub(crate) fn base_or_custom_available(
             game.player(player)
                 .custom_action_modifiers(base)
                 .iter()
-                .map(CustomActionType::playing_action_type),
+                .map(PlayingActionModifier::playing_action_type),
         )
         .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
         .collect()
@@ -423,10 +390,43 @@ pub(crate) fn pay_for_action() -> Ability {
 }
 
 fn end_turn(game: &mut Game, player: usize) {
-    game.log(
-        player,
-        &EventOrigin::Ability("End Turn".to_string()),
-        &format!("{} actions left", game.actions_left),
-    );
+    if game.actions_left > 0 {
+        EventPlayer::new(player, end_turn_origin()).add_action_log_item(
+            game,
+            ActionLogEntry::action(ActionLogBalance::Loss, game.actions_left),
+        );
+    }
     game.next_turn();
+}
+
+pub(crate) fn end_turn_origin() -> EventOrigin {
+    EventOrigin::Ability("End Turn".to_string())
+}
+
+fn add_override_origin(
+    game: &mut Game,
+    player_index: usize,
+    action_type: &PlayingActionType,
+) -> Option<EventOrigin> {
+    match action_type {
+        PlayingActionType::Special(c) => {
+            if let Some(key) = &game
+                .player(player_index)
+                .special_action_info(c)
+                .cost
+                .once_per_turn
+            {
+                game.players[player_index]
+                    .played_once_per_turn_actions
+                    .push(*key);
+            }
+            Some(
+                game.player(player_index)
+                    .special_action_info(c)
+                    .event_origin,
+            )
+        }
+        PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(*c)),
+        _ => None,
+    }
 }

@@ -12,7 +12,7 @@ use crate::log::current_turn_log_without_redo;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_modified_available};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
@@ -83,8 +83,8 @@ impl InfluenceCultureInfo {
     }
 
     #[must_use]
-    pub(crate) fn player(&self, player: usize, game: &Game) -> EventPlayer {
-        EventPlayer::from_player(player, game, self.info.origin.clone())
+    pub(crate) fn player(&self, player: usize) -> EventPlayer {
+        EventPlayer::new(player, self.info.origin.clone())
     }
 }
 
@@ -144,7 +144,7 @@ pub(crate) fn execute_influence_culture_attempt(
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
 
-    info.player(player_index, game).log(
+    info.player(player_index).log(
         game,
         &format!(
             "Tried to influence the {city_piece} in the city \
@@ -222,7 +222,7 @@ fn roll_boost_paid(
         )
         .clone();
 
-    let player = info.player(player_index, game);
+    let player = info.player(player_index);
     if payment.is_empty() {
         player.log(game, "Declined to pay to increase the dice roll");
         attempt_failed(game, player_index, a.selected_structure.position);
@@ -274,7 +274,7 @@ fn range_boost_cost(
     info: &mut InfluenceCultureInfo,
     player_index: usize,
 ) -> PaymentOptions {
-    let p = info.player(player_index, game);
+    let p = info.player(player_index);
 
     let roll = game.next_dice_roll().value + info.roll_boost;
     info.roll = roll;
@@ -457,10 +457,10 @@ fn structures(city: &City) -> Vec<SelectedStructure> {
 fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceCultureInfo) {
     let city_position = info.position;
     let city_owner = game.get_any_city(city_position).player_index;
-    let new = &info.player(influencer_index, game);
+    let new = &info.player(influencer_index);
     match info.structure {
         Structure::CityCenter => {
-            let city = lose_city(game, &info.player(city_owner, game), city_position);
+            let city = lose_city(game, &info.player(city_owner), city_position);
             gain_city(game, new, city);
         }
         Structure::Building(b) => gain_building(game, new, b, city_position),
@@ -569,7 +569,7 @@ pub fn affordable_start_city(
 
 #[must_use]
 pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(game, player, &PlayingActionType::InfluenceCultureAttempt)
+    base_or_modified_available(game, player, &PlayingActionType::InfluenceCultureAttempt)
 }
 
 pub(crate) fn influence_event_origin(

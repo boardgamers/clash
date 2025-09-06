@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::PlayingActionModifier;
 use crate::game::GameOptions;
 use crate::payment::PaymentConversion;
 use crate::playing_actions::PlayingActionType;
@@ -90,5 +90,5 @@ fn city_planning() -> AdvanceBuilder {
         "Once per turn, as a free action, you may pay 1 idea and 1 wood to get a free Construct action.",
     )
         .replaces(Advance::Sanitation)
-    .add_action_modifier(CustomActionType::CityPlanning, |cost| cost.once_per_turn().free_action().resources(ResourcePile::ideas(1) + ResourcePile::wood(1)), PlayingActionType::Construct)
+    .add_action_modifier(PlayingActionModifier::CityPlanning, |cost| cost.once_per_turn().free_action().resources(ResourcePile::ideas(1) + ResourcePile::wood(1)), PlayingActionType::Construct)
 }

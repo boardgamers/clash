@@ -28,11 +28,12 @@ fn test_free_advance() {
     JSON.test(
         "free_advance",
         vec![
-            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)).skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
-            ),
+            )
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Philosophy)),
@@ -117,7 +118,7 @@ fn test_keep_government() {
         vec![
             TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![])))
                 .skip_json(),
-            TestAction::undoable(0, payment_response(ResourcePile::empty())),
+            TestAction::not_undoable(0, payment_response(ResourcePile::empty())),
         ],
     );
 }

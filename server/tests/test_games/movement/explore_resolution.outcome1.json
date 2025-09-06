@@ -400,8 +400,24 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player2: Move: marched 1 settler from D7 to D6"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "start": "D7",
+                        "destination": "D6"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
                   ]
                 },
                 {
@@ -410,9 +426,39 @@
                       "ExploreResolution": 3
                     }
                   },
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "D6",
+                            "Fertile"
+                          ],
+                          [
+                            "E6",
+                            "Fertile"
+                          ],
+                          [
+                            "C6",
+                            "Fertile"
+                          ],
+                          [
+                            "D5",
+                            "Forest"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player2: Explore Resolution: Chose rotation 3, Explored tiles C6=Fertile, D5=Forest, D6=Fertile, E6=Fertile"
-                  ]
+                    "Player2: Explore Resolution: Chose rotation 3"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

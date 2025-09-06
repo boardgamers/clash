@@ -24,7 +24,7 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
-use crate::status_phase::play_status_phase;
+use crate::status_phase::status_phase_response;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::units_killed;
 use crate::victory_points::add_dynamic_victory_points;
@@ -38,8 +38,7 @@ pub enum Action {
     Response(EventResponse),
     Undo,
     Redo,
-    StartTurn, // created for trade routes
-    Setup,     // Game setup
+    StartTurn, // created for trade routes and status phase
     ChooseCivilization(String),
 }
 
@@ -264,7 +263,7 @@ pub(crate) fn execute_custom_phase_action(
         CombatEnd(s) => {
             on_end_combat(game, s);
         }
-        StatusPhase(s) => play_status_phase(game, s),
+        StatusPhase(s) => status_phase_response(game, s),
         TurnStart => game.on_start_turn(),
         PayAction(a) => {
             a.on_pay_action(game, player, game.current_event().origin_override.clone())?;
@@ -354,24 +353,21 @@ pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
     add_action_log_item(
         game,
         player.index,
-        ActionLogEntry::action(ActionLogBalance::Gain),
+        ActionLogEntry::action(ActionLogBalance::Gain, 1),
         player.origin.clone(),
         vec![],
     );
-    player.log(game, "Gain 1 action");
 }
 
 pub(crate) fn lose_action(game: &mut Game, player: &EventPlayer) {
-    subtract_action(game, player);
-    player.log(game, "Lose 1 action");
+    subtract_action(game, player, ActionLogBalance::Loss);
 }
 
 pub(crate) fn pay_action(game: &mut Game, player: &EventPlayer) {
-    subtract_action(game, player);
-    player.log(game, "Pay 1 action");
+    subtract_action(game, player, ActionLogBalance::Pay);
 }
 
-fn subtract_action(game: &mut Game, player: &EventPlayer) {
+fn subtract_action(game: &mut Game, player: &EventPlayer, balance: ActionLogBalance) {
     if game.actions_left == 0 && game.context == GameContext::Replay {
         return;
     }
@@ -380,7 +376,7 @@ fn subtract_action(game: &mut Game, player: &EventPlayer) {
     add_action_log_item(
         game,
         player.index,
-        ActionLogEntry::action(ActionLogBalance::Loss),
+        ActionLogEntry::action(balance, 1),
         player.origin.clone(),
         vec![],
     );

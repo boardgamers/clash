@@ -8,15 +8,15 @@ use crate::consts::STACK_LIMIT;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::advances::economy::use_taxes;
 use crate::content::advances::trade_routes::TradeRoute;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionType, SpecialAction};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
-use crate::log::add_start_turn_action_if_needed;
+use crate::log::{ActionLogEntry, add_start_turn_action_if_needed};
 use crate::map::{Block, Terrain, block_for_position, capital_city_position};
-use crate::movement::{MoveUnits, move_action_log};
+use crate::movement::MoveUnits;
 use crate::player::{Data, Player};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -223,7 +223,7 @@ pub(crate) fn lose_raid_resource() -> Ability {
                 .then_some(vec![PaymentRequest::mandatory(c, "Pay 1 resource")])
         },
         |game, s, ()| {
-            add_start_turn_action_if_needed(game);
+            add_start_turn_action_if_needed(game, s.player_index);
             s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )
@@ -304,7 +304,7 @@ fn danegeld() -> LeaderAbility {
     .add_custom_action(
         CustomActionType::Danegeld,
         |c| {
-            c.once_per_turn_mutually_exclusive(CustomActionType::Taxes)
+            c.once_per_turn_mutually_exclusive(SpecialAction::Custom(CustomActionType::Taxes))
                 .action()
                 .no_resources()
         },
@@ -382,7 +382,8 @@ fn new_colonies() -> LeaderAbility {
                         .collect_vec();
 
                     let m = MoveUnits::new(units, to, None, ResourcePile::empty());
-                    s.log(game, &move_action_log(game, p, &m));
+                    s.player()
+                        .add_action_log_item(game, ActionLogEntry::move_units(p, &m));
 
                     move_with_possible_combat(game, s.player_index, &m);
                 },

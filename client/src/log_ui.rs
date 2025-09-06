@@ -1,24 +1,47 @@
+use crate::city_ui::draw_mood_state;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, State, StateUpdate};
-use crate::layout_ui::bottom_center_texture;
+use crate::layout_ui::{FONT_SIZE, bottom_center_texture, draw_scaled_icon};
+use crate::log_collector::collect_log_entries;
 use crate::render_context::RenderContext;
-use macroquad::math::vec2;
-use server::log::TurnType;
+use macroquad::math::{Vec2, vec2};
+use macroquad::prelude::{BLACK, Color, Texture2D};
+use server::action::Action;
+use server::card::hand_card_message;
+use server::content::persistent_events::EventResponse;
+use server::events::EventOrigin;
+use server::log::{
+    ActionLogAction, ActionLogBalance, ActionLogEntry, ActionLogEntryMove, ActionLogEntryStructure,
+    ActionLogIncidentToken, ActionLogItem,
+};
+use server::movement::MovementAction;
+use server::playing_actions::PlayingAction;
+use server::position::Position;
+use server::resource_pile::ResourcePile;
+use server::structure::Structure;
+use server::unit::Units;
+
+#[derive(Clone, Debug)]
+pub(crate) enum LogBody {
+    Message(String),
+    Item(ActionLogItem),
+    PlayerSetup { player: usize, civilization: String },
+    PlayerTurn { age: u32, round: u32, player: usize },
+    Action(ActionLogAction),
+}
 
 #[derive(Clone, Debug)]
 pub(crate) struct LogEntry {
-    pub age: Option<String>,
-    pub round: Option<String>,
-    pub name: String,
-    pub message: String,
+    body: LogBody,
+    active_origin: Option<EventOrigin>,
+    indent: usize,
 }
 
 impl LogEntry {
-    pub(crate) fn new(age: Option<u32>, round: Option<u32>, name: &str, message: String) -> Self {
+    pub(crate) fn new(body: LogBody, active_origin: Option<EventOrigin>, indent: usize) -> Self {
         LogEntry {
-            age: age.map(|a| a.to_string()),
-            round: round.map(|r| r.to_string()),
-            name: name.to_string(),
-            message,
+            body,
+            active_origin,
+            indent,
         }
     }
 }
@@ -35,47 +58,7 @@ impl LogDialog {
     pub(crate) fn new(rc: &RenderContext) -> Self {
         let lines_per_page = (rc.state.screen_size.y - 150.) as usize / 25;
 
-        // Build structured log entries with age, round, player, and message
-        let mut log_entries = Vec::new();
-
-        for age in &rc.game.log {
-            for round in &age.rounds {
-                for turn in &round.turns {
-                    for action in &turn.actions {
-                        for message in &action.log {
-                            // Simulate multiline labels to get accurate line count
-                            multiline_label(
-                                rc.state,
-                                message,
-                                Self::max_width(rc),
-                                |label: &str| {
-                                    log_entries.push(match turn.turn_type {
-                                        TurnType::Player(p) => LogEntry::new(
-                                            Some(age.age),
-                                            Some(round.round),
-                                            &rc.game.player_name(p),
-                                            label.to_string(),
-                                        ),
-                                        TurnType::Setup => LogEntry::new(
-                                            None,
-                                            None,
-                                            "Game Started",
-                                            label.to_string(),
-                                        ),
-                                        TurnType::StatusPhase => LogEntry::new(
-                                            None,
-                                            Some(round.round),
-                                            "Status Phase",
-                                            label.to_string(),
-                                        ),
-                                    });
-                                },
-                            );
-                        }
-                    }
-                }
-            }
-        }
+        let log_entries = collect_log_entries(rc);
 
         let total_lines = log_entries.len();
         let pages = if total_lines == 0 {
@@ -91,68 +74,18 @@ impl LogDialog {
             log_entries,
         }
     }
-
-    fn max_width(rc: &RenderContext) -> f32 {
-        rc.state.screen_size.x - 300.
-    }
 }
 
 pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
-    let state = &rc.state;
+    let state = rc.state;
 
     // Use the pre-calculated log entries
     let start = d.current_page * d.lines_per_page;
     let end = usize::min(start + d.lines_per_page, d.log_entries.len());
-    let mut y = 0.;
-
-    // Draw column headers
-    let age_pos = vec2(30., 20.);
-    let round_pos = vec2(80., 20.);
-    let player_pos = vec2(140., 20.);
-    let message_pos = vec2(280., 20.);
-
-    rc.draw_text("Age", age_pos.x, age_pos.y);
-    rc.draw_text("Round", round_pos.x, round_pos.y);
-    rc.draw_text("Player", player_pos.x, player_pos.y);
-    rc.draw_text("Message", message_pos.x, message_pos.y);
-
-    y += 1.5; // Add some space after headers
-
-    // Track previous values to only show when they change
-    let mut prev_age: Option<String> = None;
-    let mut prev_round: Option<String> = None;
-    let mut prev_name: Option<String> = None;
+    let mut y = 1.5;
 
     for entry in &d.log_entries[start..end] {
-        let message_text = &entry.message;
-
-        // Calculate positions for each column
-        let age_pos = vec2(30., y * 25. + 20.);
-        let round_pos = vec2(80., y * 25. + 20.);
-        let player_pos = vec2(140., y * 25. + 20.);
-        let message_pos = vec2(280., y * 25. + 20.);
-
-        // Draw each column
-        if let Some(age) = &entry.age
-            && entry.age != prev_age
-        {
-            rc.draw_text(age, age_pos.x, age_pos.y);
-        }
-        if let Some(round) = &entry.round
-            && entry.round != prev_round
-        {
-            rc.draw_text(round, round_pos.x, round_pos.y);
-        }
-        if Some(&entry.name) != prev_name.as_ref() {
-            rc.draw_text(&entry.name, player_pos.x, player_pos.y);
-        }
-        rc.draw_text(message_text, message_pos.x, message_pos.y);
-
-        // Update previous values
-        prev_age.clone_from(&entry.age);
-        prev_round.clone_from(&entry.round);
-        prev_name = Some(entry.name.clone());
-
+        draw_line(rc, y, entry);
         y += 1.;
     }
     // Bottom center navigation
@@ -197,6 +130,287 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         return StateUpdate::open_dialog(ActiveDialog::Log(new_dialog));
     }
     NO_UPDATE
+}
+
+fn draw_line(rc: &RenderContext, y: f32, entry: &LogEntry) {
+    let message_pos = vec2(20. + entry.indent as f32 * 20.0, y * 25. + 20.);
+
+    let mut drawer = RichTextDrawer::new(rc, message_pos);
+
+    match &entry.body {
+        LogBody::Message(m) => rc.draw_text(m, message_pos.x, message_pos.y),
+        LogBody::Item(item) => {
+            drawer.player(item.player);
+            let balance = item.entry.balance();
+            if let Some(b) = &balance {
+                drawer.text(match b {
+                    ActionLogBalance::Gain => "gains",
+                    ActionLogBalance::Loss => "loses",
+                    ActionLogBalance::Pay => "pays",
+                });
+            }
+
+            draw_item(&mut drawer, item);
+
+            if entry
+                .active_origin
+                .as_ref()
+                .is_none_or(|o| o != &item.origin)
+            {
+                drawer.modifier(&item.origin.name(drawer.rc.game), balance);
+            }
+            item.modifiers.iter().for_each(|m| {
+                drawer.modifier(&m.name(drawer.rc.game), balance);
+            });
+        }
+        LogBody::PlayerSetup {
+            player,
+            civilization,
+        } => {
+            drawer.player(*player);
+            drawer.text(&format!("plays as {civilization}"));
+        }
+        LogBody::PlayerTurn { age, round, player } => {
+            drawer.player(*player);
+            drawer.text(&format!("starts their turn (Age {age}, Round {round})"));
+        }
+        LogBody::Action(a) => {
+            drawer.player(a.player);
+            draw_action_log_entry(&mut drawer, a);
+        }
+    }
+}
+
+struct RichTextDrawer<'a> {
+    rc: &'a RenderContext<'a>,
+    current_pos: Vec2,
+    space: f32,
+}
+
+impl RichTextDrawer<'_> {
+    fn new<'a>(rc: &'a RenderContext<'_>, start_pos: Vec2) -> RichTextDrawer<'a> {
+        RichTextDrawer {
+            rc,
+            current_pos: start_pos,
+            space: rc.state.measure_text(" ").width,
+        }
+    }
+
+    fn text(&mut self, text: &str) {
+        self.text_ex(text, BLACK, FONT_SIZE);
+    }
+
+    fn text_ex(&mut self, text: &str, color: Color, font_size: u16) {
+        self.rc.draw_text_ex(
+            text,
+            self.current_pos.x,
+            self.current_pos.y,
+            color,
+            font_size,
+        );
+        self.current_pos.x += self.rc.state.measure_text(text).width + self.space;
+    }
+
+    fn modifier(&mut self, modifier: &str, balance: Option<&ActionLogBalance>) {
+        let verb = match balance {
+            None | Some(ActionLogBalance::Gain) => "using",
+            Some(ActionLogBalance::Loss) => "to",
+            Some(ActionLogBalance::Pay) => "for",
+        };
+        self.text(&format!("{verb} {modifier}"));
+    }
+
+    fn icon(&mut self, texture: &Texture2D) {
+        self.icon_with_size(texture, 20.0);
+    }
+
+    fn icon_with_size(&mut self, texture: &Texture2D, size: f32) {
+        draw_scaled_icon(
+            &self.rc.no_icon_background(),
+            texture,
+            "",
+            vec2(self.current_pos.x, self.current_pos.y - size / 2.0 - 5.0),
+            size,
+        );
+        self.current_pos.x += size + self.space;
+    }
+
+    fn player(&mut self, player: usize) {
+        self.text_ex(
+            &self.rc.game.player_name(player),
+            self.rc.player_color(player),
+            FONT_SIZE,
+        );
+        self.current_pos.x += self.space;
+    }
+
+    fn at_location(&mut self, position: Position) {
+        self.text("at");
+        self.location(position);
+    }
+
+    fn location(&mut self, position: Position) {
+        self.icon_with_size(&self.rc.assets().hex, 35.0);
+        self.current_pos.x -= 31.0;
+        self.text_ex(&format!("{position}"), BLACK, 17);
+    }
+
+    fn resources(&mut self, resources: &ResourcePile) {
+        for (resource, amount) in resources.clone() {
+            if amount > 0
+                && let Some(texture) = self.rc.assets().resources.get(&resource)
+            {
+                self.icon(texture);
+                self.text(&amount.to_string());
+            }
+        }
+    }
+
+    fn units(&mut self, units: &Units) {
+        for (unit, amount) in units.clone() {
+            if amount > 0 {
+                let texture = self.rc.assets().unit(unit, self.rc.shown_player);
+                self.icon(texture);
+                let mut u = Units::empty();
+                for _ in 0..amount {
+                    u += &unit;
+                }
+                self.text(&u.to_string(Some(self.rc.game)));
+            }
+        }
+    }
+}
+
+fn draw_item(drawer: &mut RichTextDrawer, item: &ActionLogItem) {
+    match &item.entry {
+        ActionLogEntry::Action { balance: _, amount } => {
+            if let Some(a) = amount {
+                drawer.text(&a.to_string());
+            }
+            drawer.icon(&drawer.rc.assets().end_turn);
+        }
+        ActionLogEntry::Resources {
+            resources,
+            balance: _,
+        } => {
+            drawer.resources(resources);
+        }
+        ActionLogEntry::Advance {
+            advance,
+            balance: _,
+            incident_token,
+        } => {
+            drawer.icon(&drawer.rc.assets().advances);
+            drawer.text(advance.name(drawer.rc.game));
+            if let ActionLogIncidentToken::Take(t) = incident_token {
+                if *t > 0 {
+                    drawer.text(&format!("and take an event token ({t} left)"));
+                } else {
+                    drawer.text("and take an event token (triggering an incident)");
+                }
+            }
+        }
+        ActionLogEntry::Units {
+            units,
+            balance: _,
+            position,
+        } => {
+            drawer.units(units);
+            drawer.at_location(*position);
+        }
+        ActionLogEntry::Structure(s) => {
+            draw_structure(drawer, item, s);
+        }
+        ActionLogEntry::HandCard { card, from, to } => {
+            let (_, message) = hand_card_message(drawer.rc.game, card, from, to);
+            drawer.text(&message);
+        }
+        ActionLogEntry::MoodChange { city, mood } => {
+            drawer.text("City");
+            drawer.at_location(*city);
+            drawer.text(&format!("becomes {mood}"));
+            let c = center(drawer.current_pos);
+            drawer
+                .rc
+                .draw_circle(c, RADIUS, drawer.rc.player_color(item.player));
+            draw_mood_state(drawer.rc, c, mood);
+            drawer.current_pos.x += 35.0;
+        }
+        ActionLogEntry::Move(m) => draw_move(drawer, m),
+        ActionLogEntry::Explore { tiles } => {
+            drawer.text("explores:");
+            for (p, t) in tiles {
+                drawer.location(*p);
+                drawer.text(&format!("is {t}"));
+            }
+        }
+    }
+}
+
+fn draw_move(drawer: &mut RichTextDrawer, m: &ActionLogEntryMove) {
+    let game = drawer.rc.game;
+    let t = game
+        .map
+        .get(m.destination)
+        .expect("the destination position should be on the map");
+    let (verb, suffix) = if game.map.is_sea(m.start) {
+        if t.is_unexplored() || t.is_water() {
+            ("sailed", "")
+        } else {
+            ("disembarked", "")
+        }
+    } else if m.embark_carrier_id.is_some() {
+        ("embarked", "")
+    } else if m.start.is_neighbor(m.destination) {
+        ("marched", "")
+    } else {
+        ("marched", " on roads")
+    };
+    drawer.text(verb);
+    drawer.units(&m.units);
+    drawer.text("from");
+    drawer.location(m.start);
+    drawer.text("to");
+    drawer.location(m.destination);
+    if !suffix.is_empty() {
+        drawer.text(suffix);
+    }
+}
+
+fn draw_structure(drawer: &mut RichTextDrawer, item: &ActionLogItem, s: &ActionLogEntryStructure) {
+    // Draw structure icon or circle
+    let c = center(drawer.current_pos);
+    let r = RADIUS;
+    match &s.structure {
+        Structure::CityCenter => {
+            drawer
+                .rc
+                .draw_circle(c, r, drawer.rc.player_color(item.player));
+            drawer.current_pos.x += 35.0;
+            drawer.text("City");
+        }
+        Structure::Building(b) => {
+            draw_scaled_icon(drawer.rc, &drawer.rc.assets().buildings[b], "", c, r);
+            drawer.current_pos.x += 35.0;
+            drawer.text(b.name());
+        }
+        Structure::Wonder(w) => {
+            draw_scaled_icon(drawer.rc, &drawer.rc.assets().wonders[w], "", c, r);
+            drawer.current_pos.x += 35.0;
+            drawer.text(&w.name());
+        }
+    }
+    drawer.at_location(s.position);
+    if let Some(port_pos) = s.port_position {
+        drawer.text(" at the water tile");
+        drawer.at_location(port_pos);
+    }
+}
+
+const RADIUS: f32 = 15.0;
+
+fn center(message_pos: Vec2) -> Vec2 {
+    vec2(message_pos.x + 15.0, message_pos.y - RADIUS / 2.0)
 }
 
 pub(crate) fn multiline_label(state: &State, label: &str, len: f32, mut print: impl FnMut(&str)) {
@@ -249,5 +463,104 @@ impl MultilineText {
         multiline_label(rc.state, label, self.width, |line: &str| {
             self.text.push(line.to_string());
         });
+    }
+}
+
+fn draw_action_log_entry(drawer: &mut RichTextDrawer, a: &ActionLogAction) {
+    match &a.action {
+        Action::Playing(p) => draw_playing_action(drawer, p, a),
+        Action::Movement(m) => match m {
+            MovementAction::Move(_) => {
+                drawer.text("performs a move action");
+            }
+            MovementAction::Stop => {
+                drawer.text("stops movement");
+            }
+        },
+        Action::Response(r) => draw_response_action(drawer, r),
+        Action::Undo => panic!("Unexpected undo in log"),
+        Action::Redo => panic!("Unexpected redo in log"),
+        Action::StartTurn => panic!("Unexpected start turn in log"),
+        Action::ChooseCivilization(c) => {
+            drawer.text(&format!("Choose Civilization: {c}"));
+        }
+    }
+}
+
+fn draw_response_action(drawer: &mut RichTextDrawer, r: &EventResponse) {
+    match r {
+        EventResponse::SelectAdvance(_) => drawer.text("selects advance"),
+        EventResponse::Payment(_) => drawer.text("selects payment"),
+        EventResponse::ResourceReward(_) => drawer.text("receives"),
+        EventResponse::SelectPlayer(p) => drawer.text(&format!(
+            "selects player: {}",
+            drawer.rc.game.player_name(*p)
+        )),
+        EventResponse::SelectPositions(p) => drawer.text(&format!("selects positions: {p:?}")),
+        EventResponse::SelectUnitType(u) => {
+            drawer.text(&format!("select unit type: {}", u.name(drawer.rc.game)));
+        }
+        EventResponse::SelectUnits(_u) => drawer.text("selects units"),
+        EventResponse::SelectHandCards(_h) => drawer.text("selects hand cards"),
+        EventResponse::SelectStructures(_s) => drawer.text("select structures"),
+        EventResponse::Bool(b) => {
+            if *b {
+                drawer.text("accepts");
+            } else {
+                drawer.text("declines");
+            }
+        }
+        EventResponse::ChangeGovernmentType(c) => {
+            drawer.text(&format!("changes government to {}", c.new_government));
+        }
+        EventResponse::ExploreResolution(_) => drawer.text("chooses rotation"),
+    }
+}
+
+fn draw_playing_action(drawer: &mut RichTextDrawer, p: &PlayingAction, a: &ActionLogAction) {
+    match p {
+        PlayingAction::Advance(_) => {
+            drawer.text("advances");
+        }
+        PlayingAction::FoundCity { .. } => {
+            drawer.text("founds a city");
+        }
+        PlayingAction::Construct(_) => {
+            drawer.text("builds");
+        }
+        PlayingAction::Collect(c) => {
+            drawer.text("collects");
+            drawer.at_location(c.city_position);
+        }
+        PlayingAction::Recruit(_) => {
+            drawer.text("recruits");
+        }
+        PlayingAction::IncreaseHappiness(_) => {
+            drawer.text("increases happiness");
+        }
+        PlayingAction::InfluenceCultureAttempt(_) => {
+            drawer.text("attempts cultural influence");
+        }
+        PlayingAction::Custom(c) => {
+            drawer.text(&format!(
+                "starts {}",
+                a.items[0].origin.name(drawer.rc.game)
+            ));
+            if let Some(pos) = c.city {
+                drawer.at_location(pos);
+            }
+        }
+        PlayingAction::ActionCard(a) => {
+            drawer.text(&format!(
+                "plays Action Card: {}",
+                drawer.rc.game.cache.get_action_card(*a).name()
+            ));
+        }
+        PlayingAction::WonderCard(w) => {
+            drawer.text(&format!("plays Wonder Card: {}", w.name()));
+        }
+        PlayingAction::EndTurn => {
+            drawer.text("ends their turn");
+        }
     }
 }

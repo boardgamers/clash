@@ -6,7 +6,7 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::trigger_incident;
-use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
+use crate::log::{ActionLogBalance, ActionLogEntry, ActionLogIncidentToken, add_action_log_item};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::OnAdvanceInfo;
@@ -285,27 +285,18 @@ pub(crate) fn do_advance(
     p.advances.insert(advance);
     let t = p.incident_tokens;
 
-    player.log(
-        game,
-        &format!(
-            "Gain {} {}",
-            advance.name(game),
-            if take_incident_token {
-                (if t > 1 {
-                    format!("and take an event token ({} left)", t - 1)
-                } else {
-                    "and take an event token (triggering an incident)".to_string()
-                })
-                .to_string()
-            } else {
-                "without taking an event token".to_string()
-            }
-        ),
-    );
     add_action_log_item(
         game,
         player_index,
-        ActionLogEntry::advance(advance, ActionLogBalance::Gain, take_incident_token),
+        ActionLogEntry::advance(
+            advance,
+            ActionLogBalance::Gain,
+            if take_incident_token {
+                ActionLogIncidentToken::Take(t - 1)
+            } else {
+                ActionLogIncidentToken::NoChange
+            },
+        ),
         player.origin.clone(),
         vec![],
     );
@@ -391,7 +382,7 @@ pub(crate) fn execute_advance_action(
     gain_advance_without_payment(
         game,
         advance,
-        &EventPlayer::from_player(player_index, game, advance_event_origin()),
+        &EventPlayer::new(player_index, advance_event_origin()),
         a.payment.clone(),
         true,
     );
@@ -456,13 +447,18 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPl
             advance_bonus.resources(),
             EventOrigin::Advance(advance),
             vec![],
+            ActionLogBalance::Loss,
         );
     }
     game.player_mut(player_index).advances.remove(advance);
     add_action_log_item(
         game,
         player_index,
-        ActionLogEntry::advance(advance, ActionLogBalance::Loss, false),
+        ActionLogEntry::advance(
+            advance,
+            ActionLogBalance::Loss,
+            ActionLogIncidentToken::NoChange,
+        ),
         player.origin.clone(),
         vec![],
     );

@@ -273,11 +273,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Increase Happiness"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Increase Happiness"
@@ -309,15 +313,12 @@
                         "resources": {
                           "mood_tokens": 5
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Increase Happiness"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Increase Happiness: Pay 1 action, City C2 became Neutral, City B3 became Happy, Pay 5 mood tokens"
                   ]
                 }
               ]

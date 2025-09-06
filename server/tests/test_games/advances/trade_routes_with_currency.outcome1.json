@@ -392,8 +392,21 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 3 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -409,7 +422,8 @@
               },
               "actions": [
                 {
-                  "action": "StartTurn"
+                  "action": "StartTurn",
+                  "player": 1
                 },
                 {
                   "action": {
@@ -420,6 +434,7 @@
                       }
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -436,8 +451,9 @@
                     }
                   ],
                   "log": [
-                    "Player2: Trade Routes: Player2 selected trade routes, ship at E7 traded with city C6, settler at E7 traded with city E6, Gain 1 food and 1 gold"
-                  ]
+                    "Player2: Trade Routes: Player2 selected trade routes, ship at E7 traded with city C6, settler at E7 traded with city E6"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

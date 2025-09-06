@@ -287,6 +287,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -304,7 +305,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -313,11 +316,10 @@
                     }
                   ],
                   "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
                     "A new game event has been triggered: Population Boom",
                     "Player1: Population Boom: Base effect: Barbarians move"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -327,6 +329,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 2,
@@ -334,7 +337,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "B3"
                       },
                       "origin": {
                         "Incident": 28
@@ -346,7 +350,8 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Incident": 28
@@ -355,10 +360,9 @@
                   ],
                   "log": [
                     "Player2: Dictator: Selected Barbarian Armies that may NOT move: A3",
-                    "Player1: Population Boom: Barbarians move from B3 to B2: 2 infantry, Player2 was selected to gain 1 settler.",
-                    "Barbarians: Population Boom: Gain 1 infantry at B3",
-                    "Player2: Population Boom: Gain 1 settler at C1"
-                  ]
+                    "Player1: Population Boom: Barbarians move from B3 to B2: 2 infantry, Player2 was selected to gain 1 settler."
+                  ],
+                  "active_events": 3
                 }
               ]
             }

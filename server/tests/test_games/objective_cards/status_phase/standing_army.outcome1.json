@@ -273,14 +273,28 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player2: End Turn: 1 actions left"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
             },
             {
-              "turn_type": "StatusPhase",
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              },
               "actions": [
                 {
                   "action": {
@@ -292,6 +306,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -311,9 +326,18 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Standing Army using Food Supplies/Standing Army"
-                  ]
+                  "active_events": 2
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "FreeAdvance"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
                 }
               ]
             }
@@ -323,7 +347,7 @@
     }
   ],
   "log_index": 1,
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 1,
   "round": 4,
   "age": 1,

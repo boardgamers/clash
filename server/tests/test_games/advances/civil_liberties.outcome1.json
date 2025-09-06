@@ -209,11 +209,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "CivilLiberties"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "CivilLiberties"
@@ -231,9 +235,6 @@
                         "Ability": "Civil Liberties"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Civil Liberties: Pay 1 action, Start action, Gain 3 mood tokens"
                   ]
                 },
                 {
@@ -250,11 +251,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Recruit"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -266,7 +271,7 @@
                         "resources": {
                           "mood_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -283,7 +288,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -291,7 +297,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Recruit: Pay 1 action, Pay 2 mood tokens with Draft, Gain 1 infantry at A1",
                     "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
                   ]
                 }

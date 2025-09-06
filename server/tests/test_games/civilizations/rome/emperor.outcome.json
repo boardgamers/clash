@@ -370,6 +370,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -396,8 +400,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "leader": "Augustus"
+                        },
+                        "start": "E8",
+                        "destination": "D8"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -409,7 +426,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D8"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -432,7 +450,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "D8"
+                        "position": "D8",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -443,7 +462,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "D8"
+                        "position": "D8",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -461,10 +481,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched Augustus from E8 to D8, Pay 1 action",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with Augustus, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Emperor adds 2 combat value, Gain 2 gold, Gain city D8, City D8 became Angry",
-                    "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8, Lose city D8",
+                    "Player1: Combat: Attacking with Augustus, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Emperor adds 2 combat value",
+                    "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
                     "Player2: Choose Casualties: Remove all defending units",
                     "Attacker wins"
                   ]

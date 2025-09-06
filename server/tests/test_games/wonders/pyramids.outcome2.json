@@ -212,11 +212,15 @@
                       "WonderCard": "Pyramids"
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "Pyramids"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Build Wonder"
@@ -224,7 +228,7 @@
                     }
                   ],
                   "log": [
-                    "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city A1, Pay 1 action"
+                    "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city A1"
                   ]
                 },
                 {
@@ -241,6 +245,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -252,7 +257,7 @@
                           "gold": 1,
                           "culture_tokens": 5
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Wonder": "Pyramids"
@@ -280,17 +285,15 @@
                           "Wonder": "Pyramids"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Build Wonder"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens",
-                    "Player1: Build Wonder: Play Pyramids, Gain Pyramids at A1"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -302,6 +305,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -321,9 +325,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Magnificent Culture using Magnificent Culture/Outpost"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

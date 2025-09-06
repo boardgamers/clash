@@ -6,10 +6,10 @@ use crate::content::persistent_events::{
 };
 use crate::events::EventPlayer;
 use crate::game::Game;
+use crate::log::ActionLogEntry;
 use crate::map::{Block, BlockPosition, Map, Rotation, UnexploredBlock};
 use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -259,14 +259,7 @@ fn add_block_tiles_with_log(
         .retain(|b| b.position.top_tile != pos.top_tile);
 
     let tiles = block.tiles(pos, rotation);
-
-    let s = tiles
-        .into_iter()
-        .map(|(position, tile)| format!("{position}={tile}"))
-        .sorted()
-        .join(", ");
-
-    p.log(game, &format!("Explored tiles {s}"));
+    p.add_action_log_item(game, ActionLogEntry::explore_tiles(tiles));
     game.map.add_block_tiles(pos, block, rotation);
 }
 

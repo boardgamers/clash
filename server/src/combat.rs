@@ -431,7 +431,7 @@ fn take_over_city(
 }
 
 pub(crate) fn capture_position(game: &mut Game, stats: &mut CombatStats) {
-    let p = &EventPlayer::from_player(stats.attacker.player, game, combat_event_origin());
+    let p = &EventPlayer::new(stats.attacker.player, combat_event_origin());
     let old_player = stats.defender.player;
     let position = stats.defender.position;
     let captured_settlers = game.players[old_player]
@@ -451,7 +451,7 @@ pub(crate) fn capture_position(game: &mut Game, stats: &mut CombatStats) {
     }
     kill_units_with_stats(stats, game, old_player, &captured_settlers);
     if game.player(old_player).try_get_city(position).is_some() {
-        let d = &EventPlayer::from_player(old_player, game, combat_event_origin());
+        let d = &EventPlayer::new(old_player, combat_event_origin());
         conquer_city(game, position, p, d);
     }
 }
@@ -545,9 +545,8 @@ fn apply_battle_movement_restriction(game: &mut Game, player_index: usize, unit_
     }
 
     if used_longships {
-        EventPlayer::from_player(
+        EventPlayer::new(
             player_index,
-            game,
             EventOrigin::SpecialAdvance(SpecialAdvance::Longships),
         )
         .log(game, "Ignore battle movement restrictions");

@@ -412,14 +412,29 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 3 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
             },
             {
-              "turn_type": "StatusPhase",
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              },
               "actions": [
                 {
                   "action": {
@@ -431,6 +446,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -450,9 +466,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Complete Objectives: Complete Colony using Colony/Threat"
-                  ]
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -464,6 +478,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -484,9 +499,9 @@
                     }
                   ],
                   "log": [
-                    "Player2: Complete Objectives: Complete Outpost using Magnificent Culture/Outpost",
                     "The game has ended. Player2 has won"
-                  ]
+                  ],
+                  "active_events": 2
                 }
               ]
             }

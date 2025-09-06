@@ -234,11 +234,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -250,7 +254,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -272,7 +276,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -281,8 +287,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
                     "A new game event has been triggered: Great Diplomat",
                     "Player1: Great Diplomat: Base effect: Barbarians spawn, Barbarians cannot spawn a new city, Barbarians cannot reinforce"
                   ]
@@ -297,6 +301,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -304,7 +309,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 57
@@ -327,8 +332,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Great Diplomat: Pay 1 culture token, Gain Great Diplomat from the current event, Initiated diplomatic relations with Player2"
-                  ]
+                    "Player1: Great Diplomat: Initiated diplomatic relations with Player2"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -343,6 +349,10 @@
                         }
                       }
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
                   },
                   "combat_stats": {
                     "round": 1,
@@ -372,8 +382,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "start": "C2",
+                        "destination": "B1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -385,7 +408,7 @@
                         "resources": {
                           "culture_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -402,7 +425,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -414,7 +438,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "B1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -422,10 +447,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 1 infantry from C2 to B1 for 2 culture tokens, Pay 1 action, Pay 2 culture tokens with Great Diplomat",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
-                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B1",
+                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
+                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units",
                     "Player1: Diplomatic Relations: Diplomatic relations with Player2 ended with a surprise attack.",
                     "Player1: Choose Casualties: Remove all attacking units",
                     "Player2: Choose Casualties: Remove all defending units",

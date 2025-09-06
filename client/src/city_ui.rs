@@ -1,4 +1,4 @@
-use crate::action_buttons::{base_or_custom_action, custom_action_buttons};
+use crate::action_buttons::{base_or_modified_action, custom_action_buttons};
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
@@ -241,7 +241,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
         false,
         MultilineText::of(rc, "Collect Resources"),
         Box::new(move || {
-            base_or_custom_action(rc, &actions, "Collect resources", |custom| {
+            base_or_modified_action(rc, &actions, "Collect resources", |custom| {
                 let i = possible_resource_collections(
                     rc.game,
                     city.position,
@@ -345,27 +345,27 @@ pub(crate) fn draw_city(rc: &RenderContext, city: &City) -> RenderResult {
     {
         draw_selected_state(rc, c, 15., h)?;
     } else {
-        draw_mood_state(rc, city, c);
+        let mood = match &rc.state.active_dialog {
+            ActiveDialog::IncreaseHappiness(increase) => {
+                let steps = increase
+                    .steps
+                    .iter()
+                    .find(|(p, _)| p == &city.position)
+                    .map_or(&0, |(_, s)| s);
+                &city.mood_state.clone().add(*steps)
+            }
+            _ => &city.mood_state,
+        };
+
+        draw_mood_state(rc, c, mood);
     }
 
     let i = draw_wonders(rc, city, c, owner, highlighted)?;
     draw_buildings(rc, city, c, highlighted, i)
 }
 
-fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
-    let state = &rc.state;
-    let mood = match &state.active_dialog {
-        ActiveDialog::IncreaseHappiness(increase) => {
-            let steps = increase
-                .steps
-                .iter()
-                .find(|(p, _)| p == &city.position)
-                .map_or(&0, |(_, s)| s);
-            &city.mood_state.clone().add(*steps)
-        }
-        _ => &city.mood_state,
-    };
-    let t = match mood {
+pub(crate) fn draw_mood_state(rc: &RenderContext, c: Vec2, mood_state: &MoodState) {
+    let t = match mood_state {
         MoodState::Happy => Some(&rc.assets().resources[&ResourceType::MoodTokens]),
         MoodState::Neutral => None,
         MoodState::Angry => Some(&rc.assets().angry),
@@ -375,7 +375,7 @@ fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
         draw_scaled_icon(
             rc,
             t,
-            &format!("Happiness: {}", city.mood_state),
+            &format!("Happiness: {mood_state}"),
             c + vec2(-size / 2., -size / 2.),
             size,
         );

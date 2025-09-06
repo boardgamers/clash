@@ -222,11 +222,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Collect"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -245,12 +249,22 @@
                       "origin": {
                         "Ability": "Collect"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 idea",
-                    "Player1: Public Education: Gain 1 idea",
-                    "Player1: Waste: Could not store 1 ore"
+                    "Player1: Public Education: Gain 1 idea"
                   ]
                 }
               ]

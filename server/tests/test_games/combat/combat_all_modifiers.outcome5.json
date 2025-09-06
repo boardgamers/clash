@@ -223,11 +223,31 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -235,7 +255,6 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1, Pay 1 action",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
                     "Player2: Combat: Defending with 2 infantry"
@@ -251,6 +270,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -258,16 +278,14 @@
                         "resources": {
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "SteelWeapons"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Steel Weapons: Pay 1 ore"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -280,12 +298,13 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
                       "Resources": {
                         "resources": {},
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Siegecraft"
@@ -297,7 +316,7 @@
                         "resources": {
                           "ore": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Siegecraft"
@@ -305,8 +324,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Siegecraft: Pay nothing, Pay 2 ore, Cancel Fortress Ignore Hit"
-                  ]
+                    "Player1: Siegecraft: Cancel Fortress Ignore Hit"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -318,6 +338,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -325,16 +346,14 @@
                         "resources": {
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "SteelWeapons"
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Steel Weapons: Pay 1 ore"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -346,6 +365,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -363,9 +383,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Tactics: Play an action card face down"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -377,6 +395,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "CityWithFortress",
@@ -425,7 +444,8 @@
                         "units": {
                           "infantry": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -448,7 +468,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -459,7 +480,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -472,7 +494,8 @@
                           "Building": "Fortress"
                         },
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -485,23 +508,36 @@
                           "Building": "Fortress"
                         },
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player2: Tactics: Play an action card face down, Reveal Tactics Card Encircled",
                     "Player1: Tactics: Reveal Tactics Card Peltasts",
-                    "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units, Combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit, Gain 1 gold, Gain city C1, Gain Fortress at C1",
-                    "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, steel weapons added 1 combat value, Lost 2 infantry at C1, Lose city C1, Lose Fortress at C1",
+                    "Player2: Tactics: Reveal Tactics Card Encircled",
+                    "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units, Combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
+                    "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
                     "Player2: Encircled: Cannot do damage - opponent has fewer losses",
                     "Player2: Choose Casualties: Remove all defending units",
-                    "Attacker wins",
-                    "Player1: Waste: Could not store 1 gold"
-                  ]
+                    "Attacker wins"
+                  ],
+                  "active_events": 1
                 }
               ]
             }

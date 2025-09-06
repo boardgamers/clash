@@ -265,8 +265,26 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "ships": 2
+                        },
+                        "start": "C3",
+                        "destination": "D2"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ],
                   "log": [
-                    "Player1: Move: sailed 2 ships from C3 to D2",
                     "Combat round 1",
                     "Player1: Combat: Attacking with 1 settler, 2 ships, 1 cavalry and 1 elephant",
                     "Player2: Combat: Defending with 1 ship"
@@ -282,6 +300,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -299,9 +318,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Tactics: Play an action card face down"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -313,6 +330,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -331,10 +349,11 @@
                     }
                   ],
                   "log": [
-                    "Player2: Tactics: Play an action card face down, Reveal Tactics Card Martyr",
                     "Player1: Tactics: Reveal Tactics Card High Morale",
+                    "Player2: Tactics: Reveal Tactics Card Martyr",
                     "Player1: Martyr: Cannot use tactics card (but it is still discarded)"
-                  ]
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -344,6 +363,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -351,7 +371,8 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C3"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -359,9 +380,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Martyr: Player1 sacrifices a ship",
-                    "Player1: Combat: Lost 1 ship at C3"
-                  ]
+                    "Player1: Martyr: Player1 sacrifices a ship"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -371,6 +392,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "Sea",
@@ -403,7 +425,8 @@
                         "units": {
                           "elephants": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C3"
                       },
                       "origin": {
                         "Ability": "Choose Casualties (carried units)"
@@ -415,7 +438,8 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "D2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -423,12 +447,13 @@
                     }
                   ],
                   "log": [
-                    "Player1: Choose Casualties (carried units): Killed carried units: 1 elephant, Lost 1 elephant at C3",
+                    "Player1: Choose Casualties (carried units): Killed carried units: 1 elephant",
                     "Player2: Martyr: Player2 sacrifices a ship",
-                    "Player2: Combat: Lost 1 ship at D2, Roll no dice for combined combat value of 0 and gets 0 hits against attacking units",
                     "Player1: Combat: Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units",
+                    "Player2: Combat: Roll no dice for combined combat value of 0 and gets 0 hits against attacking units",
                     "Attacker wins"
-                  ]
+                  ],
+                  "active_events": 2
                 }
               ]
             }

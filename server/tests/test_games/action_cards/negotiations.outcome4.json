@@ -221,6 +221,10 @@
                       "ActionCard": 23
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 23
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -237,10 +241,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Negotiations/Scout",
-                    "Player1: Negotiations: Pay 1 culture token"
                   ]
                 },
                 {
@@ -253,6 +253,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -260,7 +261,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 23
@@ -268,15 +269,29 @@
                     }
                   ],
                   "log": [
-                    "Player1: Negotiations: Pay 1 culture token, Started negotiations with Player2"
-                  ]
+                    "Player1: Negotiations: Started negotiations with Player2"
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 3 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -288,6 +303,7 @@
               "actions": [
                 {
                   "action": "StartTurn",
+                  "player": 1,
                   "log": [
                     "Player2: Negotiations: May not attack Player1 this turn."
                   ]
@@ -296,8 +312,21 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player2: End Turn: 3 actions left"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -314,6 +343,7 @@
               "actions": [
                 {
                   "action": "StartTurn",
+                  "player": 0,
                   "log": [
                     "Player1: Negotiations: May attack Player2 again."
                   ]
@@ -328,6 +358,10 @@
                         "destination": "B1"
                       }
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
                   },
                   "combat_stats": {
                     "round": 1,
@@ -357,8 +391,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "start": "C2",
+                        "destination": "B1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -370,7 +417,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -382,7 +430,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "B1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -390,10 +439,9 @@
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 1 infantry from C2 to B1, Pay 1 action",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
-                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B1",
+                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
+                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units",
                     "Player1: Choose Casualties: Remove all attacking units",
                     "Player2: Choose Casualties: Remove all defending units",
                     "Battle ends in a draw"

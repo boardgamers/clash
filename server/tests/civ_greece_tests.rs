@@ -1,7 +1,7 @@
 use crate::common::{JsonTest, TestAction, custom_action, move_action, payment_response};
 use server::action::Action;
 use server::city_pieces::Building;
-use server::content::custom_actions::CustomActionType;
+use server::content::custom_actions::{CustomActionType, PlayingActionModifier, SpecialAction};
 use server::content::persistent_events::{EventResponse, SelectedStructure};
 use server::cultural_influence::{InfluenceCultureAttempt, affordable_start_city};
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -45,8 +45,9 @@ fn sparta_battle() {
 fn hellenistic_culture_staring_point() {
     let game = &JSON.load_game("hellenistic_culture");
 
-    let action_type =
-        &PlayingActionType::Custom(CustomActionType::HellenisticInfluenceCultureAttempt);
+    let action_type = &PlayingActionType::Special(SpecialAction::Modifier(
+        PlayingActionModifier::HellenisticInfluenceCultureAttempt,
+    ));
     assert_eq!(
         affordable_start_city(
             game,
@@ -84,9 +85,9 @@ fn hellenistic_culture_cost() {
                             Position::from_offset("C2"),
                             Structure::Building(Building::Port),
                         ),
-                        PlayingActionType::Custom(
-                            CustomActionType::HellenisticInfluenceCultureAttempt,
-                        ),
+                        PlayingActionType::Special(SpecialAction::Modifier(
+                            PlayingActionModifier::HellenisticInfluenceCultureAttempt,
+                        )),
                     ),
                 )),
             )

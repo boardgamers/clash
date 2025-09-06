@@ -5,7 +5,7 @@ use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
-use crate::content::custom_actions::{CustomActionType, any_non_happy};
+use crate::content::custom_actions::{CustomActionType, PlayingActionModifier, any_non_happy};
 use crate::content::persistent_events::PaymentRequest;
 use crate::events::{EventOrigin, check_event_origin};
 use crate::game::GameOptions;
@@ -37,7 +37,7 @@ fn arts() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Obelisk)
     .add_action_modifier(
-        CustomActionType::ArtsInfluenceCultureAttempt,
+        PlayingActionModifier::ArtsInfluenceCultureAttempt,
         |c| {
             c.once_per_turn()
                 .free_action()

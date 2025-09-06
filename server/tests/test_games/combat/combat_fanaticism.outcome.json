@@ -234,6 +234,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -263,8 +267,24 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -276,7 +296,8 @@
                         "units": {
                           "infantry": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -299,7 +320,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -310,7 +332,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -323,7 +346,8 @@
                           "Building": "Temple"
                         },
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -336,7 +360,8 @@
                           "Building": "Temple"
                         },
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -348,7 +373,8 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C2"
                       },
                       "origin": {
                         "Advance": "Fanaticism"
@@ -360,23 +386,32 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Place Settler"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
                   "log": [
-                    "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1, Pay 1 action",
                     "Combat round 1",
-                    "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold, Gain city C1, Gain Temple at C1",
-                    "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: Player gets +2 combat value for Fanaticism Advance, Lost 2 infantry at C1, Lose city C1, Lose Temple at C1",
+                    "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units",
+                    "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: Player gets +2 combat value for Fanaticism Advance",
                     "Player2: Choose Casualties: Remove all defending units",
-                    "Attacker wins",
-                    "Player2: Fanaticism: Gain 1 infantry at C2",
-                    "Player2: Place Settler: Gain 1 settler at C2",
-                    "Player1: Waste: Could not store 1 gold"
+                    "Attacker wins"
                   ]
                 }
               ]
