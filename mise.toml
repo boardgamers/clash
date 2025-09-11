@@ -67,8 +67,8 @@ description = "Test publish client (the real one is done in GitHub Actions)"
 run = "./scripts/publish-client.sh test"
 
 [tools]
-"cargo:cargo-nextest" = "0.9.98"
-"cargo:wasm-bindgen-cli" = "0.2.100"
+"cargo:cargo-nextest" = "0.9.103"
+"cargo:wasm-bindgen-cli" = "0.2.101"
 "cargo:wasm-pack" = "0.13.1"
 rust = { version = "1.89.0", targets = "wasm32-unknown-unknown", components = "clippy,rustfmt" }
 
