@@ -24,7 +24,6 @@ pub(crate) fn undo(mut game: Game) -> Result<Game, String> {
     };
 
     let item = l.get_mut(i).expect("should have undoable action");
-    item.log.clear();
     item.items.clear();
     let p = std::mem::take(&mut item.undo);
 

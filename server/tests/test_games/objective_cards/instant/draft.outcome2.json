@@ -266,6 +266,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
+                      "origin": {
+                        "Advance": "Draft"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -277,9 +284,6 @@
                         "Ability": "Recruit"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
                   ]
                 },
                 {
@@ -329,6 +333,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
+                      "origin": {
+                        "Advance": "Draft"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Neutral"
@@ -350,9 +361,6 @@
                         "Ability": "Recruit"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
                   ]
                 },
                 {

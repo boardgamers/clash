@@ -285,10 +285,14 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Black Death",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Black Death"
                   ]
                 },
                 {
@@ -313,10 +317,14 @@
                       "origin": {
                         "Incident": 50
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain 1 victory points",
+                      "origin": {
+                        "Incident": 50
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Black Death: Gain 1 victory points"
                   ],
                   "active_events": 1
                 }

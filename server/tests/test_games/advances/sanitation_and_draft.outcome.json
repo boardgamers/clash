@@ -325,6 +325,20 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
+                      "origin": {
+                        "Advance": "Draft"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Reduce the cost of 1 Settler to 1 mood token",
+                      "origin": {
+                        "Advance": "Sanitation"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "settlers": 1,
@@ -337,10 +351,6 @@
                         "Ability": "Recruit"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
-                    "Player1: Sanitation: Reduce the cost of 1 Settler to 1 mood token"
                   ]
                 }
               ]

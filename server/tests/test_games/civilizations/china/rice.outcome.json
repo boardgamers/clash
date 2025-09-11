@@ -287,10 +287,14 @@
                           "Advance": "Irrigation"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Added 1 food",
+                      "origin": {
+                        "SpecialAdvance": "RiceCultivation"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Rice Cultivation: Added 1 food"
                   ]
                 }
               ]

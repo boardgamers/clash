@@ -238,8 +238,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: New Ideas: Selected Storage as advance for New Ideas."
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Selected Storage as advance for New Ideas.",
+                      "origin": {
+                        "CivilCard": 41
+                      }
+                    }
                   ],
                   "active_events": 1
                 },

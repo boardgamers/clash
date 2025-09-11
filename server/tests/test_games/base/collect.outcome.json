@@ -252,6 +252,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Gain 1 idea",
+                      "origin": {
+                        "Advance": "PublicEducation"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ore": 1
@@ -262,9 +269,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Public Education: Gain 1 idea"
                   ]
                 }
               ]

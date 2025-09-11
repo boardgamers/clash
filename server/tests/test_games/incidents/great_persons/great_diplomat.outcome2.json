@@ -284,11 +284,35 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Diplomat",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians spawn",
+                      "origin": {
+                        "Incident": 57
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 57
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot reinforce",
+                      "origin": {
+                        "Incident": 57
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Diplomat",
-                    "Player1: Great Diplomat: Base effect: Barbarians spawn, Barbarians cannot spawn a new city, Barbarians cannot reinforce"
                   ]
                 },
                 {
@@ -329,10 +353,14 @@
                       "origin": {
                         "Incident": 57
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Initiated diplomatic relations with Player2",
+                      "origin": {
+                        "Incident": 57
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Diplomat: Initiated diplomatic relations with Player2"
                   ],
                   "active_events": 1
                 },
@@ -421,6 +449,70 @@
                     },
                     {
                       "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Diplomatic relations with Player2 ended with a surprise attack.",
+                      "origin": {
+                        "Ability": "Diplomatic Relations"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove all attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -430,6 +522,13 @@
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -444,16 +543,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "ends the battle in a draw",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
-                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units",
-                    "Player1: Diplomatic Relations: Diplomatic relations with Player2 ended with a surprise attack.",
-                    "Player1: Choose Casualties: Remove all attacking units",
-                    "Player2: Choose Casualties: Remove all defending units",
-                    "Battle ends in a draw"
                   ]
                 }
               ]

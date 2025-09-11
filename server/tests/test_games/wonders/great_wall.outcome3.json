@@ -309,6 +309,77 @@
                     },
                     {
                       "player": 1,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 2
+                        },
+                        "defending_player": 0,
+                        "defenders": {
+                          "infantry": 1,
+                          "cavalry": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 14,
+                        "hits": 2
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 11,
+                        "hits": 2,
+                        "combat_modifiers": [
+                          "Great Wall gives -2 combat value in the first round"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove all attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 2
@@ -318,6 +389,13 @@
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -333,15 +411,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "ends the battle in a draw",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player2: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units",
-                    "Player1: Combat: Defending with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units, Combat modifiers: Great Wall gives -2 combat value in the first round",
-                    "Player2: Choose Casualties: Remove all attacking units",
-                    "Player1: Choose Casualties: Remove all defending units",
-                    "Battle ends in a draw"
                   ]
                 },
                 {
@@ -464,6 +541,34 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "triggers the event Envoy",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians move from A2 to A1: 1 infantry and 1 elephant",
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Automatic win against Barbarians",
+                      "origin": {
+                        "Wonder": "GreatWall"
+                      }
+                    },
+                    {
                       "player": 2,
                       "Units": {
                         "units": {
@@ -516,6 +621,20 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "No Wonders left to draw",
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "No wonders left to draw as public wonder card",
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
                       "player": 1,
                       "Resources": {
                         "resources": {
@@ -527,12 +646,6 @@
                         "Incident": 40
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Envoy",
-                    "Player1: Envoy: Base effect: Barbarians move, Barbarians move from A2 to A1: 1 infantry and 1 elephant, No wonders left to draw as public wonder card",
-                    "Player1: Great Wall: Automatic win against Barbarians",
-                    "No Wonders left to draw"
                   ]
                 },
                 {

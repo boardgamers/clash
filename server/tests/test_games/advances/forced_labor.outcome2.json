@@ -272,10 +272,14 @@
                       "origin": {
                         "Advance": "ForcedLabor"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Treating Angry cities as neutral",
+                      "origin": {
+                        "Ability": "Forced Labor"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Forced Labor: Treating Angry cities as neutral"
                   ],
                   "active_events": 1
                 },

@@ -462,6 +462,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Decided to play Spy as a free action",
+                      "origin": {
+                        "Ability": "Idol"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 7
@@ -475,9 +482,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Idol: Decided to play Spy as a free action"
                   ],
                   "active_events": 1
                 },
@@ -504,10 +508,14 @@
                       "origin": {
                         "CivilCard": 7
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Decided to looked at all Wonder, Action, and Objective cards of Player2",
+                      "origin": {
+                        "CivilCard": 7
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Spy: Decided to looked at all Wonder, Action, and Objective cards of Player2"
                   ],
                   "active_events": 2
                 }

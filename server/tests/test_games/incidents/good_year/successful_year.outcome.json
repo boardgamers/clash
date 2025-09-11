@@ -280,6 +280,27 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "triggers the event A successful year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 54
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "No valid positions for Pirate Ship",
+                      "origin": {
+                        "Incident": 54
+                      }
+                    },
+                    {
                       "player": 1,
                       "Resources": {
                         "resources": {
@@ -291,10 +312,6 @@
                         "Incident": 54
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: A successful year",
-                    "Player1: A successful year: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ],
                   "active_events": 1
                 }

@@ -1,6 +1,6 @@
 use crate::client_state::{NO_UPDATE, PendingUpdate, RenderResult, StateUpdate};
 use crate::layout_ui::{bottom_centered_text_with_offset, bottom_right_texture, icon_pos};
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use macroquad::math::{Vec2, vec2};
 use server::playing_actions::PlayingActionType;

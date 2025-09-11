@@ -5,6 +5,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 47,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0
         }
       },
@@ -303,11 +306,21 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Era of Stability",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Exhausted the land in position B1",
+                      "origin": {
+                        "Incident": 47
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Era of Stability",
-                    "Player1: Era of Stability: Exhausted the land in position B1"
                   ]
                 }
               ]

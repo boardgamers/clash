@@ -135,7 +135,7 @@ impl PlayingActionType {
             PlayingActionType::IncreaseHappiness => happiness_base_event_origin(),
             PlayingActionType::InfluenceCultureAttempt => influence_base_origin(),
             PlayingActionType::ActionCard(a) => EventOrigin::CivilCard(*a),
-            PlayingActionType::WonderCard(w) => EventOrigin::Wonder(*w),
+            PlayingActionType::WonderCard(_) => wonder_origin(),
             PlayingActionType::Special(c) => player.special_action_info(c).event_origin,
             PlayingActionType::MoveUnits => move_event_origin(),
             PlayingActionType::EndTurn => end_turn_origin(),
@@ -236,7 +236,7 @@ impl PlayingAction {
                     WonderCardInfo::new(
                         w,
                         wonder_cost(game, game.player(player_index), w),
-                        EventOrigin::Ability("Build Wonder".to_string()),
+                        wonder_origin(),
                     ),
                 );
             }
@@ -391,7 +391,7 @@ pub(crate) fn pay_for_action() -> Ability {
 
 fn end_turn(game: &mut Game, player: usize) {
     if game.actions_left > 0 {
-        EventPlayer::new(player, end_turn_origin()).add_action_log_item(
+        EventPlayer::new(player, end_turn_origin()).add_log_entry(
             game,
             ActionLogEntry::action(ActionLogBalance::Loss, game.actions_left),
         );
@@ -401,6 +401,10 @@ fn end_turn(game: &mut Game, player: usize) {
 
 pub(crate) fn end_turn_origin() -> EventOrigin {
     EventOrigin::Ability("End Turn".to_string())
+}
+
+pub(crate) fn wonder_origin() -> EventOrigin {
+    EventOrigin::Ability("Build Wonder".to_string())
 }
 
 fn add_override_origin(

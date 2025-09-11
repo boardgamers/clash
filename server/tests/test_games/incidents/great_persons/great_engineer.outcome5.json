@@ -284,11 +284,35 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Engineer",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 26
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot move - will try to spawn a new city instead",
+                      "origin": {
+                        "Incident": 26
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 26
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Engineer",
-                    "Player1: Great Engineer: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
                   ]
                 },
                 {
@@ -395,6 +419,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Unlock Aqueduct",
+                      "origin": {
+                        "CivilCard": 126
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Advance": {
                         "advance": "Engineering",
                         "incident_token": "NoChange",
@@ -404,9 +435,6 @@
                         "CivilCard": 126
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Engineer: Unlock Aqueduct"
                   ],
                   "active_events": 1
                 },
@@ -420,6 +448,13 @@
                   "items": [
                     {
                       "player": 0,
+                      "Text": "Great Engineer: You may build a building in a city without spending an action and without activating it.",
+                      "origin": {
+                        "CivilCard": 126
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
                         "balance": "Gain"
                       },
@@ -427,9 +462,6 @@
                         "CivilCard": 126
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it."
                   ],
                   "active_events": 1
                 },
@@ -486,6 +518,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "May replace resources with mood tokens",
+                      "origin": {
+                        "SpecialAdvance": "Captivi"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Structure": {
                         "structure": {
                           "Building": "Fortress"
@@ -498,9 +537,6 @@
                         "Ability": "Construct Building"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Captivi: May replace resources with mood tokens"
                   ]
                 }
               ]

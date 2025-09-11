@@ -383,7 +383,7 @@ fn new_colonies() -> LeaderAbility {
 
                     let m = MoveUnits::new(units, to, None, ResourcePile::empty());
                     s.player()
-                        .add_action_log_item(game, ActionLogEntry::move_units(p, &m));
+                        .add_log_entry(game, ActionLogEntry::move_units(p, &m));
 
                     move_with_possible_combat(game, s.player_index, &m);
                 },

@@ -278,10 +278,14 @@
                       "origin": {
                         "Ability": "Observatory"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Observatory gained 1 action card",
+                      "origin": {
+                        "Ability": "Observatory"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Observatory: Observatory gained 1 action card"
                   ]
                 }
               ]

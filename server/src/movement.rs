@@ -292,7 +292,7 @@ pub(crate) fn execute_movement_action(
             player.log(game, "Used a movement actions but moved no units");
         }
         Move(m) => {
-            player.add_action_log_item(game, ActionLogEntry::move_units(player.get(game), m));
+            player.add_log_entry(game, ActionLogEntry::move_units(player.get(game), m));
         }
         Stop => player.log(game, "End the movement action"),
     }

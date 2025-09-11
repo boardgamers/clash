@@ -221,7 +221,7 @@
                   },
                   "player": 0,
                   "origin": {
-                    "Wonder": "GreatLighthouse"
+                    "Ability": "Build Wonder"
                   },
                   "items": [
                     {
@@ -233,9 +233,6 @@
                         "Ability": "Build Wonder"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Build Wonder: Play the wonder card Great Lighthouse, Decided to build Great Lighthouse in city A1"
                   ]
                 },
                 {

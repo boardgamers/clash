@@ -254,10 +254,14 @@
                       "origin": {
                         "Ability": "Action Card"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "You may influence Barbarian cities of size 1.",
+                      "origin": {
+                        "CivilCard": 15
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Cultural Takeover: You may influence Barbarian cities of size 1."
                   ]
                 },
                 {
@@ -285,10 +289,38 @@
                       "origin": {
                         "Ability": "Influence Culture"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "InfluenceCultureAttempt": {
+                        "target_player": 2,
+                        "structure": "CityCenter",
+                        "prevent_boost": false,
+                        "range_boost_cost": {
+                          "default": {
+                            "culture_tokens": 2
+                          },
+                          "origin": {
+                            "Ability": "Influence Culture"
+                          }
+                        },
+                        "info": {
+                          "player": 0,
+                          "origin": {
+                            "Ability": "Influence Culture"
+                          },
+                          "info": {},
+                          "log": []
+                        },
+                        "roll_boost": 0,
+                        "position": "B3",
+                        "starting_city_position": "A1",
+                        "barbarian_takeover": false
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Influence Culture: Tried to influence the City Center in the city at B3 by Barbarians with the city A1 and may pay 2 culture tokens to boost the range"
                   ]
                 },
                 {
@@ -311,6 +343,13 @@
                         },
                         "balance": "Pay"
                       },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Cultural influence succeeded (rolls 6)",
                       "origin": {
                         "Ability": "Influence Culture"
                       }
@@ -352,9 +391,6 @@
                         "CivilCard": 15
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Influence Culture: Cultural influence succeeded (rolled 6)"
                   ],
                   "active_events": 1
                 }

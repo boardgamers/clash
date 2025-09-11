@@ -333,6 +333,20 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Ideas limit reduced to 2",
+                      "origin": {
+                        "Advance": "Dogma"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Unlock Provinces",
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Advance": {
                         "advance": "Dogma",
                         "incident_token": {
@@ -356,10 +370,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Dogma: Ideas limit reduced to 2",
-                    "Player2: Advance: Unlock Provinces"
                   ]
                 },
                 {
@@ -410,6 +420,13 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Reduce the food cost to 0",
+                      "origin": {
+                        "Advance": "StateReligion"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Structure": {
                         "structure": {
                           "Building": "Temple"
@@ -422,9 +439,6 @@
                         "Ability": "Construct Building"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: State Religion: Reduce the food cost to 0"
                   ]
                 },
                 {
@@ -475,6 +489,13 @@
                     },
                     {
                       "player": 1,
+                      "Text": "triggers the event Anarchy",
+                      "origin": {
+                        "Advance": "Fanaticism"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Advance": {
                         "advance": "Dogma",
                         "incident_token": "NoChange",
@@ -494,11 +515,14 @@
                       "origin": {
                         "Incident": 44
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Lose 2 government advances due to Anarchy - adding 2 victory points",
+                      "origin": {
+                        "Incident": 44
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Anarchy",
-                    "Player2: Anarchy: Lose 2 government advances due to Anarchy - adding 2 victory points"
                   ],
                   "active_events": 1
                 }

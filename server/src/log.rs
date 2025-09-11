@@ -1,7 +1,9 @@
 use crate::advance::Advance;
 use crate::card::{HandCard, HandCardLocation};
 use crate::city::MoodState;
+use crate::combat_roll::UnitCombatRoll;
 use crate::combat_stats::CombatStats;
+use crate::cultural_influence::InfluenceCultureAttemptInfo;
 use crate::events::EventOrigin;
 use crate::map::Terrain;
 use crate::movement::{MoveUnits, move_event_origin};
@@ -48,10 +50,18 @@ impl ActionLogRound {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct SetupTurnType {
+    pub player: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub civilization: Option<String>,
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum TurnType {
     Player(usize),
-    Setup(usize),
+    Setup(SetupTurnType),
     StatusPhase(StatusPhaseStateType),
 }
 
@@ -100,9 +110,6 @@ pub struct ActionLogAction {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub items: Vec<ActionLogItem>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub log: Vec<String>,
-    #[serde(default)]
     #[serde(skip_serializing_if = "usize::is_zero")]
     pub active_events: usize,
 }
@@ -122,7 +129,6 @@ impl ActionLogAction {
             undo: Vec::new(),
             combat_stats: None,
             items: Vec::new(),
-            log: Vec::new(),
             active_events,
         }
     }
@@ -160,7 +166,33 @@ pub struct ActionLogEntryMove {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct ActionLogEntryCombatRound {
+    pub attackers: Units,
+    pub defending_player: usize,
+    pub defenders: Units,
+    pub round: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct ActionLogEntryCombatRoll {
+    pub rolls: Vec<UnitCombatRoll>,
+    pub combat_value: u8,
+    pub hits: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub combat_modifiers: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct ActionLogEntryAdvance {
+    pub advance: Advance,
+    pub incident_token: ActionLogIncidentToken,
+    balance: ActionLogBalance,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum ActionLogEntry {
+    Text(String),
     Action {
         balance: ActionLogBalance,
         #[serde(default)]
@@ -171,11 +203,7 @@ pub enum ActionLogEntry {
         resources: ResourcePile,
         balance: ActionLogBalance,
     },
-    Advance {
-        advance: Advance,
-        incident_token: ActionLogIncidentToken,
-        balance: ActionLogBalance,
-    },
+    Advance(ActionLogEntryAdvance),
     Units {
         units: Units,
         balance: ActionLogBalance,
@@ -195,6 +223,9 @@ pub enum ActionLogEntry {
     Explore {
         tiles: Vec<(Position, Terrain)>,
     },
+    CombatRound(ActionLogEntryCombatRound),
+    CombatRoll(ActionLogEntryCombatRoll),
+    InfluenceCultureAttempt(InfluenceCultureAttemptInfo),
 }
 
 impl ActionLogEntry {
@@ -203,14 +234,16 @@ impl ActionLogEntry {
         match self {
             ActionLogEntry::Action { balance, .. }
             | ActionLogEntry::Resources { balance, .. }
-            | ActionLogEntry::Advance { balance, .. }
             | ActionLogEntry::Units { balance, .. } => Some(balance),
             ActionLogEntry::Structure(s) => Some(&s.balance),
-            ActionLogEntry::HandCard { .. }
-            | ActionLogEntry::MoodChange { .. }
-            | ActionLogEntry::Move { .. }
-            | ActionLogEntry::Explore { .. } => None,
+            ActionLogEntry::Advance(a) => Some(&a.balance),
+            _ => None,
         }
+    }
+
+    #[must_use]
+    pub fn message(text: String) -> Self {
+        Self::Text(text)
     }
 
     #[must_use]
@@ -233,11 +266,11 @@ impl ActionLogEntry {
         balance: ActionLogBalance,
         incident_token: ActionLogIncidentToken,
     ) -> Self {
-        Self::Advance {
+        Self::Advance(ActionLogEntryAdvance {
             advance,
             incident_token,
             balance,
-        }
+        })
     }
 
     #[must_use]

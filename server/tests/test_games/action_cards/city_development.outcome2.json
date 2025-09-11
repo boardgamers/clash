@@ -280,10 +280,14 @@
                       "origin": {
                         "CivilCard": 17
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "You may build a building in a city without spending an action and without paying resources.",
+                      "origin": {
+                        "CivilCard": 17
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: City Development: You may build a building in a city without spending an action and without paying resources."
                   ],
                   "active_events": 1
                 },
@@ -332,6 +336,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "May replace resources with mood tokens",
+                      "origin": {
+                        "SpecialAdvance": "Captivi"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Structure": {
                         "structure": {
                           "Building": "Fortress"
@@ -344,9 +355,6 @@
                         "Ability": "Construct Building"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Captivi: May replace resources with mood tokens"
                   ]
                 }
               ]

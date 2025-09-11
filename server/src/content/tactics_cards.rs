@@ -22,7 +22,7 @@ pub(crate) fn peltasts(id: u8) -> TacticsCard {
         id,
         "Peltasts",
         "Roll a die for each of your Army units. \
-        If you rolled a 5 or 6, ignore 1 hit",
+        If you rolls a 5 or 6, ignore 1 hit",
     )
     .fighter_requirement(FighterRequirement::Army)
     .add_reveal_listener(7, |player, game, combat, s| {
@@ -30,12 +30,12 @@ pub(crate) fn peltasts(id: u8) -> TacticsCard {
             let roll = game.next_dice_roll().value;
             if roll >= 5 {
                 s.roll_log
-                    .push(format!("Peltasts rolled a {roll} and ignored a hit",));
+                    .push(format!("Peltasts rolls a {roll} and ignored a hit",));
                 s.hit_cancels += 1;
                 return;
             }
         }
-        s.roll_log.push("Pelts rolled no 5 or 6".to_string());
+        s.roll_log.push("Pelts rolls no 5 or 6".to_string());
     })
     .build()
 }
@@ -66,11 +66,11 @@ pub(crate) fn encircled(id: u8) -> TacticsCard {
             if roll >= 5 {
                 p.log(
                     game,
-                    "Rolled a 5 or 6 and added a hit that cannot be ignored",
+                    "rolls a 5 or 6 and added a hit that cannot be ignored",
                 );
                 e.update_hits(role, true, |h| h.extra_hits += 1);
             } else {
-                p.log(game, "Rolled no 5 or 6");
+                p.log(game, "rolls no 5 or 6");
             }
         } else {
             p.log(game, "Cannot do damage - opponent has fewer losses");
@@ -405,9 +405,9 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
 
             let roll = game.next_dice_roll().value;
             if roll >= 5 {
-                p.log(game, &format!("Rolled a {roll} and scored a hit"));
+                p.log(game, &format!("rolls a {roll} and scored a hit"));
             } else {
-                p.log(game, &format!("Rolled a {roll} and did not score a hit"));
+                p.log(game, &format!("rolls a {roll} and did not score a hit"));
                 return None;
             }
 

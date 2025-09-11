@@ -409,6 +409,76 @@
                     },
                     {
                       "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "ships": 4
+                        },
+                        "defending_player": 2,
+                        "defenders": {
+                          "ships": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 24,
+                        "hits": 2
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 12,
+                        "hits": 2
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -417,6 +487,13 @@
                       },
                       "origin": {
                         "Ability": "Pirate ship destroyed"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove 2 of their attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -434,6 +511,13 @@
                     },
                     {
                       "player": 2,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 2,
                       "Units": {
                         "units": {
                           "ships": 2
@@ -444,15 +528,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 4 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 24 and gets 2 hits against defending units",
-                    "Pirates: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units",
-                    "Player1: Choose Casualties: Remove 2 of their attacking units",
-                    "Pirates: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ],
                   "active_events": 1
                 },
@@ -544,6 +627,63 @@
                     },
                     {
                       "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "ships": 2
+                        },
+                        "defending_player": 2,
+                        "defenders": {
+                          "ships": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 12,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 1,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -552,6 +692,13 @@
                       },
                       "origin": {
                         "Ability": "Pirate ship destroyed"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -569,6 +716,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -579,13 +733,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units",
-                    "Pirates: Combat: Defending with 1 ship, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units",
-                    "Pirates: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ]
                 },
                 {

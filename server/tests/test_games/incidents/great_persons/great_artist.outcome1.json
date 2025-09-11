@@ -280,11 +280,42 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Artist",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 19
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot move - will try to spawn a new city instead",
+                      "origin": {
+                        "Incident": 19
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 19
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Cannot afford to buy Great Artist",
+                      "origin": {
+                        "Incident": 19
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Artist",
-                    "Player1: Great Artist: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Cannot afford to buy Great Artist"
                   ]
                 },
                 {

@@ -423,11 +423,21 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "triggers the event Great Warlord",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Exhausted the land in position E8",
+                      "origin": {
+                        "Incident": 24
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Warlord",
-                    "Player2: Great Warlord: Exhausted the land in position E8"
                   ]
                 },
                 {
@@ -584,6 +594,66 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 0,
+                        "defenders": {
+                          "infantry": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 5,
+                            "unit_type": "Cavalry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1,
+                        "combat_modifiers": [
+                          "Player gets +2 combat value for Great Warlord"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 2,
+                            "unit_type": "Cavalry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 2,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Units": {
                         "units": {
@@ -595,14 +665,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player2: Combat: Attacking with 1 infantry, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Player gets +2 combat value for Great Warlord",
-                    "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
-                    "Player1: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ]
                 }
               ]

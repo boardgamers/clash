@@ -325,6 +325,13 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Reduce the cost to 0",
+                      "origin": {
+                        "Advance": "Priesthood"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -360,9 +367,6 @@
                         "Advance": "Philosophy"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Priesthood: Reduce the cost to 0"
                   ]
                 },
                 {

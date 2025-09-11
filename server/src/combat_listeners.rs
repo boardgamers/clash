@@ -5,7 +5,7 @@ use crate::combat_roll::CombatHits;
 use crate::combat_stats::CombatStats;
 use crate::content::ability::{Ability, combat_event_origin};
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::current_action_log_mut;
 use crate::movement::move_units;
@@ -322,7 +322,7 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
 }
 
 fn attacker_wins(game: &mut Game, mut c: Combat) {
-    game.add_info_log_item("Attacker wins");
+    log_winner(game, c.attacker(), None);
     move_units(
         game,
         c.attacker(),
@@ -334,20 +334,26 @@ fn attacker_wins(game: &mut Game, mut c: Combat) {
     end_combat_and_store_stats(game, CombatEnd::new(CombatResult::AttackerWins, c));
 }
 
+fn log_winner(game: &mut Game, player_index: usize, origin: Option<EventOrigin>) {
+    EventPlayer::new(player_index, origin.unwrap_or(combat_event_origin()))
+        .log(game, "wins the battle");
+}
+
 fn defender_wins(game: &mut Game, c: Combat) {
-    game.add_info_log_item("Defender wins");
+    log_winner(game, c.defender(), None);
     end_combat_and_store_stats(game, CombatEnd::new(CombatResult::DefenderWins, c));
 }
 
 pub(crate) fn draw(game: &mut Game, c: Combat) {
     if c.defender_fortress(game) && c.first_round() {
-        game.add_info_log_item(&format!(
-            "{} wins the battle because he has a defending fortress",
-            game.player_name(c.defender())
-        ));
+        log_winner(
+            game,
+            c.defender(),
+            Some(EventOrigin::Ability("fortress".to_string())),
+        );
         return end_combat_and_store_stats(game, CombatEnd::new(CombatResult::DefenderWins, c));
     }
-    game.add_info_log_item("Battle ends in a draw");
+    EventPlayer::new(c.attacker(), combat_event_origin()).log(game, "ends the battle in a draw");
     end_combat_and_store_stats(game, CombatEnd::new(CombatResult::Draw, c));
 }
 

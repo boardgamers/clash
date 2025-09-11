@@ -440,6 +440,27 @@
                     },
                     {
                       "player": 1,
+                      "Text": "ship at E7 traded with city D6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "settler at E7 traded with city E6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Raided Player1 at D6",
+                      "origin": {
+                        "SpecialAdvance": "Raiding"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -462,10 +483,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6",
-                    "Player2: Raiding: Raided Player1 at D6"
                   ]
                 },
                 {
@@ -519,10 +536,14 @@
                       "origin": {
                         "Ability": "Viking Raids"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lose 1 food",
+                      "origin": {
+                        "Ability": "Viking Raids"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Viking Raids: Lose 1 food"
                   ],
                   "active_events": 1
                 }

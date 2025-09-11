@@ -12,6 +12,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 54,
+           "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0,
           "barbarians": {}
         }
@@ -275,11 +278,21 @@
                       "origin": {
                         "Ability": "Free Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event A successful year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 54
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: A successful year",
-                    "Player1: A successful year: Base effect: Pirates spawn"
                   ],
                   "active_events": 1
                 }

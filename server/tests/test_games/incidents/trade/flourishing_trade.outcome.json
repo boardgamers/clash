@@ -260,6 +260,27 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Flourishing Trade",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 46
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "No valid positions for Pirate Ship",
+                      "origin": {
+                        "Incident": 46
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -294,10 +315,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Flourishing Trade",
-                    "Player1: Flourishing Trade: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
                 }
               ]

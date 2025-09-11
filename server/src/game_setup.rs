@@ -12,7 +12,8 @@ use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
 use crate::log::{
-    ActionLogAge, ActionLogRound, TurnType, add_start_turn_action_if_needed, add_turn_log,
+    ActionLogAge, ActionLogRound, SetupTurnType, TurnType, add_start_turn_action_if_needed,
+    add_turn_log,
 };
 use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
@@ -146,13 +147,14 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         .collect_vec()
         .shuffled(&mut rng);
     let all = &cache.get_abilities().clone();
+    let choose_civ = setup.options.civilization == CivSetupOption::ChooseCivilization;
     let mut game = Game {
         seed: setup.seed.clone(),
         context: GameContext::Play,
         version: JSON_SCHEMA_VERSION,
         options: setup.options.clone(),
         cache,
-        state: if setup.options.civilization == CivSetupOption::ChooseCivilization {
+        state: if choose_civ {
             GameState::ChooseCivilization
         } else {
             GameState::Playing
@@ -187,17 +189,35 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         ability::init_player(&mut game, i, all);
     }
 
-    execute_setup_round(setup, &mut game, map_setup.as_ref());
+    execute_setup_round(setup, &mut game, map_setup.as_ref(), choose_civ);
+    if !choose_civ {
+        game.next_age();
+    }
     game
 }
 
-fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
+fn execute_setup_round(
+    setup: &GameSetup,
+    game: &mut Game,
+    map_setup: Option<&MapSetup>,
+    choose_civ: bool,
+) {
     let mut age = ActionLogAge::new(0);
     age.rounds.push(ActionLogRound::new(0));
     game.log.push(age);
 
     for player_index in 0..setup.player_amount {
-        add_turn_log(game, TurnType::Setup(player_index));
+        add_turn_log(
+            game,
+            TurnType::Setup(SetupTurnType {
+                player: player_index,
+                civilization: if choose_civ {
+                    None
+                } else {
+                    Some(game.player(player_index).civilization.name.clone())
+                },
+            }),
+        );
         add_start_turn_action_if_needed(game, player_index);
         let origin = setup_event_origin();
         let player = &EventPlayer::new(player_index, origin.clone());
@@ -216,7 +236,6 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&Ma
             gain_unit(game, player, position, UnitType::Settler);
         }
     }
-    game.next_age();
 }
 
 pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
@@ -308,11 +327,8 @@ pub(crate) fn execute_choose_civ(
     game.increment_player_index();
     if game.players.iter().all(|p| !p.civilization.is_choose_civ()) {
         game.state = GameState::Playing;
+        game.next_age();
     }
-    player.log(
-        game,
-        &format!("Choose {}", game.player(player_index).civilization.name),
-    );
     Ok(())
 }
 

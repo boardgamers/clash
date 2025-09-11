@@ -214,7 +214,7 @@
                   },
                   "player": 0,
                   "origin": {
-                    "Wonder": "GreatGardens"
+                    "Ability": "Build Wonder"
                   },
                   "items": [
                     {
@@ -226,9 +226,6 @@
                         "Ability": "Build Wonder"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Build Wonder: Play the wonder card Great Gardens, Decided to build Great Gardens in city A1"
                   ]
                 },
                 {

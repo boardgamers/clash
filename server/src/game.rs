@@ -11,8 +11,9 @@ use crate::content::persistent_events::{
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
 use crate::log::{
-    ActionLogAge, TurnType, add_round_log, add_start_turn_action_if_needed, add_turn_log,
-    current_action_log_mut, current_turn_log, current_turn_log_mut,
+    ActionLogAge, ActionLogEntry, ActionLogItem, TurnType, add_round_log,
+    add_start_turn_action_if_needed, add_turn_log, current_action_log_mut, current_turn_log,
+    current_turn_log_mut,
 };
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
@@ -336,21 +337,17 @@ impl Game {
         })
     }
 
-    pub fn add_info_log_item(&mut self, info: &str) {
-        current_action_log_mut(self).log.push(info.to_string());
+    pub fn add_log_item(&mut self, item: ActionLogItem) {
+        current_action_log_mut(self).items.push(item);
     }
 
     pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
-        let prefix = format!("{}: {}: ", self.player_name(player), origin.name(self));
-        let log = &mut current_action_log_mut(self).log;
-        for c in log.iter_mut() {
-            if c.starts_with(&prefix) {
-                use std::fmt::Write as _;
-                let _ = write!(c, ", {message}");
-                return;
-            }
-        }
-        log.push(format!("{prefix}{message}"));
+        self.add_log_item(ActionLogItem::new(
+            player,
+            ActionLogEntry::message(message.to_string()),
+            origin.clone(),
+            vec![],
+        ));
     }
 
     pub(crate) fn start_turn(&mut self) {
@@ -493,10 +490,13 @@ impl Game {
             .expect("there should be at least one player in the game")
             .0;
         let winner_name = self.player_name(winner_player_index);
-        let m = format!("The game has ended. {winner_name} has won");
-        self.add_message(&m);
+        self.add_message(&format!("The game has ended. {winner_name} has won"));
         add_start_turn_action_if_needed(self, 0);
-        self.add_info_log_item(&m);
+        EventPlayer::new(
+            winner_player_index,
+            EventOrigin::Ability("having the most points".to_string()),
+        )
+        .log(self, "wins the game");
         self.state = GameState::Finished;
     }
 

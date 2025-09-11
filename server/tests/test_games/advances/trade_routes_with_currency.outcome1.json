@@ -438,6 +438,27 @@
                   "items": [
                     {
                       "player": 1,
+                      "Text": "Player2 selected trade routes",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "ship at E7 traded with city C6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "settler at E7 traded with city E6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 1,
@@ -449,9 +470,6 @@
                         "Advance": "TradeRoutes"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Trade Routes: Player2 selected trade routes, ship at E7 traded with city C6, settler at E7 traded with city E6"
                   ],
                   "active_events": 1
                 }

@@ -12,6 +12,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 54,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0,
           "barbarians": {}
         }
@@ -349,11 +352,21 @@
                       "origin": {
                         "Ability": "Free Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event A successful year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 54
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: A successful year",
-                    "Player1: A successful year: Base effect: Pirates spawn"
                   ],
                   "active_events": 1
                 },
@@ -366,8 +379,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: A successful year: Removed a Pirate Ships at D1"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Removed a Pirate Ships at D1",
+                      "origin": {
+                        "Incident": 54
+                      }
+                    }
                   ],
                   "active_events": 2
                 },
@@ -419,10 +438,14 @@
                       "origin": {
                         "Incident": 54
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Must pay 1 resource or token to bribe the pirates",
+                      "origin": {
+                        "Incident": 54
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: A successful year: Must pay 1 resource or token to bribe the pirates"
                   ],
                   "active_events": 2
                 }

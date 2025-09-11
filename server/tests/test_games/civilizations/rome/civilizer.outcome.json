@@ -421,6 +421,66 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "leader": "Sulla"
+                        },
+                        "defending_player": 2,
+                        "defenders": {
+                          "infantry": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 5,
+                            "unit_type": "Cavalry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1,
+                        "combat_modifiers": [
+                          "Sulla adds 2 combat value"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 2,
+                            "unit_type": "Cavalry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 2,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
                       "player": 2,
                       "Units": {
                         "units": {
@@ -429,6 +489,13 @@
                         "balance": "Loss",
                         "position": "D8"
                       },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "wins the battle",
                       "origin": {
                         "Ability": "Combat"
                       }
@@ -445,13 +512,6 @@
                         "Ability": "Barbarian battle"
                       }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with Sulla, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Sulla adds 2 combat value",
-                    "Barbarians: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
-                    "Barbarians: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ]
                 }
               ]

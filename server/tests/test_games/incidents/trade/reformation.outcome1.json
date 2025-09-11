@@ -310,11 +310,49 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Reformation",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians spawn",
+                      "origin": {
+                        "Incident": 48
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 48
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot reinforce",
+                      "origin": {
+                        "Incident": 48
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Selected Player3 to execute the event",
+                      "origin": {
+                        "Incident": 48
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Pass the event to Player3",
+                      "origin": {
+                        "Incident": 48
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Reformation",
-                    "Player1: Reformation: Base effect: Barbarians spawn, Barbarians cannot spawn a new city, Barbarians cannot reinforce, Selected Player3 to execute the event, Pass the event to Player3"
                   ]
                 },
                 {

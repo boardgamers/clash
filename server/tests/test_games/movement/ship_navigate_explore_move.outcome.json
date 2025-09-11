@@ -345,10 +345,14 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Teleported ship from F2 to G3",
+                      "origin": {
+                        "Ability": "Move"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Move: Teleported ship from F2 to G3"
                   ]
                 }
               ]

@@ -232,10 +232,40 @@
                       "origin": {
                         "Ability": "Influence Culture"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "InfluenceCultureAttempt": {
+                        "target_player": 0,
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "prevent_boost": false,
+                        "range_boost_cost": {
+                          "default": {
+                            "culture_tokens": 1
+                          },
+                          "origin": {
+                            "Ability": "Influence Culture"
+                          }
+                        },
+                        "info": {
+                          "player": 1,
+                          "origin": {
+                            "Ability": "Influence Culture"
+                          },
+                          "info": {},
+                          "log": []
+                        },
+                        "roll_boost": 0,
+                        "position": "C2",
+                        "starting_city_position": "B3",
+                        "barbarian_takeover": false
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Influence Culture: Tried to influence the Temple in the city at C2 by Player1 with the city B3 and may pay 1 culture token to boost the range"
                   ]
                 },
                 {
@@ -261,10 +291,14 @@
                       "origin": {
                         "Ability": "Influence Culture"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "rolls a 1 and now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence",
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Influence Culture: Rolled a 1 and now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
                   ],
                   "active_events": 1
                 },
@@ -288,6 +322,13 @@
                         },
                         "balance": "Pay"
                       },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "pays to increase the dice roll",
                       "origin": {
                         "Ability": "Influence Culture"
                       }
@@ -320,9 +361,6 @@
                         "Ability": "Influence Culture"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Influence Culture: Paying to increase the dice roll"
                   ],
                   "active_events": 1
                 }

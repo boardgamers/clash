@@ -5,6 +5,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 1,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0
         }
       },
@@ -284,6 +287,13 @@
                   "items": [
                     {
                       "player": 0,
+                      "Text": "Draw Inspiration/Peltasts from the discard pile",
+                      "origin": {
+                        "Ability": "Great Mausoleum"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 4
@@ -297,9 +307,6 @@
                         "Ability": "Great Mausoleum"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Mausoleum: Draw Inspiration/Peltasts from the discard pile"
                   ],
                   "active_events": 1
                 },
@@ -400,9 +407,21 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Great Mausoleum: Drew Pestilence from the discard pile",
-                    "A new game event has been triggered: Pestilence"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Drew Pestilence from the discard pile",
+                      "origin": {
+                        "Ability": "Great Mausoleum"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Pestilence",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }

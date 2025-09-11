@@ -229,13 +229,75 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 1,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          },
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 2,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Player1 can retreat",
+                      "origin": {
+                        "Ability": "Retreat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units",
-                    "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
-                    "Player1: Retreat: Player1 can retreat"
                   ]
                 },
                 {
@@ -245,8 +307,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Retreat: Retreat"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Retreat",
+                      "origin": {
+                        "Ability": "Retreat"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }

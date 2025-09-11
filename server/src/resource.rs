@@ -113,7 +113,7 @@ pub(crate) fn check_for_waste(game: &mut Game) {
         let wasted_resources =
             mem::replace(&mut game.players[p].wasted_resources, ResourcePile::empty());
         if !wasted_resources.is_empty() {
-            EventPlayer::new(p, EventOrigin::Ability("Waste".to_string())).add_action_log_item(
+            EventPlayer::new(p, EventOrigin::Ability("Waste".to_string())).add_log_entry(
                 game,
                 ActionLogEntry::resources(wasted_resources, ActionLogBalance::Loss),
             );

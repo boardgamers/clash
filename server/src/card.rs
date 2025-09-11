@@ -1,7 +1,7 @@
 use crate::content::action_cards::spy::validate_spy_cards;
 use crate::content::action_cards::synergies::validate_new_plans;
 use crate::content::civilizations::rome::validate_princeps_cards;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::{ActionLogEntry, add_action_log_item};
 use crate::player::Player;
@@ -137,6 +137,7 @@ impl HandCardLocation {
 
 pub(crate) fn draw_card_from_pile<T>(
     game: &mut Game,
+    player: &EventPlayer,
     name: &str,
     get_pile: impl Fn(&mut Game) -> &mut Vec<T>,
     reshuffle_pile: impl Fn(&Game) -> Vec<T>,
@@ -153,13 +154,13 @@ where
         }
 
         if !new_pile.is_empty() {
-            game.add_info_log_item(&format!("Reshuffling {name} pile"));
+            player.log(game, &format!("Reshuffling {name} pile"));
             *get_pile(game) = new_pile.shuffled(&mut game.rng);
         }
     }
 
     if get_pile(game).is_empty() {
-        game.add_info_log_item(&format!("No {name} left to draw"));
+        player.log(game, &format!("No {name} left to draw"));
         return None;
     }
 

@@ -290,10 +290,14 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Convert 1 settler to ships",
+                      "origin": {
+                        "SpecialAdvance": "ShipConstruction"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Ship Construction: Convert 1 settler to ships"
                   ]
                 },
                 {
@@ -380,8 +384,21 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Ship Construction: Unloaded 1 settler and 1 infantry from ships, Converted 1 ship to 1 settler"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Unloaded 1 settler and 1 infantry from ships",
+                      "origin": {
+                        "SpecialAdvance": "ShipConstruction"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Converted 1 ship to 1 settler",
+                      "origin": {
+                        "SpecialAdvance": "ShipConstruction"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }

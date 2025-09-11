@@ -273,6 +273,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Famine: Draught",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -282,11 +289,14 @@
                       "origin": {
                         "Incident": 52
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lost 2 food",
+                      "origin": {
+                        "Incident": 52
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Famine: Draught",
-                    "Player1: Famine: Draught: Lost 2 food"
                   ]
                 }
               ]

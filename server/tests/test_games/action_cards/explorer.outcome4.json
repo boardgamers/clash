@@ -425,8 +425,14 @@
                     }
                   },
                   "player": 1,
-                  "log": [
-                    "Player2: Explorer: Explored B6"
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Explored B6",
+                      "origin": {
+                        "CivilCard": 21
+                      }
+                    }
                   ],
                   "active_events": 1
                 },
@@ -438,6 +444,13 @@
                   },
                   "player": 1,
                   "items": [
+                    {
+                      "player": 1,
+                      "Text": "Chose rotation 0",
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    },
                     {
                       "player": 1,
                       "Explore": {
@@ -464,9 +477,6 @@
                         "Ability": "Explore Resolution"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Explore Resolution: Chose rotation 0"
                   ],
                   "active_events": 2
                 },

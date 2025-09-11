@@ -5,6 +5,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 1,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0
         }
       },
@@ -320,10 +323,14 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Pestilence",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Pestilence"
                   ]
                 }
               ]

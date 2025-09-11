@@ -12,6 +12,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 13,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0
         }
       },
@@ -274,10 +277,14 @@
                       "origin": {
                         "Ability": "Free Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event An awesome year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: An awesome year"
                   ],
                   "active_events": 1
                 }

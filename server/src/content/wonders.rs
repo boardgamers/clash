@@ -182,7 +182,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         game.cache.get_incident(*card).name
                     ))
                 } else {
-                    i.incident_id = draw_and_discard_incident_card_from_pile(game, p.index);
+                    i.incident_id = draw_and_discard_incident_card_from_pile(game, p);
                     None
                 }
             },
@@ -201,7 +201,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                     );
                     i.incident_id = card;
                 } else {
-                    i.incident_id = draw_and_discard_incident_card_from_pile(game, s.player_index);
+                    i.incident_id = draw_and_discard_incident_card_from_pile(game, &s.player());
                 }
             },
         )

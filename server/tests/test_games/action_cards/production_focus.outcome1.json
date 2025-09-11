@@ -240,10 +240,14 @@
                       "origin": {
                         "Ability": "Action Card"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Production Focus: You may collect multiple times from the same tile.",
+                      "origin": {
+                        "CivilCard": 19
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Production Focus: Production Focus: You may collect multiple times from the same tile."
                   ]
                 },
                 {

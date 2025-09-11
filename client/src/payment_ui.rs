@@ -4,7 +4,7 @@ use crate::event_ui::event_help;
 use crate::layout_ui::{
     ICON_SIZE, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip,
 };
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;

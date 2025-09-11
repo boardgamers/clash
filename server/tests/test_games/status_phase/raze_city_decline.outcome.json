@@ -239,8 +239,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Raze city: Did not raze a city"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Did not raze a city",
+                      "origin": {
+                        "Ability": "Raze city"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }

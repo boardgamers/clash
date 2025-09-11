@@ -155,7 +155,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
 
                 let m = MoveUnits::new(units, to, None, ResourcePile::empty());
                 s.player()
-                    .add_action_log_item(game, ActionLogEntry::move_units(b, &m));
+                    .add_log_entry(game, ActionLogEntry::move_units(b, &m));
 
                 move_with_possible_combat(game, barbarian, &m);
             },

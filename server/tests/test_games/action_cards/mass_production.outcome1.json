@@ -239,10 +239,14 @@
                       "origin": {
                         "Ability": "Action Card"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Can use Mass Production to collect from 2 additional tiles.",
+                      "origin": {
+                        "CivilCard": 29
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Mass Production: Can use Mass Production to collect from 2 additional tiles."
                   ]
                 },
                 {

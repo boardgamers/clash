@@ -13,6 +13,7 @@ use crate::content::ability::combat_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
+use crate::log::{ActionLogEntry, ActionLogEntryCombatRound};
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -219,43 +220,37 @@ pub fn initiate_combat(
 }
 
 pub(crate) fn log_round(game: &mut Game, c: &Combat) {
-    game.add_info_log_item(&format!("Combat round {}", c.stats.round));
-    let origin = &combat_event_origin();
-    game.log(
-        c.attacker(),
-        origin,
-        &format!(
-            "Attacking with {}",
-            c.attackers
-                .iter()
-                .flat_map(|u| {
-                    let p = game.player(c.attacker());
-                    let u = p.get_unit(*u);
-                    vec![u.unit_type]
-                        .into_iter()
-                        .chain(
-                            carried_units(u.id, p)
-                                .iter()
-                                .map(|u| p.get_unit(*u).unit_type),
-                        )
-                        .collect_vec()
-                })
-                .collect::<Units>()
-                .to_string(Some(game))
-        ),
-    );
-    game.log(
-        c.defender(),
-        origin,
-        &format!(
-            "Defending with {}",
-            game.player(c.defender())
-                .get_units(c.defender_position())
-                .iter()
-                .map(|u| u.unit_type)
-                .collect::<Units>()
-                .to_string(Some(game))
-        ),
+    let attackers = c
+        .attackers
+        .iter()
+        .flat_map(|u| {
+            let p = game.player(c.attacker());
+            let u = p.get_unit(*u);
+            vec![u.unit_type]
+                .into_iter()
+                .chain(
+                    carried_units(u.id, p)
+                        .iter()
+                        .map(|u| p.get_unit(*u).unit_type),
+                )
+                .collect_vec()
+        })
+        .collect::<Units>();
+    let defending_player = c.defender();
+    let defenders = game
+        .player(defending_player)
+        .get_units(c.defender_position())
+        .iter()
+        .map(|u| u.unit_type)
+        .collect::<Units>();
+    EventPlayer::new(c.attacker(), combat_event_origin()).add_log_entry(
+        game,
+        ActionLogEntry::CombatRound(ActionLogEntryCombatRound {
+            round: c.stats.round,
+            attackers,
+            defending_player,
+            defenders,
+        }),
     );
 }
 

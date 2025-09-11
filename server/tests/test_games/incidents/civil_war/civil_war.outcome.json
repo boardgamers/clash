@@ -284,6 +284,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Civil War",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Angry"
@@ -305,9 +312,6 @@
                         "Incident": 36
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Civil War"
                   ]
                 }
               ]

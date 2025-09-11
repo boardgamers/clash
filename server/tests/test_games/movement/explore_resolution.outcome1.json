@@ -430,6 +430,13 @@
                   "items": [
                     {
                       "player": 1,
+                      "Text": "Chose rotation 3",
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Explore": {
                         "tiles": [
                           [
@@ -454,9 +461,6 @@
                         "Ability": "Explore Resolution"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Explore Resolution: Chose rotation 3"
                   ],
                   "active_events": 1
                 }

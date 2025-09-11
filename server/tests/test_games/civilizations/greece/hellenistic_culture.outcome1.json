@@ -285,6 +285,44 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "InfluenceCultureAttempt": {
+                        "target_player": 1,
+                        "structure": {
+                          "Building": "Port"
+                        },
+                        "prevent_boost": false,
+                        "range_boost_cost": {
+                          "default": {},
+                          "origin": {
+                            "SpecialAdvance": "HellenisticCulture"
+                          }
+                        },
+                        "info": {
+                          "player": 0,
+                          "origin": {
+                            "SpecialAdvance": "HellenisticCulture"
+                          },
+                          "info": {},
+                          "log": []
+                        },
+                        "roll_boost": 0,
+                        "position": "C2",
+                        "starting_city_position": "C2",
+                        "barbarian_takeover": false
+                      },
+                      "origin": {
+                        "SpecialAdvance": "HellenisticCulture"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Cultural influence succeeded (rolls 6)",
+                      "origin": {
+                        "SpecialAdvance": "HellenisticCulture"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Structure": {
                         "structure": {
@@ -312,9 +350,6 @@
                         "SpecialAdvance": "HellenisticCulture"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Hellenistic Culture: Tried to influence the Port in the city at C2 by Player2, Cultural influence succeeded (rolled 6)"
                   ],
                   "active_events": 1
                 }

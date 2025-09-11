@@ -325,10 +325,14 @@
                           "Advance": "Rituals"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Can pay with any resource",
+                      "origin": {
+                        "Advance": "Rituals"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Rituals: Can pay with any resource"
                   ]
                 }
               ]

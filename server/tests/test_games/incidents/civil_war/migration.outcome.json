@@ -273,6 +273,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Migration",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -281,6 +288,13 @@
                       },
                       "origin": {
                         "Ability": "Gold deposits"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Player2 was selected to gain 1 settler.",
+                      "origin": {
+                        "Incident": 34
                       }
                     },
                     {
@@ -306,10 +320,6 @@
                         "Incident": 34
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Migration",
-                    "Player1: Migration: Player2 was selected to gain 1 settler."
                   ]
                 }
               ]

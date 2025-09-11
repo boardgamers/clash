@@ -7,8 +7,9 @@ use crate::layout_ui::{
     bottom_centered_text_with_offset, bottom_right_texture, button_pressed,
     draw_scaled_icon_with_tooltip, icon_pos, top_center_anchor, top_center_texture,
 };
-use crate::log_ui::{MultilineText, multiline_label};
+use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::tooltip::show_tooltip_for_circle;
@@ -281,7 +282,7 @@ impl<'a> ColumnLabelPainter<'a> {
 
     pub fn label(&mut self, text: &str) {
         let rc = self.rc;
-        multiline_label(rc.state, text, self.max_column_width, |label| {
+        multiline_label(rc.state, text, self.max_column_width, |_, label| {
             self.used_column_width = self
                 .used_column_width
                 .max(rc.state.measure_text(label).width);

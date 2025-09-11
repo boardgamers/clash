@@ -318,6 +318,83 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "Ignore battle movement restrictions",
+                      "origin": {
+                        "SpecialAdvance": "Longships"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "ships": 3
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "ships": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 18,
+                        "hits": 1,
+                        "combat_modifiers": [
+                          "WarShips ignore the first hit in the first round of combat"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 6,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -329,15 +406,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Longships: Ignore battle movement restrictions",
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 3 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 18 and gets 1 hits against defending units, Combat modifiers: WarShips ignore the first hit in the first round of combat",
-                    "Player2: Combat: Defending with 1 ship, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units",
-                    "Player2: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ]
                 },
                 {
@@ -402,6 +478,78 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "Ignore battle movement restrictions",
+                      "origin": {
+                        "SpecialAdvance": "Longships"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "ships": 2
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "ships": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 12,
+                        "hits": 1,
+                        "combat_modifiers": [
+                          "WarShips ignore the first hit in the first round of combat"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 6,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -413,15 +561,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Longships: Ignore battle movement restrictions",
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units, Combat modifiers: WarShips ignore the first hit in the first round of combat",
-                    "Player2: Combat: Defending with 1 ship, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units",
-                    "Player2: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ]
                 }
               ]
