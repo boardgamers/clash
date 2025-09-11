@@ -21,8 +21,9 @@ use crate::layout_ui::{
     ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
     draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture,
 };
-use crate::log_ui::{LogDialog, MultilineText, show_log};
+use crate::log_ui::{LogDialog, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
+use crate::multiline::MultilineText;
 use crate::player_ui::{
     ColumnLabelPainter, player_select, show_global_controls, show_top_center, show_top_left,
 };

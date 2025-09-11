@@ -270,11 +270,28 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Architect",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 55
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "No valid positions for Pirate Ship",
+                      "origin": {
+                        "Incident": 55
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Architect",
-                    "Player1: Great Architect: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
                 },
                 {
@@ -345,9 +362,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Build Wonder: Play the wonder card Pyramids"
                   ]
                 },
                 {
@@ -359,9 +373,6 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Build Wonder: Decided to build Pyramids in city A1"
-                  ],
                   "active_events": 2
                 },
                 {

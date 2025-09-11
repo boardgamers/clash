@@ -298,12 +298,23 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry",
-                    "Player2: Combat: Defending with 2 infantry"
                   ]
                 }
               ]

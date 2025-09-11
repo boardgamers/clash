@@ -270,10 +270,14 @@
                       "origin": {
                         "Ability": "Action Card"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Player1 cannot move Barbarian army at A3 because Sulla is in range",
+                      "origin": {
+                        "CivilCard": 13
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Mercenaries: Player1 cannot move Barbarian army at A3 because Sulla is in range"
                   ]
                 },
                 {
@@ -285,8 +289,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Mercenaries: Selected Barbarian armies to move: B3"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Selected Barbarian armies to move: B3",
+                      "origin": {
+                        "CivilCard": 13
+                      }
+                    }
                   ],
                   "active_events": 1
                 },
@@ -341,6 +351,20 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Selected Barbarian army to move: B3",
+                      "origin": {
+                        "CivilCard": 13
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Selected destination for Barbarian army: B2",
+                      "origin": {
+                        "CivilCard": 13
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Move": {
                         "units": {
                           "infantry": 2
@@ -350,6 +374,68 @@
                       },
                       "origin": {
                         "CivilCard": 13
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 2
+                        },
+                        "defending_player": 0,
+                        "defenders": {
+                          "infantry": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 14,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Text": "Remove 1 of their attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -367,6 +453,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -374,6 +467,13 @@
                         "balance": "Loss",
                         "position": "B2"
                       },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Text": "wins the battle",
                       "origin": {
                         "Ability": "Combat"
                       }
@@ -391,15 +491,6 @@
                         "CivilCard": 13
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Mercenaries: Selected Barbarian army to move: B3, Selected destination for Barbarian army: B2",
-                    "Combat round 1",
-                    "Barbarians: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against defending units",
-                    "Player1: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units",
-                    "Barbarians: Choose Casualties: Remove 1 of their attacking units",
-                    "Player1: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ],
                   "active_events": 1
                 }

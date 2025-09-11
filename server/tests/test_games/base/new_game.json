@@ -389,7 +389,9 @@
           "turns": [
             {
               "turn_type": {
-                "Setup": 0
+                "Setup": {
+                  "player": 0
+                }
               },
               "actions": [
                 {
@@ -501,7 +503,9 @@
             },
             {
               "turn_type": {
-                "Setup": 1
+                "Setup": {
+                  "player": 1
+                }
               },
               "actions": [
                 {
@@ -608,32 +612,12 @@
                       }
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "age": 1,
-      "rounds": [
-        {
-          "round": 1,
-          "turns": [
-            {
-              "turn_type": {
-                "Player": 0
-              },
-              "actions": [
+                },
                 {
                   "action": {
                     "ChooseCivilization": "Vikings"
                   },
-                  "player": 0,
-                  "log": [
-                    "Player1: Setup: Choose Vikings"
-                  ]
+                  "player": 0
                 }
               ]
             }
@@ -642,14 +626,12 @@
       ]
     }
   ],
-  "log_index": 1,
-  "undo_limit": 1,
+  "log_index": 2,
+  "undo_limit": 2,
   "actions_left": 3,
   "round": 1,
-  "age": 1,
-  "messages": [
-    "Age 1 has started"
-  ],
+  "age": 0,
+  "messages": [],
   "rng": "187713005158128829250871947649707797698",
   "wonders_left": [
     "GreatGardens",

@@ -294,10 +294,14 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Heavy Earthquake",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Heavy Earthquake"
                   ]
                 },
                 {
@@ -341,6 +345,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Gain 2 points for the Fortress at C2",
+                      "origin": {
+                        "Incident": 31
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Structure": {
                         "structure": {
                           "Wonder": "GreatGardens"
@@ -352,10 +363,21 @@
                       "origin": {
                         "Incident": 31
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain 2 points for the Great Gardens at C2",
+                      "origin": {
+                        "Incident": 31
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain 2 points for the city center at B2",
+                      "origin": {
+                        "Incident": 31
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Heavy Earthquake: Gain 2 points for the Fortress at C2, Gain 2 points for the Great Gardens at C2, Gain 2 points for the city center at B2"
                   ],
                   "active_events": 1
                 },
@@ -382,10 +404,14 @@
                       "origin": {
                         "Advance": "Myths"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Avoid mood change",
+                      "origin": {
+                        "Advance": "Myths"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Myths: Avoid mood change"
                   ],
                   "active_events": 1
                 },
@@ -425,11 +451,28 @@
                       "origin": {
                         "Incident": 31
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain 2 points for the Fortress at A1",
+                      "origin": {
+                        "Incident": 31
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Gain 2 points for the city center at A1",
+                      "origin": {
+                        "Incident": 31
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Gain 2 points for the city center at A3",
+                      "origin": {
+                        "Incident": 31
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Heavy Earthquake: Gain 2 points for the Fortress at A1",
-                    "Player2: Heavy Earthquake: Gain 2 points for the city center at A1, Gain 2 points for the city center at A3"
                   ],
                   "active_events": 1
                 }

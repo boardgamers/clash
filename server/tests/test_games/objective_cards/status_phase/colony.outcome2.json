@@ -496,10 +496,14 @@
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "wins the game",
+                      "origin": {
+                        "Ability": "having the most points"
+                      }
                     }
-                  ],
-                  "log": [
-                    "The game has ended. Player2 has won"
                   ],
                   "active_events": 2
                 }

@@ -262,11 +262,28 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Athlete",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 56
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "No valid positions for Pirate Ship",
+                      "origin": {
+                        "Incident": 56
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Athlete",
-                    "Player1: Great Athlete: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
                 },
                 {
@@ -378,8 +395,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Great Athlete: Decided to convert culture to mood tokens"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Decided to convert culture to mood tokens",
+                      "origin": {
+                        "CivilCard": 156
+                      }
+                    }
                   ],
                   "active_events": 1
                 },

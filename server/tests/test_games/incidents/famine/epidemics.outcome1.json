@@ -257,10 +257,14 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Epidemics",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Epidemics"
                   ]
                 },
                 {

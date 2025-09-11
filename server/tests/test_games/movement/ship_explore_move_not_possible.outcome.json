@@ -349,6 +349,13 @@
                   "items": [
                     {
                       "player": 1,
+                      "Text": "Chose rotation 3",
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Explore": {
                         "tiles": [
                           [
@@ -372,10 +379,14 @@
                       "origin": {
                         "Ability": "Explore Resolution"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Ship can't move to the explored tile",
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Explore Resolution: Chose rotation 3, Ship can't move to the explored tile"
                   ],
                   "active_events": 1
                 }

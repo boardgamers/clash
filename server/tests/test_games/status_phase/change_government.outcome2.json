@@ -242,8 +242,14 @@
                     }
                   },
                   "player": 1,
-                  "log": [
-                    "Player2: Raze city: Did not raze a city"
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Did not raze a city",
+                      "origin": {
+                        "Ability": "Raze city"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }
@@ -302,6 +308,20 @@
                   "items": [
                     {
                       "player": 0,
+                      "Text": "Democracy changed their government from Player1 to Theocracy",
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Additional advances: Devotion",
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Advance": {
                         "advance": "Voting",
                         "incident_token": "NoChange",
@@ -318,6 +338,20 @@
                         "incident_token": "NoChange",
                         "balance": "Loss"
                       },
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Ideas limit reduced to 2",
+                      "origin": {
+                        "Advance": "Dogma"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Unlock Provinces",
                       "origin": {
                         "Ability": "Change Government"
                       }
@@ -344,10 +378,6 @@
                         "Ability": "Change Government"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Change Government: Democracy changed their government from Player1 to Theocracy, Additional advances: Devotion, Unlock Provinces",
-                    "Player1: Dogma: Ideas limit reduced to 2"
                   ],
                   "active_events": 1
                 }

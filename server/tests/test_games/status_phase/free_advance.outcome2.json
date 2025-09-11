@@ -452,6 +452,13 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Reshuffling Objective Card pile",
+                      "origin": {
+                        "Ability": "Draw Cards"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "HandCard": {
                         "card": {
                           "ObjectiveCard": 7
@@ -495,9 +502,6 @@
                         "Ability": "Draw Cards"
                       }
                     }
-                  ],
-                  "log": [
-                    "Reshuffling Objective Card pile"
                   ]
                 }
               ]

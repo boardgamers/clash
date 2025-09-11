@@ -245,6 +245,44 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "InfluenceCultureAttempt": {
+                        "target_player": 0,
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "prevent_boost": false,
+                        "range_boost_cost": {
+                          "default": {},
+                          "origin": {
+                            "Advance": "Arts"
+                          }
+                        },
+                        "info": {
+                          "player": 1,
+                          "origin": {
+                            "Advance": "Arts"
+                          },
+                          "info": {},
+                          "log": []
+                        },
+                        "roll_boost": 0,
+                        "position": "C2",
+                        "starting_city_position": "C1",
+                        "barbarian_takeover": false
+                      },
+                      "origin": {
+                        "Advance": "Arts"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Cultural influence succeeded (rolls 6)",
+                      "origin": {
+                        "Advance": "Arts"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Structure": {
                         "structure": {
@@ -272,9 +310,6 @@
                         "Advance": "Arts"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Arts: Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6)"
                   ],
                   "active_events": 1
                 }

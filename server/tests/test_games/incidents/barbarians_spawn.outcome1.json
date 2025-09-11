@@ -293,6 +293,20 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "triggers the event A good year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians spawn",
+                      "origin": {
+                        "Incident": 9
+                      }
+                    },
+                    {
                       "player": 2,
                       "Structure": {
                         "structure": "CityCenter",
@@ -317,10 +331,6 @@
                         "Incident": 9
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: A good year",
-                    "Player1: A good year: Base effect: Barbarians spawn"
                   ],
                   "active_events": 1
                 },

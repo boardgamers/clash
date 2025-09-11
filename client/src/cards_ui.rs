@@ -3,7 +3,7 @@ use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
 use crate::layout_ui::{bottom_centered_text, button_pressed, rect_from};
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;

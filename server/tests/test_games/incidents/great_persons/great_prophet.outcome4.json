@@ -336,11 +336,35 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Prophet",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 20
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot move - will try to spawn a new city instead",
+                      "origin": {
+                        "Incident": 20
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 20
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Prophet",
-                    "Player1: Great Prophet: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
                   ]
                 },
                 {
@@ -454,8 +478,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Great Prophet: Decided to build a Temple at C1"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Decided to build a Temple at C1",
+                      "origin": {
+                        "CivilCard": 120
+                      }
+                    }
                   ],
                   "active_events": 1
                 },

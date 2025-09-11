@@ -329,6 +329,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Can collect 1 resources from 2 land spaces away",
+                      "origin": {
+                        "Advance": "Husbandry"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1
@@ -339,9 +346,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Husbandry: Can collect 1 resources from 2 land spaces away"
                   ]
                 }
               ]

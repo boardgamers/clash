@@ -264,6 +264,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "May replace resources with mood tokens",
+                      "origin": {
+                        "SpecialAdvance": "Captivi"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Structure": {
                         "structure": {
                           "Building": "Market"
@@ -276,9 +283,6 @@
                         "Ability": "Construct Building"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Captivi: May replace resources with mood tokens"
                   ]
                 }
               ]

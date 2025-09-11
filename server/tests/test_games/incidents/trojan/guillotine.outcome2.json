@@ -291,6 +291,34 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Guillotine",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians spawn",
+                      "origin": {
+                        "Incident": 43
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 43
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot reinforce",
+                      "origin": {
+                        "Incident": 43
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "leader": "Caesar"
@@ -302,10 +330,6 @@
                         "Incident": 43
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Guillotine",
-                    "Player1: Guillotine: Base effect: Barbarians spawn, Barbarians cannot spawn a new city, Barbarians cannot reinforce"
                   ]
                 },
                 {
@@ -315,8 +339,21 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Guillotine: Chose to select a new leader, Chose a new leader in A1"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Chose to select a new leader",
+                      "origin": {
+                        "Incident": 43
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Chose a new leader in A1",
+                      "origin": {
+                        "Incident": 43
+                      }
+                    }
                   ],
                   "active_events": 1
                 },
@@ -342,10 +379,14 @@
                       "origin": {
                         "Incident": 43
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lose leaders due to the Guillotine: Sulla",
+                      "origin": {
+                        "Incident": 43
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Guillotine: Lose leaders due to the Guillotine: Sulla"
                   ],
                   "active_events": 1
                 }

@@ -239,8 +239,14 @@
                     }
                   },
                   "player": 1,
-                  "log": [
-                    "Player2: Raze city: Did not raze a city"
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Did not raze a city",
+                      "origin": {
+                        "Ability": "Raze city"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }
@@ -274,10 +280,14 @@
                       "origin": {
                         "Ability": "Change Government"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Keep current government",
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Change Government: Keep current government"
                   ],
                   "active_events": 1
                 }

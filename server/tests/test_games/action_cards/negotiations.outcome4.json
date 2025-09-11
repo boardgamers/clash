@@ -266,10 +266,14 @@
                       "origin": {
                         "CivilCard": 23
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Started negotiations with Player2",
+                      "origin": {
+                        "CivilCard": 23
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Negotiations: Started negotiations with Player2"
                   ],
                   "active_events": 1
                 },
@@ -304,8 +308,14 @@
                 {
                   "action": "StartTurn",
                   "player": 1,
-                  "log": [
-                    "Player2: Negotiations: May not attack Player1 this turn."
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "May not attack Player1 this turn.",
+                      "origin": {
+                        "Ability": "Negotiations"
+                      }
+                    }
                   ]
                 },
                 {
@@ -344,8 +354,14 @@
                 {
                   "action": "StartTurn",
                   "player": 0,
-                  "log": [
-                    "Player1: Negotiations: May attack Player2 again."
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "May attack Player2 again.",
+                      "origin": {
+                        "Ability": "Negotiations"
+                      }
+                    }
                   ]
                 },
                 {
@@ -413,6 +429,63 @@
                     },
                     {
                       "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 1
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove all attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -422,6 +495,13 @@
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -436,15 +516,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "ends the battle in a draw",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
-                    "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units",
-                    "Player1: Choose Casualties: Remove all attacking units",
-                    "Player2: Choose Casualties: Remove all defending units",
-                    "Battle ends in a draw"
                   ]
                 }
               ]

@@ -276,11 +276,42 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Pandemics",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 49
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot move - will try to spawn a new city instead",
+                      "origin": {
+                        "Incident": 49
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 49
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lose a total of 2 units, cards, and resources",
+                      "origin": {
+                        "Incident": 49
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Pandemics",
-                    "Player1: Pandemics: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Lose a total of 2 units, cards, and resources"
                   ]
                 },
                 {
@@ -335,10 +366,14 @@
                       "origin": {
                         "Incident": 49
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Lose a total of 1 units, cards, and resources",
+                      "origin": {
+                        "Incident": 49
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Pandemics: Lose a total of 1 units, cards, and resources"
                   ],
                   "active_events": 1
                 },
@@ -365,10 +400,14 @@
                       "origin": {
                         "Incident": 49
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Lose 1 culture token",
+                      "origin": {
+                        "Incident": 49
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Pandemics: Lose 1 culture token"
                   ],
                   "active_events": 1
                 }

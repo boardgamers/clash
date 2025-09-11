@@ -288,11 +288,28 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Solar Eclipse",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 41
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "No valid positions for Pirate Ship",
+                      "origin": {
+                        "Incident": 41
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Solar Eclipse",
-                    "Player1: Solar Eclipse: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
                 },
                 {
@@ -340,12 +357,26 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
-                    "Player2: Combat: Defending with 2 infantry"
                   ]
                 },
                 {
@@ -396,6 +427,34 @@
                       },
                       "origin": {
                         "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Reveal Tactics Card Tactical Retreat",
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Player2 withdraws to B1",
+                      "origin": {
+                        "TacticsCard": 17
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain 1 victory point for the Solar Eclipse",
+                      "origin": {
+                        "Ability": "Solar Eclipse"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     },
                     {
@@ -462,12 +521,6 @@
                         "Ability": "Combat"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Tactics: Reveal Tactics Card Tactical Retreat",
-                    "Player2: Tactical Retreat: Player2 withdraws to B1",
-                    "Player1: Solar Eclipse: Gain 1 victory point for the Solar Eclipse",
-                    "Attacker wins"
                   ],
                   "active_events": 1
                 }

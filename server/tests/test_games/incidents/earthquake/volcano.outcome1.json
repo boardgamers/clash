@@ -232,10 +232,14 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Vulcan",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Vulcan"
                   ]
                 },
                 {
@@ -248,6 +252,13 @@
                   },
                   "player": 0,
                   "items": [
+                    {
+                      "player": 0,
+                      "Text": "Selected city C2 to be destroyed",
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
                     {
                       "player": 0,
                       "Structure": {
@@ -264,6 +275,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Gain 2 points for the Fortress at C2",
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Structure": {
                         "structure": {
                           "Building": "Temple"
@@ -272,6 +290,13 @@
                         "position": "C2",
                         "port_position": null
                       },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Gain 2 points for the Temple at C2",
                       "origin": {
                         "Incident": 29
                       }
@@ -292,6 +317,20 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Gain 0 points for the Pyramids at C2",
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain 2 points for the city center at C2",
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "settlers": 4,
@@ -306,10 +345,6 @@
                         "Incident": 29
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Vulcan: Selected city C2 to be destroyed, Gain 2 points for the Fortress at C2, Gain 0 points for the Pyramids at C2, Gain 2 points for the city center at C2",
-                    "Player2: Vulcan: Gain 2 points for the Temple at C2"
                   ],
                   "active_events": 1
                 }

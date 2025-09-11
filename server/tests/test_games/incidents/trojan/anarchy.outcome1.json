@@ -262,6 +262,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Anarchy",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Advance": {
                         "advance": "Voting",
                         "incident_token": "NoChange",
@@ -270,11 +277,14 @@
                       "origin": {
                         "Incident": 44
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lose 1 government advances due to Anarchy - adding 1 victory points",
+                      "origin": {
+                        "Incident": 44
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Anarchy",
-                    "Player1: Anarchy: Lose 1 government advances due to Anarchy - adding 1 victory points"
                   ]
                 },
                 {
@@ -316,6 +326,20 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Ideas limit reduced to 2",
+                      "origin": {
+                        "Advance": "Dogma"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Unlock Provinces",
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Advance": {
                         "advance": "Dogma",
                         "incident_token": {
@@ -325,6 +349,13 @@
                       },
                       "origin": {
                         "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain a government advance, taking a game event token instead of triggering a game event (and losing 1 victory point)",
+                      "origin": {
+                        "Ability": "Anarchy"
                       }
                     },
                     {
@@ -339,11 +370,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Dogma: Ideas limit reduced to 2",
-                    "Player1: Advance: Unlock Provinces",
-                    "Player1: Anarchy: Gain a government advance, taking a game event token instead of triggering a game event (and losing 1 victory point)"
                   ]
                 }
               ]

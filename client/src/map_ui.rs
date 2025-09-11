@@ -8,8 +8,8 @@ use crate::hex_ui::HexFeature;
 use crate::layout_ui::{
     bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
 };
-use crate::log_ui::MultilineText;
 use crate::move_ui::{MoveIntent, movable_units};
+use crate::multiline::MultilineText;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;

@@ -272,12 +272,26 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Famine: Vermin",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1
                         },
                         "balance": "Loss"
                       },
+                      "origin": {
+                        "Incident": 51
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lost 1 food",
                       "origin": {
                         "Incident": 51
                       }
@@ -294,6 +308,13 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Lost 0 food",
+                      "origin": {
+                        "Incident": 51
+                      }
+                    },
+                    {
+                      "player": 1,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Angry"
@@ -302,11 +323,6 @@
                         "Incident": 51
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Famine: Vermin",
-                    "Player1: Famine: Vermin: Lost 1 food",
-                    "Player2: Famine: Vermin: Lost 0 food"
                   ]
                 }
               ]

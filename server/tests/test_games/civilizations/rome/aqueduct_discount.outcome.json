@@ -254,6 +254,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Reduce the cost to 0",
+                      "origin": {
+                        "SpecialAdvance": "Aqueduct"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -277,9 +284,6 @@
                         "Ability": "Advance"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Aqueduct: Reduce the cost to 0"
                   ]
                 }
               ]

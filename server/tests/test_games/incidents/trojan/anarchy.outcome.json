@@ -270,6 +270,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Anarchy",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Advance": {
                         "advance": "Voting",
                         "incident_token": "NoChange",
@@ -278,11 +285,14 @@
                       "origin": {
                         "Incident": 44
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lose 1 government advances due to Anarchy - adding 1 victory points",
+                      "origin": {
+                        "Incident": 44
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Anarchy",
-                    "Player1: Anarchy: Lose 1 government advances due to Anarchy - adding 1 victory points"
                   ]
                 }
               ]

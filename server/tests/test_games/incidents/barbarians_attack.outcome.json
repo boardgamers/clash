@@ -310,6 +310,99 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "triggers the event Population Boom",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 28
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians move from B2 to C2: 2 infantry and 1 elephant",
+                      "origin": {
+                        "Incident": 28
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 2,
+                          "elephants": 1
+                        },
+                        "defending_player": 0,
+                        "defenders": {
+                          "settlers": 4
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 20,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 6,
+                        "hits": 1,
+                        "combat_modifiers": [
+                          "fortress added one extra die",
+                          "fortress cancelled one hit"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Text": "Remove 1 of their attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
                       "player": 2,
                       "Units": {
                         "units": {
@@ -318,6 +411,20 @@
                         "balance": "Loss",
                         "position": "B2"
                       },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Text": "Kill 4 settlers of Player1",
                       "origin": {
                         "Ability": "Combat"
                       }
@@ -399,6 +506,13 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "Player2 was selected to gain 1 settler.",
+                      "origin": {
+                        "Incident": 28
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -411,15 +525,6 @@
                         "Incident": 28
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Population Boom",
-                    "Player1: Population Boom: Base effect: Barbarians move, Barbarians move from B2 to C2: 2 infantry and 1 elephant, Player2 was selected to gain 1 settler.",
-                    "Combat round 1",
-                    "Barbarians: Combat: Attacking with 2 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units, Kill 4 settlers of Player1",
-                    "Player1: Combat: Defending with 4 settlers, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit",
-                    "Barbarians: Choose Casualties: Remove 1 of their attacking units",
-                    "Attacker wins"
                   ],
                   "active_events": 1
                 }

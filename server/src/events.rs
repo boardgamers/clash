@@ -135,7 +135,7 @@ impl EventPlayer {
         self.get(game).get_name()
     }
 
-    pub fn add_action_log_item(&self, game: &mut Game, entry: ActionLogEntry) {
+    pub fn add_log_entry(&self, game: &mut Game, entry: ActionLogEntry) {
         add_action_log_item(game, self.index, entry, self.origin.clone(), vec![]);
     }
 }

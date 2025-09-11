@@ -228,12 +228,23 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry",
-                    "Player2: Combat: Defending with 2 infantry"
                   ]
                 },
                 {
@@ -291,6 +302,62 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Reveal Tactics Card Surprise",
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 15,
+                        "hits": 1,
+                        "combat_modifiers": [
+                          "Surprise added 1 to combat value"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Draw 1 action card for Surprise tactics",
+                      "origin": {
+                        "TacticsCard": 10
+                      }
+                    },
+                    {
+                      "player": 1,
                       "HandCard": {
                         "card": {
                           "ActionCard": 1
@@ -302,6 +369,13 @@
                       },
                       "origin": {
                         "TacticsCard": 10
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove all attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -319,6 +393,13 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Remove 1 of their defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -329,16 +410,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Tactics: Reveal Tactics Card Surprise",
-                    "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
-                    "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 15 and gets 1 hits against attacking units, Combat modifiers: Surprise added 1 to combat value",
-                    "Player2: Surprise: Draw 1 action card for Surprise tactics",
-                    "Player1: Choose Casualties: Remove all attacking units",
-                    "Player2: Choose Casualties: Remove 1 of their defending units",
-                    "Defender wins"
                   ],
                   "active_events": 1
                 }

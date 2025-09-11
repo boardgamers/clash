@@ -63,6 +63,7 @@ pub(crate) struct Assets {
 
     // Log
     pub hex: Texture2D,
+    pub fast: Texture2D,
 }
 
 impl Assets {
@@ -122,6 +123,7 @@ impl Assets {
 
             // Log
             hex: load_png(include_bytes!("../assets/hex-svgrepo-com.png")),
+            fast: load_png(include_bytes!("../assets/lightning-svgrepo-com.png")),
         }
     }
 

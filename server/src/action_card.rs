@@ -228,14 +228,15 @@ pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) 
 }
 
 pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
-    if let Some(c) = draw_action_card_from_pile(game) {
+    if let Some(c) = draw_action_card_from_pile(game, player) {
         gain_action_card(game, player, c, HandCardLocation::DrawPile);
     }
 }
 
-fn draw_action_card_from_pile(game: &mut Game) -> Option<u8> {
+fn draw_action_card_from_pile(game: &mut Game, player: &EventPlayer) -> Option<u8> {
     draw_card_from_pile(
         game,
+        player,
         "Action Card",
         |g| &mut g.action_cards_left,
         |g| g.cache.get_action_cards().iter().map(|c| c.id).collect(),

@@ -275,8 +275,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Imperial Army: Convert infantry at C2, settler at B4"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Convert infantry at C2, settler at B4",
+                      "origin": {
+                        "Ability": "Imperial Army"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }

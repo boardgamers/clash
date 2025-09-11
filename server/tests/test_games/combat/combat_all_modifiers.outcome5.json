@@ -252,12 +252,26 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
-                    "Player2: Combat: Defending with 2 infantry"
                   ]
                 },
                 {
@@ -321,10 +335,14 @@
                       "origin": {
                         "Advance": "Siegecraft"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Cancel Fortress Ignore Hit",
+                      "origin": {
+                        "Advance": "Siegecraft"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Siegecraft: Cancel Fortress Ignore Hit"
                   ],
                   "active_events": 1
                 },
@@ -439,6 +457,109 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "Reveal Tactics Card Peltasts",
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Reveal Tactics Card Encircled",
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 22,
+                        "hits": 2,
+                        "combat_modifiers": [
+                          "steel weapons added 1 combat value",
+                          "Peltasts rolls a 6 and ignored a hit"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          },
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          },
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 4,
+                        "hits": 0,
+                        "combat_modifiers": [
+                          "fortress added one extra die",
+                          "steel weapons added 1 combat value"
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Cannot do damage - opponent has fewer losses",
+                      "origin": {
+                        "TacticsCard": 2
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -447,6 +568,13 @@
                         "balance": "Loss",
                         "position": "C1"
                       },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "wins the battle",
                       "origin": {
                         "Ability": "Combat"
                       }
@@ -527,15 +655,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Tactics: Reveal Tactics Card Peltasts",
-                    "Player2: Tactics: Reveal Tactics Card Encircled",
-                    "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units, Combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
-                    "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
-                    "Player2: Encircled: Cannot do damage - opponent has fewer losses",
-                    "Player2: Choose Casualties: Remove all defending units",
-                    "Attacker wins"
                   ],
                   "active_events": 1
                 }

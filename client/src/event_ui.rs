@@ -1,4 +1,4 @@
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::content::effects;

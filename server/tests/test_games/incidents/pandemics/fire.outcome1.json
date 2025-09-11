@@ -279,6 +279,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Fire",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -289,9 +296,6 @@
                         "Ability": "Gold deposits"
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Fire"
                   ]
                 },
                 {

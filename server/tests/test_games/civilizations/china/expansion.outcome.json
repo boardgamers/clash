@@ -302,10 +302,14 @@
                       "origin": {
                         "Ability": "Recruit"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Expansion allows to move the settlers at B3, B3, A1",
+                      "origin": {
+                        "SpecialAdvance": "Expansion"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Expansion: Expansion allows to move the settlers at B3, B3, A1"
                   ]
                 }
               ]

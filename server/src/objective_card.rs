@@ -375,6 +375,7 @@ pub(crate) fn draw_objective_card_from_pile(game: &mut Game, player: &EventPlaye
     draw_great_seer_card(game, player).or_else(|| {
         let card = draw_card_from_pile(
             game,
+            player,
             "Objective Card",
             |g| &mut g.objective_cards_left,
             |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),

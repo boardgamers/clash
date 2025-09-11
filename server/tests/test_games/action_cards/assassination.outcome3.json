@@ -271,10 +271,14 @@
                       "origin": {
                         "CivilCard": 27
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Assassinated Player2",
+                      "origin": {
+                        "CivilCard": 27
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Assassination: Assassinated Player2"
                   ],
                   "active_events": 1
                 },

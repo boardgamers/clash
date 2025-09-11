@@ -260,6 +260,27 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Scientific Trade",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 45
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "No valid positions for Pirate Ship",
+                      "origin": {
+                        "Incident": 45
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 2
@@ -294,10 +315,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Scientific Trade",
-                    "Player1: Scientific Trade: Base effect: Pirates spawn, No valid positions for Pirate Ship"
                   ]
                 }
               ]

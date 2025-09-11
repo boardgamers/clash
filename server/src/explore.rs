@@ -259,7 +259,7 @@ fn add_block_tiles_with_log(
         .retain(|b| b.position.top_tile != pos.top_tile);
 
     let tiles = block.tiles(pos, rotation);
-    p.add_action_log_item(game, ActionLogEntry::explore_tiles(tiles));
+    p.add_log_entry(game, ActionLogEntry::explore_tiles(tiles));
     game.map.add_block_tiles(pos, block, rotation);
 }
 

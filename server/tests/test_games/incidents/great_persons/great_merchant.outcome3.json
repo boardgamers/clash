@@ -280,11 +280,35 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Merchant",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 25
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot move - will try to spawn a new city instead",
+                      "origin": {
+                        "Incident": 25
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 25
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Merchant",
-                    "Player1: Great Merchant: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
                   ]
                 },
                 {
@@ -389,6 +413,20 @@
                   "items": [
                     {
                       "player": 0,
+                      "Text": "Player1 selected trade routes",
+                      "origin": {
+                        "CivilCard": 125
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "settler at C2 traded with city A3",
+                      "origin": {
+                        "CivilCard": 125
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -411,9 +449,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Great Merchant: Player1 selected trade routes, settler at C2 traded with city A3"
                   ],
                   "active_events": 1
                 }

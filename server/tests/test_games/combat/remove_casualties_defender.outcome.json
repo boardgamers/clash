@@ -245,6 +245,68 @@
                     },
                     {
                       "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 14,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove all attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -254,6 +316,13 @@
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove 1 of their defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -268,15 +337,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "wins the battle",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
-                    "Player2: Combat: Defending with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units",
-                    "Player1: Choose Casualties: Remove all attacking units",
-                    "Player2: Choose Casualties: Remove 1 of their defending units",
-                    "Defender wins"
                   ]
                 }
               ]

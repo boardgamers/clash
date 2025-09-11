@@ -295,10 +295,14 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Uprising",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Uprising"
                   ]
                 },
                 {
@@ -326,10 +330,14 @@
                       "origin": {
                         "Incident": 39
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Gain 1 victory point",
+                      "origin": {
+                        "Incident": 39
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Uprising: Gain 1 victory point"
                   ],
                   "active_events": 1
                 }

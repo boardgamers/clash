@@ -257,8 +257,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Synergies: Selected Fishing as first advance"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Selected Fishing as first advance",
+                      "origin": {
+                        "CivilCard": 34
+                      }
+                    }
                   ],
                   "active_events": 1
                 },
@@ -319,8 +325,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Synergies: Selected WarShips as second advance"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Selected WarShips as second advance",
+                      "origin": {
+                        "CivilCard": 34
+                      }
+                    }
                   ],
                   "active_events": 1
                 },

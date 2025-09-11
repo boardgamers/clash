@@ -303,6 +303,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Unlock Provinces",
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Advance": {
                         "advance": "Voting",
                         "incident_token": {
@@ -314,9 +321,6 @@
                         "Ability": "Advance"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Advance: Unlock Provinces"
                   ]
                 },
                 {

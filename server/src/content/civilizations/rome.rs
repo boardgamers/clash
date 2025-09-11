@@ -329,9 +329,9 @@ fn sulla() -> LeaderInfo {
             .add_transient_event_listener(
                 |event| &mut event.on_influence_culture_attempt,
                 6,
-                |r, city, game, _| {
+                |r, city, game, p| {
                     if let Ok(info) = r
-                        && info.is_defender
+                        && info.is_defender(p.index)
                         && leader_position(game.player(city.player_index)) == city.position
                     {
                         *r =

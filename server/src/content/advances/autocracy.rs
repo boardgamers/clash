@@ -56,9 +56,9 @@ fn totalitarianism() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         0,
-        |r, city, game, _| {
+        |r, city, game, p| {
             if let Ok(info) = r
-                && info.is_defender
+                && info.is_defender(p.index)
                 && game
                     .player(city.player_index)
                     .get_units(city.position)

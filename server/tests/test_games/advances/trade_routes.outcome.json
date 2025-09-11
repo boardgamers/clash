@@ -440,6 +440,20 @@
                     },
                     {
                       "player": 1,
+                      "Text": "ship at E7 traded with city D6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "settler at E7 traded with city E6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -462,9 +476,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6"
                   ]
                 }
               ]

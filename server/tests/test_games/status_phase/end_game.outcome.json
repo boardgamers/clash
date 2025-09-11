@@ -297,8 +297,14 @@
                 {
                   "action": "StartTurn",
                   "player": 0,
-                  "log": [
-                    "The game has ended. Player2 has won"
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "wins the game",
+                      "origin": {
+                        "Ability": "having the most points"
+                      }
+                    }
                   ]
                 }
               ]

@@ -9,14 +9,15 @@ use crate::construct::on_construct;
 use crate::content::custom_actions::on_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
-use crate::events::EventPlayer;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::explore::ask_explore_resolution;
 use crate::game::GameState;
 use crate::game::{Game, GameContext};
 use crate::game_setup::execute_choose_civ;
 use crate::incident::{on_choose_incident, on_trigger_incident};
 use crate::log::{
-    ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action, current_turn_log_mut,
+    ActionLogBalance, ActionLogEntry, ActionLogItem, add_action_log_item, add_log_action,
+    current_turn_log_mut,
 };
 use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
 use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
@@ -126,9 +127,14 @@ pub fn execute_without_undo(
         && !matches!(action, Action::Response(_))
     {
         // ignore missing response in replay
-        game.add_info_log_item(&format!(
-            "interrupted {} events in replay due to a missing response",
-            game.events.len()
+        game.add_log_item(ActionLogItem::new(
+            player_index,
+            ActionLogEntry::message(format!(
+                "interrupted {} events in replay due to a missing response",
+                game.events.len()
+            )),
+            EventOrigin::Ability("replay".to_string()),
+            vec![],
         ));
         game.events.clear();
     }
@@ -243,7 +249,7 @@ pub(crate) fn execute_custom_phase_action(
         ExploreResolution(r) => {
             ask_explore_resolution(game, player, r);
         }
-        InfluenceCulture(r) => {
+        InfluenceCultureBoost(r) => {
             on_cultural_influence(game, player, r);
         }
         UnitsKilled(k) => units_killed(game, player, k),

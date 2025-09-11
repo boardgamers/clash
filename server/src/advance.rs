@@ -423,7 +423,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
         player.incident_tokens -= 1;
         if player.incident_tokens == 0 {
             player.incident_tokens = 3;
-            trigger_incident(game, player_index);
+            trigger_incident(game, player_index, EventOrigin::Advance(info.advance));
         }
     }
 }

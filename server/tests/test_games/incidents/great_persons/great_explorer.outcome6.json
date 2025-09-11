@@ -416,11 +416,21 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "triggers the event Great Explorer",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Exhausted the land in position E8",
+                      "origin": {
+                        "Incident": 18
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Great Explorer",
-                    "Player2: Great Explorer: Exhausted the land in position E8"
                   ]
                 },
                 {
@@ -534,8 +544,14 @@
                     }
                   },
                   "player": 1,
-                  "log": [
-                    "Player2: Great Explorer: Explored B6"
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Explored B6",
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    }
                   ],
                   "active_events": 1
                 },
@@ -547,6 +563,13 @@
                   },
                   "player": 1,
                   "items": [
+                    {
+                      "player": 1,
+                      "Text": "Chose rotation 0",
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    },
                     {
                       "player": 1,
                       "Explore": {
@@ -574,9 +597,6 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Explore Resolution: Chose rotation 0"
-                  ],
                   "active_events": 2
                 },
                 {
@@ -588,8 +608,14 @@
                     }
                   },
                   "player": 1,
-                  "log": [
-                    "Player2: Great Explorer: Decided to build a city A7"
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Decided to build a city A7",
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    }
                   ],
                   "active_events": 1
                 },

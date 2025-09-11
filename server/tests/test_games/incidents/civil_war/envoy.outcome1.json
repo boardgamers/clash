@@ -308,6 +308,34 @@
                     },
                     {
                       "player": 0,
+                      "Text": "triggers the event Envoy",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot move - will try to spawn a new city instead",
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 1,
@@ -315,6 +343,13 @@
                         },
                         "balance": "Gain"
                       },
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Pyramids is now available to be taken by anyone",
                       "origin": {
                         "Incident": 40
                       }
@@ -331,10 +366,6 @@
                         "Incident": 40
                       }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Envoy",
-                    "Player1: Envoy: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Pyramids is now available to be taken by anyone"
                   ]
                 },
                 {

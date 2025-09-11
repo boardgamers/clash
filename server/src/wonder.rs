@@ -208,9 +208,10 @@ pub(crate) fn on_draw_wonder_card(game: &mut Game, player_index: usize, draw: Dr
     );
 }
 
-pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
+pub(crate) fn draw_wonder_from_pile(game: &mut Game, player: &EventPlayer) -> Option<Wonder> {
     draw_card_from_pile(
         game,
+        player,
         "Wonders",
         |game| &mut game.wonders_left,
         |_| Vec::new(),
@@ -322,7 +323,7 @@ fn player_with_wonder_card(game: &Game, wonder: Wonder) -> Option<usize> {
 }
 
 fn gain_wonder_from_pile(game: &mut Game, player: &EventPlayer) {
-    if let Some(w) = draw_wonder_from_pile(game) {
+    if let Some(w) = draw_wonder_from_pile(game, player) {
         gain_wonder_card(game, player, w, HandCardLocation::DrawPile);
     }
 }
@@ -433,21 +434,14 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |e| &mut e.play_wonder_card,
             11,
             move |game, p, i| {
-                p.log(game, &format!("Play the wonder card {}", i.wonder.name()));
-
                 Some(PositionRequest::new(
                     cities_for_wonder(i.wonder, game, p.get(game), i.cost.clone()),
                     1..=1,
                     "Select city to build wonder",
                 ))
             },
-            |game, s, i| {
-                let position = s.choice[0];
-                i.selected_position = Some(position);
-                s.log(
-                    game,
-                    &format!("Decided to build {} in city {position}", i.wonder.name(),),
-                );
+            |_game, s, i| {
+                i.selected_position = Some(s.choice[0]);
             },
         )
         .add_payment_request_listener(
@@ -624,7 +618,7 @@ fn remove_public_wonder(game: &mut Game) {
 }
 
 pub(crate) fn draw_public_wonder(game: &mut Game, player: &EventPlayer) {
-    if let Some(wonder) = draw_wonder_from_pile(game) {
+    if let Some(wonder) = draw_wonder_from_pile(game, player) {
         player.log(
             game,
             &format!("{} is now available to be taken by anyone", wonder.name()),

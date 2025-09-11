@@ -2,7 +2,7 @@ use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;

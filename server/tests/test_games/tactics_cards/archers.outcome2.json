@@ -218,12 +218,23 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "infantry": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 1 infantry",
-                    "Player2: Combat: Defending with 2 infantry"
                   ]
                 },
                 {
@@ -252,11 +263,21 @@
                       "origin": {
                         "Advance": "Tactics"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Reveal Tactics Card Archers",
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "rolls a 6 and scored a hit",
+                      "origin": {
+                        "TacticsCard": 26
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Tactics: Reveal Tactics Card Archers",
-                    "Player2: Archers: Rolled a 6 and scored a hit"
                   ],
                   "active_events": 1
                 },
@@ -298,6 +319,13 @@
                   "items": [
                     {
                       "player": 1,
+                      "Text": "Player2 sacrifices an infantry for Archers",
+                      "origin": {
+                        "TacticsCard": 26
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -307,6 +335,47 @@
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          }
+                        ],
+                        "combat_value": 7,
+                        "hits": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Remove all attacking units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
                       }
                     },
                     {
@@ -324,6 +393,13 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -334,15 +410,14 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "ends the battle in a draw",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Archers: Player2 sacrifices an infantry for Archers",
-                    "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
-                    "Player2: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units",
-                    "Player1: Choose Casualties: Remove all attacking units",
-                    "Player2: Choose Casualties: Remove all defending units",
-                    "Battle ends in a draw"
                   ],
                   "active_events": 1
                 }

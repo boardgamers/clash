@@ -273,10 +273,14 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Pestilence",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: Pestilence"
                   ]
                 },
                 {
@@ -302,10 +306,14 @@
                       "origin": {
                         "Advance": "Myths"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Avoid mood change",
+                      "origin": {
+                        "Advance": "Myths"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Myths: Avoid mood change"
                   ],
                   "active_events": 1
                 },
@@ -355,10 +363,14 @@
                       "origin": {
                         "Advance": "Myths"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Avoid mood change",
+                      "origin": {
+                        "Advance": "Myths"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Myths: Avoid mood change"
                   ],
                   "active_events": 1
                 }

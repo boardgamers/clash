@@ -275,10 +275,14 @@
                       "origin": {
                         "Ability": "Free Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event An awesome year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "A new game event has been triggered: An awesome year"
                   ],
                   "active_events": 1
                 },
@@ -292,6 +296,13 @@
                   },
                   "player": 0,
                   "items": [
+                    {
+                      "player": 0,
+                      "Text": "Exhausted the land in position B2",
+                      "origin": {
+                        "Incident": 13
+                      }
+                    },
                     {
                       "player": 0,
                       "Resources": {
@@ -328,9 +339,6 @@
                         "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: An awesome year: Exhausted the land in position B2"
                   ],
                   "active_events": 2
                 }

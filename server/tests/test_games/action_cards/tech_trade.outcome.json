@@ -233,6 +233,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Selected Player2 as trade partner",
+                      "origin": {
+                        "CivilCard": 39
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -277,9 +284,6 @@
                         "CivilCard": 39
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Technology Trade: Selected Player2 as trade partner"
                   ]
                 }
               ]

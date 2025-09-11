@@ -149,7 +149,8 @@ pub(crate) fn recruit_event_origin() -> EventOrigin {
     EventOrigin::Ability("Recruit".to_string())
 }
 
-pub(crate) fn combat_event_origin() -> EventOrigin {
+#[must_use]
+pub fn combat_event_origin() -> EventOrigin {
     EventOrigin::Ability("Combat".to_string())
 }
 

@@ -335,8 +335,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Great Library: Use Engineering for the turn"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Use Engineering for the turn",
+                      "origin": {
+                        "Ability": "Great Library"
+                      }
+                    }
                   ],
                   "active_events": 1
                 },
@@ -348,7 +354,7 @@
                   },
                   "player": 0,
                   "origin": {
-                    "Wonder": "Pyramids"
+                    "Ability": "Build Wonder"
                   },
                   "items": [
                     {
@@ -360,9 +366,6 @@
                         "Ability": "Build Wonder"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2"
                   ]
                 }
               ]

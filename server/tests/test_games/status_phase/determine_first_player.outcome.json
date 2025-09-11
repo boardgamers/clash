@@ -205,8 +205,14 @@
                     }
                   },
                   "player": 0,
-                  "log": [
-                    "Player1: Determine First Player: Player1 choose Player2 as the new starting player"
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Player1 choose Player2 as the new starting player",
+                      "origin": {
+                        "Ability": "Determine First Player"
+                      }
+                    }
                   ],
                   "active_events": 1
                 }

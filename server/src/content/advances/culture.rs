@@ -80,9 +80,9 @@ fn monuments() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         1,
-        |r, city, _, _| {
+        |r, city, _, p| {
             if let Ok(info) = r
-                && info.is_defender
+                && info.is_defender(p.index)
                 && !city.pieces.wonders.is_empty()
             {
                 *r = Err(
