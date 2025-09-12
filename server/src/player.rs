@@ -76,7 +76,6 @@ pub struct Player {
     pub secrets: Vec<String>,
     pub custom_data: HashMap<String, Data>,
     pub(crate) objective_opportunities: Vec<String>, // transient
-    pub(crate) gained_objective: Option<u8>,         // transient
     pub(crate) great_mausoleum_action_cards: u8,     // transient
 }
 
@@ -125,7 +124,6 @@ impl Player {
             secrets: Vec::new(),
             custom_data: HashMap::new(),
             objective_opportunities: Vec::new(),
-            gained_objective: None,
             great_mausoleum_action_cards: 0,
         }
     }
