@@ -1,4 +1,3 @@
-use std::clone;
 use crate::action::lose_action;
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};

@@ -162,17 +162,17 @@ impl<T, U, V, W> Listener<T, U, V, W> {
 }
 
 #[derive(Clone)]
-pub struct EventMut<T, U = (), V = (), W = ()> {
-    name: String, // for debugging
+pub struct Event<T, U = (), V = (), W = ()> {
+    pub(crate) name: String, // for debugging
     listeners: Vec<Listener<T, U, V, W>>,
 }
 
-impl<T, U, V, W> EventMut<T, U, V, W>
+impl<T, U, V, W> Event<T, U, V, W>
 where
     T: Clone + PartialEq,
     W: Clone + PartialEq,
 {
-    fn new(name: &str) -> Self {
+    pub(crate) fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
             listeners: Vec::new(),
@@ -249,45 +249,15 @@ where
     }
 }
 
-#[derive(Clone)]
-pub struct Event<T, U = (), V = (), W = ()> {
-    pub name: String,
-    pub inner: Option<EventMut<T, U, V, W>>,
-    pub deleted: Option<EventOrigin>,
-}
-
-impl<T, U, V, W> Event<T, U, V, W> {
-    #[must_use]
-    pub fn new(name: &str) -> Self
-    where
-        T: Clone + PartialEq,
-        W: Clone + PartialEq,
-    {
-        Self {
-            name: name.to_string(),
-            inner: Some(EventMut::new(name)),
-            deleted: None,
-        }
-    }
-
-    pub(crate) fn get(&self) -> &EventMut<T, U, V, W> {
-        self.inner.as_ref().expect("Event should be initialized")
-    }
-
-    pub(crate) fn clone(&mut self) -> EventMut<T, U, V, W> where T: Clone, U: Clone, V: Clone, W: Clone {
-        self.inner.as_ref().expect("Event should be initialized").clone()
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{EventMut, EventOrigin, EventPlayer};
+    use super::{Event, EventOrigin, EventPlayer};
     use crate::advance::Advance;
     use crate::player::CostTrigger;
 
     #[test]
     fn mutable_event() {
-        let mut event = EventMut::new("test");
+        let mut event = Event::new("test");
         let add_constant = Advance::Arts;
         event.add_listener_mut(
             |item, constant, _, (), _| *item += constant,

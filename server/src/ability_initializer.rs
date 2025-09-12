@@ -1067,18 +1067,11 @@ where
     let deinitialize_event = event.clone();
     let initializer = move |game: &mut Game, p: &EventPlayer, prio_delta: i32| {
         let e = event(&mut p.get_mut(game).events);
-        e.inner
-            .as_mut()
-            .unwrap_or_else(|| panic!("event {} should be set: {:?}", e.name, p.origin))
-            .add_listener_mut(listener.clone(), priority + prio_delta, p.clone());
+        e.add_listener_mut(listener.clone(), priority + prio_delta, p.clone());
     };
     let deinitializer = move |game: &mut Game, p: &EventPlayer| {
         let e = deinitialize_event(&mut p.get_mut(game).events);
-        if let Some(inner) = &mut e.inner {
-            inner.remove_listener_mut_by_key(&p.origin);
-        } else {
-            e.deleted = Some(p.origin.clone());
-        }
+        e.remove_listener_mut_by_key(&p.origin);
     };
     setup
         .add_initializer(initializer)

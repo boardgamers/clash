@@ -471,7 +471,7 @@ impl Player {
         T: Clone + PartialEq,
     {
         let e = event(&self.events.transient);
-        e.get().trigger(value, info, details, &mut ());
+        e.trigger(value, info, details, &mut ());
     }
 
     pub(crate) fn trigger_cost_event<U, V>(
@@ -482,7 +482,7 @@ impl Player {
         details: &V,
         trigger: CostTrigger,
     ) -> CostInfo {
-        let event = get_event(&self.events.transient).get();
+        let event = get_event(&self.events.transient);
         match trigger {
             CostTrigger::WithModifiers => {
                 let m =
