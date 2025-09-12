@@ -274,7 +274,7 @@ impl<T, U, V, W> Event<T, U, V, W> {
         self.inner.as_ref().expect("Event should be initialized")
     }
 
-    pub(crate) fn take(&mut self) -> EventMut<T, U, V, W> where T: Clone, U: Clone, V: Clone, W: Clone {
+    pub(crate) fn clone(&mut self) -> EventMut<T, U, V, W> where T: Clone, U: Clone, V: Clone, W: Clone {
         self.inner.as_ref().expect("Event should be initialized").clone()
     }
 }

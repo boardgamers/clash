@@ -382,7 +382,7 @@ pub(crate) fn trigger_event_with_game_value<U: Clone, V: Clone, W: Clone + Parti
     details: &V,
     extra_value: &mut W,
 ) {
-    let e = event(&mut game.players[player_index].events).take();
+    let e = event(&mut game.players[player_index].events).clone();
     e.trigger(game, info, details, extra_value);
 }
 
@@ -396,6 +396,6 @@ pub(crate) fn trigger_event_with_game_info<U: Clone + PartialEq, V: Clone, W: Cl
 ) where
     W: Clone + PartialEq,
 {
-    let e = event(&mut game.players[player_index].events).take();
+    let e = event(&mut game.players[player_index].events).clone();
     e.trigger(info, game, details, extra_value);
 }
