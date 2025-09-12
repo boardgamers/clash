@@ -140,6 +140,7 @@ impl EventPlayer {
     }
 }
 
+#[derive(Clone)]
 struct Listener<T, U, V, W> {
     #[allow(clippy::type_complexity)]
     callback: Arc<dyn Fn(&mut T, &U, &V, &mut W, &EventPlayer) + Sync + Send>,
@@ -160,6 +161,7 @@ impl<T, U, V, W> Listener<T, U, V, W> {
     }
 }
 
+#[derive(Clone)]
 pub struct EventMut<T, U = (), V = (), W = ()> {
     name: String, // for debugging
     listeners: Vec<Listener<T, U, V, W>>,
@@ -247,6 +249,7 @@ where
     }
 }
 
+#[derive(Clone)]
 pub struct Event<T, U = (), V = (), W = ()> {
     pub name: String,
     pub inner: Option<EventMut<T, U, V, W>>,
@@ -271,20 +274,8 @@ impl<T, U, V, W> Event<T, U, V, W> {
         self.inner.as_ref().expect("Event should be initialized")
     }
 
-    pub(crate) fn take(&mut self) -> EventMut<T, U, V, W> {
-        self.inner.take().expect("Event should be initialized")
-    }
-
-    pub(crate) fn set(&mut self, mut event: EventMut<T, U, V, W>)
-    where
-        T: Clone + PartialEq,
-        W: Clone + PartialEq,
-    {
-        if let Some(o) = &self.deleted.take() {
-            event.remove_listener_mut_by_key(o);
-        } else {
-            self.inner = Some(event);
-        }
+    pub(crate) fn take(&mut self) -> EventMut<T, U, V, W> where T: Clone, U: Clone, V: Clone, W: Clone {
+        self.inner.as_ref().expect("Event should be initialized").clone()
     }
 }
 
