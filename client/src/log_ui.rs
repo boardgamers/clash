@@ -54,6 +54,16 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     // Use the pre-calculated log entries
     let start = d.current_page * d.lines_per_page;
     let end = usize::min(start + d.lines_per_page, d.log_entries.len());
+
+    // Header: turn and round, unless age is 0
+    if let Some(first_entry) = d.log_entries.get(start) {
+        if first_entry.age > 0 {
+            let header = format!("Age {}, Round {}", first_entry.age, first_entry.round);
+            let header_width = state.measure_text(&header).width;
+            rc.draw_text(&header, state.screen_size.x / 2. - header_width / 2., 30.);
+        }
+    }
+
     let mut y = 1.5;
 
     for entry in &d.log_entries[start..end] {

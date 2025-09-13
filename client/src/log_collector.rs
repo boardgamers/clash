@@ -67,19 +67,31 @@ pub(crate) struct LogEntry {
     pub(crate) body: LogBody,
     pub(crate) active_origin: Option<EventOrigin>,
     pub(crate) indent: usize,
+    pub(crate) age: u32,
+    pub(crate) round: u32,
 }
 
 impl LogEntry {
-    pub(crate) fn new(body: LogBody, active_origin: Option<EventOrigin>, indent: usize) -> Self {
+    pub(crate) fn new(
+        body: LogBody,
+        active_origin: Option<EventOrigin>,
+        indent: usize,
+        age: u32,
+        round: u32,
+    ) -> Self {
         LogEntry {
             body,
             active_origin,
             indent,
+            age,
+            round,
         }
     }
 }
 
 struct LogCollector {
+    age: u32,
+    round: u32,
     log_entries: Vec<LogEntry>,
     active_origin: Option<EventOrigin>,
 }
@@ -89,12 +101,14 @@ impl LogCollector {
         Self {
             log_entries: Vec::new(),
             active_origin: None,
+            age: 0,
+            round: 0,
         }
     }
 
     fn add_entry(&mut self, body: LogBody, indent: usize) {
         self.log_entries
-            .push(LogEntry::new(body, self.active_origin.clone(), indent));
+            .push(LogEntry::new(body, self.active_origin.clone(), indent, self.age, self.round));
     }
 
     fn add_message(&mut self, message: &str, indent: usize) {
@@ -106,10 +120,12 @@ pub(crate) fn collect_log_entries(rc: &RenderContext) -> Vec<LogEntry> {
     let mut c = LogCollector::new();
 
     for age in &rc.game.log {
+        c.age = age.age;
         if age.age == 0 {
             c.add_message("Game Start", 0);
         }
         for round in &age.rounds {
+            c.round = round.round;
             if round.round > 0 {
                 c.add_message(&format!("Age {}, Round {}", age.age, round.round), 0);
             }
@@ -310,7 +326,8 @@ fn inline_action_items(items: &mut Vec<ActionLogItem>, action: &mut ActionLogBod
                 ..
             } if *player == action.action.player
         )
-    }).map(|i| i.entry);
+    })
+    .map(|i| i.entry);
 }
 
 pub fn find_action_arg(
