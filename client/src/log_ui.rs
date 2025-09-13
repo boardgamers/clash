@@ -365,6 +365,11 @@ fn draw_action(drawer: &mut RichTextDrawer, body: &ActionLogBody) {
             drawer.text(&format!("Choose Civilization: {c}"));
         }
     }
+
+    if let Some(payment) = &body.payment {
+        drawer.text("paying");
+        draw_entry(drawer, payment, body.action.player);
+    }
 }
 
 fn draw_response_action(drawer: &mut RichTextDrawer, r: &EventResponse) {
@@ -483,6 +488,6 @@ fn draw_argument(drawer: &mut RichTextDrawer, body: &ActionLogBody) {
     if let Some(a) = &body.argument {
         draw_entry(drawer, a, body.action.player);
     } else {
-        panic!("subject missing advance details");
+        panic!("subject missing argument");
     }
 }

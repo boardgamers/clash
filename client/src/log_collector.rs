@@ -27,6 +27,7 @@ pub(crate) struct ActionLogBody {
     pub(crate) action: ActionLogAction,
     pub(crate) action_cost: bool,
     pub(crate) argument: Option<ActionLogEntry>,
+    pub(crate) payment: Option<ActionLogEntry>,
 }
 
 impl ActionLogBody {
@@ -35,6 +36,7 @@ impl ActionLogBody {
             action,
             action_cost: false,
             argument: None,
+            payment: None,
         }
     }
 }
@@ -296,6 +298,19 @@ fn inline_action_items(items: &mut Vec<ActionLogItem>, action: &mut ActionLogBod
         action.action_cost = true;
     }
     action.argument = pull_action_arg(items, action);
+    action.payment = remove_element_by(items, |item| {
+        matches!(
+            item,
+            ActionLogItem {
+                player,
+                entry: ActionLogEntry::Resources {
+                    balance: ActionLogBalance::Pay,
+                    ..
+                },
+                ..
+            } if *player == action.action.player
+        )
+    }).map(|i| i.entry);
 }
 
 pub fn find_action_arg(
