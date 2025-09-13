@@ -8,9 +8,7 @@ use std::mem;
 pub(crate) fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
     let choices = info.choices.clone();
 
-    let mut list = choices.iter()
-        .filter(|(_, v)| !v.is_empty())
-        .collect_vec();
+    let mut list = choices.iter().filter(|(_, v)| !v.is_empty()).collect_vec();
     let tiles = list.len(); // production focus is not considered
     let mut max_tiles = tiles;
 
