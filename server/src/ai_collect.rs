@@ -8,7 +8,9 @@ use std::mem;
 pub(crate) fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
     let choices = info.choices.clone();
 
-    let mut list = choices.iter().collect_vec();
+    let mut list = choices.iter()
+        .filter(|(_, v)| !v.is_empty())
+        .collect_vec();
     let tiles = list.len(); // production focus is not considered
     let mut max_tiles = tiles;
 
@@ -69,7 +71,12 @@ fn add_combination(
             }
         }
     } else {
-        let n = pile.iter().next().expect("pile empty");
+        let n = pile.iter().next().unwrap_or_else(|| {
+            panic!(
+                "Pile should have at least one element for position {pos:?}, \
+                got choices {choices:?} and combo {combo:?}"
+            )
+        });
         for r in &mut *result {
             r.push(PositionCollection::new(*pos, n.clone()));
         }
