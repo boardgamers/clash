@@ -320,6 +320,18 @@ fn pull_action_arg(items: &mut Vec<ActionLogItem>, body: &ActionLogBody) -> Opti
                     }
                 )
             }),
+            PlayingAction::Collect(_) => find_action_arg(items, body, |item| {
+                matches!(
+                    item,
+                    ActionLogItem {
+                        entry: ActionLogEntry::Resources {
+                            balance: ActionLogBalance::Gain,
+                            ..
+                        },
+                        ..
+                    }
+                )
+            }),
             PlayingAction::FoundCity { .. } | PlayingAction::Construct(_) => {
                 find_action_arg(items, body, |item| {
                     matches!(

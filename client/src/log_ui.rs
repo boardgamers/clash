@@ -105,7 +105,7 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
 }
 
 fn draw_line(rc: &RenderContext, y: f32, entry: &LogEntry) {
-    let message_pos = vec2(20. + entry.indent as f32 * 30.0, y * 25. + 20.);
+    let message_pos = vec2(20. + entry.indent as f32 * 45.0, y * 25. + 20.);
 
     let mut drawer = RichTextDrawer::new(rc, message_pos);
 
@@ -417,8 +417,10 @@ fn draw_playing_action(drawer: &mut RichTextDrawer, p: &PlayingAction, body: &Ac
         }
         PlayingAction::Collect(c) => {
             drawer.text("collects");
+            draw_argument(drawer, body);
             drawer.at_location(c.city_position);
             draw_modifier_suffix(drawer, &c.action_type, origin);
+
         }
         PlayingAction::Recruit(_) => {
             drawer.text("recruits");
