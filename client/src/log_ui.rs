@@ -161,7 +161,7 @@ fn draw_line(rc: &RenderContext, y: f32, entry: &LogEntry) {
         LogBody::InfluenceRangeBoost(i) => {
             drawer.player(i.player);
             drawer.text("may pay");
-            drawer.resources(&i.info.range_boost_cost.default);
+            drawer.resources(&i.info.range_boost_cost.default, &ActionLogBalance::Pay);
             drawer.text("to boost the range");
         }
     }
@@ -218,17 +218,17 @@ fn draw_die_roll(drawer: &mut RichTextDrawer, r: &UnitCombatRoll) {
 
 fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize) {
     match entry {
-        ActionLogEntry::Action { balance: _, amount } => {
+        ActionLogEntry::Action { balance, amount } => {
             if let Some(a) = amount {
-                drawer.text(&a.to_string());
+                drawer.amount(*a, balance);
             }
             drawer.action_icon();
         }
         ActionLogEntry::Resources {
             resources,
-            balance: _,
+            balance,
         } => {
-            drawer.resources(resources);
+            drawer.resources(resources, balance);
         }
         ActionLogEntry::Advance(a) => {
             draw_advance(drawer, a);

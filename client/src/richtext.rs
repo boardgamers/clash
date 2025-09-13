@@ -1,7 +1,7 @@
 use crate::city_ui::draw_mood_state;
 use crate::layout_ui::{FONT_SIZE, draw_scaled_icon};
 use crate::render_context::RenderContext;
-use macroquad::color::{BLACK, Color};
+use macroquad::color::{BLACK, BLUE, Color, RED};
 use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::Texture2D;
 use server::city::MoodState;
@@ -86,15 +86,25 @@ impl RichTextDrawer<'_> {
         self.text_ex(&format!("{position}"), BLACK, 17);
     }
 
-    pub(crate) fn resources(&mut self, resources: &ResourcePile) {
+    pub(crate) fn resources(&mut self, resources: &ResourcePile, balance: &ActionLogBalance) {
         for (resource, amount) in resources.clone() {
-            if amount > 0
-                && let Some(texture) = self.rc.assets().resources.get(&resource)
-            {
-                self.icon(texture);
-                self.text(&amount.to_string());
+            if amount > 0 {
+                self.icon(&self.rc.assets().resources[&resource]);
+                self.amount(amount as u32, balance);
             }
         }
+    }
+
+    pub(crate) fn amount(&mut self, amount: u32, balance: &ActionLogBalance) {
+        self.text_ex(
+            &amount.to_string(),
+            if *balance == ActionLogBalance::Gain {
+                BLUE
+            } else {
+                RED
+            },
+            FONT_SIZE,
+        );
     }
 
     pub(crate) fn unit_icon(&mut self, unit_type: UnitType) {
