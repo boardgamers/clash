@@ -360,6 +360,7 @@ pub struct OnAdvanceInfo {
     pub take_incident_token: bool,
 }
 
+#[derive(Clone)]
 pub struct MoveInfo {
     pub units: Vec<u32>,
     pub from: Position,
@@ -373,32 +374,28 @@ impl MoveInfo {
     }
 }
 
-pub(crate) fn trigger_event_with_game_value<U, V, W>(
+pub(crate) fn trigger_event_with_game_value<U: Clone, V: Clone, W: Clone + PartialEq>(
     game: &mut Game,
     player_index: usize,
     event: impl Fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
     info: &U,
     details: &V,
     extra_value: &mut W,
-) where
-    W: Clone + PartialEq,
-{
-    let e = event(&mut game.players[player_index].events).take();
-    e.trigger(game, info, details, extra_value);
-    event(&mut game.players[player_index].events).set(e);
+) {
+    event(&mut game.players[player_index].events)
+        .clone()
+        .trigger(game, info, details, extra_value);
 }
 
-pub(crate) fn trigger_event_with_game_info<U: Clone + PartialEq, V, W>(
+pub(crate) fn trigger_event_with_game_info<U: Clone + PartialEq, V: Clone, W: Clone + PartialEq>(
     game: &mut Game,
     player_index: usize,
     event: impl Fn(&mut PlayerEvents) -> &mut Event<U, Game, V, W>,
     info: &mut U,
     details: &V,
     extra_value: &mut W,
-) where
-    W: Clone + PartialEq,
-{
-    let e = event(&mut game.players[player_index].events).take();
-    e.trigger(info, game, details, extra_value);
-    event(&mut game.players[player_index].events).set(e);
+) {
+    event(&mut game.players[player_index].events)
+        .clone()
+        .trigger(info, game, details, extra_value);
 }

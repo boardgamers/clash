@@ -278,7 +278,7 @@ impl Game {
         )
     }
 
-    pub(crate) fn trigger_transient_event_with_game_value<U, V>(
+    pub(crate) fn trigger_transient_event_with_game_value<U: Clone, V: Clone>(
         &mut self,
         player_index: usize,
         event: fn(&mut TransientEvents) -> &mut Event<Game, U, V>,

@@ -392,7 +392,6 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         secrets: data.secrets,
         custom_data: data.custom_data,
         objective_opportunities: Vec::new(),
-        gained_objective: None,
         great_mausoleum_action_cards: 0,
     }
 }

@@ -20,7 +20,7 @@ use crate::log::{
     current_turn_log_mut,
 };
 use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
-use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
+use crate::objective_card::{complete_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::recruit::on_recruit;
@@ -160,10 +160,6 @@ pub fn execute_without_undo(
 
 pub(crate) fn after_action(game: &mut Game, player_index: usize) {
     check_for_waste(game);
-
-    if let Some(o) = game.player_mut(player_index).gained_objective.take() {
-        gain_objective_card(game, player_index, o);
-    }
 
     if game
         .player(player_index)

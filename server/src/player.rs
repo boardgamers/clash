@@ -76,7 +76,6 @@ pub struct Player {
     pub secrets: Vec<String>,
     pub custom_data: HashMap<String, Data>,
     pub(crate) objective_opportunities: Vec<String>, // transient
-    pub(crate) gained_objective: Option<u8>,         // transient
     pub(crate) great_mausoleum_action_cards: u8,     // transient
 }
 
@@ -125,7 +124,6 @@ impl Player {
             secrets: Vec::new(),
             custom_data: HashMap::new(),
             objective_opportunities: Vec::new(),
-            gained_objective: None,
             great_mausoleum_action_cards: 0,
         }
     }
@@ -471,7 +469,7 @@ impl Player {
         T: Clone + PartialEq,
     {
         let e = event(&self.events.transient);
-        e.get().trigger(value, info, details, &mut ());
+        e.trigger(value, info, details, &mut ());
     }
 
     pub(crate) fn trigger_cost_event<U, V>(
@@ -482,7 +480,7 @@ impl Player {
         details: &V,
         trigger: CostTrigger,
     ) -> CostInfo {
-        let event = get_event(&self.events.transient).get();
+        let event = get_event(&self.events.transient);
         match trigger {
             CostTrigger::WithModifiers => {
                 let m =

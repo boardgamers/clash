@@ -10,7 +10,7 @@ use crate::content::custom_actions::PlayingActionModifier;
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::GameOptions;
 use crate::log::{ActionLogEntry, current_turn_log_mut};
-use crate::objective_card::draw_objective_card_from_pile;
+use crate::objective_card::gain_objective_card_from_pile;
 use crate::playing_actions::PlayingActionType;
 use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
@@ -42,9 +42,7 @@ fn writing() -> AdvanceBuilder {
         if !game.is_update_patch() {
             gain_action_card_from_pile(game, player);
         }
-        // can't gain objective card directly, because the "combat_end" listener might
-        // currently being processed ("teach us now")
-        player.get_mut(game).gained_objective = draw_objective_card_from_pile(game, player);
+        gain_objective_card_from_pile(game, player);
     })
     .add_transient_event_listener(
         |event| &mut event.after_action,

@@ -140,6 +140,7 @@ impl EventPlayer {
     }
 }
 
+#[derive(Clone)]
 struct Listener<T, U, V, W> {
     #[allow(clippy::type_complexity)]
     callback: Arc<dyn Fn(&mut T, &U, &V, &mut W, &EventPlayer) + Sync + Send>,
@@ -160,17 +161,18 @@ impl<T, U, V, W> Listener<T, U, V, W> {
     }
 }
 
-pub struct EventMut<T, U = (), V = (), W = ()> {
-    name: String, // for debugging
+#[derive(Clone)]
+pub struct Event<T, U = (), V = (), W = ()> {
+    pub(crate) name: String, // for debugging
     listeners: Vec<Listener<T, U, V, W>>,
 }
 
-impl<T, U, V, W> EventMut<T, U, V, W>
+impl<T, U, V, W> Event<T, U, V, W>
 where
     T: Clone + PartialEq,
     W: Clone + PartialEq,
 {
-    fn new(name: &str) -> Self {
+    pub(crate) fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
             listeners: Vec::new(),
@@ -247,56 +249,15 @@ where
     }
 }
 
-pub struct Event<T, U = (), V = (), W = ()> {
-    pub name: String,
-    pub inner: Option<EventMut<T, U, V, W>>,
-    pub deleted: Option<EventOrigin>,
-}
-
-impl<T, U, V, W> Event<T, U, V, W> {
-    #[must_use]
-    pub fn new(name: &str) -> Self
-    where
-        T: Clone + PartialEq,
-        W: Clone + PartialEq,
-    {
-        Self {
-            name: name.to_string(),
-            inner: Some(EventMut::new(name)),
-            deleted: None,
-        }
-    }
-
-    pub(crate) fn get(&self) -> &EventMut<T, U, V, W> {
-        self.inner.as_ref().expect("Event should be initialized")
-    }
-
-    pub(crate) fn take(&mut self) -> EventMut<T, U, V, W> {
-        self.inner.take().expect("Event should be initialized")
-    }
-
-    pub(crate) fn set(&mut self, mut event: EventMut<T, U, V, W>)
-    where
-        T: Clone + PartialEq,
-        W: Clone + PartialEq,
-    {
-        if let Some(o) = &self.deleted.take() {
-            event.remove_listener_mut_by_key(o);
-        } else {
-            self.inner = Some(event);
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{EventMut, EventOrigin, EventPlayer};
+    use super::{Event, EventOrigin, EventPlayer};
     use crate::advance::Advance;
     use crate::player::CostTrigger;
 
     #[test]
     fn mutable_event() {
-        let mut event = EventMut::new("test");
+        let mut event = Event::new("test");
         let add_constant = Advance::Arts;
         event.add_listener_mut(
             |item, constant, _, (), _| *item += constant,
