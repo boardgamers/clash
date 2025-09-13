@@ -57,7 +57,7 @@ async fn main() {
                 } else {
                     CivSetupOption::Random
                 },
-                patch: PatchOption::BalancePatch,
+                patch: PatchOption::Standard,
             })
             .build(),
     );

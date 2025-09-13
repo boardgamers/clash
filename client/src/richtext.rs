@@ -141,8 +141,8 @@ impl RichTextDrawer<'_> {
                     self.rc,
                     &self.rc.assets().buildings[b],
                     "",
-                    center(self.current_pos),
-                    RADIUS,
+                    self.building_pos(),
+                    ICON_SIZE,
                 );
                 self.current_pos.x += 35.0;
                 self.text(b.name());
@@ -158,13 +158,17 @@ impl RichTextDrawer<'_> {
         }
     }
 
+    fn building_pos(&mut self) -> Vec2 {
+        self.current_pos + vec2(0.0, -20.0)
+    }
+
     pub(crate) fn wonder(&mut self, w: Wonder) {
         draw_scaled_icon(
             self.rc,
             &self.rc.assets().wonders[&w],
             "",
-            center(self.current_pos),
-            RADIUS,
+            self.building_pos(),
+            ICON_SIZE,
         );
         self.current_pos.x += 35.0;
         self.text(&w.name());
@@ -179,6 +183,7 @@ impl RichTextDrawer<'_> {
 }
 
 const RADIUS: f32 = 15.0;
+const ICON_SIZE: f32 = 15.0 * 2.0;
 
 fn center(message_pos: Vec2) -> Vec2 {
     vec2(message_pos.x + 15.0, message_pos.y - RADIUS / 2.0)
