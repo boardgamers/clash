@@ -56,12 +56,12 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     let end = usize::min(start + d.lines_per_page, d.log_entries.len());
 
     // Header: turn and round, unless age is 0
-    if let Some(first_entry) = d.log_entries.get(start) {
-        if first_entry.age > 0 {
-            let header = format!("Age {}, Round {}", first_entry.age, first_entry.round);
-            let header_width = state.measure_text(&header).width;
-            rc.draw_text(&header, state.screen_size.x / 2. - header_width / 2., 30.);
-        }
+    if let Some(first_entry) = d.log_entries.get(start)
+        && first_entry.age > 0
+    {
+        let header = format!("Age {}, Round {}", first_entry.age, first_entry.round);
+        let header_width = state.measure_text(&header).width;
+        rc.draw_text(&header, state.screen_size.x / 2. - header_width / 2., 30.);
     }
 
     let mut y = 1.5;
@@ -224,10 +224,7 @@ fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize
             }
             drawer.action_icon();
         }
-        ActionLogEntry::Resources {
-            resources,
-            balance,
-        } => {
+        ActionLogEntry::Resources { resources, balance } => {
             drawer.resources(resources, balance);
         }
         ActionLogEntry::Advance(a) => {
@@ -249,7 +246,7 @@ fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize
             drawer.text(&message);
         }
         ActionLogEntry::MoodChange { city, mood } => {
-            drawer.text("City");
+            drawer.text("'s city");
             drawer.at_location(*city);
             drawer.text(&format!("becomes {mood}"));
             drawer.mood(player, mood);
@@ -435,7 +432,6 @@ fn draw_playing_action(drawer: &mut RichTextDrawer, p: &PlayingAction, body: &Ac
             draw_argument(drawer, body);
             drawer.at_location(c.city_position);
             draw_modifier_suffix(drawer, &c.action_type, origin);
-
         }
         PlayingAction::Recruit(_) => {
             drawer.text("recruits");

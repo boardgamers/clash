@@ -1,9 +1,10 @@
 use crate::city_ui::draw_mood_state;
+use crate::client_state::ColorProfile;
 use crate::layout_ui::{FONT_SIZE, draw_scaled_icon};
 use crate::render_context::RenderContext;
 use macroquad::color::{BLACK, BLUE, Color, RED};
 use macroquad::math::{Vec2, vec2};
-use macroquad::prelude::Texture2D;
+use macroquad::prelude::{GREEN, Texture2D};
 use server::city::MoodState;
 use server::log::ActionLogBalance;
 use server::position::Position;
@@ -90,7 +91,7 @@ impl RichTextDrawer<'_> {
         for (resource, amount) in resources.clone() {
             if amount > 0 {
                 self.icon(&self.rc.assets().resources[&resource]);
-                self.amount(amount as u32, balance);
+                self.amount(u32::from(amount), balance);
             }
         }
     }
@@ -99,7 +100,11 @@ impl RichTextDrawer<'_> {
         self.text_ex(
             &amount.to_string(),
             if *balance == ActionLogBalance::Gain {
-                BLUE
+                if self.rc.state.color_profile == ColorProfile::HighContrast {
+                    BLUE
+                } else {
+                    GREEN
+                }
             } else {
                 RED
             },

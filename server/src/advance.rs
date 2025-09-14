@@ -465,7 +465,10 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPl
 }
 
 fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player: &EventPlayer) {
-    player.log(game, &format!("unlocks {}", special_advance.info(game).name));
+    player.log(
+        game,
+        &format!("unlocks {}", special_advance.info(game).name),
+    );
     special_advance
         .info(game)
         .listeners

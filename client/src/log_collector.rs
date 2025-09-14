@@ -51,7 +51,7 @@ pub(crate) enum LogBody {
         round: u32,
         player: usize,
     },
-    Action(ActionLogBody),
+    Action(Box<ActionLogBody>),
     CombatUnits {
         role: String,
         player: usize,
@@ -107,8 +107,13 @@ impl LogCollector {
     }
 
     fn add_entry(&mut self, body: LogBody, indent: usize) {
-        self.log_entries
-            .push(LogEntry::new(body, self.active_origin.clone(), indent, self.age, self.round));
+        self.log_entries.push(LogEntry::new(
+            body,
+            self.active_origin.clone(),
+            indent,
+            self.age,
+            self.round,
+        ));
     }
 
     fn add_message(&mut self, message: &str, indent: usize) {
@@ -157,7 +162,7 @@ fn collect_action(
     } else {
         let mut body = ActionLogBody::new(action.clone());
         inline_action_items(&mut items, &mut body);
-        c.add_entry(LogBody::Action(body.clone()), indent);
+        c.add_entry(LogBody::Action(Box::new(body.clone())), indent);
         add_additional_action_items(c, &mut body, action, indent + 1);
         indent + 1
     };
