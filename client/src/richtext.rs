@@ -1,15 +1,16 @@
 use crate::city_ui::draw_mood_state;
+use crate::client_state::ColorProfile;
 use crate::layout_ui::{FONT_SIZE, draw_scaled_icon};
 use crate::render_context::RenderContext;
-use macroquad::color::{BLACK, Color};
+use macroquad::color::{BLACK, BLUE, Color, RED};
 use macroquad::math::{Vec2, vec2};
-use macroquad::prelude::Texture2D;
+use macroquad::prelude::{GREEN, Texture2D};
 use server::city::MoodState;
 use server::log::ActionLogBalance;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::structure::Structure;
-use server::unit::{UnitType, Units};
+use server::unit::{UnitPrintArg, UnitType, Units};
 use server::wonder::Wonder;
 
 pub struct RichTextDrawer<'a> {
@@ -86,22 +87,36 @@ impl RichTextDrawer<'_> {
         self.text_ex(&format!("{position}"), BLACK, 17);
     }
 
-    pub(crate) fn resources(&mut self, resources: &ResourcePile) {
+    pub(crate) fn resources(&mut self, resources: &ResourcePile, balance: &ActionLogBalance) {
         for (resource, amount) in resources.clone() {
-            if amount > 0
-                && let Some(texture) = self.rc.assets().resources.get(&resource)
-            {
-                self.icon(texture);
-                self.text(&amount.to_string());
+            if amount > 0 {
+                self.icon(&self.rc.assets().resources[&resource]);
+                self.amount(u32::from(amount), balance);
             }
         }
+    }
+
+    pub(crate) fn amount(&mut self, amount: u32, balance: &ActionLogBalance) {
+        self.text_ex(
+            &amount.to_string(),
+            if *balance == ActionLogBalance::Gain {
+                if self.rc.state.color_profile == ColorProfile::HighContrast {
+                    BLUE
+                } else {
+                    GREEN
+                }
+            } else {
+                RED
+            },
+            FONT_SIZE,
+        );
     }
 
     pub(crate) fn unit_icon(&mut self, unit_type: UnitType) {
         self.icon(self.rc.assets().unit(unit_type, self.rc.shown_player));
     }
 
-    pub(crate) fn units(&mut self, units: &Units) {
+    pub(crate) fn units(&mut self, units: &Units, balance: Option<&ActionLogBalance>) {
         for (unit, amount) in units.clone() {
             if amount > 0 {
                 self.unit_icon(unit);
@@ -109,7 +124,16 @@ impl RichTextDrawer<'_> {
                 for _ in 0..amount {
                     u += &unit;
                 }
-                self.text(&u.to_string(Some(self.rc.game)));
+                u.print(Some(self.rc.game), &mut |a| match a {
+                    UnitPrintArg::Text(t) => self.text(t),
+                    UnitPrintArg::Amount(a) => {
+                        if let Some(b) = balance {
+                            self.amount(u32::from(*a), b);
+                        } else {
+                            self.text(&a.to_string());
+                        }
+                    }
+                });
             }
         }
     }
@@ -141,8 +165,8 @@ impl RichTextDrawer<'_> {
                     self.rc,
                     &self.rc.assets().buildings[b],
                     "",
-                    center(self.current_pos),
-                    RADIUS,
+                    self.building_pos(),
+                    ICON_SIZE,
                 );
                 self.current_pos.x += 35.0;
                 self.text(b.name());
@@ -158,13 +182,17 @@ impl RichTextDrawer<'_> {
         }
     }
 
+    fn building_pos(&mut self) -> Vec2 {
+        self.current_pos + vec2(0.0, -20.0)
+    }
+
     pub(crate) fn wonder(&mut self, w: Wonder) {
         draw_scaled_icon(
             self.rc,
             &self.rc.assets().wonders[&w],
             "",
-            center(self.current_pos),
-            RADIUS,
+            self.building_pos(),
+            ICON_SIZE,
         );
         self.current_pos.x += 35.0;
         self.text(&w.name());
@@ -179,6 +207,7 @@ impl RichTextDrawer<'_> {
 }
 
 const RADIUS: f32 = 15.0;
+const ICON_SIZE: f32 = 15.0 * 2.0;
 
 fn center(message_pos: Vec2) -> Vec2 {
     vec2(message_pos.x + 15.0, message_pos.y - RADIUS / 2.0)

@@ -404,7 +404,7 @@
                   "items": [
                     {
                       "player": 0,
-                      "Text": "Killed carried units: 1 cavalry",
+                      "Text": "Killed carried units: 1 cavalry and",
                       "origin": {
                         "Ability": "Choose Casualties (carried units)"
                       }

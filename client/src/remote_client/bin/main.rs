@@ -4,7 +4,7 @@ use macroquad::prelude::next_frame;
 
 extern crate console_error_panic_hook;
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
-use client::client_state::State;
+use client::client_state::{ColorProfile, State};
 use macroquad::math::vec2;
 use serde::{Deserialize, Serialize};
 use server::action::Action;
@@ -74,8 +74,9 @@ struct RemoteClient {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Preferences {
-    ui_scale: Option<String>,
-    world_zoom_factor: Option<String>,
+    ui_scale: String,
+    world_zoom_factor: String,
+    color_profile: ColorProfile,
 }
 
 #[macroquad::main("Clash")]
@@ -148,16 +149,18 @@ impl RemoteClient {
         let p: Preferences =
             serde_json::from_str(prefs).expect("preferences can't be deserialized");
 
-        if let Some(scale) = p.ui_scale {
-            self.state.ui_scale = f32::from_str(&scale).expect("ui scale should be a float");
-            log(&format!("set ui scale to {scale}"));
-        }
+        let scale = p.ui_scale;
+        self.state.ui_scale = f32::from_str(&scale).expect("ui scale should be a float");
+        log(&format!("set ui scale to {scale}"));
 
-        if let Some(zoom) = p.world_zoom_factor {
-            self.state.world_zoom_factor =
-                f32::from_str(&zoom).expect("world zoom factor should be a float");
-            log(&format!("set world zoom factor to {zoom}"));
-        }
+        let zoom = p.world_zoom_factor;
+        self.state.world_zoom_factor =
+            f32::from_str(&zoom).expect("world zoom factor should be a float");
+        log(&format!("set world zoom factor to {zoom}"));
+
+        let profile = p.color_profile;
+        log(&format!("set color profile to {profile:?}",));
+        self.state.color_profile = profile;
     }
 
     fn update_state(&mut self) -> GameSyncResult {

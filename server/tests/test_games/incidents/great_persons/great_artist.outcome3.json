@@ -420,7 +420,7 @@
                     },
                     {
                       "player": 1,
-                      "Text": "Unlock Hellenistic Culture",
+                      "Text": "unlocks Hellenistic Culture",
                       "origin": {
                         "CivilCard": 119
                       }

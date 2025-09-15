@@ -17,6 +17,7 @@ use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::{RenderContext, RenderStage};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
+use serde::{Deserialize, Serialize};
 use server::action::Action;
 use server::advance::Advance;
 use server::card::HandCard;
@@ -336,6 +337,12 @@ pub(crate) enum CameraMode {
     World,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub enum ColorProfile {
+    Standard,
+    HighContrast,
+}
+
 use crate::info_ui::InfoDialog;
 #[cfg(not(target_arch = "wasm32"))]
 use server::ai::AI;
@@ -347,20 +354,21 @@ pub struct State {
     pub show_player: usize,
     pub(crate) active_dialog: ActiveDialog,
     pub(crate) pending_update: Option<PendingUpdate>,
-    pub world_camera: Camera2D,
-    pub world_zoom: f32,
+    pub(crate) world_camera: Camera2D,
+    pub(crate) world_zoom: f32,
     pub world_zoom_factor: f32,
-    pub ui_camera: Camera2D,
+    pub(crate) ui_camera: Camera2D,
     pub ui_scale: f32,
     pub raw_screen_size: Vec2,
-    pub screen_size: Vec2, // scaled by ui_scale
+    pub(crate) screen_size: Vec2, // scaled by ui_scale
     pub(crate) mouse_positions: Vec<MousePosition>,
-    pub focused_tile: Option<Position>,
-    pub show_permanent_effects: bool,
+    pub(crate) focused_tile: Option<Position>,
+    pub(crate) show_permanent_effects: bool,
     pub ai_autoplay: bool,
-    pub pan_map: bool,
+    pub(crate) pan_map: bool,
     #[cfg(not(target_arch = "wasm32"))]
     pub ai_players: Vec<AI>,
+    pub color_profile: ColorProfile,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -393,6 +401,7 @@ impl State {
             ai_autoplay: false,
             #[cfg(not(target_arch = "wasm32"))]
             ai_players: vec![],
+            color_profile: ColorProfile::Standard,
         }
     }
 

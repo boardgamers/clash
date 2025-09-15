@@ -351,7 +351,7 @@
                     },
                     {
                       "player": 0,
-                      "Text": "Unlock Provinces",
+                      "Text": "unlocks Provinces",
                       "origin": {
                         "Ability": "Change Government"
                       }

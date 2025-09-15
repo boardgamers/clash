@@ -18,7 +18,8 @@ use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::{Player, remove_unit};
 use crate::special_advance::SpecialAdvance;
-use crate::{game::Game, leader, position::Position, resource_pile::ResourcePile, unit, utils};
+use crate::{game::Game, leader, position::Position, resource_pile::ResourcePile, unit};
+use string_builder::Builder;
 
 #[derive(Clone)]
 pub struct Unit {
@@ -47,6 +48,11 @@ pub struct UnitData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub carried_units: Vec<UnitBaseData>,
+}
+
+pub enum UnitPrintArg {
+    Text(String),
+    Amount(u8),
 }
 
 impl Unit {
@@ -412,50 +418,97 @@ impl Units {
     /// Panics if `game` is `None` and the units contain a leader.
     #[must_use]
     pub fn to_string(&self, game: Option<&Game>) -> String {
-        let mut unit_types = Vec::new();
+        let mut builder = Builder::default();
+        self.print(game, &mut |a| {
+            if builder.len() > 0 {
+                builder.append(" ".to_string());
+            }
+            match a {
+                UnitPrintArg::Amount(a) => builder.append(a.to_string()),
+                UnitPrintArg::Text(t) => builder.append(t.to_string()),
+            }
+        });
+        builder.string().unwrap_or_default()
+    }
+
+    ///
+    /// # Panics
+    ///
+    /// Panics if `game` is `None` and the units contain a leader.
+    pub fn print<F>(&self, game: Option<&Game>, print: &mut F)
+    where
+        F: FnMut(&UnitPrintArg),
+    {
+        fn amount<F: FnMut(&UnitPrintArg)>(print: &mut F, a: u8) {
+            print(&UnitPrintArg::Amount(a));
+        }
+        fn text<F: FnMut(&UnitPrintArg)>(print: &mut F, t: &str) {
+            print(&UnitPrintArg::Text(t.to_string()));
+        }
+        let mut and = false;
+        let mut add_and = |print: &mut F| {
+            if and {
+                text(print, "and");
+                and = false;
+            } else {
+                and = true;
+            }
+        };
+
         if self.settlers > 0 {
-            unit_types.push(format!(
-                "{} {}",
-                self.settlers,
+            amount(print, self.settlers);
+            text(
+                print,
                 if self.settlers == 1 {
                     "settler"
                 } else {
                     "settlers"
-                }
-            ));
+                },
+            );
+            add_and(print);
         }
         if self.infantry > 0 {
-            unit_types.push(format!("{} infantry", self.infantry,));
+            add_and(print);
+            amount(print, self.infantry);
+            text(print, "infantry");
+            add_and(print);
         }
         if self.ships > 0 {
-            unit_types.push(format!(
-                "{} {}",
-                self.ships,
-                if self.ships == 1 { "ship" } else { "ships" }
-            ));
+            add_and(print);
+            amount(print, self.ships);
+            text(print, if self.ships == 1 { "ship" } else { "ships" });
+            add_and(print);
         }
         if self.cavalry > 0 {
-            unit_types.push(format!("{} cavalry", self.cavalry,));
+            add_and(print);
+            amount(print, self.cavalry);
+            text(print, "cavalry");
+            add_and(print);
         }
         if self.elephants > 0 {
-            unit_types.push(format!(
-                "{} {}",
-                self.elephants,
+            add_and(print);
+            amount(print, self.elephants);
+            text(
+                print,
                 if self.elephants == 1 {
                     "elephant"
                 } else {
                     "elephants"
-                }
-            ));
+                },
+            );
+            add_and(print);
         }
         if let Some(l) = self.leader {
+            add_and(print);
             if let Some(game) = game {
-                unit_types.push(l.name(game));
+                text(print, &l.name(game));
             } else {
                 panic!("game missing for leader")
             }
         }
-        utils::format_and(&unit_types, "no units")
+        if self.is_empty() {
+            text(print, "no units");
+        }
     }
 }
 
@@ -834,6 +887,15 @@ mod tests {
         assert_eq!(
             get_units_to_replace(&available, &new_units),
             Units::new(0, 1, 0, 0, 0, None)
+        );
+    }
+
+    #[test]
+    fn test_to_string() {
+        let units = Units::new(1, 2, 0, 1, 0, None);
+        assert_eq!(
+            units.to_string(None),
+            "1 settler and 2 infantry and 1 cavalry"
         );
     }
 }

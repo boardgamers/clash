@@ -340,7 +340,7 @@
                     },
                     {
                       "player": 1,
-                      "Text": "Unlock Provinces",
+                      "Text": "unlocks Provinces",
                       "origin": {
                         "Ability": "Advance"
                       }

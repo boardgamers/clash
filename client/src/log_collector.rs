@@ -27,6 +27,7 @@ pub(crate) struct ActionLogBody {
     pub(crate) action: ActionLogAction,
     pub(crate) action_cost: bool,
     pub(crate) argument: Option<ActionLogEntry>,
+    pub(crate) payment: Option<ActionLogEntry>,
 }
 
 impl ActionLogBody {
@@ -35,6 +36,7 @@ impl ActionLogBody {
             action,
             action_cost: false,
             argument: None,
+            payment: None,
         }
     }
 }
@@ -49,7 +51,7 @@ pub(crate) enum LogBody {
         round: u32,
         player: usize,
     },
-    Action(ActionLogBody),
+    Action(Box<ActionLogBody>),
     CombatUnits {
         role: String,
         player: usize,
@@ -65,19 +67,31 @@ pub(crate) struct LogEntry {
     pub(crate) body: LogBody,
     pub(crate) active_origin: Option<EventOrigin>,
     pub(crate) indent: usize,
+    pub(crate) age: u32,
+    pub(crate) round: u32,
 }
 
 impl LogEntry {
-    pub(crate) fn new(body: LogBody, active_origin: Option<EventOrigin>, indent: usize) -> Self {
+    pub(crate) fn new(
+        body: LogBody,
+        active_origin: Option<EventOrigin>,
+        indent: usize,
+        age: u32,
+        round: u32,
+    ) -> Self {
         LogEntry {
             body,
             active_origin,
             indent,
+            age,
+            round,
         }
     }
 }
 
 struct LogCollector {
+    age: u32,
+    round: u32,
     log_entries: Vec<LogEntry>,
     active_origin: Option<EventOrigin>,
 }
@@ -87,12 +101,19 @@ impl LogCollector {
         Self {
             log_entries: Vec::new(),
             active_origin: None,
+            age: 0,
+            round: 0,
         }
     }
 
     fn add_entry(&mut self, body: LogBody, indent: usize) {
-        self.log_entries
-            .push(LogEntry::new(body, self.active_origin.clone(), indent));
+        self.log_entries.push(LogEntry::new(
+            body,
+            self.active_origin.clone(),
+            indent,
+            self.age,
+            self.round,
+        ));
     }
 
     fn add_message(&mut self, message: &str, indent: usize) {
@@ -104,10 +125,12 @@ pub(crate) fn collect_log_entries(rc: &RenderContext) -> Vec<LogEntry> {
     let mut c = LogCollector::new();
 
     for age in &rc.game.log {
+        c.age = age.age;
         if age.age == 0 {
             c.add_message("Game Start", 0);
         }
         for round in &age.rounds {
+            c.round = round.round;
             if round.round > 0 {
                 c.add_message(&format!("Age {}, Round {}", age.age, round.round), 0);
             }
@@ -139,7 +162,7 @@ fn collect_action(
     } else {
         let mut body = ActionLogBody::new(action.clone());
         inline_action_items(&mut items, &mut body);
-        c.add_entry(LogBody::Action(body.clone()), indent);
+        c.add_entry(LogBody::Action(Box::new(body.clone())), indent);
         add_additional_action_items(c, &mut body, action, indent + 1);
         indent + 1
     };
@@ -296,6 +319,20 @@ fn inline_action_items(items: &mut Vec<ActionLogItem>, action: &mut ActionLogBod
         action.action_cost = true;
     }
     action.argument = pull_action_arg(items, action);
+    action.payment = remove_element_by(items, |item| {
+        matches!(
+            item,
+            ActionLogItem {
+                player,
+                entry: ActionLogEntry::Resources {
+                    balance: ActionLogBalance::Pay,
+                    ..
+                },
+                ..
+            } if *player == action.action.player
+        )
+    })
+    .map(|i| i.entry);
 }
 
 pub fn find_action_arg(
@@ -316,6 +353,18 @@ fn pull_action_arg(items: &mut Vec<ActionLogItem>, body: &ActionLogBody) -> Opti
                     item,
                     ActionLogItem {
                         entry: ActionLogEntry::Advance(_),
+                        ..
+                    }
+                )
+            }),
+            PlayingAction::Collect(_) => find_action_arg(items, body, |item| {
+                matches!(
+                    item,
+                    ActionLogItem {
+                        entry: ActionLogEntry::Resources {
+                            balance: ActionLogBalance::Gain,
+                            ..
+                        },
                         ..
                     }
                 )

@@ -54,6 +54,16 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     // Use the pre-calculated log entries
     let start = d.current_page * d.lines_per_page;
     let end = usize::min(start + d.lines_per_page, d.log_entries.len());
+
+    // Header: turn and round, unless age is 0
+    if let Some(first_entry) = d.log_entries.get(start)
+        && first_entry.age > 0
+    {
+        let header = format!("Age {}, Round {}", first_entry.age, first_entry.round);
+        let header_width = state.measure_text(&header).width;
+        rc.draw_text(&header, state.screen_size.x / 2. - header_width / 2., 30.);
+    }
+
     let mut y = 1.5;
 
     for entry in &d.log_entries[start..end] {
@@ -105,7 +115,7 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
 }
 
 fn draw_line(rc: &RenderContext, y: f32, entry: &LogEntry) {
-    let message_pos = vec2(20. + entry.indent as f32 * 30.0, y * 25. + 20.);
+    let message_pos = vec2(20. + entry.indent as f32 * 45.0, y * 25. + 20.);
 
     let mut drawer = RichTextDrawer::new(rc, message_pos);
 
@@ -138,7 +148,7 @@ fn draw_line(rc: &RenderContext, y: f32, entry: &LogEntry) {
             drawer.text(role);
             drawer.player(*player);
             drawer.text("with");
-            drawer.units(units);
+            drawer.units(units, None);
         }
         LogBody::DieRoll(r) => {
             draw_die_roll(&mut drawer, r);
@@ -151,7 +161,7 @@ fn draw_line(rc: &RenderContext, y: f32, entry: &LogEntry) {
         LogBody::InfluenceRangeBoost(i) => {
             drawer.player(i.player);
             drawer.text("may pay");
-            drawer.resources(&i.info.range_boost_cost.default);
+            drawer.resources(&i.info.range_boost_cost.default, &ActionLogBalance::Pay);
             drawer.text("to boost the range");
         }
     }
@@ -208,27 +218,24 @@ fn draw_die_roll(drawer: &mut RichTextDrawer, r: &UnitCombatRoll) {
 
 fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize) {
     match entry {
-        ActionLogEntry::Action { balance: _, amount } => {
+        ActionLogEntry::Action { balance, amount } => {
             if let Some(a) = amount {
-                drawer.text(&a.to_string());
+                drawer.amount(*a, balance);
             }
             drawer.action_icon();
         }
-        ActionLogEntry::Resources {
-            resources,
-            balance: _,
-        } => {
-            drawer.resources(resources);
+        ActionLogEntry::Resources { resources, balance } => {
+            drawer.resources(resources, balance);
         }
         ActionLogEntry::Advance(a) => {
             draw_advance(drawer, a);
         }
         ActionLogEntry::Units {
             units,
-            balance: _,
+            balance,
             position,
         } => {
-            drawer.units(units);
+            drawer.units(units, Some(balance));
             drawer.at_location(*position);
         }
         ActionLogEntry::Structure(s) => {
@@ -239,7 +246,7 @@ fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize
             drawer.text(&message);
         }
         ActionLogEntry::MoodChange { city, mood } => {
-            drawer.text("City");
+            drawer.text("'s city");
             drawer.at_location(*city);
             drawer.text(&format!("becomes {mood}"));
             drawer.mood(player, mood);
@@ -302,7 +309,7 @@ fn draw_move(drawer: &mut RichTextDrawer, m: &ActionLogEntryMove) {
         ("marches", " on roads")
     };
     drawer.text(verb);
-    drawer.units(&m.units);
+    drawer.units(&m.units, None);
     drawer.text("from");
     drawer.location(m.start);
     drawer.text("to");
@@ -365,6 +372,11 @@ fn draw_action(drawer: &mut RichTextDrawer, body: &ActionLogBody) {
             drawer.text(&format!("Choose Civilization: {c}"));
         }
     }
+
+    if let Some(payment) = &body.payment {
+        drawer.text("paying");
+        draw_entry(drawer, payment, body.action.player);
+    }
 }
 
 fn draw_response_action(drawer: &mut RichTextDrawer, r: &EventResponse) {
@@ -417,6 +429,7 @@ fn draw_playing_action(drawer: &mut RichTextDrawer, p: &PlayingAction, body: &Ac
         }
         PlayingAction::Collect(c) => {
             drawer.text("collects");
+            draw_argument(drawer, body);
             drawer.at_location(c.city_position);
             draw_modifier_suffix(drawer, &c.action_type, origin);
         }
@@ -481,6 +494,6 @@ fn draw_argument(drawer: &mut RichTextDrawer, body: &ActionLogBody) {
     if let Some(a) = &body.argument {
         draw_entry(drawer, a, body.action.player);
     } else {
-        panic!("subject missing advance details");
+        panic!("subject missing argument");
     }
 }
