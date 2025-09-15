@@ -10,7 +10,7 @@ use server::log::ActionLogBalance;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::structure::Structure;
-use server::unit::{UnitType, Units};
+use server::unit::{UnitPrintArg, UnitType, Units};
 use server::wonder::Wonder;
 
 pub struct RichTextDrawer<'a> {
@@ -116,7 +116,7 @@ impl RichTextDrawer<'_> {
         self.icon(self.rc.assets().unit(unit_type, self.rc.shown_player));
     }
 
-    pub(crate) fn units(&mut self, units: &Units) {
+    pub(crate) fn units(&mut self, units: &Units, balance: Option<&ActionLogBalance>) {
         for (unit, amount) in units.clone() {
             if amount > 0 {
                 self.unit_icon(unit);
@@ -124,7 +124,16 @@ impl RichTextDrawer<'_> {
                 for _ in 0..amount {
                     u += &unit;
                 }
-                self.text(&u.to_string(Some(self.rc.game)));
+                u.print(Some(self.rc.game), &mut |a| match a {
+                    UnitPrintArg::Text(t) => self.text(t),
+                    UnitPrintArg::Amount(a) => {
+                        if let Some(b) = balance {
+                            self.amount(u32::from(*a), b);
+                        } else {
+                            self.text(&a.to_string());
+                        }
+                    }
+                });
             }
         }
     }

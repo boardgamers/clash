@@ -34,6 +34,7 @@ rustc-hash = "2.1.1"
 pyroscope = { version = "0.5.8", optional = true }
 pyroscope_pprofrs = { version = "0.2.10", optional = true }
 chrono = "0.4.41"
+string-builder = "0.2.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1.45.0", features = ["full"]}

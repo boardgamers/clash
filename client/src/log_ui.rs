@@ -148,7 +148,7 @@ fn draw_line(rc: &RenderContext, y: f32, entry: &LogEntry) {
             drawer.text(role);
             drawer.player(*player);
             drawer.text("with");
-            drawer.units(units);
+            drawer.units(units, None);
         }
         LogBody::DieRoll(r) => {
             draw_die_roll(&mut drawer, r);
@@ -232,10 +232,10 @@ fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize
         }
         ActionLogEntry::Units {
             units,
-            balance: _,
+            balance,
             position,
         } => {
-            drawer.units(units);
+            drawer.units(units, Some(balance));
             drawer.at_location(*position);
         }
         ActionLogEntry::Structure(s) => {
@@ -309,7 +309,7 @@ fn draw_move(drawer: &mut RichTextDrawer, m: &ActionLogEntryMove) {
         ("marches", " on roads")
     };
     drawer.text(verb);
-    drawer.units(&m.units);
+    drawer.units(&m.units, None);
     drawer.text("from");
     drawer.location(m.start);
     drawer.text("to");
