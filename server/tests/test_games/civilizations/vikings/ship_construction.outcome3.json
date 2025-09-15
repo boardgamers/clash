@@ -394,7 +394,7 @@
                     },
                     {
                       "player": 0,
-                      "Text": "Converted 1 ship to 1 settler",
+                      "Text": "Converted 1 ship and to 1 settler",
                       "origin": {
                         "SpecialAdvance": "ShipConstruction"
                       }

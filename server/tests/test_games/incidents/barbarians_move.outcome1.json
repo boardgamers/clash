@@ -350,7 +350,7 @@
                     },
                     {
                       "player": 0,
-                      "Text": "Barbarians move from B3 to B2: 2 infantry",
+                      "Text": "Barbarians move from B3 to B2: 2 infantry and",
                       "origin": {
                         "Incident": 28
                       }

@@ -455,7 +455,7 @@
                   "items": [
                     {
                       "player": 0,
-                      "Text": "Killed carried units: 1 elephant",
+                      "Text": "Killed carried units: 1 elephant and",
                       "origin": {
                         "Ability": "Choose Casualties (carried units)"
                       }
