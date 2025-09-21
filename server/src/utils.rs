@@ -92,7 +92,7 @@ pub fn median(list: &[f64]) -> f64 {
     let mut sorted_list = list.to_vec();
     sorted_list.sort_by(f64::total_cmp);
     let len = sorted_list.len();
-    if len % 2 == 0 {
+    if len.is_multiple_of(2) {
         f64::midpoint(sorted_list[len / 2 - 1], sorted_list[len / 2])
     } else {
         sorted_list[len / 2]

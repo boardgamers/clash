@@ -706,7 +706,7 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
             u.carrier_id
                 .is_some_and(|id| game.player(player).try_get_unit(id).is_none())
         })
-        .map(|u| (u.id))
+        .map(|u| u.id)
         .collect_vec();
 
     if survivors.is_empty() {
