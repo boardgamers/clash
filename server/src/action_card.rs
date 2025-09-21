@@ -328,7 +328,7 @@ pub fn combat_requirement_met(
     action_card_id: u8,
     requirement: &CombatRequirement,
 ) -> Option<usize> {
-    let sister_card = if action_card_id % 2 == 0 {
+    let sister_card = if action_card_id.is_multiple_of(2) {
         action_card_id - 1
     } else {
         action_card_id + 1
