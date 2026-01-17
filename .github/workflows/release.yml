@@ -17,7 +17,7 @@ jobs:
           version: v2026.1.1
           sha256: 986e4630dfdfaae41d09c0317507e252c7403d72839fc66844b534c120a3dc57
       - name: Use Node.js ${{ env.node_version }}
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: ${{ env.node_version }}
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
