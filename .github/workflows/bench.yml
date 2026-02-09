@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
-          version: v2026.2.0
-          sha256: 7e1cd2dc33f6ebc9f33c1911013ed92bf724cf63ece21f284aaa4b34987e5002
+          version: v2026.2.7
+          sha256: d23400ea220cfcbcd04856cf224dc6bc1a5e2a16e6c7365a433b7737c0774c23
       - name: Random actions test
         run: mise run random-actions
