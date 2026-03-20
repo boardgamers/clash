@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "webpack": "5.105.4",
-    "webpack-cli": "7.0.1"
+    "webpack-cli": "7.0.2"
   },
   "dependencies": {
     "events": "^3.3.0"
