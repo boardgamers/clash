@@ -313,7 +313,7 @@ dependencies = [
  "hex2d",
  "itertools 0.14.0",
  "macroquad",
- "pyroscope 2.0.1",
+ "pyroscope 2.0.2",
  "pyroscope_pprofrs",
  "serde",
  "serde_json",
@@ -1724,7 +1724,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "27c6023962132f4b30eb4c172c91ce92d933da334c59c23cddee82358ddafb0b"
 dependencies = [
  "anyhow",
- "itertools 0.10.5",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -1750,9 +1750,9 @@ dependencies = [
 
 [[package]]
 name = "pyroscope"
-version = "2.0.1"
+version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "480661d88db8b4dfb7cb34b1626a0c77e01572cc34de2b08f88200beaa52adbb"
+checksum = "8ef335beaacecb830dc21ab54c8b4a75677874bb78a375ad880715ce385ccb35"
 dependencies = [
  "lazy_static",
  "libc",
@@ -2108,7 +2108,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.1",
 ]
 
 [[package]]
@@ -2274,7 +2274,7 @@ dependencies = [
  "num",
  "num_cpus",
  "pathfinding",
- "pyroscope 2.0.1",
+ "pyroscope 2.0.2",
  "pyroscope_pprofrs",
  "rustc-hash",
  "serde",
@@ -2870,7 +2870,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.1",
 ]
 
 [[package]]
