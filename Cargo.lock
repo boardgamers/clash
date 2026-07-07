@@ -313,7 +313,7 @@ dependencies = [
  "hex2d",
  "itertools 0.14.0",
  "macroquad",
- "pyroscope 2.0.6",
+ "pyroscope 2.1.0",
  "pyroscope_pprofrs",
  "serde",
  "serde_json",
@@ -1724,7 +1724,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "27c6023962132f4b30eb4c172c91ce92d933da334c59c23cddee82358ddafb0b"
 dependencies = [
  "anyhow",
- "itertools 0.14.0",
+ "itertools 0.10.5",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -1750,11 +1750,10 @@ dependencies = [
 
 [[package]]
 name = "pyroscope"
-version = "2.0.6"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6869e0f2cae5cef10281c57d5a260f91372d7f190a7f717eb1a54f643d92151"
+checksum = "7b9adfbc87341b5976c0bbab196ed2e2c188e2acf9f4d434d46eb9433f0f529c"
 dependencies = [
- "lazy_static",
  "libc",
  "libflate 2.2.1",
  "log",
@@ -2273,7 +2272,7 @@ dependencies = [
  "num",
  "num_cpus",
  "pathfinding",
- "pyroscope 2.0.6",
+ "pyroscope 2.1.0",
  "pyroscope_pprofrs",
  "rustc-hash",
  "serde",
