@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Μπορεί να μετακινήσει μονάδες Στρατού, μπορεί να χρησιμοποιήσει Τακτικές σε Κάρτες Ενέργειας",
   "May continue to embark units without using movement actions": "Μπορεί να συνεχίσει να επιβιβάζει μονάδες χωρίς να χρησιμοποιεί ενέργειες κίνησης",
   "May continue to move the fleet in the same sea without using movement actions": "Μπορεί να συνεχίσει να μετακινεί τον στόλο στην ίδια θάλασσα χωρίς να χρησιμοποιεί ενέργειες κίνησης",
-  "May raze a size 1 city for 1 gold": "Μπορεί να ισοπεδώσει μια πόλη μεγέθους 1 για 1 χρυσό",
+  "May raze a size 1 city for 1 gold": "Μπορεί να ισοπεδώσει πόλη μεγέθους 1 και να λάβει 1 χρυσό",
   "Maya": "Μάγια",
   "Medicine": "Ιατρική",
   "Mention suggestions": "Προτάσεις αναφοράς",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Ισοπέδωσε Πόλη Μεγέθους 1",
   "Raze captured city": "Ισοπέδωσε κατακτημένη πόλη",
   "Raze city": "Ισοπέδωσε πόλη",
-  "Raze size 1 city for 1 gold": "Ισοπέδωσε πόλη μεγέθους 1 για 1 χρυσό",
+  "Raze size 1 city for 1 gold": "Ισοπέδωσε πόλη μεγέθους 1 και πάρε 1 χρυσό",
   "Recruit": "Στρατολόγησε",
   "Recruit Units": "Στρατολόγησε Μονάδες",
   "Recruit units": "Στρατολόγησε μονάδες",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Προσθέτεις +1 στη ζαριά Επιρροής Πολιτισμού και κερδίζεις 1 μάρκα πολιτισμού όταν κάνεις επιτυχημένη προσπάθεια Επιρροής Πολιτισμού.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Μπορείς να στρατολογήσεις μονάδες Ιππικού σε οποιαδήποτε πόλη που απέχει τουλάχιστον 3 χώρους από την πρωτεύουσά σου. Οι καταληφθείσες πόλεις γίνονται Ουδέτερες αντί Θυμωμένες - ή Ευτυχισμένες αν πληρώσεις 1 μάρκα πολιτισμού.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Δεν μπορείς να κατασκευάσεις κτίρια ή θαύματα μέχρι να ερευνήσεις την Υγιεινή.",
-  "You captured a barbarian city with at least 2 army units.": "Κατέλαβες μια βαρβαρική πόλη με τουλάχιστον 2 μονάδες στρατού.",
+  "You captured a barbarian city with at least 2 army units.": "Κατέλαβες βαρβαρική πόλη που υπερασπίζονταν τουλάχιστον 2 στρατιωτικές μονάδες.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Κατέλαβες μια πόλη ή κέρδισες μια χερσαία μάχη σε αυτή τη σειρά: Κέρδισε 2 ιδέες.",
   "You captured a city with army units that disembarked from a ship.": "Κατέλαβες μια πόλη με μονάδες στρατού που αποβιβάστηκαν από πλοίο.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Θα μπορούσες να δημιουργήσεις τουλάχιστον 2 εμπορικούς δρόμους μόνο με πλοία αν ήθελες. Δεν μπορεί να ολοκληρωθεί μαζί με το Εμπορική Ισχύς.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Μπορείς να επιλέξεις μια κάρτα για να ολοκληρώσεις τον στόχο: {p0}",
   "You must pay up to": "Πρέπει να πληρώσεις έως",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Πρέπει να πληρώσεις έως {p0} τροφή (χρυσός δεν είναι δυνατός). Αν δεν μπορείς να πληρώσεις ολόκληρο το ποσό, κάνε 1 πόλη Θυμωμένη.",
-  "You participated in a land battle with at least 6 army units": "Συμμετείχες σε χερσαία μάχη με τουλάχιστον 6 μονάδες στρατού",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Συμμετείχατε σε χερσαία μάχη με τουλάχιστον 6 στρατιωτικές μονάδες συνολικά και στις δύο πλευρές.",
   "You won a battle against a human player despite having fewer units than them.": "Κέρδισες μια μάχη εναντίον ανθρώπινου παίκτη παρόλο που είχες λιγότερες μονάδες από αυτόν.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Κέρδισες μια μάχη εναντίον παίκτη που έχει περισσότερες προόδους Πολέμου - ή παρόλο που είχες λιγότερες μονάδες από αυτόν.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Κέρδισες μια μάχη με ηγέτη όπου δεν είχες περισσότερες μονάδες στρατού από τον αντίπαλό σου.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} θυσιάζει {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} θυσιάζει {p1} για Τοξότες",
   "{p0} was selected to gain 1 settler.": "{p0} επιλέχθηκε να κερδίσει 1 άποικο.",
-  "{p0} withdraws to {p1}": "{p0} αποσύρεται στο {p1}"
+  "{p0} withdraws to {p1}": "{p0} αποσύρεται στο {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Κερδίσατε μάχη εναντίον Βαρβάρων σε πόλη και σκοτώσατε τουλάχιστον 2 μονάδες τους."
 }

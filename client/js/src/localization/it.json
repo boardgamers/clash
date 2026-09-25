@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Può muovere unità dell'esercito, può usare Tattica sulle carte azione",
   "May continue to embark units without using movement actions": "Può continuare a imbarcare unità senza usare azioni di movimento",
   "May continue to move the fleet in the same sea without using movement actions": "Può continuare a muovere la flotta nello stesso mare senza usare azioni di movimento",
-  "May raze a size 1 city for 1 gold": "Può radere al suolo una città di dimensione 1 per 1 oro",
+  "May raze a size 1 city for 1 gold": "Può radere al suolo una città di dimensione 1 e ricevere 1 oro",
   "Maya": "Maya",
   "Medicine": "Medicina",
   "Mention suggestions": "Suggerimenti di menzione",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Radi al suolo città di dimensione 1",
   "Raze captured city": "Radi al suolo la città catturata",
   "Raze city": "Radi al suolo la città",
-  "Raze size 1 city for 1 gold": "Radi al suolo città di dimensione 1 per 1 oro",
+  "Raze size 1 city for 1 gold": "Radi al suolo una città di dimensione 1 e ricevi 1 oro",
   "Recruit": "Recluta",
   "Recruit Units": "Recluta unità",
   "Recruit units": "Recluta unità",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Aggiungi +1 al tuo tiro di Influenza Culturale e ottieni 1 segnalino cultura quando effettui con successo un tentativo di Influenza Culturale.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Puoi reclutare unità di Cavalleria in qualsiasi città che sia ad almeno 3 spazi di distanza dalla tua capitale. Le città catturate diventano Neutrali invece che Arrabbiate - o Felici se paghi 1 segnalino cultura.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Non puoi costruire edifici o meraviglie finché non ricerchi Igiene.",
-  "You captured a barbarian city with at least 2 army units.": "Hai catturato una città barbara con almeno 2 unità dell'esercito.",
+  "You captured a barbarian city with at least 2 army units.": "Hai conquistato una città barbara difesa da almeno 2 unità militari.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Hai catturato una città o vinto una battaglia terrestre in questo turno: Ottieni 2 idee.",
   "You captured a city with army units that disembarked from a ship.": "Hai catturato una città con unità dell'esercito sbarcate da una nave.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Potresti formare almeno 2 rotte commerciali solo con navi, se volessi. Non può essere completato insieme a Potenza Commerciale.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Puoi selezionare una carta per completare l'obiettivo: {p0}",
   "You must pay up to": "Devi pagare fino a",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Devi pagare fino a {p0} cibo (l'oro non è possibile). Se non puoi pagare l'intero importo, rendi 1 città Arrabbiata.",
-  "You participated in a land battle with at least 6 army units": "Hai partecipato a una battaglia terrestre con almeno 6 unità dell'esercito.",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Hai partecipato a una battaglia terrestre con almeno 6 unità militari complessive tra i due schieramenti.",
   "You won a battle against a human player despite having fewer units than them.": "Hai vinto una battaglia contro un giocatore umano nonostante avessi meno unità di lui.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Hai vinto una battaglia contro un giocatore che ha più progressi di Guerra - o nonostante avessi meno unità di lui.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Hai vinto una battaglia con un leader in cui non avevi più unità dell'esercito del tuo avversario.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} sacrifica {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} sacrifica {p1} per gli Arcieri",
   "{p0} was selected to gain 1 settler.": "{p0} è stato scelto per ottenere 1 colono.",
-  "{p0} withdraws to {p1}": "{p0} si ritira a {p1}"
+  "{p0} withdraws to {p1}": "{p0} si ritira a {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Hai vinto una battaglia contro i Barbari in una città ed eliminato almeno 2 delle loro unità."
 }

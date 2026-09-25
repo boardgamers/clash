@@ -89,7 +89,7 @@ pub(crate) fn great_battle() -> Objective {
     let name = "Great Battle";
     Objective::builder(
         name,
-        "You participated in a land battle with at least 6 army units",
+        "You participated in a land battle with at least 6 army units on both sides combined.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -300,7 +300,7 @@ pub(crate) fn resistance() -> Objective {
     let name = "Resistance";
     Objective::builder(
         name,
-        "You captured a barbarian city with at least 2 army units.",
+        "You won a battle against Barbarians in a city and killed at least 2 of their units.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,

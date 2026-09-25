@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Có thể di chuyển đơn vị Lục quân, có thể dùng Chiến thuật trên Thẻ Hành động",
   "May continue to embark units without using movement actions": "Có thể tiếp tục đưa đơn vị lên tàu mà không dùng hành động di chuyển",
   "May continue to move the fleet in the same sea without using movement actions": "Có thể tiếp tục di chuyển hạm đội trong cùng vùng biển mà không dùng hành động di chuyển",
-  "May raze a size 1 city for 1 gold": "Có thể san bằng thành phố cỡ 1 để lấy 1 vàng",
+  "May raze a size 1 city for 1 gold": "Có thể san bằng thành phố cỡ 1 để nhận 1 vàng",
   "Maya": "Maya",
   "Medicine": "Y học",
   "Mention suggestions": "Gợi ý đề cập",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Phá hủy thành phố cỡ 1",
   "Raze captured city": "Phá hủy thành phố đã chiếm",
   "Raze city": "Phá hủy thành phố",
-  "Raze size 1 city for 1 gold": "Phá hủy thành phố cỡ 1 để lấy 1 vàng",
+  "Raze size 1 city for 1 gold": "San bằng thành phố cỡ 1 và nhận 1 vàng",
   "Recruit": "Tuyển mộ",
   "Recruit Units": "Tuyển mộ đơn vị",
   "Recruit units": "Tuyển mộ đơn vị",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Bạn thêm +1 vào lượt tung Ảnh hưởng Văn hóa của mình và nhận 1 token văn hóa khi bạn thực hiện thành công một nỗ lực Ảnh hưởng Văn hóa.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Bạn có thể tuyển mộ các đơn vị Kỵ binh ở bất kỳ thành phố nào cách thủ đô của bạn ít nhất 3 ô. Các thành phố bị chiếm trở thành Trung lập thay vì Giận dữ - hoặc Hạnh phúc nếu bạn trả 1 token văn hóa.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Bạn không thể xây dựng công trình hoặc kỳ quan cho đến khi bạn nghiên cứu Vệ sinh.",
-  "You captured a barbarian city with at least 2 army units.": "Bạn chiếm được một thành phố man rợ với ít nhất 2 đơn vị quân đội.",
+  "You captured a barbarian city with at least 2 army units.": "Bạn đã chiếm một thành phố man rợ được ít nhất 2 đơn vị quân đội bảo vệ.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Bạn chiếm được một thành phố hoặc thắng một trận chiến trên bộ trong lượt này: Nhận 2 ý tưởng.",
   "You captured a city with army units that disembarked from a ship.": "Bạn chiếm được một thành phố bằng các đơn vị quân đội đổ bộ từ tàu.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Bạn có thể tạo ít nhất 2 tuyến thương mại chỉ bằng tàu nếu muốn. Không thể hoàn thành cùng với Sức mạnh Thương mại.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Bạn có thể chọn một thẻ để hoàn thành mục tiêu: {p0}",
   "You must pay up to": "Bạn phải trả tối đa",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Bạn phải trả tối đa {p0} lương thực (vàng không được). Nếu bạn không thể trả đủ số tiền, làm cho 1 thành phố Giận dữ.",
-  "You participated in a land battle with at least 6 army units": "Bạn đã tham gia một trận chiến trên bộ với ít nhất 6 đơn vị quân đội",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Bạn đã tham gia một trận chiến trên bộ với tổng cộng ít nhất 6 đơn vị quân đội của cả hai bên.",
   "You won a battle against a human player despite having fewer units than them.": "Bạn đã thắng một trận chiến chống lại người chơi người dù có ít đơn vị hơn họ.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Bạn đã thắng một trận chiến chống lại người chơi có nhiều tiến bộ Chiến tranh hơn - hoặc dù có ít đơn vị hơn họ.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Bạn đã thắng một trận chiến với thủ lĩnh mà bạn không có nhiều đơn vị quân đội hơn đối thủ.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} hiến tế {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} hiến tế {p1} cho Cung thủ",
   "{p0} was selected to gain 1 settler.": "{p0} được chọn để nhận 1 người định cư.",
-  "{p0} withdraws to {p1}": "{p0} rút lui về {p1}"
+  "{p0} withdraws to {p1}": "{p0} rút lui về {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Bạn đã thắng một trận chiến với Người man rợ trong một thành phố và tiêu diệt ít nhất 2 đơn vị của họ."
 }

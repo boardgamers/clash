@@ -2130,7 +2130,7 @@
   "You may select a card to complete objective: {p0}": "You may select a card to complete objective: {p0}",
   "You must pay up to": "You must pay up to",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.",
-  "You participated in a land battle with at least 6 army units": "You participated in a land battle with at least 6 army units",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "You participated in a land battle with at least 6 army units on both sides combined.",
   "You won a battle against a human player despite having fewer units than them.": "You won a battle against a human player despite having fewer units than them.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "You won a battle with a leader where you did not have more army units than your opponent.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} sacrifices {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} sacrifices {p1} for Archers",
   "{p0} was selected to gain 1 settler.": "{p0} was selected to gain 1 settler.",
-  "{p0} withdraws to {p1}": "{p0} withdraws to {p1}"
+  "{p0} withdraws to {p1}": "{p0} withdraws to {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "You won a battle against Barbarians in a city and killed at least 2 of their units."
 }
