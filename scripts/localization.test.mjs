@@ -67,3 +67,17 @@ test("decorative arrows and attached currency values keep their meaning", () => 
   assert.equal(t.translate("Draw →"), "Tekenen →");
   assert.equal(t.translate("Your cash: $20"), "Je geld: $20");
 });
+
+// Real catalogues: a quantity range must not become a purpose clause, and
+// "left" after a number must not use the direction's translation.
+test("game context distinguishes quantities from directions and conscription from card drafting", async () => {
+  const actual = {};
+  for (const locale of ["fr", "de", "zh-TW"]) {
+    actual[locale] = JSON.parse(await readFile(new URL(`../client/js/src/localization/${locale}.json`, import.meta.url), "utf8"));
+  }
+  const fr = createTranslator(actual, "fr");
+  assert.equal(fr.translate("2 left"), "Il reste 2");
+  assert.equal(fr.translate("Need to select 1 to 3 units"), "Sélectionnez entre 1 et 3 unités");
+  assert.equal(createTranslator(actual, "de").translate("Used Draft"), "Wehrpflicht genutzt");
+  assert.equal(createTranslator(actual, "zh-TW").translate("Used Draft"), "已使用徵兵");
+});
