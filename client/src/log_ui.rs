@@ -325,6 +325,13 @@ pub(crate) fn multiline_label(
     len: f32,
     mut print: impl FnMut(usize, &str),
 ) {
+    if let Some(lines) = crate::localization::wrap(label, len, crate::layout_ui::FONT_SIZE) {
+        for (i, line) in lines.iter().enumerate() {
+            print(i, line);
+        }
+        return;
+    }
+    let label = crate::localization::translate(label);
     let mut line = String::new();
     let mut i = 0;
     label.split(' ').for_each(|s| {

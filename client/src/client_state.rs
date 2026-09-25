@@ -591,7 +591,8 @@ impl State {
 
     #[must_use]
     pub(crate) fn measure_text(&self, text: &str) -> TextDimensions {
-        measure_text(text, Some(&self.assets.font), FONT_SIZE, 1.0)
+        crate::localization::measure(text, FONT_SIZE)
+            .unwrap_or_else(|| measure_text(text, Some(&self.assets.font), FONT_SIZE, 1.0))
     }
 
     pub(crate) fn draw_text(&self, text: &str, x: f32, y: f32) {
@@ -599,6 +600,9 @@ impl State {
     }
 
     pub(crate) fn draw_text_ex(&self, text: &str, x: f32, y: f32, color: Color, font_size: u16) {
+        if crate::localization::draw(text, font_size, x, y, color) {
+            return;
+        }
         draw_text_ex(
             text,
             x,

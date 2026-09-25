@@ -26,6 +26,7 @@ mod hex_ui;
 mod influence_ui;
 mod info_ui;
 mod layout_ui;
+mod localization;
 mod log_collector;
 mod log_ui;
 mod map_ui;
