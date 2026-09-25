@@ -200,6 +200,13 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
 }
 
 pub(crate) fn multiline_label(state: &State, label: &str, len: f32, mut print: impl FnMut(&str)) {
+    if let Some(lines) = crate::localization::wrap(label, len, crate::layout_ui::FONT_SIZE) {
+        for line in lines {
+            print(&line);
+        }
+        return;
+    }
+    let label = crate::localization::translate(label);
     let mut line = String::new();
     label.split(' ').for_each(|s| {
         let next = format!("{line} {s}");

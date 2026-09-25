@@ -31,7 +31,7 @@ impl HandCardObject {
     pub(crate) fn new(id: HandCard, color: Color, name: &str, description: MultilineText) -> Self {
         Self {
             id,
-            name: name.chars().take(17).collect(),
+            name: crate::localization::translate(name),
             description,
             color,
         }
@@ -324,7 +324,12 @@ pub(crate) fn objective_card_object(
                 .iter()
                 .find_map(|(i, n)| (i == &id).then_some(n.clone()))
         })
-        .unwrap_or_else(|| card.objectives.iter().map(|o| o.name.clone()).join(", "));
+        .unwrap_or_else(|| {
+            card.objectives
+                .iter()
+                .map(|o| crate::localization::translate(&o.name))
+                .join(", ")
+        });
 
     HandCardObject::new(
         HandCard::ObjectiveCard(id),
