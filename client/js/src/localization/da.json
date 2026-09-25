@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Må flytte hærenheder, må bruge taktik på handlingskort",
   "May continue to embark units without using movement actions": "Må fortsætte med at indskibe enheder uden at bruge bevægelseshandlinger",
   "May continue to move the fleet in the same sea without using movement actions": "Må fortsætte med at flytte flåden i samme hav uden at bruge bevægelseshandlinger",
-  "May raze a size 1 city for 1 gold": "Må jævne en by af størrelse 1 med jorden for 1 guld",
+  "May raze a size 1 city for 1 gold": "Må nedbrænde en by af størrelse 1 og modtage 1 guld",
   "Maya": "Maya",
   "Medicine": "Medicin",
   "Mention suggestions": "Forslag til omtale",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Nedbrænd størrelse 1-by",
   "Raze captured city": "Nedbrænd erobret by",
   "Raze city": "Nedbrænd by",
-  "Raze size 1 city for 1 gold": "Nedbrænd størrelse 1-by for 1 guld",
+  "Raze size 1 city for 1 gold": "Nedbrænd en by af størrelse 1 og modtag 1 guld",
   "Recruit": "Rekrutter",
   "Recruit Units": "Rekrutter enheder",
   "Recruit units": "Rekrutter enheder",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Du tilføjer +1 til dit påvirk-kultur-slag og får 1 kulturpolet, når du laver et vellykket forsøg på at påvirke kultur.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Du kan rekruttere kavalerienheder i enhver by, der er mindst 3 felter væk fra din hovedstad. Erobrede byer bliver neutrale i stedet for vrede - eller glade, hvis du betaler 1 kulturpolet.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Du kan ikke bygge bygninger eller vidundere, før du har forsket i sanitet.",
-  "You captured a barbarian city with at least 2 army units.": "Du erobrede en barbarby med mindst 2 hærenheder.",
+  "You captured a barbarian city with at least 2 army units.": "Du erobrede en barbarby, der blev forsvaret af mindst 2 hærenheder.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Du erobrede en by eller vandt et landslag i denne tur: Få 2 ideer.",
   "You captured a city with army units that disembarked from a ship.": "Du erobrede en by med hærenheder, der gik fra borde fra et skib.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Du kunne danne mindst 2 handelsruter kun med skibe, hvis du ville. Kan ikke fuldføres sammen med Handelsmagt.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Du må vælge et kort for at fuldføre mål: {p0}",
   "You must pay up to": "Du skal betale op til",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Du skal betale op til {p0} føde (guld er ikke muligt). Hvis du ikke kan betale det fulde beløb, gør 1 by vred.",
-  "You participated in a land battle with at least 6 army units": "Du deltog i et landslag med mindst 6 hærenheder",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Du har deltaget i et landslag med mindst 6 hærenheder på de to sider tilsammen.",
   "You won a battle against a human player despite having fewer units than them.": "Du vandt et slag mod en menneskelig spiller på trods af at have færre enheder end dem.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Du vandt et slag mod en spiller, der har flere krigsførelsesfremskridt - eller på trods af at have færre enheder end dem.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Du vandt et slag med en leder, hvor du ikke havde flere hærenheder end din modstander.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} ofrer {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} ofrer {p1} for Bueskytter",
   "{p0} was selected to gain 1 settler.": "{p0} blev valgt til at få 1 nybygger.",
-  "{p0} withdraws to {p1}": "{p0} trækker sig tilbage til {p1}"
+  "{p0} withdraws to {p1}": "{p0} trækker sig tilbage til {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Du har vundet et slag mod barbarer i en by og dræbt mindst 2 af deres enheder."
 }

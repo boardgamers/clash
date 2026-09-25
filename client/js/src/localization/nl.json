@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Mag legereenheden verplaatsen, mag tactieken gebruiken op actiekaarten",
   "May continue to embark units without using movement actions": "Mag doorgaan met het inschepen van eenheden zonder bewegingsacties te gebruiken",
   "May continue to move the fleet in the same sea without using movement actions": "Mag doorgaan met het verplaatsen van de vloot in dezelfde zee zonder bewegingsacties te gebruiken",
-  "May raze a size 1 city for 1 gold": "Mag een stad van grootte 1 met de grond gelijk maken voor 1 goud",
+  "May raze a size 1 city for 1 gold": "Mag een stad van grootte 1 verwoesten en 1 goud ontvangen",
   "Maya": "Maya",
   "Medicine": "Geneeskunde",
   "Mention suggestions": "Vermeld suggesties",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Stad van grootte 1 verwoesten",
   "Raze captured city": "Veroverde stad verwoesten",
   "Raze city": "Stad verwoesten",
-  "Raze size 1 city for 1 gold": "Verwoest stad van grootte 1 voor 1 goud",
+  "Raze size 1 city for 1 gold": "Verwoest een stad van grootte 1 en ontvang 1 goud",
   "Recruit": "Rekruteren",
   "Recruit Units": "Eenheden rekruteren",
   "Recruit units": "Eenheden rekruteren",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Je voegt +1 toe aan je Cultuur beïnvloeden-worp en ontvangt 1 cultuurfiche wanneer je een succesvolle poging om cultuur te beïnvloeden doet.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Je kunt Cavalerie-eenheden rekruteren in elke stad die minstens 3 velden van je hoofdstad verwijderd is. Veroverde steden worden Neutraal in plaats van Boos - of Gelukkig als je 1 cultuurfiche betaalt.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Je kunt geen gebouwen of wonderen bouwen totdat je Sanitatie hebt onderzocht.",
-  "You captured a barbarian city with at least 2 army units.": "Je hebt een barbaarse stad veroverd met minstens 2 legereenheden.",
+  "You captured a barbarian city with at least 2 army units.": "Je hebt een barbaarse stad veroverd die door minstens 2 legereenheden werd verdedigd.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Je hebt deze beurt een stad veroverd of een landgevecht gewonnen: Krijg 2 ideeën.",
   "You captured a city with army units that disembarked from a ship.": "Je hebt een stad veroverd met legereenheden die van een schip zijn ontscheept.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Je zou minstens 2 handelsroutes kunnen vormen met alleen schepen als je dat zou willen. Kan niet samen met Handelsmacht worden voltooid.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Je mag een kaart selecteren om doelstelling te voltooien: {p0}",
   "You must pay up to": "Je moet betalen tot",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Je moet tot {p0} voedsel betalen (goud is niet mogelijk). Als je het volledige bedrag niet kunt betalen, maak dan 1 stad Boos.",
-  "You participated in a land battle with at least 6 army units": "Je hebt deelgenomen aan een landgevecht met minstens 6 legereenheden",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Je hebt deelgenomen aan een landgevecht met in totaal minstens 6 legereenheden aan beide zijden samen.",
   "You won a battle against a human player despite having fewer units than them.": "Je hebt een gevecht tegen een menselijke speler gewonnen ondanks dat je minder eenheden had dan zij.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Je hebt een gevecht gewonnen tegen een speler die meer Oorlogsvoering-ontwikkelingen heeft - of ondanks dat je minder eenheden had dan zij.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Je hebt een gevecht gewonnen met een leider waarbij je niet meer legereenheden had dan je tegenstander.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} offert {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} offert {p1} voor Boogschutters",
   "{p0} was selected to gain 1 settler.": "{p0} is geselecteerd om 1 kolonist te krijgen.",
-  "{p0} withdraws to {p1}": "{p0} trekt zich terug naar {p1}"
+  "{p0} withdraws to {p1}": "{p0} trekt zich terug naar {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Je hebt een gevecht tegen Barbaren in een stad gewonnen en minstens 2 van hun eenheden gedood."
 }

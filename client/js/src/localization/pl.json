@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Może przesuwać jednostki armii, może używać Taktyki na kartach akcji",
   "May continue to embark units without using movement actions": "Może kontynuować załadunek jednostek bez użycia akcji ruchu",
   "May continue to move the fleet in the same sea without using movement actions": "Może kontynuować ruch floty po tym samym morzu bez użycia akcji ruchu",
-  "May raze a size 1 city for 1 gold": "Może zburzyć miasto rozmiaru 1 za 1 złota",
+  "May raze a size 1 city for 1 gold": "Może zburzyć miasto wielkości 1 i otrzymać 1 złoto",
   "Maya": "Maya",
   "Medicine": "Medycyna",
   "Mention suggestions": "Propozycje wzmianek",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Zburz miasto wielkości 1",
   "Raze captured city": "Zburz zdobyte miasto",
   "Raze city": "Zburz miasto",
-  "Raze size 1 city for 1 gold": "Zburz miasto wielkości 1 za 1 złota",
+  "Raze size 1 city for 1 gold": "Zburz miasto wielkości 1 i otrzymaj 1 złoto",
   "Recruit": "Rekrutuj",
   "Recruit Units": "Rekrutuj jednostki",
   "Recruit units": "Rekrutuj jednostki",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Dodajesz +1 do rzutu na Wpływanie kulturą i zyskujesz 1 żeton kultury, gdy uda ci się próba Wpływania kulturą.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Możesz werbować jednostki Kawalerii w każdym mieście oddalonym o co najmniej 3 pola od twojej stolicy. Zdobyte miasta stają się Neutralne zamiast Rozgniewanych – lub Szczęśliwe, jeśli zapłacisz 1 żeton kultury.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Nie możesz budować budynków ani cudów, dopóki nie opracujesz Higieny.",
-  "You captured a barbarian city with at least 2 army units.": "Zdobyłeś barbarzyńskie miasto, mając co najmniej 2 jednostki armii.",
+  "You captured a barbarian city with at least 2 army units.": "Zdobyłeś barbarzyńskie miasto bronione przez co najmniej 2 jednostki wojskowe.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Zdobyłeś miasto lub wygrałeś bitwę lądową w tej turze: Zyskaj 2 pomysły.",
   "You captured a city with army units that disembarked from a ship.": "Zdobyłeś miasto jednostkami armii, które zeszły ze statku.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Mógłbyś utworzyć co najmniej 2 szlaki handlowe wyłącznie statkami, gdybyś chciał. Nie można ukończyć razem z Potęgą Handlową.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Możesz wybrać kartę, aby ukończyć cel: {p0}",
   "You must pay up to": "Musisz zapłacić do",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Musisz zapłacić do {p0} żywności (złoto nie jest możliwe). Jeśli nie możesz zapłacić pełnej kwoty, spraw, aby 1 miasto było Wściekłe.",
-  "You participated in a land battle with at least 6 army units": "Uczestniczyłeś w bitwie lądowej z co najmniej 6 jednostkami armii",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Uczestniczyłeś w bitwie lądowej z udziałem łącznie co najmniej 6 jednostek wojskowych po obu stronach.",
   "You won a battle against a human player despite having fewer units than them.": "Wygrałeś bitwę przeciwko ludzkiemu graczowi, mimo że miałeś mniej jednostek niż on.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Wygrałeś bitwę przeciwko graczowi, który ma więcej postępów Wojennych – lub mimo że miałeś mniej jednostek niż on.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Wygrałeś bitwę z dowódcą, w której nie miałeś więcej jednostek armii niż twój przeciwnik.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} poświęca {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} poświęca {p1} dla Łuczników",
   "{p0} was selected to gain 1 settler.": "{p0} został wybrany, aby zdobyć 1 osadnika.",
-  "{p0} withdraws to {p1}": "{p0} wycofuje się do {p1}"
+  "{p0} withdraws to {p1}": "{p0} wycofuje się do {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Wygrałeś bitwę z barbarzyńcami w mieście i zabiłeś co najmniej 2 ich jednostki."
 }

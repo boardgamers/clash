@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Poate muta unități de armată, poate folosi Tactici pe cărți de acțiune",
   "May continue to embark units without using movement actions": "Poate continua să îmbarce unități fără a folosi acțiuni de mișcare",
   "May continue to move the fleet in the same sea without using movement actions": "Poate continua să mute flota în aceeași mare fără a folosi acțiuni de mișcare",
-  "May raze a size 1 city for 1 gold": "Poate distruge un oraș de mărime 1 pentru 1 aur",
+  "May raze a size 1 city for 1 gold": "Poate distruge un oraș de mărime 1 și primi 1 aur",
   "Maya": "Maya",
   "Medicine": "Medicină",
   "Mention suggestions": "Sugestii de mențiune",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Distruge orașul de mărime 1",
   "Raze captured city": "Distruge orașul capturat",
   "Raze city": "Distruge orașul",
-  "Raze size 1 city for 1 gold": "Distruge orașul de mărime 1 pentru 1 aur",
+  "Raze size 1 city for 1 gold": "Distruge un oraș de mărime 1 și primește 1 aur",
   "Recruit": "Recrutează",
   "Recruit Units": "Recrutează unități",
   "Recruit units": "Recrutează unități",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Adaugi +1 la aruncarea ta de Influență Culturală și câștigi 1 jeton de cultură când reușești o încercare de Influență Culturală.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Poți recruta unități de Cavalerie în orice oraș aflat la cel puțin 3 spații distanță de capitala ta. Orașele capturate devin Neutre în loc de Furioase - sau Fericite dacă plătești 1 jeton de cultură.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Nu poți construi clădiri sau minuni până nu cercetezi Salubritatea.",
-  "You captured a barbarian city with at least 2 army units.": "Ai capturat un oraș barbar cu cel puțin 2 unități de armată.",
+  "You captured a barbarian city with at least 2 army units.": "Ai cucerit un oraș barbar apărat de cel puțin 2 unități militare.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Ai capturat un oraș sau ai câștigat o bătălie terestră în această tură: Câștigi 2 idei.",
   "You captured a city with army units that disembarked from a ship.": "Ai capturat un oraș cu unități de armată care au debarcat de pe o navă.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Ai putea forma cel puțin 2 rute comerciale doar cu nave, dacă ai dori. Nu poate fi completată împreună cu Putere Comercială.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Poți selecta o carte pentru a completa obiectivul: {p0}",
   "You must pay up to": "Trebuie să plătești până la",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Trebuie să plătești până la {p0} hrană (aurul nu este posibil). Dacă nu poți plăti suma integrală, fă 1 oraș Furios.",
-  "You participated in a land battle with at least 6 army units": "Ai participat la o bătălie terestră cu cel puțin 6 unități de armată.",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Ai participat la o luptă terestră cu cel puțin 6 unități militare în total, însumând ambele tabere.",
   "You won a battle against a human player despite having fewer units than them.": "Ai câștigat o bătălie împotriva unui jucător uman deși aveai mai puține unități decât el.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Ai câștigat o bătălie împotriva unui jucător care are mai multe progrese de Război - sau deși aveai mai puține unități decât el.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Ai câștigat o bătălie cu un conducător în care nu aveai mai multe unități de armată decât adversarul tău.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} sacrifică {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} sacrifică {p1} pentru Arcași",
   "{p0} was selected to gain 1 settler.": "{p0} a fost selectat pentru a primi 1 colonist.",
-  "{p0} withdraws to {p1}": "{p0} se retrage la {p1}"
+  "{p0} withdraws to {p1}": "{p0} se retrage la {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Ai câștigat o luptă împotriva barbarilor într-un oraș și ai eliminat cel puțin 2 dintre unitățile lor."
 }

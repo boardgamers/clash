@@ -504,7 +504,7 @@
   "May Move Army units, May use Tactics on Action Cards": "Можно перемещать армейские юниты, можно использовать тактику на картах действий",
   "May continue to embark units without using movement actions": "Можно продолжать посадку юнитов без использования действий передвижения",
   "May continue to move the fleet in the same sea without using movement actions": "Можно продолжать движение флота в том же море без использования действий передвижения",
-  "May raze a size 1 city for 1 gold": "Можно снести город размера 1 за 1 золото",
+  "May raze a size 1 city for 1 gold": "Можно разрушить город размера 1 и получить 1 золото",
   "Maya": "Майя",
   "Medicine": "Медицина",
   "Mention suggestions": "Предложения упоминаний",
@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Разрушить город размера 1",
   "Raze captured city": "Разрушить захваченный город",
   "Raze city": "Разрушить город",
-  "Raze size 1 city for 1 gold": "Разрушить город размера 1 за 1 золото",
+  "Raze size 1 city for 1 gold": "Разрушить город размера 1 и получить 1 золото",
   "Recruit": "Нанять",
   "Recruit Units": "Нанять юнитов",
   "Recruit units": "Нанять юнитов",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Вы добавляете +1 к броску культурного влияния и получаете 1 жетон культуры при успешной попытке культурного влияния.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Вы можете набирать кавалерийские отряды в любом городе, который находится как минимум в 3 клетках от вашей столицы. Захваченные города становятся нейтральными вместо разгневанных — или счастливыми, если вы заплатите 1 жетон культуры.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Вы не можете строить здания или чудеса, пока не изучите «Санитарию».",
-  "You captured a barbarian city with at least 2 army units.": "Вы захватили варварский город как минимум 2 отрядами.",
+  "You captured a barbarian city with at least 2 army units.": "Вы захватили варварский город, который защищали не менее 2 армейских отрядов.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Вы захватили город или выиграли сухопутный бой в этом ходу: получите 2 идеи.",
   "You captured a city with army units that disembarked from a ship.": "Вы захватили город отрядами, высадившимися с корабля.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "При желании вы могли бы создать как минимум 2 торговых пути только кораблями. Нельзя выполнить вместе с «Торговой мощью».",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Вы можете выбрать карту для выполнения цели: {p0}",
   "You must pay up to": "Вы должны заплатить до",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Вы должны заплатить до {p0} еды (золото невозможно). Если не можете заплатить полностью, сделайте 1 город недовольным.",
-  "You participated in a land battle with at least 6 army units": "Вы участвовали в сухопутном бою как минимум с 6 отрядами.",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Вы участвовали в сухопутном бою, в котором с обеих сторон в сумме было не менее 6 армейских отрядов.",
   "You won a battle against a human player despite having fewer units than them.": "Вы выиграли бой против живого игрока, имея меньше отрядов, чем у него.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Вы выиграли бой против игрока, у которого больше достижений в военном деле, — или имея меньше отрядов, чем у него.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Вы выиграли бой с лидером, не имея большего числа отрядов, чем у противника.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} приносит в жертву {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} приносит в жертву {p1} ради лучников",
   "{p0} was selected to gain 1 settler.": "{p0} выбран, чтобы получить 1 поселенца.",
-  "{p0} withdraws to {p1}": "{p0} отступает в {p1}"
+  "{p0} withdraws to {p1}": "{p0} отступает в {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Вы выиграли бой против варваров в городе и уничтожили не менее 2 их отрядов."
 }

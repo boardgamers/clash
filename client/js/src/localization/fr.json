@@ -663,7 +663,7 @@
   "Raze Size 1 City": "Raser une ville de taille 1",
   "Raze captured city": "Raser la ville capturée",
   "Raze city": "Raser la ville",
-  "Raze size 1 city for 1 gold": "Raser une ville de taille 1 pour 1 or",
+  "Raze size 1 city for 1 gold": "Raser une ville de taille 1 et gagner 1 or",
   "Recruit": "Recruter",
   "Recruit Units": "Recruter des unités",
   "Recruit units": "Recruter des unités",
@@ -2097,7 +2097,7 @@
   "You add +1 to your Influence Culture roll and gain 1 culture token when you make a successful Influence Culture attempt.": "Vous ajoutez +1 à votre jet d'Influence culturelle et gagnez 1 jeton de culture lorsque vous réussissez une tentative d'Influence culturelle.",
   "You can recruit Cavalry units in any city that is at least 3 spaces away from your capital. Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.": "Vous pouvez recruter des unités de Cavalerie dans n'importe quelle ville située à au moins 3 cases de votre capitale. Les villes capturées deviennent Neutres au lieu d'être en Colère - ou Heureuses si vous payez 1 jeton de culture.",
   "You cannot construct buildings or wonders until you research Sanitation.": "Vous ne pouvez pas construire de bâtiments ni de merveilles tant que vous n'avez pas recherché Assainissement.",
-  "You captured a barbarian city with at least 2 army units.": "Vous avez capturé une ville barbare avec au moins 2 unités d'armée.",
+  "You captured a barbarian city with at least 2 army units.": "Vous avez capturé une ville barbare défendue par au moins 2 unités militaires.",
   "You captured a city or won a land battle this turn: Gain 2 ideas.": "Vous avez capturé une ville ou gagné une bataille terrestre ce tour-ci : Gagnez 2 idées.",
   "You captured a city with army units that disembarked from a ship.": "Vous avez capturé une ville avec des unités d'armée qui ont débarqué d'un navire.",
   "You could form at least 2 trade routes only with ships if you wanted to.Cannot be completed together with Trade Power.": "Vous pourriez former au moins 2 routes commerciales uniquement avec des navires si vous le vouliez. Ne peut pas être accompli en même temps que Puissance commerciale.",
@@ -2137,7 +2137,7 @@
   "You may select a card to complete objective: {p0}": "Vous pouvez sélectionner une carte pour accomplir l'objectif : {p0}",
   "You must pay up to": "Vous devez payer jusqu'à",
   "You must pay up to {p0} food (gold is not possible). If you cannot pay the full amount, make 1 city Angry.": "Vous devez payer jusqu'à {p0} nourriture (l'or n'est pas possible). Si vous ne pouvez pas payer le montant total, rendez 1 ville en colère.",
-  "You participated in a land battle with at least 6 army units": "Vous avez participé à une bataille terrestre avec au moins 6 unités d'armée",
+  "You participated in a land battle with at least 6 army units on both sides combined.": "Vous avez participé à une bataille terrestre avec au moins 6 unités militaires au total, les deux camps réunis.",
   "You won a battle against a human player despite having fewer units than them.": "Vous avez remporté un combat contre un joueur humain malgré votre infériorité numérique.",
   "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.": "Vous avez gagné une bataille contre un joueur qui a plus de progrès de Guerre - ou malgré avoir moins d'unités que lui.",
   "You won a battle with a leader where you did not have more army units than your opponent.": "Vous avez gagné une bataille avec un dirigeant où vous n'aviez pas plus d'unités d'armée que votre adversaire.",
@@ -2280,5 +2280,6 @@
   "{p0} sacrifices {p1}": "{p0} sacrifie {p1}",
   "{p0} sacrifices {p1} for Archers": "{p0} sacrifie {p1} pour des Archers",
   "{p0} was selected to gain 1 settler.": "{p0} a été choisi pour gagner 1 colon.",
-  "{p0} withdraws to {p1}": "{p0} se replie vers {p1}"
+  "{p0} withdraws to {p1}": "{p0} se replie vers {p1}",
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Vous avez remporté une bataille contre les Barbares dans une ville et éliminé au moins 2 de leurs unités."
 }
