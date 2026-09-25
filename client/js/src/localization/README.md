@@ -8,4 +8,6 @@ English keeps the original macroquad text renderer. Other languages use browser-
 
 For a BGS release, build the client against the engine version currently deployed. Keep the JS, WASM, fonts and other assets in the same immutable release directory. The browser smoke test should exercise the deployed engine's state format and at least one Latin, Devanagari, Korean and Traditional Chinese locale. Publishing this viewer must not change the engine package or game visibility.
 
+When hosting assets on another origin, allow cross-origin GET and HEAD requests from BGS. The WASM fetch and browser font loading require CORS response headers; a successful asset download alone does not verify that the viewer can load it. Test from the BGS origin before switching the published viewer URL.
+
 With fontTools' WOFF support and the Noto source fonts installed, run `python scripts/build-localization-fonts.py` from the repository root. Font paths can be supplied with `--cjk-font` and `--devanagari-font`. Keep the OFL notices when redistributing regenerated fonts.
