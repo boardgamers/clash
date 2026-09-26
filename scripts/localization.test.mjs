@@ -81,3 +81,8 @@ test("game context distinguishes quantities from directions and conscription fro
   assert.equal(createTranslator(actual, "de").translate("Used Draft"), "Wehrpflicht genutzt");
   assert.equal(createTranslator(actual, "zh-TW").translate("Used Draft"), "已使用徵兵");
 });
+
+test("Persian regional tags select Farsi", () => {
+ assert.equal(resolveLocale("fa-IR"), "fa");
+ assert.equal(resolveLocale("fa_IR"), "fa");
+});

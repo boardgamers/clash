@@ -4,10 +4,14 @@ The BGS client reads the shared `preferences.locale` value. JSON catalogues in `
 
 English keeps the original macroquad text renderer. Other languages use browser-shaped text cached as WebGL textures, so Devanagari shaping and Korean/Chinese glyphs work correctly. Text measurement and wrapping use the same font and translated text as drawing. Chat/state/actions are never translated or modified. Player names are excluded. Native desktop clients continue to use English.
 
-`client/assets/localization` includes subsets of Noto Sans Devanagari and Noto Sans CJK, licensed under the SIL Open Font License; notices are included alongside the fonts. Regenerate the subsets after adding translation characters, using fontTools and the corresponding Noto source fonts. The Latin/Greek/Cyrillic renderer uses the existing Source Sans 3 asset.
+`client/assets/localization` includes subsets of Noto Sans Arabic, Noto Sans Devanagari and Noto Sans CJK, licensed under the SIL Open Font License; notices are included alongside the fonts. Regenerate the subsets after adding translation characters, using fontTools and the corresponding Noto source fonts. The Latin/Greek/Cyrillic renderer uses the existing Source Sans 3 asset.
 
 For a BGS release, build the client against the engine version currently deployed. Keep the JS, WASM, fonts and other assets in the same immutable release directory. The browser smoke test should exercise the deployed engine's state format and at least one Latin, Devanagari, Korean and Traditional Chinese locale. Publishing this viewer must not change the engine package or game visibility.
 
 When hosting assets on another origin, allow cross-origin GET and HEAD requests from BGS. The WASM fetch and browser font loading require CORS response headers; a successful asset download alone does not verify that the viewer can load it. Test from the BGS origin before switching the published viewer URL.
 
-With fontTools' WOFF support and the Noto source fonts installed, run `python scripts/build-localization-fonts.py` from the repository root. Font paths can be supplied with `--cjk-font` and `--devanagari-font`. Keep the OFL notices when redistributing regenerated fonts.
+With fontTools' WOFF support and the Noto source fonts installed, run `python scripts/build-localization-fonts.py` from the repository root. Font paths can be supplied with `--cjk-font`, `--devanagari-font` and `--arabic-font`. Keep the OFL notices when redistributing regenerated fonts.
+
+Persian (`fa`, including `fa-IR`) uses a bundled Noto Sans Arabic subset and browser canvas RTL shaping. Text remains anchored in the existing LTR board coordinates. Regenerate the Arabic font with `scripts/build-localization-fonts.py`.
+
+The Arabic subset is generated from Debian’s `fonts-noto-core` NotoSansArabic-Regular.ttf. Its upstream provenance and SIL OFL 1.1 copyright/license notice are preserved in `client/assets/localization/LICENSE-Noto-Arabic.txt`.

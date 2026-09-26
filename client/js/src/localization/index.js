@@ -13,6 +13,7 @@ import catalog11 from "./zh-TW.json";
 import catalog12 from "./vi.json";
 import catalog13 from "./it.json";
 import catalog14 from "./nl.json";
+import catalog15 from "./fa.json";
 export const catalogs = {
   en: catalog0,
   de: catalog1,
@@ -29,4 +30,5 @@ export const catalogs = {
   vi: catalog12,
   it: catalog13,
   nl: catalog14,
+  fa: catalog15,
 };
