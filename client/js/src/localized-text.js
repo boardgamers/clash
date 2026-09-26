@@ -25,7 +25,9 @@ export async function setLocale(value, assets) {
   const requested = ++pendingLocale;
   const next = resolveLocale(value);
   const font =
-    next === "hi"
+    next === "fa"
+      ? "Arabic"
+      : next === "hi"
       ? "Devanagari"
       : next === "ko"
         ? "Korean"
@@ -67,6 +69,8 @@ function metrics(text, size) {
   const key = `${size}:${translated}`;
   if (measurements.has(key)) return measurements.get(key);
   context.font = `${size}px ${family}`;
+  context.direction = locale === "fa" ? "rtl" : "ltr";
+  context.textAlign = "left";
   const measured = context.measureText(translated);
   const left = Math.ceil(Math.max(0, measured.actualBoundingBoxLeft)) + 2;
   const ascent = Math.ceil(measured.actualBoundingBoxAscent) + 2;
@@ -116,6 +120,8 @@ window.bgsTextPixels = (text, size) => {
   canvas.height = m.height * 2;
   context.scale(2, 2);
   context.font = `${size}px ${family}`;
+  context.direction = locale === "fa" ? "rtl" : "ltr";
+  context.textAlign = "left";
   context.fillStyle = "white";
   context.fillText(m.translated, m.left, m.ascent);
   return context.getImageData(0, 0, canvas.width, canvas.height).data;

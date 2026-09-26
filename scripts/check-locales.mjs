@@ -24,6 +24,7 @@ const locales = [
   "vi",
   "it",
   "nl",
+  "fa",
 ];
 for (const locale of locales) {
   const catalog = JSON.parse(
