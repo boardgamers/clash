@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Clash 3D · production bundle</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="/bundle/viewer.js"></script>
+    <script type="module">
+      import { uplinkSchemas } from '/node_modules/@boardgamers/protocol/dist/contracts.js';
+      const transport = window.clash3d.launch('#app');
+      for (const event of Object.keys(uplinkSchemas))
+        transport.on(event, (payload) =>
+          parent.postMessage({ source: 'clash-viewer', event, payload }, location.origin),
+        );
+      addEventListener('message', (event) => {
+        if (
+          event.source === parent &&
+          event.origin === location.origin &&
+          event.data?.source === 'clash-host'
+        )
+          transport.receive(event.data.event, event.data.payload);
+      });
+      parent.postMessage({ source: 'clash-viewer', event: 'mounted' }, location.origin);
+    </script>
+  </body>
+</html>

@@ -185,3 +185,33 @@ impl Messages {
         Self { messages, data }
     }
 }
+
+#[wasm_bindgen(js_name = "webView")]
+pub fn web_view(data: String, player: Option<usize>) -> Result<String, JsValue> {
+    serde_json::to_string(&crate::web_view::view(&get_game(data), player))
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+#[wasm_bindgen(js_name = "webCollectPreview")]
+pub fn web_collect_preview(
+    data: String,
+    player: usize,
+    city: String,
+    selections: String,
+) -> Result<String, JsValue> {
+    let selections =
+        serde_json::from_str(&selections).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let city = serde_json::from_value(serde_json::Value::String(city))
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let result = crate::web_view::collect_preview(&get_game(data), player, city, selections)
+        .map_err(|e| JsValue::from_str(&e))?;
+    serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+#[wasm_bindgen(js_name = "tryMove")]
+pub fn try_move(data: String, action: String, player: usize) -> Result<String, JsValue> {
+    let action = serde_json::from_str(&action).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    crate::action::try_execute_action(get_game(data), action, player)
+        .map(from_game)
+        .map_err(|e| JsValue::from_str(&e))
+}

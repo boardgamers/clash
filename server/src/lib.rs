@@ -13,7 +13,6 @@ extern crate core;
 
 pub mod ability_initializer;
 pub mod action;
-pub mod analysis;
 pub mod action_card;
 mod action_cost;
 pub mod advance;
@@ -25,6 +24,7 @@ pub mod ai_actions;
 pub mod ai_collect;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ai_missions;
+pub mod analysis;
 pub mod barbarians;
 pub mod cache;
 pub mod card;
@@ -75,4 +75,5 @@ mod undo;
 pub mod unit;
 pub mod utils;
 pub mod victory_points;
+pub mod web_view;
 pub mod wonder;

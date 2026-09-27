@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Clash · Classic controls</title>
+    <style>
+      body {
+        margin: 0;
+        font: 12px system-ui;
+      }
+      header {
+        height: 35px;
+        padding: 0 15px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background: #233d35;
+        color: #fff;
+      }
+      a {
+        color: #fff;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: calc(100vh - 35px);
+      }
+      #error {
+        color: #9b241d;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/">← Return to 3D view</a><span>Classic controls · same local game</span
+      ><span id="status"></span>
+    </header>
+    <canvas id="glcanvas"></canvas>
+    <div id="error"></div>
+    <script src="https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js"></script>
+    <script src="/legacy/client-scroll-dacf9577a4c1c430.js"></script>
+    <script>
+      const control = clash.launch('#glcanvas');
+      let seat,
+        revision = -1;
+      async function refresh() {
+        const data = await (await fetch('/api/state')).json();
+        seat = data.seat;
+        revision = data.revision;
+        control.emit('player', { index: seat });
+        control.emit('state', data.state);
+        document.getElementById('status').textContent = 'Player ' + (seat + 1);
+      }
+      control.on('ready', refresh);
+      control.on('fetchState', refresh);
+      control.emit('preferences', { locale: 'en', ui_scale: '0.8' });
+      control.on('move', async (move) => {
+        const response = await fetch('/api/move', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ move, seat, revision }),
+        });
+        if (!response.ok) document.getElementById('error').textContent = (await response.json()).error;
+        await refresh();
+      });
+    </script>
+  </body>
+</html>

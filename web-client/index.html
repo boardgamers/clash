@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clash of Cultures</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #f7f3e8;
+      }
+      #preview-bar {
+        height: 35px;
+        background: #233d35;
+        color: #d8decb;
+        font: 10px system-ui;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 0 16px;
+        box-sizing: border-box;
+      }
+      #preview-bar strong {
+        font-weight: 500;
+        letter-spacing: 0.3px;
+      }
+      #preview-bar button,
+      #preview-bar select,
+      #preview-bar a {
+        font: 10px system-ui;
+        background: #ffffff12;
+        color: #e4e8d9;
+        border: 1px solid #ffffff20;
+        padding: 3px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      #preview-bar select option {
+        color: #222;
+        background: #eee;
+      }
+      #preview-bar #status {
+        margin-left: auto;
+        font-size: 9px;
+        opacity: 0.7;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        height: calc(100% - 35px);
+        border: 0;
+      }
+      #host-error {
+        position: fixed;
+        top: 45px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff0de;
+        color: #a44f2e;
+        z-index: 10;
+        padding: 12px;
+        font: 12px system-ui;
+        border: 1px solid #ca9d66;
+        border-radius: 5px;
+      }
+      #host-error:empty {
+        display: none;
+      }
+      @media (max-width: 650px) {
+        #preview-bar {
+          gap: 7px;
+          padding: 0 8px;
+        }
+        #preview-bar strong {
+          font-size: 9px;
+        }
+        #status {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="preview-bar">
+      <strong>Design preview</strong
+      ><select id="seat" aria-label="Preview player">
+        <option value="auto">Hotseat</option>
+        <option value="0">Player 1</option>
+        <option value="1">Player 2</option>
+        <option value="spectator">Spectator</option></select
+      ><button id="reset">New game</button><button id="theme">Theme</button
+      ><span id="status">Connecting to local game…</span>
+    </div>
+    <div id="host-error" role="alert"></div>
+    <iframe title="Clash of Cultures" src="/viewer.html"></iframe>
+    <script type="module" src="/src/local-host.ts"></script>
+  </body>
+</html>
