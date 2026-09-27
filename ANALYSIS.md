@@ -10,7 +10,9 @@ must use that sanitized state. The export throws for unsupported positions.
 `canLaunchAnalysisMode(data)` allows finished games through the existing path,
 and permits ongoing ordinary play, civilization selection and movement when
 there is no pending event. Pending event stacks, Great Seer assignments and
-remembered Spy information are currently excluded. These hold private choices
+remembered Spy information are currently excluded. Positions after an Action
+Card or Events pile reshuffle are also excluded: the engine keeps lifetime
+discard archives, which no longer describe the current deck cycle. These hold private choices
 or knowledge that require specific reconstruction rules; copying or dropping
 them would be unsafe or change the position's legal continuation.
 
@@ -28,7 +30,8 @@ be reconciled with the catalogue are rejected.
 
 Public facts needed for objective rules survive in a reduced current-round log:
 completed objectives, played wonders and combat statistics without private card
-fields. Original actions, free text, private origin/modifier payloads, undo and
+fields. Minimal typed observed-hand facts also survive, preserving known
+opponent cards when the platform rerolls the sanitized original snapshot. Original actions, free text, private origin/modifier payloads, undo and
 redo are removed. The scenario cannot undo before the branch. Player listeners
 are rebuilt for simulated hands. Source seed, random state, queued dice results,
 messages, custom UI and dropped-seat automation are replaced or cleared.

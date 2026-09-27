@@ -20,6 +20,12 @@ pub fn can_create(game: &Game) -> bool {
         && !game.permanent_effects.iter().any(|e| matches!(e, PermanentEffect::GreatSeer(_)))
         // Spy's prose records cannot reliably be mapped back to card identities.
         && game.players.iter().all(|p| p.secrets.is_empty())
+        // These discard arrays are lifetime archives, not current-cycle piles.
+        // Once a pile has refilled, their exclusions are no longer sufficient.
+        && !game.log.iter().flat_map(|a| &a.rounds).flat_map(|r| &r.turns)
+            .flat_map(|t| &t.actions).flat_map(|a| &a.log).any(|text| {
+                text == "Reshuffling Action Card pile" || text == "Reshuffling Events pile"
+            })
 }
 
 /// Build from public facts and the requesting seat's hand, never from the
@@ -32,7 +38,7 @@ pub fn create(mut game: Game, seat: Option<usize>, seed: &str) -> Result<Game, S
         return Err("Analysis requires a seed and a valid requesting seat".into());
     }
     if !can_create(&game) {
-        return Err("Analysis is unavailable during pending choices, Great Seer or remembered Spy information".into());
+        return Err("Analysis is unavailable during pending choices, Great Seer, remembered Spy information or after action/incident pile reshuffling".into());
     }
     // Hash all supplied UTF-8 bytes; no source seed, clock or source RNG involved.
     let value = seed
@@ -110,6 +116,15 @@ pub fn create(mut game: Game, seat: Option<usize>, seed: &str) -> Result<Game, S
     game.action_cards_left = actions;
     game.objective_cards_left = objectives;
     game.wonders_left = wonders;
+    for p in &game.players {
+        for card in &p.action_cards {
+            if *card >= crate::content::incidents::great_persons::GREAT_PERSON_OFFSET {
+                incidents.retain(|i| {
+                    *i != *card - crate::content::incidents::great_persons::GREAT_PERSON_OFFSET
+                });
+            }
+        }
+    }
     game.incidents_left = incidents;
     // Subtract the publicly revealed blocks from the published catalogue. Their
     // two legal orientations are equivalent; exhaustion retains base terrain.
@@ -119,9 +134,34 @@ pub fn create(mut game: Game, seat: Option<usize>, seed: &str) -> Result<Game, S
         b.block = blocks.pop().ok_or("Too many unexplored map blocks")?;
     }
     retain_rule_facts(&mut game);
+    remember_known_hands(&mut game, &known);
     // Objective listeners belong to the simulated cards, not the source hands.
     let cache = game.cache.clone();
     Ok(Game::from_data(game.data(), cache, GameContext::Play))
+}
+
+fn remember_known_hands(game: &mut Game, known: &[Vec<HandCard>]) {
+    // Keep only observed hand constraints at the branch, so a reroll of this
+    // sanitized snapshot retains the same knowledge without source history.
+    if known.iter().any(|cards| !cards.is_empty()) {
+        crate::log::add_log_action(game, Action::StartTurn);
+        for (player, cards) in known.iter().enumerate() {
+            for card in cards {
+                crate::log::add_action_log_item(
+                    game,
+                    player,
+                    crate::log::ActionLogEntry::HandCard {
+                        card: card.clone(),
+                        from: HandCardLocation::Public,
+                        to: HandCardLocation::Hand(player),
+                    },
+                    EventOrigin::Ability("Analysis known card".into()),
+                    vec![],
+                );
+            }
+        }
+        game.undo_limit = game.log_index;
+    }
 }
 
 fn remaining_blocks(game: &Game) -> Result<Vec<Block>, String> {
@@ -456,6 +496,10 @@ mod tests {
             let game = create(copy(&source), seat, "fake").unwrap();
             assert_eq!(game.players[1].action_cards, vec![id]);
             assert!(!game.action_cards_left.contains(&id));
+            let rerolled = create(game, seat, "second simulation seed").unwrap();
+            assert_eq!(rerolled.players[1].action_cards, vec![id]);
+            assert!(!rerolled.action_cards_left.contains(&id));
+            assert!(!rerolled.can_undo());
         }
     }
 
@@ -484,5 +528,20 @@ mod tests {
                 .unwrap();
             remaining.remove(i);
         }
+    }
+
+    #[test]
+    fn fails_closed_after_action_pile_refill() {
+        let mut game = game_api::init(2, "source".into(), GameOptions::default());
+        crate::log::add_start_turn_action_if_needed(&mut game);
+        game.action_cards_left.clear();
+        game.action_cards_discarded = game.cache.get_action_cards().iter().map(|c| c.id).collect();
+        let p = game.active_player();
+        let player =
+            crate::events::EventPlayer::from_player(p, &game, EventOrigin::Ability("test".into()));
+        crate::action_card::gain_action_card_from_pile(&mut game, &player);
+        assert!(!game.action_cards_left.is_empty());
+        assert!(!can_create(&game));
+        assert!(create(game, None, "fake").is_err());
     }
 }
