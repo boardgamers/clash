@@ -1,3 +1,4 @@
+import { bindPageScrolling } from "./page-scrolling";
 import init, { set_wasm } from "../../dist/remote_client";
 
 function dynamicallyLoadScript(url, onload) {
@@ -9,6 +10,7 @@ function dynamicallyLoadScript(url, onload) {
 }
 
 export async function run({ selector, control }) {
+  bindPageScrolling(document.querySelector(selector));
   let wbg = await init();
   miniquad_add_plugin({
     register_plugin: (a) => {
