@@ -250,7 +250,7 @@ pub(crate) const UNEXPLORED_BLOCK: Block = Block {
 };
 
 // by amount of water, descending
-const BLOCKS: [Block; 16] = [
+pub(crate) const BLOCKS: [Block; 16] = [
     // 2 water tiles
     Block {
         terrain: [

@@ -26,6 +26,29 @@ fn from_game(game: Game) -> String {
     serde_json::to_string(&game.data()).expect("game should be serializable")
 }
 
+#[derive(Deserialize)]
+pub struct AnalysisOptions {
+    player: Option<usize>,
+    seed: String,
+}
+
+#[wasm_bindgen(js_name = "canLaunchAnalysisMode")]
+pub fn can_launch_analysis_mode(data: String) -> bool {
+    let game = get_game(data);
+    game_api::ended(&game) || crate::analysis::can_create(&game)
+}
+
+#[wasm_bindgen(js_name = "createAnalysisScenario")]
+pub fn create_analysis_scenario(data: String, options: JsValue) -> Result<String, JsValue> {
+    let options: AnalysisOptions =
+        serde_wasm_bindgen::from_value(options).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let game = crate::analysis::create(get_game(data), options.player, &options.seed)
+        .map_err(|e| JsValue::from_str(&e))?;
+    // Canonical object ordering also covers custom_data maps.
+    let value = serde_json::to_value(game.data()).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    serde_json::to_string(&value).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
 #[wasm_bindgen]
 pub async fn init(
     player_amount: usize,

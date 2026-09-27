@@ -13,6 +13,7 @@ extern crate core;
 
 pub mod ability_initializer;
 pub mod action;
+pub mod analysis;
 pub mod action_card;
 mod action_cost;
 pub mod advance;
