@@ -26,7 +26,10 @@ button:disabled {
   opacity: 0.46;
 }
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 3px solid #bb8745;
   outline-offset: 4px;
 }
@@ -296,6 +299,11 @@ small {
   height: 100%;
   display: block;
   touch-action: none;
+  cursor: grab;
+}
+.map-world > canvas:focus-visible {
+  outline: 3px solid #bb8745;
+  outline-offset: -4px;
 }
 .map-vignette {
   position: absolute;
@@ -393,11 +401,13 @@ small {
   z-index: 2;
   overflow: hidden;
 }
-.city-map-label {
+.city-map-label,
+.city-map-label:disabled {
   position: absolute;
   left: 0;
   top: 0;
-  pointer-events: auto;
+  pointer-events: none;
+  opacity: 0;
   white-space: nowrap;
   border: 1px solid #f4efde80;
   border-radius: 4px;
@@ -409,6 +419,19 @@ small {
   padding: 7px 11px;
   box-shadow: 0 3px 13px #28483d28;
   border-bottom: 2px solid var(--player-color);
+  transition:
+    opacity 0.12s,
+    box-shadow 0.12s;
+}
+.city-map-label:is(.selected, .hovered, :hover, :focus-visible) {
+  opacity: 1;
+  pointer-events: auto;
+}
+.city-map-label:disabled {
+  pointer-events: none;
+}
+.city-map-label:hover:not(:disabled) {
+  background: #fff6df;
 }
 .city-map-label.selected {
   background: #fff6df;
@@ -1767,6 +1790,14 @@ small {
   height: 20px;
   margin: 0 2px;
   background: var(--line);
+}
+.city-dock button:hover:not(:disabled),
+.building-option:hover:not(:disabled),
+.city-picker button:hover:not(:disabled),
+.settler-picker button:hover:not(:disabled),
+.settler-destinations button:hover:not(:disabled) {
+  background: var(--paper2);
+  border-color: #b69c69;
 }
 .floating-panel {
   position: absolute;

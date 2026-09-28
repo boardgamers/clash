@@ -15,7 +15,12 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
     if (event.isTrusted) controller.audio.unlock();
   };
   const clickAudio = (event: Event) => {
-    if (event.isTrusted && event.target instanceof Element && event.target.closest('button:not(:disabled)'))
+    if (
+      event.isTrusted &&
+      event.target instanceof Element &&
+      event.target.closest('button:not(:disabled)') &&
+      !event.target.closest('.city-map-label')
+    )
       controller.audio.play('select');
   };
   target.addEventListener('pointerdown', unlockAudio, true);

@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
 import { positionXY } from './model';
+import { MapGesture } from './map-gesture';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -20,13 +21,18 @@ export class World {
   private board = new THREE.Group();
   private rings = new THREE.Group();
   private tiles = new Map<string, THREE.Mesh>();
+  private pieces: THREE.Group[] = [];
+  private hoverRing: THREE.Mesh;
+  private hovered: string | null = null;
+  private selectable: Set<string> | null = null;
+  private pending = false;
+  private gesture = new MapGesture();
   private raycaster = new THREE.Raycaster();
   private resize: ResizeObserver;
   private frame = 0;
   private dirty = true;
   private lastSignature = '';
   private selectionSignature = '';
-  private start = [0, 0];
   private disposed = false;
   private topDown = false;
   private materials = new Set<THREE.Material>();
@@ -96,6 +102,18 @@ export class World {
       this.scene.add(glint);
     }
     this.scene.add(this.board, this.rings);
+    const hoverMaterial = new THREE.MeshBasicMaterial({
+      color: '#fff3c9',
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false,
+    });
+    this.materials.add(hoverMaterial);
+    this.hoverRing = this.mesh(new THREE.TorusGeometry(0.98, 0.025, 6, 6), hoverMaterial);
+    this.hoverRing.rotation.x = -Math.PI / 2;
+    this.hoverRing.visible = false;
+    this.hoverRing.castShadow = false;
+    this.scene.add(this.hoverRing);
     this.camera.position.set(17, 22, 25);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.copy(this.center);
@@ -106,8 +124,14 @@ export class World {
     this.controls.minPolarAngle = 0.08;
     this.controls.enablePan = true;
     this.controls.update();
-    this.controls.addEventListener('change', () => this.invalidate());
+    this.controls.addEventListener('change', () => {
+      this.setHovered(null);
+      this.invalidate();
+    });
     this.renderer.domElement.addEventListener('pointerdown', this.down);
+    this.renderer.domElement.addEventListener('pointermove', this.move);
+    this.renderer.domElement.addEventListener('pointerleave', this.leave);
+    this.renderer.domElement.addEventListener('pointercancel', this.cancel);
     this.renderer.domElement.addEventListener('pointerup', this.up);
     this.renderer.domElement.addEventListener('keydown', this.key);
     this.resize = new ResizeObserver(() => {
@@ -123,21 +147,66 @@ export class World {
     this.resize.observe(host);
   }
   private down = (e: PointerEvent) => {
-    this.start = [e.clientX, e.clientY];
+    this.gesture.down(e.pointerId, e.clientX, e.clientY);
   };
   private up = (e: PointerEvent) => {
-    if (Math.hypot(e.clientX - this.start[0], e.clientY - this.start[1]) > 5) return;
+    const clicked = this.gesture.up(e.pointerId, e.clientX, e.clientY);
+    const position = this.hitTile(e.clientX, e.clientY);
+    if (clicked && e.button === 0 && position && this.canPick(position)) this.pick(position);
+    this.setHovered(e.pointerType === 'touch' ? null : position);
+  };
+  private move = (e: PointerEvent) => {
+    this.gesture.move(e.clientX, e.clientY);
+    this.setHovered(
+      this.gesture.dragging || e.pointerType === 'touch' ? null : this.hitTile(e.clientX, e.clientY),
+    );
+  };
+  private leave = (e: PointerEvent) => {
+    if (e.relatedTarget instanceof Node && this.labelHost.contains(e.relatedTarget)) return;
+    this.setHovered(null);
+  };
+  private cancel = (e: PointerEvent) => {
+    this.gesture.cancel(e.pointerId);
+    this.setHovered(null);
+  };
+  private canPick(position: string) {
+    return !this.pending && (this.selectable === null || this.selectable.has(position));
+  }
+  private hitTile(x: number, y: number): string | null {
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.raycaster.setFromCamera(
-      new THREE.Vector2(
-        ((e.clientX - rect.left) / rect.width) * 2 - 1,
-        (-(e.clientY - rect.top) / rect.height) * 2 + 1,
-      ),
+      new THREE.Vector2(((x - rect.left) / rect.width) * 2 - 1, (-(y - rect.top) / rect.height) * 2 + 1),
       this.camera,
     );
-    const hit = this.raycaster.intersectObjects([...this.tiles.values()])[0];
-    if (hit) this.pick(hit.object.userData.position);
-  };
+    const hit = this.raycaster.intersectObjects([...this.tiles.values(), ...this.pieces], true)[0];
+    let object: THREE.Object3D | null = hit?.object ?? null;
+    while (object) {
+      if (typeof object.userData.position === 'string') return object.userData.position;
+      object = object.parent;
+    }
+    return null;
+  }
+  private setHovered(position: string | null) {
+    const changed = this.hovered !== position;
+    this.hovered = position;
+    this.renderer.domElement.style.cursor = this.gesture.dragging
+      ? 'grabbing'
+      : this.pending
+        ? 'wait'
+        : position
+          ? this.canPick(position)
+            ? 'pointer'
+            : 'not-allowed'
+          : 'grab';
+    this.hoverRing.visible = !!position && this.canPick(position) && !this.gesture.dragging;
+    if (position) {
+      const [x, z] = positionXY(position);
+      this.hoverRing.position.set(x, 0.36, z);
+    }
+    for (const label of this.labelPositions)
+      label.node.classList.toggle('hovered', label.position === position);
+    if (changed) this.invalidate();
+  }
   private key = (e: KeyboardEvent) => {
     if (e.key === 'Home') this.reset();
     else if (e.key === '+' || e.key === '=') this.zoom(0.85);
@@ -365,11 +434,24 @@ export class World {
     });
     this.board.clear();
     this.tiles.clear();
+    this.pieces = [];
     this.labelHost.replaceChildren();
     this.labelPositions = [];
   }
   update(s: Session) {
     if (!s.game) return;
+    this.pending = s.pending;
+    this.selectable =
+      s.mode === 'collect'
+        ? new Set(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
+        : s.mode === 'settlers'
+          ? new Set([
+              ...(s.view?.settlers.map((u) => u.position) ?? []),
+              ...(s.view?.settlers
+                .find((u) => u.id === s.selectedSettler)
+                ?.destinations.map((d) => d.position) ?? []),
+            ])
+          : null;
     const signature = JSON.stringify([
       s.game.map.tiles,
       s.game.players.map((p) => [p.cities, p.units]),
@@ -408,11 +490,13 @@ export class World {
         this.board.add(group);
       }
       for (const player of s.game.players) {
-        for (const [i, city] of (player.cities ?? []).entries()) {
+        for (const city of player.cities ?? []) {
           const [x, z] = positionXY(city.position);
           const cityModel = this.building(playerColor(player.id, s.colorBlind));
           cityModel.position.set(x, 0.38, z);
           cityModel.rotation.y = 0.25;
+          cityModel.userData.position = city.position;
+          this.pieces.push(cityModel);
           if (s.colorBlind) {
             const badge = this.ownershipBadge(player.id);
             badge.position.set(0.6, 1.05, -0.2);
@@ -446,9 +530,15 @@ export class World {
           const label = document.createElement('button');
           label.className = 'city-map-label';
           label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind));
-          label.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization} · ${i === 0 ? 'Capital' : city.position}`;
+          label.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization} · ${city.position}`;
           label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position}`);
-          label.onclick = () => this.pick(city.position);
+          label.onclick = () => {
+            if (this.canPick(city.position)) this.pick(city.position);
+          };
+          label.onpointerenter = () => this.setHovered(city.position);
+          label.onpointerleave = () => this.setHovered(null);
+          label.onfocus = () => this.setHovered(city.position);
+          label.onblur = () => this.setHovered(null);
           this.labelHost.append(label);
           this.labelPositions.push({
             position: city.position,
@@ -459,6 +549,8 @@ export class World {
         for (const [unitIndex, unit] of (player.units ?? []).entries()) {
           const [x, z] = positionXY(unit.position);
           const pawn = new THREE.Group();
+          pawn.userData.position = unit.position;
+          this.pieces.push(pawn);
           const color = this.material(playerColor(player.id, s.colorBlind));
           const body = this.mesh(new THREE.ConeGeometry(0.085, 0.27, 7), color);
           body.position.y = 0.19;
@@ -509,13 +601,14 @@ export class World {
       if (this.selectionSignature === '') this.reset();
     }
     const settler = s.view?.settlers.find((u) => u.id === s.selectedSettler);
+    const focusedPosition = s.mode === 'overview' ? (s.focus ?? s.city) : s.city;
     const selected =
       s.mode === 'settlers'
         ? [settler?.position, s.destination].filter((p): p is string => !!p)
         : s.mode === 'collect'
           ? s.selection.map((c) => c.position)
-          : s.city
-            ? [s.city]
+          : focusedPosition
+            ? [focusedPosition]
             : [];
     const available =
       s.mode === 'settlers'
@@ -542,18 +635,19 @@ export class World {
           this.material(selected.includes(pos) ? '#ffe0a0' : '#e5cc92'),
         );
         ring.rotation.x = -Math.PI / 2;
-        ring.rotation.z = Math.PI / 6;
         ring.position.set(x, 0.35, z);
         this.rings.add(ring);
       }
     }
-    this.labelPositions.forEach((label) =>
-      label.node.classList.toggle('selected', label.position === s.city),
-    );
+    for (const label of this.labelPositions) {
+      label.node.classList.toggle('selected', label.position === focusedPosition);
+      label.node.disabled = !this.canPick(label.position);
+    }
     if (s.topDown !== this.topDown) {
       this.topDown = s.topDown;
       this.reset();
     }
+    this.setHovered(this.hovered);
     this.invalidate();
   }
   destroy() {
@@ -562,6 +656,9 @@ export class World {
     this.resize.disconnect();
     this.controls.dispose();
     this.renderer.domElement.removeEventListener('pointerdown', this.down);
+    this.renderer.domElement.removeEventListener('pointermove', this.move);
+    this.renderer.domElement.removeEventListener('pointerleave', this.leave);
+    this.renderer.domElement.removeEventListener('pointercancel', this.cancel);
     this.renderer.domElement.removeEventListener('pointerup', this.up);
     this.renderer.domElement.removeEventListener('keydown', this.key);
     for (const geometry of this.geometries) geometry.dispose();

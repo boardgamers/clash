@@ -97,17 +97,25 @@
               : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+      if ($session.activityOpen) controller.closeActivity();
+      if ($session.mode === 'collect' || $session.mode === 'settlers' || confirmEnd) closeAction();
+    };
+    document.addEventListener('keydown', escape);
+    let off: (() => void) | undefined;
     try {
       world = new World(boardHost, (p) => controller.selectTile(p));
-      const off = session.subscribe((s) => world.update(s));
-      return () => {
-        off();
-        world.destroy();
-      };
+      off = session.subscribe((s) => world.update(s));
     } catch (e) {
       boardError =
         'The 3D map could not start on this device. You can still select your city and collect resources with the controls.';
     }
+    return () => {
+      document.removeEventListener('keydown', escape);
+      off?.();
+      world?.destroy();
+    };
   });
   function chatPanel(node: HTMLElement) {
     const panel = mountChat(node, {
@@ -282,7 +290,7 @@
         ><button title="Zoom out" aria-label="Zoom out" onclick={() => world?.zoom(1.18)}
           ><Minus size={18} /></button
         ><span></span><button
-          title="Toggle top-down view"
+          title={$session.topDown ? 'Switch to 3D view' : 'Switch to 2D overview'}
           aria-label="Toggle top-down view"
           aria-pressed={$session.topDown}
           onclick={() => controller.toggleMapView()}><Layers size={18} /></button
