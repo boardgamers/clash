@@ -248,17 +248,30 @@
   class="game-shell"
 >
   <header class="masthead">
-    <button
-      class="brand"
-      onclick={() => controller.commands.openBoardgame()}
-      aria-label="About Clash of Cultures"
-      ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
-        >Age {['I', 'II', 'III', 'IV', 'V', 'VI'][($session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.game
-          ?.round ?? 1) > 3
-          ? 'End of age'
-          : `Round ${$session.game?.round ?? 1}/3`}</span
-      ></button
-    >
+    <div class="brand-block">
+      <button
+        class="brand"
+        onclick={() => controller.commands.openBoardgame()}
+        aria-label="About Clash of Cultures"
+        ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
+          >Age {['I', 'II', 'III', 'IV', 'V', 'VI'][($session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.game
+            ?.round ?? 1) > 3
+            ? 'End of age'
+            : `Round ${$session.game?.round ?? 1}/3`}</span
+        ></button
+      >
+      <p class="game-credits">
+        <span title="Game design: Christian Marcussen">Christian Marcussen</span>
+        <span aria-hidden="true">·</span>
+        <a
+          href="https://wizkids.com/clash-of-cultures-monumental-edition/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Publisher: WizKids"
+          title="Published by WizKids">WizKids</a
+        >
+      </p>
+    </div>
     <div class="age-track" aria-label={`Age ${$session.game?.age ?? 1} of 6`}>
       <span>THE AGES</span>{#each [1, 2, 3, 4, 5, 6] as age}<span
           class:current={age === ($session.game?.age ?? 1)}
