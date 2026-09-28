@@ -38,7 +38,7 @@ export const unitInfo: Record<
   },
 };
 export function cityReason(reason: string | null, size = 1) {
-  if (reason === 'Need more cities') return `You need ${size + 1} cities before this city can grow.`;
+  if (reason === 'Need more cities') return `Requires ${size + 1} cities to build here.`;
   if (reason === 'Invalid replacement')
     return 'Choose matching units on the map to replace pieces missing from your supply.';
   if (reason === 'Too many units') return 'The selection exceeds this city’s recruitment capacity.';
