@@ -318,3 +318,97 @@ test('offset hex coordinates preserve the odd-column layout', () => {
   assert.deepEqual(positionXY('B1'), [1.5, Math.sqrt(3) / 2]);
   assert.equal(positionXY('D7')[1] - positionXY('D2')[1], 5 * Math.sqrt(3));
 });
+
+test('Engineering exposes the drawn wonder only to its owner and scores have an exact breakdown for 2–4 players', async () => {
+  for (const count of [2, 3, 4]) {
+    const state = await engine.init(
+      count,
+      [],
+      { undo: 'SamePlayer', civilization: 'Random' },
+      `score-${count}`,
+      {},
+    );
+    const view: View = JSON.parse(engine.webView(engine.stripSecret(state, undefined), undefined));
+    assert.equal(view.players.length, count);
+    for (const player of view.players) {
+      assert.equal(player.scoreParts.length, 6);
+      assert.equal(
+        player.scoreParts.reduce((sum, part) => sum + part.points, 0),
+        player.score,
+      );
+    }
+    assert.deepEqual(view.wonderCards, []);
+  }
+  let state = await initial();
+  const seat = engine.currentPlayer(state);
+  const before: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  const engineering = before.advances.find((a) => a.id === 'Engineering')!;
+  assert.ok(engineering.action);
+  state = engine.tryMove(state, JSON.stringify(engineering.action), seat);
+  const after: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  assert.equal(after.wonderCards.length, 1);
+  const card = after.wonderCards[0];
+  assert.equal(card.id, JSON.parse(state).players[seat].wonder_cards[0]);
+  assert.ok(card.name && card.description && card.requiredAdvance);
+  assert.ok(Object.values(card.cost).some((n) => n! > 0));
+  assert.ok(card.builtPoints > 0 && card.ownedPoints > 0);
+  assert.equal(
+    after.players[seat].scoreParts.find((part) => part.name === 'Wonders')!.points,
+    0,
+    'A wonder in hand scores no points',
+  );
+  assert.ok(
+    after.players[seat].scoreParts.find((part) => part.name === 'Advances')!.points >
+      before.players[seat].scoreParts.find((part) => part.name === 'Advances')!.points,
+  );
+  assert.equal(
+    after.players[seat].scoreParts.reduce((sum, part) => sum + part.points, 0),
+    after.players[seat].score,
+  );
+  for (const index of [undefined, 1 - seat]) {
+    const stripped = engine.stripSecret(state, index);
+    assert.deepEqual(JSON.parse(engine.webView(stripped, index)).wonderCards, []);
+    assert.deepEqual(
+      JSON.parse(engine.webView(stripped, seat)).wonderCards,
+      [],
+      'Cannot resolve a Hidden wonder by selecting another seat',
+    );
+  }
+});
+
+test('activation previews match actual mood changes, angry blocking and turn reset', async () => {
+  let state = await initial();
+  const seat = engine.currentPlayer(state);
+  const view = () => JSON.parse(engine.webView(engine.stripSecret(state, seat), seat)) as View;
+  const collect = () => {
+    const city = view().cities[0];
+    const preview = JSON.parse(
+      engine.webCollectPreview(
+        engine.stripSecret(state, seat),
+        seat,
+        city.position,
+        JSON.stringify([{ ...city.choices[0], times: 1 }]),
+      ),
+    );
+    state = engine.tryMove(state, JSON.stringify(preview.action), seat);
+  };
+  assert.equal(view().cities[0].activations, 0);
+  assert.equal(view().cities[0].activationMood, 'Happy');
+  collect();
+  assert.equal(view().cities[0].mood, 'Happy');
+  assert.equal(view().cities[0].activationMood, 'Neutral');
+  const capacity = view().cities[0].activationCapacity;
+  collect();
+  assert.equal(view().cities[0].mood, 'Neutral');
+  assert.equal(view().cities[0].capacity, capacity);
+  assert.equal(view().cities[0].activationMood, 'Angry');
+  collect();
+  assert.equal(view().cities[0].mood, 'Angry');
+  assert.equal(view().cities[0].activations, 3);
+  state = engine.tryMove(state, JSON.stringify({ Playing: 'EndTurn' }), seat);
+  state = engine.tryMove(state, JSON.stringify({ Playing: 'EndTurn' }), 1 - seat);
+  assert.equal(view().cities[0].activations, 0);
+  collect();
+  assert.equal(view().cities[0].canActivate, false);
+  assert.throws(collect, 'An angry city cannot activate twice');
+});

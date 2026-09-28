@@ -36,12 +36,17 @@
     Volume2,
     VolumeX,
     Eye,
+    RotateCw,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
   import ResearchTree from './ResearchTree.svelte';
   import CityPanel from './CityPanel.svelte';
   import SettlerPanel from './SettlerPanel.svelte';
+  import ScoreDialog from './ScoreDialog.svelte';
+  import WondersDialog from './WondersDialog.svelte';
+  import CardReveal from './CardReveal.svelte';
+  import ActivationStatus from './ActivationStatus.svelte';
   import ResourceAmount from './ResourceAmount.svelte';
   import type { Controller } from './controller';
   import type { Resource } from './types';
@@ -99,13 +104,18 @@
   onMount(() => {
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+      if ($session.cardDraws.length) controller.patch({ cardDraws: [] });
       if ($session.activityOpen) controller.closeActivity();
       if ($session.mode === 'collect' || $session.mode === 'settlers' || confirmEnd) closeAction();
     };
     document.addEventListener('keydown', escape);
     let off: (() => void) | undefined;
     try {
-      world = new World(boardHost, (p) => controller.selectTile(p));
+      world = new World(
+        boardHost,
+        (p) => controller.selectTile(p),
+        () => controller.audio.play('hover'),
+      );
       off = session.subscribe((s) => world.update(s));
     } catch (e) {
       boardError =
@@ -172,6 +182,13 @@
     <nav class="header-actions">
       {#if $session.seat !== undefined}
         <button
+          class="text-button wonders-button"
+          aria-label={`Wonders: ${$session.view?.wonderCards?.length ?? 0} ${$session.view?.wonderCards?.length === 1 ? 'card' : 'cards'}`}
+          onclick={() => controller.patch({ wondersOpen: true, cardDraws: [] })}
+          ><Landmark size={17} /> Wonders
+          <span class="card-count">{$session.view?.wonderCards?.length ?? 0}</span></button
+        >
+        <button
           class="text-button objectives-button"
           aria-label={`Objectives: ${$session.view?.objectiveCards?.length ?? 0} ${$session.view?.objectiveCards?.length === 1 ? 'card' : 'cards'}`}
           onclick={() => controller.patch({ objectivesOpen: true })}
@@ -222,7 +239,9 @@
             class="player-card"
             class:active={player.index === $session.view?.activePlayer}
             style={`--player:${playerColor(player.index, $session.colorBlind)}`}
-            onclick={() => controller.commands.openPlayer(player.index)}
+            title={`View ${player.civilization} victory-point breakdown`}
+            aria-label={`${player.civilization}: ${player.score} victory points. View score breakdown`}
+            onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
               controller.commands.hoverPlayer(player.index, {
@@ -312,6 +331,13 @@
                 >{identity?.civilization}
                 {c.position === $session.view?.cities[0]?.position ? 'Capital' : 'City'}</strong
               ><small>{c.position} <span>·</span> Size {c.size} <span>·</span> {c.mood}</small></span
+            ><span
+              class="city-activation-badge"
+              class:used={c.activations > 0}
+              class:blocked={!c.canActivate}
+              title={`${c.activations} ${c.activations === 1 ? 'activation' : 'activations'} this turn${!c.canActivate ? ' · Cannot activate again' : c.activations ? ` · Next activation: ${c.activationMood}` : ' · First activation keeps mood'}`}
+              aria-label={`${c.activations} ${c.activations === 1 ? 'activation' : 'activations'} this turn`}
+              ><RotateCw size={12} aria-hidden="true" />{c.activations}</span
             ><ChevronRight size={16} /></button
           >{/each}
       </div>
@@ -478,6 +504,7 @@
             Your {city?.mood.toLowerCase()} city can gather from up to <b>{city?.capacity} tiles</b>. Choose
             on the map or below.
           </p>
+          {#if city}<ActivationStatus {city} warning />{/if}
           <div class="collection-choices">
             {#each city?.choices ?? [] as choice}{@const resource = Object.keys(
                 choice.pile,
@@ -501,8 +528,9 @@
               <span>You will collect</span><strong>{pileText($session.preview.total)}</strong
               >{#if Object.values($session.preview.waste).some((n) => n)}<small class="warning"
                   >Storage is full: {pileText($session.preview.waste)} will be lost.</small
-                >{/if}{#if $session.preview.moodWillDecrease}<small class="warning"
-                  >Activating this city again lowers its mood.</small
+                >{/if}
+              {#if city && city.activationMood !== city.mood}<span class="activation-inline"
+                  ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
                 >{/if}
             </div>{/if}
           <button
@@ -588,6 +616,9 @@
   </main>
   {#if $session.mode === 'research'}<ResearchTree {controller} />{/if}
   {#if $session.mode === 'city'}<CityPanel {controller} />{/if}
+  {#if $session.scorePlayer !== null}<ScoreDialog {controller} />{/if}
+  {#if $session.wondersOpen && $session.seat !== undefined}<WondersDialog {controller} />{/if}
+  <CardReveal {controller} />
   {#if $session.toast}<div class="toast" role="status"><Check size={16} />{$session.toast}</div>{/if}
   {#if $session.objectivesOpen && $session.seat !== undefined}
     <dialog

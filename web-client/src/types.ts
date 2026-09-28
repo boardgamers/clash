@@ -62,6 +62,9 @@ export interface CityView {
   maxRange2: number;
   mood: string;
   activations: number;
+  canActivate: boolean;
+  activationMood: string;
+  activationCapacity: number;
   reason: string | null;
   choices: Choice[];
 }
@@ -84,8 +87,21 @@ export interface PlayerView {
   name: string;
   civilization: string;
   score: number;
+  scoreParts: { name: string; points: number }[];
   cities: { position: string; size: number; capacity: number; mood: string; activations: number }[];
 }
+export interface WonderCard {
+  id: string;
+  name: string;
+  description: string;
+  cost: Pile;
+  requiredAdvance: string;
+  requiredAdvanceOwned: boolean;
+  builtPoints: number;
+  ownedPoints: number;
+}
+export type CardDraw =
+  { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
   activePlayer: number;
   canPlay: boolean;
@@ -101,6 +117,7 @@ export interface View {
     id: number;
     objectives: { name: string; description: string; timing: 'Instant' | 'Status phase' }[];
   }[];
+  wonderCards: WonderCard[];
   objectiveDecision: {
     name: string;
     description: string;
@@ -196,6 +213,9 @@ export interface Session {
   activityOpen: boolean;
   help: boolean;
   objectivesOpen: boolean;
+  wondersOpen: boolean;
+  scorePlayer: number | null;
+  cardDraws: CardDraw[];
   dark: boolean;
   unread: number;
   avatars: string[];

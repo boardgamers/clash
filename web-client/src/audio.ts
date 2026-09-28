@@ -1,11 +1,14 @@
 import type { Move } from './types.ts';
 
-export type SoundCue = 'select' | 'collect' | 'build' | 'research' | 'move' | 'confirm' | 'undo' | 'error';
+export type SoundCue =
+  'hover' | 'select' | 'collect' | 'build' | 'research' | 'draw' | 'move' | 'confirm' | 'undo' | 'error';
 const notes: Record<SoundCue, number[]> = {
+  hover: [560],
   select: [420],
   collect: [330, 440],
   build: [165, 220, 330],
   research: [660, 880, 990],
+  draw: [523, 784, 1047],
   move: [220, 294],
   confirm: [392, 494],
   undo: [330, 220],
@@ -31,6 +34,7 @@ export class GameAudio {
   private voices = new Map<OscillatorNode, GainNode>();
   private enabled = false;
   private disposed = false;
+  private lastHover = -Infinity;
   private createContext: () => AudioContext;
   constructor(createContext: () => AudioContext = () => new AudioContext()) {
     this.createContext = createContext;
@@ -69,7 +73,12 @@ export class GameAudio {
     )
       return;
     if (this.voices.size >= 12) return;
-    const duration = cue === 'select' ? 0.045 : cue === 'research' ? 0.24 : 0.12;
+    if (cue === 'hover') {
+      if (context.currentTime - this.lastHover < 0.09) return;
+      this.lastHover = context.currentTime;
+    }
+    const duration =
+      cue === 'hover' ? 0.025 : cue === 'select' ? 0.045 : cue === 'research' || cue === 'draw' ? 0.24 : 0.12;
     notes[cue].forEach((frequency, index) => {
       const start = context.currentTime + index * (cue === 'research' ? 0.075 : 0.055);
       const oscillator = context.createOscillator();
@@ -78,7 +87,10 @@ export class GameAudio {
       oscillator.frequency.setValueAtTime(frequency, start);
       oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.96, start + duration);
       gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(cue === 'select' ? 0.25 : 0.4, start + 0.006);
+      gain.gain.linearRampToValueAtTime(
+        cue === 'hover' ? 0.07 : cue === 'select' ? 0.25 : 0.4,
+        start + 0.006,
+      );
       gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
       oscillator.connect(gain);
       gain.connect(this.volume!);

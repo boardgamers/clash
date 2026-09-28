@@ -23,9 +23,17 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
     )
       controller.audio.play('select');
   };
+  const hoverAudio = (event: Event) => {
+    if (!(event instanceof PointerEvent)) return;
+    if (!event.isTrusted || event.pointerType === 'touch' || !(event.target instanceof Element)) return;
+    const button = event.target.closest('button:not(:disabled):not(.city-map-label)');
+    if (!button || (event.relatedTarget instanceof Node && button.contains(event.relatedTarget))) return;
+    controller.audio.play('hover');
+  };
   target.addEventListener('pointerdown', unlockAudio, true);
   target.addEventListener('keydown', unlockAudio, true);
   target.addEventListener('click', clickAudio, true);
+  target.addEventListener('pointerover', hoverAudio, true);
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   controller.patch({ reducedMotion: motion.matches });
   return {
@@ -53,6 +61,7 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
       target.removeEventListener('pointerdown', unlockAudio, true);
       target.removeEventListener('keydown', unlockAudio, true);
       target.removeEventListener('click', clickAudio, true);
+      target.removeEventListener('pointerover', hoverAudio, true);
       controller.destroy();
       void unmount(app);
       style.remove();

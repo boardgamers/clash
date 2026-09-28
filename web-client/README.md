@@ -20,7 +20,9 @@ No production games, catalog records, or chat rooms are modified. Remaining acti
 ## Implemented slice
 
 - Procedural 3D terrain, cities, settlers, tile selection, orbit/zoom, and a top-down view.
-- Named resources, storage limits, player scores, action count, city mood, and a short field guide.
+- Named resources, storage limits, action count, city mood, and a short field guide. Select a civilization to see all six victory-point categories from the Rust scoring rules, with a link to its BGS player profile.
+- Private wonder hand with card effects, base costs, required research, and building/ownership points. New wonder and objective draws show a dismissible animated card and a sound cue; loading, changing seats, duplicate states, and undo do not replay old draws. Reduced-motion settings suppress the reveal animation.
+- City docks show activation counts. Collection and city management show activation availability and the exact next mood, with capacity and angry-city warnings before confirmation.
 - Private objective hand with both alternative conditions and their completion timing, read from the Rust definitions. When the engine offers an eligible objective, the player can claim points or keep the card directly in the action panel.
 - Collect resources: Rust supplies legal tiles, resource alternatives, capacity, total gain, waste, and an activation warning. Confirming submits the original Rust action format.
 - Research: a searchable tree with pictograms, short effect summaries, prerequisite branches, costs, bonuses, and unlocked buildings. Rust supplies the graph, full rules, payments, and action payloads; selecting an advance opens its full rule text before confirmation.
@@ -30,10 +32,10 @@ No production games, catalog records, or chat rooms are modified. Remaining acti
 - One-resource bonus choices (including Temples) and yes/no decisions. These remain private to the player who must answer.
 - Buildings appear around city centers; recruited units have separate positions and basic type markers.
 - BGS registration/lifecycle, player/spectator handling, theme, avatars, and the shared chat controller/panel. Chat sends, failed-send drafts, updates/deletions, mentions, read reports, editing and translation handlers are supplied by the protocol package; the host decides which features are enabled.
-- Journal entries use action and resource pictograms. Setup is summarized as player, civilization, and original starting tile. Text equivalents are published with `replaceLog` so undo cannot leave stale entries.
+- Journal entries use high-contrast text and action and resource pictograms. Setup is summarized as player, civilization, and original starting tile. Text equivalents are published with `replaceLog` so undo cannot leave stale entries.
 - Full-width board with floating action controls and dismissible journal/chat panels. The layout stays within the viewport on desktop and mobile; panels scroll internally. City/action controls are keyboard accessible, and the board renders only when changed.
 - City labels appear on hover, selection, or keyboard focus. Map targets highlight on hover; cursors distinguish selection, unavailable targets, and camera dragging. City and unit models are selectable directly. Dragging or pinching cannot accidentally select a tile, and Escape closes floating action, journal, and chat panels.
-- Quiet synthesized interaction and confirmed-action sounds follow BGS's global `sound` preference. Muting stops active and scheduled notes immediately; sound starts only after interaction, and loading or reconnecting does not play past actions.
+- Quiet, throttled tile/control hover sounds, card-draw cues, and synthesized confirmed-action sounds follow BGS's global `sound` preference. Muting stops active and scheduled notes immediately; sound starts only after interaction, and loading or reconnecting does not play past actions.
 - BGS's global `colorBlind` preference adds matching ownership symbols to player cards, city flags, and unit groups, with a distinct player palette. Resources keep their icons and labels; terrain keeps its physical shapes.
 - Sound and colorblind toggle buttons sit beside Journal and Chat and write to BGS's global preferences. The map button saves `mapView` (`3d` or `2d`) with BGS's `updatePreference` command and restores it from incoming preferences. The overhead view pans without tilting. The standalone preview emulates persistence locally for these same buttons.
 
@@ -66,7 +68,7 @@ The script uploads the viewer, verifies the hosted bytes, then updates the versi
 
 ## Next slices
 
-The controls do not yet cover army/fleet movement, exploration, unit replacement/leader recruitment, wonders, action cards, cultural influence, combat, civilization selection, or most status/event choices. Free/custom-action variants and multi-city happiness selection are also pending. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
+The controls do not yet cover army/fleet movement, exploration, unit replacement/leader recruitment, wonder construction, action cards, cultural influence, combat, civilization selection, or most status/event choices. Free/custom-action variants and multi-city happiness selection are also pending. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
 
 Before public release: complete action/phase coverage, verify against an actual BGS staging game (including reconnects, moderation, translation, and read-state persistence), and test larger multiplayer boards on mobile hardware.
 

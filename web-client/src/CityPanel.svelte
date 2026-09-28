@@ -3,6 +3,7 @@
   import type { Controller } from './controller';
   import { buildingInfo, unitInfo, cityReason } from './city';
   import ResourceAmount from './ResourceAmount.svelte';
+  import ActivationStatus from './ActivationStatus.svelte';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let tab = $state('build');
@@ -58,6 +59,10 @@
       >{/each}
   </nav>
   <div class="city-content">
+    {#if city}<ActivationStatus
+        {city}
+        warning={tab === 'recruit' || (tab === 'build' && !!selected?.moodWillDecrease)}
+      />{/if}
     {#if tab === 'build'}
       <p class="city-rule">
         Each building adds 1 city size and 1 point. A city’s size cannot exceed your number of cities.
@@ -138,8 +143,9 @@
       <div>
         <strong>{selected.name}</strong><ResourceAmount pile={selected.payment} /><small
           >{cityReason(selected.reason, city?.size) || 'Costs 1 action · Activates this city'}</small
-        >{#if selected.moodWillDecrease}<small class="warning"
-            >Activating this city again lowers its mood.</small
+        >{#if selected.moodWillDecrease && city && city.activationMood !== city.mood}<span
+            class="activation-inline"
+            ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
           >{/if}
       </div>
       <div class="port-choices">
@@ -156,8 +162,9 @@
         <strong>{count} {count === 1 ? 'unit' : 'units'} selected</strong
         >{#if $session.recruitPreview}<ResourceAmount
             pile={$session.recruitPreview.payment}
-          />{#if $session.recruitPreview.moodWillDecrease}<small class="warning"
-              >Activating this city again lowers its mood.</small
+          />{#if $session.recruitPreview.moodWillDecrease && city && city.activationMood !== city.mood}<span
+              class="activation-inline"
+              ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
             >{/if}{/if}
       </div>
       <button

@@ -56,6 +56,7 @@ export class World {
   constructor(
     private host: HTMLElement,
     private pick: (position: string) => void,
+    private hover: () => void = () => {},
   ) {
     this.scene.background = new THREE.Color('#b1c7c0');
     this.scene.fog = new THREE.Fog('#b1c7c0', 55, 105);
@@ -159,6 +160,7 @@ export class World {
     this.gesture.move(e.clientX, e.clientY);
     this.setHovered(
       this.gesture.dragging || e.pointerType === 'touch' ? null : this.hitTile(e.clientX, e.clientY),
+      true,
     );
   };
   private leave = (e: PointerEvent) => {
@@ -186,8 +188,9 @@ export class World {
     }
     return null;
   }
-  private setHovered(position: string | null) {
+  private setHovered(position: string | null, audible = false) {
     const changed = this.hovered !== position;
+    if (audible && changed && position && this.canPick(position) && !this.gesture.dragging) this.hover();
     this.hovered = position;
     this.renderer.domElement.style.cursor = this.gesture.dragging
       ? 'grabbing'
@@ -535,7 +538,7 @@ export class World {
           label.onclick = () => {
             if (this.canPick(city.position)) this.pick(city.position);
           };
-          label.onpointerenter = () => this.setHovered(city.position);
+          label.onpointerenter = () => this.setHovered(city.position, true);
           label.onpointerleave = () => this.setHovered(null);
           label.onfocus = () => this.setHovered(city.position);
           label.onblur = () => this.setHovered(null);

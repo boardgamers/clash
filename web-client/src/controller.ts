@@ -6,6 +6,7 @@ import { journal } from './model';
 import { loadBridge } from './bridge';
 import { readPreferences } from './preferences';
 import { GameAudio, moveSound } from './audio';
+import { CardDrawTracker } from './card-draws';
 export class Controller {
   readonly session = writable<Session>({
     game: null,
@@ -25,6 +26,9 @@ export class Controller {
     activityOpen: false,
     help: false,
     objectivesOpen: false,
+    wondersOpen: false,
+    scorePlayer: null,
+    cardDraws: [],
     dark: false,
     unread: 0,
     avatars: [],
@@ -38,6 +42,7 @@ export class Controller {
   });
   readonly chat = new ChatController();
   readonly audio = new GameAudio();
+  private cardDraws = new CardDrawTracker();
   private submittedMove: Move | null = null;
   private raw = '';
   private engine: Bridge | null = null;
@@ -85,6 +90,7 @@ export class Controller {
     const changed = raw !== this.raw;
     this.raw = raw;
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
+    const drawn = this.cardDraws.update(old.seat, game, view);
     const city = view.cities.some((c) => c.position === old.city)
       ? old.city
       : (view.cities[0]?.position ?? null);
@@ -110,16 +116,27 @@ export class Controller {
           ? 'overview'
           : old.mode,
       objectivesOpen: view.objectiveDecision || view.choiceDecision ? false : old.objectivesOpen,
+      cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>
+        draw.kind === 'wonder'
+          ? view.wonderCards.some((card) => card.id === draw.card.id)
+          : view.objectiveCards.some((card) => card.id === draw.card.id),
+      ),
     });
     this.commands.replaceLog(journal(game).map((entry) => entry.text));
     if (view.objectiveDecision || view.choiceDecision) this.closeActivity();
-    if (old.pending && changed) {
+    if (drawn.length) {
+      this.audio.play('draw');
+    } else if (old.pending && changed) {
       this.audio.play(moveSound(this.submittedMove));
       this.notify('Game updated.');
     }
     this.submittedMove = null;
   }
   setPlayer(index?: number) {
+    if (get(this.session).seat !== index) {
+      this.cardDraws.reset();
+      this.patch({ cardDraws: [], wondersOpen: false, scorePlayer: null });
+    }
     this.patch({
       seat: index,
       mode: 'overview',

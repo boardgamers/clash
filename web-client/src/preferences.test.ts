@@ -141,3 +141,27 @@ test('map view round-trips through BGS preferences and incoming preferences neve
   assert.equal(current.topDown, true);
   reopened.destroy();
 });
+
+test('tile and control hover sounds are throttled and obey global mute', () => {
+  const { device, voices } = audioDevice();
+  const audio = new GameAudio(() => device as unknown as AudioContext);
+  audio.setEnabled(true);
+  audio.unlock();
+  audio.play('hover');
+  audio.play('hover');
+  device.currentTime += 0.03;
+  audio.play('hover');
+  assert.equal(voices.length, 1);
+  device.currentTime += 0.1;
+  audio.play('hover');
+  assert.equal(voices.length, 2);
+  audio.play('draw');
+  assert.equal(voices.length, 5);
+  audio.setEnabled(false);
+  device.currentTime += 1;
+  audio.play('hover');
+  audio.play('draw');
+  assert.equal(voices.length, 5);
+  assert.ok(voices.every((voice) => voice.stops.at(-1) === undefined));
+  audio.destroy();
+});
