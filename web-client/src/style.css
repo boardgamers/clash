@@ -87,7 +87,7 @@ small {
   flex-direction: column;
 }
 .masthead {
-  height: 85px;
+  height: 56px;
   padding: 0 28px;
   display: flex;
   align-items: center;
@@ -202,7 +202,7 @@ small {
   background: var(--paper2);
 }
 .resource-bar {
-  height: 83px;
+  height: 52px;
   display: grid;
   grid-template-columns: 160px repeat(7, minmax(76px, 1fr)) 70px;
   align-items: center;
@@ -221,7 +221,7 @@ small {
 .civilization-tag {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
   border-right: 1px solid var(--line);
 }
 .civilization-tag strong {
@@ -229,6 +229,7 @@ small {
     25px 'Libre Caslon Display',
     Georgia,
     serif;
+  line-height: 1.1;
 }
 .resource {
   display: flex;
@@ -279,6 +280,7 @@ small {
 }
 .resource strong {
   font-size: 21px;
+  line-height: 1.1;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -1230,12 +1232,6 @@ small {
   .action-panel > p {
     font-size: 13px;
   }
-  .resource-bar {
-    height: 90px;
-  }
-  .play-layout {
-    height: calc(100dvh - 175px);
-  }
   .primary {
     font-size: 12px;
   }
@@ -1692,12 +1688,6 @@ small {
   }
 }
 @media (min-width: 761px) and (max-height: 950px) {
-  .masthead {
-    height: 68px;
-  }
-  .resource-bar {
-    height: 70px;
-  }
   .play-layout {
     height: calc(100dvh - 138px);
     min-height: 480px;
