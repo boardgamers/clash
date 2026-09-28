@@ -37,6 +37,9 @@
     VolumeX,
     Eye,
     RotateCw,
+    Zap,
+    Frown,
+    Meh,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
@@ -48,10 +51,13 @@
   import CardReveal from './CardReveal.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
   import ResourceAmount from './ResourceAmount.svelte';
+  import ResourceText from './ResourceText.svelte';
+  import ObjectiveCondition from './ObjectiveCondition.svelte';
+  import CivilizationEmblem from './CivilizationEmblem.svelte';
   import type { Controller } from './controller';
   import type { Resource } from './types';
   import { resources, resourceNames, playerColor, playerSymbol } from './types';
-  import { journal, journalParts, pileText } from './model';
+  import { journal, pileText } from './model';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let boardHost: HTMLDivElement;
@@ -66,6 +72,20 @@
     gold: Coins,
     mood_tokens: Smile,
     culture_tokens: Drama,
+  };
+  const journalTokenIcons = {
+    ...icons,
+    action: Zap,
+    wonder: Landmark,
+    objective: Target,
+    card: Layers,
+    research: GraduationCap,
+    city: Landmark,
+    unit: Users,
+    happy: Smile,
+    neutral: Meh,
+    angry: Frown,
+    event: Hourglass,
   };
   const journalIcons = {
     setup: Landmark,
@@ -83,7 +103,15 @@
   let current = $derived($session.game?.players.find((p) => p.id === $session.seat));
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let identity = $derived($session.view?.players.find((p) => p.index === $session.seat));
-  let log = $derived($session.game ? journal($session.game) : []);
+  let log = $derived($session.game ? journal($session.game).reverse() : []);
+  const coordinateInteraction = {
+    onCoordinate: (position: string | null) => world?.highlightCoordinate(position),
+    onLocate: (position: string) => {
+      world?.locateCoordinate(position);
+      controller.closeActivity();
+    },
+  };
+  let mapPositions = $derived(new Set($session.game?.map.tiles.map(([position]) => position) ?? []));
   let totalActions = $derived($session.game?.actions_left ?? 0);
   let objectiveDecision = $derived($session.view?.objectiveDecision);
   let choiceDecision = $derived($session.view?.choiceDecision);
@@ -104,6 +132,7 @@
   onMount(() => {
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+      world?.clearCoordinate();
       if ($session.cardDraws.length) controller.patch({ cardDraws: [] });
       if ($session.activityOpen) controller.closeActivity();
       if ($session.mode === 'collect' || $session.mode === 'settlers' || confirmEnd) closeAction();
@@ -258,10 +287,7 @@
             <span class="player-emblem"
               >{#if $session.colorBlind}<span class="ownership-symbol" aria-hidden="true"
                   >{playerSymbol(player.index)}</span
-                >{:else if $session.avatars[player.index]}<img
-                  src={$session.avatars[player.index]}
-                  alt=""
-                />{:else}<Landmark size={18} />{/if}</span
+                >{:else}<CivilizationEmblem civilization={player.civilization} size={24} />{/if}</span
             ><span class="player-info"
               ><strong>{player.civilization}</strong><small
                 >{player.index === $session.seat ? 'You' : player.name}</small
@@ -473,7 +499,7 @@
           </div>
         {:else if objectiveDecision}
           <h2>{objectiveDecision.name}</h2>
-          <p>{objectiveDecision.description}</p>
+          <p><ResourceText text={objectiveDecision.description} /></p>
           {#each objectiveDecision.cards as card (card.id)}
             <div class="objective-claim">
               <small>Card: {card.name.replaceAll('/', ' / ')}</small>
@@ -582,28 +608,65 @@
         >
       </div>
       <div class="journal" hidden={$session.tab !== 'journal'} role="tabpanel" aria-label="Journal">
-        {#each [...log].reverse() as entry}{@const EntryIcon = journalIcons[entry.kind]}
+        {#each log as entry, index}{@const EntryIcon = journalIcons[entry.kind]}
+          {#if index === 0 || entry.age !== log[index - 1].age || entry.round !== log[index - 1].round}
+            <h3 class="journal-round">
+              {entry.age === 0 ? 'Setup' : `Age ${entry.age} · Round ${entry.round}`}
+            </h3>
+          {/if}
           <article>
-            <span class="journal-symbol" aria-hidden="true"><EntryIcon size={15} /></span><small
-              >{entry.age === 0 ? 'SETUP' : `AGE ${entry.age} · ROUND ${entry.round}`}</small
+            <span
+              class="journal-symbol"
+              aria-hidden="true"
+              style={`--player:${playerColor(entry.player ?? 0, $session.colorBlind)}`}
             >
-            {#if entry.setup}
-              <p class="journal-setup">
-                <strong>{entry.setup.player}</strong><span>· {entry.setup.civilization}</span
-                >{#if entry.setup.position}<span class="journal-position" title="Starting location"
-                    ><MapPin size={13} aria-hidden="true" /><span class="sr-only">Starts at </span>{entry
-                      .setup.position}</span
-                  >{/if}
-              </p>
-            {:else}
-              <p>
-                {#each journalParts(entry.text) as part}{#if part.resource}{@const ResourceIcon =
-                      icons[part.resource]}<span class="journal-resource"
-                      ><ResourceIcon size={13} aria-hidden="true" />{part.text}</span
-                    >{:else}{part.text}{/if}{/each}
-              </p>
-            {/if}
-          </article>{/each}{#if log.length === 0}<p>No actions yet.</p>{/if}
+              {#if entry.civilization}<CivilizationEmblem
+                  civilization={entry.civilization}
+                  size={23}
+                />{:else}<EntryIcon size={17} />{/if}
+            </span>
+            <div class="journal-heading">
+              {#if entry.civilization}<strong>{entry.civilization}</strong>{/if}
+              <span
+                ><EntryIcon size={13} aria-hidden="true" /><ResourceText
+                  text={entry.title}
+                  positions={mapPositions}
+                  {...coordinateInteraction}
+                /></span
+              >
+            </div>
+            {#if entry.tokens.length}<div class="journal-deltas">
+                {#each entry.tokens as token}{@const TokenIcon = journalTokenIcons[token.icon]}
+                  <span
+                    class="journal-delta"
+                    class:gain={token.tone === 'gain'}
+                    class:loss={token.tone === 'loss'}
+                    title={token.description}
+                    aria-label={token.description}
+                  >
+                    {#if token.value}<b aria-hidden="true">{token.value}</b>{/if}<TokenIcon
+                      size={14}
+                      aria-hidden="true"
+                    />
+                    <span class:sr-only={token.compact}
+                      ><ResourceText
+                        text={token.label}
+                        positions={mapPositions}
+                        {...coordinateInteraction}
+                      /></span
+                    >
+                  </span>
+                {/each}
+              </div>{/if}
+            {#if entry.notes.length}<p class="journal-notes">
+                <ResourceText
+                  text={entry.notes.join(', ')}
+                  positions={mapPositions}
+                  {...coordinateInteraction}
+                />
+              </p>{/if}
+          </article>
+        {/each}{#if log.length === 0}<p>No actions yet.</p>{/if}
       </div>
       <div
         class="chat-panel"
@@ -645,23 +708,14 @@
         >
           {#each card.objectives as objective, index}
             {#if index > 0}<div class="objective-divider">or</div>{/if}
-            <section>
-              <div class="objective-title">
-                <h3>{objective.name}</h3>
-                <span>{objective.timing}</span>
-              </div>
-              <p>{objective.description}</p>
-            </section>
+            <ObjectiveCondition {objective} />
           {/each}
         </article>
       {:else}
         <p class="objectives-empty">No objective cards in your hand.</p>
       {/each}
       {#if $session.view?.objectiveCards?.length}
-        <p class="objectives-note">
-          Complete one objective per card for 2 points. When eligible, choose whether to claim it or keep the
-          card. Status phase objectives are checked at the end of an age.
-        </p>
+        <p class="objectives-note">Complete one objective per card for 2 points.</p>
       {/if}
     </dialog>
   {/if}
@@ -687,15 +741,16 @@
           <h3>Scoring</h3>
           <p>
             Each city piece is worth 1 point. Advances add ½ point each. Completed objectives and wonders can
-            add more.
+            add more. End-of-age objectives are checked after everyone’s third turn, during the status phase.
           </p>
         </article>
         <article>
           <Hourglass />
           <h3>Actions</h3>
           <p>
-            Each turn gives you three actions. Collect resources, research, grow cities, recruit, move,
-            improve happiness, or influence another culture.
+            Each age has three rounds, with one turn per player per round. Each turn gives you three actions.
+            Collect resources, research, grow cities, recruit, move, improve happiness, or influence another
+            culture.
           </p>
         </article>
         <article>

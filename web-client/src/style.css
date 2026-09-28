@@ -406,26 +406,52 @@ small {
   position: absolute;
   left: 0;
   top: 0;
-  pointer-events: none;
-  opacity: 0;
+  pointer-events: auto;
+  opacity: 1;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
   white-space: nowrap;
-  border: 1px solid #f4efde80;
-  border-radius: 4px;
-  background: #f7f3e8e8;
-  color: #47564a;
+  border: 1px solid #f7f3e8c9;
+  border-radius: 50%;
+  background: #f7f3e8f2;
+  color: #6b6252;
   font:
     500 10px 'DM Sans',
     sans-serif;
-  padding: 7px 11px;
-  box-shadow: 0 3px 13px #28483d28;
-  border-bottom: 2px solid var(--player-color);
-  transition:
-    opacity 0.12s,
-    box-shadow 0.12s;
+  padding: 2px;
+  box-shadow: 0 1px 5px #28483d30;
+  transition: box-shadow 0.12s;
 }
-.city-map-label:is(.selected, .hovered, :hover, :focus-visible) {
+.city-map-label > svg {
+  width: 17px;
+  height: 17px;
+}
+.city-map-label[data-mood='happy'] {
+  color: #3d6246;
+}
+.city-map-label[data-mood='angry'] {
+  color: #a44832;
+}
+.city-map-name {
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 9px;
+  border: 1px solid #f4efde80;
+  border-bottom: 2px solid var(--player-color);
+  border-radius: 4px;
+  background: #f7f3e8f5;
+  color: #47564a;
+  box-shadow: 0 3px 13px #28483d28;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+}
+.city-map-label:is(.selected, .hovered, :hover, :focus-visible) .city-map-name {
   opacity: 1;
-  pointer-events: auto;
 }
 .city-map-label:disabled {
   pointer-events: none;
@@ -434,10 +460,9 @@ small {
   background: #fff6df;
 }
 .city-map-label.selected {
-  background: #fff6df;
   box-shadow:
-    0 0 0 2px #b5925580,
-    0 3px 13px #28483d28;
+    0 0 0 2px #b5925570,
+    0 1px 5px #28483d30;
 }
 .map-controls {
   position: absolute;
@@ -785,12 +810,12 @@ small {
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: #9a9884;
+  color: var(--muted);
   padding: 0;
   position: relative;
 }
 .activity-tabs button.active {
-  color: #4b6651;
+  color: var(--ink);
 }
 .activity-tabs button.active:after {
   position: absolute;
@@ -815,68 +840,101 @@ small {
   scrollbar-color: #d2cbb8 transparent;
   flex: 1;
 }
+.journal-round {
+  font:
+    600 10px 'DM Sans',
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  padding: 2px 0 14px;
+}
+.journal-round:not(:first-child) {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
 .journal article {
-  padding-left: 24px;
-  border-left: 1px solid #ddd6c2;
   position: relative;
-  padding-bottom: 23px;
+  padding: 0 0 18px 39px;
 }
 .journal article:last-child {
   padding-bottom: 2px;
 }
-.journal article > small {
-  font-size: 9px;
-  letter-spacing: 1.2px;
+.journal-symbol {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  background: var(--paper2);
+  border-radius: 50%;
+  color: var(--ink);
+  border-bottom: 2px solid var(--player);
+}
+.journal-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 8px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.journal-heading strong {
+  font-weight: 650;
+}
+.journal-heading > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--muted);
+}
+.journal-deltas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.journal-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: var(--paper2);
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.25;
+}
+.journal-delta svg {
+  flex-shrink: 0;
+}
+.journal-delta b {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+.journal-delta.gain {
+  color: #30533d;
+  background: #e3eadb;
+}
+.journal-delta.loss {
+  color: #884430;
+  background: #f0e2d7;
+}
+.dark .journal-delta.gain {
+  color: #d0e3b9;
+  background: #364636;
+}
+.dark .journal-delta.loss {
+  color: #f2c8ae;
+  background: #503b32;
 }
 .journal article p {
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.6;
   color: var(--ink);
-  margin-top: 8px;
-}
-.journal-symbol {
-  width: 23px;
-  height: 23px;
-  position: absolute;
-  left: -12px;
-  top: 0;
-  background: var(--paper);
-  color: #927d4e;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-}
-.journal-setup {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-.journal-setup strong {
-  color: var(--ink);
-  font-weight: 500;
-}
-.journal-position {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-left: auto;
-  color: var(--ink);
-  font-size: 11px;
-}
-.journal-resource {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-  white-space: nowrap;
-}
-.journal-resource svg {
-  align-self: center;
-  color: var(--green);
-}
-.dark .journal-resource svg {
-  color: #b5c5a0;
+  margin-top: 6px;
 }
 .sr-only {
   position: absolute;
@@ -956,8 +1014,8 @@ small {
   overflow: auto;
   border: 1px solid #bca574;
   padding: 44px;
-  background: #f7f1e1;
-  color: #3c493b;
+  background: var(--paper);
+  color: var(--ink);
   border-radius: 8px;
   box-shadow: 0 15px 80px #172e3550;
 }
@@ -978,7 +1036,7 @@ small {
 .guide-intro {
   font-size: 13px;
   line-height: 1.8;
-  color: #82836d;
+  color: var(--muted);
   max-width: 530px;
 }
 .card-count {
@@ -1071,7 +1129,7 @@ small {
   margin: 28px 0;
 }
 .guide-grid article > svg {
-  color: #a08954;
+  color: var(--muted);
   width: 22px;
   margin-bottom: 7px;
 }
@@ -1080,9 +1138,9 @@ small {
   margin-bottom: 7px;
 }
 .guide-grid p {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.8;
-  color: #82836d;
+  color: var(--muted);
 }
 .dark {
   --paper: #272f2b;
@@ -1344,7 +1402,6 @@ small {
   }
   .city-map-label {
     font-size: 8px;
-    padding: 6px 8px;
   }
   .map-controls {
     right: 12px;
@@ -2306,4 +2363,138 @@ small {
     font-size: 10px;
     padding: 3px;
   }
+}
+
+.civilization-emblem {
+  display: inline-block;
+  flex-shrink: 0;
+  background: currentColor;
+  mask: var(--emblem) center / contain no-repeat;
+}
+
+.inline-resource {
+  display: inline-flex;
+  gap: 3px;
+  align-items: baseline;
+  white-space: nowrap;
+  font-weight: 550;
+}
+.inline-resource svg {
+  align-self: center;
+}
+
+.objective-art {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 20%, var(--paper), var(--paper2));
+}
+.objective-art-accent {
+  position: absolute;
+  right: -1px;
+  bottom: 0;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+}
+
+.objective-condition header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.objective-condition h3 {
+  font-size: 27px;
+  line-height: 1.1;
+}
+.objective-timing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.objective-condition p {
+  font-size: 14px;
+  line-height: 1.65;
+  margin-top: 14px;
+}
+
+.objective-glyph {
+  width: 34px;
+  height: 34px;
+  background: currentColor;
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+}
+
+.coordinate-link {
+  display: inline;
+  padding: 0 2px;
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: 1px dotted currentColor;
+  border-radius: 2px;
+}
+.coordinate-link:hover,
+.coordinate-link:focus-visible {
+  background: var(--paper2);
+  border-bottom-style: solid;
+}
+.map-coordinate-reference {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: #334b3e;
+  color: #fff4d9;
+  padding: 4px 7px;
+  font-size: 12px;
+  font-weight: 650;
+  border: 1px solid #fff1bb;
+  border-radius: 4px;
+  box-shadow: 0 2px 7px #15271d40;
+}
+
+.dark .player-card,
+.dark .city-dock button {
+  background: var(--paper);
+  color: var(--ink);
+}
+.dark .player-card.active,
+.dark .player-card:hover,
+.dark .city-dock button.selected {
+  background: var(--paper2);
+}
+.dark .player-info small,
+.dark .player-score,
+.dark .city-dock button small {
+  color: var(--muted);
+}
+.dark .city-thumb {
+  background: var(--paper2);
+  color: var(--muted);
+}
+
+.world-labels.top-down .city-map-label {
+  width: 18px;
+  height: 18px;
+  padding: 1px;
+}
+.world-labels.top-down .city-map-label > svg {
+  width: 14px;
+  height: 14px;
 }

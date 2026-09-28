@@ -42,6 +42,7 @@ export interface LoggedAction {
   log?: string[];
   items?: {
     player: number;
+    origin?: Record<string, unknown>;
     Structure?: { structure: unknown; balance: string; position: string };
     HandCard?: { to: unknown };
   }[];
@@ -175,6 +176,26 @@ export interface RecruitPreview {
   action: Move;
   moodWillDecrease: boolean;
 }
+export interface JournalToken {
+  icon:
+    | Resource
+    | 'action'
+    | 'wonder'
+    | 'objective'
+    | 'card'
+    | 'research'
+    | 'city'
+    | 'unit'
+    | 'happy'
+    | 'neutral'
+    | 'angry'
+    | 'event';
+  value?: string;
+  label: string;
+  description: string;
+  compact?: boolean;
+  tone?: 'gain' | 'loss';
+}
 export interface JournalEntry {
   id: string;
   age: number;
@@ -192,7 +213,12 @@ export interface JournalEntry {
     | 'combat'
     | 'card'
     | 'event';
-  setup?: { player: string; civilization: string; position?: string };
+  player?: number;
+  civilization?: string;
+  title: string;
+  tokens: JournalToken[];
+  notes: string[];
+  setup?: { civilization: string; position?: string };
 }
 export interface Session {
   game: Game | null;

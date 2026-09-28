@@ -1,6 +1,7 @@
 <script lang="ts">
   import { X, ArrowRight, Target, Landmark } from 'lucide-svelte';
   import WonderCard from './WonderCard.svelte';
+  import ObjectiveCondition from './ObjectiveCondition.svelte';
   import type { Controller } from './controller';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
@@ -32,9 +33,7 @@
       {#if draw.kind === 'wonder'}<WonderCard card={draw.card} />{:else}
         <div class="drawn-objective">
           {#each draw.card.objectives as objective, i}{#if i}<span class="objective-divider">or</span>{/if}
-            <h3>{objective.name}</h3>
-            <p>{objective.description}</p>
-            <small>{objective.timing}</small>{/each}
+            <ObjectiveCondition {objective} />{/each}
         </div>
       {/if}
       <button class="reveal-open" onclick={openHand}

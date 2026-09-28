@@ -24,6 +24,9 @@ export class World {
   private pieces: THREE.Group[] = [];
   private hoverRing: THREE.Mesh;
   private hovered: string | null = null;
+  private referenceRing: THREE.Mesh;
+  private referenceLabel: HTMLDivElement;
+  private pinnedReference: string | null = null;
   private selectable: Set<string> | null = null;
   private pending = false;
   private gesture = new MapGesture();
@@ -115,6 +118,19 @@ export class World {
     this.hoverRing.visible = false;
     this.hoverRing.castShadow = false;
     this.scene.add(this.hoverRing);
+    const referenceMaterial = new THREE.MeshBasicMaterial({ color: '#fff3bd', depthTest: false });
+    this.materials.add(referenceMaterial);
+    this.referenceRing = this.mesh(new THREE.TorusGeometry(1.01, 0.045, 6, 6), referenceMaterial);
+    this.referenceRing.rotation.x = -Math.PI / 2;
+    this.referenceRing.visible = false;
+    this.referenceRing.castShadow = false;
+    this.referenceRing.renderOrder = 10;
+    this.scene.add(this.referenceRing);
+    this.referenceLabel = document.createElement('div');
+    this.referenceLabel.className = 'map-coordinate-reference';
+    this.referenceLabel.hidden = true;
+    this.referenceLabel.setAttribute('role', 'status');
+    host.append(this.referenceLabel);
     this.camera.position.set(17, 22, 25);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.copy(this.center);
@@ -148,6 +164,7 @@ export class World {
     this.resize.observe(host);
   }
   private down = (e: PointerEvent) => {
+    this.clearCoordinate();
     this.gesture.down(e.pointerId, e.clientX, e.clientY);
   };
   private up = (e: PointerEvent) => {
@@ -212,6 +229,7 @@ export class World {
   }
   private key = (e: KeyboardEvent) => {
     if (e.key === 'Home') this.reset();
+    else if (e.key === 'Escape') this.clearCoordinate();
     else if (e.key === '+' || e.key === '=') this.zoom(0.85);
     else if (e.key === '-') this.zoom(1.15);
     else if (e.key.startsWith('Arrow')) {
@@ -239,10 +257,42 @@ export class World {
         h = this.host.clientHeight;
       for (const label of this.labelPositions) {
         const v = label.at.clone().project(this.camera);
-        label.node.style.transform = `translate(-50%, -50%) translate(${((v.x + 1) * w) / 2}px,${((-v.y + 1) * h) / 2}px)`;
+        label.node.style.transform = `translate(-50%, -50%) translate(${((v.x + 1) * w) / 2 + (this.topDown ? 11 : 0)}px,${((-v.y + 1) * h) / 2 - (this.topDown ? 12 : 0)}px)`;
         label.node.style.display = v.z > 1 ? 'none' : '';
       }
+      if (this.referenceRing.visible) {
+        const v = this.referenceRing.position.clone().project(this.camera);
+        this.referenceLabel.style.transform = `translate(-50%, 8px) translate(${((v.x + 1) * w) / 2}px,${((-v.y + 1) * h) / 2}px)`;
+        this.referenceLabel.hidden = v.z > 1;
+      }
     });
+  }
+  highlightCoordinate(position: string | null) {
+    const target = position ?? this.pinnedReference;
+    const visible = !!target && this.tiles.has(target);
+    this.referenceRing.visible = visible;
+    this.referenceLabel.hidden = !visible;
+    if (visible) {
+      const [x, z] = positionXY(target!);
+      this.referenceRing.position.set(x, 0.42, z);
+      this.referenceLabel.textContent = target;
+      this.referenceLabel.setAttribute('aria-label', `Map location ${target}`);
+    }
+    this.invalidate();
+  }
+  locateCoordinate(position: string) {
+    if (!this.tiles.has(position)) return;
+    const [x, z] = positionXY(position);
+    const target = new THREE.Vector3(x, 0, z);
+    this.camera.position.add(target.clone().sub(this.controls.target));
+    this.controls.target.copy(target);
+    this.controls.update();
+    this.pinnedReference = position;
+    this.highlightCoordinate(position);
+  }
+  clearCoordinate() {
+    this.pinnedReference = null;
+    this.highlightCoordinate(null);
   }
   zoom(factor: number) {
     const direction = this.camera.position.clone().sub(this.controls.target);
@@ -252,10 +302,12 @@ export class World {
     this.invalidate();
   }
   reset() {
+    this.clearCoordinate();
     this.renderer.domElement.setAttribute(
       'aria-label',
       `${this.topDown ? 'Overhead' : '3D'} civilization map. Select a city or terrain tile. Drag to ${this.topDown ? 'pan' : 'orbit'}; scroll to zoom.`,
     );
+    this.labelHost.classList.toggle('top-down', this.topDown);
     this.controls.enableRotate = !this.topDown;
     this.controls.minPolarAngle = this.topDown ? 0 : 0.08;
     this.controls.maxPolarAngle = this.topDown ? 0 : Math.PI * 0.43;
@@ -533,8 +585,31 @@ export class World {
           const label = document.createElement('button');
           label.className = 'city-map-label';
           label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind));
-          label.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization} · ${city.position}`;
-          label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position}`);
+          const mood = city.mood_state;
+          label.dataset.mood = mood.toLowerCase();
+          const face = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          face.setAttribute('viewBox', '0 0 24 24');
+          face.setAttribute('aria-hidden', 'true');
+          face.setAttribute('fill', 'none');
+          face.setAttribute('stroke', 'currentColor');
+          face.setAttribute('stroke-width', '1.8');
+          face.setAttribute('stroke-linecap', 'round');
+          face.setAttribute('stroke-linejoin', 'round');
+          const outline = document.createElementNS(face.namespaceURI, 'circle');
+          outline.setAttribute('cx', '12');
+          outline.setAttribute('cy', '12');
+          outline.setAttribute('r', '9');
+          const features = document.createElementNS(face.namespaceURI, 'path');
+          features.setAttribute(
+            'd',
+            `M8 9h.01M16 9h.01 ${mood === 'Happy' ? 'M8 14q4 4 8 0' : mood === 'Angry' ? 'M8 17q4-4 8 0' : 'M8 15h8'}`,
+          );
+          face.append(outline, features);
+          const name = document.createElement('span');
+          name.className = 'city-map-name';
+          name.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization} · ${city.position} · ${mood}`;
+          label.append(face, name);
+          label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position} · ${mood}`);
           label.onclick = () => {
             if (this.canPick(city.position)) this.pick(city.position);
           };
@@ -545,7 +620,7 @@ export class World {
           this.labelHost.append(label);
           this.labelPositions.push({
             position: city.position,
-            at: new THREE.Vector3(x, 1.85, z),
+            at: new THREE.Vector3(x, 1.6, z),
             node: label,
           });
         }
@@ -670,5 +745,6 @@ export class World {
     this.renderer.dispose();
     this.renderer.domElement.remove();
     this.labelHost.remove();
+    this.referenceLabel.remove();
   }
 }
