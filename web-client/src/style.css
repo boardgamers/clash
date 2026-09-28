@@ -288,7 +288,6 @@ small {
   min-width: 0;
   overflow: hidden;
   background: #adc5c0;
-  isolation: isolate;
 }
 .map-world {
   position: absolute;
@@ -2533,6 +2532,57 @@ small {
 .world-labels.top-down .city-map-label > svg {
   width: 14px;
   height: 14px;
+}
+
+.map-control-help {
+  display: flex;
+}
+.map-controls:has(.map-control-help:hover),
+.map-controls:has(.map-control-help button:focus-visible) {
+  z-index: 26;
+}
+.map-tooltip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  width: min(270px, calc(100vw - 32px));
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 4px 18px #203b3626;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.map-tooltip strong {
+  display: block;
+  margin-bottom: 6px;
+}
+.map-tooltip > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.map-tooltip p {
+  margin-top: 7px;
+}
+.map-tooltip .route-line {
+  width: 22px;
+  flex-shrink: 0;
+  border-top: 2px solid currentColor;
+}
+.map-tooltip .route-line.dashed {
+  border-top-style: dashed;
+}
+.map-control-help:hover .map-tooltip:not(.dismissed),
+.map-control-help button:focus-visible + .map-tooltip:not(.dismissed) {
+  visibility: visible;
+  opacity: 1;
 }
 
 .board-toolbar .board-actions {

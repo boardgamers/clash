@@ -143,7 +143,10 @@ export class Controller {
           : old.objectivesOpen,
       cardsOpen: old.pending || view.decision ? false : old.cardsOpen,
       wondersOpen: old.pending || view.decision ? false : old.wondersOpen,
-      abilitiesOpen: old.pending || view.decision ? false : old.abilitiesOpen,
+      abilitiesOpen:
+        old.pending || view.decision || (!view.specialActions?.length && !view.influence?.length)
+          ? false
+          : old.abilitiesOpen,
       cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>
         draw.kind === 'wonder'
           ? view.wonderCards.some((card) => card.id === draw.card.id)

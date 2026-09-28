@@ -72,6 +72,7 @@
   let world: World;
   let boardError = $state('');
   let confirmEnd = $state(false);
+  let seaTooltipDismissed = $state(false);
   const icons = {
     food: Wheat,
     wood: Trees,
@@ -134,6 +135,9 @@
   let settlersAvailable = $derived(
     !!$session.view?.stopMovement ||
       (!!$session.view?.canPlay && totalActions > 0 && !!$session.view?.units?.length),
+  );
+  let abilitiesAvailable = $derived(
+    !!$session.view?.specialActions?.length || !!$session.view?.influence?.length,
   );
   let objectiveDecision = $derived($session.view?.objectiveDecision);
   let choiceDecision = $derived($session.view?.choiceDecision);
@@ -377,21 +381,37 @@
             ? `Sea routes from ${$session.seaRouteStart}. Arrow keys choose another sea tile.`
             : 'Map guide. Hover or select a sea tile; arrow keys cycle tiles. Dashed shortcuts require Navigation.'}
         </div>
-        <button
-          class:active={$session.seaRoutes && $session.mode === 'overview'}
-          aria-label="Show sea routes"
-          aria-pressed={$session.seaRoutes && $session.mode === 'overview'}
-          title="Sea-route guide · Solid: connected seas · Dashed: requires Navigation · Hover or select a sea tile; arrow keys cycle tiles. Ships stop at enemies and unexplored regions."
-          aria-describedby="sea-route-help"
-          onkeydown={(event) => {
-            if ($session.seaRoutes && ['ArrowRight', 'ArrowLeft'].includes(event.key)) {
-              event.preventDefault();
-              controller.nextSeaRoute(event.key === 'ArrowRight' ? 1 : -1);
-            }
-          }}
-          onclick={() => controller.showSeaRoutes(!($session.seaRoutes && $session.mode === 'overview'))}
-          ><Ship size={18} /></button
-        ><span></span>
+        <div class="map-control-help">
+          <button
+            class:active={$session.seaRoutes && $session.mode === 'overview'}
+            aria-label="Show sea routes"
+            aria-pressed={$session.seaRoutes && $session.mode === 'overview'}
+            aria-describedby="sea-route-tooltip sea-route-help"
+            onpointerenter={() => (seaTooltipDismissed = false)}
+            onfocus={() => (seaTooltipDismissed = false)}
+            onkeydown={(event) => {
+              if (event.key === 'Escape') seaTooltipDismissed = true;
+              if ($session.seaRoutes && ['ArrowRight', 'ArrowLeft'].includes(event.key)) {
+                event.preventDefault();
+                controller.nextSeaRoute(event.key === 'ArrowRight' ? 1 : -1);
+              }
+            }}
+            onclick={() => controller.showSeaRoutes(!($session.seaRoutes && $session.mode === 'overview'))}
+            ><Ship size={18} /></button
+          >
+          <div
+            id="sea-route-tooltip"
+            role="tooltip"
+            class="map-tooltip"
+            class:dismissed={seaTooltipDismissed}
+          >
+            <strong>Sea-route guide</strong>
+            <div><i class="route-line" aria-hidden="true"></i>Connected sea tiles</div>
+            <div><i class="route-line dashed" aria-hidden="true"></i>Shortcut requiring Navigation</div>
+            <p>Hover a sea tile to trace its routes.</p>
+          </div>
+        </div>
+        <span></span>
         <button title="Zoom in" aria-label="Zoom in" onclick={() => world?.zoom(0.84)}
           ><Plus size={18} /></button
         ><button title="Zoom out" aria-label="Zoom out" onclick={() => world?.zoom(1.18)}
@@ -508,10 +528,12 @@
             />{/if}</button
         >
         <button
-          title="Abilities and cultural influence"
+          title={abilitiesAvailable
+            ? 'Abilities and cultural influence'
+            : 'No abilities or influence targets available'}
           aria-label="Abilities and cultural influence"
           class:active={$session.abilitiesOpen}
-          disabled={$session.seat === undefined}
+          disabled={!abilitiesAvailable || $session.pending}
           onclick={() => {
             controller.closeActivity();
             controller.patch({ mode: 'overview', abilitiesOpen: !$session.abilitiesOpen });
