@@ -619,6 +619,26 @@
   font-size: 11px;
   cursor: pointer;
 }
+.leader-recruit .unit-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.unit-picker .leader-option {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px;
+  text-align: left;
+}
+.leader-name,
+.leader-cost {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.leader-name {
+  font-weight: 600;
+}
 .unit-count {
   border-radius: 50%;
   font-size: 9px;

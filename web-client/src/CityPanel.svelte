@@ -125,11 +125,10 @@
           </article>{/each}
       </div>
       {#if options?.leaders?.length}<section class="leader-recruit" aria-label="Leaders">
-          <h3><Crown size={16} />Leaders</h3><ResourceAmount
-            pile={{ mood_tokens: 1, culture_tokens: 1 }}
-          />
+          <h3><Crown size={16} />Leaders</h3>
           <div class="unit-picker">
             {#each options.leaders as leader}<button
+                class="leader-option"
                 title={leader.description}
                 class:selected={$session.recruits.leader === leader.id}
                 aria-pressed={$session.recruits.leader === leader.id}
@@ -138,7 +137,11 @@
                   controller.setRecruits({
                     ...$session.recruits,
                     leader: $session.recruits.leader === leader.id ? null : leader.id,
-                  })}><Crown size={15} />{leader.name}</button
+                  })}
+                ><span class="leader-name"><Crown size={15} />{leader.name}</span>
+                <span class="leader-cost"><span>Cost</span><ResourceAmount
+                    pile={{ mood_tokens: 1, culture_tokens: 1 }}
+                  /></span></button
               >{/each}
           </div>
         </section>{/if}
