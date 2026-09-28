@@ -56,6 +56,7 @@ export interface Selection extends Choice {
   times: number;
 }
 export interface CityView {
+  capital?: boolean;
   position: string;
   size: number;
   capacity: number;
@@ -84,6 +85,7 @@ export interface AdvanceView {
   unlocks: string | null;
 }
 export interface PlayerView {
+  capital?: string;
   index: number;
   name: string;
   civilization: string;
@@ -92,6 +94,8 @@ export interface PlayerView {
   cities: { position: string; size: number; capacity: number; mood: string; activations: number }[];
 }
 export interface WonderCard {
+  action?: Move | null;
+  reason?: string | null;
   id: string;
   name: string;
   description: string;
@@ -104,6 +108,22 @@ export interface WonderCard {
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
+  collectActions?: ActionVariant[];
+  happinessActions?: ActionVariant[];
+  decision?: Decision | null;
+  civilizations?: { name: string; action: Move }[];
+  actionCards?: ActionCard[];
+  specialActions?: { name: string; description: string; position: string | null; action: Move }[];
+  influence?: {
+    name: string;
+    position: string;
+    origin: string;
+    variant: string;
+    payment: Pile;
+    action: Move;
+  }[];
+  units?: UnitView[];
+  movementLeft?: number;
   seaRoutes?: string[][];
   activePlayer: number;
   canPlay: boolean;
@@ -143,6 +163,7 @@ export interface CollectionPreview {
   moodWillDecrease: boolean;
 }
 export interface Bridge {
+  webQuery: (state: string, seat: number, query: string) => string;
   webView: (state: string, seat?: number) => string;
   webCollectPreview: (state: string, seat: number, city: string, choices: string) => string;
   webRecruitPreview: (state: string, seat: number, city: string, units: string) => string;
@@ -150,13 +171,14 @@ export interface Bridge {
 export type UnitKind = 'Settler' | 'Infantry' | 'Cavalry' | 'Elephant' | 'Ship';
 export type RecruitSelection = Partial<
   Record<'settlers' | 'infantry' | 'cavalry' | 'elephants' | 'ships', number>
->;
+> & { leader?: string | null };
 export interface ActionOffer {
   action: Move | null;
   payment: Pile;
   reason: string | null;
 }
 export interface CityActions {
+  leaders?: { id: string; name: string; description: string }[];
   position: string;
   buildings: {
     name: string;
@@ -167,7 +189,7 @@ export interface CityActions {
     moodWillDecrease: boolean;
     choices: { position: string | null; action: Move }[];
   }[];
-  recruits: { type: UnitKind; payment: Pile; reason: string | null; available: number }[];
+  recruits: { type: UnitKind; payment: Pile; reason: string | null; available: number; limit?: number }[];
   happiness: (ActionOffer & { steps: number; mood: string })[];
 }
 export interface SettlerView {
@@ -227,6 +249,13 @@ export interface JournalEntry {
   setup?: { civilization: string; position?: string };
 }
 export interface Session {
+  replacements: number[];
+  collectVariant: Move;
+  selectedUnits: number[];
+  moveDestinations: MoveDestination[];
+  moveDestination: number | null;
+  cardsOpen: boolean;
+  abilitiesOpen: boolean;
   seaRoutes: boolean;
   seaRouteStart: string | null;
   game: Game | null;
@@ -262,6 +291,50 @@ export interface Session {
   selectedAdvance: string | null;
   toast: string;
   topDown: boolean;
+}
+export interface UnitView {
+  id: number;
+  type: string | { Leader: string };
+  position: string;
+  carrier: number | null;
+}
+export interface ActionVariant {
+  value: Move;
+  name: string;
+  free: boolean;
+}
+export interface MoveDestination {
+  position: string;
+  terrain: Terrain;
+  payment: Pile;
+  carrier: number | null;
+  attack: boolean;
+  action: Move;
+}
+export interface ActionCard {
+  id: number;
+  name: string;
+  description: string;
+  free: boolean;
+  tactics: { name: string; description: string } | null;
+  reason: string | null;
+  action: Move | null;
+}
+export interface Decision {
+  name: string;
+  description: string;
+  min: number;
+  max: number;
+  reward: boolean;
+  endOfAge: boolean;
+  options: {
+    value: unknown;
+    name: string;
+    description: string;
+    position: string | null;
+    terrain?: Terrain;
+  }[];
+  fields: { name: string; optional: boolean; resources: Resource[]; initial: Pile; cost: Pile }[];
 }
 export const resourceNames: Record<Resource, string> = {
   food: 'Food',

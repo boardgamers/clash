@@ -19,7 +19,32 @@ use crate::victory_points::victory_points_parts;
 use crate::wonder::Wonder;
 use serde_json::{Value, json};
 mod actions;
+mod decisions;
 pub use actions::recruit_preview;
+
+pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
+    if seat >= game.players.len() || !game.player(seat).is_human() {
+        return Err("Choose a player".into());
+    }
+    match input["kind"].as_str() {
+        Some("decision") => decisions::preview(game, seat, &input),
+        Some("movement") => actions::movement(
+            game,
+            seat,
+            serde_json::from_value(input["units"].clone()).map_err(|e| e.to_string())?,
+        ),
+        Some("recruit") => actions::recruit_extended(game, seat, &input),
+        Some("happiness") => actions::happiness_preview(game, seat, &input),
+        Some("collect") => collect_variant_preview(
+            game,
+            seat,
+            serde_json::from_value(input["city"].clone()).map_err(|e| e.to_string())?,
+            serde_json::from_value(input["selections"].clone()).map_err(|e| e.to_string())?,
+            serde_json::from_value(input["variant"].clone()).map_err(|e| e.to_string())?,
+        ),
+        _ => Err("Unknown preview".into()),
+    }
+}
 
 pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let seat = seat.filter(|i| *i < game.players.len() && game.player(*i).is_human());
@@ -35,15 +60,29 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let moving = matches!(game.state, GameState::Movement(_)) && game.events.is_empty();
     let choice = seat.and_then(|seat| choice_decision(game, seat));
     let exploration = seat.and_then(|seat| exploration_decision(game, seat));
-    let supported_phase = playing || objective_phase || moving || choice.is_some() || exploration.is_some();
+    let decision = seat.and_then(|seat| decisions::describe(game, seat));
+    let supported_phase = playing
+        || objective_phase
+        || moving
+        || choice.is_some()
+        || exploration.is_some()
+        || decision.is_some()
+        || matches!(
+            game.state,
+            GameState::ChooseCivilization | GameState::Finished
+        );
     let can_play = seat == Some(active) && playing;
     // A map-reading aid, not legal move offers. Use visible terrain only, including for spectators.
-    let mut sea_routes = game.map.tiles.iter().filter(|(_, terrain)| terrain.is_water())
+    let mut sea_routes = game
+        .map
+        .tiles
+        .iter()
+        .filter(|(_, terrain)| terrain.is_water())
         .flat_map(|(position, _)| crate::move_routes::navigation_paths(&game.map, *position))
         .collect::<Vec<_>>();
     sea_routes.sort_by_key(|path| format!("{path:?}"));
     let players = game.players.iter().filter(|p| p.is_human()).map(|p| json!({
-        "index": p.index, "name": game.player_name(p.index), "civilization": p.civilization.name,
+        "index": p.index, "name": game.player_name(p.index), "civilization": p.civilization.name, "capital":crate::map::capital_city_position(game,p),
         "score": p.victory_points(game),
         "scoreParts": victory_points_parts(p, game).map(|(name, points)| json!({"name": name, "points": points})),
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
@@ -54,7 +93,9 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
         let info = wonder.info(game);
+        let reason = if can_play { PlayingActionType::WonderCard(*wonder).is_available(game,seat).err() } else { Some("Wait for your turn".into()) };
         json!({"id": wonder, "name": info.name(), "description": info.description,
+            "reason":reason,"action":reason.is_none().then(||Action::Playing(PlayingAction::WonderCard(*wonder))),
             "cost": info.cost.default_payment(), "requiredAdvance": info.required_advance.name(game),
             "requiredAdvanceOwned": p.has_advance(info.required_advance),
             "builtPoints": info.built_victory_points, "ownedPoints": info.owned_victory_points})
@@ -77,7 +118,11 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         })
         .collect::<Vec<_>>();
     let collect_type = PlayingActionType::Collect;
-    let collect_reason = collect_type.is_available(game, seat).err();
+    let collect_reason = if crate::collect::available_collect_actions(game, seat).is_empty() {
+        collect_type.is_available(game, seat).err()
+    } else {
+        None
+    };
     let origin = collect_event_origin(&collect_type, p);
     let cities = p.cities.iter().map(|city| {
         let mut after_activation = crate::city::City::from_data(city.cloned_data(), seat);
@@ -88,7 +133,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         let mut choices = info.choices.iter().flat_map(|(position, piles)| piles.iter().map(move |pile| json!({"position":position,"pile":pile}))).collect::<Vec<_>>();
         choices.sort_by_key(Value::to_string);
         let reason = if !can_play { Some("Wait for your turn".to_string()) } else if !city.can_activate() { Some("This city has already been activated while angry".to_string()) } else { collect_reason.clone() };
-        json!({"position":city.position,"size":city.size(),"capacity":info.max_selection,"maxPerTile":info.max_per_tile,"maxRange2":info.max_range2_tiles,"mood":city.mood_state,"activations":city.activations,"reason":reason,"choices":choices,
+        json!({"position":city.position,"capital":city.position == crate::map::capital_city_position(game,p),"size":city.size(),"capacity":info.max_selection,"maxPerTile":info.max_per_tile,"maxRange2":info.max_range2_tiles,"mood":city.mood_state,"activations":city.activations,"reason":reason,"choices":choices,
             "canActivate":city.can_activate(), "activationMood":after_activation.mood_state,"activationCapacity":after_activation.mood_modified_size(p)})
     }).collect::<Vec<_>>();
     let mut advances = game.cache.get_advances().iter().map(|(advance, info)| {
@@ -111,7 +156,13 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
     json!({"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
-        "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards,
+        "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "decision":decision,
+        "civilizations":if seat == active && game.state == GameState::ChooseCivilization {game.cache.get_civilizations().iter().filter(|c|c.is_human() && !game.players.iter().any(|p|p.civilization.name==c.name)).map(|c|json!({"name":c.name,"action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>()} else {vec![]},
+        "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
+        "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free})).collect::<Vec<_>>()} else {vec![]},
+        "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free})).collect::<Vec<_>>()} else {vec![]},
+        "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id})).collect::<Vec<_>>(),
+        "movementLeft":if let GameState::Movement(m)=&game.state {m.movement_actions_left} else {3},
         "seaRoutes":sea_routes,
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
@@ -206,10 +257,22 @@ pub fn collect_preview(
     city: Position,
     selections: Vec<PositionCollection>,
 ) -> Result<Value, String> {
+    collect_variant_preview(game, seat, city, selections, PlayingActionType::Collect)
+}
+
+fn collect_variant_preview(
+    game: &Game,
+    seat: usize,
+    city: Position,
+    selections: Vec<PositionCollection>,
+    kind: PlayingActionType,
+) -> Result<Value, String> {
     if seat >= game.players.len() || !game.player(seat).is_human() || seat != game.active_player() {
         return Err("Wait for your turn".to_string());
     }
-    PlayingActionType::Collect.is_available(game, seat)?;
+    if !crate::collect::available_collect_actions(game, seat).contains(&kind) {
+        return Err("Collection action unavailable".into());
+    }
     let p = game.player(seat);
     let city_data = p.try_get_city(city).ok_or("Choose one of your cities")?;
     if !city_data.can_activate() {
@@ -218,7 +281,7 @@ pub fn collect_preview(
     if selections.iter().any(|c| c.times == 0) {
         return Err("Choose at least one resource".to_string());
     }
-    let origin = collect_event_origin(&PlayingActionType::Collect, p);
+    let origin = collect_event_origin(&kind, p);
     let total = get_total_collection(
         game,
         seat,
@@ -230,11 +293,7 @@ pub fn collect_preview(
     .total;
     let mut after = p.resources.clone() + total.clone();
     let waste = after.apply_resource_limit(&p.resource_limit);
-    let action = Action::Playing(PlayingAction::Collect(Collect::new(
-        city,
-        selections,
-        PlayingActionType::Collect,
-    )));
+    let action = Action::Playing(PlayingAction::Collect(Collect::new(city, selections, kind)));
     Ok(
         json!({"action":action,"total":total,"waste":waste,"after":after,"moodWillDecrease":city_data.is_activated()}),
     )

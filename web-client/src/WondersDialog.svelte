@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X, Landmark, Info } from 'lucide-svelte';
+  import { X, Landmark, Hammer } from 'lucide-svelte';
   import WonderCard from './WonderCard.svelte';
   import type { Controller } from './controller';
   let { controller }: { controller: Controller } = $props();
@@ -30,6 +30,13 @@
   </p>
   {#each $session.view?.wonderCards ?? [] as card (card.id)}
     <WonderCard {card} />
+    <button
+      class="primary wide"
+      disabled={!card.action || $session.pending}
+      title={card.reason ?? 'Choose a city and pay to construct this wonder'}
+      onclick={() => card.action && controller.submit(card.action)}
+      ><Hammer size={16} />Construct {card.name}</button
+    >
   {:else}
     <div class="hand-empty">
       <Landmark size={32} />
@@ -42,6 +49,6 @@
       A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required
       advance to gain its effects and points.
     </p>
-    <p class="feature-note"><Info size={16} /> Wonder construction is not available in this interface yet.</p>
   {/if}
+  {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </dialog>

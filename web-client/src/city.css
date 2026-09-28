@@ -325,7 +325,7 @@
 }
 .board-toolbar .board-actions {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 .board-toolbar .board-actions button {
   min-width: 0;
@@ -340,7 +340,7 @@
     max-width: calc(100% - 150px);
   }
   .board-toolbar .board-actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     padding: 4px;
     gap: 0;
   }
@@ -469,4 +469,217 @@
   justify-content: center;
   gap: 5px;
   font-size: 11px;
+}
+
+.city-facts,
+.city-facts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.city-facts {
+  gap: 9px;
+  margin-left: 9px;
+  color: var(--ink);
+}
+.city-dock button strong {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.city-dock button strong > svg {
+  color: #896222;
+}
+.decision-panel {
+  z-index: 25;
+}
+.decision-panel h2,
+.cards-dialog h2,
+.abilities-panel h2,
+.abilities-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.decision-description {
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.decision-count {
+  display: flex;
+  justify-content: space-between;
+  margin: 14px 0 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.decision-options {
+  display: grid;
+  gap: 6px;
+  max-height: 42vh;
+  overflow-y: auto;
+  margin: 12px 0;
+  padding: 1px;
+}
+.decision-options button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.decision-options button > span {
+  flex: 1;
+}
+.decision-options button > small {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--muted);
+}
+.decision-options button.selected,
+.unit-picker button.selected {
+  border-color: #a9762e;
+  background: #b6893920;
+}
+.decision-option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px;
+}
+.decision-detail {
+  grid-column: 1/-1;
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 4px 8px 10px;
+  color: var(--ink);
+}
+.decision-payment {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+  font-size: 12px;
+}
+.decision-cost {
+  margin: 8px 0;
+}
+.resource-steppers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin: 10px 0;
+}
+.resource-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.resource-stepper > span {
+  flex: 1;
+}
+.resource-stepper .resource-amount > span {
+  font-size: 0;
+  gap: 0;
+}
+.resource-stepper .resource-amount svg {
+  width: 18px;
+  height: 18px;
+}
+.resource-stepper .icon-button {
+  width: 25px;
+  height: 27px;
+  border: 1px solid var(--line);
+  padding: 3px;
+}
+.resource-stepper output {
+  min-width: 17px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.unit-picker,
+.movement-markers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+.unit-picker button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 4px;
+  padding: 7px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.unit-count {
+  border-radius: 50%;
+  font-size: 9px;
+  background: #8b947321;
+  padding: 1px 4px;
+}
+.movement-markers span {
+  border: 1px solid #b68b3c;
+  border-radius: 50%;
+  padding: 4px;
+  line-height: 0;
+}
+.movement-markers span.spent {
+  opacity: 0.25;
+}
+.play-card {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.play-card > h3 {
+  margin: 0 0 8px;
+}
+.play-card p,
+.ability-offer p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.play-card summary,
+.ability-offer summary {
+  cursor: pointer;
+  font-size: 12px;
+  padding: 9px 0;
+}
+.play-card summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.play-card > .primary {
+  margin: 12px 0 6px;
+}
+.play-card > small {
+  color: var(--muted);
+}
+.ability-offer {
+  border-bottom: 1px solid var(--line);
+}
+.abilities-panel h3 {
+  font-size: 15px;
+  margin-top: 22px;
+}
+@media (max-width: 760px) {
+  .header-actions .cards-button > span:not(.card-count) {
+    display: none;
+  }
+  .board-actions {
+    gap: 2px;
+  }
+  .board-actions > button {
+    min-width: 0;
+    padding-inline: 8px;
+  }
 }

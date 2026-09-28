@@ -1,0 +1,49 @@
+<script lang="ts">
+  import { X, Layers, Zap, Swords } from 'lucide-svelte';
+  import ResourceText from './ResourceText.svelte';
+  import type { Controller } from './controller';
+  import { actionReason } from './model';
+  let { controller }: { controller: Controller } = $props();
+  const session = $derived(controller.session);
+  const close = () => controller.patch({ cardsOpen: false });
+  function show(node: HTMLDialogElement) {
+    node.showModal();
+  }
+</script>
+
+<dialog
+  class="field-guide cards-dialog"
+  aria-labelledby="action-cards-title"
+  use:show
+  onclose={close}
+  onclick={(e) => {
+    if (e.target === e.currentTarget) close();
+  }}
+  onkeydown={(e) => {
+    if (e.key === 'Escape') close();
+  }}
+>
+  <button class="close-guide icon-button" aria-label="Close action cards" onclick={close}
+    ><X size={20} /></button
+  >
+  <h2 id="action-cards-title"><Layers size={23} />Action cards</h2>
+  {#each $session.view?.actionCards ?? [] as card}
+    <article class="play-card">
+      <h3>{card.name}</h3>
+      <p><ResourceText text={card.description} /></p>
+      {#if card.tactics}<details>
+          <summary><Swords size={15} />{card.tactics.name}</summary>
+          <p><ResourceText text={card.tactics.description} /></p>
+        </details>{/if}
+      <button
+        class="primary wide"
+        title={card.reason ?? 'Play this card'}
+        disabled={!card.action || $session.pending}
+        onclick={() => card.action && controller.submit(card.action)}
+        >Play {#if !card.free}<span><Zap size={13} />1</span>{/if}</button
+      >
+      {#if actionReason(card.reason)}<small>{actionReason(card.reason)}</small>{/if}
+    </article>
+  {:else}<p>No action cards in hand.</p>{/each}
+  {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
+</dialog>

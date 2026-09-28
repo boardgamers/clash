@@ -1,6 +1,6 @@
 # Clash of Cultures — web viewer
 
-First playable slice of a Svelte/TypeScript interface with a Three.js board. The Rust engine remains the rule authority.
+Playtest interface built with Svelte/TypeScript and a Three.js board. The Rust engine remains the rule authority.
 
 ## Run locally
 
@@ -15,9 +15,9 @@ npm run dev
 
 Open http://127.0.0.1:8643. The preview binds to loopback and saves its disposable game under `.engine/preview-state.json`. **New game** resets that game and its local chat. Hotseat follows the active player; the player selector also supports fixed seats and spectators.
 
-No production games, catalog records, or chat rooms are modified. Remaining actions and phases will be implemented in this interface.
+The local preview does not modify production games, catalog records, or chat rooms.
 
-## Implemented slice
+## Implemented controls
 
 - Procedural 3D terrain, cities, settlers, tile selection, orbit/zoom, and a top-down view.
 - Named resources, storage limits, action count, city mood, and a short field guide. Select a civilization to see all six victory-point categories from the Rust scoring rules, with a link to its BGS player profile.
@@ -27,14 +27,16 @@ No production games, catalog records, or chat rooms are modified. Remaining acti
 - Collect resources: Rust supplies legal tiles, resource alternatives, capacity, total gain, waste, and an activation warning. Confirming submits the original Rust action format.
 - Research: a searchable tree with pictograms, short effect summaries, prerequisite branches, costs, bonuses, and unlocked buildings. Rust supplies the graph, full rules, payments, and action payloads; selecting an advance opens its full rule text before confirmation.
 - End turn and undo, with state and journal reconciliation.
-- City management: buildings with visible effects and requirements, Port placement, combined recruitment of standard units, and one-city happiness actions. Payments and legal actions come from Rust; repeat activations warn about mood loss.
-- Settler movement on revealed land and into unexplored regions without enemies, movement completion, and founding cities. Destination and collection options highlight their map tiles on hover or keyboard focus. Exploration uses the engine’s forced placements or offers both legal orientations with miniature maps and a board preview before confirmation.
-- One-resource bonus choices (including Temples) and yes/no decisions. These remain private to the player who must answer.
+- City management: buildings and Port placement, combined recruitment including leaders, supply replacements, and multi-city happiness with legal free-action variants. Payments and legal actions come from Rust; repeat activations warn about mood loss. Size and mood use accessible pictograms. The original capital is identified from the map setup, never city ordering, with a small gold crown on its model.
+- Group movement for settlers, armies, and fleets: legal destinations, attacks, embarkation by carrier, disembarkation, Navigation, movement completion, and founding cities. Destination and collection options highlight their map tiles on hover or keyboard focus. Exploration uses the engine’s forced placements or offers both legal orientations with miniature maps and a board preview before confirmation.
+- Action cards (civil effects and tactics descriptions), wonder construction, cultural influence, and available civilization/research/wonder abilities. Free collection and happiness variants use the original engine action type.
+- Every persistent request variant has controls: adjustable payments, resource rewards, advances, players, positions, unit types/groups, structures, hand cards, government changes, yes/no, and exploration. Selection previews check membership, counts, special restrictions, and payment validity without executing a move. Combat casualties/tactics, incidents, and end-of-age decisions use these same controls. Civilization selection is also available.
 - Buildings appear around city centers; recruited units have separate positions and basic type markers.
 - BGS registration/lifecycle, player/spectator handling, theme, avatars, and the shared chat controller/panel. Chat sends, failed-send drafts, updates/deletions, mentions, read reports, editing and translation handlers are supplied by the protocol package; the host decides which features are enabled.
 - Journal entries use high-contrast text and action and resource pictograms. Setup is summarized as civilization and original starting tile. Text equivalents are published with `replaceLog` so undo cannot leave stale entries.
 - Full-width board with floating action controls and dismissible journal/chat panels. The layout stays within the viewport on desktop and mobile; panels scroll internally. City/action controls are keyboard accessible, and the board renders only when changed.
-- Small, persistent face icons show each city’s mood on the map; smile, straight mouth, and frown distinguish all three moods without relying on color. City names and mood text appear on hover, selection, or keyboard focus. Map targets highlight on hover; cursors distinguish selection, unavailable targets, and camera dragging. City and unit models are selectable directly. Dragging or pinching cannot accidentally select a tile, and Escape closes floating action, journal, and chat panels.
+- Small, persistent face icons show each city’s mood on the map; smile, straight mouth, and frown distinguish all three moods without relying on color. City names and mood text appear on hover or keyboard focus. Map targets highlight on hover; cursors distinguish selection, unavailable targets, and camera dragging. City and unit models are selectable directly. Dragging or pinching cannot accidentally select a tile, and Escape closes floating action, journal, and chat panels.
+- The ship map control traces connected seas and Navigation shortcuts along the edge; it is a reading aid, separate from engine-validated movement destinations.
 - Quiet, throttled tile/control hover sounds, card-draw cues, and synthesized confirmed-action sounds follow BGS's global `sound` preference. Muting stops active and scheduled notes immediately; sound starts only after interaction, and loading or reconnecting does not play past actions.
 - BGS's global `colorBlind` preference adds matching ownership symbols to player cards, city flags, and unit groups, with a distinct player palette. Resources keep their icons and labels; terrain keeps its physical shapes.
 - Sound and colorblind toggle buttons sit beside Journal and Chat and write to BGS's global preferences. The map button saves `mapView` (`3d` or `2d`) with BGS's `updatePreference` command and restores it from incoming preferences. The overhead view pans without tilting. The standalone preview emulates persistence locally for these same buttons.
@@ -69,15 +71,15 @@ npm run publish:bgs -- --version=1
 
 The script uploads the viewer, verifies the hosted bytes, then updates the version's viewer configuration and preference declarations from `bgs-preferences.json`. The shared `sound` and `colorBlind` declarations expose BGS's global controls; `mapView` is saved per user for Clash. Obsolete scale, zoom, and color-profile controls are replaced. The script preserves the engine, visibility, and unrelated preference declarations, checks for concurrent changes, and saves the previous version document under `.engine/releases/` for rollback. Publishing is separate from pushing Git commits. The GitHub workflow builds and tests the viewer and retains the bundle as an artifact; it does not publish automatically.
 
-## Next slices
+## Remaining playtest work
 
-The controls do not yet cover army/fleet movement, unit replacement/leader recruitment, wonder construction, action cards, cultural influence, combat, civilization selection, or most status/event choices. Free/custom-action variants and multi-city happiness selection are also pending. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
+Automated scenarios cover a complete six-age sequence, mixed rewards, government changes, combat casualties/tactics, wonder construction, action cards, influence, civilization abilities, army/fleet movement and transport, leaders/replacements, and free/multi-city actions. This is playtest coverage, not an exhaustive check of every civilization/card interaction. Ordinary research, construction and recruitment still choose the engine's first valid resource payment; explicit payment requests allow resource adjustments. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
 
-Before public release: complete action/phase coverage, verify against an actual BGS staging game (including reconnects, moderation, translation, and read-state persistence), and test larger multiplayer boards on mobile hardware.
+Before public release: play through unusual civilization/card combinations, verify against an actual BGS staging game (including reconnects, moderation, translation, and read-state persistence), and test larger multiplayer boards on mobile hardware.
 
 ## Architecture
 
-`server/src/web_view.rs` and `web_view/actions.rs` expose read-only rule queries; `game_api_wrapper.rs` exports them to WASM. Queries consume the same player-filtered state BGS sends to the viewer. They neither mutate the game nor send moves. The server always validates actual moves. `src/bridge.ts` initializes the embedded WASM; `.bridge/` and `.engine/` are generated by `build:bridge`.
+`server/src/web_view.rs`, `web_view/actions.rs` and `web_view/decisions.rs` expose read-only rule queries; `game_api_wrapper.rs` exports them to WASM. Queries consume the same player-filtered state BGS sends to the viewer. They neither mutate the game nor send moves. The server always validates actual moves. `src/bridge.ts` initializes the embedded WASM; `.bridge/` and `.engine/` are generated by `build:bridge`.
 
 `src/controller.ts` coordinates state, choices, and the BGS commands. `src/App.svelte` owns the HTML interface. `src/board.ts` owns and disposes the Three.js scene. `src/viewer.ts` is the production entry. `src/local-host.ts` and `scripts/preview-api.ts` are development-only.
 

@@ -525,10 +525,8 @@ export class World {
         ? new Set(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
         : s.mode === 'settlers'
           ? new Set([
-              ...(s.view?.settlers.map((u) => u.position) ?? []),
-              ...(s.view?.settlers
-                .find((u) => u.id === s.selectedSettler)
-                ?.destinations.map((d) => d.position) ?? []),
+              ...(s.view?.units?.map((u) => u.position) ?? []),
+              ...s.moveDestinations.map((d) => d.position),
             ])
           : null;
     const signature = JSON.stringify([
@@ -574,6 +572,18 @@ export class World {
           const cityModel = this.building(playerColor(player.id, s.colorBlind));
           cityModel.position.set(x, 0.38, z);
           cityModel.rotation.y = 0.25;
+          const capital = s.view?.players.find((p) => p.index === player.id)?.capital === city.position;
+          if (capital) {
+            const gold = this.material('#d5af55');
+            const band = this.mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.07, 12), gold);
+            band.position.set(0, 0.91, 0);
+            cityModel.add(band);
+            for (let i = 0; i < 3; i++) {
+              const point = this.mesh(new THREE.ConeGeometry(0.055, 0.15, 4), gold);
+              point.position.set((i - 1) * 0.11, 1.01, 0);
+              cityModel.add(point);
+            }
+          }
           cityModel.userData.position = city.position;
           this.pieces.push(cityModel);
           if (s.colorBlind) {
@@ -631,7 +641,7 @@ export class World {
           face.append(outline, features);
           const name = document.createElement('span');
           name.className = 'city-map-name';
-          name.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization} · ${city.position} · ${mood}`;
+          name.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization}${capital ? ' ♛' : ''} · ${city.position} · ${mood}`;
           label.append(face, name);
           label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position} · ${mood}`);
           label.onclick = () => {
@@ -683,6 +693,13 @@ export class World {
             );
             mount.position.y = 0.13;
             pawn.add(mount);
+          } else if (typeof unit.unit_type === 'object') {
+            const crown = this.mesh(
+              new THREE.CylinderGeometry(0.09, 0.075, 0.09, 6),
+              this.material('#d5af55'),
+            );
+            crown.position.y = 0.46;
+            pawn.add(crown);
           }
           const stackIndex = (player.units ?? [])
             .slice(0, unitIndex)
@@ -702,14 +719,17 @@ export class World {
       }
       if (this.selectionSignature === '') this.reset();
     }
-    const settler = s.view?.settlers.find((u) => u.id === s.selectedSettler);
+    const settler = s.view?.units?.find((u) => s.selectedUnits.includes(u.id));
     const focusedPosition = s.mode === 'overview' ? (s.focus ?? s.city) : s.city;
     const selected = exploration
       ? exploration.destination
         ? [exploration.destination]
         : []
       : s.mode === 'settlers'
-        ? [settler?.position, s.destination].filter((p): p is string => !!p)
+        ? [
+            settler?.position,
+            s.moveDestination === null ? null : s.moveDestinations[s.moveDestination]?.position,
+          ].filter((p): p is string => !!p)
         : s.mode === 'collect'
           ? s.selection.map((c) => c.position)
           : focusedPosition
@@ -718,7 +738,7 @@ export class World {
     const available = placement
       ? placement.tiles.map(([position]) => position)
       : s.mode === 'settlers'
-        ? (settler?.destinations.map((d) => d.position) ?? [])
+        ? s.moveDestinations.map((d) => d.position)
         : s.mode === 'collect'
           ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
           : [];

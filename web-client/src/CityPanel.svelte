@@ -1,9 +1,12 @@
 <script lang="ts">
-  import { X, Landmark, Hammer, Users, Smile, Plus, Minus, Check } from 'lucide-svelte';
+  import { X, Landmark, Hammer, Users, Smile, Plus, Minus, Check, Crown } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { buildingInfo, unitInfo, cityReason } from './city';
   import ResourceAmount from './ResourceAmount.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
+  import HappinessPanel from './HappinessPanel.svelte';
+  import CityFacts from './CityFacts.svelte';
+  import UnitIcon from './UnitIcon.svelte';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let tab = $state('build');
@@ -11,7 +14,9 @@
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let options = $derived($session.view?.cityActions.find((c) => c.position === $session.city));
   let selected = $derived(options?.buildings.find((b) => b.name === building));
-  let count = $derived(Object.values($session.recruits).reduce((a, b) => a + (b ?? 0), 0));
+  let count = $derived(
+    Object.values($session.recruits).reduce<number>((a, b) => a + (typeof b === 'string' ? 1 : (b ?? 0)), 0),
+  );
   function close() {
     controller.patch({ mode: 'overview', error: '' });
   }
@@ -36,7 +41,9 @@
   <header class="city-dialog-header">
     <div>
       <h2 id="city-title"><Landmark size={26} /> City {$session.city}</h2>
-      <p>Size {city?.size} · {city?.mood} · Collect or recruit up to {city?.capacity}</p>
+      <p>
+        {#if city}<CityFacts size={city.size} mood={city.mood} />{/if} · Capacity {city?.capacity}
+      </p>
     </div>
     <button class="icon-button" aria-label="Close city management" onclick={close}><X /></button>
   </header>
@@ -46,7 +53,7 @@
         onclick={() => {
           building = null;
           controller.openCities(c.position);
-        }}><Landmark size={14} />{c.position} <span>{c.mood}</span></button
+        }}><Landmark size={14} />{c.position}<CityFacts size={c.size} mood={c.mood} /></button
       >{/each}
   </nav>
   <nav class="city-tabs" aria-label="City actions">
@@ -59,7 +66,7 @@
       >{/each}
   </nav>
   <div class="city-content">
-    {#if city}<ActivationStatus
+    {#if city && tab !== 'happiness'}<ActivationStatus
         {city}
         warning={tab === 'recruit' || (tab === 'build' && !!selected?.moodWillDecrease)}
       />{/if}
@@ -108,7 +115,7 @@
               ><output aria-label={`${item.type} selected`}>{amount}</output><button
                 aria-label={`Add ${item.type}`}
                 disabled={!!item.reason ||
-                  amount >= item.available ||
+                  amount >= (item.limit ?? item.available) ||
                   count >= (city?.capacity ?? 0) ||
                   $session.pending}
                 onclick={() => controller.setRecruits({ ...$session.recruits, [info.key]: amount + 1 })}
@@ -117,30 +124,44 @@
             </div>
           </article>{/each}
       </div>
+      {#if options?.leaders?.length}<details class="leader-recruit">
+          <summary><Crown size={16} />Leaders</summary><ResourceAmount
+            pile={{ mood_tokens: 1, culture_tokens: 1 }}
+          />
+          <div class="unit-picker">
+            {#each options.leaders as leader}<button
+                title={leader.description}
+                class:selected={$session.recruits.leader === leader.id}
+                aria-pressed={$session.recruits.leader === leader.id}
+                disabled={$session.pending || (!$session.recruits.leader && count >= (city?.capacity ?? 0))}
+                onclick={() =>
+                  controller.setRecruits({
+                    ...$session.recruits,
+                    leader: $session.recruits.leader === leader.id ? null : leader.id,
+                  })}><Crown size={15} />{leader.name}</button
+              >{/each}
+          </div>
+        </details>{/if}
+      {#if $session.view?.units?.length}<details class="replacement-recruit">
+          <summary>Replace units on the map</summary>
+          <div class="unit-picker">
+            {#each $session.view.units as unit}<button
+                class:selected={$session.replacements.includes(unit.id)}
+                aria-pressed={$session.replacements.includes(unit.id)}
+                title={`Replace ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} at ${unit.position}`}
+                onclick={() => {
+                  controller.patch({
+                    replacements: $session.replacements.includes(unit.id)
+                      ? $session.replacements.filter((id) => id !== unit.id)
+                      : [...$session.replacements, unit.id],
+                  });
+                  controller.setRecruits($session.recruits);
+                }}><UnitIcon type={unit.type} />#{unit.id + 1} · {unit.position}</button
+              >{/each}
+          </div>
+        </details>{/if}
     {:else}
-      <p class="city-rule">
-        Happier cities collect more and recruit more. Improving mood uses 1 action without activating the
-        city.
-      </p>
-      {#if !options?.happiness.length}<div class="happy-message">
-          <Smile size={32} />
-          <h3>This city is already happy</h3>
-          <p>Its capacity is {city?.capacity}, one more than its size.</p>
-        </div>{/if}
-      <div class="happiness-options">
-        {#each options?.happiness ?? [] as item}<article>
-            <Smile size={26} />
-            <h3>{item.mood}</h3>
-            <p>Raise mood by {item.steps} {item.steps === 1 ? 'step' : 'steps'}.</p>
-            <ResourceAmount pile={item.payment} /><small>{cityReason(item.reason) || 'Costs 1 action'}</small
-            ><button
-              class="primary"
-              title={item.reason ?? undefined}
-              disabled={!item.action || $session.pending}
-              onclick={() => item.action && controller.submit(item.action)}>Raise to {item.mood}</button
-            >
-          </article>{/each}
-      </div>
+      <HappinessPanel {controller} />
     {/if}
   </div>
   {#if tab === 'build' && selected && !selected.owned}<footer class="city-confirm">

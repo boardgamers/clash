@@ -9,6 +9,13 @@ import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
 export class Controller {
   readonly session = writable<Session>({
+    replacements: [],
+    collectVariant: 'Collect',
+    selectedUnits: [],
+    moveDestinations: [],
+    moveDestination: null,
+    cardsOpen: false,
+    abilitiesOpen: false,
     seaRoutes: false,
     seaRouteStart: null,
     game: null,
@@ -113,6 +120,8 @@ export class Controller {
       preview: null,
       recruits: {},
       recruitPreview: null,
+      replacements: [],
+      collectVariant: view.collectActions?.[0]?.value ?? 'Collect',
       destination: null,
       explorationRotation: view.explorationDecision?.choices[0]?.rotation ?? null,
       explorationPreview: null,
@@ -121,13 +130,20 @@ export class Controller {
         : (view.settlers[0]?.id ?? null),
       mode: view.stopMovement
         ? 'settlers'
-        : old.pending || view.objectiveDecision || view.choiceDecision || view.explorationDecision
+        : old.pending ||
+            view.decision ||
+            view.objectiveDecision ||
+            view.choiceDecision ||
+            view.explorationDecision
           ? 'overview'
           : old.mode,
       objectivesOpen:
-        view.objectiveDecision || view.choiceDecision || view.explorationDecision
+        view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision
           ? false
           : old.objectivesOpen,
+      cardsOpen: old.pending || view.decision ? false : old.cardsOpen,
+      wondersOpen: old.pending || view.decision ? false : old.wondersOpen,
+      abilitiesOpen: old.pending || view.decision ? false : old.abilitiesOpen,
       cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>
         draw.kind === 'wonder'
           ? view.wonderCards.some((card) => card.id === draw.card.id)
@@ -135,7 +151,9 @@ export class Controller {
       ),
     });
     this.commands.replaceLog(journal(game).map((entry) => entry.text));
-    if (view.objectiveDecision || view.choiceDecision || view.explorationDecision) this.closeActivity();
+    if (view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision)
+      this.closeActivity();
+    this.selectUnits(old.selectedUnits.filter((id) => view.units?.some((u) => u.id === id)));
     if (drawn.length) {
       this.audio.play('draw');
     } else if (old.pending && changed) {
@@ -159,6 +177,11 @@ export class Controller {
       recruits: {},
       recruitPreview: null,
       selectedSettler: null,
+      selectedUnits: [],
+      moveDestinations: [],
+      moveDestination: null,
+      cardsOpen: false,
+      abilitiesOpen: false,
       destination: null,
       explorationRotation: null,
       explorationPreview: null,
@@ -190,11 +213,11 @@ export class Controller {
     }
     const city = s.view?.cities.find((c) => c.position === position);
     if (s.mode === 'settlers') {
-      const unit = s.view?.settlers.find((u) => u.id === s.selectedSettler);
-      if (unit?.destinations.some((d) => d.position === position)) this.patch({ destination: position });
+      const index = s.moveDestinations.findIndex((d) => d.position === position);
+      if (index >= 0) this.patch({ moveDestination: index });
       else {
-        const selected = s.view?.settlers.find((u) => u.position === position);
-        if (selected) this.patch({ selectedSettler: selected.id, destination: null });
+        const unit = s.view?.units?.find((u) => u.position === position);
+        if (unit) this.selectUnits([unit.id]);
       }
     } else if (s.mode === 'collect') {
       const choice = s.view?.cities
@@ -229,14 +252,24 @@ export class Controller {
   }
   beginCollect() {
     this.closeActivity();
-    this.patch({ mode: 'collect', selection: [], preview: null, error: '', selectedAdvance: null });
+    this.patch({
+      mode: 'collect',
+      selection: [],
+      preview: null,
+      error: '',
+      selectedAdvance: null,
+      collectVariant: get(this.session).view?.collectActions?.[0]?.value ?? 'Collect',
+      abilitiesOpen: false,
+    });
   }
   openCities(position?: string) {
     this.closeActivity();
     this.patch({
       mode: 'city',
+      abilitiesOpen: false,
       city: position ?? get(this.session).city,
       recruits: {},
+      replacements: [],
       recruitPreview: null,
       error: '',
     });
@@ -246,10 +279,39 @@ export class Controller {
     const s = get(this.session);
     this.patch({
       mode: 'settlers',
+      abilitiesOpen: false,
       selectedSettler: s.selectedSettler ?? s.view?.settlers[0]?.id ?? null,
       destination: null,
       error: '',
     });
+    this.selectUnits(
+      s.selectedUnits.length ? s.selectedUnits : s.view?.units?.[0] ? [s.view.units[0].id] : [],
+    );
+  }
+  query<T>(input: unknown): T {
+    const s = get(this.session);
+    if (!this.engine || s.seat === undefined) throw new Error('Choose a player');
+    return JSON.parse(this.engine.webQuery(this.raw, s.seat, JSON.stringify(input))) as T;
+  }
+  selectUnits(selectedUnits: number[]) {
+    this.patch({ selectedUnits, moveDestinations: [], moveDestination: null });
+    const s = get(this.session);
+    if (
+      !selectedUnits.length ||
+      (!s.view?.canPlay && !s.view?.stopMovement) ||
+      s.view?.decision ||
+      s.view?.explorationDecision
+    )
+      return;
+    try {
+      const result = this.query<{ destinations: Session['moveDestinations'] }>({
+        kind: 'movement',
+        units: selectedUnits,
+      });
+      this.patch({ moveDestinations: result.destinations });
+    } catch {
+      /* Browsing units remains possible while a move is unavailable. */
+    }
   }
   setRecruits(recruits: RecruitSelection) {
     const s = get(this.session);
@@ -258,9 +320,12 @@ export class Controller {
     if (!Object.values(recruits).some(Boolean)) return;
     try {
       this.patch({
-        recruitPreview: JSON.parse(
-          this.engine.webRecruitPreview(this.raw, s.seat, s.city, JSON.stringify(recruits)),
-        ),
+        recruitPreview: this.query({
+          kind: 'recruit',
+          city: s.city,
+          units: recruits,
+          replaced: s.replacements,
+        }),
       });
     } catch (error) {
       this.patch({ error: String(error) });
@@ -274,7 +339,9 @@ export class Controller {
     );
     const city = s.view.cities.find((c) => c.position === s.city)!;
     const selection = selected
-      ? s.selection.filter((c) => c !== selected)
+      ? selected.times < city.maxPerTile && s.selection.reduce((sum, c) => sum + c.times, 0) < city.capacity
+        ? s.selection.map((c) => (c === selected ? { ...c, times: c.times + 1 } : c))
+        : s.selection.filter((c) => c !== selected)
       : [...s.selection, { ...choice, times: 1 }];
     if (selection.length > city.capacity) {
       this.patch({
@@ -284,7 +351,12 @@ export class Controller {
     }
     try {
       const preview = selection.length
-        ? JSON.parse(this.engine.webCollectPreview(this.raw, s.seat, s.city, JSON.stringify(selection)))
+        ? this.query<NonNullable<Session['preview']>>({
+            kind: 'collect',
+            city: s.city,
+            selections: selection,
+            variant: s.collectVariant,
+          })
         : null;
       this.patch({ selection, preview, error: '' });
     } catch (error) {
@@ -311,7 +383,7 @@ export class Controller {
   }
   setTab(tab: 'journal' | 'chat') {
     this.chat.setOpen(tab === 'chat');
-    this.patch({ tab, activityOpen: true, mode: 'overview' });
+    this.patch({ tab, activityOpen: true, mode: 'overview', abilitiesOpen: false });
   }
   closeActivity() {
     this.chat.setOpen(false);

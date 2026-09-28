@@ -41,6 +41,8 @@
     Ship,
     Frown,
     Meh,
+    Crown,
+    Sparkles,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
@@ -56,6 +58,10 @@
   import ResourceText from './ResourceText.svelte';
   import ObjectiveCondition from './ObjectiveCondition.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
+  import CityFacts from './CityFacts.svelte';
+  import DecisionPanel from './DecisionPanel.svelte';
+  import ActionCardsDialog from './ActionCardsDialog.svelte';
+  import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
   import type { Resource } from './types';
   import { resources, resourceNames, playerColor, playerSymbol } from './types';
@@ -127,7 +133,7 @@
   );
   let settlersAvailable = $derived(
     !!$session.view?.stopMovement ||
-      $session.view?.settlers.some((u) => u.destinations.length > 0 || !!u.foundAction),
+      (!!$session.view?.canPlay && totalActions > 0 && !!$session.view?.units?.length),
   );
   let objectiveDecision = $derived($session.view?.objectiveDecision);
   let choiceDecision = $derived($session.view?.choiceDecision);
@@ -135,19 +141,25 @@
   let actionTitle = $derived(
     $session.seat === undefined
       ? 'Spectating'
-      : $session.view?.explorationDecision
-        ? 'Place explored terrain'
-        : choiceDecision
-          ? 'Choose a bonus'
-          : objectiveDecision
-            ? 'Objective available'
-            : $session.view?.stopMovement
-              ? 'Moving settlers'
-              : readyToEnd
-                ? 'Ready to end turn'
-                : $session.view?.canPlay
-                  ? 'Your turn'
-                  : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
+      : $session.game?.state === 'Finished'
+        ? 'Game over'
+        : $session.view?.decision
+          ? $session.view.decision.endOfAge
+            ? 'End of age'
+            : $session.view.decision.name
+          : $session.view?.explorationDecision
+            ? 'Place explored terrain'
+            : choiceDecision
+              ? 'Choose a bonus'
+              : objectiveDecision
+                ? 'Objective available'
+                : $session.view?.stopMovement
+                  ? 'Moving units'
+                  : readyToEnd
+                    ? 'Ready to end turn'
+                    : $session.view?.canPlay
+                      ? 'Your turn'
+                      : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
     const escape = (event: KeyboardEvent) => {
@@ -156,6 +168,7 @@
       if ($session.seaRoutes) controller.showSeaRoutes(false);
       if ($session.cardDraws.length) controller.patch({ cardDraws: [] });
       if ($session.activityOpen) controller.closeActivity();
+      if ($session.abilitiesOpen) controller.patch({ abilitiesOpen: false });
       if ($session.mode === 'collect' || $session.mode === 'settlers' || confirmEnd) closeAction();
     };
     document.addEventListener('keydown', escape);
@@ -204,7 +217,7 @@
   function openResearch() {
     confirmEnd = false;
     controller.closeActivity();
-    controller.patch({ mode: 'research', selectedAdvance: null, error: '' });
+    controller.patch({ mode: 'research', selectedAdvance: null, error: '', abilitiesOpen: false });
   }
   function toggleActivity(tab: 'journal' | 'chat') {
     confirmEnd = false;
@@ -231,6 +244,14 @@
     </div>
     <nav class="header-actions">
       {#if $session.seat !== undefined}
+        <button
+          class="text-button cards-button"
+          aria-label={`Action cards: ${$session.view?.actionCards?.length ?? 0}`}
+          onclick={() => controller.patch({ cardsOpen: true })}
+          ><Layers size={17} /><span>Cards</span><span class="card-count"
+            >{$session.view?.actionCards?.length ?? 0}</span
+          ></button
+        >
         <button
           class="text-button wonders-button"
           aria-label={`Wonders: ${$session.view?.wonderCards?.length ?? 0} ${$session.view?.wonderCards?.length === 1 ? 'card' : 'cards'}`}
@@ -274,7 +295,7 @@
       </div>{/each}
     <div class="round-label">
       {#if ($session.game?.round ?? 1) > 3}
-        <span class="tiny-label">AGE END</span><strong class="status-label">Status</strong>
+        <span class="tiny-label">END OF</span><strong class="status-label">Age</strong>
       {:else}
         <span class="tiny-label">ROUND</span><strong>{$session.game?.round ?? 1} <span>/ 3</span></strong>
       {/if}
@@ -323,7 +344,7 @@
           <h2>Loading game…</h2>
         </div>{/if}
       {#if boardError}<div class="map-warning" role="alert">{boardError}</div>{/if}
-      {#if !$session.seaRoutes && $session.mode === 'overview' && $session.focus && $session.focus !== $session.city && typeof focusTerrain === 'string'}<div
+      {#if !$session.seaRoutes && !$session.view?.decision && !choiceDecision && !objectiveDecision && $session.mode === 'overview' && $session.focus && $session.focus !== $session.city && typeof focusTerrain === 'string'}<div
           class="tile-inspector"
         >
           <button
@@ -396,8 +417,11 @@
             ><span class="city-thumb"><Landmark size={25} /></span><span
               ><strong
                 >{identity?.civilization}
-                {c.position === $session.view?.cities[0]?.position ? 'Capital' : 'City'}</strong
-              ><small>{c.position} <span>·</span> Size {c.size} <span>·</span> {c.mood}</small></span
+                {c.capital ? 'Capital' : 'City'}{#if c.capital}<Crown
+                    size={11}
+                    aria-label="Original capital"
+                  />{/if}</strong
+              ><small>{c.position}<CityFacts size={c.size} mood={c.mood} /></small></span
             ><span
               class="city-activation-badge"
               class:used={c.activations > 0}
@@ -412,7 +436,7 @@
     <div class="board-toolbar" aria-label="Game controls">
       <div class="turn-banner">
         <span class="turn-light"></span><strong>{actionTitle}</strong
-        >{#if !objectiveDecision && ($session.game?.round ?? 1) <= 3}<span
+        >{#if !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.game?.round ?? 1) <= 3}<span
             class="action-markers"
             role="img"
             aria-label={`${totalActions} ${totalActions === 1 ? 'action' : 'actions'} remaining`}
@@ -470,18 +494,28 @@
         <button
           class:active={$session.mode === 'settlers'}
           class:inspect-only={!settlersAvailable}
-          aria-label="Move settlers and found cities"
-          title={settlersAvailable ? 'Move settlers and found cities' : 'View settlers · Locate your units'}
+          aria-label="Move units and found cities"
+          title="Move armies, settlers and ships · Found cities"
           disabled={$session.seat === undefined}
           onclick={() => {
             confirmEnd = false;
             controller.openSettlers();
           }}
-          ><Footprints size={21} /><span>Settlers</span>{#if !settlersAvailable}<Eye
+          ><Footprints size={21} /><span>Move</span>{#if !settlersAvailable}<Eye
               class="action-inspect"
               size={10}
               aria-hidden="true"
             />{/if}</button
+        >
+        <button
+          title="Abilities and cultural influence"
+          aria-label="Abilities and cultural influence"
+          class:active={$session.abilitiesOpen}
+          disabled={$session.seat === undefined}
+          onclick={() => {
+            controller.closeActivity();
+            controller.patch({ mode: 'overview', abilitiesOpen: !$session.abilitiesOpen });
+          }}><Sparkles size={21} /><span>Abilities</span></button
         >
         <button
           title="Undo last action"
@@ -588,6 +622,20 @@
           <p>The controls for this phase are still being built.</p>
         {:else if $session.mode === 'collect'}
           <h2>Collect resources</h2>
+          {#if ($session.view?.collectActions?.length ?? 0) > 1}<div class="variant-picker">
+              {#each $session.view?.collectActions ?? [] as variant}<button
+                  class:selected={JSON.stringify($session.collectVariant) === JSON.stringify(variant.value)}
+                  aria-pressed={JSON.stringify($session.collectVariant) === JSON.stringify(variant.value)}
+                  onclick={() =>
+                    controller.patch({
+                      collectVariant: variant.value,
+                      selection: [],
+                      preview: null,
+                      error: '',
+                    })}
+                  >{variant.name}{#if !variant.free}<Zap size={12} />1{/if}</button
+                >{/each}
+            </div>{/if}
           <p>
             Choose up to <b>{city?.capacity} {city?.capacity === 1 ? 'tile' : 'tiles'} total</b>: your city’s
             tile or directly adjacent tiles.
@@ -616,7 +664,11 @@
                 ><span class="choice-icon {resource}"><Icon size={21} /></span><span
                   ><strong>{pileText(choice.pile)}</strong><small>Tile {choice.position}</small></span
                 ><span class="choice-check"
-                  >{#if selected}<Check size={14} />{:else}<Plus size={13} />{/if}</span
+                  >{#if selected && city && city.maxPerTile > 1}{$session.selection.find(
+                      (c) =>
+                        c.position === choice.position &&
+                        JSON.stringify(c.pile) === JSON.stringify(choice.pile),
+                    )?.times}{:else if selected}<Check size={14} />{:else}<Plus size={13} />{/if}</span
                 ></button
               >{/each}
           </div>
@@ -634,7 +686,13 @@
             disabled={!$session.preview || $session.pending}
             onclick={() => controller.collect()}
             >{$session.pending ? 'Confirming…' : 'Collect resources'}<ArrowRight size={17} /></button
-          ><span class="action-cost">Costs 1 action · Activates your city</span>
+          ><span class="action-cost"
+            >{($session.view?.collectActions ?? []).find(
+              (a) => JSON.stringify(a.value) === JSON.stringify($session.collectVariant),
+            )?.free
+              ? 'Free action'
+              : 'Costs 1 action'} · Activates your city</span
+          >
         {:else if confirmEnd}
           <h2>End turn?</h2>
           <p>You have {totalActions} unused {totalActions === 1 ? 'action' : 'actions'}.</p>
@@ -652,11 +710,33 @@
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </section>
     {/if}
-    {#if $session.mode === 'settlers' && !$session.view?.explorationDecision}<SettlerPanel
+    {#if $session.mode === 'settlers' && !$session.view?.explorationDecision && !$session.view?.decision && !choiceDecision && !objectiveDecision}<SettlerPanel
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
     {#if $session.view?.explorationDecision}<ExplorationPanel {controller} />{/if}
+    {#if $session.view?.decision}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
+          {controller}
+          decision={$session.view.decision}
+          onHighlight={(position) => world?.highlightCoordinate(position)}
+        />{/key}{/if}
+    {#if $session.abilitiesOpen && $session.mode === 'overview' && !$session.view?.decision && !choiceDecision && !objectiveDecision}<AbilitiesPanel
+        {controller}
+        onHighlight={(position) => world?.highlightCoordinate(position)}
+      />{/if}
+    {#if $session.view?.civilizations?.length}<section
+        class="action-panel floating-panel"
+        aria-label="Choose civilization"
+      >
+        <h2>Choose civilization</h2>
+        <div class="decision-options">
+          {#each $session.view.civilizations as civilization}<button
+              disabled={$session.pending}
+              onclick={() => controller.submit(civilization.action)}
+              ><CivilizationEmblem civilization={civilization.name} />{civilization.name}</button
+            >{/each}
+        </div>
+      </section>{/if}
     <section
       class="activity floating-panel"
       hidden={!$session.activityOpen}
@@ -755,6 +835,7 @@
   {#if $session.mode === 'city'}<CityPanel {controller} />{/if}
   {#if $session.scorePlayer !== null}<ScoreDialog {controller} />{/if}
   {#if $session.wondersOpen && $session.seat !== undefined}<WondersDialog {controller} />{/if}
+  {#if $session.cardsOpen && $session.seat !== undefined}<ActionCardsDialog {controller} />{/if}
   <CardReveal {controller} />
   {#if $session.toast}<div class="toast" role="status"><Check size={16} />{$session.toast}</div>{/if}
   {#if $session.objectivesOpen && $session.seat !== undefined}

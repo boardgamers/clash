@@ -25,7 +25,7 @@ export const buildingInfo: Record<string, { icon: typeof Landmark; effect: strin
 };
 export const unitInfo: Record<
   UnitKind,
-  { icon: typeof Footprints; key: keyof RecruitSelection; effect: string }
+  { icon: typeof Footprints; key: Exclude<keyof RecruitSelection, 'leader'>; effect: string }
 > = {
   Settler: { icon: Footprints, key: 'settlers', effect: 'Explore and found new cities.' },
   Infantry: { icon: Swords, key: 'infantry', effect: 'Fight on land. Needs Tactics to move.' },
@@ -39,7 +39,8 @@ export const unitInfo: Record<
 };
 export function cityReason(reason: string | null, size = 1) {
   if (reason === 'Need more cities') return `You need ${size + 1} cities before this city can grow.`;
-  if (reason === 'Invalid replacement') return 'No pieces left in your supply.';
+  if (reason === 'Invalid replacement')
+    return 'Choose matching units on the map to replace pieces missing from your supply.';
   if (reason === 'Too many units') return 'The selection exceeds this city’s recruitment capacity.';
   return actionReason(reason).replace('Mising building:', 'Requires a');
 }

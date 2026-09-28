@@ -230,3 +230,11 @@ pub fn web_recruit_preview(
         .map_err(|e| JsValue::from_str(&e))?;
     serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
 }
+
+#[wasm_bindgen(js_name = "webQuery")]
+pub fn web_query(data: String, player: usize, query: String) -> Result<String, JsValue> {
+    let query = serde_json::from_str(&query).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let result = crate::web_view::query(&get_game(data), player, query)
+        .map_err(|e| JsValue::from_str(&e))?;
+    serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
+}
