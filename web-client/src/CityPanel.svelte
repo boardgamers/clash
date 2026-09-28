@@ -78,7 +78,9 @@
               ><info.icon size={21} />{item.name}{#if item.owned}<Check size={16} />{/if}</strong
             ><span>{info.effect}</span>{#if item.owned}<small>Built</small>{:else}<ResourceAmount
                 pile={item.payment}
-              /><small>{cityReason(item.reason, city?.size) || 'Available'}</small>{/if}</button
+              />{#if cityReason(item.reason, city?.size) || item.choices.length}<small
+                  >{cityReason(item.reason, city?.size) || 'Available'}</small
+                >{/if}{/if}</button
           >{/each}
       </div>
     {:else if tab === 'recruit'}
@@ -130,8 +132,10 @@
             <Smile size={26} />
             <h3>{item.mood}</h3>
             <p>Raise mood by {item.steps} {item.steps === 1 ? 'step' : 'steps'}.</p>
-            <ResourceAmount pile={item.payment} /><small>{item.reason ?? 'Costs 1 action'}</small><button
+            <ResourceAmount pile={item.payment} /><small>{cityReason(item.reason) || 'Costs 1 action'}</small
+            ><button
               class="primary"
+              title={item.reason ?? undefined}
               disabled={!item.action || $session.pending}
               onclick={() => item.action && controller.submit(item.action)}>Raise to {item.mood}</button
             >

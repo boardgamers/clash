@@ -285,18 +285,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
-.settler-destinations > strong,
-.settler-destinations > p {
-  grid-column: 1 / -1;
-}
-.settler-destinations > strong {
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.settler-destinations p,
-.settler-panel .feature-note {
+.settler-panel .settler-empty {
   font-size: 11px;
   line-height: 1.6;
   color: var(--muted);
@@ -315,16 +304,21 @@
 }
 .settler-confirm,
 .settler-found {
-  padding: 14px 0;
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 9px;
 }
-.settler-confirm small,
-.settler-found small {
-  font-size: 10px;
+.settler-panel .settler-action-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  font-size: 11px;
+}
+.settler-found button:disabled {
+  opacity: 1;
   color: var(--muted);
-  line-height: 1.5;
 }
 .play-layout .board-toolbar {
   width: 354px;

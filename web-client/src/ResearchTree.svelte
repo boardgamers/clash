@@ -18,7 +18,7 @@
   } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { resourceNames, type Resource, type AdvanceView } from './types';
-  import { pileText } from './model';
+  import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
@@ -134,9 +134,11 @@
                 >{#if advance.owned}<Check
                     size={16}
                     aria-label="Researched"
-                  />{:else if !advance.action}<LockKeyhole
+                  />{:else if !advance.action && (actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
                     size={13}
-                    aria-label={advance.reason ?? 'Unavailable'}
+                    aria-label={parent && !parent.owned
+                      ? `Needs ${parent.name}`
+                      : actionReason(advance.reason)}
                   />{/if}</span
               >
               <span class="research-summary">{presentation.summary}</span>
@@ -160,7 +162,7 @@
                       ? 'Available'
                       : parent && !advances.find((a) => a.id === parent.id)?.owned
                         ? `Needs ${parent.name}`
-                        : advance.reason}</span
+                        : actionReason(advance.reason)}</span
                   >{/if}</span
               >
             </button>
@@ -176,11 +178,14 @@
         <p>{selected.description}</p>
         {#if selected.bonus && Object.values(selected.bonus).some(Boolean)}<small
             >Research bonus: {pileText(selected.bonus)}</small
-          >{/if}{#if selected.reason && !selected.owned}<small>{selected.reason}</small>{/if}
+          >{/if}{#if actionReason(selected.reason) && !selected.owned}<small
+            >{actionReason(selected.reason)}</small
+          >{/if}
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
       <button
         class="primary"
+        title={selected.reason ?? undefined}
         disabled={!selected.action || $session.pending}
         onclick={() => selected?.action && controller.submit(selected.action)}
         >{$session.pending ? 'Confirming…' : selected.owned ? 'Researched' : `Research ${selected.name}`}

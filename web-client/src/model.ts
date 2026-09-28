@@ -9,6 +9,11 @@ export function pileText(pile: Pile): string {
   );
 }
 export { journal } from './journal.ts';
+// Turn availability is communicated once by the toolbar; keep item-specific restrictions.
+export function actionReason(reason: string | null | undefined): string {
+  if (!reason || reason === 'No actions left' || reason.startsWith('Wait for your turn')) return '';
+  return reason;
+}
 type TextPart = { text: string; resource?: Resource; position?: string };
 export function journalParts(text: string): TextPart[] {
   const names: Record<string, Resource> = {

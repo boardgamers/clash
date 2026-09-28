@@ -13,6 +13,7 @@ import {
   Ship,
 } from 'lucide-svelte';
 import type { RecruitSelection, UnitKind } from './types';
+import { actionReason } from './model';
 export const buildingInfo: Record<string, { icon: typeof Landmark; effect: string }> = {
   Academy: { icon: BookOpen, effect: 'Gain 2 ideas when built.' },
   Market: { icon: Store, effect: 'Recruit cavalry and elephants here.' },
@@ -36,5 +37,5 @@ export function cityReason(reason: string | null, size = 1) {
   if (reason === 'Need more cities') return `You need ${size + 1} cities before this city can grow.`;
   if (reason === 'Invalid replacement') return 'No pieces left in your supply.';
   if (reason === 'Too many units') return 'The selection exceeds this city’s recruitment capacity.';
-  return reason?.replace('Mising building:', 'Requires a') ?? '';
+  return actionReason(reason).replace('Mising building:', 'Requires a');
 }

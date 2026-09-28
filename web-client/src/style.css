@@ -450,7 +450,7 @@ small {
   pointer-events: none;
   transition: opacity 0.12s;
 }
-.city-map-label:is(.selected, .hovered, :hover, :focus-visible) .city-map-name {
+.city-map-label:is(.hovered, :hover, :focus-visible) .city-map-name {
   opacity: 1;
 }
 .city-map-label:disabled {
@@ -690,8 +690,9 @@ small {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #eae6d7;
-  border: 1px solid #d9d2bf;
+  background: var(--paper2);
+  border: 1px solid var(--line);
+  color: var(--ink);
   border-radius: 4px;
   padding: 10px 15px;
   font-size: 11px;
@@ -1798,6 +1799,7 @@ small {
   gap: 2px;
 }
 .board-actions button {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -1815,6 +1817,28 @@ small {
 }
 .dark .board-actions button {
   color: var(--ink);
+}
+.board-actions button.inspect-only {
+  color: var(--muted);
+}
+.board-toolbar .board-actions .action-inspect {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 3px;
+  right: 3px;
+}
+.board-actions button.end-turn-ready:not(:disabled) {
+  background: var(--green);
+  color: #fff8e8;
+  box-shadow: 0 0 0 2px #b5925550;
+}
+.board-actions button.end-turn-ready:hover:not(:disabled) {
+  background: #396957;
+}
+.dark .board-actions button.end-turn-ready:not(:disabled) {
+  background: #d8bc7d;
+  color: #263c30;
 }
 .table-tools {
   position: absolute;

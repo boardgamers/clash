@@ -114,6 +114,20 @@
   };
   let mapPositions = $derived(new Set($session.game?.map.tiles.map(([position]) => position) ?? []));
   let totalActions = $derived($session.game?.actions_left ?? 0);
+  let readyToEnd = $derived(!!$session.view?.canEndTurn && totalActions === 0);
+  let researchAvailable = $derived($session.view?.advances.some((a) => !!a.action));
+  let cityActionsAvailable = $derived(
+    $session.view?.cityActions.some(
+      (c) =>
+        c.buildings.some((b) => b.choices.length > 0) ||
+        c.recruits.some((r) => !r.reason && r.available > 0) ||
+        c.happiness.some((h) => !!h.action),
+    ),
+  );
+  let settlersAvailable = $derived(
+    !!$session.view?.stopMovement ||
+      $session.view?.settlers.some((u) => u.destinations.length > 0 || !!u.foundAction),
+  );
   let objectiveDecision = $derived($session.view?.objectiveDecision);
   let choiceDecision = $derived($session.view?.choiceDecision);
   let focusTerrain = $derived($session.game?.map.tiles.find(([p]) => p === $session.focus)?.[1]);
@@ -128,9 +142,11 @@
             ? 'Objective available'
             : $session.view?.stopMovement
               ? 'Moving settlers'
-              : $session.view?.canPlay
-                ? 'Your turn'
-                : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
+              : readyToEnd
+                ? 'Ready to end turn'
+                : $session.view?.canPlay
+                  ? 'Your turn'
+                  : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
     const escape = (event: KeyboardEvent) => {
@@ -305,7 +321,7 @@
           <h2>Loading game…</h2>
         </div>{/if}
       {#if boardError}<div class="map-warning" role="alert">{boardError}</div>{/if}
-      {#if $session.focus && $session.focus !== $session.city && typeof focusTerrain === 'string'}<div
+      {#if $session.mode === 'overview' && $session.focus && $session.focus !== $session.city && typeof focusTerrain === 'string'}<div
           class="tile-inspector"
         >
           <button
@@ -400,30 +416,50 @@
         >
         <button
           class:active={$session.mode === 'research'}
-          title="Research tree"
+          class:inspect-only={!researchAvailable}
+          title={researchAvailable ? 'Research tree' : 'View research · Browse advances and costs'}
           aria-label="Research tree"
           disabled={$session.seat === undefined}
-          onclick={openResearch}><GraduationCap size={21} /><span>Research</span></button
+          onclick={openResearch}
+          ><GraduationCap size={21} /><span>Research</span>{#if !researchAvailable}<Eye
+              class="action-inspect"
+              size={10}
+              aria-hidden="true"
+            />{/if}</button
         >
         <button
           class:active={$session.mode === 'city'}
+          class:inspect-only={!cityActionsAvailable}
           aria-label="Manage cities"
-          title="Build, recruit and improve happiness"
+          title={cityActionsAvailable
+            ? 'Build, recruit and improve happiness'
+            : 'View cities · Browse buildings, units and costs'}
           disabled={!city}
           onclick={() => {
             confirmEnd = false;
             controller.openCities();
-          }}><Hammer size={21} /><span>Cities</span></button
+          }}
+          ><Hammer size={21} /><span>Cities</span>{#if !cityActionsAvailable}<Eye
+              class="action-inspect"
+              size={10}
+              aria-hidden="true"
+            />{/if}</button
         >
         <button
           class:active={$session.mode === 'settlers'}
+          class:inspect-only={!settlersAvailable}
           aria-label="Move settlers and found cities"
-          title="Move settlers and found cities"
+          title={settlersAvailable ? 'Move settlers and found cities' : 'View settlers · Locate your units'}
           disabled={$session.seat === undefined}
           onclick={() => {
             confirmEnd = false;
             controller.openSettlers();
-          }}><Footprints size={21} /><span>Settlers</span></button
+          }}
+          ><Footprints size={21} /><span>Settlers</span>{#if !settlersAvailable}<Eye
+              class="action-inspect"
+              size={10}
+              aria-hidden="true"
+            />{/if}</button
         >
         <button
           title="Undo last action"
@@ -433,6 +469,7 @@
         >
         <button
           class:active={confirmEnd}
+          class:end-turn-ready={readyToEnd}
           title="End turn"
           aria-label="End turn"
           disabled={!$session.view?.canEndTurn || $session.pending}
