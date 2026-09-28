@@ -8,7 +8,8 @@
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "node --experimental-strip-types --test src/*.test.ts",
-    "build:bridge": "bash scripts/build-bridge.sh"
+    "build:bridge": "bash scripts/build-bridge.sh",
+    "publish:bgs": "node scripts/publish.mjs"
   },
   "dependencies": {
     "@boardgamers/protocol": "0.6.1",

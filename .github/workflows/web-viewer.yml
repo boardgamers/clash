@@ -1,0 +1,28 @@
+name: Web viewer
+on:
+  pull_request:
+    paths: ['web-client/**', 'server/**', 'Cargo.*', '.github/workflows/web-viewer.yml']
+  push:
+    branches: [feat/3d-web-viewer]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v3
+        with:
+          version: 2025.7.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web-client/package-lock.json
+      - run: rustup target add wasm32-unknown-unknown
+      - run: npm ci
+        working-directory: web-client
+      - run: npm run build:bridge && npm run check && npm test && npm run build
+        working-directory: web-client
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clash-viewer
+          path: web-client/dist/viewer.js

@@ -15,6 +15,8 @@ use crate::player::CostTrigger;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use serde_json::{Value, json};
+mod actions;
+pub use actions::recruit_preview;
 
 pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let seat = seat.filter(|i| *i < game.players.len() && game.player(*i).is_human());
@@ -27,7 +29,9 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                 Some(PersistentEventRequest::SelectHandCards(_))
             )
     });
-    let supported_phase = playing || objective_phase;
+    let moving = matches!(game.state, GameState::Movement(_)) && game.events.is_empty();
+    let choice = seat.and_then(|seat| choice_decision(game, seat));
+    let supported_phase = playing || objective_phase || moving || choice.is_some();
     let can_play = seat == Some(active) && playing;
     let players = game.players.iter().filter(|p| p.is_human()).map(|p| json!({
         "index": p.index, "name": game.player_name(p.index), "civilization": p.civilization.name,
@@ -35,7 +39,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "objectiveDecision": null, "canUndo": false, "canEndTurn": false});
+        return json!({"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false});
     };
     let p = game.player(seat);
     // Hidden cards use ID zero in the player-filtered state; never resolve them.
@@ -84,7 +88,38 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             "bonus":info.bonus.as_ref().map(|bonus| bonus.resources()),"unlocks":info.unlocked_building.map(|building| building.to_string())})
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
-    json!({"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),"canUndo":seat == active && game.can_undo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
+    json!({"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
+        "choiceDecision":choice,
+        "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
+        "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
+        "canUndo":seat == active && game.can_undo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
+}
+
+fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
+    use crate::resource::ResourceType;
+    use crate::resource_pile::ResourcePile;
+    let event = game.events.last()?;
+    if event.player.index != seat {
+        return None;
+    }
+    let handler = game.current_event_handler()?;
+    if handler.response.is_some() {
+        return None;
+    }
+    match &handler.request {
+        PersistentEventRequest::ResourceReward(request)
+            if request.reward.payment_options.default.amount() == 1 =>
+        {
+            let choices = ResourceType::all().into_iter().map(|r| ResourcePile::of(r,1))
+                .filter(|pile|request.reward.payment_options.is_valid_payment(pile))
+                .map(|pile|json!({"name":pile.to_string(),"pile":pile,"action":Action::Response(EventResponse::ResourceReward(pile.clone()))})).collect::<Vec<_>>();
+            Some(json!({"name":request.name,"choices":choices}))
+        }
+        PersistentEventRequest::BoolRequest(name) => Some(json!({"name":name,"choices":[
+            {"name":"Yes","action":Action::Response(EventResponse::Bool(true))},
+            {"name":"No","action":Action::Response(EventResponse::Bool(false))}]})),
+        _ => None,
+    }
 }
 
 fn objective_decision(game: &Game, seat: usize) -> Option<Value> {

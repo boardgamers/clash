@@ -1,8 +1,9 @@
 import { get, writable } from 'svelte/store';
 import { ChatController } from '@boardgamers/protocol/chat';
 import type { ViewerCommands } from '@boardgamers/protocol/viewer';
-import type { Bridge, Choice, Game, Move, Session, View } from './types';
+import type { Bridge, Choice, Game, Move, RecruitSelection, Session, View } from './types';
 import { journal } from './model';
+import { loadBridge } from './bridge';
 export class Controller {
   readonly session = writable<Session>({
     game: null,
@@ -10,6 +11,10 @@ export class Controller {
     city: null,
     focus: null,
     mode: 'overview',
+    selectedSettler: null,
+    destination: null,
+    recruits: {},
+    recruitPreview: null,
     selection: [],
     preview: null,
     error: '',
@@ -48,11 +53,7 @@ export class Controller {
   async load(raw: unknown) {
     if (typeof raw !== 'string') throw new Error('Clash expects a serialized game state.');
     if (!this.engine) {
-      const engine = (await import(
-        /* @vite-ignore */ new URL('engine/server.js', this.assetBase).href
-      )) as Bridge;
-      await engine.default();
-      this.engine = engine;
+      this.engine = await loadBridge();
     }
     if (this.destroyed) return;
     const old = get(this.session);
@@ -72,10 +73,21 @@ export class Controller {
       error: '',
       selection: [],
       preview: null,
-      mode: old.pending || view.objectiveDecision ? 'overview' : old.mode,
-      objectivesOpen: view.objectiveDecision ? false : old.objectivesOpen,
+      recruits: {},
+      recruitPreview: null,
+      destination: null,
+      selectedSettler: view.settlers.some((u) => u.id === old.selectedSettler)
+        ? old.selectedSettler
+        : (view.settlers[0]?.id ?? null),
+      mode: view.stopMovement
+        ? 'settlers'
+        : old.pending || view.objectiveDecision || view.choiceDecision
+          ? 'overview'
+          : old.mode,
+      objectivesOpen: view.objectiveDecision || view.choiceDecision ? false : old.objectivesOpen,
     });
     this.commands.replaceLog(journal(game).map((entry) => entry.text));
+    if (view.objectiveDecision || view.choiceDecision) this.closeActivity();
     if (old.pending) this.notify('Game updated.');
   }
   setPlayer(index?: number) {
@@ -86,6 +98,10 @@ export class Controller {
       preview: null,
       selectedAdvance: null,
       objectivesOpen: false,
+      recruits: {},
+      recruitPreview: null,
+      selectedSettler: null,
+      destination: null,
     });
     if (this.engine && this.raw) {
       const view = JSON.parse(this.engine.webView(this.raw, index)) as View;
@@ -100,12 +116,21 @@ export class Controller {
       preview: null,
       error: '',
       mode: 'overview',
+      recruits: {},
+      recruitPreview: null,
     });
   }
   selectTile(position: string) {
     const s = get(this.session);
     const city = s.view?.cities.find((c) => c.position === position);
-    if (s.mode === 'collect') {
+    if (s.mode === 'settlers') {
+      const unit = s.view?.settlers.find((u) => u.id === s.selectedSettler);
+      if (unit?.destinations.some((d) => d.position === position)) this.patch({ destination: position });
+      else {
+        const selected = s.view?.settlers.find((u) => u.position === position);
+        if (selected) this.patch({ selectedSettler: selected.id, destination: null });
+      }
+    } else if (s.mode === 'collect') {
       const choice = s.view?.cities
         .find((c) => c.position === s.city)
         ?.choices.find((c) => c.position === position);
@@ -116,6 +141,41 @@ export class Controller {
   beginCollect() {
     this.closeActivity();
     this.patch({ mode: 'collect', selection: [], preview: null, error: '', selectedAdvance: null });
+  }
+  openCities(position?: string) {
+    this.closeActivity();
+    this.patch({
+      mode: 'city',
+      city: position ?? get(this.session).city,
+      recruits: {},
+      recruitPreview: null,
+      error: '',
+    });
+  }
+  openSettlers() {
+    this.closeActivity();
+    const s = get(this.session);
+    this.patch({
+      mode: 'settlers',
+      selectedSettler: s.selectedSettler ?? s.view?.settlers[0]?.id ?? null,
+      destination: null,
+      error: '',
+    });
+  }
+  setRecruits(recruits: RecruitSelection) {
+    const s = get(this.session);
+    if (s.pending || s.seat === undefined || !s.city || !this.engine) return;
+    this.patch({ recruits, recruitPreview: null, error: '' });
+    if (!Object.values(recruits).some(Boolean)) return;
+    try {
+      this.patch({
+        recruitPreview: JSON.parse(
+          this.engine.webRecruitPreview(this.raw, s.seat, s.city, JSON.stringify(recruits)),
+        ),
+      });
+    } catch (error) {
+      this.patch({ error: String(error) });
+    }
   }
   toggleChoice(choice: Choice) {
     const s = get(this.session);

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { previewApi } from './scripts/preview-api';
 export default defineConfig({
+  publicDir: false,
   plugins: [svelte(), previewApi()],
   build: {
     lib: { entry: 'src/viewer.ts', name: 'Clash3DBundle', formats: ['iife'], fileName: () => 'viewer.js' },

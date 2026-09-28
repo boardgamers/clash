@@ -190,9 +190,7 @@ export class World {
           this.topDown ? 0 : 12.5,
           this.topDown ? 27 : 22,
           this.topDown ? 0.01 : 17,
-        ).multiplyScalar(
-          Math.max(1, 0.92 / this.camera.aspect) * (this.camera.aspect > 1.4 ? 0.85 : 1),
-        ),
+        ).multiplyScalar(Math.max(1, 0.92 / this.camera.aspect) * (this.camera.aspect > 1.4 ? 0.85 : 1)),
       );
     this.controls.update();
     this.invalidate();
@@ -375,6 +373,30 @@ export class World {
           const cityModel = this.building(playerColors[player.id] ?? '#bfa986');
           cityModel.position.set(x, 0.38, z);
           cityModel.rotation.y = 0.25;
+          const additions = Object.keys(city.city_pieces ?? {}).filter((k) => k !== 'wonders');
+          for (const [j, name] of additions.entries()) {
+            const annex = new THREE.Group();
+            const stone = this.material('#d5c6a0');
+            const angle = j * 2.4;
+            const tower = this.mesh(
+              name === 'obelisk'
+                ? new THREE.ConeGeometry(0.1, 0.85, 4)
+                : new THREE.BoxGeometry(0.22, name === 'fortress' ? 0.55 : 0.27, 0.26),
+              stone,
+            );
+            tower.position.y = name === 'obelisk' ? 0.42 : name === 'fortress' ? 0.27 : 0.14;
+            annex.add(tower);
+            if (name !== 'obelisk' && name !== 'fortress') {
+              const roof = this.mesh(
+                new THREE.ConeGeometry(0.23, 0.18, name === 'observatory' ? 12 : 4),
+                this.material(name === 'observatory' ? '#62887b' : '#a86042'),
+              );
+              roof.position.y = 0.35;
+              annex.add(roof);
+            }
+            annex.position.set(Math.cos(angle) * 0.66, 0, Math.sin(angle) * 0.64);
+            cityModel.add(annex);
+          }
           this.board.add(cityModel);
           const label = document.createElement('button');
           label.className = 'city-map-label';
@@ -389,7 +411,7 @@ export class World {
             node: label,
           });
         }
-        for (const unit of player.units ?? []) {
+        for (const [unitIndex, unit] of (player.units ?? []).entries()) {
           const [x, z] = positionXY(unit.position);
           const pawn = new THREE.Group();
           const color = this.material(playerColors[player.id] ?? '#bfa986');
@@ -401,17 +423,56 @@ export class World {
           pawn.add(head);
           const base = this.mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.04, 14), this.material('#e5d19e'));
           pawn.add(base);
-          pawn.position.set(x - 0.58, 0.4, z + 0.25);
+          if (unit.unit_type === 'Infantry') {
+            const spear = this.mesh(
+              new THREE.CylinderGeometry(0.013, 0.013, 0.56, 5),
+              this.material('#6b6042'),
+            );
+            spear.position.set(0.13, 0.28, 0);
+            pawn.add(spear);
+          } else if (unit.unit_type === 'Ship') {
+            const hull = this.mesh(new THREE.BoxGeometry(0.23, 0.13, 0.5), color);
+            hull.position.y = 0.07;
+            pawn.add(hull);
+            const sail = this.mesh(new THREE.BoxGeometry(0.25, 0.27, 0.018), this.material('#f4e8cc'));
+            sail.position.y = 0.4;
+            pawn.add(sail);
+          } else if (unit.unit_type === 'Cavalry' || unit.unit_type === 'Elephant') {
+            const mount = this.mesh(
+              new THREE.BoxGeometry(0.19, 0.2, 0.35),
+              this.material(unit.unit_type === 'Elephant' ? '#859187' : '#887258'),
+            );
+            mount.position.y = 0.13;
+            pawn.add(mount);
+          }
+          const stackIndex = (player.units ?? [])
+            .slice(0, unitIndex)
+            .filter((u) => u.position === unit.position).length;
+          pawn.position.set(
+            x - 0.58 + (stackIndex % 3) * 0.23,
+            0.4,
+            z + 0.25 + Math.floor(stackIndex / 3) * 0.23,
+          );
           this.board.add(pawn);
         }
       }
       if (this.selectionSignature === '') this.reset();
     }
-    const selected = s.mode === 'collect' ? s.selection.map((c) => c.position) : s.city ? [s.city] : [];
+    const settler = s.view?.settlers.find((u) => u.id === s.selectedSettler);
+    const selected =
+      s.mode === 'settlers'
+        ? [settler?.position, s.destination].filter((p): p is string => !!p)
+        : s.mode === 'collect'
+          ? s.selection.map((c) => c.position)
+          : s.city
+            ? [s.city]
+            : [];
     const available =
-      s.mode === 'collect'
-        ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
-        : [];
+      s.mode === 'settlers'
+        ? (settler?.destinations.map((d) => d.position) ?? [])
+        : s.mode === 'collect'
+          ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
+          : [];
     const selectionSig = JSON.stringify([selected, available]);
     if (selectionSig !== this.selectionSignature) {
       this.selectionSignature = selectionSig;

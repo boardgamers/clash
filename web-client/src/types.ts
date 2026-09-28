@@ -8,7 +8,7 @@ export type Terrain =
 export interface City {
   position: string;
   mood_state: string;
-  pieces?: Record<string, unknown>;
+  city_pieces?: Record<string, unknown>;
   activations?: number;
 }
 export interface Player {
@@ -92,6 +92,10 @@ export interface View {
   supportedPhase: boolean;
   players: PlayerView[];
   cities: CityView[];
+  cityActions: CityActions[];
+  settlers: SettlerView[];
+  stopMovement: Move | null;
+  choiceDecision?: { name: string; choices: { name: string; pile?: Pile; action: Move }[] } | null;
   advances: AdvanceView[];
   objectiveCards: {
     id: number;
@@ -115,9 +119,44 @@ export interface CollectionPreview {
   moodWillDecrease: boolean;
 }
 export interface Bridge {
-  default: (input?: unknown) => Promise<unknown>;
   webView: (state: string, seat?: number) => string;
   webCollectPreview: (state: string, seat: number, city: string, choices: string) => string;
+  webRecruitPreview: (state: string, seat: number, city: string, units: string) => string;
+}
+export type UnitKind = 'Settler' | 'Infantry' | 'Cavalry' | 'Elephant' | 'Ship';
+export type RecruitSelection = Partial<
+  Record<'settlers' | 'infantry' | 'cavalry' | 'elephants' | 'ships', number>
+>;
+export interface ActionOffer {
+  action: Move | null;
+  payment: Pile;
+  reason: string | null;
+}
+export interface CityActions {
+  position: string;
+  buildings: {
+    name: string;
+    owned: boolean;
+    required: string;
+    payment: Pile;
+    reason: string | null;
+    moodWillDecrease: boolean;
+    choices: { position: string | null; action: Move }[];
+  }[];
+  recruits: { type: UnitKind; payment: Pile; reason: string | null; available: number }[];
+  happiness: (ActionOffer & { steps: number; mood: string })[];
+}
+export interface SettlerView {
+  id: number;
+  position: string;
+  foundReason: string | null;
+  foundAction: Move | null;
+  destinations: { position: string; terrain: Terrain; payment: Pile; action: Move }[];
+}
+export interface RecruitPreview {
+  payment: Pile;
+  action: Move;
+  moodWillDecrease: boolean;
 }
 export interface JournalEntry {
   id: string;
@@ -144,7 +183,11 @@ export interface Session {
   seat?: number;
   city: string | null;
   focus: string | null;
-  mode: 'overview' | 'collect' | 'research';
+  mode: 'overview' | 'collect' | 'research' | 'city' | 'settlers';
+  selectedSettler: number | null;
+  destination: string | null;
+  recruits: RecruitSelection;
+  recruitPreview: RecruitPreview | null;
   selection: Selection[];
   preview: CollectionPreview | null;
   error: string;

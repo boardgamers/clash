@@ -66,6 +66,12 @@ test('viewer queries respect spectator and opponent seats and reject illegal cho
     ),
   );
   const full = JSON.parse(state);
+  const exhausted = { ...full, actions_left: 0 };
+  const exhaustedView: View = JSON.parse(
+    engine.webView(engine.stripSecret(JSON.stringify(exhausted), seat), seat),
+  );
+  assert.ok(exhaustedView.settlers.length > 0);
+  assert.ok(exhaustedView.settlers.every((u) => !u.foundAction && u.destinations.length === 0));
   const limited = JSON.parse(visible);
   assert.ok(full.players[1 - seat].action_cards.some((id: number) => id !== 0));
   assert.ok(limited.players[1 - seat].action_cards.every((id: number) => id === 0));
@@ -233,6 +239,78 @@ test('BGS lifecycle, chat acknowledgements, journal, and cleanup', async () => {
   assert.equal(chat.snapshot.messages.length, 0);
   client.destroy();
   assert.equal(client.emitter.emit('state', '{}'), false);
+});
+
+test('settlers move, found a second city, and unlock construction without exceeding the turn budget', async () => {
+  const setup = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(setup));
+  const p = setup.players[seat];
+  p.resources = { food: 2, wood: 4, ore: 4, ideas: 4, mood_tokens: 4 };
+  p.advances.push('Writing');
+  let state = JSON.stringify(setup);
+  const view = () => JSON.parse(engine.webView(engine.stripSecret(state, seat), seat)) as View;
+  const city = view().cities[0].position;
+  assert.equal(view().cityActions[0].buildings.find((b) => b.name === 'Academy')!.reason, 'Need more cities');
+  const destination = view().settlers[0].destinations.find((d) => d.terrain === 'Forest')!;
+  assert.ok(destination);
+  state = engine.tryMove(state, JSON.stringify(destination.action), seat);
+  assert.equal(JSON.parse(state).actions_left, 2);
+  if (view().stopMovement) state = engine.tryMove(state, JSON.stringify(view().stopMovement), seat);
+  const found = view().settlers[0].foundAction;
+  assert.ok(found);
+  state = engine.tryMove(state, JSON.stringify(found), seat);
+  assert.equal(view().cities.length, 2);
+  assert.equal(view().settlers.length, 0);
+  const academy = view()
+    .cityActions.find((c) => c.position === city)!
+    .buildings.find((b) => b.name === 'Academy')!;
+  assert.equal(academy.reason, null);
+  state = engine.tryMove(state, JSON.stringify(academy.choices[0].action), seat);
+  assert.equal(view().cities.find((c) => c.position === city)!.size, 2);
+  assert.equal(JSON.parse(state).actions_left, 0);
+  assert.ok(view().cityActions.every((c) => c.buildings.every((b) => b.choices.length === 0)));
+  assert.ok(view().settlers.every((u) => u.destinations.length === 0));
+});
+
+test('recruitment validates the whole selection, happiness uses mood, and temple bonuses can be chosen', async () => {
+  const setup = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(setup));
+  const p = setup.players[seat];
+  p.resources = { food: 2, wood: 4, ore: 4, mood_tokens: 4 };
+  p.advances.push('Myths');
+  const city = p.cities[0].position;
+  const expansion: View = JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(setup), seat), seat));
+  p.cities.push({ ...p.cities[0], position: expansion.settlers[0].destinations[0].position });
+  let state = JSON.stringify(setup);
+  let visible = engine.stripSecret(state, seat);
+  const recruit = JSON.parse(engine.webRecruitPreview(visible, seat, city, JSON.stringify({ infantry: 2 })));
+  assert.deepEqual(recruit.payment, { food: 2, ore: 2 });
+  assert.throws(() => engine.webRecruitPreview(visible, seat, city, JSON.stringify({ settlers: 3 })));
+  assert.throws(() => engine.webRecruitPreview(visible, 1 - seat, city, JSON.stringify({ infantry: 1 })));
+  assert.throws(() => engine.webRecruitPreview(visible, seat, 'Z99', JSON.stringify({ infantry: 1 })));
+  const recruited = JSON.parse(engine.tryMove(state, JSON.stringify(recruit.action), seat));
+  assert.equal(recruited.players[seat].units.filter((u: any) => u.unit_type === 'Infantry').length, 2);
+  assert.equal(recruited.actions_left, 2);
+  p.cities[0].mood_state = 'Neutral';
+  state = JSON.stringify(setup);
+  let view: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  const happy = view.cityActions[0].happiness[0];
+  assert.deepEqual(happy.payment, { mood_tokens: 1 });
+  state = engine.tryMove(state, JSON.stringify(happy.action), seat);
+  assert.equal(JSON.parse(state).players[seat].cities[0].mood_state, 'Happy');
+  view = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  const temple = view.cityActions[0].buildings.find((b) => b.name === 'Temple')!;
+  state = engine.tryMove(state, JSON.stringify(temple.choices[0].action), seat);
+  view = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  assert.equal(view.choiceDecision?.choices.length, 2);
+  assert.equal(
+    JSON.parse(engine.webView(engine.stripSecret(state, 1 - seat), 1 - seat)).choiceDecision,
+    null,
+  );
+  const bonus = view.choiceDecision!.choices.find((c) => c.pile?.culture_tokens)!;
+  state = engine.tryMove(state, JSON.stringify(bonus.action), seat);
+  assert.equal(JSON.parse(state).players[seat].resources.culture_tokens, 1);
+  assert.equal(JSON.parse(engine.webView(engine.stripSecret(state, seat), seat)).choiceDecision, null);
 });
 
 test('offset hex coordinates preserve the odd-column layout', () => {

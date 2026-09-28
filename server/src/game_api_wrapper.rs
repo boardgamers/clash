@@ -215,3 +215,18 @@ pub fn try_move(data: String, action: String, player: usize) -> Result<String, J
         .map(from_game)
         .map_err(|e| JsValue::from_str(&e))
 }
+
+#[wasm_bindgen(js_name = "webRecruitPreview")]
+pub fn web_recruit_preview(
+    data: String,
+    player: usize,
+    city: String,
+    units: String,
+) -> Result<String, JsValue> {
+    let units = serde_json::from_str(&units).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let city = serde_json::from_value(serde_json::Value::String(city))
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let result = crate::web_view::recruit_preview(&get_game(data), player, city, units)
+        .map_err(|e| JsValue::from_str(&e))?;
+    serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
+}
