@@ -272,11 +272,24 @@
         >
       </p>
     </div>
-    <div class="age-track" aria-label={`Age ${$session.game?.age ?? 1} of 6`}>
-      <span>THE AGES</span>{#each [1, 2, 3, 4, 5, 6] as age}<span
+    <div class="age-track" role="group" aria-label={`Age ${$session.game?.age ?? 1} of 6`}>
+      {#each [1, 2, 3, 4, 5, 6] as age}
+        <span
+          class="age-step"
           class:current={age === ($session.game?.age ?? 1)}
-          class:past={age < ($session.game?.age ?? 1)}>{['I', 'II', 'III', 'IV', 'V', 'VI'][age - 1]}</span
-        >{/each}
+          class:past={age < ($session.game?.age ?? 1)}
+          title={`Age ${age} of 6`}
+        >
+          {['I', 'II', 'III', 'IV', 'V', 'VI'][age - 1]}
+          {#if age === ($session.game?.age ?? 1)}
+            <small class="round-label"
+              >{($session.game?.round ?? 1) > 3
+                ? 'End of age'
+                : `Round ${$session.game?.round ?? 1}/3`}</small
+            >
+          {/if}
+        </span>
+      {/each}
     </div>
     <nav class="header-actions">
       {#if $session.seat !== undefined}
@@ -307,38 +320,27 @@
         ><BookOpen size={17} /> How to play</button
       >
     </nav>
+    {#if current}
+      <section class="resource-bar" aria-label="Your resources">
+        {#each resources as resource}{@const Icon = icons[resource]}
+          <div
+            class="resource"
+            role="img"
+            aria-label={`${resourceNames[resource]}: ${current.resources?.[resource] ?? 0}${current.resource_limit?.[resource] !== undefined ? `, storage limit ${current.resource_limit[resource]}` : ''}`}
+            title={`${resourceNames[resource]}${current?.resource_limit?.[resource] !== undefined ? ` · Storage limit ${current.resource_limit[resource]}` : ''}`}
+          >
+            <span class="resource-icon {resource}"><Icon size={18} strokeWidth={1.65} /></span><span
+              ><strong
+                >{current.resources?.[resource] ?? 0}{#if current.resource_limit?.[resource] !== undefined}<em
+                  >
+                    / {current.resource_limit[resource]}</em
+                  >{/if}</strong
+              ></span
+            >
+          </div>{/each}
+      </section>
+    {/if}
   </header>
-  <section class="resource-bar" aria-label="Your resources">
-    <div class="civilization-tag">
-      <span class="tiny-label">{$session.seat === undefined ? 'THE TABLE' : 'YOUR CIVILIZATION'}</span><strong
-        >{identity?.civilization ?? 'Spectator'}</strong
-      >
-    </div>
-    {#each resources as resource}{@const Icon = icons[resource]}
-      <div
-        class="resource"
-        role="img"
-        aria-label={`${resourceNames[resource]}: ${current?.resources?.[resource] ?? '—'}${current?.resource_limit?.[resource] !== undefined ? `, storage limit ${current.resource_limit[resource]}` : ''}`}
-        title={`${resourceNames[resource]}${current?.resource_limit?.[resource] !== undefined ? ` · Storage limit ${current.resource_limit[resource]}` : ''}`}
-      >
-        <span class="resource-icon {resource}"><Icon size={21} strokeWidth={1.65} /></span><span
-          ><small>{resourceNames[resource]}</small><strong
-            >{current
-              ? (current.resources?.[resource] ?? 0)
-              : '—'}{#if current?.resource_limit?.[resource] !== undefined}<em>
-                / {current.resource_limit[resource]}</em
-              >{/if}</strong
-          ></span
-        >
-      </div>{/each}
-    <div class="round-label">
-      {#if ($session.game?.round ?? 1) > 3}
-        <span class="tiny-label">END OF</span><strong class="status-label">Age</strong>
-      {:else}
-        <span class="tiny-label">ROUND</span><strong>{$session.game?.round ?? 1} <span>/ 3</span></strong>
-      {/if}
-    </div>
-  </section>
   <main class="play-layout">
     <section class="map-section" aria-label="The civilization map">
       <div class="map-world" bind:this={boardHost}></div>
