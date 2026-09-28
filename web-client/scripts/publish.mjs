@@ -21,6 +21,17 @@ async function api(url, options = {}) {
   return res.json();
 }
 const previous = await api(endpoint);
+const declaredPreferences = JSON.parse(await fs.readFile(path.join(root, 'bgs-preferences.json'), 'utf8'));
+const replacedPreferences = new Set([
+  'ui_scale',
+  'world_zoom_factor',
+  'color_profile',
+  ...declaredPreferences.map((pref) => pref.name),
+]);
+const preferences = [
+  ...(previous.preferences ?? []).filter((pref) => !replacedPreferences.has(pref.name)),
+  ...declaredPreferences,
+];
 const bytes = await fs.readFile(path.join(root, 'dist/viewer.js'));
 if (bytes.length > 25 * 1024 * 1024) throw new Error('Viewer exceeds the BGS upload limit');
 const hash = createHash('sha256').update(bytes).digest('hex');
@@ -33,6 +44,7 @@ console.log(
       bytes: bytes.length,
       sha256: hash,
       previousViewer: previous.viewer.url,
+      preferences,
       dryRun: process.argv.includes('--dry-run'),
     },
     null,
@@ -68,17 +80,21 @@ if (!process.argv.includes('--dry-run')) {
     chat: true,
   };
   const current = await api(endpoint);
-  if (JSON.stringify(current.viewer) !== JSON.stringify(previous.viewer))
-    throw new Error('The viewer changed during upload; version metadata was not changed');
+  if (
+    JSON.stringify(current.viewer) !== JSON.stringify(previous.viewer) ||
+    JSON.stringify(current.preferences) !== JSON.stringify(previous.preferences)
+  )
+    throw new Error('The viewer or preferences changed during upload; version metadata was not changed');
   await api(endpoint, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ viewer }),
+    body: JSON.stringify({ viewer, preferences }),
   });
   const saved = await api(endpoint);
   if (
     saved.viewer.url !== uploaded.url ||
     saved.viewer.topLevelVariable !== 'clash3d' ||
+    JSON.stringify(saved.preferences) !== JSON.stringify(preferences) ||
     JSON.stringify(saved.engine) !== JSON.stringify(previous.engine)
   )
     throw new Error('Published version verification failed; inspect the saved backup');

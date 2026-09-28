@@ -201,6 +201,7 @@ export interface Session {
   avatars: string[];
   reducedMotion: boolean;
   colorBlind: boolean;
+  sound: boolean;
   locale: string;
   selectedAdvance: string | null;
   toast: string;
@@ -217,3 +218,7 @@ export const resourceNames: Record<Resource, string> = {
 };
 export const resources = Object.keys(resourceNames) as Resource[];
 export const playerColors = ['#5086af', '#b96c4c', '#6d9173', '#ae92b6'];
+const accessiblePlayerColors = ['#0072b2', '#d55e00', '#009e73', '#cc79a7', '#746800', '#333333'];
+export const playerSymbol = (index: number) => ['●', '▲', '■', '◆', '✚', '✕'][index] ?? String(index + 1);
+export const playerColor = (index: number, colorBlind: boolean) =>
+  (colorBlind ? accessiblePlayerColors : playerColors)[index] ?? '#bfa986';

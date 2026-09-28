@@ -32,6 +32,9 @@ No production games, catalog records, or chat rooms are modified. Remaining acti
 - BGS registration/lifecycle, player/spectator handling, theme, avatars, and the shared chat controller/panel. Chat sends, failed-send drafts, updates/deletions, mentions, read reports, editing and translation handlers are supplied by the protocol package; the host decides which features are enabled.
 - Journal entries use action and resource pictograms. Setup is summarized as player, civilization, and original starting tile. Text equivalents are published with `replaceLog` so undo cannot leave stale entries.
 - Full-width board with floating action controls and dismissible journal/chat panels. The layout stays within the viewport on desktop and mobile; panels scroll internally. City/action controls are keyboard accessible, and the board renders only when changed.
+- Quiet synthesized interaction and confirmed-action sounds follow BGS's global `sound` preference. Muting stops active and scheduled notes immediately; sound starts only after interaction, and loading or reconnecting does not play past actions.
+- BGS's global `colorBlind` preference adds matching ownership symbols to player cards, city flags, and unit groups, with a distinct player palette. Resources keep their icons and labels; terrain keeps its physical shapes.
+- The map button saves `mapView` (`3d` or `2d`) with BGS's `updatePreference` command and restores it from incoming preferences. The overhead view pans without tilting. The standalone preview emulates these settings locally through its Preferences control.
 
 The preview host uses a real iframe and `postMessage` to exchange BGS events. Its chat is local test data, not a connection to a live BGS room. Production BGS integration still needs a staging playtest.
 
@@ -58,11 +61,11 @@ npm run publish:bgs -- --version=1 --dry-run
 npm run publish:bgs -- --version=1
 ```
 
-The script uploads the viewer, verifies the hosted bytes, then updates only the version's viewer configuration. It preserves the engine and visibility settings, checks for concurrent viewer changes, and saves the previous version document under `.engine/releases/` for rollback. Publishing is separate from pushing Git commits. The GitHub workflow builds and tests the viewer and retains the bundle as an artifact; it does not publish automatically.
+The script uploads the viewer, verifies the hosted bytes, then updates the version's viewer configuration and preference declarations from `bgs-preferences.json`. The shared `sound` and `colorBlind` declarations expose BGS's global controls; `mapView` is saved per user for Clash. Obsolete scale, zoom, and color-profile controls are replaced. The script preserves the engine, visibility, and unrelated preference declarations, checks for concurrent changes, and saves the previous version document under `.engine/releases/` for rollback. Publishing is separate from pushing Git commits. The GitHub workflow builds and tests the viewer and retains the bundle as an artifact; it does not publish automatically.
 
 ## Next slices
 
-The controls do not yet cover army/fleet movement, exploration, unit replacement/leader recruitment, wonders, action cards, cultural influence, combat, civilization selection, or most status/event choices. Free/custom-action variants and multi-city happiness selection are also pending. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Audio and advanced accessibility preferences need a separate pass.
+The controls do not yet cover army/fleet movement, exploration, unit replacement/leader recruitment, wonders, action cards, cultural influence, combat, civilization selection, or most status/event choices. Free/custom-action variants and multi-city happiness selection are also pending. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
 
 Before public release: complete action/phase coverage, verify against an actual BGS staging game (including reconnects, moderation, translation, and read-state persistence), and test larger multiplayer boards on mobile hardware.
 

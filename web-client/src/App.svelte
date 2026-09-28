@@ -42,7 +42,7 @@
   import ResourceAmount from './ResourceAmount.svelte';
   import type { Controller } from './controller';
   import type { Resource } from './types';
-  import { resources, resourceNames, playerColors } from './types';
+  import { resources, resourceNames, playerColor, playerSymbol } from './types';
   import { journal, journalParts, pileText } from './model';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
@@ -210,7 +210,7 @@
         {#each $session.view?.players ?? [] as player}<button
             class="player-card"
             class:active={player.index === $session.view?.activePlayer}
-            style={`--player:${playerColors[player.index]}`}
+            style={`--player:${playerColor(player.index, $session.colorBlind)}`}
             onclick={() => controller.commands.openPlayer(player.index)}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -226,7 +226,9 @@
             onblur={() => controller.commands.leavePlayer()}
           >
             <span class="player-emblem"
-              >{#if $session.avatars[player.index]}<img
+              >{#if $session.colorBlind}<span class="ownership-symbol" aria-hidden="true"
+                  >{playerSymbol(player.index)}</span
+                >{:else if $session.avatars[player.index]}<img
                   src={$session.avatars[player.index]}
                   alt=""
                 />{:else}<Landmark size={18} />{/if}</span
@@ -280,7 +282,7 @@
           title="Toggle top-down view"
           aria-label="Toggle top-down view"
           aria-pressed={$session.topDown}
-          onclick={() => controller.patch({ topDown: !$session.topDown })}><Layers size={18} /></button
+          onclick={() => controller.toggleMapView()}><Layers size={18} /></button
         ><button title="Reset camera" aria-label="Reset camera" onclick={() => world?.reset()}
           ><Maximize size={17} /></button
         >

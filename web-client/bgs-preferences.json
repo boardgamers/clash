@@ -1,0 +1,14 @@
+[
+  { "name": "sound", "label": "Sound", "type": "checkbox", "default": true },
+  { "name": "colorBlind", "label": "Color-blind mode", "type": "checkbox", "default": false },
+  {
+    "name": "mapView",
+    "label": "Map view",
+    "type": "select",
+    "default": "3d",
+    "items": [
+      { "name": "3d", "label": "3D" },
+      { "name": "2d", "label": "2D overview" }
+    ]
+  }
+]

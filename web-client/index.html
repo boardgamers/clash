@@ -28,6 +28,7 @@
       }
       #preview-bar button,
       #preview-bar select,
+      #preview-bar summary,
       #preview-bar a {
         font: 10px system-ui;
         background: #ffffff12;
@@ -41,6 +42,29 @@
       #preview-bar select option {
         color: #222;
         background: #eee;
+      }
+      #preview-preferences {
+        position: relative;
+        z-index: 20;
+      }
+      #preview-preferences summary {
+        list-style: none;
+      }
+      #preview-preferences > div {
+        position: absolute;
+        top: 28px;
+        right: 0;
+        width: 170px;
+        padding: 10px;
+        border-radius: 5px;
+        background: #233d35;
+        box-shadow: 0 4px 16px #0003;
+      }
+      #preview-preferences label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px;
       }
       #preview-bar #status {
         margin-left: auto;
@@ -91,8 +115,15 @@
         <option value="0">Player 1</option>
         <option value="1">Player 2</option>
         <option value="spectator">Spectator</option></select
-      ><button id="reset">New game</button><button id="theme">Theme</button
-      ><span id="status">Connecting to local game…</span>
+      ><button id="reset">New game</button><button id="theme">Theme</button>
+      <details id="preview-preferences">
+        <summary title="Preview BGS preferences">Preferences</summary>
+        <div>
+          <label><input id="pref-sound" type="checkbox" />Sound</label>
+          <label><input id="pref-colorBlind" type="checkbox" />Color-blind mode</label>
+        </div>
+      </details>
+      <span id="status">Connecting to local game…</span>
     </div>
     <div id="host-error" role="alert"></div>
     <iframe title="Clash of Cultures" src="/viewer.html"></iframe>

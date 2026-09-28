@@ -1088,6 +1088,10 @@ small {
 .colorblind .player-emblem {
   border: 2px solid currentColor;
 }
+.ownership-symbol {
+  font: 18px system-ui;
+  line-height: 1;
+}
 @media (min-width: 1550px) {
   .play-layout {
     grid-template-columns: minmax(0, 1fr) 380px;

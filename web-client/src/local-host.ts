@@ -11,6 +11,30 @@ let queued = false;
 let journal: string[] = [];
 const send = (event: string, payload?: unknown) =>
   frame.contentWindow?.postMessage({ source: 'clash-host', event, payload }, location.origin);
+const preferences: Record<string, unknown> = { locale: 'en', sound: true, colorBlind: false, mapView: '3d' };
+try {
+  const saved = JSON.parse(localStorage.getItem('clash-preview-preferences') ?? '{}');
+  for (const key of ['sound', 'colorBlind'])
+    if (typeof saved[key] === 'boolean') preferences[key] = saved[key];
+  if (saved.mapView === '2d') preferences.mapView = '2d';
+} catch {}
+function savePreference(name: string, value: unknown) {
+  if (!(
+    (['sound', 'colorBlind'].includes(name) && typeof value === 'boolean') ||
+    (name === 'mapView' && (value === '2d' || value === '3d'))
+  ))
+    return;
+  preferences[name] = value;
+  try {
+    localStorage.setItem('clash-preview-preferences', JSON.stringify(preferences));
+  } catch {}
+  send('preferences', preferences);
+}
+for (const name of ['sound', 'colorBlind']) {
+  const input = document.querySelector<HTMLInputElement>(`#pref-${name}`)!;
+  input.checked = preferences[name] === true;
+  input.addEventListener('change', () => savePreference(name, input.checked));
+}
 function showError(message: string) {
   document.querySelector('#host-error')!.textContent = message;
 }
@@ -76,11 +100,12 @@ addEventListener('message', async (event) => {
   const { event: kind, payload } = event.data;
   if (kind === 'mounted') {
     ready = true;
-    send('preferences', { locale: 'en' });
+    send('preferences', preferences);
     send('theme', { dark });
     await refresh(true);
   }
   if (kind === 'fetchState') await refresh(true);
+  if (kind === 'update:preference') savePreference(payload.name, payload.value);
   if (kind === 'move') {
     try {
       showError('');

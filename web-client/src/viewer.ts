@@ -11,6 +11,16 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
   document.head.append(style);
   const controller = new Controller(commands, assetBase);
   const app = mount(App, { target, props: { controller } });
+  const unlockAudio = (event: Event) => {
+    if (event.isTrusted) controller.audio.unlock();
+  };
+  const clickAudio = (event: Event) => {
+    if (event.isTrusted && event.target instanceof Element && event.target.closest('button:not(:disabled)'))
+      controller.audio.play('select');
+  };
+  target.addEventListener('pointerdown', unlockAudio, true);
+  target.addEventListener('keydown', unlockAudio, true);
+  target.addEventListener('click', clickAudio, true);
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   controller.patch({ reducedMotion: motion.matches });
   return {
@@ -26,18 +36,18 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
       controller.patch({ avatars });
     },
     onPreferences(prefs) {
-      controller.patch({
-        locale: typeof prefs.locale === 'string' ? prefs.locale : 'en',
-        colorBlind: prefs.colorBlind === true,
-      });
+      controller.setPreferences(prefs);
     },
     onTheme({ dark }) {
       controller.patch({ dark });
     },
     onError(error) {
-      controller.patch({ error: String(error), pending: false });
+      controller.handleError(error);
     },
     destroy() {
+      target.removeEventListener('pointerdown', unlockAudio, true);
+      target.removeEventListener('keydown', unlockAudio, true);
+      target.removeEventListener('click', clickAudio, true);
       controller.destroy();
       void unmount(app);
       style.remove();

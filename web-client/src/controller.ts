@@ -4,6 +4,8 @@ import type { ViewerCommands } from '@boardgamers/protocol/viewer';
 import type { Bridge, Choice, Game, Move, RecruitSelection, Session, View } from './types';
 import { journal } from './model';
 import { loadBridge } from './bridge';
+import { readPreferences } from './preferences';
+import { GameAudio, moveSound } from './audio';
 export class Controller {
   readonly session = writable<Session>({
     game: null,
@@ -28,12 +30,15 @@ export class Controller {
     avatars: [],
     reducedMotion: false,
     colorBlind: false,
+    sound: false,
     locale: 'en',
     selectedAdvance: null,
     toast: '',
     topDown: false,
   });
   readonly chat = new ChatController();
+  readonly audio = new GameAudio();
+  private submittedMove: Move | null = null;
   private raw = '';
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -50,6 +55,20 @@ export class Controller {
   patch(patch: Partial<Session>) {
     this.session.update((s) => ({ ...s, ...patch }));
   }
+  setPreferences(preferences: Record<string, unknown>) {
+    const next = readPreferences(preferences);
+    this.audio.setEnabled(next.sound);
+    this.patch(next);
+  }
+  toggleMapView() {
+    const topDown = !get(this.session).topDown;
+    if (this.commands.updatePreference('mapView', topDown ? '2d' : '3d')) this.patch({ topDown });
+  }
+  handleError(error: unknown) {
+    this.submittedMove = null;
+    this.audio.play('error');
+    this.patch({ error: String(error), pending: false });
+  }
   async load(raw: unknown) {
     if (typeof raw !== 'string') throw new Error('Clash expects a serialized game state.');
     if (!this.engine) {
@@ -58,6 +77,7 @@ export class Controller {
     if (this.destroyed) return;
     const old = get(this.session);
     const game = JSON.parse(raw) as Game;
+    const changed = raw !== this.raw;
     this.raw = raw;
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
     const city = view.cities.some((c) => c.position === old.city)
@@ -88,7 +108,11 @@ export class Controller {
     });
     this.commands.replaceLog(journal(game).map((entry) => entry.text));
     if (view.objectiveDecision || view.choiceDecision) this.closeActivity();
-    if (old.pending) this.notify('Game updated.');
+    if (old.pending && changed) {
+      this.audio.play(moveSound(this.submittedMove));
+      this.notify('Game updated.');
+    }
+    this.submittedMove = null;
   }
   setPlayer(index?: number) {
     this.patch({
@@ -121,6 +145,7 @@ export class Controller {
     });
   }
   selectTile(position: string) {
+    this.audio.play('select');
     const s = get(this.session);
     const city = s.view?.cities.find((c) => c.position === position);
     if (s.mode === 'settlers') {
@@ -204,8 +229,9 @@ export class Controller {
     const s = get(this.session);
     if (s.pending || s.seat === undefined || s.view?.activePlayer !== s.seat) return;
     this.patch({ pending: true, error: '' });
+    this.submittedMove = move;
     if (!this.commands.move(JSON.stringify(move))) {
-      this.patch({ pending: false, error: 'The action could not be sent. Please try again.' });
+      this.handleError('The action could not be sent. Please try again.');
       return;
     }
     this.refreshTimer = setTimeout(() => {
@@ -235,5 +261,6 @@ export class Controller {
     clearTimeout(this.timer);
     clearTimeout(this.refreshTimer);
     this.chatOff();
+    this.audio.destroy();
   }
 }

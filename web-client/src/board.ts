@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
-import { playerColors } from './types';
+import { playerColor, playerSymbol } from './types';
 import { positionXY } from './model';
 
 const terrainColor: Record<string, string> = {
@@ -117,8 +117,6 @@ export class World {
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
       this.controls.enableZoom = true;
-      this.controls.enableRotate = true;
-      this.controls.touches.ONE = THREE.TOUCH.ROTATE;
       this.renderer.domElement.style.touchAction = 'none';
       this.reset();
     });
@@ -182,6 +180,15 @@ export class World {
     this.invalidate();
   }
   reset() {
+    this.renderer.domElement.setAttribute(
+      'aria-label',
+      `${this.topDown ? 'Overhead' : '3D'} civilization map. Select a city or terrain tile. Drag to ${this.topDown ? 'pan' : 'orbit'}; scroll to zoom.`,
+    );
+    this.controls.enableRotate = !this.topDown;
+    this.controls.minPolarAngle = this.topDown ? 0 : 0.08;
+    this.controls.maxPolarAngle = this.topDown ? 0 : Math.PI * 0.43;
+    this.controls.touches.ONE = this.topDown ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
+    this.controls.mouseButtons.LEFT = this.topDown ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     this.controls.target.copy(this.center);
     this.camera.position
       .copy(this.center)
@@ -312,13 +319,45 @@ export class World {
       }
     }
   }
+  private ownershipBadge(index: number) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 64;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = '#fff7e6';
+    context.strokeStyle = '#2d392f';
+    context.lineWidth = 3;
+    context.beginPath();
+    context.arc(32, 32, 29, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
+    context.fillStyle = '#25372e';
+    context.font = 'bold 42px system-ui';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(playerSymbol(index), 32, 33);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    this.textures.add(texture);
+    const material = new THREE.SpriteMaterial({ map: texture, depthTest: false, toneMapped: false });
+    this.materials.add(material);
+    const badge = new THREE.Sprite(material);
+    badge.scale.set(0.42, 0.42, 1);
+    badge.renderOrder = 2;
+    return badge;
+  }
   private clearBoard() {
     this.board.traverse((o) => {
-      if (o instanceof THREE.Mesh) {
-        o.geometry.dispose();
-        this.geometries.delete(o.geometry);
+      if (o instanceof THREE.Mesh || o instanceof THREE.Sprite) {
+        if (o instanceof THREE.Mesh) {
+          o.geometry.dispose();
+          this.geometries.delete(o.geometry);
+        }
         const mats = Array.isArray(o.material) ? o.material : [o.material];
         mats.forEach((m) => {
+          if (m instanceof THREE.SpriteMaterial && m.map) {
+            m.map.dispose();
+            this.textures.delete(m.map);
+          }
           m.dispose();
           this.materials.delete(m);
         });
@@ -336,6 +375,7 @@ export class World {
       s.game.players.map((p) => [p.cities, p.units]),
       s.view?.players,
       s.seat,
+      s.colorBlind,
     ]);
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
@@ -370,9 +410,14 @@ export class World {
       for (const player of s.game.players) {
         for (const [i, city] of (player.cities ?? []).entries()) {
           const [x, z] = positionXY(city.position);
-          const cityModel = this.building(playerColors[player.id] ?? '#bfa986');
+          const cityModel = this.building(playerColor(player.id, s.colorBlind));
           cityModel.position.set(x, 0.38, z);
           cityModel.rotation.y = 0.25;
+          if (s.colorBlind) {
+            const badge = this.ownershipBadge(player.id);
+            badge.position.set(0.6, 1.05, -0.2);
+            cityModel.add(badge);
+          }
           const additions = Object.keys(city.city_pieces ?? {}).filter((k) => k !== 'wonders');
           for (const [j, name] of additions.entries()) {
             const annex = new THREE.Group();
@@ -400,8 +445,8 @@ export class World {
           this.board.add(cityModel);
           const label = document.createElement('button');
           label.className = 'city-map-label';
-          label.style.setProperty('--player-color', playerColors[player.id] ?? '#bfa986');
-          label.textContent = `${player.civilization} · ${i === 0 ? 'Capital' : city.position}`;
+          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind));
+          label.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization} · ${i === 0 ? 'Capital' : city.position}`;
           label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position}`);
           label.onclick = () => this.pick(city.position);
           this.labelHost.append(label);
@@ -414,7 +459,7 @@ export class World {
         for (const [unitIndex, unit] of (player.units ?? []).entries()) {
           const [x, z] = positionXY(unit.position);
           const pawn = new THREE.Group();
-          const color = this.material(playerColors[player.id] ?? '#bfa986');
+          const color = this.material(playerColor(player.id, s.colorBlind));
           const body = this.mesh(new THREE.ConeGeometry(0.085, 0.27, 7), color);
           body.position.y = 0.19;
           pawn.add(body);
@@ -448,6 +493,11 @@ export class World {
           const stackIndex = (player.units ?? [])
             .slice(0, unitIndex)
             .filter((u) => u.position === unit.position).length;
+          if (s.colorBlind && stackIndex === 0) {
+            const badge = this.ownershipBadge(player.id);
+            badge.position.set(-0.08, 0.65, 0);
+            pawn.add(badge);
+          }
           pawn.position.set(
             x - 0.58 + (stackIndex % 3) * 0.23,
             0.4,
