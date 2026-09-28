@@ -379,12 +379,12 @@
         <div class="sr-only" id="sea-route-help" aria-live="polite">
           {$session.seaRouteStart
             ? `Sea routes from ${$session.seaRouteStart}. Arrow keys choose another sea tile.`
-            : 'Map guide. Hover or select a sea tile; arrow keys cycle tiles. Dashed shortcuts require Navigation.'}
+            : 'Toggle all sea routes. Hover a sea tile to preview its routes. When enabled, select a sea tile or use arrow keys to focus its routes. Dashed shortcuts require Navigation.'}
         </div>
         <div class="map-control-help">
           <button
             class:active={$session.seaRoutes && $session.mode === 'overview'}
-            aria-label="Show sea routes"
+            aria-label="Show all sea routes"
             aria-pressed={$session.seaRoutes && $session.mode === 'overview'}
             aria-describedby="sea-route-tooltip sea-route-help"
             onpointerenter={() => (seaTooltipDismissed = false)}
@@ -408,7 +408,7 @@
             <strong>Sea-route guide</strong>
             <div><i class="route-line" aria-hidden="true"></i>Connected sea tiles</div>
             <div><i class="route-line dashed" aria-hidden="true"></i>Shortcut requiring Navigation</div>
-            <p>Hover a sea tile to trace its routes.</p>
+            <p>Hover a sea tile to preview. Click here to show all routes.</p>
           </div>
         </div>
         <span></span>

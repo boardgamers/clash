@@ -22,6 +22,8 @@ export class World {
   private board = new THREE.Group();
   private rings = new THREE.Group();
   private seaOverlay = new SeaOverlay();
+  private seaGuide = false;
+  private seaPreviewAllowed = false;
   private seaRouteStart: string | null = null;
   private tiles = new Map<string, THREE.Mesh>();
   private pieces: THREE.Group[] = [];
@@ -213,7 +215,14 @@ export class World {
     const changed = this.hovered !== position;
     if (audible && changed && position && this.canPick(position) && !this.gesture.dragging) this.hover();
     this.hovered = position;
-    this.seaOverlay.setFocus(this.seaOverlay.hasWater(position) ? position : this.seaRouteStart);
+    this.seaOverlay.setFocus(
+      this.seaGuide
+        ? this.seaRouteStart
+        : this.seaPreviewAllowed && this.seaOverlay.hasWater(position)
+          ? position
+          : null,
+      this.seaGuide,
+    );
     this.renderer.domElement.style.cursor = this.gesture.dragging
       ? 'grabbing'
       : this.pending
@@ -329,7 +338,7 @@ export class World {
         ).multiplyScalar(
           Math.max(1, 0.92 / this.camera.aspect) *
             (this.camera.aspect > 1.4 ? 0.85 : 1) *
-            (this.seaOverlay.group.visible ? 1.15 : 1),
+            (this.seaGuide ? 1.15 : 1),
         ),
       );
     this.controls.update();
@@ -505,9 +514,17 @@ export class World {
   update(s: Session) {
     if (!s.game) return;
     const seaGuide = s.seaRoutes && s.mode === 'overview';
-    const guideChanged = seaGuide !== this.seaOverlay.group.visible;
+    const guideChanged = seaGuide !== this.seaGuide;
+    this.seaGuide = seaGuide;
+    this.seaPreviewAllowed =
+      s.mode === 'overview' &&
+      !s.pending &&
+      !s.view?.decision &&
+      !s.view?.explorationDecision &&
+      !s.view?.choiceDecision &&
+      !s.view?.objectiveDecision;
     this.seaRouteStart = s.seaRouteStart;
-    this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? [], seaGuide);
+    this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? []);
     this.pending = s.pending;
     const exploration = s.view?.explorationDecision;
     const placement =

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { positionXY } from './model';
-import { seaArea, seaConnections, seaEdgePoint } from './sea-routes';
+import { positionXY } from './model.ts';
+import { seaArea, seaConnections, seaEdgePoint } from './sea-routes.ts';
 import type { Terrain } from './types';
 
 /** Read-only geography overlay. It never creates or submits game actions. */
@@ -10,6 +10,7 @@ export class SeaOverlay {
   private water = new Set<string>();
   private connections: [string, string][] = [];
   private focus: string | null = null;
+  private showAll = false;
   private shortcuts: [string, string][] = [];
   private visuals: {
     positions: string[];
@@ -21,9 +22,7 @@ export class SeaOverlay {
   hasWater(position: string | null): position is string {
     return !!position && this.water.has(position);
   }
-  update(tiles: [string, Terrain][], paths: string[][], enabled: boolean) {
-    this.group.visible = enabled;
-    if (!enabled) return;
+  update(tiles: [string, Terrain][], paths: string[][]) {
     const signature = JSON.stringify([tiles, paths]);
     if (signature === this.signature) return;
     this.dispose();
@@ -79,7 +78,7 @@ export class SeaOverlay {
     this.group.traverse((o) => {
       o.renderOrder = 3;
     });
-    this.setFocus(this.focus);
+    this.setFocus(this.focus, this.showAll);
   }
   private material(positions: string[], color: string, base: number, navigation = false) {
     const material = new THREE.MeshBasicMaterial({
@@ -93,8 +92,10 @@ export class SeaOverlay {
     this.visuals.push({ positions, material, base, navigation });
     return material;
   }
-  setFocus(position: string | null) {
+  setFocus(position: string | null, showAll = false) {
     this.focus = position;
+    this.showAll = showAll;
+    this.group.visible = showAll || this.hasWater(position);
     const area = seaArea(position, this.connections);
     const reachable = new Set(area);
     for (const [from, to] of this.shortcuts) {
@@ -103,7 +104,7 @@ export class SeaOverlay {
     }
     for (const { positions, material, base, navigation } of this.visuals) {
       const relevant = navigation ? area : reachable;
-      material.opacity = !position || positions.some((p) => relevant.has(p)) ? base : 0.12;
+      material.opacity = !position || positions.some((p) => relevant.has(p)) ? base : showAll ? 0.12 : 0;
     }
   }
   dispose() {
