@@ -15,6 +15,7 @@
     Drama,
     Hammer,
     BookOpen,
+    Map,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { resourceNames, type Resource, type AdvanceView } from './types';
@@ -174,8 +175,19 @@
   {#if selected}
     <section class="research-detail" aria-label="Research details">
       <div>
-        <h3>{selected.name}</h3>
-        <p>{selected.description}</p>
+        <h3>
+          {selected.name}{#if selected.group === 'Seafaring'}<button
+              class="icon-button sea-map-link"
+              aria-label="Show sea routes on map"
+              title="Show connected seas and Navigation shortcuts on the map"
+              onclick={() => controller.showSeaRoutes()}><Map size={18} /></button
+            >{/if}
+        </h3>
+        <p>
+          {selected.id === 'Navigation'
+            ? 'Ships sail through connected sea tiles. Navigation adds a clockwise or counterclockwise shortcut around the edge to the next sea area. Unexplored regions must be explored before sailing farther.'
+            : selected.description}
+        </p>
         {#if selected.bonus && Object.values(selected.bonus).some(Boolean)}<small
             >Research bonus: {pileText(selected.bonus)}</small
           >{/if}{#if actionReason(selected.reason) && !selected.owned}<small

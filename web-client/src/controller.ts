@@ -9,6 +9,8 @@ import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
 export class Controller {
   readonly session = writable<Session>({
+    seaRoutes: false,
+    seaRouteStart: null,
     game: null,
     view: null,
     city: null,
@@ -100,6 +102,9 @@ export class Controller {
     this.patch({
       game,
       view,
+      seaRouteStart: game.map.tiles.some(([p, t]) => p === old.seaRouteStart && t === 'Water')
+        ? old.seaRouteStart
+        : null,
       city,
       focus: old.focus ?? city,
       pending: false,
@@ -178,6 +183,11 @@ export class Controller {
   selectTile(position: string) {
     this.audio.play('select');
     const s = get(this.session);
+    if (s.seaRoutes && s.mode === 'overview') {
+      if (s.game?.map.tiles.some(([p, terrain]) => p === position && terrain === 'Water'))
+        this.patch({ seaRouteStart: position });
+      return;
+    }
     const city = s.view?.cities.find((c) => c.position === position);
     if (s.mode === 'settlers') {
       const unit = s.view?.settlers.find((u) => u.id === s.selectedSettler);
@@ -193,6 +203,29 @@ export class Controller {
       if (choice) this.toggleChoice(choice);
     } else if (city) this.selectCity(position);
     else this.patch({ focus: position });
+  }
+  showSeaRoutes(show = true) {
+    this.closeActivity();
+    this.patch({
+      seaRoutes: show,
+      seaRouteStart: null,
+      mode: 'overview',
+      error: '',
+      selection: [],
+      preview: null,
+    });
+  }
+  nextSeaRoute(direction: number) {
+    const s = get(this.session);
+    const water = (s.game?.map.tiles ?? [])
+      .filter(([, terrain]) => terrain === 'Water')
+      .map(([p]) => p)
+      .sort();
+    if (!water.length) return;
+    const index = water.indexOf(s.seaRouteStart ?? '');
+    const next =
+      index < 0 ? (direction > 0 ? 0 : water.length - 1) : (index + direction + water.length) % water.length;
+    this.patch({ seaRouteStart: water[next] });
   }
   beginCollect() {
     this.closeActivity();

@@ -4,6 +4,7 @@ import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
 import { positionXY } from './model';
 import { MapGesture } from './map-gesture';
+import { SeaOverlay } from './sea-overlay';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -20,6 +21,8 @@ export class World {
   private controls: OrbitControls;
   private board = new THREE.Group();
   private rings = new THREE.Group();
+  private seaOverlay = new SeaOverlay();
+  private seaRouteStart: string | null = null;
   private tiles = new Map<string, THREE.Mesh>();
   private pieces: THREE.Group[] = [];
   private hoverRing: THREE.Mesh;
@@ -118,6 +121,7 @@ export class World {
     this.hoverRing.visible = false;
     this.hoverRing.castShadow = false;
     this.scene.add(this.hoverRing);
+    this.scene.add(this.seaOverlay.group);
     const referenceMaterial = new THREE.MeshBasicMaterial({ color: '#fff3bd', depthTest: false });
     this.materials.add(referenceMaterial);
     this.referenceRing = this.mesh(new THREE.TorusGeometry(1.01, 0.045, 6, 6), referenceMaterial);
@@ -209,6 +213,7 @@ export class World {
     const changed = this.hovered !== position;
     if (audible && changed && position && this.canPick(position) && !this.gesture.dragging) this.hover();
     this.hovered = position;
+    this.seaOverlay.setFocus(this.seaOverlay.hasWater(position) ? position : this.seaRouteStart);
     this.renderer.domElement.style.cursor = this.gesture.dragging
       ? 'grabbing'
       : this.pending
@@ -321,7 +326,11 @@ export class World {
           this.topDown ? 0 : 12.5,
           this.topDown ? 27 : 22,
           this.topDown ? 0.01 : 17,
-        ).multiplyScalar(Math.max(1, 0.92 / this.camera.aspect) * (this.camera.aspect > 1.4 ? 0.85 : 1)),
+        ).multiplyScalar(
+          Math.max(1, 0.92 / this.camera.aspect) *
+            (this.camera.aspect > 1.4 ? 0.85 : 1) *
+            (this.seaOverlay.group.visible ? 1.15 : 1),
+        ),
       );
     this.controls.update();
     this.invalidate();
@@ -495,6 +504,10 @@ export class World {
   }
   update(s: Session) {
     if (!s.game) return;
+    const seaGuide = s.seaRoutes && s.mode === 'overview';
+    const guideChanged = seaGuide !== this.seaOverlay.group.visible;
+    this.seaRouteStart = s.seaRouteStart;
+    this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? [], seaGuide);
     this.pending = s.pending;
     const exploration = s.view?.explorationDecision;
     const placement =
@@ -732,11 +745,17 @@ export class World {
         this.rings.add(ring);
       }
     }
+    if (seaGuide) {
+      this.selectable = new Set(
+        s.game.map.tiles.filter(([, terrain]) => terrain === 'Water').map(([p]) => p),
+      );
+      this.rings.visible = false;
+    } else this.rings.visible = true;
     for (const label of this.labelPositions) {
       label.node.classList.toggle('selected', label.position === focusedPosition);
       label.node.disabled = !this.canPick(label.position);
     }
-    if (s.topDown !== this.topDown) {
+    if (s.topDown !== this.topDown || guideChanged) {
       this.topDown = s.topDown;
       this.reset();
     }
@@ -745,6 +764,7 @@ export class World {
   }
   destroy() {
     this.disposed = true;
+    this.seaOverlay.dispose();
     cancelAnimationFrame(this.frame);
     this.resize.disconnect();
     this.controls.dispose();

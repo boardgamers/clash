@@ -1970,13 +1970,25 @@ small {
   .city-dock {
     bottom: 12px;
     left: 12px;
-    max-width: calc(100% - 160px);
+    max-width: calc(100% - 205px);
   }
   .city-dock button {
-    min-width: 172px;
+    min-width: 0;
+    width: 100%;
+    flex-shrink: 0;
+    gap: 6px;
+  }
+  .city-dock button > span:nth-child(2) {
+    min-width: 0;
+  }
+  .city-dock button strong,
+  .city-dock button small {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .city-dock button .city-thumb {
-    width: 26px;
+    display: none;
   }
   .map-controls {
     bottom: 12px;

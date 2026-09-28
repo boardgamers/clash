@@ -37,6 +37,11 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let exploration = seat.and_then(|seat| exploration_decision(game, seat));
     let supported_phase = playing || objective_phase || moving || choice.is_some() || exploration.is_some();
     let can_play = seat == Some(active) && playing;
+    // A map-reading aid, not legal move offers. Use visible terrain only, including for spectators.
+    let mut sea_routes = game.map.tiles.iter().filter(|(_, terrain)| terrain.is_water())
+        .flat_map(|(position, _)| crate::move_routes::navigation_paths(&game.map, *position))
+        .collect::<Vec<_>>();
+    sea_routes.sort_by_key(|path| format!("{path:?}"));
     let players = game.players.iter().filter(|p| p.is_human()).map(|p| json!({
         "index": p.index, "name": game.player_name(p.index), "civilization": p.civilization.name,
         "score": p.victory_points(game),
@@ -44,7 +49,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false});
+        return json!({"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -107,6 +112,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
     json!({"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards,
+        "seaRoutes":sea_routes,
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})

@@ -58,7 +58,7 @@ const advances = {
     'From/to cities, pay 1 food + 1 ore for +1 land range and ignore terrain. No exploring or boarding ships.',
   ],
   Fishing: [Fish, 'Collect food from one sea tile.'],
-  Navigation: [Ship, 'Move ships around the map edge to the next sea tile.'],
+  Navigation: [Ship, 'Sail around the edge to the next sea area. Stop at unexplored regions.'],
   WarShips: [Shield, 'Ignore the first hit in round 1 when attacking by ship or disembarking.'],
   Cartography: [Map, 'Ship movement earns 1 idea; using Navigation also earns 1 culture.'],
   Writing: [BookOpen, 'Draw an action card and an objective card.'],

@@ -31,7 +31,11 @@ export const unitInfo: Record<
   Infantry: { icon: Swords, key: 'infantry', effect: 'Fight on land. Needs Tactics to move.' },
   Cavalry: { icon: Flag, key: 'cavalry', effect: 'Army unit; requires a Market.' },
   Elephant: { icon: Shield, key: 'elephants', effect: 'Army unit; requires a Market.' },
-  Ship: { icon: Ship, key: 'ships', effect: 'Sail and transport units; requires a Port.' },
+  Ship: {
+    icon: Ship,
+    key: 'ships',
+    effect: 'Sail through connected seas. Navigation adds edge shortcuts. Requires a Port.',
+  },
 };
 export function cityReason(reason: string | null, size = 1) {
   if (reason === 'Need more cities') return `You need ${size + 1} cities before this city can grow.`;

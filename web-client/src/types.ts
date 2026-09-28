@@ -104,6 +104,7 @@ export interface WonderCard {
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
+  seaRoutes?: string[][];
   activePlayer: number;
   canPlay: boolean;
   supportedPhase: boolean;
@@ -226,6 +227,8 @@ export interface JournalEntry {
   setup?: { civilization: string; position?: string };
 }
 export interface Session {
+  seaRoutes: boolean;
+  seaRouteStart: string | null;
   game: Game | null;
   view: View | null;
   seat?: number;

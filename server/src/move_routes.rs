@@ -248,15 +248,9 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
             })
     });
     if let Some(ship) = ship {
-        let perimeter = find_perimeter(map, ship);
-        let can_navigate = |p: &Position| *p != ship && (map.is_sea(*p) || map.is_unexplored(*p));
-        // skip the first position as it is the ship's current position
-        let first = perimeter.iter().skip(1).copied().find(can_navigate);
-        let last = perimeter.iter().skip(1).copied().rfind(can_navigate);
-
-        return vec![first, last]
+        return navigation_paths(map, ship)
             .into_iter()
-            .flatten()
+            .filter_map(|path| path.last().copied())
             .map(|destination| {
                 MoveRoute::new(
                     destination,
@@ -268,6 +262,25 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
             .collect();
     }
     vec![]
+}
+
+/// Visible perimeter paths, ending at the first sea or unexplored tile in each direction.
+pub(crate) fn navigation_paths(map: &Map, start: Position) -> Vec<Vec<Position>> {
+    if !start.neighbors().iter().any(|p| map.is_outside(*p)) {
+        return vec![];
+    }
+    let perimeter = find_perimeter(map, start);
+    let target = |(_, p): &(usize, &Position)| **p != start && (map.is_sea(**p) || map.is_unexplored(**p));
+    let first = perimeter.iter().enumerate().skip(1).find(target);
+    let last = perimeter.iter().enumerate().skip(1).rfind(target);
+    let mut paths = vec![];
+    if let Some((i, _)) = first {
+        paths.push(perimeter[..=i].to_vec());
+    }
+    if let Some((i, _)) = last {
+        paths.push(std::iter::once(start).chain(perimeter[i..].iter().rev().copied()).collect());
+    }
+    paths
 }
 
 pub fn find_perimeter(map: &Map, start_tile: Position) -> Vec<Position> {

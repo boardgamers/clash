@@ -12,6 +12,48 @@ async function initial() {
   return engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'clash-preview-20260927', {});
 }
 
+test('sea route guide follows Navigation perimeter rules and stops at unexplored terrain without revealing it', () => {
+  const raw = readFileSync(
+    new URL('../../server/tests/test_games/movement/ship_navigation_unit_test.json', import.meta.url),
+    'utf8',
+  );
+  const visible = engine.stripSecret(raw, 1);
+  const view: View = JSON.parse(engine.webView(visible, 1));
+  for (const [from, to] of [
+    ['B3', 'B5'],
+    ['B5', 'A7'],
+    ['A7', 'F7'],
+    ['G7', 'G3'],
+    ['G3', 'B3'],
+  ]) {
+    assert.ok(
+      view.seaRoutes?.some((path) => path[0] === from && path.at(-1) === to),
+      `${from} → ${to}`,
+    );
+    assert.ok(
+      view.seaRoutes?.some((path) => path[0] === to && path.at(-1) === from),
+      `${to} → ${from}`,
+    );
+  }
+  const hidden = JSON.parse(visible);
+  const example = view.seaRoutes!.find((path) => path.length > 2)!;
+  const fog = example[1];
+  hidden.map.tiles = hidden.map.tiles.map(([p, terrain]: [string, string]) => [
+    p,
+    p === fog ? 'Unexplored' : terrain,
+  ]);
+  const partial: View = JSON.parse(engine.webView(JSON.stringify(hidden), 1));
+  assert.ok(partial.seaRoutes?.some((path) => path[0] === example[0] && path.at(-1) === fog));
+  const terrain = new Map<string, string>(hidden.map.tiles);
+  for (const path of partial.seaRoutes ?? []) {
+    assert.equal(terrain.get(path[0]), 'Water');
+    assert.ok(['Water', 'Unexplored'].includes(terrain.get(path.at(-1)!)!));
+    assert.ok(path.slice(1, -1).every((p) => !['Water', 'Unexplored'].includes(terrain.get(p)!)));
+  }
+  const spectator: View = JSON.parse(engine.webView(JSON.stringify(hidden), undefined));
+  assert.deepEqual(spectator.seaRoutes, partial.seaRoutes);
+});
+
 test('settlers can explore from filtered state and a placement choice completes both legal orientations', () => {
   const state = readFileSync(
     new URL('../../server/tests/test_games/movement/explore_resolution.json', import.meta.url),

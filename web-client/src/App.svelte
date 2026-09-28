@@ -38,6 +38,7 @@
     Eye,
     RotateCw,
     Zap,
+    Ship,
     Frown,
     Meh,
   } from 'lucide-svelte';
@@ -152,6 +153,7 @@
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
       world?.clearCoordinate();
+      if ($session.seaRoutes) controller.showSeaRoutes(false);
       if ($session.cardDraws.length) controller.patch({ cardDraws: [] });
       if ($session.activityOpen) controller.closeActivity();
       if ($session.mode === 'collect' || $session.mode === 'settlers' || confirmEnd) closeAction();
@@ -321,7 +323,7 @@
           <h2>Loading game…</h2>
         </div>{/if}
       {#if boardError}<div class="map-warning" role="alert">{boardError}</div>{/if}
-      {#if $session.mode === 'overview' && $session.focus && $session.focus !== $session.city && typeof focusTerrain === 'string'}<div
+      {#if !$session.seaRoutes && $session.mode === 'overview' && $session.focus && $session.focus !== $session.city && typeof focusTerrain === 'string'}<div
           class="tile-inspector"
         >
           <button
@@ -349,6 +351,26 @@
           </p>
         </div>{/if}
       <div class="map-controls">
+        <div class="sr-only" id="sea-route-help" aria-live="polite">
+          {$session.seaRouteStart
+            ? `Sea routes from ${$session.seaRouteStart}. Arrow keys choose another sea tile.`
+            : 'Map guide. Hover or select a sea tile; arrow keys cycle tiles. Dashed shortcuts require Navigation.'}
+        </div>
+        <button
+          class:active={$session.seaRoutes && $session.mode === 'overview'}
+          aria-label="Show sea routes"
+          aria-pressed={$session.seaRoutes && $session.mode === 'overview'}
+          title="Sea-route guide · Solid: connected seas · Dashed: requires Navigation · Hover or select a sea tile; arrow keys cycle tiles. Ships stop at enemies and unexplored regions."
+          aria-describedby="sea-route-help"
+          onkeydown={(event) => {
+            if ($session.seaRoutes && ['ArrowRight', 'ArrowLeft'].includes(event.key)) {
+              event.preventDefault();
+              controller.nextSeaRoute(event.key === 'ArrowRight' ? 1 : -1);
+            }
+          }}
+          onclick={() => controller.showSeaRoutes(!($session.seaRoutes && $session.mode === 'overview'))}
+          ><Ship size={18} /></button
+        ><span></span>
         <button title="Zoom in" aria-label="Zoom in" onclick={() => world?.zoom(0.84)}
           ><Plus size={18} /></button
         ><button title="Zoom out" aria-label="Zoom out" onclick={() => world?.zoom(1.18)}
