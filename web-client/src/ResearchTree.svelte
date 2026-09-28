@@ -85,6 +85,8 @@
       <h2 id="research-title">Research</h2>
       <p>Each advance scores ½ point. Branches unlock from their first advance.</p>
     </div>
+    <!-- The dialog focuses its first control; avoid opening the mobile keyboard. -->
+    <button class="icon-button" aria-label="Close research" onclick={close}><X size={21} /></button>
     <label class="research-search"
       ><Search size={17} /><input
         aria-label="Search research"
@@ -92,7 +94,6 @@
         bind:value={query}
       /></label
     >
-    <button class="icon-button" aria-label="Close research" onclick={close}><X size={21} /></button>
   </header>
   <nav class="research-filters" aria-label="Research categories">
     <button class:active={category === 'All'} onclick={() => (category = 'All')}>All advances</button>

@@ -34,6 +34,7 @@
 }
 .research-header > .icon-button {
   margin-left: auto;
+  order: 1;
 }
 .research-search {
   display: flex;
@@ -325,7 +326,7 @@
 .dark .available .research-availability {
   color: #bbd09b;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
   .research-dialog {
     width: calc(100% - 16px);
     height: calc(100dvh - 16px);

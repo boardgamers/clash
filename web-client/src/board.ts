@@ -65,6 +65,7 @@ export class World {
     private host: HTMLElement,
     private pick: (position: string) => void,
     private hover: () => void = () => {},
+    private dismiss: () => void = () => {},
   ) {
     this.scene.background = new THREE.Color('#b1c7c0');
     this.scene.fog = new THREE.Fog('#b1c7c0', 55, 105);
@@ -176,7 +177,10 @@ export class World {
   private up = (e: PointerEvent) => {
     const clicked = this.gesture.up(e.pointerId, e.clientX, e.clientY);
     const position = this.hitTile(e.clientX, e.clientY);
-    if (clicked && e.button === 0 && position && this.canPick(position)) this.pick(position);
+    if (clicked && e.button === 0) {
+      if (position && this.canPick(position)) this.pick(position);
+      else if (!position) this.dismiss();
+    }
     this.setHovered(e.pointerType === 'touch' ? null : position);
   };
   private move = (e: PointerEvent) => {

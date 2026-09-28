@@ -168,20 +168,21 @@
   onMount(() => {
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
-      world?.clearCoordinate();
       if ($session.seaRoutes) controller.showSeaRoutes(false);
       if ($session.cardDraws.length) controller.patch({ cardDraws: [] });
-      if ($session.activityOpen) controller.closeActivity();
-      if ($session.abilitiesOpen) controller.patch({ abilitiesOpen: false });
-      if ($session.mode === 'collect' || $session.mode === 'settlers' || confirmEnd) closeAction();
+      dismissMapDetails();
     };
     document.addEventListener('keydown', escape);
     let off: (() => void) | undefined;
     try {
       world = new World(
         boardHost,
-        (p) => controller.selectTile(p),
+        (p) => {
+          if ($session.activityOpen || $session.abilitiesOpen || confirmEnd) dismissMapDetails();
+          else controller.selectTile(p);
+        },
         () => controller.audio.play('hover'),
+        dismissMapDetails,
       );
       off = session.subscribe((s) => world.update(s));
     } catch (e) {
@@ -218,6 +219,13 @@
     confirmEnd = false;
     controller.patch({ mode: 'overview', selection: [], preview: null, error: '' });
   }
+  function dismissMapDetails() {
+    if ($session.pending) return;
+    world?.clearCoordinate();
+    controller.closeActivity();
+    controller.patch({ focus: $session.city, abilitiesOpen: false, seaRouteStart: null });
+    closeAction();
+  }
   function openResearch() {
     confirmEnd = false;
     controller.closeActivity();
@@ -233,12 +241,23 @@
   }
 </script>
 
-<div class:dark={$session.dark} class:colorblind={$session.colorBlind} class="game-shell">
+<div
+  class:dark={$session.dark}
+  class:colorblind={$session.colorBlind}
+  class:spectating={$session.seat === undefined}
+  class="game-shell"
+>
   <header class="masthead">
     <button
       class="brand"
       onclick={() => controller.commands.openBoardgame()}
-      aria-label="About Clash of Cultures"><span class="brand-name">Clash <i>of</i> Cultures</span></button
+      aria-label="About Clash of Cultures"
+      ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
+        >Age {['I', 'II', 'III', 'IV', 'V', 'VI'][($session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.game
+          ?.round ?? 1) > 3
+          ? 'End of age'
+          : `Round ${$session.game?.round ?? 1}/3`}</span
+      ></button
     >
     <div class="age-track" aria-label={`Age ${$session.game?.age ?? 1} of 6`}>
       <span>THE AGES</span>{#each [1, 2, 3, 4, 5, 6] as age}<span
@@ -271,7 +290,7 @@
           <span class="card-count">{$session.view?.objectiveCards?.length ?? 0}</span></button
         >
       {/if}
-      <button class="text-button" onclick={() => controller.patch({ help: true })}
+      <button class="text-button" aria-label="How to play" onclick={() => controller.patch({ help: true })}
         ><BookOpen size={17} /> How to play</button
       >
     </nav>
@@ -285,6 +304,8 @@
     {#each resources as resource}{@const Icon = icons[resource]}
       <div
         class="resource"
+        role="img"
+        aria-label={`${resourceNames[resource]}: ${current?.resources?.[resource] ?? '—'}${current?.resource_limit?.[resource] !== undefined ? `, storage limit ${current.resource_limit[resource]}` : ''}`}
         title={`${resourceNames[resource]}${current?.resource_limit?.[resource] !== undefined ? ` · Storage limit ${current.resource_limit[resource]}` : ''}`}
       >
         <span class="resource-icon {resource}"><Icon size={21} strokeWidth={1.65} /></span><span
@@ -353,7 +374,7 @@
         >
           <button
             aria-label="Close terrain details"
-            onclick={() => controller.patch({ focus: $session.city })}><X size={12} /></button
+            onclick={() => controller.patch({ focus: $session.city })}><X size={18} /></button
           ><span class="tiny-label">TILE {$session.focus}</span><strong
             >{focusTerrain === 'Unexplored'
               ? 'Unexplored'
