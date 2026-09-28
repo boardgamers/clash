@@ -530,8 +530,12 @@
         {:else if $session.mode === 'collect'}
           <h2>Collect resources</h2>
           <p>
-            Your {city?.mood.toLowerCase()} city can gather from up to <b>{city?.capacity} tiles</b>. Choose
-            on the map or below.
+            Choose up to <b>{city?.capacity} {city?.capacity === 1 ? 'tile' : 'tiles'} total</b>: your city’s
+            tile or directly adjacent tiles.
+            {#if city?.maxRange2}
+              With Husbandry, up to {city.maxRange2} selected land
+              {city.maxRange2 === 1 ? 'tile' : 'tiles'} may be 2 tiles away.
+            {/if}
           </p>
           {#if city}<ActivationStatus {city} warning />{/if}
           <div class="collection-choices">

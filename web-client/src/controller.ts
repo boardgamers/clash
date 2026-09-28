@@ -244,7 +244,9 @@ export class Controller {
       ? s.selection.filter((c) => c !== selected)
       : [...s.selection, { ...choice, times: 1 }];
     if (selection.length > city.capacity) {
-      this.patch({ error: `This city can collect from ${city.capacity} tiles. Remove a selection first.` });
+      this.patch({
+        error: `Choose up to ${city.capacity} ${city.capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection first.`,
+      });
       return;
     }
     try {
