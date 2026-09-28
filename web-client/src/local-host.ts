@@ -30,11 +30,6 @@ function savePreference(name: string, value: unknown) {
   } catch {}
   send('preferences', preferences);
 }
-for (const name of ['sound', 'colorBlind']) {
-  const input = document.querySelector<HTMLInputElement>(`#pref-${name}`)!;
-  input.checked = preferences[name] === true;
-  input.addEventListener('change', () => savePreference(name, input.checked));
-}
 function showError(message: string) {
   document.querySelector('#host-error')!.textContent = message;
 }

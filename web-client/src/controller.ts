@@ -64,6 +64,11 @@ export class Controller {
     const topDown = !get(this.session).topDown;
     if (this.commands.updatePreference('mapView', topDown ? '2d' : '3d')) this.patch({ topDown });
   }
+  setGlobalPreference(name: 'sound' | 'colorBlind', enabled: boolean) {
+    if (!this.commands.updatePreference(name, enabled)) return;
+    if (name === 'sound') this.audio.setEnabled(enabled);
+    this.patch({ [name]: enabled });
+  }
   handleError(error: unknown) {
     this.submittedMove = null;
     this.audio.play('error');

@@ -33,6 +33,9 @@
     Footprints,
     Users,
     Swords,
+    Volume2,
+    VolumeX,
+    Eye,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
@@ -379,7 +382,7 @@
         >
       </nav>
     </div>
-    <nav class="table-tools" aria-label="Table panels">
+    <nav class="table-tools" aria-label="Table controls">
       <button
         class:active={$session.activityOpen && $session.tab === 'journal'}
         title="Journal"
@@ -396,6 +399,23 @@
         ><MessageCircle size={19} /><span>Chat</span>{#if $session.unread}<span class="unread"
             >{$session.unread}</span
           >{/if}</button
+      >
+      <span class="tool-divider" aria-hidden="true"></span>
+      <button
+        class:active={$session.sound}
+        title={`Sound ${$session.sound ? 'on' : 'off'} · All BGS games`}
+        aria-label="Sound"
+        aria-pressed={$session.sound}
+        onclick={() => controller.setGlobalPreference('sound', !$session.sound)}
+        >{#if $session.sound}<Volume2 size={19} />{:else}<VolumeX size={19} />{/if}</button
+      >
+      <button
+        class:active={$session.colorBlind}
+        title={`Color-blind mode ${$session.colorBlind ? 'on' : 'off'} · All BGS games`}
+        aria-label="Color-blind mode"
+        aria-pressed={$session.colorBlind}
+        onclick={() => controller.setGlobalPreference('colorBlind', !$session.colorBlind)}
+        ><Eye size={19} /></button
       >
     </nav>
     {#if choiceDecision || objectiveDecision || ($session.game && !$session.view?.supportedPhase && $session.seat === $session.view?.activePlayer) || $session.mode === 'collect' || confirmEnd || ($session.error && $session.mode === 'overview')}

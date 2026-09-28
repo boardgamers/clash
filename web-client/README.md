@@ -34,7 +34,7 @@ No production games, catalog records, or chat rooms are modified. Remaining acti
 - Full-width board with floating action controls and dismissible journal/chat panels. The layout stays within the viewport on desktop and mobile; panels scroll internally. City/action controls are keyboard accessible, and the board renders only when changed.
 - Quiet synthesized interaction and confirmed-action sounds follow BGS's global `sound` preference. Muting stops active and scheduled notes immediately; sound starts only after interaction, and loading or reconnecting does not play past actions.
 - BGS's global `colorBlind` preference adds matching ownership symbols to player cards, city flags, and unit groups, with a distinct player palette. Resources keep their icons and labels; terrain keeps its physical shapes.
-- The map button saves `mapView` (`3d` or `2d`) with BGS's `updatePreference` command and restores it from incoming preferences. The overhead view pans without tilting. The standalone preview emulates these settings locally through its Preferences control.
+- Sound and colorblind toggle buttons sit beside Journal and Chat and write to BGS's global preferences. The map button saves `mapView` (`3d` or `2d`) with BGS's `updatePreference` command and restores it from incoming preferences. The overhead view pans without tilting. The standalone preview emulates persistence locally for these same buttons.
 
 The preview host uses a real iframe and `postMessage` to exchange BGS events. Its chat is local test data, not a connection to a live BGS room. Production BGS integration still needs a staging playtest.
 
