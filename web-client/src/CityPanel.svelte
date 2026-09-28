@@ -124,8 +124,8 @@
             </div>
           </article>{/each}
       </div>
-      {#if options?.leaders?.length}<details class="leader-recruit">
-          <summary><Crown size={16} />Leaders</summary><ResourceAmount
+      {#if options?.leaders?.length}<section class="leader-recruit" aria-label="Leaders">
+          <h3><Crown size={16} />Leaders</h3><ResourceAmount
             pile={{ mood_tokens: 1, culture_tokens: 1 }}
           />
           <div class="unit-picker">
@@ -141,7 +141,7 @@
                   })}><Crown size={15} />{leader.name}</button
               >{/each}
           </div>
-        </details>{/if}
+        </section>{/if}
       {#if $session.view?.units?.length}<details class="replacement-recruit">
           <summary>Replace units on the map</summary>
           <div class="unit-picker">

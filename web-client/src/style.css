@@ -2637,11 +2637,19 @@ small {
   border-top: 1px solid var(--line);
   padding: 14px 0;
 }
-.leader-recruit summary,
+.leader-recruit h3,
 .replacement-recruit summary {
   font-size: 12px;
-  cursor: pointer;
   margin-bottom: 8px;
+}
+.leader-recruit h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0;
+}
+.replacement-recruit summary {
+  cursor: pointer;
 }
 @media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
   .board-toolbar .board-actions button > span:not(.action-inspect) {
