@@ -1,29 +1,15 @@
 <script lang="ts">
-  import { Compass, RotateCw, Check, Trees, Wheat, Mountain, Waves, Circle } from 'lucide-svelte';
+  import { Compass, RotateCw, Check } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { positionXY } from './model';
+  import TerrainIcon from './TerrainIcon.svelte';
+  import { terrainInfo } from './terrain';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let decision = $derived($session.view?.explorationDecision);
   let selected = $derived(
     decision?.choices.find((c) => c.rotation === $session.explorationRotation) ?? decision?.choices[0],
   );
-  const icons = {
-    Forest: Trees,
-    Fertile: Wheat,
-    Mountain,
-    Water: Waves,
-    Barren: Circle,
-    Unexplored: Compass,
-  };
-  const colors: Record<string, string> = {
-    Forest: '#82a67d',
-    Fertile: '#ddcf85',
-    Mountain: '#b6c0b8',
-    Water: '#99c5cc',
-    Barren: '#dbc39e',
-    Unexplored: '#78918e',
-  };
   const hex = Array.from(
     { length: 6 },
     (_, i) => `${Math.cos((i * Math.PI) / 3) * 0.96},${Math.sin((i * Math.PI) / 3) * 0.96}`,
@@ -36,6 +22,9 @@
     <p>Choose terrain placement.</p>
     <div class="exploration-choices">
       {#each decision.choices as choice, i}
+        {@const destinationTerrain = choice.tiles.find(
+          ([position]) => position === decision.destination,
+        )?.[1]}
         {@const points = choice.tiles.map(([position]) => positionXY(position))}
         {@const minX = Math.min(...points.map((p) => p[0])) - 1.1}
         {@const minY = Math.min(...points.map((p) => p[1])) - 1.1}
@@ -58,17 +47,17 @@
               />{/if}</span
           >
           <svg class="placement-map" viewBox={`${minX} ${minY} ${width} ${height}`} aria-hidden="true">
-            {#each choice.tiles as [position, terrain], t}{@const name =
-                typeof terrain === 'string' ? terrain : 'Barren'}{@const Icon =
-                icons[name as keyof typeof icons] ?? Circle}
+            {#each choice.tiles as [position, terrain], t}{@const info = terrainInfo(terrain)}
               <g transform={`translate(${points[t][0]} ${points[t][1]})`}>
                 <polygon
                   points={hex}
-                  fill={colors[name]}
+                  fill={info.color}
                   stroke={position === decision.destination ? '#263f33' : '#ffffff'}
                   stroke-width={position === decision.destination ? 0.1 : 0.03}
                 />
-                <g transform="translate(-.27,-.57)"><Icon size={0.54} strokeWidth={1.7} color="#263f33" /></g>
+                <g transform="translate(-.27,-.57)"
+                  ><info.Icon size={0.54} strokeWidth={1.7} color="#263f33" /></g
+                >
                 <text text-anchor="middle" y=".42" fill="#263f33" font-size=".4" font-weight="650"
                   >{position}</text
                 >
@@ -77,16 +66,13 @@
           </svg>
           <span class="sr-only"
             >{choice.tiles
-              .map(
-                ([position, terrain]) =>
-                  `${position}: ${typeof terrain === 'string' ? terrain : 'Exhausted'}`,
-              )
+              .map(([position, terrain]) => `${position}: ${terrainInfo(terrain).label}`)
               .join(', ')}</span
           >
-          {#if decision.destination}<span class="placement-destination"
-              >{decision.destination} · {choice.tiles.find(
-                ([position]) => position === decision.destination,
-              )?.[1]}</span
+          {#if decision.destination && destinationTerrain}<span
+              class="placement-destination"
+              title={`${decision.destination} · ${terrainInfo(destinationTerrain).label}`}
+              ><TerrainIcon terrain={destinationTerrain} size={20} />{decision.destination}</span
             >{/if}
         </button>
       {/each}

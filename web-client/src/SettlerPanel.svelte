@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { Footprints, Landmark, MapPin, X, ArrowRight, Check, Compass } from 'lucide-svelte';
+  import { Footprints, Landmark, MapPin, X, ArrowRight, Check } from 'lucide-svelte';
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
+  import TerrainIcon from './TerrainIcon.svelte';
+  import { terrainInfo } from './terrain';
   let {
     controller,
     onHighlight,
@@ -41,17 +43,16 @@
       <p>Choose a highlighted tile or a destination below.</p>
       {#each unit.destinations as d}<button
           class:selected={destination?.position === d.position}
+          title={`${d.position} · ${terrainInfo(d.terrain).label}`}
+          aria-label={`${d.position} · ${terrainInfo(d.terrain).label}`}
+          aria-pressed={destination?.position === d.position}
           onmouseenter={() => onHighlight(d.position)}
           onmouseleave={() => onHighlight(null)}
           onfocus={() => onHighlight(d.position)}
           onblur={() => onHighlight(null)}
           disabled={$session.pending}
           onclick={() => controller.patch({ destination: d.position, error: '' })}
-          ><span
-            >{#if d.terrain === 'Unexplored'}<Compass size={14} />{/if}{d.position} · {typeof d.terrain ===
-            'string'
-              ? d.terrain
-              : 'Exhausted'}</span
+          ><span><TerrainIcon terrain={d.terrain} />{d.position}</span
           >{#if destination?.position === d.position}<Check size={15} />{/if}</button
         >{:else}<p>No available destinations for this settler.</p>{/each}
     </div>
