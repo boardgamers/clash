@@ -496,8 +496,19 @@ export class World {
   update(s: Session) {
     if (!s.game) return;
     this.pending = s.pending;
-    this.selectable =
-      s.mode === 'collect'
+    const exploration = s.view?.explorationDecision;
+    const placement =
+      exploration?.choices.find(
+        (choice) => choice.rotation === (s.explorationPreview ?? s.explorationRotation),
+      ) ?? exploration?.choices[0];
+    const overlay = new Map(placement?.tiles ?? []);
+    const mapTiles: typeof s.game.map.tiles = s.game.map.tiles.map(([position, terrain]) => [
+      position,
+      overlay.get(position) ?? terrain,
+    ]);
+    this.selectable = exploration
+      ? new Set()
+      : s.mode === 'collect'
         ? new Set(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
         : s.mode === 'settlers'
           ? new Set([
@@ -508,7 +519,7 @@ export class World {
             ])
           : null;
     const signature = JSON.stringify([
-      s.game.map.tiles,
+      mapTiles,
       s.game.players.map((p) => [p.cities, p.units]),
       s.view?.players,
       s.seat,
@@ -523,7 +534,7 @@ export class World {
         minZ = Math.min(...coords.map((c) => c[1])),
         maxZ = Math.max(...coords.map((c) => c[1]));
       this.center.set((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
-      for (const [position, terrain] of s.game.map.tiles) {
+      for (const [position, terrain] of mapTiles) {
         const kind = typeof terrain === 'string' ? terrain : 'Barren';
         const [x, z] = positionXY(position);
         const height = kind === 'Water' ? 0.13 : kind === 'Unexplored' ? 0.27 : 0.43;
@@ -680,16 +691,20 @@ export class World {
     }
     const settler = s.view?.settlers.find((u) => u.id === s.selectedSettler);
     const focusedPosition = s.mode === 'overview' ? (s.focus ?? s.city) : s.city;
-    const selected =
-      s.mode === 'settlers'
+    const selected = exploration
+      ? exploration.destination
+        ? [exploration.destination]
+        : []
+      : s.mode === 'settlers'
         ? [settler?.position, s.destination].filter((p): p is string => !!p)
         : s.mode === 'collect'
           ? s.selection.map((c) => c.position)
           : focusedPosition
             ? [focusedPosition]
             : [];
-    const available =
-      s.mode === 'settlers'
+    const available = placement
+      ? placement.tiles.map(([position]) => position)
+      : s.mode === 'settlers'
         ? (settler?.destinations.map((d) => d.position) ?? [])
         : s.mode === 'collect'
           ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])

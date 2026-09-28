@@ -16,6 +16,8 @@ export class Controller {
     mode: 'overview',
     selectedSettler: null,
     destination: null,
+    explorationRotation: null,
+    explorationPreview: null,
     recruits: {},
     recruitPreview: null,
     selection: [],
@@ -107,15 +109,20 @@ export class Controller {
       recruits: {},
       recruitPreview: null,
       destination: null,
+      explorationRotation: view.explorationDecision?.choices[0]?.rotation ?? null,
+      explorationPreview: null,
       selectedSettler: view.settlers.some((u) => u.id === old.selectedSettler)
         ? old.selectedSettler
         : (view.settlers[0]?.id ?? null),
       mode: view.stopMovement
         ? 'settlers'
-        : old.pending || view.objectiveDecision || view.choiceDecision
+        : old.pending || view.objectiveDecision || view.choiceDecision || view.explorationDecision
           ? 'overview'
           : old.mode,
-      objectivesOpen: view.objectiveDecision || view.choiceDecision ? false : old.objectivesOpen,
+      objectivesOpen:
+        view.objectiveDecision || view.choiceDecision || view.explorationDecision
+          ? false
+          : old.objectivesOpen,
       cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>
         draw.kind === 'wonder'
           ? view.wonderCards.some((card) => card.id === draw.card.id)
@@ -123,7 +130,7 @@ export class Controller {
       ),
     });
     this.commands.replaceLog(journal(game).map((entry) => entry.text));
-    if (view.objectiveDecision || view.choiceDecision) this.closeActivity();
+    if (view.objectiveDecision || view.choiceDecision || view.explorationDecision) this.closeActivity();
     if (drawn.length) {
       this.audio.play('draw');
     } else if (old.pending && changed) {
@@ -148,6 +155,8 @@ export class Controller {
       recruitPreview: null,
       selectedSettler: null,
       destination: null,
+      explorationRotation: null,
+      explorationPreview: null,
     });
     if (this.engine && this.raw) {
       const view = JSON.parse(this.engine.webView(this.raw, index)) as View;

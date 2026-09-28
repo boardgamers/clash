@@ -34,7 +34,8 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     });
     let moving = matches!(game.state, GameState::Movement(_)) && game.events.is_empty();
     let choice = seat.and_then(|seat| choice_decision(game, seat));
-    let supported_phase = playing || objective_phase || moving || choice.is_some();
+    let exploration = seat.and_then(|seat| exploration_decision(game, seat));
+    let supported_phase = playing || objective_phase || moving || choice.is_some() || exploration.is_some();
     let can_play = seat == Some(active) && playing;
     let players = game.players.iter().filter(|p| p.is_human()).map(|p| json!({
         "index": p.index, "name": game.player_name(p.index), "civilization": p.civilization.name,
@@ -105,10 +106,34 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
     json!({"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
-        "choiceDecision":choice, "wonderCards":wonder_cards,
+        "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards,
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
+}
+
+fn exploration_decision(game: &Game, seat: usize) -> Option<Value> {
+    let event = game.events.last()?;
+    if event.player.index != seat {
+        return None;
+    }
+    let PersistentEventType::ExploreResolution(state) = &event.event_type else {
+        return None;
+    };
+    let handler = game.current_event_handler()?;
+    if handler.response.is_some()
+        || !matches!(handler.request, PersistentEventRequest::ExploreResolution)
+    {
+        return None;
+    }
+    // The engine has already revealed this region and applied forced-placement rules.
+    // Only the original and opposite orientations are valid for this request.
+    let base = state.block.position.rotation;
+    let choices = [base, (base + 3) % 6].map(|rotation| {
+        json!({"rotation":rotation,"tiles":state.block.block.tiles(&state.block.position,rotation),
+            "action":Action::Response(EventResponse::ExploreResolution(rotation))})
+    });
+    Some(json!({"start":state.start,"destination":state.destination,"choices":choices}))
 }
 
 fn choice_decision(game: &Game, seat: usize) -> Option<Value> {

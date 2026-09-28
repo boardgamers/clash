@@ -28,7 +28,7 @@ No production games, catalog records, or chat rooms are modified. Remaining acti
 - Research: a searchable tree with pictograms, short effect summaries, prerequisite branches, costs, bonuses, and unlocked buildings. Rust supplies the graph, full rules, payments, and action payloads; selecting an advance opens its full rule text before confirmation.
 - End turn and undo, with state and journal reconciliation.
 - City management: buildings with visible effects and requirements, Port placement, combined recruitment of standard units, and one-city happiness actions. Payments and legal actions come from Rust; repeat activations warn about mood loss.
-- Settler movement on revealed land without enemies, movement completion, and founding cities. Destination rings and map clicks work alongside accessible destination buttons.
+- Settler movement on revealed land and into unexplored regions without enemies, movement completion, and founding cities. Destination and collection options highlight their map tiles on hover or keyboard focus. Exploration uses the engine’s forced placements or offers both legal orientations with miniature maps and a board preview before confirmation.
 - One-resource bonus choices (including Temples) and yes/no decisions. These remain private to the player who must answer.
 - Buildings appear around city centers; recruited units have separate positions and basic type markers.
 - BGS registration/lifecycle, player/spectator handling, theme, avatars, and the shared chat controller/panel. Chat sends, failed-send drafts, updates/deletions, mentions, read reports, editing and translation handlers are supplied by the protocol package; the host decides which features are enabled.
@@ -71,7 +71,7 @@ The script uploads the viewer, verifies the hosted bytes, then updates the versi
 
 ## Next slices
 
-The controls do not yet cover army/fleet movement, exploration, unit replacement/leader recruitment, wonder construction, action cards, cultural influence, combat, civilization selection, or most status/event choices. Free/custom-action variants and multi-city happiness selection are also pending. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
+The controls do not yet cover army/fleet movement, unit replacement/leader recruitment, wonder construction, action cards, cultural influence, combat, civilization selection, or most status/event choices. Free/custom-action variants and multi-city happiness selection are also pending. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
 
 Before public release: complete action/phase coverage, verify against an actual BGS staging game (including reconnects, moderation, translation, and read-state persistence), and test larger multiplayer boards on mobile hardware.
 

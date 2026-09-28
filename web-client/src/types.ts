@@ -119,6 +119,11 @@ export interface View {
     objectives: { name: string; description: string; timing: 'Instant' | 'Status phase' }[];
   }[];
   wonderCards: WonderCard[];
+  explorationDecision?: {
+    start: string;
+    destination: string | null;
+    choices: { rotation: number; tiles: [string, Terrain][]; action: Move }[];
+  } | null;
   objectiveDecision: {
     name: string;
     description: string;
@@ -229,6 +234,8 @@ export interface Session {
   mode: 'overview' | 'collect' | 'research' | 'city' | 'settlers';
   selectedSettler: number | null;
   destination: string | null;
+  explorationRotation: number | null;
+  explorationPreview: number | null;
   recruits: RecruitSelection;
   recruitPreview: RecruitPreview | null;
   selection: Selection[];

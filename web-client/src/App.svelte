@@ -46,6 +46,7 @@
   import ResearchTree from './ResearchTree.svelte';
   import CityPanel from './CityPanel.svelte';
   import SettlerPanel from './SettlerPanel.svelte';
+  import ExplorationPanel from './ExplorationPanel.svelte';
   import ScoreDialog from './ScoreDialog.svelte';
   import WondersDialog from './WondersDialog.svelte';
   import CardReveal from './CardReveal.svelte';
@@ -119,15 +120,17 @@
   let actionTitle = $derived(
     $session.seat === undefined
       ? 'Spectating'
-      : choiceDecision
-        ? 'Choose a bonus'
-        : objectiveDecision
-          ? 'Objective available'
-          : $session.view?.stopMovement
-            ? 'Moving settlers'
-            : $session.view?.canPlay
-              ? 'Your turn'
-              : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
+      : $session.view?.explorationDecision
+        ? 'Place explored terrain'
+        : choiceDecision
+          ? 'Choose a bonus'
+          : objectiveDecision
+            ? 'Objective available'
+            : $session.view?.stopMovement
+              ? 'Moving settlers'
+              : $session.view?.canPlay
+                ? 'Your turn'
+                : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
     const escape = (event: KeyboardEvent) => {
@@ -540,6 +543,10 @@
                     c.position === choice.position && JSON.stringify(c.pile) === JSON.stringify(choice.pile),
                 )}<button
                 class:selected
+                onmouseenter={() => world?.highlightCoordinate(choice.position)}
+                onmouseleave={() => world?.highlightCoordinate(null)}
+                onfocus={() => world?.highlightCoordinate(choice.position)}
+                onblur={() => world?.highlightCoordinate(null)}
                 onclick={() => controller.toggleChoice(choice)}
                 disabled={$session.pending}
                 aria-pressed={selected}
@@ -582,7 +589,11 @@
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </section>
     {/if}
-    {#if $session.mode === 'settlers'}<SettlerPanel {controller} />{/if}
+    {#if $session.mode === 'settlers' && !$session.view?.explorationDecision}<SettlerPanel
+        {controller}
+        onHighlight={(position) => world?.highlightCoordinate(position)}
+      />{/if}
+    {#if $session.view?.explorationDecision}<ExplorationPanel {controller} />{/if}
     <section
       class="activity floating-panel"
       hidden={!$session.activityOpen}

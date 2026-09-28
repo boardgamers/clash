@@ -93,7 +93,7 @@ pub fn settlers(game: &Game, seat: usize, can_move: bool) -> Vec<Value> {
     let p = game.player(seat);
     p.units.iter().filter(|u|u.is_settler() && !u.is_transported()).map(|unit| {
         let mut destinations = if can_move {possible_move_routes(p,game,&[unit.id],unit.position,None).unwrap_or_default().into_iter()
-            .filter(|route|game.map.is_land(route.destination) && game.map.get(route.destination)!=Some(&Terrain::Unexplored) && game.enemy_player(seat,route.destination).is_none())
+            .filter(|route|(game.map.is_land(route.destination) || game.map.get(route.destination)==Some(&Terrain::Unexplored)) && game.enemy_player(seat,route.destination).is_none())
             .filter_map(|route|route.cost.first_valid_payment(&p.resources).map(|payment|json!({
                 "position":route.destination,"terrain":game.map.get(route.destination),"payment":payment,
                 "action":Action::Movement(MovementAction::Move(MoveUnits::new(vec![unit.id],route.destination,None,payment.clone())))}))).collect::<Vec<_>>() } else {vec![]};

@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 import { createViewer } from '@boardgamers/protocol/viewer';
 import { ChatController } from '@boardgamers/protocol/chat';
 import { journal, positionXY } from './model.ts';
@@ -10,6 +11,88 @@ const engine = require('../.engine/server.js');
 async function initial() {
   return engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'clash-preview-20260927', {});
 }
+
+test('settlers can explore from filtered state and a placement choice completes both legal orientations', () => {
+  const state = readFileSync(
+    new URL('../../server/tests/test_games/movement/explore_resolution.json', import.meta.url),
+    'utf8',
+  );
+  const seat = engine.currentPlayer(state);
+  const visible = engine.stripSecret(state, seat);
+  const before: View = JSON.parse(engine.webView(visible, seat));
+  assert.equal(before.explorationDecision, null);
+  const destination = before.settlers[0].destinations.find((d) => d.position === 'D6')!;
+  assert.equal(destination.terrain, 'Unexplored');
+  // Querying a destination never exposes its still-hidden terrain.
+  assert.ok(
+    JSON.parse(visible).map.unexplored_blocks.every((b: any) =>
+      b.block.terrain.every((t: string) => t === 'Unexplored'),
+    ),
+  );
+  const revealed = engine.tryMove(state, JSON.stringify(destination.action), seat);
+  const decisionView: View = JSON.parse(engine.webView(engine.stripSecret(revealed, seat), seat));
+  assert.equal(decisionView.supportedPhase, true);
+  assert.equal(decisionView.canUndo, false);
+  assert.equal(decisionView.canEndTurn, false);
+  assert.ok(decisionView.settlers.every((u) => u.destinations.length === 0));
+  const decision = decisionView.explorationDecision!;
+  assert.equal(decision.destination, 'D6');
+  assert.deepEqual(
+    decision.choices.map((c) => c.rotation),
+    [0, 3],
+  );
+  for (const index of [undefined, 99, 1 - seat]) {
+    const other: View = JSON.parse(engine.webView(engine.stripSecret(revealed, index), index));
+    assert.equal(other.explorationDecision ?? null, null);
+  }
+  for (const choice of decision.choices) {
+    assert.equal(choice.tiles.length, 4);
+    assert.ok(choice.tiles.every(([, terrain]) => terrain !== 'Unexplored'));
+    const resolved = engine.tryMove(revealed, JSON.stringify(choice.action), seat);
+    const game: Game = JSON.parse(resolved);
+    for (const [position, terrain] of choice.tiles)
+      assert.deepEqual(game.map.tiles.find(([p]) => p === position)?.[1], terrain);
+    assert.equal(game.players[seat].units?.find((u) => u.id === 0)?.position, 'D6');
+    const after: View = JSON.parse(engine.webView(engine.stripSecret(resolved, seat), seat));
+    assert.equal(after.explorationDecision, null);
+    assert.equal(after.supportedPhase, true);
+    assert.ok(after.settlers[0].foundAction);
+  }
+});
+
+test('forced exploration placement resolves automatically without moving settlers onto water', () => {
+  const state = readFileSync(
+    new URL('../../server/tests/test_games/movement/explore_auto_no_walk_on_water.json', import.meta.url),
+    'utf8',
+  );
+  const seat = engine.currentPlayer(state);
+  const before: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  const destination = before.settlers[0].destinations.find((d) => d.position === 'B2')!;
+  assert.equal(destination.terrain, 'Unexplored');
+  const resolved = engine.tryMove(state, JSON.stringify(destination.action), seat);
+  const game: Game = JSON.parse(resolved);
+  assert.equal(game.players[seat].units?.find((u) => u.id === 0)?.position, 'B2');
+  assert.notEqual(game.map.tiles.find(([p]) => p === 'B2')?.[1], 'Water');
+  const after: View = JSON.parse(engine.webView(engine.stripSecret(resolved, seat), seat));
+  assert.equal(after.explorationDecision, null);
+  assert.equal(after.supportedPhase, true);
+});
+
+test('exploring starts one movement action and waiting players receive no exploration moves', async () => {
+  let state = await initial();
+  const seat = engine.currentPlayer(state);
+  const actions = JSON.parse(state).actions_left;
+  const before: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  const destination = before.settlers.flatMap((u) => u.destinations).find((d) => d.terrain === 'Unexplored')!;
+  assert.ok(destination);
+  const waiting: View = JSON.parse(engine.webView(engine.stripSecret(state, 1 - seat), 1 - seat));
+  assert.ok(waiting.settlers.every((u) => u.destinations.length === 0));
+  state = engine.tryMove(state, JSON.stringify(destination.action), seat);
+  assert.equal(JSON.parse(state).actions_left, actions - 1);
+  const decision = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat)).explorationDecision;
+  if (decision) state = engine.tryMove(state, JSON.stringify(decision.choices[0].action), seat);
+  assert.equal(JSON.parse(state).actions_left, actions - 1);
+});
 
 test('opening collection, research, undo, and handoff use the Rust engine', async () => {
   let state = await initial();
