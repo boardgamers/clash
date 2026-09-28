@@ -1680,9 +1680,33 @@ small {
   padding: 0 13px;
   border-radius: 8px 8px 0 0;
 }
-.board-toolbar .turn-banner small {
+.action-markers {
   margin-left: auto;
-  font-size: 10px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+}
+.action-marker {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #a47431;
+  border-radius: 50%;
+  background: #d6a64f;
+  box-shadow: inset 0 0 0 2px #ffffff18;
+}
+.action-marker.spent {
+  border-color: #7d866b80;
+  background: transparent;
+  box-shadow: none;
+}
+.dark .action-marker {
+  border-color: #f7dfa0;
+  background: #edc66e;
+}
+.dark .action-marker.spent {
+  border-color: #ffffff50;
+  background: transparent;
 }
 .board-actions {
   display: flex;
@@ -1803,9 +1827,6 @@ small {
   }
   .board-toolbar .turn-banner strong {
     font-size: 10px;
-  }
-  .board-toolbar .turn-banner small {
-    font-size: 9px;
   }
   .board-actions {
     padding: 4px;

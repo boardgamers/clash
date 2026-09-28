@@ -306,9 +306,18 @@
     <div class="board-toolbar" aria-label="Game controls">
       <div class="turn-banner">
         <span class="turn-light"></span><strong>{actionTitle}</strong
-        >{#if !objectiveDecision && ($session.game?.round ?? 1) <= 3}<small
-            >{totalActions} {totalActions === 1 ? 'action' : 'actions'} left</small
-          >{/if}
+        >{#if !objectiveDecision && ($session.game?.round ?? 1) <= 3}<span
+            class="action-markers"
+            role="img"
+            aria-label={`${totalActions} ${totalActions === 1 ? 'action' : 'actions'} remaining`}
+            title={`${totalActions} ${totalActions === 1 ? 'action' : 'actions'} remaining`}
+          >
+            {#each Array.from({ length: Math.max(3, totalActions) }) as _, index}<span
+                class="action-marker"
+                class:spent={index >= totalActions}
+                aria-hidden="true"
+              ></span>{/each}
+          </span>{/if}
       </div>
       <nav class="board-actions" aria-label="Actions">
         <button
