@@ -1182,6 +1182,24 @@
           </p>
         </article>
         <article>
+          <Swords />
+          <h3>Battles</h3>
+          <p>
+            Move an army or ship onto an enemy-occupied tile and confirm Attack. Army movement requires
+            Tactics. Starting Move costs one action; combat rounds do not cost extra actions. Settlers do not
+            fight.
+          </p>
+          <p>
+            Each round, both sides normally roll one die per fighting unit. Every 5 combat value scores a hit,
+            before bonuses and cancellations. Losses apply to both sides; choose casualties when prompted.
+            Leaders, advances, fortresses and tactics cards can change the result.
+          </p>
+          <p>
+            Fighting continues until a side is defeated or the attacker retreats when offered. Winning
+            attackers enter the tile. Captured cities become Angry. The journal records rolls and losses.
+          </p>
+        </article>
+        <article>
           <Hammer />
           <h3>Growing cities</h3>
           <p>
