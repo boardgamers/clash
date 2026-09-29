@@ -1168,9 +1168,10 @@
           <Smile />
           <h3>City mood</h3>
           <p>
-            Collection and recruitment capacity is size + 1 in a Happy city, size in a Neutral city, and 1 in
-            an Angry city. Collecting, recruiting and construction activate the city. Each activation after
-            the first in a turn lowers its mood by one step. Angry cities cannot construct buildings.
+            Each city has its own mood. Base collection and recruitment capacity is size + 1 when Happy, size
+            when Neutral, and 1 when Angry. Collecting, recruiting and construction activate the city. Each
+            activation after the first in a turn lowers its mood by one step. An Angry city can be activated
+            once per turn while Angry and cannot construct buildings.
           </p>
         </article>
         <article>
@@ -1316,7 +1317,31 @@
           </p>
           <p>
             After a round, the attacker may retreat if allowed. Otherwise, fighting continues until a side is
-            defeated. Winning attackers occupy the tile. Captured cities become Angry.
+            defeated. Winning attackers occupy the tile.
+          </p>
+        </article>
+        <article>
+          <Flag />
+          <h3>Capturing cities</h3>
+          <p>
+            Army units capture a city by occupying it after defeating its defenders, or by entering an
+            undefended city. You control the city and can use its existing buildings.
+          </p>
+          <p>
+            Each settlement or building changed to your color scores 1 point for you instead of its previous
+            owner. Obelisks and buildings in a third player's color keep their color.
+          </p>
+          <p>
+            <ResourceText
+              text="Taking another player's city gives gold equal to its size: add 1 gold if it was Happy, or take only 1 gold if it was Angry."
+            />
+          </p>
+          <p>
+            The captured city becomes Angry, keeps its point value and counts toward your total number of
+            cities for growth. Improve its mood through Happiness to restore its capacity.
+          </p>
+          <p>
+            The previous owner places a settler from their supply in one of their remaining cities, if able.
           </p>
         </article>
         <article>
