@@ -47,7 +47,6 @@ export class World {
   private interactionPanel: HTMLElement | null = null;
   private interactionPositions: string[] = [];
   private interactionSignature = '';
-  private availableViewport = { width: 1, height: 1 };
   private frame = 0;
   private dirty = true;
   private lastSignature = '';
@@ -184,18 +183,20 @@ export class World {
     this.renderer.domElement.addEventListener('pointercancel', this.cancel);
     this.renderer.domElement.addEventListener('pointerup', this.up);
     this.renderer.domElement.addEventListener('keydown', this.key);
+    let viewportWidth = 0,
+      viewportHeight = 0;
     this.resize = new ResizeObserver(() => {
       const { width, height } = host.getBoundingClientRect();
       if (!width || !height) return;
-      const resized =
-        this.camera.aspect !== width / height || this.renderer.domElement.clientHeight !== height;
+      const resized = viewportWidth !== width || viewportHeight !== height;
+      viewportWidth = width;
+      viewportHeight = height;
       this.renderer.setSize(width, height);
       this.camera.aspect = width / height;
       this.updateViewport();
       this.controls.enableZoom = true;
       this.renderer.domElement.style.touchAction = 'none';
       if (resized) this.reset();
-      else this.frameInteraction();
     });
     this.resize.observe(host);
     const layout = host.closest('.play-layout')!;
@@ -208,7 +209,6 @@ export class World {
       this.interactionPanel = panel;
       if (panel) this.resize.observe(panel);
       this.updateViewport();
-      this.frameInteraction();
     });
     this.panelObserver.observe(layout, { childList: true, subtree: true });
   }
@@ -219,7 +219,6 @@ export class World {
     const width = this.host.clientWidth,
       height = this.host.clientHeight;
     if (!width || !height) return;
-    this.availableViewport = { width, height };
     if (this.boardInteraction && this.compactMap() && this.interactionPanel) {
       const board = this.host.getBoundingClientRect();
       const panel = this.interactionPanel.getBoundingClientRect();
@@ -229,7 +228,6 @@ export class World {
       const right = width - 12;
       const top = landscape ? 60 : 12;
       const bottom = landscape ? height - 12 : Math.max(top + 80, panel.top - board.top - 12);
-      this.availableViewport = { width: Math.max(80, right - left), height: Math.max(80, bottom - top) };
       this.camera.setViewOffset(
         width,
         height,
@@ -431,10 +429,9 @@ export class World {
         ),
       );
     this.controls.update();
-    this.frameInteraction();
     this.invalidate();
   }
-  private frameInteraction() {
+  private centerInteraction() {
     const positions = this.decisionPositions.length
       ? this.decisionPositions
       : this.compactMap()
@@ -449,25 +446,9 @@ export class World {
       0,
       (Math.min(...zs) + Math.max(...zs)) / 2,
     );
-    const inverse = this.camera.quaternion.clone().invert();
-    const tangent = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
-    const horizontal = (tangent * this.camera.aspect * this.availableViewport.width) / this.host.clientWidth;
-    const vertical = (tangent * this.availableViewport.height) / this.host.clientHeight;
-    const distance = THREE.MathUtils.clamp(
-      Math.max(
-        ...points.map(([x, z]) => {
-          const point = new THREE.Vector3(x, 0, z).sub(target).applyQuaternion(inverse);
-          return (
-            Math.max((Math.abs(point.x) + 1.2) / horizontal, (Math.abs(point.y) + 1.2) / vertical) + point.z
-          );
-        }),
-      ),
-      10,
-      55,
-    );
-    const offset = this.camera.position.clone().sub(this.controls.target).setLength(distance);
+    // Opening a selection may pan to its targets, but must keep the player's zoom and angle.
+    this.camera.position.add(target.clone().sub(this.controls.target));
     this.controls.target.copy(target);
-    this.camera.position.copy(target).add(offset);
     this.controls.update();
   }
   private building(color: string) {
@@ -1120,7 +1101,6 @@ export class World {
           kind: 'destination',
         });
       }
-      if (mapChoices.length) this.frameInteraction();
     }
     if (seaGuide) {
       this.selectable = new Set(
@@ -1147,16 +1127,16 @@ export class World {
       this.topDown = s.topDown;
       this.reset();
     }
-    const framingSignature = JSON.stringify([
+    const interactionSignature = JSON.stringify([
       s.mode,
       s.tilePanel,
       this.interactionPositions,
       decisionPositions,
     ]);
-    if (framingSignature !== this.interactionSignature) {
-      this.interactionSignature = framingSignature;
+    if (interactionSignature !== this.interactionSignature) {
+      this.interactionSignature = interactionSignature;
       this.updateViewport();
-      this.frameInteraction();
+      this.centerInteraction();
     }
     this.setHovered(this.hovered);
     this.invalidate();
