@@ -1,16 +1,22 @@
 import { get, writable } from 'svelte/store';
 import { ChatController } from '@boardgamers/protocol/chat';
 import type { ViewerCommands } from '@boardgamers/protocol/viewer';
-import type { Bridge, Choice, Game, Move, RecruitSelection, Session, View } from './types';
+import type { Bridge, Choice, Game, Move, RecruitSelection, Session, View, MapPick } from './types';
 import { journal } from './model';
 import { loadBridge } from './bridge';
 import { readPreferences } from './preferences';
 import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
+import { canMoveOnMap, moveOrigins } from './map-actions';
+import { movementBonus } from './movement-bonus';
 export class Controller {
   readonly session = writable<Session>({
     replacements: [],
     collectVariant: 'Collect',
+    tilePanel: false,
+    cityTab: 'build',
+    collectionTile: null,
+    moveTarget: null,
     selectedUnits: [],
     moveDestinations: [],
     moveDestination: null,
@@ -57,6 +63,7 @@ export class Controller {
   private cardDraws = new CardDrawTracker();
   private submittedMove: Move | null = null;
   private raw = '';
+  private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private refreshTimer: ReturnType<typeof setTimeout> | undefined;
@@ -105,8 +112,16 @@ export class Controller {
     const game = JSON.parse(raw) as Game;
     const changed = raw !== this.raw;
     this.raw = raw;
+    this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
     const drawn = this.cardDraws.update(old.seat, game, view);
+    const bonus = movementBonus(game);
+    const bonusGranted =
+      !!old.game &&
+      old.seat === view.activePlayer &&
+      this.submittedMove !== 'Undo' &&
+      bonus &&
+      bonus.key !== movementBonus(old.game)?.key;
     const city = view.cities.some((c) => c.position === old.city)
       ? old.city
       : (view.cities[0]?.position ?? null);
@@ -114,6 +129,8 @@ export class Controller {
     this.patch({
       game,
       view,
+      tilePanel: old.pending || changed ? false : old.tilePanel,
+      collectionTile: null,
       seaRouteStart: game.map.tiles.some(([p, t]) => p === old.seaRouteStart && t === 'Water')
         ? old.seaRouteStart
         : null,
@@ -162,7 +179,14 @@ export class Controller {
     if (view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision)
       this.closeActivity();
     this.selectUnits(old.selectedUnits.filter((id) => view.units?.some((u) => u.id === id)));
-    if (drawn.length) {
+    if (view.stopMovement && !get(this.session).moveDestinations.length) {
+      const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);
+      if (next) this.selectUnits([next.id]);
+    }
+    if (bonusGranted) {
+      this.audio.play('research');
+      this.notify(`${bonus.source} · ${bonus.label}`);
+    } else if (drawn.length) {
       this.audio.play('draw');
     } else if (old.pending && changed) {
       this.audio.play(moveSound(this.submittedMove));
@@ -171,12 +195,16 @@ export class Controller {
     this.submittedMove = null;
   }
   setPlayer(index?: number) {
+    this.moveCache.clear();
     if (get(this.session).seat !== index) {
       this.cardDraws.reset();
       this.patch({ cardDraws: [], wondersOpen: false, scorePlayer: null });
     }
     this.patch({
       seat: index,
+      tilePanel: false,
+      collectionTile: null,
+      moveTarget: null,
       mode: 'overview',
       selection: [],
       preview: null,
@@ -211,34 +239,100 @@ export class Controller {
       recruitPreview: null,
     });
   }
-  selectTile(position: string) {
-    this.audio.play('select');
+  selectTile(position: string, pick: MapPick = { kind: 'tile' }) {
     const s = get(this.session);
+    if (
+      s.pending ||
+      s.view?.decision ||
+      s.view?.explorationDecision ||
+      s.view?.choiceDecision ||
+      s.view?.objectiveDecision
+    )
+      return;
+    this.audio.play('select');
     if (s.seaRoutes && s.mode === 'overview') {
       if (s.game?.map.tiles.some(([p, terrain]) => p === position && terrain === 'Water'))
         this.patch({ seaRouteStart: position });
       return;
     }
+    if (s.mode === 'collect') {
+      this.selectCollectionTile(position);
+      return;
+    }
+    // A destination takes priority over pieces on it (boarding or attacking).
+    if (s.mode === 'settlers' && s.moveDestinations.some((d) => d.position === position)) {
+      this.chooseMoveDestination(position);
+      return;
+    }
+    const units = s.view?.units?.filter((u) => u.position === position) ?? [];
     const city = s.view?.cities.find((c) => c.position === position);
-    if (s.mode === 'settlers') {
-      const index = s.moveDestinations.findIndex((d) => d.position === position);
-      if (index >= 0) this.patch({ moveDestination: index });
-      else {
-        const unit = s.view?.units?.find((u) => u.position === position);
-        if (unit) this.selectUnits([unit.id]);
+    const pickedUnit = pick.player === s.seat ? units.find((u) => u.id === pick.unit) : undefined;
+    if (
+      canMoveOnMap(s.view, s.game) &&
+      units.length &&
+      (pickedUnit ||
+        (pick.kind === 'units' && pick.player === s.seat) ||
+        (!city && pick.kind === 'tile') ||
+        s.mode === 'settlers')
+    ) {
+      this.openUnits([pickedUnit?.id ?? units.find((u) => u.carrier === null)?.id ?? units[0].id]);
+      return;
+    }
+    if (city) this.selectCity(position);
+    this.closeActivity();
+    this.patch({ focus: position, tilePanel: true, mode: 'overview', abilitiesOpen: false, error: '' });
+  }
+  chooseMoveDestination(position: string) {
+    const s = get(this.session);
+    if (s.pending) return;
+    const indices = s.moveDestinations.flatMap((d, i) => (d.position === position ? [i] : []));
+    this.patch({ moveTarget: position, moveDestination: indices.length === 1 ? indices[0] : null });
+  }
+  movementDestinations(ids: number[]) {
+    const s = get(this.session);
+    if (!ids.length || !canMoveOnMap(s.view, s.game)) return [];
+    const key = [...ids].sort((a, b) => a - b).join(',');
+    let destinations = this.moveCache.get(key);
+    if (!destinations) {
+      try {
+        destinations = this.query<{ destinations: Session['moveDestinations'] }>({
+          kind: 'movement',
+          units: ids,
+        }).destinations;
+      } catch {
+        destinations = [];
       }
-    } else if (s.mode === 'collect') {
-      const choice = s.view?.cities
-        .find((c) => c.position === s.city)
-        ?.choices.find((c) => c.position === position);
-      if (choice) this.toggleChoice(choice);
-    } else if (city) this.selectCity(position);
-    else this.patch({ focus: position });
+      this.moveCache.set(key, destinations);
+    }
+    return destinations;
+  }
+  moveOrigins(position: string) {
+    const s = get(this.session);
+    return moveOrigins(s.view, s.game, position, (ids) => this.movementDestinations(ids));
+  }
+  openUnits(ids: number[], target: string | null = null) {
+    if (get(this.session).pending) return;
+    this.closeActivity();
+    this.patch({ mode: 'settlers', tilePanel: false, seaRoutes: false, abilitiesOpen: false, error: '' });
+    this.selectUnits(ids, target);
+  }
+  selectCollectionTile(position: string) {
+    const s = get(this.session);
+    if (s.pending) return;
+    const choices =
+      s.view?.cities.find((c) => c.position === s.city)?.choices.filter((c) => c.position === position) ?? [];
+    this.patch({ collectionTile: choices.length > 1 ? position : null });
+    if (choices.length === 1) this.toggleChoice(choices[0]);
+  }
+  collectFromTile(city: string, tile: string) {
+    this.beginCollect(city);
+    this.selectCollectionTile(tile);
   }
   showSeaRoutes(show = true) {
     this.closeActivity();
     this.patch({
       seaRoutes: show,
+      tilePanel: false,
       seaRouteStart: null,
       mode: 'overview',
       error: '',
@@ -258,10 +352,15 @@ export class Controller {
       index < 0 ? (direction > 0 ? 0 : water.length - 1) : (index + direction + water.length) % water.length;
     this.patch({ seaRouteStart: water[next] });
   }
-  beginCollect() {
+  beginCollect(position?: string) {
+    if (get(this.session).pending) return;
+    if (position) this.selectCity(position);
     this.closeActivity();
     this.patch({
       mode: 'collect',
+      tilePanel: false,
+      collectionTile: null,
+      seaRoutes: false,
       selection: [],
       preview: null,
       error: '',
@@ -270,10 +369,12 @@ export class Controller {
       abilitiesOpen: false,
     });
   }
-  openCities(position?: string) {
+  openCities(position?: string, cityTab: Session['cityTab'] = 'build') {
     this.closeActivity();
     this.patch({
       mode: 'city',
+      cityTab,
+      tilePanel: false,
       abilitiesOpen: false,
       city: position ?? get(this.session).city,
       recruits: {},
@@ -283,17 +384,16 @@ export class Controller {
     });
   }
   openSettlers() {
-    this.closeActivity();
     const s = get(this.session);
-    this.patch({
-      mode: 'settlers',
-      abilitiesOpen: false,
-      selectedSettler: s.selectedSettler ?? s.view?.settlers[0]?.id ?? null,
-      destination: null,
-      error: '',
-    });
-    this.selectUnits(
-      s.selectedUnits.length ? s.selectedUnits : s.view?.units?.[0] ? [s.view.units[0].id] : [],
+    const atFocus = s.view?.units?.find((u) => u.position === s.focus && u.carrier === null);
+    this.openUnits(
+      s.selectedUnits.length
+        ? s.selectedUnits
+        : atFocus
+          ? [atFocus.id]
+          : s.view?.units?.[0]
+            ? [s.view.units[0].id]
+            : [],
     );
   }
   query<T>(input: unknown): T {
@@ -301,25 +401,14 @@ export class Controller {
     if (!this.engine || s.seat === undefined) throw new Error('Choose a player');
     return JSON.parse(this.engine.webQuery(this.raw, s.seat, JSON.stringify(input))) as T;
   }
-  selectUnits(selectedUnits: number[]) {
-    this.patch({ selectedUnits, moveDestinations: [], moveDestination: null });
-    const s = get(this.session);
-    if (
-      !selectedUnits.length ||
-      (!s.view?.canPlay && !s.view?.stopMovement) ||
-      s.view?.decision ||
-      s.view?.explorationDecision
-    )
-      return;
-    try {
-      const result = this.query<{ destinations: Session['moveDestinations'] }>({
-        kind: 'movement',
-        units: selectedUnits,
-      });
-      this.patch({ moveDestinations: result.destinations });
-    } catch {
-      /* Browsing units remains possible while a move is unavailable. */
-    }
+  selectUnits(selectedUnits: number[], target: string | null = null) {
+    this.patch({
+      selectedUnits,
+      moveDestinations: this.movementDestinations(selectedUnits),
+      moveDestination: null,
+      moveTarget: null,
+    });
+    if (target) this.chooseMoveDestination(target);
   }
   setRecruits(recruits: RecruitSelection) {
     const s = get(this.session);
@@ -391,7 +480,7 @@ export class Controller {
   }
   setTab(tab: 'journal' | 'chat') {
     this.chat.setOpen(tab === 'chat');
-    this.patch({ tab, activityOpen: true, mode: 'overview', abilitiesOpen: false });
+    this.patch({ tab, activityOpen: true, mode: 'overview', tilePanel: false, abilitiesOpen: false });
   }
   closeActivity() {
     this.chat.setOpen(false);

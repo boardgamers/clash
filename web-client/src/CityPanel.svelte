@@ -25,7 +25,7 @@
   import UnitIcon from './UnitIcon.svelte';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
-  let tab = $state('build');
+  let tab = $derived($session.cityTab);
   let building = $state<string | null>(null);
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let options = $derived($session.view?.cityActions.find((c) => c.position === $session.city));
@@ -43,7 +43,8 @@
     return Sparkles;
   }
   function close() {
-    controller.patch({ mode: 'overview', error: '' });
+    // A confirmed recruitment may already have opened bonus movement controls.
+    if ($session.mode === 'city') controller.patch({ mode: 'overview', error: '' });
   }
   function open(node: HTMLDialogElement) {
     node.showModal();
@@ -53,6 +54,7 @@
 
 <dialog
   class="city-dialog"
+  class:happiness-dialog={tab === 'happiness'}
   use:open
   onclose={close}
   onclick={(e) => {
@@ -85,7 +87,7 @@
     {#each [{ id: 'build', label: 'Buildings', icon: Hammer }, { id: 'recruit', label: 'Recruit', icon: Users }, { id: 'happiness', label: 'Happiness', icon: Smile }] as item}<button
         class:active={tab === item.id}
         onclick={() => {
-          tab = item.id;
+          controller.patch({ cityTab: item.id as typeof tab });
           controller.patch({ error: '' });
         }}><item.icon size={17} />{item.label}</button
       >{/each}

@@ -82,7 +82,7 @@
       .includes(query.trim().toLowerCase());
   }
   function close() {
-    controller.patch({ mode: 'overview', selectedAdvance: null });
+    if ($session.mode === 'research') controller.patch({ mode: 'overview', selectedAdvance: null });
   }
   function open(node: HTMLDialogElement) {
     node.showModal();

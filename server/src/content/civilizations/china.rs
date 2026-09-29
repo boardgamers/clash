@@ -46,16 +46,7 @@ fn rice() -> SpecialAdvanceInfo {
             let city = game.get_any_city(i.city);
             let food = collections
                 .iter()
-                .filter(|c| {
-                    let pos = c.position;
-                    pos.distance(city.position) > 0
-                        && game.map.get(pos) == Some(&Terrain::Fertile)
-                        && game
-                            .player(i.info.player)
-                            .units
-                            .iter()
-                            .any(|u| u.position == pos && u.is_settler())
-                })
+                .filter(|c| rice_cultivation_tile(game, i.info.player, city.position, c.position))
                 .count()
                 .min(2);
             i.total += ResourcePile::food(food as u8);
@@ -64,6 +55,13 @@ fn rice() -> SpecialAdvanceInfo {
         },
     )
     .build()
+}
+
+// Shared by the collection effect and the viewer's per-tile yield preview.
+pub(crate) fn rice_cultivation_tile(game: &Game, player: usize, city: Position, tile: Position) -> bool {
+    tile != city
+        && game.map.get(tile) == Some(&Terrain::Fertile)
+        && game.player(player).units.iter().any(|u| u.position == tile && u.is_settler())
 }
 
 fn expansion() -> SpecialAdvanceInfo {

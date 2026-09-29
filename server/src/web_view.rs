@@ -158,7 +158,12 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             after_activation.mood_state = match city.mood_state { MoodState::Happy => MoodState::Neutral, _ => MoodState::Angry };
         }
         let info = possible_resource_collections(game, city.position, seat, &origin, CostTrigger::NoModifiers);
-        let mut choices = info.choices.iter().flat_map(|(position, piles)| piles.iter().map(move |pile| json!({"position":position,"pile":pile}))).collect::<Vec<_>>();
+        let mut choices = info.choices.iter().flat_map(|(position, piles)| piles.iter().map(move |pile| json!({"position":position,"pile":pile,"bonuses":
+            if p.has_special_advance(crate::special_advance::SpecialAdvance::RiceCultivation)
+                && is_special_advance_active(crate::special_advance::SpecialAdvance::RiceCultivation, p.advances, game)
+                && crate::content::civilizations::china::rice_cultivation_tile(game, seat, city.position, *position) {
+                vec![json!({"source":"Rice Cultivation","pile":ResourcePile::food(1),"limit":2})]
+            } else {vec![]}}))).collect::<Vec<_>>();
         choices.sort_by_key(Value::to_string);
         let reason = if !can_play { Some("Wait for your turn".to_string()) } else if !city.can_activate() { Some("This city has already been activated while angry".to_string()) } else { collect_reason.clone() };
         json!({"position":city.position,"capital":city.position == crate::map::capital_city_position(game,p),"size":city.size(),"capacity":info.max_selection,"maxPerTile":info.max_per_tile,"maxRange2":info.max_range2_tiles,"mood":city.mood_state,"activations":city.activations,"reason":reason,"choices":choices,

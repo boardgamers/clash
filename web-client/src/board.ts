@@ -1,3 +1,6 @@
+import CollectionMapBadge from './CollectionMapBadge.svelte';
+import { collectionYield, collectionBonusLabel, sameCollection } from './collection-yield';
+import type { MapPick } from './types';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
@@ -43,8 +46,15 @@ export class World {
   private dirty = true;
   private lastSignature = '';
   private selectionSignature = '';
+  private moveMarkerSignature = '';
+  private collectionSignature = '';
+  private collectionBadges = new Map<
+    string,
+    { node: HTMLButtonElement; component: ReturnType<typeof mount> }
+  >();
   private disposed = false;
   private topDown = false;
+  private boardInteraction = false;
   private materials = new Set<THREE.Material>();
   private geometries = new Set<THREE.BufferGeometry>();
   private textures = new Set<THREE.Texture>();
@@ -52,7 +62,7 @@ export class World {
     position: string;
     at: THREE.Vector3;
     node: HTMLButtonElement;
-    kind: 'city' | 'units';
+    kind: 'city' | 'units' | 'destination' | 'collection';
     offsetY?: number;
   }[] = [];
   private unitBadges: ReturnType<typeof mount>[] = [];
@@ -72,7 +82,7 @@ export class World {
   }
   constructor(
     private host: HTMLElement,
-    private pick: (position: string) => void,
+    private pick: (position: string, source?: MapPick) => void,
     private hover: () => void = () => {},
     private dismiss: () => void = () => {},
   ) {
@@ -172,12 +182,21 @@ export class World {
       if (!width || !height) return;
       this.renderer.setSize(width, height);
       this.camera.aspect = width / height;
-      this.camera.updateProjectionMatrix();
+      this.updateViewport();
       this.controls.enableZoom = true;
       this.renderer.domElement.style.touchAction = 'none';
       this.reset();
     });
     this.resize.observe(host);
+  }
+  private updateViewport() {
+    const width = this.host.clientWidth,
+      height = this.host.clientHeight;
+    if (this.boardInteraction && width <= 760 && height > 400)
+      this.camera.setViewOffset(width, height, 0, height * 0.3, width, height);
+    else this.camera.clearViewOffset();
+    this.camera.updateProjectionMatrix();
+    this.invalidate();
   }
   private down = (e: PointerEvent) => {
     this.clearCoordinate();
@@ -185,9 +204,10 @@ export class World {
   };
   private up = (e: PointerEvent) => {
     const clicked = this.gesture.up(e.pointerId, e.clientX, e.clientY);
-    const position = this.hitTile(e.clientX, e.clientY);
+    const hit = this.hitTarget(e.clientX, e.clientY);
+    const position = hit?.position ?? null;
     if (clicked && e.button === 0) {
-      if (position && this.canPick(position)) this.pick(position);
+      if (position && this.canPick(position)) this.pick(position, hit?.pick);
       else if (!position) this.dismiss();
     }
     this.setHovered(e.pointerType === 'touch' ? null : position);
@@ -211,6 +231,9 @@ export class World {
     return !this.pending && (this.selectable === null || this.selectable.has(position));
   }
   private hitTile(x: number, y: number): string | null {
+    return this.hitTarget(x, y)?.position ?? null;
+  }
+  private hitTarget(x: number, y: number): { position: string; pick: MapPick } | null {
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.raycaster.setFromCamera(
       new THREE.Vector2(((x - rect.left) / rect.width) * 2 - 1, (-(y - rect.top) / rect.height) * 2 + 1),
@@ -219,7 +242,15 @@ export class World {
     const hit = this.raycaster.intersectObjects([...this.tiles.values(), ...this.pieces], true)[0];
     let object: THREE.Object3D | null = hit?.object ?? null;
     while (object) {
-      if (typeof object.userData.position === 'string') return object.userData.position;
+      if (typeof object.userData.position === 'string')
+        return {
+          position: object.userData.position,
+          pick: {
+            kind: object.userData.kind ?? 'tile',
+            player: object.userData.player,
+            unit: object.userData.unit,
+          },
+        };
       object = object.parent;
     }
     return null;
@@ -501,7 +532,17 @@ export class World {
     badge.renderOrder = 2;
     return badge;
   }
+  private clearCollectionBadges() {
+    for (const badge of this.collectionBadges.values()) {
+      void unmount(badge.component);
+      badge.node.remove();
+    }
+    this.collectionBadges.clear();
+    this.collectionSignature = '';
+    this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'collection');
+  }
   private clearBoard() {
+    this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
     this.board.traverse((o) => {
@@ -526,9 +567,15 @@ export class World {
     this.pieces = [];
     this.labelHost.replaceChildren();
     this.labelPositions = [];
+    this.moveMarkerSignature = '';
   }
   update(s: Session) {
     if (!s.game) return;
+    const interacting = s.mode === 'collect' || s.mode === 'settlers' || s.tilePanel;
+    if (interacting !== this.boardInteraction) {
+      this.boardInteraction = interacting;
+      this.updateViewport();
+    }
     const seaGuide = s.seaRoutes && s.mode === 'overview';
     const guideChanged = seaGuide !== this.seaGuide;
     this.seaGuide = seaGuide;
@@ -617,7 +664,7 @@ export class World {
               cityModel.add(point);
             }
           }
-          cityModel.userData.position = city.position;
+          cityModel.userData = { position: city.position, kind: 'city', player: player.id };
           this.pieces.push(cityModel);
           if (s.colorBlind) {
             const badge = this.ownershipBadge(player.id);
@@ -678,7 +725,7 @@ export class World {
           label.append(face, name);
           label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position} · ${mood}`);
           label.onclick = () => {
-            if (this.canPick(city.position)) this.pick(city.position);
+            if (this.canPick(city.position)) this.pick(city.position, { kind: 'city', player: player.id });
           };
           label.onpointerenter = () => this.setHovered(city.position, true);
           label.onpointerleave = () => this.setHovered(null);
@@ -695,7 +742,7 @@ export class World {
         for (const [unitIndex, unit] of (player.units ?? []).entries()) {
           const [x, z] = positionXY(unit.position);
           const pawn = new THREE.Group();
-          pawn.userData.position = unit.position;
+          pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id };
           this.pieces.push(pawn);
           const color = this.material(playerColor(player.id, s.colorBlind));
           const body = this.mesh(new THREE.ConeGeometry(0.085, 0.27, 7), color);
@@ -776,7 +823,7 @@ export class World {
             }),
           );
           label.onclick = () => {
-            if (this.canPick(position)) this.pick(position);
+            if (this.canPick(position)) this.pick(position, { kind: 'units', player: player.id });
           };
           label.onpointerenter = () => this.setHovered(position, true);
           label.onpointerleave = () => this.setHovered(null);
@@ -798,19 +845,17 @@ export class World {
       if (this.selectionSignature === '') this.reset();
     }
     const settler = s.view?.units?.find((u) => s.selectedUnits.includes(u.id));
-    const focusedPosition = s.mode === 'overview' ? (s.focus ?? s.city) : s.city;
+    const focusedPosition =
+      s.mode === 'settlers' ? settler?.position : s.mode === 'overview' ? (s.focus ?? s.city) : s.city;
     const selected = exploration
       ? exploration.destination
         ? [exploration.destination]
         : []
       : s.mode === 'settlers'
-        ? [
-            settler?.position,
-            s.moveDestination === null ? null : s.moveDestinations[s.moveDestination]?.position,
-          ].filter((p): p is string => !!p)
+        ? [settler?.position, s.moveTarget].filter((p): p is string => !!p)
         : s.mode === 'collect'
           ? s.selection.map((c) => c.position)
-          : focusedPosition
+          : s.tilePanel && focusedPosition
             ? [focusedPosition]
             : [];
     const available = placement
@@ -835,12 +880,122 @@ export class World {
       for (const pos of new Set([...selected, ...available])) {
         const [x, z] = positionXY(pos);
         const ring = this.mesh(
-          new THREE.TorusGeometry(0.99, selected.includes(pos) ? 0.035 : 0.018, 6, 6),
-          this.material(selected.includes(pos) ? '#ffe0a0' : '#e5cc92'),
+          new THREE.TorusGeometry(0.99, selected.includes(pos) ? 0.06 : 0.018, 6, 6),
+          new THREE.MeshBasicMaterial({ color: selected.includes(pos) ? '#ffd16b' : '#ebdab3' }),
         );
         ring.rotation.x = -Math.PI / 2;
-        ring.position.set(x, 0.35, z);
+        ring.position.set(x, selected.includes(pos) ? 0.48 : 0.35, z);
+        this.materials.add(ring.material as THREE.Material);
         this.rings.add(ring);
+        if (selected.includes(pos)) {
+          const material = new THREE.MeshBasicMaterial({
+            color: '#ffc450',
+            transparent: true,
+            opacity: 0.27,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          });
+          this.materials.add(material);
+          const fill = this.mesh(new THREE.CircleGeometry(0.92, 6), material);
+          fill.rotation.x = -Math.PI / 2;
+          fill.position.set(x, 0.47, z);
+          fill.castShadow = false;
+          this.rings.add(fill);
+        }
+      }
+    }
+    const collectionChoices =
+      s.mode === 'collect' ? (s.view?.cities.find((c) => c.position === s.city)?.choices ?? []) : [];
+    const collectionSignature = JSON.stringify([collectionChoices, s.selection]);
+    if (collectionSignature !== this.collectionSignature) {
+      const positions = new Set(collectionChoices.map((c) => c.position));
+      for (const [position, badge] of this.collectionBadges) {
+        if (!positions.has(position)) {
+          void unmount(badge.component);
+          badge.node.remove();
+          this.collectionBadges.delete(position);
+        }
+      }
+      this.labelPositions = this.labelPositions.filter(
+        (l) => l.kind !== 'collection' || positions.has(l.position),
+      );
+      for (const position of positions) {
+        const choices = collectionChoices.filter((c) => c.position === position);
+        const selectedChoices = choices.filter((c) =>
+          s.selection.some((selected) => sameCollection(c, selected)),
+        );
+        const displayed = selectedChoices.length ? selectedChoices : choices;
+        const piles = displayed.map((c) => collectionYield(c, s.selection));
+        const previous = this.collectionBadges.get(position);
+        const label = previous?.node ?? document.createElement('button');
+        if (previous) void unmount(previous.component);
+        else {
+          label.className = 'collect-map-label';
+          label.onclick = () => {
+            if (this.canPick(position)) this.pick(position);
+          };
+          label.onpointerenter = () => this.setHovered(position, true);
+          label.onpointerleave = () => this.setHovered(null);
+          label.onfocus = () => this.setHovered(position);
+          label.onblur = () => this.setHovered(null);
+          this.labelHost.append(label);
+          const [x, z] = positionXY(position);
+          this.labelPositions.push({
+            position,
+            at: new THREE.Vector3(x, 0.7, z),
+            node: label,
+            kind: 'collection',
+          });
+        }
+        const amounts = piles
+          .map((pile) =>
+            Object.entries(pile)
+              .map(([r, n]) => `${n} ${r.replace('_tokens', ' tokens')}`)
+              .join(' + '),
+          )
+          .join(' or ');
+        const bonuses = [...new Set(choices.map(collectionBonusLabel).filter(Boolean))].join(', ');
+        label.title = `${position}: ${amounts}${bonuses ? ` · ${bonuses}` : ''}`;
+        label.setAttribute('aria-label', `Collect at ${label.title}`);
+        label.setAttribute('aria-pressed', String(selectedChoices.length > 0));
+        label.classList.toggle('selected', selectedChoices.length > 0);
+        this.collectionBadges.set(position, {
+          node: label,
+          component: mount(CollectionMapBadge, {
+            target: label,
+            props: { piles, selected: selectedChoices.length > 0 },
+          }),
+        });
+      }
+      this.collectionSignature = collectionSignature;
+    }
+    const moveMarkers = s.mode === 'settlers' ? [...new Set(s.moveDestinations.map((d) => d.position))] : [];
+    const markerSignature = JSON.stringify(moveMarkers);
+    if (markerSignature !== this.moveMarkerSignature) {
+      this.moveMarkerSignature = markerSignature;
+      for (const label of this.labelPositions.filter((l) => l.kind === 'destination')) label.node.remove();
+      this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'destination');
+      for (const position of moveMarkers) {
+        const label = document.createElement('button');
+        label.className = 'move-map-label';
+        label.textContent = position;
+        label.setAttribute('aria-label', `Move destination ${position}`);
+        label.title = `Select destination ${position}`;
+        label.onclick = () => {
+          if (this.canPick(position)) this.pick(position);
+        };
+        label.onpointerenter = () => this.setHovered(position, true);
+        label.onpointerleave = () => this.setHovered(null);
+        label.onfocus = () => this.setHovered(position);
+        label.onblur = () => this.setHovered(null);
+        this.labelHost.append(label);
+        const [x, z] = positionXY(position);
+        this.labelPositions.push({
+          position,
+          at: new THREE.Vector3(x, 0.7, z),
+          node: label,
+          kind: 'destination',
+        });
       }
     }
     if (seaGuide) {
@@ -851,7 +1006,11 @@ export class World {
     } else this.rings.visible = true;
     this.labelHost.classList.toggle('hide-unit-badges', !s.unitBadges);
     for (const label of this.labelPositions) {
-      label.node.classList.toggle('selected', label.position === focusedPosition);
+      if (label.kind !== 'collection')
+        label.node.classList.toggle(
+          'selected',
+          label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
+        );
       label.node.disabled = !this.canPick(label.position);
     }
     if (s.topDown !== this.topDown || guideChanged) {
@@ -863,6 +1022,7 @@ export class World {
   }
   destroy() {
     this.disposed = true;
+    this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
     this.seaOverlay.dispose();

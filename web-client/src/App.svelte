@@ -1,6 +1,6 @@
 <script lang="ts">
   import EventMarkers from './EventMarkers.svelte';
-  import TileUnits from './TileUnits.svelte';
+  import TilePanel from './TilePanel.svelte';
   import { onMount } from 'svelte';
   import {
     Landmark,
@@ -70,6 +70,8 @@
   import type { Resource } from './types';
   import { resources, resourceNames, playerColor, playerSymbol } from './types';
   import { journal, pileText } from './model';
+  import { collectionYield, collectionBonusLabel } from './collection-yield';
+  import { movementBonus } from './movement-bonus';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let boardHost: HTMLDivElement;
@@ -145,7 +147,7 @@
   );
   let objectiveDecision = $derived($session.view?.objectiveDecision);
   let choiceDecision = $derived($session.view?.choiceDecision);
-  let focusTerrain = $derived($session.game?.map.tiles.find(([p]) => p === $session.focus)?.[1]);
+  let activeMovementBonus = $derived(movementBonus($session.game));
   let actionTitle = $derived(
     $session.seat === undefined
       ? 'Spectating'
@@ -162,7 +164,9 @@
               : objectiveDecision
                 ? 'Objective available'
                 : $session.view?.stopMovement
-                  ? 'Moving units'
+                  ? activeMovementBonus
+                    ? `${activeMovementBonus.source} moves`
+                    : 'Moving units'
                   : readyToEnd
                     ? 'Ready to end turn'
                     : $session.view?.canPlay
@@ -181,9 +185,9 @@
     try {
       world = new World(
         boardHost,
-        (p) => {
+        (p, pick) => {
           if ($session.activityOpen || $session.abilitiesOpen || confirmEnd) dismissMapDetails();
-          else controller.selectTile(p);
+          controller.selectTile(p, pick);
         },
         () => controller.audio.play('hover'),
         dismissMapDetails,
@@ -221,7 +225,16 @@
   }
   function closeAction() {
     confirmEnd = false;
-    controller.patch({ mode: 'overview', selection: [], preview: null, error: '' });
+    controller.patch({
+      mode: 'overview',
+      tilePanel: false,
+      collectionTile: null,
+      moveTarget: null,
+      moveDestination: null,
+      selection: [],
+      preview: null,
+      error: '',
+    });
   }
   function dismissMapDetails() {
     if ($session.pending) return;
@@ -233,7 +246,13 @@
   function openResearch() {
     confirmEnd = false;
     controller.closeActivity();
-    controller.patch({ mode: 'research', selectedAdvance: null, error: '', abilitiesOpen: false });
+    controller.patch({
+      mode: 'research',
+      tilePanel: false,
+      selectedAdvance: null,
+      error: '',
+      abilitiesOpen: false,
+    });
   }
   function toggleActivity(tab: 'journal' | 'chat') {
     confirmEnd = false;
@@ -249,6 +268,7 @@
   class:dark={$session.dark}
   class:colorblind={$session.colorBlind}
   class:spectating={$session.seat === undefined}
+  class:board-interacting={$session.mode === 'collect' || $session.mode === 'settlers' || $session.tilePanel}
   class="game-shell"
 >
   <header class="masthead">
@@ -355,7 +375,7 @@
             class:active={player.index === $session.view?.activePlayer}
             style={`--player:${playerColor(player.index, $session.colorBlind)}`}
             title={`Inspect ${player.civilization}: advances and victory points`}
-            aria-label={`${player.civilization}: ${player.score} victory points. View advances and scores`}
+            aria-label={`${player.civilization}: ${player.score} victory points. View resources, advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -388,34 +408,9 @@
           <h2>Loading game…</h2>
         </div>{/if}
       {#if boardError}<div class="map-warning" role="alert">{boardError}</div>{/if}
-      {#if !$session.seaRoutes && !$session.view?.decision && !choiceDecision && !objectiveDecision && $session.mode === 'overview' && $session.focus && $session.focus !== $session.city && typeof focusTerrain === 'string'}<div
-          class="tile-inspector"
-        >
-          <button
-            aria-label="Close terrain details"
-            onclick={() => controller.patch({ focus: $session.city })}><X size={18} /></button
-          ><span class="tiny-label">TILE {$session.focus}</span><strong
-            >{focusTerrain === 'Unexplored'
-              ? 'Unexplored'
-              : focusTerrain === 'Fertile'
-                ? 'Fertile land'
-                : focusTerrain}</strong
-          >
-          <p>
-            {focusTerrain === 'Unexplored'
-              ? 'Move a unit here to reveal the terrain.'
-              : focusTerrain === 'Forest'
-                ? 'Collect wood here from a nearby city.'
-                : focusTerrain === 'Mountain'
-                  ? 'Collect ore here from a nearby city.'
-                  : focusTerrain === 'Fertile'
-                    ? 'Collect food here from a nearby city.'
-                    : focusTerrain === 'Water'
-                      ? 'Coastal waters. Fishing unlocks food collection.'
-                      : 'Barren terrain. Some advances unlock new ways to use it.'}
-          </p>
-          <TileUnits players={$session.game?.players ?? []} position={$session.focus!} />
-        </div>{/if}
+      {#if $session.tilePanel && !$session.seaRoutes && $session.mode === 'overview' && !$session.view?.decision && !choiceDecision && !objectiveDecision && !$session.view?.explorationDecision}
+        <TilePanel {controller} onHighlight={(p) => world?.highlightCoordinate(p)} />
+      {/if}
       <div class="map-controls">
         <div class="sr-only" id="sea-route-help" aria-live="polite">
           {$session.seaRouteStart
@@ -584,7 +579,7 @@
           disabled={!abilitiesAvailable || $session.pending}
           onclick={() => {
             controller.closeActivity();
-            controller.patch({ mode: 'overview', abilitiesOpen: !$session.abilitiesOpen });
+            controller.patch({ mode: 'overview', tilePanel: false, abilitiesOpen: !$session.abilitiesOpen });
           }}><Sparkles size={21} /><span>Abilities</span></button
         >
         <button
@@ -601,7 +596,7 @@
           disabled={!$session.view?.canEndTurn || $session.pending}
           onclick={() => {
             controller.closeActivity();
-            controller.patch({ mode: 'overview' });
+            controller.patch({ mode: 'overview', tilePanel: false });
             if (totalActions) confirmEnd = !confirmEnd;
             else controller.submit({ Playing: 'EndTurn' });
           }}><Flag size={19} /><span>End turn</span></button
@@ -645,7 +640,11 @@
       >
     </nav>
     {#if choiceDecision || objectiveDecision || ($session.game && !$session.view?.supportedPhase && $session.seat === $session.view?.activePlayer) || $session.mode === 'collect' || confirmEnd || ($session.error && $session.mode === 'overview')}
-      <section class="action-panel floating-panel" aria-label="Current action">
+      <section
+        class="action-panel floating-panel"
+        class:board-collection={$session.mode === 'collect'}
+        aria-label="Current action"
+      >
         {#if !choiceDecision && !objectiveDecision && $session.view?.supportedPhase}<button
             class="icon-button close-action"
             aria-label="Close action"
@@ -691,7 +690,7 @@
           <h2>Decision not available yet</h2>
           <p>The controls for this phase are still being built.</p>
         {:else if $session.mode === 'collect'}
-          <h2>Collect resources</h2>
+          <h2>Collect <span class="movement-origin">{$session.city}</span></h2>
           {#if ($session.view?.collectActions?.length ?? 0) > 1}<div class="variant-picker">
               {#each $session.view?.collectActions ?? [] as variant}<button
                   class:selected={JSON.stringify($session.collectVariant) === JSON.stringify(variant.value)}
@@ -706,42 +705,64 @@
                   >{variant.name}{#if !variant.free}<Zap size={12} />1{/if}</button
                 >{/each}
             </div>{/if}
-          <p>
-            Choose up to <b>{city?.capacity} {city?.capacity === 1 ? 'tile' : 'tiles'} total</b>: your city’s
-            tile or directly adjacent tiles.
-            {#if city?.maxRange2}
-              With Husbandry, up to {city.maxRange2} selected land
-              {city.maxRange2 === 1 ? 'tile' : 'tiles'} may be 2 tiles away.
-            {/if}
+          <p
+            class="collection-limit"
+            title={`Choose from this city's tile or adjacent tiles.${city?.maxRange2 ? ` Husbandry allows up to ${city.maxRange2} land tiles two spaces away.` : ''}`}
+          >
+            Select tiles · {$session.selection.reduce((sum, c) => sum + c.times, 0)} / {city?.capacity}
           </p>
-          {#if city}<ActivationStatus {city} warning />{/if}
-          <div class="collection-choices">
-            {#each city?.choices ?? [] as choice}{@const resource = Object.keys(
-                choice.pile,
-              )[0] as Resource}{@const Icon = icons[resource] ?? Wheat}{@const selected =
-                $session.selection.some(
-                  (c) =>
-                    c.position === choice.position && JSON.stringify(c.pile) === JSON.stringify(choice.pile),
-                )}<button
-                class:selected
-                onmouseenter={() => world?.highlightCoordinate(choice.position)}
-                onmouseleave={() => world?.highlightCoordinate(null)}
-                onfocus={() => world?.highlightCoordinate(choice.position)}
-                onblur={() => world?.highlightCoordinate(null)}
-                onclick={() => controller.toggleChoice(choice)}
-                disabled={$session.pending}
-                aria-pressed={selected}
-                ><span class="choice-icon {resource}"><Icon size={21} /></span><span
-                  ><strong>{pileText(choice.pile)}</strong><small>Tile {choice.position}</small></span
-                ><span class="choice-check"
-                  >{#if selected && city && city.maxPerTile > 1}{$session.selection.find(
-                      (c) =>
-                        c.position === choice.position &&
-                        JSON.stringify(c.pile) === JSON.stringify(choice.pile),
-                    )?.times}{:else if selected}<Check size={14} />{:else}<Plus size={13} />{/if}</span
-                ></button
-              >{/each}
-          </div>
+          {#if city && city.activations > 0}<ActivationStatus {city} warning />{/if}
+          {#if $session.collectionTile}<div
+              class="collection-tile-options"
+              role="group"
+              aria-label={`Resource at ${$session.collectionTile}`}
+            >
+              <strong>{$session.collectionTile}</strong>
+              {#each city?.choices.filter((c) => c.position === $session.collectionTile) ?? [] as choice}<button
+                  class="secondary"
+                  onclick={() => {
+                    controller.toggleChoice(choice);
+                    controller.patch({ collectionTile: null });
+                  }}><ResourceAmount pile={choice.pile} /></button
+                >{/each}
+            </div>{/if}
+          <details class="collection-tile-list" open={!!boardError}>
+            <summary>Tile yields</summary>
+            <div class="collection-choices">
+              {#each city?.choices ?? [] as choice}{@const resource = Object.keys(
+                  choice.pile,
+                )[0] as Resource}{@const Icon = icons[resource] ?? Wheat}{@const selected =
+                  $session.selection.some(
+                    (c) =>
+                      c.position === choice.position &&
+                      JSON.stringify(c.pile) === JSON.stringify(choice.pile),
+                  )}<button
+                  class:selected
+                  aria-label={`${choice.position}: ${pileText(collectionYield(choice, $session.selection))}${choice.bonuses?.length ? ` · ${collectionBonusLabel(choice)}` : ''}`}
+                  onmouseenter={() => world?.highlightCoordinate(choice.position)}
+                  onmouseleave={() => world?.highlightCoordinate(null)}
+                  onfocus={() => world?.highlightCoordinate(choice.position)}
+                  onblur={() => world?.highlightCoordinate(null)}
+                  onclick={() => controller.toggleChoice(choice)}
+                  disabled={$session.pending}
+                  aria-pressed={selected}
+                  ><span class="choice-icon {resource}"><Icon size={21} /></span><span
+                    ><strong>{pileText(collectionYield(choice, $session.selection))}</strong><small
+                      >Tile {choice.position}</small
+                    >{#if choice.bonuses?.length}<small
+                        class="collection-bonus"
+                        title={collectionBonusLabel(choice)}>{collectionBonusLabel(choice)}</small
+                      >{/if}</span
+                  ><span class="choice-check"
+                    >{#if selected && city && city.maxPerTile > 1}{$session.selection.find(
+                        (c) =>
+                          c.position === choice.position &&
+                          JSON.stringify(c.pile) === JSON.stringify(choice.pile),
+                      )?.times}{:else if selected}<Check size={14} />{:else}<Plus size={13} />{/if}</span
+                  ></button
+                >{/each}
+            </div>
+          </details>
           {#if $session.preview}<div class="collection-summary">
               <span>You will collect</span><strong>{pileText($session.preview.total)}</strong
               >{#if Object.values($session.preview.waste).some((n) => n)}<small class="warning"
@@ -965,33 +986,91 @@
           <Landmark />
           <h3>Scoring</h3>
           <p>
-            Each city piece is worth 1 point. Advances add ½ point each. Completed objectives and wonders can
-            add more. End-of-age objectives are checked after everyone’s third turn, during the status phase.
+            Each city piece scores 1 point; each advance scores ½ point. Objectives and wonders add more.
+            Select a civilization to see its resources, score breakdown and advances.
           </p>
         </article>
         <article>
           <Hourglass />
-          <h3>Actions</h3>
+          <h3>Turns and ages</h3>
           <p>
-            Each age has three rounds, with one turn per player per round. Each turn gives you three actions.
-            Collect resources, research, grow cities, recruit, move, improve happiness, or influence another
-            culture.
+            Each age has three rounds, with one turn per player per round. You get three actions per turn.
+            After round three, resolve end-of-age steps before starting the next age.
           </p>
         </article>
         <article>
           <Wheat />
-          <h3>Resources</h3>
+          <h3>Collecting resources</h3>
           <p>
-            Select your capital, then Collect resources. Fertile land gives food, forests give wood, and
-            mountains give ore.
+            Select a city, choose Collect, then select resource icons on the map. Each collection activates
+            one city. Choose its own tile or adjacent tiles; some advances extend your reach. Food comes from
+            fertile land, wood from forests, and ore from mountains. Excess beyond your storage limit is lost.
           </p>
         </article>
         <article>
           <Smile />
-          <h3>City mood and storage</h3>
+          <h3>City mood</h3>
           <p>
-            A happy city collects from more tiles. Activating a city again in the same turn lowers its mood.
-            Storage limits can make excess resources go to waste.
+            Happy cities collect resources or recruit units up to their size + 1; neutral cities use their
+            size; angry cities are limited to 1. Activating a city again in the same turn lowers its mood.
+            Angry cities cannot build new buildings.
+          </p>
+        </article>
+        <article>
+          <Smile />
+          <h3>Mood tokens and happiness</h3>
+          <p>
+            <ResourceText
+              text="Gaining 1 mood token adds to your supply; it does not change a city's mood. Improving happiness normally costs one action, plus mood tokens equal to the city's size per mood step. You may improve several cities together in that action."
+            />
+          </p>
+        </article>
+        <article>
+          <GraduationCap />
+          <h3>Research</h3>
+          <p>
+            <ResourceText
+              text="Research normally costs one action and 2 resources: any mix of food, ideas and gold. Wood and ore cannot pay for research. Some advances reduce the cost. Civilization advances unlock automatically with their required research, without another payment or action."
+            />
+          </p>
+        </article>
+        <article>
+          <ScrollText />
+          <h3>Events</h3>
+          <p>
+            Each ordinary advance normally removes one of your three event markers. When the last is removed,
+            an event occurs and the markers refill. The countdown carries across turns; civilization advances
+            do not remove extra markers. Events can bring benefits, disasters, barbarians or pirates,
+            sometimes affecting everyone.
+          </p>
+        </article>
+        <article>
+          <Target />
+          <h3>Objective cards</h3>
+          <p>
+            Open Objectives to see your secret goals. Each card offers two alternatives: complete either to
+            claim points when prompted. Some can be claimed during play; others are checked at the end of an
+            age. Claiming discards the whole card, including its other objective. You may keep it instead.
+          </p>
+        </article>
+        <article>
+          <Footprints />
+          <h3>Moving on the map</h3>
+          <p>
+            Select one of your units, then a highlighted destination and confirm the move. You can also select
+            a destination first and choose a unit that can reach it. Moving into unexplored land reveals
+            terrain. One Move action lets you move up to three groups. A group is one or more units moving
+            together from the same tile to the same destination. A new Move action lets units move again;
+            mountains and combat can prevent this. Finish moving ends the current action.
+          </p>
+        </article>
+        <article>
+          <Hammer />
+          <h3>Growing cities</h3>
+          <p>
+            A building adds one city size and one point. A city's size cannot exceed your total number of
+            cities. Recruit settlers and move them to empty land to found more cities; founding costs a
+            separate action.
           </p>
         </article>
       </div>

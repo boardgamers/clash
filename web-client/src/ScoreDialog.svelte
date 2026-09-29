@@ -12,12 +12,20 @@
   } from 'lucide-svelte';
   import EventMarkers from './EventMarkers.svelte';
   import ResourceText from './ResourceText.svelte';
+  import ResourceAmount from './ResourceAmount.svelte';
+  import { resourceNames, type Pile } from './types';
   import CivilizationAdvances from './CivilizationAdvances.svelte';
   import { researchPresentation } from './research';
   import type { Controller } from './controller';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let player = $derived($session.view?.players.find((p) => p.index === $session.scorePlayer));
+  const publicPlayer = $derived($session.game?.players.find((p) => p.id === player?.index));
+  const resources = $derived(
+    Object.fromEntries(
+      Object.keys(resourceNames).map((key) => [key, publicPlayer?.resources?.[key as keyof Pile] ?? 0]),
+    ) as Pile,
+  );
   let tab = $state<'score' | 'advances'>('score');
   let advances = $derived(
     [...(player?.advances ?? [])].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
@@ -61,6 +69,9 @@
     >
     <span class="card-eyebrow">Civilization</span>
     <h2 id="score-title">{player.civilization} <EventMarkers remaining={player.eventTokens} /></h2>
+    <div class="civilization-resources" role="group" aria-label={`${player.civilization} resources`}>
+      <ResourceAmount pile={resources} showZero />
+    </div>
     <nav class="civilization-tabs" aria-label="Civilization details">
       <button class:active={tab === 'score'} aria-pressed={tab === 'score'} onclick={() => (tab = 'score')}
         ><Trophy size={16} /> Score</button

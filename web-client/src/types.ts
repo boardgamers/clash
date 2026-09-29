@@ -48,12 +48,14 @@ export interface LoggedAction {
   items?: {
     player: number;
     origin?: Record<string, unknown>;
+    Action?: { balance: string };
     Structure?: { structure: unknown; balance: string; position: string };
     HandCard?: { to: unknown };
   }[];
   combat_stats?: unknown;
 }
 export interface Choice {
+  bonuses?: { source: string; pile: Pile; limit: number }[];
   position: string;
   pile: Pile;
 }
@@ -276,6 +278,10 @@ export interface JournalEntry {
 export interface Session {
   replacements: number[];
   collectVariant: Move;
+  tilePanel: boolean;
+  cityTab: 'build' | 'recruit' | 'happiness';
+  collectionTile: string | null;
+  moveTarget: string | null;
   selectedUnits: number[];
   moveDestinations: MoveDestination[];
   moveDestination: number | null;
@@ -317,6 +323,11 @@ export interface Session {
   toast: string;
   topDown: boolean;
   unitBadges: boolean;
+}
+export interface MapPick {
+  kind: 'tile' | 'city' | 'unit' | 'units';
+  player?: number;
+  unit?: number;
 }
 export interface UnitView {
   id: number;
