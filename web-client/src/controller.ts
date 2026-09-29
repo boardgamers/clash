@@ -9,8 +9,10 @@ import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
 import { canMoveOnMap, moveOrigins } from './map-actions';
 import { movementBonus } from './movement-bonus';
+import { freeResearchDecision, mapDecisionOptions, toggleDecisionSelection } from './decision-controls';
 export class Controller {
   readonly session = writable<Session>({
+    decisionSelection: [],
     replacements: [],
     collectVariant: 'Collect',
     tilePanel: false,
@@ -114,6 +116,8 @@ export class Controller {
     this.raw = raw;
     this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
+    const freeResearch = freeResearchDecision(view);
+    const newDecision = changed || JSON.stringify(view.decision) !== JSON.stringify(old.view?.decision);
     const drawn = this.cardDraws.update(old.seat, game, view);
     const bonus = movementBonus(game);
     const bonusGranted =
@@ -129,6 +133,8 @@ export class Controller {
     this.patch({
       game,
       view,
+      decisionSelection: newDecision ? [] : old.decisionSelection,
+      selectedAdvance: newDecision && freeResearch ? null : old.selectedAdvance,
       tilePanel: old.pending || changed ? false : old.tilePanel,
       collectionTile: null,
       seaRouteStart: game.map.tiles.some(([p, t]) => p === old.seaRouteStart && t === 'Water')
@@ -150,15 +156,19 @@ export class Controller {
       selectedSettler: view.settlers.some((u) => u.id === old.selectedSettler)
         ? old.selectedSettler
         : (view.settlers[0]?.id ?? null),
-      mode: view.stopMovement
-        ? 'settlers'
-        : old.pending ||
-            view.decision ||
-            view.objectiveDecision ||
-            view.choiceDecision ||
-            view.explorationDecision
-          ? 'overview'
-          : old.mode,
+      mode: freeResearch
+        ? newDecision || !freeResearchDecision(old.view)
+          ? 'research'
+          : old.mode
+        : view.stopMovement
+          ? 'settlers'
+          : old.pending ||
+              view.decision ||
+              view.objectiveDecision ||
+              view.choiceDecision ||
+              view.explorationDecision
+            ? 'overview'
+            : old.mode,
       objectivesOpen:
         view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision
           ? false
@@ -202,6 +212,7 @@ export class Controller {
     }
     this.patch({
       seat: index,
+      decisionSelection: [],
       tilePanel: false,
       collectionTile: null,
       moveTarget: null,
@@ -224,7 +235,12 @@ export class Controller {
     });
     if (this.engine && this.raw) {
       const view = JSON.parse(this.engine.webView(this.raw, index)) as View;
-      this.patch({ view, city: view.cities[0]?.position ?? null, focus: view.cities[0]?.position ?? null });
+      this.patch({
+        view,
+        mode: freeResearchDecision(view) ? 'research' : 'overview',
+        city: view.cities[0]?.position ?? null,
+        focus: view.cities[0]?.position ?? null,
+      });
     }
   }
   selectCity(position: string) {
@@ -241,6 +257,11 @@ export class Controller {
   }
   selectTile(position: string, pick: MapPick = { kind: 'tile' }) {
     const s = get(this.session);
+    if (mapDecisionOptions(s.view?.decision).length) {
+      const index = s.view!.decision!.options.findIndex((o) => o.position === position);
+      if (index >= 0) this.selectDecisionOption(index);
+      return;
+    }
     if (
       s.pending ||
       s.view?.decision ||
@@ -283,6 +304,16 @@ export class Controller {
     if (city) this.selectCity(position);
     this.closeActivity();
     this.patch({ focus: position, tilePanel: true, mode: 'overview', abilitiesOpen: false, error: '' });
+  }
+  selectDecisionOption(index: number) {
+    const s = get(this.session);
+    const decision = s.view?.decision;
+    if (s.pending || !decision || s.seat !== s.view?.activePlayer) return;
+    this.audio.play('select');
+    this.patch({
+      decisionSelection: toggleDecisionSelection(decision, s.decisionSelection, index),
+      error: '',
+    });
   }
   chooseMoveDestination(position: string) {
     const s = get(this.session);

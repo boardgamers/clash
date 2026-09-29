@@ -10,6 +10,7 @@ import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
 import { mount, unmount } from 'svelte';
 import UnitMapBadge from './UnitMapBadge.svelte';
+import { mapDecisionOptions } from './decision-controls';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -55,6 +56,7 @@ export class World {
   private disposed = false;
   private topDown = false;
   private boardInteraction = false;
+  private decisionPositions: string[] = [];
   private materials = new Set<THREE.Material>();
   private geometries = new Set<THREE.BufferGeometry>();
   private textures = new Set<THREE.Texture>();
@@ -387,7 +389,29 @@ export class World {
         ),
       );
     this.controls.update();
+    this.frameDecision();
     this.invalidate();
+  }
+  private frameDecision() {
+    if (!this.decisionPositions.length) return;
+    const points = this.decisionPositions.map(positionXY);
+    const xs = points.map(([x]) => x),
+      zs = points.map(([, z]) => z);
+    const target = new THREE.Vector3(
+      (Math.min(...xs) + Math.max(...xs)) / 2,
+      0,
+      (Math.min(...zs) + Math.max(...zs)) / 2,
+    );
+    const span = Math.max(5, Math.max(...xs) - Math.min(...xs) + 3, Math.max(...zs) - Math.min(...zs) + 3);
+    const distance = THREE.MathUtils.clamp(
+      span / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2))) / Math.min(1, this.camera.aspect),
+      12,
+      55,
+    );
+    const offset = this.camera.position.clone().sub(this.controls.target).setLength(distance);
+    this.controls.target.copy(target);
+    this.camera.position.copy(target).add(offset);
+    this.controls.update();
   }
   private building(color: string) {
     const group = new THREE.Group();
@@ -571,12 +595,16 @@ export class World {
   }
   update(s: Session) {
     if (!s.game) return;
-    const interacting = s.mode === 'collect' || s.mode === 'settlers' || s.tilePanel;
+    const mapChoices = mapDecisionOptions(s.view?.decision);
+    const decisionPositions = mapChoices.map((o) => o.position!);
+    this.decisionPositions = decisionPositions;
+    const decisionSelected = s.decisionSelection.flatMap((i) => mapChoices[i]?.position ?? []);
+    const interacting = s.mode === 'collect' || s.mode === 'settlers' || s.tilePanel || mapChoices.length > 0;
     if (interacting !== this.boardInteraction) {
       this.boardInteraction = interacting;
       this.updateViewport();
     }
-    const seaGuide = s.seaRoutes && s.mode === 'overview';
+    const seaGuide = s.seaRoutes && s.mode === 'overview' && !s.view?.decision;
     const guideChanged = seaGuide !== this.seaGuide;
     this.seaGuide = seaGuide;
     this.seaPreviewAllowed =
@@ -601,14 +629,16 @@ export class World {
     ]);
     this.selectable = exploration
       ? new Set()
-      : s.mode === 'collect'
-        ? new Set(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
-        : s.mode === 'settlers'
-          ? new Set([
-              ...(s.view?.units?.map((u) => u.position) ?? []),
-              ...s.moveDestinations.map((d) => d.position),
-            ])
-          : null;
+      : s.view?.decision
+        ? new Set(decisionPositions)
+        : s.mode === 'collect'
+          ? new Set(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
+          : s.mode === 'settlers'
+            ? new Set([
+                ...(s.view?.units?.map((u) => u.position) ?? []),
+                ...s.moveDestinations.map((d) => d.position),
+              ])
+            : null;
     const signature = JSON.stringify([
       mapTiles,
       s.game.players.map((p) => [p.cities, p.units]),
@@ -847,24 +877,28 @@ export class World {
     const settler = s.view?.units?.find((u) => s.selectedUnits.includes(u.id));
     const focusedPosition =
       s.mode === 'settlers' ? settler?.position : s.mode === 'overview' ? (s.focus ?? s.city) : s.city;
-    const selected = exploration
-      ? exploration.destination
-        ? [exploration.destination]
-        : []
-      : s.mode === 'settlers'
-        ? [settler?.position, s.moveTarget].filter((p): p is string => !!p)
-        : s.mode === 'collect'
-          ? s.selection.map((c) => c.position)
-          : s.tilePanel && focusedPosition
-            ? [focusedPosition]
+    const selected = mapChoices.length
+      ? decisionSelected
+      : exploration
+        ? exploration.destination
+          ? [exploration.destination]
+          : []
+        : s.mode === 'settlers'
+          ? [settler?.position, s.moveTarget].filter((p): p is string => !!p)
+          : s.mode === 'collect'
+            ? s.selection.map((c) => c.position)
+            : s.tilePanel && focusedPosition
+              ? [focusedPosition]
+              : [];
+    const available = mapChoices.length
+      ? decisionPositions
+      : placement
+        ? placement.tiles.map(([position]) => position)
+        : s.mode === 'settlers'
+          ? s.moveDestinations.map((d) => d.position)
+          : s.mode === 'collect'
+            ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
             : [];
-    const available = placement
-      ? placement.tiles.map(([position]) => position)
-      : s.mode === 'settlers'
-        ? s.moveDestinations.map((d) => d.position)
-        : s.mode === 'collect'
-          ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
-          : [];
     const selectionSig = JSON.stringify([selected, available]);
     if (selectionSig !== this.selectionSignature) {
       this.selectionSignature = selectionSig;
@@ -969,8 +1003,12 @@ export class World {
       }
       this.collectionSignature = collectionSignature;
     }
-    const moveMarkers = s.mode === 'settlers' ? [...new Set(s.moveDestinations.map((d) => d.position))] : [];
-    const markerSignature = JSON.stringify(moveMarkers);
+    const moveMarkers = mapChoices.length
+      ? decisionPositions
+      : s.mode === 'settlers'
+        ? [...new Set(s.moveDestinations.map((d) => d.position))]
+        : [];
+    const markerSignature = JSON.stringify([moveMarkers, mapChoices.length > 0, s.view?.decision?.name]);
     if (markerSignature !== this.moveMarkerSignature) {
       this.moveMarkerSignature = markerSignature;
       for (const label of this.labelPositions.filter((l) => l.kind === 'destination')) label.node.remove();
@@ -978,9 +1016,15 @@ export class World {
       for (const position of moveMarkers) {
         const label = document.createElement('button');
         label.className = 'move-map-label';
+        label.classList.toggle('decision-map-label', mapChoices.length > 0);
         label.textContent = position;
-        label.setAttribute('aria-label', `Move destination ${position}`);
-        label.title = `Select destination ${position}`;
+        label.setAttribute(
+          'aria-label',
+          mapChoices.length ? `Select tile ${position}` : `Move destination ${position}`,
+        );
+        label.title = mapChoices.length
+          ? `Select ${position} · ${s.view!.decision!.name}`
+          : `Select destination ${position}`;
         label.onclick = () => {
           if (this.canPick(position)) this.pick(position);
         };
@@ -997,6 +1041,7 @@ export class World {
           kind: 'destination',
         });
       }
+      if (mapChoices.length) this.frameDecision();
     }
     if (seaGuide) {
       this.selectable = new Set(
@@ -1009,8 +1054,14 @@ export class World {
       if (label.kind !== 'collection')
         label.node.classList.toggle(
           'selected',
-          label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
+          mapChoices.length
+            ? decisionSelected.includes(label.position)
+            : label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
         );
+      if (label.kind === 'destination' && mapChoices.length) {
+        label.node.setAttribute('aria-pressed', String(decisionSelected.includes(label.position)));
+        label.node.textContent = `${decisionSelected.includes(label.position) ? '✓ ' : ''}${label.position}`;
+      }
       label.node.disabled = !this.canPick(label.position);
     }
     if (s.topDown !== this.topDown || guideChanged) {

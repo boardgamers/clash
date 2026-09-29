@@ -212,6 +212,10 @@
   outline: 2px solid #b88b3f;
   outline-offset: 1px;
 }
+.move-map-label.decision-map-label {
+  min-width: 40px;
+  min-height: 40px;
+}
 .play-layout .action-panel.floating-panel.board-movement {
   left: 20px;
   right: auto;
@@ -587,6 +591,65 @@
 }
 .play-layout .board-movement > :not(.close-action) {
   margin-block: 0;
+}
+.play-layout .action-panel.floating-panel.board-decision {
+  top: auto;
+  bottom: 20px;
+  left: 20px;
+  right: auto;
+  width: 340px;
+  max-height: 50%;
+  padding: 16px;
+}
+.board-decision h2 {
+  font-size: 23px;
+  margin: 0 0 8px;
+}
+.board-decision .decision-description {
+  margin: 0 0 12px;
+}
+.board-decision .tiny-label {
+  display: none;
+}
+.decision-tile-list {
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.decision-tile-list > summary {
+  cursor: pointer;
+  color: var(--ink);
+}
+.decision-tile-list > summary > span {
+  float: right;
+  color: var(--muted);
+}
+.board-decision .decision-options {
+  max-height: 20vh;
+}
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
+  .play-layout .action-panel.floating-panel.board-decision {
+    left: 12px;
+    right: 12px;
+    bottom: 112px;
+    width: auto;
+    max-height: 45%;
+    padding: 12px;
+  }
+  .board-decision h2 {
+    font-size: 21px;
+  }
+  .map-decision .city-dock {
+    display: none;
+  }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+  .play-layout .action-panel.floating-panel.board-decision {
+    width: 280px;
+    right: auto;
+    top: 8px;
+    bottom: auto;
+    max-height: calc(100% - 16px);
+  }
 }
 .play-layout .action-panel.floating-panel.board-collection {
   left: 20px;

@@ -36,6 +36,7 @@ fn resource_field(
     optional: bool,
     available: &ResourcePile,
     reward: bool,
+    stock: &ResourcePile,
 ) -> Value {
     // Resource keys come from the same serialized piles used by every action.
     let types = cost
@@ -52,7 +53,39 @@ fn resource_field(
         })
         .unique()
         .collect::<Vec<_>>();
-    json!({"name":name,"optional":optional,"resources":types,"initial":if reward {cost.default_payment()} else {cost.first_valid_payment(available).unwrap_or_default()},"cost":cost.default_payment()})
+    json!({"name":name,"optional":optional,"resources":types,"initial":if reward {cost.default_payment()} else {cost.first_valid_payment(available).unwrap_or_default()},"cost":cost.default_payment(),
+        "choices":payment_choices(cost, stock, reward, optional)})
+}
+
+// Present complete, engine-validated payments. Large choice spaces use direct
+// amount selectors in the viewer instead of building an unbounded list.
+fn payment_choices(cost: &PaymentOptions, stock: &ResourcePile, reward: bool, optional: bool) -> Option<Vec<ResourcePile>> {
+    use crate::resource::ResourceType;
+    fn visit(cost: &PaymentOptions, stock: &ResourcePile, reward: bool, types: &[ResourceType], remaining: u8,
+        pile: ResourcePile, result: &mut Vec<ResourcePile>, budget: &mut usize) -> bool {
+        if *budget == 0 || result.len() > 128 { return false; }
+        *budget -= 1;
+        let Some((resource, rest)) = types.split_first() else {
+            if cost.is_valid_payment(&pile) { result.push(pile); }
+            return true;
+        };
+        let max = if reward { remaining } else { remaining.min(stock.get(resource)) };
+        for amount in 0..=max {
+            let mut next = pile.clone();
+            next.add_type(*resource, i32::from(amount));
+            if !visit(cost, stock, reward, rest, remaining - amount, next, result, budget) { return false; }
+        }
+        true
+    }
+    // Expanding conversions need the unrestricted amount picker rather than a
+    // total capped at the printed cost.
+    if cost.conversions.iter().any(|c| c.from.iter().any(|from| c.to.amount() > from.amount())) { return None; }
+    let mut types = cost.possible_resource_types();
+    types.sort(); types.dedup();
+    let mut result = vec![];
+    if !visit(cost, stock, reward, &types, cost.default_payment().amount(), ResourcePile::empty(), &mut result, &mut 10_000) { return None; }
+    if optional && !result.iter().any(ResourcePile::is_empty) { result.push(ResourcePile::empty()); }
+    Some(result)
 }
 
 pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
@@ -78,9 +111,19 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             return None;
         }
         PersistentEventRequest::Payment(requests) => {
+            if requests.iter().any(|r| r.name == "Pay to gain the Action Card")
+                && let crate::events::EventOrigin::Incident(id) = h.origin
+                && let Some(card) = &game.cache.get_incident(id).action_card
+            {
+                let text = card.civil_card.description.strip_prefix(
+                    crate::content::incidents::great_persons::GREAT_PERSON_DESCRIPTION
+                ).unwrap_or(&card.civil_card.description).trim();
+                description = format!("When played ({}): {text}",
+                    if card.civil_card.action_type.free { "free action" } else { "1 action" });
+            }
             let mut available = p.resources.clone();
             for r in requests {
-                let field = resource_field(&r.cost, &r.name, r.optional, &available, false);
+                let field = resource_field(&r.cost, &r.name, r.optional, &available, false, &p.resources);
                 let initial: ResourcePile =
                     serde_json::from_value(field["initial"].clone()).unwrap();
                 available -= initial;
@@ -98,6 +141,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                 false,
                 &p.resources,
                 true,
+                &p.resources,
             ));
             min = 0;
             max = 0;
@@ -235,6 +279,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
     Some(
         json!({"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
+        "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),
         "endOfAge":crate::status_phase::get_status_phase(game).is_some()}),
     )
 }

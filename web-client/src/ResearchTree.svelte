@@ -26,8 +26,10 @@
   import { resourceNames, type Resource, type Pile, type AdvanceView, type PublicAdvance } from './types';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
+  import { freeResearchDecision } from './decision-controls';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
+  const freeResearch = $derived(freeResearchDecision($session.view));
   let query = $state('');
   let category = $state('All');
   let chosenPayment = $state<{ advance: string; payment: Pile } | null>(null);
@@ -76,6 +78,7 @@
         (category === 'All' || group === category) && advances.some((a) => a.group === group && matches(a)),
     ),
   );
+  const selectedAction = $derived(freeResearch ? selected?.action : selectedPayment?.action);
   function matches(advance: PublicAdvance) {
     return `${advance.name} ${advance.description} ${researchPresentation(advance).summary}`
       .toLowerCase()
@@ -126,11 +129,16 @@
   <header class="research-header">
     <div>
       <h2 id="research-title">
-        Research {#if $session.view?.players.find((p) => p.index === $session.seat)}<EventMarkers
+        {freeResearch ? 'Free advance' : 'Research'}
+        {#if $session.view?.players.find((p) => p.index === $session.seat)}<EventMarkers
             remaining={$session.view.players.find((p) => p.index === $session.seat)!.eventTokens}
           />{/if}
       </h2>
-      <p>Each advance scores ½ point. Branches unlock from their first advance.</p>
+      <p>
+        {freeResearch
+          ? 'End of age · Choose one advance.'
+          : 'Each advance scores ½ point. Branches unlock from their first advance.'}
+      </p>
     </div>
     <!-- The dialog focuses its first control; avoid opening the mobile keyboard. -->
     <button class="icon-button" aria-label="Close research" onclick={close}><X size={21} /></button>
@@ -217,10 +225,10 @@
               <span class="research-node-cost"
                 >{#if advance.owned}<span class="researched-label">Researched</span>{:else}<span
                     class="research-flexible-cost"
-                    title={costLabel(advance)}
-                    aria-label={costLabel(advance)}
+                    title={freeResearch ? 'Free advance' : costLabel(advance)}
+                    aria-label={freeResearch ? 'Free advance' : costLabel(advance)}
                   >
-                    {#if advance.costAmount === 0}No resources{:else}
+                    {#if freeResearch}Free{:else if advance.costAmount === 0}No resources{:else}
                       <b>{advance.costAmount}</b>
                       {#each advance.costResources as resource, i}{@const CostIcon =
                           resourceIcons[resource]}{#if i > 0}/{/if}<CostIcon size={13} />{/each}
@@ -275,7 +283,7 @@
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
       <div class="research-payment">
-        {#if !selected.owned && selected.payments.length > 1}
+        {#if !freeResearch && !selected.owned && selected.payments.length > 1}
           <div class="research-payment-options" role="group" aria-label="Choose research payment">
             <span>Pay</span>
             {#each selected.payments as option}
@@ -294,13 +302,16 @@
         <button
           class="primary"
           title={selected.reason ?? undefined}
-          disabled={!selectedPayment?.action || $session.pending}
-          onclick={() => selectedPayment?.action && controller.submit(selectedPayment.action)}
+          disabled={!selectedAction || $session.pending}
+          onclick={() => selectedAction && controller.submit(selectedAction)}
         >
           {$session.pending ? 'Confirming…' : selected.owned ? 'Researched' : `Research ${selected.name}`}
           {#if !selected.owned}<span
-              >{#if selectedPayment}Pay <ResourceAmount pile={selectedPayment.payment} compact /> ·
-              {/if}1 action</span
+              >{#if freeResearch}Free{:else}{#if selectedPayment}Pay <ResourceAmount
+                    pile={selectedPayment.payment}
+                    compact
+                  /> ·
+                {/if}1 action{/if}</span
             >{/if}
         </button>
       </div>

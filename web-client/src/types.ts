@@ -315,6 +315,7 @@ export interface EventInfo {
   targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
+  decisionSelection: number[];
   replacements: number[];
   collectVariant: Move;
   tilePanel: boolean;
@@ -397,6 +398,7 @@ export interface ActionCard {
   action: Move | null;
 }
 export interface Decision {
+  advanceSelection?: boolean;
   name: string;
   description: string;
   min: number;
@@ -410,7 +412,14 @@ export interface Decision {
     position: string | null;
     terrain?: Terrain;
   }[];
-  fields: { name: string; optional: boolean; resources: Resource[]; initial: Pile; cost: Pile }[];
+  fields: {
+    name: string;
+    optional: boolean;
+    resources: Resource[];
+    initial: Pile;
+    cost: Pile;
+    choices?: Pile[] | null;
+  }[];
 }
 export const resourceNames: Record<Resource, string> = {
   food: 'Food',

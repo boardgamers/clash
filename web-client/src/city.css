@@ -567,49 +567,49 @@
 .decision-cost {
   margin: 8px 0;
 }
-.token-payment-choices {
+.payment-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 18px;
+  gap: 8px;
+  margin-top: 14px;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 2px;
 }
-.token-payment-choices > button {
+.payment-choices.single {
+  grid-template-columns: 1fr;
+}
+.payment-choices > button {
   justify-content: center;
-  min-height: 48px;
+  min-height: 46px;
   padding: 10px 8px;
 }
-.resource-steppers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
-  margin: 10px 0;
+.payment-choices > button.selected {
+  border-color: #ba9147;
+  background: #b6893920;
 }
-.resource-stepper {
+.payment-choices .resource-amount {
+  flex-wrap: wrap;
+}
+.payment-amounts {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+.payment-amounts > label {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 12px;
 }
-.resource-stepper > span {
-  flex: 1;
-}
-.resource-stepper .resource-amount > span {
-  font-size: 0;
-  gap: 0;
-}
-.resource-stepper .resource-amount svg {
-  width: 18px;
-  height: 18px;
-}
-.resource-stepper .icon-button {
-  width: 25px;
-  height: 27px;
+.payment-amounts select {
+  background: var(--paper2);
+  color: var(--ink);
   border: 1px solid var(--line);
-  padding: 3px;
-}
-.resource-stepper output {
-  min-width: 17px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+  border-radius: 5px;
+  min-height: 40px;
+  min-width: 70px;
+  padding: 8px;
 }
 .unit-picker,
 .movement-markers {

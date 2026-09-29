@@ -185,7 +185,27 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         json!({"position":city.position,"capital":city.position == crate::map::capital_city_position(game,p),"size":city.size(),"capacity":info.max_selection,"maxPerTile":info.max_per_tile,"maxRange2":info.max_range2_tiles,"mood":city.mood_state,"activations":city.activations,"reason":reason,"choices":choices,
             "canActivate":city.can_activate(), "activationMood":after_activation.mood_state,"activationCapacity":after_activation.mood_modified_size(p)})
     }).collect::<Vec<_>>();
+    let free_advances = if seat == active && crate::status_phase::get_status_phase(game).is_some() {
+        game.current_event_handler().and_then(|handler| match &handler.request {
+            PersistentEventRequest::SelectAdvance(request) if handler.response.is_none() => Some(&request.choices),
+            _ => None,
+        })
+    } else { None };
     let mut advances = game.cache.get_advances().iter().map(|(advance, info)| {
+        if let Some(choices) = free_advances {
+            let owned = p.has_advance(*advance);
+            let action = choices.contains(advance).then(|| Action::Response(EventResponse::SelectAdvance(*advance)));
+            let reason = if owned { Some("Already researched".to_string()) }
+                else if action.is_some() { None }
+                else if let Some(required) = info.required.filter(|a| !p.has_advance(*a)) { Some(format!("Requires {}", required.name(game))) }
+                else { Some("Unavailable for this choice".to_string()) };
+            let mut item = advance_description(game, *advance);
+            item.as_object_mut().unwrap().extend(json!({
+                "owned":owned,"reason":reason,"payment":{},"action":action,
+                "costAmount":0,"costResources":[],"payments":[]
+            }).as_object().unwrap().clone());
+            return item;
+        }
         let cost = p.advance_cost(*advance, game, CostTrigger::NoModifiers).cost;
         let payment = cost.first_valid_payment(&p.resources);
         let payment_options = advance_payments(&cost);

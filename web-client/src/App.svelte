@@ -54,6 +54,7 @@
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
   import ResearchTree from './ResearchTree.svelte';
+  import { freeResearchDecision, mapDecisionOptions } from './decision-controls';
   import CityPanel from './CityPanel.svelte';
   import SettlerPanel from './SettlerPanel.svelte';
   import ExplorationPanel from './ExplorationPanel.svelte';
@@ -134,6 +135,8 @@
   let totalActions = $derived($session.game?.actions_left ?? 0);
   let readyToEnd = $derived(!!$session.view?.canEndTurn && totalActions === 0);
   let researchAvailable = $derived($session.view?.advances.some((a) => !!a.action));
+  let freeResearch = $derived(freeResearchDecision($session.view));
+  let mapDecision = $derived(mapDecisionOptions($session.view?.decision).length > 0);
   let cityActionsAvailable = $derived(
     $session.view?.cityActions.some(
       (c) =>
@@ -388,7 +391,11 @@
   class:dark={$session.dark}
   class:colorblind={$session.colorBlind}
   class:spectating={$session.seat === undefined}
-  class:board-interacting={$session.mode === 'collect' || $session.mode === 'settlers' || $session.tilePanel}
+  class:board-interacting={$session.mode === 'collect' ||
+    $session.mode === 'settlers' ||
+    $session.tilePanel ||
+    mapDecision}
+  class:map-decision={mapDecision}
   class="game-shell"
 >
   <header class="masthead">
@@ -959,7 +966,14 @@
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
     {#if $session.view?.explorationDecision}<ExplorationPanel {controller} />{/if}
-    {#if $session.view?.decision}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
+    {#if freeResearch && $session.mode !== 'research'}<section
+        class="action-panel floating-panel decision-panel"
+        aria-label="Free advance"
+      >
+        <h2><GraduationCap size={21} />Free advance</h2>
+        <button class="primary wide" onclick={openResearch}>Choose an advance<ArrowRight size={16} /></button>
+      </section>
+    {:else if $session.view?.decision && !freeResearch}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
           {controller}
           decision={$session.view.decision}
           onHighlight={(position) => world?.highlightCoordinate(position)}
@@ -1215,6 +1229,19 @@
           <p>
             Leaders have two unique abilities and count as army units. Tactics is required to move them, alone
             or with other army units. Capturing an opponent's leader scores 2 points.
+          </p>
+        </article>
+        <article>
+          <Drama />
+          <h3>Cultural influence</h3>
+          <p>
+            Spend 1 action to target a city's building within range of one of your cities. Range equals your
+            city's size. Roll 5 or higher to replace a building with your color: you score its point, while
+            the city's owner continues to use it. You can also reclaim buildings in your own cities.
+          </p>
+          <p>
+            Each culture token adds 1 range before the roll or +1 to the result afterwards. You may succeed
+            once per turn. Advances such as Arts can change the action cost.
           </p>
         </article>
         <article>
