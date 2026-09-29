@@ -39,9 +39,10 @@ pub struct Incident {
     pub id: u8,
     pub name: String,
     description: String,
-    protection_advance: Option<Advance>,
-    protection_special_advance: Option<SpecialAdvance>,
+    pub(crate) protection_advance: Option<Advance>,
+    pub(crate) protection_special_advance: Option<SpecialAdvance>,
     pub base_effect: IncidentBaseEffect,
+    pub(crate) targets: Vec<IncidentTarget>,
     pub listeners: AbilityListeners,
     pub(crate) action_card: Option<ActionCard>,
 }
@@ -61,7 +62,7 @@ impl Incident {
     pub fn description(&self, game: &Game) -> Vec<String> {
         let mut h = vec![];
 
-        if matches!(self.base_effect, IncidentBaseEffect::None) {
+        if !matches!(self.base_effect, IncidentBaseEffect::None) {
             h.push(self.base_effect.to_string());
         }
         if let Some(p) = &self.protection_advance {
@@ -179,6 +180,7 @@ pub(crate) struct IncidentBuilder {
     protection_special_advance: Option<SpecialAdvance>,
     action_card: Option<ActionCard>,
     builder: AbilityInitializerBuilder,
+    targets: Vec<IncidentTarget>,
 }
 
 impl IncidentBuilder {
@@ -190,6 +192,7 @@ impl IncidentBuilder {
             description: description.to_string(),
             base_effect,
             builder: AbilityInitializerBuilder::new(),
+            targets: Vec::new(),
             protection_advance: None,
             protection_special_advance: None,
             action_card: None,
@@ -214,6 +217,7 @@ impl IncidentBuilder {
             name: builder.name,
             description: builder.description,
             base_effect: builder.base_effect,
+            targets: builder.targets,
             listeners: builder.builder.build(),
             protection_advance: builder.protection_advance,
             protection_special_advance: builder.protection_special_advance,
@@ -241,7 +245,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub fn add_simple_incident_listener<F>(
-        self,
+        mut self,
         role: IncidentTarget,
         priority: i32,
         listener: F,
@@ -263,7 +267,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub(crate) fn add_incident_position_request(
-        self,
+        mut self,
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<PositionRequest>
@@ -296,7 +300,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub(crate) fn add_incident_units_request(
-        self,
+        mut self,
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<UnitsRequest>
@@ -329,7 +333,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub(crate) fn add_incident_structures_request(
-        self,
+        mut self,
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<StructuresRequest>
@@ -366,7 +370,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub(crate) fn add_incident_resource_request(
-        self,
+        mut self,
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<ResourceRewardRequest>
@@ -389,7 +393,10 @@ impl IncidentBuilder {
         )
     }
 
-    fn new_filter(&self, role: IncidentTarget, priority: i32) -> IncidentFilter {
+    fn new_filter(&mut self, role: IncidentTarget, priority: i32) -> IncidentFilter {
+        if priority < BASE_EFFECT_PRIORITY && !self.targets.contains(&role) {
+            self.targets.push(role);
+        }
         IncidentFilter::new(
             role,
             priority,
@@ -400,7 +407,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub(crate) fn add_incident_payment_request(
-        self,
+        mut self,
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<Vec<PaymentRequest>>
@@ -433,7 +440,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub(crate) fn add_incident_hand_card_request(
-        self,
+        mut self,
         role: IncidentTarget,
         priority: i32,
         request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<HandCardsRequest>
@@ -466,7 +473,7 @@ impl IncidentBuilder {
 
     #[must_use]
     pub(crate) fn add_incident_player_request(
-        self,
+        mut self,
         target: IncidentTarget,
         description: &str,
         player_pred: impl Fn(&Player, &Game, &IncidentInfo) -> bool + 'static + Clone + Sync + Send,

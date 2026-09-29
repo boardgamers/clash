@@ -47,6 +47,8 @@
     Meh,
     Crown,
     Sparkles,
+    ShieldCheck,
+    CircleSlash,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
@@ -67,7 +69,7 @@
   import ActionCardsDialog from './ActionCardsDialog.svelte';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
-  import type { Resource } from './types';
+  import type { Resource, JournalEntry } from './types';
   import { resources, resourceNames, playerColor, playerSymbol } from './types';
   import { journal, pileText } from './model';
   import { collectionYield, collectionBonusLabel } from './collection-yield';
@@ -118,7 +120,7 @@
   let current = $derived($session.game?.players.find((p) => p.id === $session.seat));
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let identity = $derived($session.view?.players.find((p) => p.index === $session.seat));
-  let log = $derived($session.game ? journal($session.game).reverse() : []);
+  let log = $derived($session.game ? journal($session.game, $session.view ?? undefined).reverse() : []);
   const coordinateInteraction = {
     onCoordinate: (position: string | null) => world?.highlightCoordinate(position),
     onLocate: (position: string) => {
@@ -263,6 +265,86 @@
     controller.patch({ objectivesOpen: false });
   }
 </script>
+
+{#snippet journalRow(entry: JournalEntry, outcome = false)}
+  {@const EntryIcon = journalIcons[entry.kind]}
+  <article class:journal-event={!!entry.event} class:journal-outcome={outcome}>
+    <span
+      class="journal-symbol"
+      aria-hidden="true"
+      style={`--player:${playerColor(entry.player ?? 0, $session.colorBlind)}`}
+    >
+      {#if entry.civilization}<CivilizationEmblem
+          civilization={entry.civilization}
+          size={23}
+        />{:else}<EntryIcon size={17} />{/if}
+    </span>
+    <div class="journal-heading">
+      {#if entry.civilization}<strong>{entry.civilization}</strong>{/if}
+      {#if !outcome}<span class:journal-event-title={!!entry.event}
+          >{#if !entry.event}<EntryIcon size={13} aria-hidden="true" />{/if}<ResourceText
+            text={entry.title}
+            positions={mapPositions}
+            {...coordinateInteraction}
+          /></span
+        >{/if}
+    </div>
+    {#if entry.tokens.length}<div class="journal-deltas">
+        {#each entry.tokens as token}{@const TokenIcon = journalTokenIcons[token.icon]}
+          <span
+            class="journal-delta"
+            class:gain={token.tone === 'gain'}
+            class:loss={token.tone === 'loss'}
+            title={token.description}
+            aria-label={token.description}
+          >
+            {#if token.value}<b aria-hidden="true">{token.value}</b>{/if}<TokenIcon
+              size={14}
+              aria-hidden="true"
+            />
+            <span class:sr-only={token.compact}
+              ><ResourceText text={token.label} positions={mapPositions} {...coordinateInteraction} /></span
+            >
+          </span>
+        {/each}
+      </div>{/if}
+    {#if entry.notes.length}<p class="journal-notes">
+        <ResourceText text={entry.notes.join(', ')} positions={mapPositions} {...coordinateInteraction} />
+      </p>{/if}
+
+    {#if entry.event}
+      {#each entry.event.outcomes as effect (effect.id)}
+        {@render journalRow(effect, true)}
+      {/each}
+      {#each entry.event.explanations as explanation}
+        {@const faction = $session.game?.players.find((p) => p.id === explanation.player)?.civilization}
+        <div class="event-explanation">
+          {#if explanation.protected}<ShieldCheck size={15} aria-hidden="true" />{:else}<CircleSlash
+              size={15}
+              aria-hidden="true"
+            />{/if}
+          <div>
+            {#if faction}<strong>{faction}</strong>{/if}<span>{explanation.text}</span>
+          </div>
+        </div>
+      {/each}
+      {#if entry.event.pending}<p class="event-pending"><Hourglass size={14} />{entry.event.pending}</p>{/if}
+      {#if entry.event.info}
+        <details class="event-rules">
+          <summary aria-label={`${entry.title} rules`}
+            ><BookOpen size={13} /> Rules <ChevronRight size={13} /></summary
+          >
+          {#each entry.event.info.rules as rule}
+            <p><ResourceText text={rule} positions={mapPositions} {...coordinateInteraction} /></p>
+          {/each}
+          {#if entry.event.info.baseEffect && entry.event.info.protectionAdvance}
+            <p>Protection does not prevent the base effect.</p>
+          {/if}
+        </details>
+      {/if}
+    {/if}
+  </article>
+{/snippet}
 
 <div
   class:dark={$session.dark}
@@ -853,64 +935,13 @@
         >
       </div>
       <div class="journal" hidden={$session.tab !== 'journal'} role="tabpanel" aria-label="Journal">
-        {#each log as entry, index}{@const EntryIcon = journalIcons[entry.kind]}
+        {#each log as entry, index (entry.id)}
           {#if index === 0 || entry.age !== log[index - 1].age || entry.round !== log[index - 1].round}
             <h3 class="journal-round">
               {entry.age === 0 ? 'Setup' : `Age ${entry.age} · Round ${entry.round}`}
             </h3>
           {/if}
-          <article>
-            <span
-              class="journal-symbol"
-              aria-hidden="true"
-              style={`--player:${playerColor(entry.player ?? 0, $session.colorBlind)}`}
-            >
-              {#if entry.civilization}<CivilizationEmblem
-                  civilization={entry.civilization}
-                  size={23}
-                />{:else}<EntryIcon size={17} />{/if}
-            </span>
-            <div class="journal-heading">
-              {#if entry.civilization}<strong>{entry.civilization}</strong>{/if}
-              <span
-                ><EntryIcon size={13} aria-hidden="true" /><ResourceText
-                  text={entry.title}
-                  positions={mapPositions}
-                  {...coordinateInteraction}
-                /></span
-              >
-            </div>
-            {#if entry.tokens.length}<div class="journal-deltas">
-                {#each entry.tokens as token}{@const TokenIcon = journalTokenIcons[token.icon]}
-                  <span
-                    class="journal-delta"
-                    class:gain={token.tone === 'gain'}
-                    class:loss={token.tone === 'loss'}
-                    title={token.description}
-                    aria-label={token.description}
-                  >
-                    {#if token.value}<b aria-hidden="true">{token.value}</b>{/if}<TokenIcon
-                      size={14}
-                      aria-hidden="true"
-                    />
-                    <span class:sr-only={token.compact}
-                      ><ResourceText
-                        text={token.label}
-                        positions={mapPositions}
-                        {...coordinateInteraction}
-                      /></span
-                    >
-                  </span>
-                {/each}
-              </div>{/if}
-            {#if entry.notes.length}<p class="journal-notes">
-                <ResourceText
-                  text={entry.notes.join(', ')}
-                  positions={mapPositions}
-                  {...coordinateInteraction}
-                />
-              </p>{/if}
-          </article>
+          {@render journalRow(entry)}
         {/each}{#if log.length === 0}<p>No actions yet.</p>{/if}
       </div>
       <div

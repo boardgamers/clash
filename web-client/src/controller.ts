@@ -175,7 +175,7 @@ export class Controller {
           : view.objectiveCards.some((card) => card.id === draw.card.id),
       ),
     });
-    this.commands.replaceLog(journal(game).map((entry) => entry.text));
+    this.commands.replaceLog(journal(game, view).map((entry) => entry.text));
     if (view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision)
       this.closeActivity();
     this.selectUnits(old.selectedUnits.filter((id) => view.units?.some((u) => u.id === id)));

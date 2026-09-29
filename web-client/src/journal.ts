@@ -1,4 +1,6 @@
 import type { Game, JournalEntry, JournalToken, LoggedAction, Player, Resource } from './types.ts';
+import type { View } from './types.ts';
+import { explainEvents } from './event-journal.ts';
 
 const resourceIcons: Record<string, Resource | 'action'> = {
   food: 'food',
@@ -77,16 +79,16 @@ function factionText(game: Game, text: string): string {
 function delta(value: number, label: string, icon: JournalToken['icon'], compact = false): JournalToken {
   return {
     icon,
-    value: `${value < 0 ? '−' : '+'}${Math.abs(value)}`,
+    value: `${value === 0 ? '' : value < 0 ? '−' : '+'}${Math.abs(value)}`,
     label,
     compact,
-    description: `${value < 0 ? '−' : '+'}${Math.abs(value)} ${label}`,
-    tone: value < 0 ? 'loss' : 'gain',
+    description: `${value === 0 ? '' : value < 0 ? '−' : '+'}${Math.abs(value)} ${label}`,
+    tone: value === 0 ? undefined : value < 0 ? 'loss' : 'gain',
   };
 }
 
 function addClause(entry: JournalEntry, clause: string): void {
-  let match = clause.match(/^(Pay|Gain|Lose) (.+)$/);
+  let match = clause.match(/^(Pay|Gain|Lose|Lost) (.+)$/);
   if (match) {
     const sign = match[1] === 'Gain' ? 1 : -1;
     const quantities = match[2]
@@ -137,7 +139,9 @@ function addClause(entry: JournalEntry, clause: string): void {
     entry.tokens.push(delta(match[1] === 'Gain' ? 1 : -1, `City ${match[2]}`, 'city'));
     return;
   }
-  match = clause.match(/^(Gain|Lose) (\d+) (settlers?|infantry|cavalry|elephants?|ships?)( at [A-Z]+\d+)?$/);
+  match = clause.match(
+    /^(Gain|Lose|Lost) (\d+) (settlers?|infantry|cavalry|elephants?|ships?)( at [A-Z]+\d+)?$/,
+  );
   if (match) {
     entry.tokens.push(
       delta((match[1] === 'Gain' ? 1 : -1) * Number(match[2]), match[3] + (match[4] ?? ''), 'unit'),
@@ -158,8 +162,27 @@ function addClause(entry: JournalEntry, clause: string): void {
   entry.notes.push(clause);
 }
 
-export function journal(game: Game): JournalEntry[] {
-  return (game.log ?? []).flatMap((age, a) =>
+export function journal(
+  game: Game,
+  view?: Pick<View, 'eventCatalog' | 'pendingEvent' | 'players'>,
+): JournalEntry[] {
+  const eventNames = [
+    ...new Set([
+      ...(view?.eventCatalog?.map((e) => e.name) ?? []),
+      ...(game.log ?? []).flatMap((a) =>
+        a.rounds.flatMap((r) =>
+          r.turns.flatMap((t) =>
+            (t.actions ?? []).flatMap((action) =>
+              (action.log ?? []).flatMap(
+                (line) => line.match(/^A new game event has been triggered: (.+)$/)?.[1] ?? [],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]),
+  ].sort((a, b) => b.length - a.length);
+  const entries = (game.log ?? []).flatMap((age, a) =>
     age.rounds.flatMap((round, r) =>
       round.turns.flatMap((turn, t) =>
         (turn.actions ?? []).flatMap((action, c) => {
@@ -206,13 +229,38 @@ export function journal(game: Game): JournalEntry[] {
           }
           const entries: JournalEntry[] = [];
           for (const line of action.log ?? []) {
-            const match = line.match(/^([^:]+): ([^:]+): (.*)$/s);
+            const eventName = line.match(/^A new game event has been triggered: (.+)$/)?.[1];
+            if (eventName) {
+              entries.push({
+                ...base,
+                id: `${id}-${entries.length}`,
+                kind: 'event',
+                title: eventName,
+                text: '',
+                tokens: [],
+                notes: [],
+                event: { outcomes: [], explanations: [], triggeredBy: entries.at(-1)?.player },
+              });
+              continue;
+            }
+            const actorLine = line.match(/^([^:]+): (.*)$/s);
+            const eventSource = actorLine && eventNames.find((name) => actorLine[2].startsWith(`${name}: `));
+            const match =
+              eventSource && actorLine
+                ? [line, actorLine[1], eventSource, actorLine[2].slice(eventSource.length + 2)]
+                : line.match(/^([^:]+): ([^:]+): (.*)$/s);
             const origin = match?.[2];
             // Origin metadata also identifies actors in old logs after a display-name change.
             const originPlayers = [
               ...new Set(
                 action.items
-                  ?.filter((item) => Object.values(item.origin ?? {}).includes(origin))
+                  ?.filter(
+                    (item) =>
+                      Object.values(item.origin ?? {}).includes(origin) ||
+                      view?.eventCatalog?.some(
+                        (event) => event.name === origin && event.id === item.origin?.Incident,
+                      ),
+                  )
                   .map((item) => item.player),
               ),
             ];
@@ -274,4 +322,5 @@ export function journal(game: Game): JournalEntry[] {
       ),
     ),
   );
+  return explainEvents(entries, game, view);
 }

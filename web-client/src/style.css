@@ -950,6 +950,74 @@ small {
   gap: 4px;
   color: var(--muted);
 }
+.journal-heading > .journal-event-title {
+  color: var(--ink);
+  font-weight: 650;
+}
+.journal-event > .journal-outcome {
+  margin-top: 10px;
+  padding: 0 0 0 30px;
+}
+.journal-outcome > .journal-symbol {
+  width: 23px;
+  height: 23px;
+}
+.event-explanation {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 10px;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.event-explanation > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--muted);
+}
+.event-explanation > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+}
+.event-explanation strong {
+  font-weight: 650;
+}
+.journal .event-pending {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.event-rules {
+  margin-top: 8px;
+}
+.event-rules summary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  min-height: 30px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  list-style: none;
+}
+.event-rules summary::-webkit-details-marker {
+  display: none;
+}
+.event-rules summary:hover {
+  color: var(--ink);
+}
+.event-rules[open] summary > svg:last-child {
+  transform: rotate(90deg);
+}
+.journal .event-rules p {
+  margin: 6px 0;
+  font-size: 12px;
+}
 .journal-deltas {
   display: flex;
   flex-wrap: wrap;

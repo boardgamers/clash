@@ -27,6 +27,7 @@ export interface Player {
     carried_units?: { unit_type: string | { Leader: string }; id: number }[];
   }[];
   advances?: string[];
+  special_advances?: string[];
   action_cards?: number[];
   objective_cards?: number[];
 }
@@ -53,6 +54,8 @@ export interface LoggedAction {
     Action?: { balance: string };
     Structure?: { structure: unknown; balance: string; position: string };
     HandCard?: { to: unknown };
+    Advance?: { advance: string; balance: string; take_incident_token?: boolean };
+    Units?: { units: Record<string, number | string>; balance: string };
   }[];
   combat_stats?: unknown;
 }
@@ -132,6 +135,8 @@ export interface WonderCard {
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
+  eventCatalog?: EventInfo[];
+  pendingEvent?: { id: number; player: number } | null;
   collectActions?: ActionVariant[];
   happinessActions?: ActionVariant[];
   decision?: Decision | null;
@@ -276,6 +281,23 @@ export interface JournalEntry {
   tokens: JournalToken[];
   notes: string[];
   setup?: { civilization: string; position?: string };
+  event?: {
+    triggeredBy?: number;
+    info?: EventInfo;
+    outcomes: JournalEntry[];
+    explanations: { player?: number; text: string; protected?: boolean }[];
+    pending?: string;
+  };
+}
+export interface EventInfo {
+  id: number;
+  name: string;
+  rules: string[];
+  baseEffect: string | null;
+  protectionAdvance: string | null;
+  protectionSpecialAdvance: string | null;
+  minimumCities?: number | null;
+  targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
   replacements: number[];

@@ -24,6 +24,7 @@ use crate::wonder::Wonder;
 use serde_json::{Value, json};
 mod actions;
 mod decisions;
+mod journal;
 pub use actions::recruit_preview;
 
 pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
@@ -76,6 +77,14 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             GameState::ChooseCivilization | GameState::Finished
         );
     let can_play = seat == Some(active) && playing;
+    let event_catalog = journal::catalog(game);
+    let pending_event = game.events.iter().rev().find_map(|event| {
+        if let PersistentEventType::Incident(info) = &event.event_type {
+            Some(json!({"id":info.incident_id,"player":active}))
+        } else {
+            None
+        }
+    });
     // A map-reading aid, not legal move offers. Use visible terrain only, including for spectators.
     let mut sea_routes = game
         .map
@@ -116,7 +125,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
+        return json!({"eventCatalog":event_catalog,"pendingEvent":pending_event,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -195,7 +204,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         item
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
-    json!({"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
+    json!({"eventCatalog":event_catalog,"pendingEvent":pending_event,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "decision":decision,
         "civilizations":if seat == active && game.state == GameState::ChooseCivilization {game.cache.get_civilizations().iter().filter(|c|c.is_human() && !game.players.iter().any(|p|p.civilization.name==c.name)).map(|c|json!({"name":c.name,"action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>()} else {vec![]},
         "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
