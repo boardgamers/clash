@@ -278,6 +278,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
     };
     Some(
         json!({"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
+        "eventContext":super::journal::decision_context(game,seat),
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),
         "endOfAge":crate::status_phase::get_status_phase(game).is_some()}),

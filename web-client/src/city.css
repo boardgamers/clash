@@ -506,6 +506,44 @@
   font-size: 12px;
   line-height: 1.6;
 }
+.decision-event-context {
+  padding: 10px 12px;
+  margin: 10px 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.decision-event-context p {
+  margin: 6px 0;
+  color: var(--ink);
+}
+.decision-event-context .event-raid {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.event-raid > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.event-card-offer,
+.event-card-use {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.event-card-offer {
+  margin: 8px 0;
+  font-weight: 600;
+}
+.event-card-offer > .resource-amount {
+  margin-left: auto;
+}
+.event-card-use {
+  margin-bottom: 4px;
+  color: var(--gold);
+}
 .decision-count {
   display: flex;
   justify-content: space-between;

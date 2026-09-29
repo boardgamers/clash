@@ -405,6 +405,20 @@ export interface ActionCard {
   action: Move | null;
 }
 export interface Decision {
+  eventContext?: {
+    name: string;
+    rules: string[];
+    raid: string | null;
+    placement: string | null;
+    card: {
+      name: string;
+      description: string;
+      cost: Pile;
+      free: boolean;
+      later: boolean;
+      firstOffer: boolean;
+    } | null;
+  } | null;
   advanceSelection?: boolean;
   name: string;
   description: string;

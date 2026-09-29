@@ -30,6 +30,58 @@ test('events expose engine rules and protections to spectators without revealing
   assert.equal(view(state).objectiveCards.length, 0);
 });
 
+test('Great Seer explains the pirate raid and exposes the later card price before spending a bribe', () => {
+  const raw = JSON.parse(fixture('great_persons/great_seer'));
+  raw.map.tiles = raw.map.tiles.map(([position, terrain]: [string, unknown]) => [
+    position,
+    ['B1', 'B2'].includes(position) ? 'Water' : terrain,
+  ]);
+  raw.players[0].resources.culture_tokens = 1;
+  let state = run(JSON.stringify(raw), {
+    Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } },
+  });
+  let sawPlacement = false;
+  let sawBribe = false;
+  let sawPurchase = false;
+  for (let step = 0; step < 10; step++) {
+    const seat = engine.currentPlayer(state);
+    const v: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+    const decision = v.decision;
+    if (!decision) break;
+    const context = decision.eventContext!;
+    assert.equal(context.name, 'Great Seer');
+    assert.deepEqual(context.card!.cost, { culture_tokens: seat === 0 ? 1 : 2 });
+    assert.match(context.card!.description, /Draw 1 objective card per player/);
+    if (decision.options.length) {
+      sawPlacement = true;
+      assert.ok(context.card!.later);
+      assert.match(context.placement!, /Place 2 pirate ships/);
+    } else if (decision.fields.some((f) => f.name.includes('bribe'))) {
+      sawBribe = true;
+      assert.ok(context.card!.later);
+      assert.match(context.raid!, /pays 1 resource or token/);
+      assert.match(context.raid!, /lower the mood/);
+    } else {
+      sawPurchase = true;
+      assert.equal(context.card!.later, false);
+      assert.equal(context.raid, null);
+      assert.equal(seat, 0);
+    }
+    const input = {
+      kind: 'decision',
+      values: decision.options.slice(0, decision.min).map((o) => o.value),
+      payments: decision.fields.map((f) => (f.name.includes('bribe') ? { food: 1 } : { culture_tokens: 1 })),
+    };
+    const action = JSON.parse(
+      engine.webQuery(engine.stripSecret(state, seat), seat, JSON.stringify(input)),
+    ).action;
+    state = run(state, action, seat);
+  }
+  assert.ok(sawPlacement && sawBribe && sawPurchase);
+  assert.ok(JSON.parse(state).players[0].action_cards.includes(158));
+  assert.equal(JSON.parse(state).players[0].resources.culture_tokens ?? 0, 0);
+});
+
 test('Epidemics explains a whiff for each civilization with fewer than two units', () => {
   const raw = JSON.parse(fixture('famine/epidemics'));
   raw.players[0].units = raw.players[0].units.slice(0, 1);

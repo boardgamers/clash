@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
-  import { Check, CircleHelp, Sparkles } from 'lucide-svelte';
+  import { Check, CircleHelp, Sparkles, Layers, BookOpen, Ship, ChevronRight, Zap } from 'lucide-svelte';
   import type { Controller } from './controller';
   import type { Decision, Move, Pile, Resource } from './types';
   import { resourceNames } from './types';
@@ -117,6 +117,52 @@
 >
   {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
   <h2><Sparkles size={21} />{decision.name}</h2>
+  {#if decision.eventContext}
+    {@const context = decision.eventContext}
+    <div class="decision-event-context">
+      {#if context.raid}<p class="event-raid"><Ship size={17} /><ResourceText text={context.raid} /></p>{/if}
+      {#if context.card}
+        {@const card = context.card}
+        <div class="event-card-offer">
+          <Layers size={16} />
+          <span
+            >{card.later
+              ? card.firstOffer
+                ? 'Then: take the card'
+                : 'If passed to you'
+              : 'Take the card'}</span
+          >
+          <ResourceAmount pile={card.cost} />
+        </div>
+        <details class="event-rules">
+          <summary aria-label={`${card.name} event details`}
+            ><BookOpen size={13} />{card.name}<ChevronRight size={13} /></summary
+          >
+          {#if context.placement}<p>{context.placement}</p>{/if}
+          <p>
+            The player who triggered the event may take the card for <ResourceAmount
+              pile={{ culture_tokens: 1 }}
+            />. If they pass, other players may take it in turn order for <ResourceAmount
+              pile={{ culture_tokens: 2 }}
+            />.
+          </p>
+          <p>
+            <span class="event-card-use">Play <Zap size={13} />{card.free ? 0 : 1}</span><ResourceText
+              text={card.description}
+            />
+          </p>
+        </details>
+      {:else}
+        <details class="event-rules">
+          <summary aria-label={`${context.name} event details`}
+            ><BookOpen size={13} />Event rules<ChevronRight size={13} /></summary
+          >
+          {#if context.placement}<p>{context.placement}</p>{/if}
+          {#each context.rules as rule}<p><ResourceText text={rule} /></p>{/each}
+        </details>
+      {/if}
+    </div>
+  {/if}
   {#if decision.description}<p class="decision-description">
       <ResourceText
         text={decision.description

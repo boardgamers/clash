@@ -158,3 +158,61 @@ test('objective resource formatting preserves condition text and amounts', () =>
     ['food', 'ore', 'wood'],
   );
 });
+
+test('card payment announcements, including repeated starts, never count as culture spent', () => {
+  const announcement: LoggedAction = {
+    action: { Playing: { ActionCard: 27 } },
+    items: [{ player: 0, HandCard: { to: 'PlayToDiscard' }, origin: { Ability: 'Action Card' } }],
+    log: ['Leif: Action Card: Play Assassination/High Ground', 'Leif: Assassination: Pay 1 culture token'],
+  };
+  const payment: LoggedAction = {
+    action: { Response: { Payment: [{ culture_tokens: 1 }] } },
+    items: [
+      {
+        player: 0,
+        Resources: { resources: { culture_tokens: 1 }, balance: 'Loss' },
+        origin: { CivilCard: 27 },
+      },
+    ],
+    log: ['Leif: Assassination: Pay 1 culture token, Assassinated Aurelia'],
+  };
+  assert.equal(journal(game([announcement])).flatMap((e) => e.tokens).length, 0);
+  const entries = journal(game([announcement, structuredClone(announcement), payment]));
+  assert.deepEqual(
+    entries.flatMap((e) => e.tokens).map((t) => [t.icon, t.value]),
+    [['culture_tokens', '−1']],
+  );
+  assert.equal(entries.filter((e) => e.title === 'Assassination').length, 1);
+  assert.ok(entries.some((e) => e.notes.includes('Assassinated Aurelia')));
+});
+
+test('shared happiness fees and substituted custom-action payments use actual resource losses', () => {
+  const state = game([
+    {
+      action: { Playing: { IncreaseHappiness: { action_type: { Custom: 'VotingIncreaseHappiness' } } } },
+      items: [{ player: 0, Resources: { resources: { mood_tokens: 5 }, balance: 'Loss' } }],
+      log: ['Leif: Voting: Pay 1 mood token, Pay 5 mood tokens, City D2 became Happy, City E4 became Happy'],
+    },
+    {
+      action: { Playing: { Custom: { action: 'TheArtOfWar' } } },
+      log: ['Leif: The Art of War: Pay 1 mood token'],
+    },
+    {
+      action: { Response: { Payment: [{ culture_tokens: 1 }] } },
+      items: [{ player: 0, Resources: { resources: { culture_tokens: 1 }, balance: 'Loss' } }],
+      log: ['Leif: The Art of War: Pay 1 culture token'],
+    },
+  ]);
+  const entries = journal(state);
+  assert.deepEqual(
+    entries
+      .flatMap((e) => e.tokens)
+      .filter((t) => t.tone === 'loss')
+      .map((t) => [t.icon, t.value]),
+    [
+      ['mood_tokens', '−5'],
+      ['culture_tokens', '−1'],
+    ],
+  );
+  assert.equal(entries.flatMap((e) => e.tokens).filter((t) => t.icon === 'happy').length, 2);
+});

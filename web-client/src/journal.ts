@@ -1,4 +1,4 @@
-import type { Game, JournalEntry, JournalToken, LoggedAction, Player, Resource } from './types.ts';
+import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Player, Resource } from './types.ts';
 import type { View } from './types.ts';
 import { explainEvents } from './event-journal.ts';
 import { collectionCities, explainCollection } from './collection-journal.ts';
@@ -88,7 +88,46 @@ function delta(value: number, label: string, icon: JournalToken['icon'], compact
   };
 }
 
-function addClause(entry: JournalEntry, clause: string): void {
+type PaymentLog = { entry: JournalEntry; tokens: JournalToken[]; pile: Pile; note?: string };
+
+// Playing actions can announce a cost before opening a payment request. Only
+// resource-loss items record money actually spent. Match backwards because the
+// confirmed payment follows the announcement when both resolve in one action.
+function confirmPayments(action: LoggedAction, payments: PaymentLog[], entries: JournalEntry[]): void {
+  const playing = typeof action.action === 'object' && action.action?.Playing;
+  const deferred =
+    playing &&
+    typeof playing === 'object' &&
+    ('ActionCard' in playing ||
+      'Custom' in playing ||
+      Object.values(playing).some(
+        (v) => v && typeof v === 'object' && 'action_type' in v && typeof v.action_type === 'object',
+      ));
+  if (!deferred) return;
+  const balances = new Map<number, Pile>();
+  for (const item of action.items ?? []) {
+    if (item.Resources?.balance !== 'Loss') continue;
+    const balance = balances.get(item.player) ?? {};
+    for (const [resource, amount] of Object.entries(item.Resources.resources))
+      balance[resource as Resource] = (balance[resource as Resource] ?? 0) + amount;
+    balances.set(item.player, balance);
+  }
+  for (const payment of [...payments].reverse()) {
+    if (payment.entry.player === undefined) continue;
+    const balance = balances.get(payment.entry.player) ?? {};
+    const amounts = Object.entries(payment.pile) as [Resource, number][];
+    if (amounts.every(([resource, amount]) => (balance[resource] ?? 0) >= amount)) {
+      for (const [resource, amount] of amounts) balance[resource] = (balance[resource] ?? 0) - amount;
+    } else {
+      payment.entry.tokens = payment.entry.tokens.filter((token) => !payment.tokens.includes(token));
+      if (payment.note) payment.entry.notes = payment.entry.notes.filter((note) => note !== payment.note);
+      if (!payment.entry.tokens.length && !payment.entry.notes.length)
+        entries.splice(entries.indexOf(payment.entry), 1);
+    }
+  }
+}
+
+function addClause(entry: JournalEntry, clause: string, payments: PaymentLog[]): void {
   let match = clause.match(/^(Pay|Gain|Added|Lose|Lost) (.+?)(?: with (.+))?$/);
   if (match) {
     const sign = match[1] === 'Gain' || match[1] === 'Added' ? 1 : -1;
@@ -98,10 +137,18 @@ function addClause(entry: JournalEntry, clause: string): void {
         part.match(/^(\d+(?:\.\d+)?) (food|wood|ore|ideas?|gold|mood tokens?|culture tokens?|actions?)$/),
       );
     if (quantities.every((q) => q)) {
-      entry.tokens.push(
-        ...quantities.map((q) => delta(sign * Number(q![1]), q![2], resourceIcons[q![2]], true)),
-      );
-      if (match[3]) entry.notes.push(`With ${match[3]}`);
+      const tokens = quantities.map((q) => delta(sign * Number(q![1]), q![2], resourceIcons[q![2]], true));
+      entry.tokens.push(...tokens);
+      const note = match[3] ? `With ${match[3]}` : undefined;
+      if (note) entry.notes.push(note);
+      if (match[1] === 'Pay' && tokens.every((token) => token.icon !== 'action')) {
+        const pile: Pile = {};
+        for (const q of quantities) {
+          const resource = resourceIcons[q![2]] as Resource;
+          pile[resource] = (pile[resource] ?? 0) + Number(q![1]);
+        }
+        payments.push({ entry, tokens, pile, note });
+      }
       return;
     }
   }
@@ -239,6 +286,7 @@ export function journal(
             }));
           }
           const entries: JournalEntry[] = [];
+          const payments: PaymentLog[] = [];
           for (const line of action.log ?? []) {
             const eventName = line.match(/^A new game event has been triggered: (.+)$/)?.[1];
             if (eventName) {
@@ -317,8 +365,9 @@ export function journal(
               continue;
             }
             for (const clause of match[3].split(/,(?!\s*(?:\d|and\b))\s*/))
-              addClause(entry, factionText(game, clause));
+              addClause(entry, factionText(game, clause), payments);
           }
+          confirmPayments(action, payments, entries);
           explainCollection(action, entries, historicalCities.get(id));
           for (const entry of entries)
             entry.text = [

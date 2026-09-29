@@ -1255,6 +1255,10 @@
             A fleet can cross successive sea tiles as one movement group. Exploration or combat ends its
             movement. Navigation allows travel around the map edge to the next sea or unexplored tile.
           </p>
+          <p>
+            Attack pirates by moving ships into their sea tile, or by recruiting ships there from an adjacent
+            Port. Either starts a naval battle.
+          </p>
         </article>
         <article>
           <Ship />

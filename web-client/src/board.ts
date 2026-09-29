@@ -875,9 +875,13 @@ export class World {
           const stackIndex = (player.units ?? [])
             .slice(0, unitIndex)
             .filter((u) => u.position === unit.position).length;
+          const tile = this.tiles.get(unit.position);
+          const surface = tile
+            ? tile.parent!.position.y + (tile.geometry as THREE.CylinderGeometry).parameters.height / 2
+            : 0.31;
           pawn.position.set(
             x - 0.58 + (stackIndex % 3) * 0.23,
-            0.4,
+            unit.unit_type === 'Ship' ? surface - 0.02 : surface + 0.09,
             z + 0.25 + Math.floor(stackIndex / 3) * 0.23,
           );
           this.board.add(pawn);
