@@ -19,6 +19,31 @@
   let selected = $state<number[]>([]);
   let payments = $state<Pile[]>(untrack(() => decision.fields.map((f) => ({ ...f.initial }))));
   let expanded = $state<number | null>(null);
+  const tokenChoices = $derived.by(() => {
+    const field = decision.fields[0];
+    if (
+      decision.reward ||
+      decision.options.length ||
+      decision.fields.length !== 1 ||
+      field.optional ||
+      Object.values(field.cost).reduce((total, amount) => total + amount, 0) !== 1 ||
+      !field.resources.length ||
+      !field.resources.every((r) => r === 'mood_tokens' || r === 'culture_tokens')
+    )
+      return null;
+    return field.resources.map((resource) => {
+      const payment = { [resource]: 1 };
+      try {
+        return {
+          resource,
+          payment,
+          ...controller.query<{ action: Move }>({ kind: 'decision', values: [], payments: [payment] }),
+        };
+      } catch {
+        return { resource, payment, action: null };
+      }
+    });
+  });
   const preview = $derived.by(() => {
     try {
       return {
@@ -97,56 +122,73 @@
       {/each}
     </div>
   {/if}
-  {#each decision.fields as field, i}
-    <div class="decision-payment">
-      {#if decision.fields.length > 1 || field.name !== decision.name}<strong
-          ><ResourceText text={field.name} /></strong
-        >{/if}
-      {#if !decision.reward}<div class="decision-cost"><ResourceAmount pile={field.cost} /></div>{/if}
-      <div class="resource-steppers">
-        {#each field.resources as resource}
-          <div class="resource-stepper">
-            <span title={resourceNames[resource]}><ResourceAmount pile={{ [resource]: 1 }} /></span>
-            <button
-              class="icon-button"
-              aria-label={`Less ${resourceNames[resource]} for ${field.name}`}
-              disabled={$session.pending || !(payments[i][resource] ?? 0)}
-              onclick={() => adjust(i, resource, -1)}><Minus size={13} /></button
-            >
-            <output>{payments[i][resource] ?? 0}</output>
-            <button
-              class="icon-button"
-              aria-label={`More ${resourceNames[resource]} for ${field.name}`}
-              disabled={$session.pending ||
-                (payments[i][resource] ?? 0) >=
-                  (decision.reward
-                    ? 255
-                    : ($session.game?.players.find((p) => p.id === $session.seat)?.resources?.[resource] ??
-                      0))}
-              onclick={() => adjust(i, resource, 1)}><Plus size={13} /></button
-            >
-          </div>
-        {/each}
-      </div>
-      {#if field.optional}<button
-          class="secondary compact"
-          disabled={$session.pending}
-          onclick={() => (payments = payments.map((p, j) => (i === j ? {} : p)))}>Decline</button
-        >{/if}
+  {#if tokenChoices}
+    <div class="token-payment-choices">
+      {#each tokenChoices as choice}
+        <button
+          class="secondary"
+          aria-label={`Pay 1 ${resourceNames[choice.resource].toLowerCase()} token`}
+          disabled={$session.pending || !choice.action}
+          title={choice.action
+            ? undefined
+            : `Not enough ${resourceNames[choice.resource].toLowerCase()} tokens`}
+          onclick={() => choice.action && controller.submit(choice.action)}
+          >Pay <ResourceAmount pile={choice.payment} compact={false} /></button
+        >
+      {/each}
     </div>
-  {/each}
-  <button
-    class="primary wide"
-    disabled={!preview.action || $session.pending}
-    title={preview.error || 'Confirm selection'}
-    onclick={() => preview.action && controller.submit(preview.action)}
-  >
-    {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : 'Confirm'}<Check
-      size={16}
-    />
-  </button>
-  {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
-      {preview.error}
-    </p>{/if}
+  {:else}
+    {#each decision.fields as field, i}
+      <div class="decision-payment">
+        {#if decision.fields.length > 1 || field.name !== decision.name}<strong
+            ><ResourceText text={field.name} /></strong
+          >{/if}
+        {#if !decision.reward}<div class="decision-cost"><ResourceAmount pile={field.cost} /></div>{/if}
+        <div class="resource-steppers">
+          {#each field.resources as resource}
+            <div class="resource-stepper">
+              <span title={resourceNames[resource]}><ResourceAmount pile={{ [resource]: 1 }} /></span>
+              <button
+                class="icon-button"
+                aria-label={`Less ${resourceNames[resource]} for ${field.name}`}
+                disabled={$session.pending || !(payments[i][resource] ?? 0)}
+                onclick={() => adjust(i, resource, -1)}><Minus size={13} /></button
+              >
+              <output>{payments[i][resource] ?? 0}</output>
+              <button
+                class="icon-button"
+                aria-label={`More ${resourceNames[resource]} for ${field.name}`}
+                disabled={$session.pending ||
+                  (payments[i][resource] ?? 0) >=
+                    (decision.reward
+                      ? 255
+                      : ($session.game?.players.find((p) => p.id === $session.seat)?.resources?.[resource] ??
+                        0))}
+                onclick={() => adjust(i, resource, 1)}><Plus size={13} /></button
+              >
+            </div>
+          {/each}
+        </div>
+        {#if field.optional}<button
+            class="secondary compact"
+            disabled={$session.pending}
+            onclick={() => (payments = payments.map((p, j) => (i === j ? {} : p)))}>Decline</button
+          >{/if}
+      </div>
+    {/each}
+    <button
+      class="primary wide"
+      disabled={!preview.action || $session.pending}
+      title={preview.error || 'Confirm selection'}
+      onclick={() => preview.action && controller.submit(preview.action)}
+    >
+      {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : 'Confirm'}<Check
+        size={16}
+      />
+    </button>
+    {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
+        {preview.error}
+      </p>{/if}
+  {/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>

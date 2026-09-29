@@ -19,18 +19,18 @@
     onclick={() => controller.patch({ abilitiesOpen: false })}><X size={18} /></button
   >
   <h2><Sparkles size={21} />Abilities</h2>
-  {#each $session.view?.specialActions ?? [] as action}<details class="ability-offer">
-      <summary
-        >{action.name}{#if action.position}
-          · {action.position}{/if}</summary
-      >
+  {#each $session.view?.specialActions ?? [] as action}<article class="ability-offer">
+      <h3>
+        {action.name}{#if action.position}
+          · {action.position}{/if}
+      </h3>
       <p><ResourceText text={action.description} /></p>
       <button
         class="primary wide"
         disabled={$session.pending}
         onclick={() => controller.submit(action.action)}>Use {action.name}</button
       >
-    </details>{:else}<p class="settler-empty">No special actions available.</p>{/each}
+    </article>{:else}<p class="settler-empty">No special actions available.</p>{/each}
   <h3><Drama size={18} />Cultural influence</h3>
   <div class="decision-options">
     {#each $session.view?.influence ?? [] as offer, i}<button

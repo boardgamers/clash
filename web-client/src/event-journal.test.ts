@@ -83,6 +83,53 @@ test('Irrigation protection is explicit while barbarian side effects remain visi
   assert.ok(!event.event!.explanations.some((e) => e.player === 1), 'Only the targeted player is protected');
 });
 
+test('Vermin explains why an opponent without Storage is unaffected', () => {
+  const raw = JSON.parse(fixture('pandemics/vermin'));
+  raw.players[0].advances.push('Irrigation');
+  raw.players[1].advances = raw.players[1].advances.filter((a: string) => a !== 'Storage');
+  const state = run(JSON.stringify(raw), advance);
+  const event = entries(state).find((e) => e.event)!;
+  assert.equal(event.event!.pending, undefined);
+  assert.deepEqual(event.event!.explanations, [
+    { player: 0, text: 'Protected by Irrigation', protected: true },
+    { player: 1, text: 'Unaffected · no Storage' },
+  ]);
+  // Learning Storage later must not rewrite the old event's eligibility.
+  const game = JSON.parse(engine.stripSecret(state));
+  game.players[1].advances.push('Storage');
+  game.log[0].rounds[0].turns.push({
+    turn_type: { Player: 1 },
+    actions: [
+      {
+        action: { Playing: { Advance: {} } },
+        log: ['Player2: Advance: Gain Storage without taking an event token'],
+        items: [{ player: 1, Advance: { advance: 'Storage', balance: 'Gain' } }],
+      },
+    ],
+  });
+  assert.ok(
+    journal(game, view(state))
+      .find((e) => e.event)!
+      .event!.explanations.some((e) => e.player === 1 && e.text === 'Unaffected · no Storage'),
+  );
+});
+
+test('Vermin immediately charges an opponent with Storage even when its triggerer is protected', () => {
+  const raw = JSON.parse(fixture('pandemics/vermin'));
+  raw.players[0].advances.push('Irrigation');
+  raw.players[1].resources.food = 1;
+  const state = run(JSON.stringify(raw), advance);
+  assert.equal(JSON.parse(state).players[1].resources.food ?? 0, 0);
+  const event = entries(state).find((e) => e.event)!;
+  assert.equal(event.event!.pending, undefined);
+  assert.ok(
+    event.event!.outcomes.some(
+      (e) => e.player === 1 && e.tokens.some((t) => t.icon === 'food' && t.value === '−1'),
+    ),
+  );
+  assert.ok(!event.event!.explanations.some((e) => e.player === 1));
+});
+
 const info: EventInfo = {
   id: 2,
   name: 'Epidemics',

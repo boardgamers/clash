@@ -37,6 +37,9 @@
   line-height: 1.5;
   color: var(--ink);
 }
+.tile-leader-ability > button {
+  margin-top: 10px;
+}
 .board-context {
   position: absolute;
   left: 20px;

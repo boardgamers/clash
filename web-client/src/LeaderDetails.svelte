@@ -1,15 +1,21 @@
 <script lang="ts">
-  import { Crown, Sparkles, ChevronRight } from 'lucide-svelte';
-  import type { PlayerView } from './types';
+  import { Crown, Sparkles, ChevronRight, ArrowRight } from 'lucide-svelte';
+  import type { PlayerView, View, Move } from './types';
   import ResourceText from './ResourceText.svelte';
   let {
     leader,
     civilization,
     compact = false,
+    actions = [],
+    pending = false,
+    onUse,
   }: {
     leader: NonNullable<PlayerView['leaders']>[number];
     civilization?: string;
     compact?: boolean;
+    actions?: NonNullable<View['specialActions']>;
+    pending?: boolean;
+    onUse?: (action: Move) => void;
   } = $props();
 </script>
 
@@ -19,9 +25,17 @@
       >{/if}<ChevronRight size={14} /></summary
   >
   {#each leader.abilities as ability}
+    {@const action = actions.find(
+      (a) => a.name === ability.name && (!a.position || a.position === leader.position),
+    )}
     <div class="tile-leader-ability">
       <strong><Sparkles size={13} />{ability.name}</strong>
       <p><ResourceText text={ability.description} /></p>
+      {#if action && onUse}
+        <button class="primary wide" disabled={pending} onclick={() => onUse?.(action.action)}>
+          Use {ability.name}<ArrowRight size={16} />
+        </button>
+      {/if}
     </div>
   {/each}
 </details>

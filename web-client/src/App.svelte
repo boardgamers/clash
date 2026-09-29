@@ -1191,6 +1191,20 @@
           </p>
         </article>
         <article>
+          <Ship />
+          <h3>Transporting units</h3>
+          <p>
+            Each ship carries up to two land units. Embark by moving a land group onto your ship in an
+            adjacent sea tile. Disembark by moving passengers onto adjacent land, applying the usual terrain
+            and combat rules. Each counts as that land group's move.
+          </p>
+          <p>
+            Sailing carries passengers with the ship. Boarding and sailing can share one Move action; landing
+            those units requires a second Move action. Units already aboard can sail and land in one action.
+            The usual limit of three groups per Move action applies.
+          </p>
+        </article>
+        <article>
           <Crown />
           <h3>Leaders</h3>
           <p>

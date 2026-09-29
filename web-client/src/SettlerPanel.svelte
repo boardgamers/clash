@@ -97,7 +97,13 @@
   {#each $session.view?.players
     .find((p) => p.index === $session.seat)
     ?.leaders?.filter((l) => $session.selectedUnits.includes(l.unit)) ?? [] as leader}
-    <LeaderDetails {leader} compact />
+    <LeaderDetails
+      {leader}
+      compact
+      actions={$session.view?.specialActions}
+      pending={$session.pending}
+      onUse={(action) => controller.submit(action)}
+    />
   {/each}
   {#if $session.moveDestinations.length}
     <p class="movement-hint">Choose a highlighted tile.</p>

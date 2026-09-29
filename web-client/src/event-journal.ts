@@ -190,6 +190,8 @@ function addExplanations(
         text: `Protected by ${protectedBy}`,
         protected: true,
       });
+    } else if (info.id === 51 && !facts.advances.has('Storage') && facts.borrowed !== 'Storage') {
+      event.explanations.push({ player: player.id, text: 'Unaffected · no Storage' });
     } else if (
       info.name === 'Epidemics' &&
       !changes.some((item) => item.Units?.balance === 'Loss') &&

@@ -87,7 +87,13 @@
     {:else}<TileUnits players={$session.game?.players ?? []} {position} />{/if}
     {#each $session.view?.players ?? [] as player}
       {#each player.leaders?.filter((l) => l.position === position) ?? [] as leader}
-        <LeaderDetails {leader} civilization={player.civilization} />
+        <LeaderDetails
+          {leader}
+          civilization={player.civilization}
+          actions={player.index === $session.seat ? $session.view?.specialActions : []}
+          pending={$session.pending}
+          onUse={(action) => controller.submit(action)}
+        />
       {/each}
     {/each}
     {#if origins.length}
