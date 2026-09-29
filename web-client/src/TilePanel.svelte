@@ -8,6 +8,7 @@
   import TileUnits from './TileUnits.svelte';
   import CityFacts from './CityFacts.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
+  import CityBuildings from './CityBuildings.svelte';
   let {
     controller,
     onHighlight,
@@ -17,6 +18,10 @@
   const terrain = $derived($session.game?.map.tiles.find(([p]) => p === position)?.[1]);
   const owner = $derived($session.view?.players.find((p) => p.cities.some((c) => c.position === position)));
   const city = $derived(owner?.cities.find((c) => c.position === position));
+  const publicOwner = $derived(
+    $session.game?.players.find((p) => p.cities?.some((c) => c.position === position)),
+  );
+  const publicCity = $derived(publicOwner?.cities?.find((c) => c.position === position));
   const ownCity = $derived($session.view?.cities.find((c) => c.position === position));
   const ownUnits = $derived($session.view?.units?.filter((u) => u.position === position) ?? []);
   const canMove = $derived(canMoveOnMap($session.view, $session.game));
@@ -47,6 +52,11 @@
         >{/if}
       <button class="icon-button" aria-label="Close tile actions" onclick={close}><X size={18} /></button>
     </header>
+    {#if publicCity && publicOwner}<CityBuildings
+        city={publicCity}
+        owner={publicOwner.id}
+        players={$session.game?.players ?? []}
+      />{/if}
     {#if ownCity}
       <div class="tile-city-actions" aria-label={`City ${position} actions`}>
         <button

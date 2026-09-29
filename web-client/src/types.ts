@@ -8,7 +8,9 @@ export type Terrain =
 export interface City {
   position: string;
   mood_state: string;
-  city_pieces?: Record<string, unknown>;
+  city_pieces?: Partial<
+    Record<'academy' | 'market' | 'obelisk' | 'observatory' | 'fortress' | 'port' | 'temple', number>
+  > & { wonders?: string[] };
   activations?: number;
 }
 export interface Player {

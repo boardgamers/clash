@@ -9,12 +9,15 @@
     Trophy,
     X,
     UserRound,
+    MapPin,
   } from 'lucide-svelte';
   import EventMarkers from './EventMarkers.svelte';
   import ResourceText from './ResourceText.svelte';
   import ResourceAmount from './ResourceAmount.svelte';
   import { resourceNames, type Pile } from './types';
   import CivilizationAdvances from './CivilizationAdvances.svelte';
+  import CityBuildings from './CityBuildings.svelte';
+  import CityFacts from './CityFacts.svelte';
   import { researchPresentation } from './research';
   import type { Controller } from './controller';
   let { controller }: { controller: Controller } = $props();
@@ -26,7 +29,7 @@
       Object.keys(resourceNames).map((key) => [key, publicPlayer?.resources?.[key as keyof Pile] ?? 0]),
     ) as Pile,
   );
-  let tab = $state<'score' | 'advances'>('score');
+  let tab = $state<'score' | 'advances' | 'cities'>('score');
   let advances = $derived(
     [...(player?.advances ?? [])].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
   );
@@ -82,6 +85,13 @@
         onclick={() => (tab = 'advances')}
         ><GraduationCap size={16} /> Advances <span>{advances.length}</span></button
       >
+      <button
+        class:active={tab === 'cities'}
+        aria-pressed={tab === 'cities'}
+        onclick={() => (tab = 'cities')}
+      >
+        <Landmark size={16} /> Cities <span>{player.cities.length}</span>
+      </button>
     </nav>
     {#if tab === 'score'}
       <div class="score-summary">
@@ -100,6 +110,30 @@
             <b>{part.points}</b>
           </div>
         {/each}
+      </div>
+    {:else if tab === 'cities'}
+      <div class="public-cities">
+        {#each player.cities as city}
+          {@const details = publicPlayer?.cities?.find((c) => c.position === city.position)}
+          <section aria-label={`City ${city.position}`}>
+            <header>
+              <button
+                title={`Show city ${city.position} on the map`}
+                disabled={$session.pending}
+                onclick={() => {
+                  controller.patch({ scorePlayer: null, mode: 'overview' });
+                  controller.selectTile(city.position, { kind: 'city' });
+                }}><MapPin size={15} />{city.position}</button
+              >
+              <CityFacts size={city.size} mood={city.mood} />
+            </header>
+            {#if details}<CityBuildings
+                city={details}
+                owner={player.index}
+                players={$session.game?.players ?? []}
+              />{/if}
+          </section>
+        {:else}<p>No cities.</p>{/each}
       </div>
     {:else}
       {#if player.civilizationAdvances.length}<CivilizationAdvances

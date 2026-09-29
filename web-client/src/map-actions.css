@@ -29,6 +29,70 @@
 .board-context > header > .icon-button {
   margin-left: auto;
 }
+.city-buildings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.city-buildings > li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper2);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.city-buildings svg {
+  flex-shrink: 0;
+}
+.city-buildings .foreign-building {
+  border-style: dashed;
+}
+.city-buildings small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.city-buildings .built-wonder > svg {
+  color: var(--gold);
+}
+.public-cities {
+  display: grid;
+  gap: 18px;
+}
+.public-cities > section > header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.public-cities > section > header > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 7px;
+  font-size: 13px;
+  border-radius: 4px;
+  background: var(--paper2);
+}
+.public-cities > section > header > button:hover {
+  outline: 1px solid var(--gold);
+}
+@media (max-width: 500px) {
+  .score-dialog .civilization-tabs {
+    gap: 2px;
+  }
+  .score-dialog .civilization-tabs button {
+    padding: 10px 6px;
+    gap: 5px;
+    font-size: 12px;
+  }
+}
 .tile-city-actions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
