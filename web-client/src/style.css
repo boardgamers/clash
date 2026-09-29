@@ -2655,26 +2655,6 @@ small {
   border-color: #a9762e;
   background: #b6893920;
 }
-.happiness-city {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--line);
-}
-.happiness-target {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  min-width: 38px;
-}
-.happiness-selection > .primary {
-  margin-top: 18px;
-}
-.happiness-selection > .resource-amount {
-  margin-top: 15px;
-}
 .city-dock {
   scrollbar-width: none;
 }

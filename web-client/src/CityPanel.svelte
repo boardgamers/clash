@@ -67,22 +67,33 @@
 >
   <header class="city-dialog-header">
     <div>
-      <h2 id="city-title"><Landmark size={26} /> City {$session.city}</h2>
-      <p>
-        {#if city}<CityFacts size={city.size} mood={city.mood} />{/if} · Capacity {city?.capacity}
-      </p>
+      <h2 id="city-title">
+        {#if tab === 'happiness'}<Smile size={26} />Happiness{:else}<Landmark size={26} />City {$session.city}{/if}
+      </h2>
+      {#if tab !== 'happiness'}<p>
+          {#if city}<CityFacts size={city.size} mood={city.mood} />{/if} · Capacity {city?.capacity}
+        </p>{/if}
     </div>
+    {#if tab === 'happiness'}<div class="happiness-budget" title="Mood tokens available">
+        <small>Available</small><ResourceAmount
+          pile={{
+            mood_tokens:
+              $session.game?.players.find((p) => p.id === $session.seat)?.resources?.mood_tokens ?? 0,
+          }}
+          showZero
+        />
+      </div>{/if}
     <button class="icon-button" aria-label="Close city management" onclick={close}><X /></button>
   </header>
-  <nav class="city-picker" aria-label="Choose city">
-    {#each $session.view?.cities ?? [] as c}<button
-        class:active={c.position === $session.city}
-        onclick={() => {
-          building = null;
-          controller.openCities(c.position);
-        }}><Landmark size={14} />{c.position}<CityFacts size={c.size} mood={c.mood} /></button
-      >{/each}
-  </nav>
+  {#if tab !== 'happiness'}<nav class="city-picker" aria-label="Choose city">
+      {#each $session.view?.cities ?? [] as c}<button
+          class:active={c.position === $session.city}
+          onclick={() => {
+            building = null;
+            controller.openCities(c.position);
+          }}><Landmark size={14} />{c.position}<CityFacts size={c.size} mood={c.mood} /></button
+        >{/each}
+    </nav>{/if}
   <nav class="city-tabs" aria-label="City actions">
     {#each [{ id: 'build', label: 'Buildings', icon: Hammer }, { id: 'recruit', label: 'Recruit', icon: Users }, { id: 'happiness', label: 'Happiness', icon: Smile }] as item}<button
         class:active={tab === item.id}
