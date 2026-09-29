@@ -1,6 +1,6 @@
 [
   { "name": "sound", "label": "Sound", "type": "checkbox", "default": true },
-  { "name": "unitBadges", "label": "Unit badges", "type": "checkbox", "default": true },
+  { "name": "unitBadges", "label": "Unit badges", "type": "checkbox", "default": false },
   { "name": "colorBlind", "label": "Color-blind mode", "type": "checkbox", "default": false },
   {
     "name": "mapView",

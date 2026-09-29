@@ -510,9 +510,14 @@ small {
   pointer-events: none;
 }
 .unit-map-label:is(.hovered, :hover, :focus-visible, .selected) {
-  outline: 2px solid #26382f;
-  outline-offset: 2px;
+  outline: none;
+  border-color: #26382f;
+  border-left-color: var(--player-color);
+  box-shadow: 0 1px 3px #18372f80;
   z-index: 1;
+}
+.unit-map-label:focus-visible {
+  box-shadow: inset 0 0 0 1px #26382f;
 }
 .unit-owner-symbol {
   font-size: 13px;

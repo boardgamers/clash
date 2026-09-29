@@ -50,7 +50,7 @@ export class Controller {
     selectedAdvance: null,
     toast: '',
     topDown: false,
-    unitBadges: true,
+    unitBadges: false,
   });
   readonly chat = new ChatController();
   readonly audio = new GameAudio();

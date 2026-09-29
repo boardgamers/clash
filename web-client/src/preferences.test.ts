@@ -113,6 +113,7 @@ test('unavailable audio does not interrupt the viewer', () => {
 test('map view and unit badges round-trip through BGS preferences and incoming preferences never write back', () => {
   let saved = { sound: false, colorBlind: true, mapView: '3d', unitBadges: true };
   let current = readPreferences({});
+  assert.equal(current.unitBadges, false);
   let writes = 0;
   const options = {
     onState() {},

@@ -16,7 +16,7 @@ const preferences: Record<string, unknown> = {
   sound: true,
   colorBlind: false,
   mapView: '3d',
-  unitBadges: true,
+  unitBadges: false,
 };
 try {
   const saved = JSON.parse(localStorage.getItem('clash-preview-preferences') ?? '{}');
