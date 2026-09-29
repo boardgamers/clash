@@ -733,6 +733,19 @@
   line-height: 1.6;
   color: var(--muted);
 }
+.card-play-button {
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-play-cost,
+.card-play-cost > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-play-cost {
+  flex-shrink: 0;
+}
 .card-battle-use {
   margin-top: 14px;
   padding: 12px 14px;

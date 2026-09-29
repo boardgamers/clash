@@ -96,13 +96,20 @@ pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Valu
     }
     let origin = crate::happiness::happiness_event_origin(&kind, p);
     let cost = happiness_cost(seat, steps, CostTrigger::NoModifiers, &kind, game, &origin);
-    let payment = cost
-        .cost
-        .first_valid_payment(&p.resources)
-        .ok_or("Not enough resources")?;
-    Ok(
-        json!({"payment":payment,"action":Action::Playing(PlayingAction::IncreaseHappiness(IncreaseHappiness::new(selections,payment.clone(),kind)))}),
-    )
+    let affordable = cost.cost.first_valid_payment(&p.resources);
+    let payment = affordable
+        .clone()
+        .unwrap_or_else(|| cost.cost.default_payment());
+    let action = affordable.map(|payment| {
+        Action::Playing(PlayingAction::IncreaseHappiness(IncreaseHappiness::new(
+            selections, payment, kind,
+        )))
+    });
+    Ok(json!({
+        "payment":payment,
+        "reason":action.is_none().then_some("Not enough resources"),
+        "action":action
+    }))
 }
 
 pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, String> {
@@ -149,6 +156,7 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
         let c = game.cache.get_action_card(*id);
         let reason = action_reason(game,seat,can_play,PlayingActionType::ActionCard(*id));
         json!({"id":id,"name":c.civil_card.name,"description":c.civil_card.description,"free":c.civil_card.action_type.free,
+            "cost":PlayingActionType::ActionCard(*id).payment_options(game,seat).default,
             "tactics":c.tactics_card.as_ref().map(|t|json!({"name":t.name,"description":t.description})),
             "reason":reason,"action":reason.is_none().then(||Action::Playing(PlayingAction::ActionCard(*id)))})
     }).collect()

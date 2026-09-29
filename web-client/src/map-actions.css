@@ -430,6 +430,24 @@
 .happiness-city-list {
   display: grid;
 }
+.happiness-surcharge {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 12px;
+}
+.happiness-surcharge > span,
+.happiness-action-cost,
+.happiness-payment {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.happiness-surcharge small {
+  color: var(--muted);
+}
 .mood-city-row {
   display: grid;
   grid-template-columns: 56px 21px 15px minmax(0, 1fr);

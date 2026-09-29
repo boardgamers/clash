@@ -379,6 +379,12 @@ export interface ActionVariant {
   value: Move;
   name: string;
   free: boolean;
+  surcharge?: Pile;
+}
+export interface HappinessPreview {
+  action: Move | null;
+  payment: Pile;
+  reason: string | null;
 }
 export interface MoveDestination {
   position: string;
@@ -393,6 +399,7 @@ export interface ActionCard {
   name: string;
   description: string;
   free: boolean;
+  cost: Pile;
   tactics: { name: string; description: string } | null;
   reason: string | null;
   action: Move | null;

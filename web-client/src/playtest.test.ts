@@ -158,6 +158,76 @@ test('multi-city happiness and free collection/happiness preserve action costs',
   assert.equal(view(state).collectActions!.length, 0, 'Free Economy is the only collection that turn');
 });
 
+test('Voting shows city costs separately and charges its fee once across the selection', async () => {
+  const raw = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(raw));
+  const p = raw.players[seat];
+  p.advances = ['Farming', 'Mining', 'Voting'];
+  p.resources = { mood_tokens: 5 };
+  p.cities[0].mood_state = 'Neutral';
+  p.cities[0].city_pieces = { academy: seat };
+  const pos = p.cities[0].position;
+  const other = pos === 'D2' ? 'E2' : 'E7';
+  p.cities.push({ ...p.cities[0], position: other });
+  let state = JSON.stringify(raw);
+  const v = view(state);
+  const voting = v.happinessActions!.find((a) => a.name === 'Voting')!;
+  const regular = v.happinessActions!.find((a) => !a.free)!;
+  assert.deepEqual(voting.surcharge, { mood_tokens: 1 });
+  for (const city of v.cityActions) assert.deepEqual(city.happiness[0].payment, { mood_tokens: 2 });
+  const request = (cities: [string, number][], variant = voting.value) =>
+    query(state, { kind: 'happiness', cities, variant });
+  assert.deepEqual(request([[pos, 1]]).payment, { mood_tokens: 3 });
+  const both: [string, number][] = [
+    [pos, 1],
+    [other, 1],
+  ];
+  assert.deepEqual(request(both, regular.value).payment, { mood_tokens: 4 });
+  const paid = request(both);
+  assert.deepEqual(paid.payment, { mood_tokens: 5 });
+  assert.equal(paid.reason, null);
+  const after = JSON.parse(execute(state, paid.action));
+  assert.equal(after.players[seat].resources?.mood_tokens ?? 0, 0);
+  assert.equal(after.actions_left, 3);
+  assert.ok(after.players[seat].cities.every((c: any) => c.mood_state === 'Happy'));
+
+  p.resources.mood_tokens = 4;
+  state = JSON.stringify(raw);
+  assert.ok(request([[pos, 1]]).action);
+  assert.ok(request(both, regular.value).action);
+  assert.deepEqual(request(both), {
+    payment: { mood_tokens: 5 },
+    action: null,
+    reason: 'Not enough resources',
+  });
+  raw.actions_left = 0;
+  state = JSON.stringify(raw);
+  assert.deepEqual(
+    view(state).happinessActions!.map((a) => a.name),
+    ['Voting'],
+  );
+  assert.ok(request([[other, 1]]).action);
+});
+
+test('action cards expose their own costs before play, independent of earlier cards', async () => {
+  const raw = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(raw));
+  raw.players[seat].action_cards = [9, 25, 27];
+  raw.players[seat].resources.culture_tokens = 2;
+  let state = JSON.stringify(raw);
+  const cards = () => view(state).actionCards!;
+  assert.deepEqual(cards().find((c) => c.name === 'Ideas')!.cost, {});
+  const leadership = cards().find((c) => c.name === 'Leadership')!;
+  assert.deepEqual(leadership.cost, { culture_tokens: 1 });
+  assert.equal(leadership.free, true);
+  assert.deepEqual(cards().find((c) => c.name === 'Assassination')!.cost, { culture_tokens: 1 });
+  state = execute(state, leadership.action!);
+  const payment = view(state).decision!;
+  state = execute(state, choose(state, payment));
+  assert.deepEqual(cards().find((c) => c.name === 'Assassination')!.cost, { culture_tokens: 1 });
+  assert.equal(JSON.parse(state).players[seat].resources.culture_tokens, 1);
+});
+
 test('leaders and supply replacements can be recruited through the same validated selection', async () => {
   const raw = JSON.parse(await initial());
   const seat = engine.currentPlayer(JSON.stringify(raw));

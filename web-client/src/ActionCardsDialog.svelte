@@ -1,6 +1,7 @@
 <script lang="ts">
   import { X, Layers, Zap, Swords } from 'lucide-svelte';
   import ResourceText from './ResourceText.svelte';
+  import ResourceAmount from './ResourceAmount.svelte';
   import type { Controller } from './controller';
   import { actionReason } from './model';
   let { controller }: { controller: Controller } = $props();
@@ -37,12 +38,18 @@
       <h3>{card.name}</h3>
       <p><ResourceText text={card.description} /></p>
       <button
-        class="primary wide"
+        class="primary wide card-play-button"
         title={card.reason ?? 'Play this card'}
         disabled={!card.action || $session.pending}
         onclick={() => card.action && controller.submit(card.action)}
-        >Play {card.name}
-        {#if !card.free}<span><Zap size={13} />1</span>{/if}</button
+        ><span>Play {card.name}</span>
+        <span class="card-play-cost"
+          >{#if card.cost && Object.values(card.cost).some(Boolean)}<ResourceAmount pile={card.cost} />{/if}
+          <span
+            aria-label={card.free ? 'Free action' : 'Costs 1 action'}
+            title={card.free ? 'Free action' : 'Costs 1 action'}><Zap size={13} />{card.free ? 0 : 1}</span
+          ></span
+        ></button
       >
       {#if actionReason(card.reason)}<small>{actionReason(card.reason)}</small>{/if}
       {#if card.tactics}<section class="card-battle-use" aria-label={`Battle use: ${card.tactics.name}`}>
