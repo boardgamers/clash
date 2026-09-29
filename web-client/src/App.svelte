@@ -49,6 +49,7 @@
     Sparkles,
     ShieldCheck,
     CircleSlash,
+    TriangleAlert,
     Hexagon,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
@@ -122,6 +123,11 @@
   };
   let current = $derived($session.game?.players.find((p) => p.id === $session.seat));
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
+  const collectionFree = $derived(
+    ($session.view?.collectActions ?? []).find(
+      (a) => JSON.stringify(a.value) === JSON.stringify($session.collectVariant),
+    )?.free ?? false,
+  );
   let identity = $derived($session.view?.players.find((p) => p.index === $session.seat));
   let log = $derived($session.game ? journal($session.game, $session.view ?? undefined).reverse() : []);
   const coordinateInteraction = {
@@ -575,11 +581,18 @@
           </div>
         </div>
         <span></span>
-        <button title="Zoom in" aria-label="Zoom in" onclick={() => world?.zoom(0.84)}
-          ><Plus size={18} /></button
-        ><button title="Zoom out" aria-label="Zoom out" onclick={() => world?.zoom(1.18)}
-          ><Minus size={18} /></button
+        <button
+          class="map-secondary-control"
+          title="Zoom in"
+          aria-label="Zoom in"
+          onclick={() => world?.zoom(0.84)}><Plus size={18} /></button
+        ><button
+          class="map-secondary-control"
+          title="Zoom out"
+          aria-label="Zoom out"
+          onclick={() => world?.zoom(1.18)}><Minus size={18} /></button
         ><span></span><button
+          class="map-secondary-control"
           title={$session.unitBadges ? 'Hide unit badges' : 'Show unit badges'}
           aria-label="Unit badges"
           aria-pressed={$session.unitBadges}
@@ -817,28 +830,34 @@
           <h2>Decision not available yet</h2>
           <p>The controls for this phase are still being built.</p>
         {:else if $session.mode === 'collect'}
-          <h2>Collect <span class="movement-origin">{$session.city}</span></h2>
-          {#if ($session.view?.cities.length ?? 0) > 1}
-            <nav class="collection-city-picker" aria-label="Collect from city">
-              {#each $session.view?.cities ?? [] as c}
-                <button
-                  class:active={c.position === $session.city}
-                  aria-pressed={c.position === $session.city}
-                  aria-label={`Collect from ${c.position}, ${c.mood}, capacity ${c.capacity}`}
-                  title={`${c.position} · ${c.mood} · Capacity ${c.capacity}${c.activations ? ` · Activated ${c.activations} times` : ''}`}
-                  disabled={$session.pending}
-                  onmouseenter={() => world?.highlightCoordinate(c.position)}
-                  onmouseleave={() => world?.highlightCoordinate(null)}
-                  onfocus={() => world?.highlightCoordinate(c.position)}
-                  onblur={() => world?.highlightCoordinate(null)}
-                  onclick={() => controller.switchCollectionCity(c.position)}
-                  >{c.position}<CityFacts size={c.size} mood={c.mood} />{#if c.activations}<span
-                      class="city-activation-count"><RotateCw size={12} />{c.activations}</span
-                    >{/if}</button
-                >
-              {/each}
-            </nav>
-          {/if}
+          <header class="collection-heading">
+            <h2>
+              Collect{#if ($session.view?.cities.length ?? 0) <= 1}<span class="movement-origin"
+                  >{$session.city}</span
+                >{/if}
+            </h2>
+            {#if ($session.view?.cities.length ?? 0) > 1}
+              <nav class="collection-city-picker" aria-label="Collect from city">
+                {#each $session.view?.cities ?? [] as c}
+                  <button
+                    class:active={c.position === $session.city}
+                    aria-pressed={c.position === $session.city}
+                    aria-label={`Collect from ${c.position}, ${c.mood}, capacity ${c.capacity}`}
+                    title={`${c.position} · ${c.mood} · Capacity ${c.capacity}${c.activations ? ` · Activated ${c.activations} times` : ''}`}
+                    disabled={$session.pending}
+                    onmouseenter={() => world?.highlightCoordinate(c.position)}
+                    onmouseleave={() => world?.highlightCoordinate(null)}
+                    onfocus={() => world?.highlightCoordinate(c.position)}
+                    onblur={() => world?.highlightCoordinate(null)}
+                    onclick={() => controller.switchCollectionCity(c.position)}
+                    >{c.position}<CityFacts size={c.size} mood={c.mood} />{#if c.activations}<span
+                        class="city-activation-count"><RotateCw size={12} />{c.activations}</span
+                      >{/if}</button
+                  >
+                {/each}
+              </nav>
+            {/if}
+          </header>
           {#if ($session.view?.collectActions?.length ?? 0) > 1}<div class="variant-picker">
               {#each $session.view?.collectActions ?? [] as variant}<button
                   class:selected={JSON.stringify($session.collectVariant) === JSON.stringify(variant.value)}
@@ -853,14 +872,25 @@
                   >{variant.name}{#if !variant.free}<Zap size={12} />1{/if}</button
                 >{/each}
             </div>{/if}
-          <p
-            class="collection-limit"
-            title={`Choose from this city's tile or adjacent tiles.${city?.maxRange2 ? ` Husbandry allows up to ${city.maxRange2} land tiles two spaces away.` : ''}`}
-          >
-            Select tiles · {$session.selection.reduce((sum, c) => sum + c.times, 0)} / {city?.capacity}
-            {#if city}<CollectionCapacity size={city.size} mood={city.mood} />{/if}
-          </p>
-          {#if city && city.activations > 0}<ActivationStatus {city} warning />{/if}
+          {#if city && city.activations > 0}
+            {@const Before = city.mood === 'Happy' ? Smile : city.mood === 'Angry' ? Frown : Meh}
+            {@const After =
+              city.activationMood === 'Happy' ? Smile : city.activationMood === 'Angry' ? Frown : Meh}
+            <details class="collection-activation">
+              <summary>
+                <TriangleAlert size={16} /><span
+                  >{city.canActivate ? 'Activate again' : 'City exhausted'}</span
+                >
+                {#if city.canActivate && city.mood !== city.activationMood}<span
+                    class="collection-mood-change"
+                    aria-label={`${city.mood} becomes ${city.activationMood}`}
+                    ><Before size={16} /><ArrowRight size={13} /><After size={16} /></span
+                  >{/if}
+                <ChevronRight size={14} />
+              </summary>
+              <ActivationStatus {city} warning />
+            </details>
+          {/if}
           {#if $session.collectionTile}<div
               class="collection-tile-options"
               role="group"
@@ -876,7 +906,16 @@
                 >{/each}
             </div>{/if}
           <details class="collection-tile-list" open={!!boardError}>
-            <summary>Tile yields</summary>
+            <summary
+              title={`Choose from this city's tile or adjacent tiles.${city?.maxRange2 ? ` Husbandry allows up to ${city.maxRange2} land tiles two spaces away.` : ''}`}
+            >
+              <span
+                >Tiles <b>{$session.selection.reduce((sum, c) => sum + c.times, 0)} / {city?.capacity}</b
+                ></span
+              >
+              {#if city}<CollectionCapacity size={city.size} mood={city.mood} />{/if}
+              <span class="collection-list-label">List <ChevronRight size={14} /></span>
+            </summary>
             <div class="collection-choices">
               {#each city?.choices ?? [] as choice}{@const resource = Object.keys(
                   choice.pile,
@@ -914,8 +953,7 @@
           </details>
           <div class="collection-confirm">
             {#if $session.preview}<div class="collection-summary">
-                <span>You will collect</span><strong><ResourceAmount pile={$session.preview.total} /></strong
-                >{#if Object.values($session.preview.waste).some((n) => n)}<small class="warning"
+                {#if Object.values($session.preview.waste).some((n) => n)}<small class="warning"
                     >Storage is full: {pileText($session.preview.waste)} will be lost.</small
                   >{/if}
                 {#each $session.preview.effects ?? [] as effect}
@@ -932,17 +970,19 @@
                   >{/if}
               </div>{/if}
             <button
-              class="primary wide"
+              class="primary wide collect-submit"
               disabled={!$session.preview || $session.pending}
+              title={`${collectionFree ? 'Free action' : 'Costs 1 action'} · Activates this city`}
+              aria-label={`Collect resources${$session.preview ? `: ${pileText($session.preview.total)}` : ''} · ${collectionFree ? 'Free action' : '1 action'}`}
               onclick={() => controller.collect()}
-              >{$session.pending ? 'Confirming…' : 'Collect resources'}<ArrowRight size={17} /></button
-            ><span class="action-cost"
-              >{($session.view?.collectActions ?? []).find(
-                (a) => JSON.stringify(a.value) === JSON.stringify($session.collectVariant),
-              )?.free
-                ? 'Free action'
-                : 'Costs 1 action'} · Activates your city</span
             >
+              <span>{$session.pending ? 'Confirming…' : 'Collect'}</span>
+              {#if $session.preview}<ResourceAmount pile={$session.preview.total} />{/if}
+              <span class="collection-action-cost"
+                >{#if collectionFree}Free{:else}<Zap size={14} />1{/if}</span
+              >
+              <ArrowRight size={17} />
+            </button>
           </div>
         {:else if confirmEnd}
           <h2>End turn?</h2>

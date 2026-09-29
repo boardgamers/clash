@@ -111,6 +111,9 @@ export class Controller {
     }
     if (this.destroyed) return;
     const old = get(this.session);
+    // The platform can resend an unchanged snapshot after seat metadata or a reconnect.
+    // It is not an acknowledgement of a pending move and must preserve local selections.
+    if (raw === this.raw && old.view) return;
     const game = JSON.parse(raw) as Game;
     const changed = raw !== this.raw;
     this.raw = raw;
@@ -188,7 +191,18 @@ export class Controller {
     this.commands.replaceLog(journal(game, view).map((entry) => entry.text));
     if (view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision)
       this.closeActivity();
-    this.selectUnits(old.selectedUnits.filter((id) => view.units?.some((u) => u.id === id)));
+    const recruitedMover = bonusGranted
+      ? view.units?.find(
+          (u) =>
+            !old.view?.units?.some((previous) => previous.id === u.id) &&
+            this.movementDestinations([u.id]).length,
+        )
+      : undefined;
+    this.selectUnits(
+      recruitedMover
+        ? [recruitedMover.id]
+        : old.selectedUnits.filter((id) => view.units?.some((u) => u.id === id)),
+    );
     if (view.stopMovement && !get(this.session).moveDestinations.length) {
       const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);
       if (next) this.selectUnits([next.id]);
@@ -205,13 +219,14 @@ export class Controller {
     this.submittedMove = null;
   }
   setPlayer(index?: number) {
+    if (get(this.session).seat === index) return;
     this.moveCache.clear();
-    if (get(this.session).seat !== index) {
-      this.cardDraws.reset();
-      this.patch({ cardDraws: [], wondersOpen: false, scorePlayer: null });
-    }
+    this.cardDraws.reset();
     this.patch({
       seat: index,
+      cardDraws: [],
+      wondersOpen: false,
+      scorePlayer: null,
       decisionSelection: [],
       tilePanel: false,
       collectionTile: null,
@@ -237,10 +252,14 @@ export class Controller {
       const view = JSON.parse(this.engine.webView(this.raw, index)) as View;
       this.patch({
         view,
-        mode: freeResearchDecision(view) ? 'research' : 'overview',
+        mode: freeResearchDecision(view) ? 'research' : view.stopMovement ? 'settlers' : 'overview',
         city: view.cities[0]?.position ?? null,
         focus: view.cities[0]?.position ?? null,
       });
+      if (view.stopMovement) {
+        const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);
+        if (next) this.selectUnits([next.id]);
+      }
     }
   }
   selectCity(position: string) {
@@ -296,7 +315,8 @@ export class Controller {
       (pickedUnit ||
         (pick.kind === 'units' && pick.player === s.seat && !inspectLeader) ||
         (!city && pick.kind === 'tile' && !inspectLeader) ||
-        s.mode === 'settlers')
+        s.mode === 'settlers' ||
+        !!s.view?.stopMovement)
     ) {
       this.openUnits([pickedUnit?.id ?? units.find((u) => u.carrier === null)?.id ?? units[0].id]);
       return;

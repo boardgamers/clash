@@ -85,7 +85,10 @@
       </div>{/if}
     <button class="icon-button" aria-label="Close city management" onclick={close}><X /></button>
   </header>
-  {#if tab !== 'happiness'}<nav class="city-picker" aria-label="Choose city">
+  {#if tab !== 'happiness' && ($session.view?.cities.length ?? 0) > 1}<nav
+      class="city-picker"
+      aria-label="Choose city"
+    >
       {#each $session.view?.cities ?? [] as c}<button
           class:active={c.position === $session.city}
           onclick={() => {

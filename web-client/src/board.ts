@@ -43,6 +43,11 @@ export class World {
   private gesture = new MapGesture();
   private raycaster = new THREE.Raycaster();
   private resize: ResizeObserver;
+  private panelObserver: MutationObserver;
+  private interactionPanel: HTMLElement | null = null;
+  private interactionPositions: string[] = [];
+  private interactionSignature = '';
+  private availableViewport = { width: 1, height: 1 };
   private frame = 0;
   private dirty = true;
   private lastSignature = '';
@@ -182,21 +187,58 @@ export class World {
     this.resize = new ResizeObserver(() => {
       const { width, height } = host.getBoundingClientRect();
       if (!width || !height) return;
+      const resized =
+        this.camera.aspect !== width / height || this.renderer.domElement.clientHeight !== height;
       this.renderer.setSize(width, height);
       this.camera.aspect = width / height;
       this.updateViewport();
       this.controls.enableZoom = true;
       this.renderer.domElement.style.touchAction = 'none';
-      this.reset();
+      if (resized) this.reset();
+      else this.frameInteraction();
     });
     this.resize.observe(host);
+    const layout = host.closest('.play-layout')!;
+    this.panelObserver = new MutationObserver(() => {
+      const panel = layout.querySelector<HTMLElement>(
+        '.board-collection, .board-movement, .board-decision, .board-context',
+      );
+      if (panel === this.interactionPanel) return;
+      if (this.interactionPanel) this.resize.unobserve(this.interactionPanel);
+      this.interactionPanel = panel;
+      if (panel) this.resize.observe(panel);
+      this.updateViewport();
+      this.frameInteraction();
+    });
+    this.panelObserver.observe(layout, { childList: true, subtree: true });
+  }
+  private compactMap() {
+    return this.host.clientWidth <= 760 || (this.host.clientWidth <= 1000 && this.host.clientHeight <= 500);
   }
   private updateViewport() {
     const width = this.host.clientWidth,
       height = this.host.clientHeight;
-    if (this.boardInteraction && width <= 760 && height > 400)
-      this.camera.setViewOffset(width, height, 0, height * 0.3, width, height);
-    else this.camera.clearViewOffset();
+    if (!width || !height) return;
+    this.availableViewport = { width, height };
+    if (this.boardInteraction && this.compactMap() && this.interactionPanel) {
+      const board = this.host.getBoundingClientRect();
+      const panel = this.interactionPanel.getBoundingClientRect();
+      // Leave room for the map tools, then frame the usable area beside or above the panel.
+      const landscape = width >= 600 && height <= 500;
+      const left = landscape ? Math.max(8, panel.right - board.left + 12) : 12;
+      const right = width - 12;
+      const top = landscape ? 60 : 12;
+      const bottom = landscape ? height - 12 : Math.max(top + 80, panel.top - board.top - 12);
+      this.availableViewport = { width: Math.max(80, right - left), height: Math.max(80, bottom - top) };
+      this.camera.setViewOffset(
+        width,
+        height,
+        width / 2 - (left + right) / 2,
+        height / 2 - (top + bottom) / 2,
+        width,
+        height,
+      );
+    } else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
     this.invalidate();
   }
@@ -389,12 +431,17 @@ export class World {
         ),
       );
     this.controls.update();
-    this.frameDecision();
+    this.frameInteraction();
     this.invalidate();
   }
-  private frameDecision() {
-    if (!this.decisionPositions.length) return;
-    const points = this.decisionPositions.map(positionXY);
+  private frameInteraction() {
+    const positions = this.decisionPositions.length
+      ? this.decisionPositions
+      : this.compactMap()
+        ? this.interactionPositions
+        : [];
+    if (!positions.length || !this.host.clientWidth || !this.host.clientHeight) return;
+    const points = positions.map(positionXY);
     const xs = points.map(([x]) => x),
       zs = points.map(([, z]) => z);
     const target = new THREE.Vector3(
@@ -402,10 +449,20 @@ export class World {
       0,
       (Math.min(...zs) + Math.max(...zs)) / 2,
     );
-    const span = Math.max(5, Math.max(...xs) - Math.min(...xs) + 3, Math.max(...zs) - Math.min(...zs) + 3);
+    const inverse = this.camera.quaternion.clone().invert();
+    const tangent = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+    const horizontal = (tangent * this.camera.aspect * this.availableViewport.width) / this.host.clientWidth;
+    const vertical = (tangent * this.availableViewport.height) / this.host.clientHeight;
     const distance = THREE.MathUtils.clamp(
-      span / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2))) / Math.min(1, this.camera.aspect),
-      12,
+      Math.max(
+        ...points.map(([x, z]) => {
+          const point = new THREE.Vector3(x, 0, z).sub(target).applyQuaternion(inverse);
+          return (
+            Math.max((Math.abs(point.x) + 1.2) / horizontal, (Math.abs(point.y) + 1.2) / vertical) + point.z
+          );
+        }),
+      ),
+      10,
       55,
     );
     const offset = this.camera.position.clone().sub(this.controls.target).setLength(distance);
@@ -598,6 +655,28 @@ export class World {
     const mapChoices = mapDecisionOptions(s.view?.decision);
     const decisionPositions = mapChoices.map((o) => o.position!);
     this.decisionPositions = decisionPositions;
+    this.interactionPositions =
+      s.mode === 'collect'
+        ? [
+            ...new Set(
+              [
+                s.city!,
+                ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? []),
+              ].filter(Boolean),
+            ),
+          ]
+        : s.mode === 'settlers'
+          ? [
+              ...new Set([
+                ...(s.view?.units?.filter((u) => s.selectedUnits.includes(u.id)).map((u) => u.position) ??
+                  []),
+                ...s.moveDestinations.map((d) => d.position),
+              ]),
+            ]
+          : s.tilePanel && s.focus
+            ? [s.focus]
+            : [];
+    this.labelHost.classList.toggle('collecting', s.mode === 'collect');
     const decisionSelected = s.decisionSelection.flatMap((i) => mapChoices[i]?.position ?? []);
     const interacting = s.mode === 'collect' || s.mode === 'settlers' || s.tilePanel || mapChoices.length > 0;
     if (interacting !== this.boardInteraction) {
@@ -1041,7 +1120,7 @@ export class World {
           kind: 'destination',
         });
       }
-      if (mapChoices.length) this.frameDecision();
+      if (mapChoices.length) this.frameInteraction();
     }
     if (seaGuide) {
       this.selectable = new Set(
@@ -1068,6 +1147,17 @@ export class World {
       this.topDown = s.topDown;
       this.reset();
     }
+    const framingSignature = JSON.stringify([
+      s.mode,
+      s.tilePanel,
+      this.interactionPositions,
+      decisionPositions,
+    ]);
+    if (framingSignature !== this.interactionSignature) {
+      this.interactionSignature = framingSignature;
+      this.updateViewport();
+      this.frameInteraction();
+    }
     this.setHovered(this.hovered);
     this.invalidate();
   }
@@ -1079,6 +1169,7 @@ export class World {
     this.seaOverlay.dispose();
     cancelAnimationFrame(this.frame);
     this.resize.disconnect();
+    this.panelObserver.disconnect();
     this.controls.dispose();
     this.renderer.domElement.removeEventListener('pointerdown', this.down);
     this.renderer.domElement.removeEventListener('pointermove', this.move);
