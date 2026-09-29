@@ -1,5 +1,5 @@
 import { initSync, webView, webCollectPreview, webRecruitPreview, webQuery } from '../.bridge/server.js';
-import wasm from '../.bridge/server_bg.wasm?url';
+import wasm from '../.bridge/server_bg.wasm?url&no-inline';
 import type { Bridge } from './types';
 let ready: Promise<Bridge> | undefined;
 export function loadBridge(): Promise<Bridge> {

@@ -58,7 +58,7 @@ cargo test -p server --lib web_view
 
 After building, `http://127.0.0.1:8643/?built` loads the production IIFE bundle inside the preview host.
 
-`dist/viewer.js` contains the interface, styles, and Rust WASM bridge in one uploadable file. It exports `window.clash3d.launch(selector)` and uses string state/move payloads, matching the existing engine. Configure `topLevelVariable: "clash3d"`, `fullScreen: true`, `chat: true`, and `replayable: false`. No extra runtime scripts or stylesheets are needed. Fonts currently load from Google Fonts; system fonts remain available if blocked.
+`dist/viewer.js` contains the interface and styles. Upload `dist/server_bg.wasm` beside it for the Rust bridge. It exports `window.clash3d.launch(selector)` and uses string state/move payloads, matching the existing engine. Configure `topLevelVariable: "clash3d"`, `fullScreen: true`, `chat: true`, and `replayable: false`. No extra runtime scripts or stylesheets are needed. Fonts currently load from Google Fonts; system fonts remain available if blocked.
 
 ## Publish to BGS
 
@@ -84,3 +84,5 @@ Before public release: play through unusual civilization/card combinations, veri
 `src/controller.ts` coordinates state, choices, and the BGS commands. `src/App.svelte` owns the HTML interface. `src/board.ts` owns and disposes the Three.js scene. `src/viewer.ts` is the production entry. `src/local-host.ts` and `scripts/preview-api.ts` are development-only.
 
 The protocol dependency is AGPL-3.0-only. The engine retains its existing licensing.
+
+Viewer releases: see [uploading the complete viewer build](docs/viewer-publishing.md).

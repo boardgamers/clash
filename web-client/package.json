@@ -22,6 +22,7 @@
     "@types/node": "^24.0.0",
     "@types/three": "^0.180.0",
     "esbuild": "0.28.2",
+    "playwright": "1.62.1",
     "prettier": "^3.9.9",
     "prettier-plugin-svelte": "^4.1.1",
     "svelte-check": "^4.0.0",

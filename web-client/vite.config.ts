@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { previewApi } from './scripts/preview-api';
 export default defineConfig({
+  base: './',
   publicDir: false,
   plugins: [svelte(), previewApi()],
   build: {
