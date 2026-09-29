@@ -1088,42 +1088,43 @@
           <Landmark />
           <h3>Scoring</h3>
           <p>
-            Each city piece scores 1 point; each advance scores ½ point. Objectives and wonders add more.
-            Select a civilization to see its resources, score breakdown and advances.
+            Each settlement and building you own scores 1 point; each advance scores ½ point. Completed
+            objectives score 2 points each. Wonders, events and captured leaders can add points.
           </p>
         </article>
         <article>
           <Hourglass />
           <h3>Turns and ages</h3>
           <p>
-            Each age has three rounds, with one turn per player per round. You get three actions per turn.
-            After round three, resolve end-of-age steps before starting the next age.
+            Each age has three rounds. In each round, every player takes one turn with three actions. Between
+            ages, resolve objectives, gain a free advance and draw new cards.
           </p>
         </article>
         <article>
           <Wheat />
           <h3>Collecting resources</h3>
           <p>
-            Select a city, choose Collect, then select resource icons on the map. Each collection activates
-            one city. Choose its own tile or adjacent tiles; some advances extend your reach. Food comes from
-            fertile land, wood from forests, and ore from mountains. Excess beyond your storage limit is lost.
+            Spend 1 action to activate one city and collect from its own tile or adjacent tiles, up to its
+            collection capacity. Each selected tile normally yields 1 resource: food from fertile land, wood
+            from forests, or ore from mountains. Advances can extend collection range and add resources.
+            Resources beyond your storage limit are lost.
           </p>
         </article>
         <article>
           <Smile />
           <h3>City mood</h3>
           <p>
-            Happy cities collect resources or recruit units up to their size + 1; neutral cities use their
-            size; angry cities are limited to 1. Activating a city again in the same turn lowers its mood.
-            Angry cities cannot build new buildings.
+            Collection and recruitment capacity is size + 1 in a Happy city, size in a Neutral city, and 1 in
+            an Angry city. Collecting, recruiting and construction activate the city. Each activation after
+            the first in a turn lowers its mood by one step. Angry cities cannot construct buildings.
           </p>
         </article>
         <article>
           <Smile />
-          <h3>Mood tokens and happiness</h3>
+          <h3>Happiness</h3>
           <p>
             <ResourceText
-              text="Gaining 1 mood token adds to your supply; it does not change a city's mood. Improving happiness normally costs one action, plus mood tokens equal to the city's size per mood step. You may improve several cities together in that action."
+              text="Spend 1 action to improve happiness in one or more cities. Each step from Angry to Neutral to Happy costs mood tokens equal to that city's size."
             />
           </p>
         </article>
@@ -1132,7 +1133,16 @@
           <h3>Research</h3>
           <p>
             <ResourceText
-              text="Research normally costs one action and 2 resources: any mix of food, ideas and gold. Wood and ore cannot pay for research. Some advances reduce the cost. Civilization advances unlock automatically with their required research, without another payment or action."
+              text="Spend 1 action and 2 resources in any mix of food, ideas and gold to gain an advance. Some advances reduce this cost. Civilization advances unlock for free when their research requirements are met."
+            />
+          </p>
+        </article>
+        <article>
+          <Coins />
+          <h3>Gold</h3>
+          <p>
+            <ResourceText
+              text="Gold can replace food, wood, ore or ideas in a payment, one for one. Use it for research, construction and recruitment. A resource cost of 2 wood can be paid with 1 wood and 1 gold, or 2 gold."
             />
           </p>
         </article>
@@ -1140,30 +1150,31 @@
           <ScrollText />
           <h3>Events</h3>
           <p>
-            Each ordinary advance normally removes one of your three event markers. When the last is removed,
-            an event occurs and the markers refill. The countdown carries across turns; civilization advances
-            do not remove extra markers. Events can bring benefits, disasters, barbarians or pirates,
-            sometimes affecting everyone.
+            Gaining a standard advance uses one event marker. After using all three, resolve an event and
+            refill the markers. Unused markers carry over between turns. Events can grant rewards, cause
+            disasters or bring barbarians and pirates.
           </p>
         </article>
         <article>
           <Target />
           <h3>Objective cards</h3>
           <p>
-            Open Objectives to see your secret goals. Each card offers two alternatives: complete either to
-            claim points when prompted. Some can be claimed during play; others are checked at the end of an
-            age. Claiming discards the whole card, including its other objective. You may keep it instead.
+            Each secret objective card offers two goals. You may claim either completed goal for 2 points,
+            then discard the card. Each goal specifies when it can be claimed: during play or at the end of an
+            age.
           </p>
         </article>
         <article>
           <Footprints />
-          <h3>Moving on the map</h3>
+          <h3>Movement</h3>
           <p>
-            Select one of your units, then a highlighted destination and confirm the move. You can also select
-            a destination first and choose a unit that can reach it. Moving into unexplored land reveals
-            terrain. One Move action lets you move up to three groups. A group is one or more units moving
-            together from the same tile to the same destination. A new Move action lets units move again;
-            mountains and combat can prevent this. Finish moving ends the current action.
+            Spend 1 action to move up to three groups. A group consists of units moving together from the same
+            tile; each unit may join one group per Move action. Land groups move to an adjacent tile, with
+            longer routes available through Roads and other abilities. Army movement requires Tactics.
+          </p>
+          <p>
+            Entering unexplored terrain reveals it. Mountains and combat can prevent further movement that
+            turn.
           </p>
         </article>
         <article>
@@ -1171,41 +1182,39 @@
           <h3>Ships and sea movement</h3>
           <p>
             <ResourceText
-              text="A Port is a building, not a ship. Open that city's Recruit tab to build a ship, normally for 2 wood and one action. It appears on the sea tile beside the Port. Select the ship, choose Move, then a highlighted sea tile."
+              text="Recruit ships in a city with a Port for 2 wood each. Recruitment costs 1 action and activates the city. Ships start on the Port's sea tile."
             />
           </p>
           <p>
-            Starting Move costs one action; sailing normally costs no resources. The same fleet can continue
-            through adjacent sea tiles during that move. Exploration or combat ends its movement. Navigation
-            adds routes around the map's edge to the next sea space; it is not needed for ordinary sailing.
-            The ship button on the map toolbar only shows routes.
+            A fleet can cross successive sea tiles as one movement group. Exploration or combat ends its
+            movement. Navigation allows travel around the map edge to the next sea or unexplored tile.
           </p>
         </article>
         <article>
           <Swords />
           <h3>Battles</h3>
           <p>
-            Move an army or ship onto an enemy-occupied tile and confirm Attack. Army movement requires
-            Tactics. Starting Move costs one action; combat rounds do not cost extra actions. Settlers do not
-            fight.
+            Moving an army or fleet onto an enemy-occupied tile starts a battle as part of the Move action.
+            Settlers do not fight.
           </p>
           <p>
-            Each round, both sides normally roll one die per fighting unit. Every 5 combat value scores a hit,
-            before bonuses and cancellations. Losses apply to both sides; choose casualties when prompted.
-            Leaders, advances, fortresses and tactics cards can change the result.
+            Each round, both sides roll one die per fighting unit and apply bonuses from units, leaders,
+            advances, fortresses and tactics cards. Every 5 combat value scores a hit, before hit
+            cancellations. Each hit removes one unit; players choose their own casualties and both sides
+            suffer their losses.
           </p>
           <p>
-            Fighting continues until a side is defeated or the attacker retreats when offered. Winning
-            attackers enter the tile. Captured cities become Angry. The journal records rolls and losses.
+            After a round, the attacker may retreat if allowed. Otherwise, fighting continues until a side is
+            defeated. Winning attackers occupy the tile. Captured cities become Angry.
           </p>
         </article>
         <article>
           <Hammer />
           <h3>Growing cities</h3>
           <p>
-            A building adds one city size and one point. A city's size cannot exceed your total number of
-            cities. Recruit settlers and move them to empty land to found more cities; founding costs a
-            separate action.
+            Each settlement starts at size 1. Buildings and wonders each add 1 to the city's size. After
+            construction, its size must be no greater than your total number of cities. Founding a new city
+            costs 1 action and replaces a settler on empty land with a settlement.
           </p>
         </article>
       </div>
