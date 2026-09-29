@@ -47,6 +47,78 @@ function game(actions: LoggedAction[]): Game {
   };
 }
 
+test('naval rolls omit unused army die symbols while preserving tactics, hits and ship losses', () => {
+  const state = game([
+    {
+      combat_stats: { battleground: 'Sea' },
+      log: [
+        'Leif: Combat: Roll 3 (infantry, no bonus) for combined combat value of 5 and gets 1 hits against defending units, Combat modifiers: High Morale added 2 combat value',
+        'Pirates: Combat: Roll 4 (elephant, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Lost 1 ship at D3',
+      ],
+    },
+  ]);
+  state.players.push({ id: 3, civilization: 'Pirates' });
+  const [attacker, defender] = journal(state);
+  assert.deepEqual(attacker.notes, [
+    'Roll 3 → combat value 5 → 1 hit against defending units',
+    'Combat modifiers: High Morale added 2 combat value',
+  ]);
+  assert.deepEqual(defender.notes, ['Roll 4 → combat value 4 → 0 hits against attacking units']);
+  assert.deepEqual(
+    defender.tokens.map((t) => [t.value, t.label]),
+    [['−1', 'ship at D3']],
+  );
+});
+
+test('unfinished naval battles also omit inactive symbols on each die', () => {
+  // Combat stats are only stored when the entire battle ends.
+  const [entry] = journal(
+    game([
+      {
+        log: [
+          'Leif: Combat: Attacking with 2 ships, Roll 4 (elephant, no bonus), 1 (leader, no bonus) for combined combat value of 5 and gets 1 hits against defending units',
+        ],
+      },
+    ]),
+  );
+  assert.deepEqual(entry.notes, [
+    'Attacking with 2 ships',
+    'Roll 4, 1 → combat value 5 → 1 hit against defending units',
+  ]);
+});
+
+test('land rolls identify activated die symbols and preserve rerolls, bonuses and cancellations', () => {
+  const [entry] = journal(
+    game([
+      {
+        log: [
+          'Leif: Combat: Attacking with 1 infantry, 1 elephant and 1 leader, Roll 1 (leader, re-roll), 6 (infantry, +1 combat value), 4 (elephant, -1 hits, no combat value), 5 (cavalry, no bonus) for combined combat value of 12 and gets 2 hits against defending units',
+        ],
+      },
+    ]),
+  );
+  assert.equal(
+    entry.notes.join(', '),
+    'Attacking with 1 infantry, 1 elephant and 1 leader, Roll 1 (leader die symbol: re-roll), 6 (infantry die symbol: +1 combat value), 4 (elephant die symbol: -1 hits, no combat value), 5 → combat value 12 → 2 hits against defending units',
+  );
+});
+
+test('combat wording preserves no-dice rolls and unknown rule details', () => {
+  const [entry] = journal(
+    game([
+      {
+        log: [
+          'Leif: Combat: Roll no dice for combined combat value of 0 and gets 0 hits against defending units, Custom combat effect',
+        ],
+      },
+    ]),
+  );
+  assert.deepEqual(entry.notes, [
+    'Roll no dice → combat value 0 → 0 hits against defending units',
+    'Custom combat effect',
+  ]);
+});
+
 test('journal combines research and its card draw without revealing hidden card identities', () => {
   const entries = journal(
     game([

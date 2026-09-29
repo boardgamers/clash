@@ -90,6 +90,20 @@ function delta(value: number, label: string, icon: JournalToken['icon'], compact
 
 type PaymentLog = { entry: JournalEntry; tokens: JournalToken[]; pile: Pile; note?: string };
 
+function formatCombatRolls(text: string): string {
+  return text.replace(
+    /\bRoll (.+?) for combined combat value of (\d+) and gets (\d+) hits against (attacking|defending) units/g,
+    (_match, rolls: string, value: string, hits: string, opponent: string) => {
+      // The engine logs army symbols on every die, including naval rolls. Only
+      // show symbols that actually activated, retaining bonuses and rerolls.
+      const dice = rolls
+        .replace(/ \((?:infantry|cavalry|elephant|leader), no bonus\)/g, '')
+        .replace(/\((infantry|cavalry|elephant|leader), /g, '($1 die symbol: ');
+      return `Roll ${dice} → combat value ${value} → ${hits} ${hits === '1' ? 'hit' : 'hits'} against ${opponent} units`;
+    },
+  );
+}
+
 // Playing actions can announce a cost before opening a payment request. Only
 // resource-loss items record money actually spent. Match backwards because the
 // confirmed payment follows the announcement when both resolve in one action.
@@ -287,7 +301,8 @@ export function journal(
           }
           const entries: JournalEntry[] = [];
           const payments: PaymentLog[] = [];
-          for (const line of action.log ?? []) {
+          for (const rawLine of action.log ?? []) {
+            const line = rawLine.includes(': Combat: ') ? formatCombatRolls(rawLine) : rawLine;
             const eventName = line.match(/^A new game event has been triggered: (.+)$/)?.[1];
             if (eventName) {
               entries.push({
