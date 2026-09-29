@@ -61,7 +61,7 @@ impl LeaderAbility {
                 "A: When drawing a wonder: Take {wonder} from anywhere in the game - \
                 unless already built. If a player or Envoy had {wonder}, \
                 they get to draw a new wonder instead. \
-                B: Building {wonder} costs 2 culture tokens less.\
+                B: Building {wonder} costs 2 culture tokens less. \
                 C: Building any wonder in the leader city is a free action.",
             ),
         )

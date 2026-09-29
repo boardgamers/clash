@@ -1,5 +1,6 @@
 use crate::action::Action;
-use crate::advance::{Advance, AdvanceAction};
+use crate::advance::{Advance, AdvanceAction, is_special_advance_active};
+use crate::special_advance::SpecialAdvanceRequirement;
 use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -96,6 +97,21 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             let info = a.info(game);
             json!({"id":a,"name":info.name,"description":info.description,"group":p.civilization.name,"order":1000,"borrowed":false})
         })).collect::<Vec<_>>(),
+        "civilizationAdvances": p.civilization.special_advances.iter().enumerate().map(|(order, info)| {
+            let required = match info.requirement {
+                SpecialAdvanceRequirement::Advance(a) => vec![a],
+                SpecialAdvanceRequirement::AnyGovernment => {
+                    let mut advances = game.cache.get_advances().iter().filter(|(_, a)| a.leading_government).map(|(a, _)| *a).collect::<Vec<_>>();
+                    advances.sort();
+                    advances
+                }
+            };
+            json!({"id":info.advance,"name":info.name,"description":info.description,"group":p.civilization.name,"order":order,
+                "owned":p.has_special_advance(info.advance),
+                "active":p.has_special_advance(info.advance) && is_special_advance_active(info.advance, p.advances, game),
+                "requirement":info.requirement.name(game),
+                "prerequisites":required.iter().map(|a|json!({"id":a,"name":a.name(game)})).collect::<Vec<_>>()})
+        }).collect::<Vec<_>>(),
         "scoreParts": victory_points_parts(p, game).map(|(name, points)| json!({"name": name, "points": points})),
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();

@@ -613,3 +613,107 @@ test('public civilization inspection includes researched and civilization advanc
     assert.ok(view.players.every((p) => p.advances.every((a) => !('action' in a) && !('payment' in a))));
   }
 });
+
+test('all civilizations expose four public automatic advances, exact prerequisites and structured leader abilities', async () => {
+  const state = await engine.init(
+    4,
+    [],
+    { undo: 'SamePlayer', civilization: 'Random' },
+    'civilization-preview',
+    {},
+  );
+  const expected: Record<string, Record<string, string[]>> = {
+    Rome: {
+      Aqueduct: ['Engineering'],
+      RomanRoads: ['Roads'],
+      Captivi: ['Bartering'],
+      Provinces: ['Dogma', 'Nationalism', 'Voting'],
+    },
+    Greece: {
+      Study: ['PublicEducation'],
+      Sparta: ['Draft'],
+      HellenisticCulture: ['Arts'],
+      CityStates: ['Dogma', 'Nationalism', 'Voting'],
+    },
+    China: {
+      RiceCultivation: ['Irrigation'],
+      Expansion: ['Husbandry'],
+      Fireworks: ['Metallurgy'],
+      ImperialArmy: ['Dogma', 'Nationalism', 'Voting'],
+    },
+    Vikings: {
+      ShipConstruction: ['Fishing'],
+      Longships: ['WarShips'],
+      Raiding: ['TradeRoutes'],
+      RuneStones: ['Rituals'],
+    },
+  };
+  const spectator: View = JSON.parse(engine.webView(engine.stripSecret(state, undefined), undefined));
+  assert.deepEqual(spectator.players.map((p) => p.civilization).sort(), Object.keys(expected).sort());
+  for (const player of spectator.players) {
+    assert.equal(player.civilizationAdvances.length, 4);
+    for (const advance of player.civilizationAdvances) {
+      assert.ok(advance.name && advance.description && advance.requirement);
+      assert.equal(advance.owned, false);
+      assert.equal(advance.active, false);
+      assert.deepEqual(
+        advance.prerequisites.map((p) => p.id).sort(),
+        expected[player.civilization][advance.id],
+      );
+      assert.ok(!('action' in advance) && !('payment' in advance));
+    }
+    const owner: View = JSON.parse(engine.webView(engine.stripSecret(state, player.index), player.index));
+    assert.deepEqual(
+      owner.players.map((p) => p.civilizationAdvances),
+      spectator.players.map((p) => p.civilizationAdvances),
+    );
+    for (const special of player.civilizationAdvances)
+      for (const required of special.prerequisites)
+        assert.equal(required.name, owner.advances.find((a) => a.id === required.id)?.name);
+    const leaders = owner.cityActions[0].leaders!;
+    assert.equal(leaders.length, 3);
+    for (const leader of leaders) {
+      assert.equal(leader.abilities.length, 2);
+      assert.ok(leader.abilities.every((a) => a.name && a.description));
+      assert.equal(leader.description, leader.abilities.map((a) => `${a.name}: ${a.description}`).join('\n'));
+    }
+  }
+});
+
+test('automatic advances unlock with their research, with no extra action or event marker, and update for spectators', async () => {
+  for (const [civilization, research, special, prerequisites] of [
+    ['Vikings', 'Fishing', 'ShipConstruction', []],
+    ['Rome', 'Engineering', 'Aqueduct', []],
+    ['Greece', 'PublicEducation', 'Study', ['Writing']],
+    ['China', 'Irrigation', 'RiceCultivation', []],
+    ['Rome', 'Voting', 'Provinces', ['Writing', 'Philosophy']],
+  ] as const) {
+    const raw = JSON.parse(await initial());
+    const seat = engine.currentPlayer(JSON.stringify(raw));
+    raw.players[seat].civilization = civilization;
+    raw.players[seat].special_advances = [];
+    raw.players[seat].advances.push(...prerequisites);
+    const state = JSON.stringify(raw);
+    const before: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+    assert.equal(before.players[seat].civilizationAdvances.find((a) => a.id === special)!.active, false);
+    const action = before.advances.find((a) => a.id === research)!.action;
+    assert.ok(action, `${civilization}: ${research} is available`);
+    const afterState = engine.tryMove(state, JSON.stringify(action), seat);
+    const after: View = JSON.parse(engine.webView(engine.stripSecret(afterState, undefined), undefined));
+    assert.equal(after.players[seat].civilizationAdvances.find((a) => a.id === special)!.active, true);
+    assert.equal(after.players[seat].civilizationAdvances.filter((a) => a.owned).length, 1);
+    assert.equal(after.players[seat].score, before.players[seat].score + 1);
+    assert.equal(after.players[seat].eventTokens, before.players[seat].eventTokens - 1);
+    assert.equal(JSON.parse(afterState).actions_left, raw.actions_left - 1);
+  }
+});
+
+test('borrowing a prerequisite from the Great Library does not unlock a civilization advance', async () => {
+  const raw = JSON.parse(await initial());
+  raw.players[0].great_library_advance = 'Fishing';
+  const state = JSON.stringify(raw);
+  const view: View = JSON.parse(engine.webView(engine.stripSecret(state, undefined), undefined));
+  assert.equal(view.players[0].civilization, 'Vikings');
+  assert.equal(view.players[0].advances.find((a) => a.id === 'Fishing')?.borrowed, true);
+  assert.equal(view.players[0].civilizationAdvances.find((a) => a.id === 'ShipConstruction')!.owned, false);
+});

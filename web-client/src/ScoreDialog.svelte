@@ -12,6 +12,7 @@
   } from 'lucide-svelte';
   import EventMarkers from './EventMarkers.svelte';
   import ResourceText from './ResourceText.svelte';
+  import CivilizationAdvances from './CivilizationAdvances.svelte';
   import { researchPresentation } from './research';
   import type { Controller } from './controller';
   let { controller }: { controller: Controller } = $props();
@@ -21,7 +22,10 @@
   let advances = $derived(
     [...(player?.advances ?? [])].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
   );
-  let groups = $derived([...new Set(advances.map((a) => a.group))]);
+  let ordinaryAdvances = $derived(
+    advances.filter((a) => !player?.civilizationAdvances.some((c) => c.id === a.id)),
+  );
+  let groups = $derived([...new Set(ordinaryAdvances.map((a) => a.group))]);
   const categories: Record<string, { icon: typeof Landmark; description: string }> = {
     'City pieces': {
       icon: Landmark,
@@ -87,11 +91,15 @@
         {/each}
       </div>
     {:else}
+      {#if player.civilizationAdvances.length}<CivilizationAdvances
+          civilization={player.civilization}
+          advances={player.civilizationAdvances}
+        />{/if}
       <div class="public-advances">
         {#each groups as group}
           <section aria-label={group}>
             <h3>{group}</h3>
-            {#each advances.filter((a) => a.group === group) as advance}
+            {#each ordinaryAdvances.filter((a) => a.group === group) as advance}
               {@const presentation = researchPresentation(advance)}
               {@const Icon = presentation.icon}
               <article title={advance.description}>

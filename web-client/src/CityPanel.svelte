@@ -1,8 +1,24 @@
 <script lang="ts">
-  import { X, Landmark, Hammer, Users, Smile, Plus, Minus, Check, Crown } from 'lucide-svelte';
+  import {
+    X,
+    Landmark,
+    Hammer,
+    Users,
+    Smile,
+    Plus,
+    Minus,
+    Check,
+    Crown,
+    Swords,
+    Sparkles,
+    GraduationCap,
+    Layers,
+    Footprints,
+  } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { buildingInfo, unitInfo, cityReason } from './city';
   import ResourceAmount from './ResourceAmount.svelte';
+  import ResourceText from './ResourceText.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
   import HappinessPanel from './HappinessPanel.svelte';
   import CityFacts from './CityFacts.svelte';
@@ -17,6 +33,15 @@
   let count = $derived(
     Object.values($session.recruits).reduce<number>((a, b) => a + (typeof b === 'string' ? 1 : (b ?? 0)), 0),
   );
+  function abilityIcon(text: string) {
+    if (/battle|combat|captur|attack/i.test(text)) return Swords;
+    if (/advance/i.test(text)) return GraduationCap;
+    if (/wonder/i.test(text)) return Landmark;
+    if (/card/i.test(text)) return Layers;
+    if (/happiness/i.test(text)) return Smile;
+    if (/mov(e|ing|ement)/i.test(text)) return Footprints;
+    return Sparkles;
+  }
   function close() {
     controller.patch({ mode: 'overview', error: '' });
   }
@@ -126,23 +151,40 @@
       </div>
       {#if options?.leaders?.length}<section class="leader-recruit" aria-label="Leaders">
           <h3><Crown size={16} />Leaders</h3>
-          <div class="unit-picker">
-            {#each options.leaders as leader}<button
-                class="leader-option"
-                title={leader.description}
-                class:selected={$session.recruits.leader === leader.id}
-                aria-pressed={$session.recruits.leader === leader.id}
-                disabled={$session.pending || (!$session.recruits.leader && count >= (city?.capacity ?? 0))}
-                onclick={() =>
-                  controller.setRecruits({
-                    ...$session.recruits,
-                    leader: $session.recruits.leader === leader.id ? null : leader.id,
-                  })}
-                ><span class="leader-name"><Crown size={15} />{leader.name}</span>
-                <span class="leader-cost"><span>Cost</span><ResourceAmount
-                    pile={{ mood_tokens: 1, culture_tokens: 1 }}
-                  /></span></button
-              >{/each}
+          <div class="leader-grid">
+            {#each options.leaders as leader}
+              <article class="leader-card" class:selected={$session.recruits.leader === leader.id}>
+                <button
+                  class="leader-select"
+                  aria-label={`Select ${leader.name}`}
+                  aria-pressed={$session.recruits.leader === leader.id}
+                  disabled={$session.pending || (!$session.recruits.leader && count >= (city?.capacity ?? 0))}
+                  onclick={() =>
+                    controller.setRecruits({
+                      ...$session.recruits,
+                      leader: $session.recruits.leader === leader.id ? null : leader.id,
+                    })}
+                >
+                  <span class="leader-name"><Crown size={16} />{leader.name}</span>
+                  <span class="leader-cost"
+                    ><span>Cost</span><ResourceAmount pile={{ mood_tokens: 1, culture_tokens: 1 }} />
+                    <span class="leader-selection"
+                      >{#if $session.recruits.leader === leader.id}<Check size={14} />Selected{:else}<Plus
+                          size={14}
+                        />Select{/if}</span
+                    >
+                  </span>
+                </button>
+                <dl class="leader-abilities">
+                  {#each leader.abilities as ability}{@const Icon = abilityIcon(ability.description)}
+                    <div>
+                      <dt><Icon size={15} />{ability.name}</dt>
+                      <dd><ResourceText text={ability.description} /></dd>
+                    </div>
+                  {/each}
+                </dl>
+              </article>
+            {/each}
           </div>
         </section>{/if}
       {#if $session.view?.units?.length}<details class="replacement-recruit">

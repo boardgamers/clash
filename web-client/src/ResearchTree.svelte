@@ -20,7 +20,10 @@
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
   import EventMarkers from './EventMarkers.svelte';
-  import { resourceNames, type Resource, type Pile, type AdvanceView } from './types';
+  import CivilizationAdvances from './CivilizationAdvances.svelte';
+  import CivilizationEmblem from './CivilizationEmblem.svelte';
+  import ResourceText from './ResourceText.svelte';
+  import { resourceNames, type Resource, type Pile, type AdvanceView, type PublicAdvance } from './types';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   let { controller }: { controller: Controller } = $props();
@@ -45,6 +48,18 @@
     culture_tokens: Drama,
   };
   let advances = $derived([...($session.view?.advances ?? [])].sort((a, b) => a.order - b.order));
+  let player = $derived($session.view?.players.find((p) => p.index === $session.seat));
+  let civilizationAdvances = $derived(player?.civilizationAdvances ?? []);
+  let visibleCivilizationAdvances = $derived(
+    category === 'All' || category === 'Civilization'
+      ? civilizationAdvances.filter(
+          (a) =>
+            matches(a) ||
+            a.requirement.toLowerCase().includes(query.trim().toLowerCase()) ||
+            a.prerequisites.some((p) => p.name.toLowerCase().includes(query.trim().toLowerCase())),
+        )
+      : [],
+  );
   let groups = $derived([...new Set(advances.map((a) => a.group))]);
   let selected = $derived(advances.find((a) => a.id === $session.selectedAdvance));
   let selectedPayment = $derived(
@@ -61,7 +76,7 @@
         (category === 'All' || group === category) && advances.some((a) => a.group === group && matches(a)),
     ),
   );
-  function matches(advance: AdvanceView) {
+  function matches(advance: PublicAdvance) {
     return `${advance.name} ${advance.description} ${researchPresentation(advance).summary}`
       .toLowerCase()
       .includes(query.trim().toLowerCase());
@@ -73,9 +88,19 @@
     node.showModal();
     return { destroy: () => node.close() };
   }
+  async function showCivilizationAdvance(id: string) {
+    query = '';
+    category = 'Civilization';
+    controller.patch({ selectedAdvance: null });
+    await tick();
+    document.getElementById(`civilization-${id}`)?.scrollIntoView({
+      block: 'nearest',
+      behavior: $session.reducedMotion ? 'instant' : 'smooth',
+    });
+  }
   async function prerequisite(id: string) {
     query = '';
-    category = 'All';
+    category = advances.find((a) => a.id === id)?.group ?? 'All';
     controller.patch({ selectedAdvance: id });
     await tick();
     document.getElementById(`research-${id}`)?.scrollIntoView({
@@ -119,12 +144,26 @@
   </header>
   <nav class="research-filters" aria-label="Research categories">
     <button class:active={category === 'All'} onclick={() => (category = 'All')}>All advances</button>
+    {#if player && civilizationAdvances.length}<button
+        class:active={category === 'Civilization'}
+        onclick={() => {
+          category = 'Civilization';
+          controller.patch({ selectedAdvance: null });
+        }}><CivilizationEmblem civilization={player.civilization} size={16} />{player.civilization}</button
+      >{/if}
     {#each groups as group}{@const Icon = groupIcons[group] ?? BookOpen}<button
         class:active={category === group}
         onclick={() => (category = group)}><Icon size={15} />{group}</button
       >{/each}
   </nav>
-  <div class="research-tree" aria-label="Research tree">
+  <div class="research-tree" class:civilization-only={category === 'Civilization'} aria-label="Research tree">
+    {#if player && visibleCivilizationAdvances.length}
+      <CivilizationAdvances
+        civilization={player.civilization}
+        advances={visibleCivilizationAdvances}
+        onPrerequisite={prerequisite}
+      />
+    {/if}
     {#each visibleGroups as group}{@const GroupIcon = groupIcons[group] ?? BookOpen}
       <section class="research-branch" aria-label={group}>
         <h3><GroupIcon size={18} />{group}</h3>
@@ -165,7 +204,7 @@
                       : actionReason(advance.reason)}
                   />{/if}</span
               >
-              <span class="research-summary">{presentation.summary}</span>
+              <span class="research-summary"><ResourceText text={presentation.summary} /></span>
               <span class="research-effects"
                 >{#if advance.unlocks}<span title={`Unlocks ${advance.unlocks}`}
                     ><Hammer size={12} />{advance.unlocks}</span
@@ -196,10 +235,24 @@
                   >{/if}</span
               >
             </button>
+            {#each civilizationAdvances.filter( (a) => a.prerequisites.some((p) => p.id === advance.id) ) as special}
+              <button
+                class="research-civilization-link"
+                onclick={() => showCivilizationAdvance(special.id)}
+                title={`${special.active ? 'Unlocked' : 'Unlocks automatically'}: ${special.name}`}
+              >
+                <CivilizationEmblem civilization={player!.civilization} size={14} />
+                {special.active ? 'Unlocked' : 'Unlocks'}
+                {special.name}<ArrowRight size={12} />
+              </button>
+            {/each}
           </article>
         {/each}
       </section>
-    {:else}<p class="research-empty">No advances match “{query}”.</p>{/each}
+    {/each}
+    {#if !visibleGroups.length && !visibleCivilizationAdvances.length}<p class="research-empty">
+        No advances match “{query}”.
+      </p>{/if}
   </div>
   {#if selected}
     <section class="research-detail" aria-label="Research details">

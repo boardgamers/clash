@@ -455,3 +455,111 @@
     grid-row: 2;
   }
 }
+
+.civilization-advances {
+  min-width: 0;
+}
+.civilization-advances > h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 0 5px;
+}
+.civilization-unlock-note {
+  margin: 0 0 12px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.civilization-advance-grid {
+  display: grid;
+  gap: 12px;
+}
+.civilization-advance {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 12px;
+  scroll-margin: 16px;
+  min-width: 0;
+}
+.civilization-advance.owned {
+  border-color: #a0b493;
+  background: #e9eedf;
+}
+.dark .civilization-advance.owned {
+  background: #344531;
+}
+.civilization-advance-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.civilization-advance-title strong {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.civilization-advance-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--muted);
+  margin-left: auto;
+}
+.civilization-advance-effect {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 10px 0;
+  color: var(--ink);
+}
+.civilization-prerequisites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-size: 11px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.civilization-prerequisites > span {
+  color: var(--muted);
+}
+.civilization-prerequisites > button {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 5px 0;
+  font-weight: 600;
+}
+.civilization-prerequisites > button:hover {
+  text-decoration-thickness: 2px;
+}
+.research-civilization-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  width: 100%;
+  text-align: left;
+}
+.research-civilization-link:hover {
+  background: var(--paper2);
+}
+.research-civilization-link > svg:last-child {
+  margin-left: auto;
+}
+.research-tree.civilization-only {
+  grid-template-columns: 1fr;
+}
+.civilization-only .civilization-advance-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+  align-items: start;
+}
+.score-dialog .civilization-advances {
+  margin: 20px 0;
+}

@@ -231,7 +231,7 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             let action = reason.is_none().then(||Action::Playing(PlayingAction::IncreaseHappiness(IncreaseHappiness::new(vec![(city.position,steps)],payment.clone(),kind))));
             json!({"steps":steps,"mood":if steps==max_steps {"Happy"} else {"Neutral"},"payment":payment,"reason":reason,"action":action})
         }).collect::<Vec<_>>();
-        let leaders = p.available_leaders.iter().map(|l|json!({"id":l,"name":l.name(game),"description":game.cache.get_leader(l).abilities.iter().map(|a|format!("{}: {}",a.name,a.description)).collect::<Vec<_>>().join("\n")})).collect::<Vec<_>>();
+        let leaders = p.available_leaders.iter().map(|l|json!({"id":l,"name":l.name(game),"abilities":game.cache.get_leader(l).abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>(),"description":game.cache.get_leader(l).abilities.iter().map(|a|format!("{}: {}",a.name,a.description)).collect::<Vec<_>>().join("\n")})).collect::<Vec<_>>();
         json!({"position":city.position,"buildings":buildings,"recruits":recruits,"happiness":happiness,"leaders":leaders})
     }).collect()
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama } from 'lucide-svelte';
   import { resourceNames, type Pile, type Resource } from './types';
-  let { pile, compact = false }: { pile: Pile; compact?: boolean } = $props();
+  let { pile, compact = true }: { pile: Pile; compact?: boolean } = $props();
   const icons = {
     food: Wheat,
     wood: Trees,
@@ -18,7 +18,8 @@
       icons[key as Resource]}<span
       title={`${amount} ${resourceNames[key as Resource]}`}
       aria-label={compact ? `${amount} ${resourceNames[key as Resource]}` : undefined}
-      ><Icon size={14} />{amount}{#if !compact}
-        {resourceNames[key as Resource]}{/if}</span
+      ><Icon size={14} aria-hidden="true" /><span>{amount}</span>{#if !compact}<span
+          >{resourceNames[key as Resource]}</span
+        >{/if}</span
     >{:else}<span>No resources</span>{/each}</span
 >

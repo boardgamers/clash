@@ -102,6 +102,25 @@ const advances = {
   Fanaticism: [Zap, '+2 in the first battle round at a Temple city. Gain infantry if you lose.'],
 } as const;
 
+const civilizationIcons: Record<string, typeof Wheat> = {
+  Aqueduct: Droplets,
+  RomanRoads: Route,
+  Captivi: Swords,
+  Provinces: Flag,
+  Study: BookOpen,
+  Sparta: Shield,
+  HellenisticCulture: Palette,
+  CityStates: Landmark,
+  RiceCultivation: Wheat,
+  Expansion: Map,
+  Fireworks: Sparkles,
+  ImperialArmy: Swords,
+  ShipConstruction: Hammer,
+  Longships: Ship,
+  Raiding: Swords,
+  RuneStones: Scroll,
+};
+
 export const groupIcons: Record<string, typeof Wheat> = {
   Agriculture: Wheat,
   Construction: Hammer,
@@ -119,7 +138,7 @@ export const groupIcons: Record<string, typeof Wheat> = {
 export function researchPresentation(advance: Pick<PublicAdvance, 'id' | 'group' | 'description'>) {
   const entry = advances[advance.id as keyof typeof advances];
   return {
-    icon: entry?.[0] ?? groupIcons[advance.group] ?? BookOpen,
+    icon: entry?.[0] ?? civilizationIcons[advance.id] ?? groupIcons[advance.group] ?? BookOpen,
     summary:
       advance.id === 'Philosophy' && advance.description.includes('3 ideas')
         ? advance.description

@@ -323,7 +323,7 @@ fn sulla() -> LeaderInfo {
         add_barbarian_control(
             LeaderAbility::builder(
                 "Dictator",
-                "The leader city may not be the target of influence culture attempts.\
+                "The leader city may not be the target of influence culture attempts. \
                 Barbarians within 2 spaces of Sulla may only move if you agree to it.",
             )
             .add_transient_event_listener(

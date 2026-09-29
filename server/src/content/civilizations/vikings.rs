@@ -48,7 +48,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
         SpecialAdvance::ShipConstruction,
         SpecialAdvanceRequirement::Advance(Advance::Fishing),
         "Ship Construction",
-        "May move settlers and infantry in and out of water (if there is no enemy),\
+        "May move settlers and infantry in and out of water (if there is no enemy), \
         converting them to ships and back (or being carried by other ships). \
         The cost of Navigation is reduced to 0 resources.",
     )

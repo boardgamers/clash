@@ -95,6 +95,12 @@ export interface AdvanceView extends PublicAdvance {
   bonus: Pile | null;
   unlocks: string | null;
 }
+export interface CivilizationAdvance extends PublicAdvance {
+  owned: boolean;
+  active: boolean;
+  requirement: string;
+  prerequisites: { id: string; name: string }[];
+}
 export interface PlayerView {
   capital?: string;
   index: number;
@@ -103,6 +109,7 @@ export interface PlayerView {
   score: number;
   eventTokens: number;
   advances: PublicAdvance[];
+  civilizationAdvances: CivilizationAdvance[];
   scoreParts: { name: string; points: number }[];
   cities: { position: string; size: number; capacity: number; mood: string; activations: number }[];
 }
@@ -191,7 +198,12 @@ export interface ActionOffer {
   reason: string | null;
 }
 export interface CityActions {
-  leaders?: { id: string; name: string; description: string }[];
+  leaders?: {
+    id: string;
+    name: string;
+    description: string;
+    abilities: { name: string; description: string }[];
+  }[];
   position: string;
   buildings: {
     name: string;
