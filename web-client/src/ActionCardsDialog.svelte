@@ -27,22 +27,29 @@
     ><X size={20} /></button
   >
   <h2 id="action-cards-title"><Layers size={23} />Action cards</h2>
+  {#if $session.view?.actionCards?.some((card) => card.tactics)}
+    <p class="card-use-rule">
+      Choose one use, then discard. Battle uses require Tactics: one card per combat round.
+    </p>
+  {/if}
   {#each $session.view?.actionCards ?? [] as card}
     <article class="play-card">
       <h3>{card.name}</h3>
       <p><ResourceText text={card.description} /></p>
-      {#if card.tactics}<details>
-          <summary><Swords size={15} />{card.tactics.name}</summary>
-          <p><ResourceText text={card.tactics.description} /></p>
-        </details>{/if}
       <button
         class="primary wide"
         title={card.reason ?? 'Play this card'}
         disabled={!card.action || $session.pending}
         onclick={() => card.action && controller.submit(card.action)}
-        >Play {#if !card.free}<span><Zap size={13} />1</span>{/if}</button
+        >Play {card.name}
+        {#if !card.free}<span><Zap size={13} />1</span>{/if}</button
       >
       {#if actionReason(card.reason)}<small>{actionReason(card.reason)}</small>{/if}
+      {#if card.tactics}<section class="card-battle-use" aria-label={`Battle use: ${card.tactics.name}`}>
+          <div class="card-use-label"><Swords size={15} />Or · Battle use</div>
+          <h4>{card.tactics.name}</h4>
+          <p><ResourceText text={card.tactics.description} /></p>
+        </section>{/if}
     </article>
   {:else}<p>No action cards in hand.</p>{/each}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}

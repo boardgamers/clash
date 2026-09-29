@@ -1210,6 +1210,18 @@
           </p>
         </article>
         <article>
+          <Layers />
+          <h3>Action cards</h3>
+          <p>
+            Play a card's action effect when its conditions are met, or save it for its battle effect. Choose
+            one use, then discard the card.
+          </p>
+          <p>
+            With the Tactics advance, you may play one card for its battle effect at the start of each combat
+            round. The effect applies to that round and follows the conditions printed on the card.
+          </p>
+        </article>
+        <article>
           <Target />
           <h3>Objective cards</h3>
           <p>
@@ -1276,8 +1288,9 @@
           <h3>Cultural influence</h3>
           <p>
             Spend 1 action to target a city's building within range of one of your cities. Range equals your
-            city's size. Roll 5 or higher to replace a building with your color: you score its point, while
-            the city's owner continues to use it. You can also reclaim buildings in your own cities.
+            city's size. Roll one die (results 1–6); a total of 5 or higher replaces a building with your
+            color. You score its point, while the city's owner continues to use it. You can also reclaim
+            buildings in your own cities.
           </p>
           <p>
             Each culture token adds 1 range before the roll or +1 to the result afterwards. You may succeed
