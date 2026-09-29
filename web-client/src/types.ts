@@ -56,6 +56,8 @@ export interface LoggedAction {
     HandCard?: { to: unknown };
     Advance?: { advance: string; balance: string; take_incident_token?: boolean };
     Units?: { units: Record<string, number | string>; balance: string };
+    Resources?: { resources: Pile; balance: string };
+    MoodChange?: { city: string; mood: string };
   }[];
   combat_stats?: unknown;
 }
@@ -109,6 +111,13 @@ export interface CivilizationAdvance extends PublicAdvance {
   prerequisites: { id: string; name: string }[];
 }
 export interface PlayerView {
+  leaders?: {
+    id: string;
+    unit: number;
+    position: string;
+    name: string;
+    abilities: { name: string; description: string }[];
+  }[];
   capital?: string;
   index: number;
   name: string;
@@ -188,6 +197,7 @@ export interface CollectionPreview {
   action: Move;
   total: Pile;
   waste: Pile;
+  effects?: { source: string; description: string }[];
   after: Pile;
   moodWillDecrease: boolean;
 }
@@ -280,6 +290,11 @@ export interface JournalEntry {
   title: string;
   tokens: JournalToken[];
   notes: string[];
+  collection?: {
+    city?: { size: number; mood: string; structures: string[] };
+    tiles: { position: string; pile: Pile; times: number }[];
+    effects: { source: string; tokens: JournalToken[] }[];
+  };
   setup?: { civilization: string; position?: string };
   event?: {
     triggeredBy?: number;

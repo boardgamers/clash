@@ -49,6 +49,7 @@
     Sparkles,
     ShieldCheck,
     CircleSlash,
+    Hexagon,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
@@ -65,6 +66,7 @@
   import ObjectiveCondition from './ObjectiveCondition.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import CityFacts from './CityFacts.svelte';
+  import CollectionCapacity from './CollectionCapacity.svelte';
   import DecisionPanel from './DecisionPanel.svelte';
   import ActionCardsDialog from './ActionCardsDialog.svelte';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
@@ -311,6 +313,42 @@
     {#if entry.notes.length}<p class="journal-notes">
         <ResourceText text={entry.notes.join(', ')} positions={mapPositions} {...coordinateInteraction} />
       </p>{/if}
+    {#if entry.collection}
+      {#each entry.collection.effects as effect}
+        <div class="collection-included">
+          <span><GraduationCap size={13} aria-hidden="true" />{effect.source}</span>
+          {#each effect.tokens as token}{@const Icon = journalTokenIcons[token.icon]}
+            <span title={token.description} aria-label={token.description}
+              >{token.value}<Icon size={13} aria-hidden="true" /></span
+            >
+          {/each}<small>included</small>
+        </div>
+      {/each}
+      <details class="collection-sources">
+        <summary aria-label={`Collection sources for ${entry.title.split(' · ')[1]}`}>
+          {#if entry.collection.city}<CollectionCapacity {...entry.collection.city} /><span aria-hidden="true"
+              >·</span
+            >{/if}
+          <span
+            ><Hexagon size={13} aria-hidden="true" />{entry.collection.tiles.reduce(
+              (sum, tile) => sum + tile.times,
+              0,
+            )} collected</span
+          ><ChevronRight size={13} />
+        </summary>
+        {#if entry.collection.city}<p class="collection-structures">
+            {entry.collection.city.structures.join(' + ')}
+          </p>{/if}
+        {#each entry.collection.tiles as tile}
+          <div class="collection-source">
+            <ResourceText text={tile.position} positions={mapPositions} {...coordinateInteraction} />
+            <ResourceAmount
+              pile={Object.fromEntries(Object.entries(tile.pile).map(([r, n]) => [r, n! * tile.times]))}
+            />
+          </div>
+        {/each}
+      </details>
+    {/if}
 
     {#if entry.event}
       {#each entry.event.outcomes as effect (effect.id)}
@@ -773,6 +811,27 @@
           <p>The controls for this phase are still being built.</p>
         {:else if $session.mode === 'collect'}
           <h2>Collect <span class="movement-origin">{$session.city}</span></h2>
+          {#if ($session.view?.cities.length ?? 0) > 1}
+            <nav class="collection-city-picker" aria-label="Collect from city">
+              {#each $session.view?.cities ?? [] as c}
+                <button
+                  class:active={c.position === $session.city}
+                  aria-pressed={c.position === $session.city}
+                  aria-label={`Collect from ${c.position}, ${c.mood}, capacity ${c.capacity}`}
+                  title={`${c.position} · ${c.mood} · Capacity ${c.capacity}${c.activations ? ` · Activated ${c.activations} times` : ''}`}
+                  disabled={$session.pending}
+                  onmouseenter={() => world?.highlightCoordinate(c.position)}
+                  onmouseleave={() => world?.highlightCoordinate(null)}
+                  onfocus={() => world?.highlightCoordinate(c.position)}
+                  onblur={() => world?.highlightCoordinate(null)}
+                  onclick={() => controller.switchCollectionCity(c.position)}
+                  >{c.position}<CityFacts size={c.size} mood={c.mood} />{#if c.activations}<span
+                      class="city-activation-count"><RotateCw size={12} />{c.activations}</span
+                    >{/if}</button
+                >
+              {/each}
+            </nav>
+          {/if}
           {#if ($session.view?.collectActions?.length ?? 0) > 1}<div class="variant-picker">
               {#each $session.view?.collectActions ?? [] as variant}<button
                   class:selected={JSON.stringify($session.collectVariant) === JSON.stringify(variant.value)}
@@ -792,6 +851,7 @@
             title={`Choose from this city's tile or adjacent tiles.${city?.maxRange2 ? ` Husbandry allows up to ${city.maxRange2} land tiles two spaces away.` : ''}`}
           >
             Select tiles · {$session.selection.reduce((sum, c) => sum + c.times, 0)} / {city?.capacity}
+            {#if city}<CollectionCapacity size={city.size} mood={city.mood} />{/if}
           </p>
           {#if city && city.activations > 0}<ActivationStatus {city} warning />{/if}
           {#if $session.collectionTile}<div
@@ -845,27 +905,38 @@
                 >{/each}
             </div>
           </details>
-          {#if $session.preview}<div class="collection-summary">
-              <span>You will collect</span><strong>{pileText($session.preview.total)}</strong
-              >{#if Object.values($session.preview.waste).some((n) => n)}<small class="warning"
-                  >Storage is full: {pileText($session.preview.waste)} will be lost.</small
-                >{/if}
-              {#if city && city.activationMood !== city.mood}<span class="activation-inline"
-                  ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
-                >{/if}
-            </div>{/if}
-          <button
-            class="primary wide"
-            disabled={!$session.preview || $session.pending}
-            onclick={() => controller.collect()}
-            >{$session.pending ? 'Confirming…' : 'Collect resources'}<ArrowRight size={17} /></button
-          ><span class="action-cost"
-            >{($session.view?.collectActions ?? []).find(
-              (a) => JSON.stringify(a.value) === JSON.stringify($session.collectVariant),
-            )?.free
-              ? 'Free action'
-              : 'Costs 1 action'} · Activates your city</span
-          >
+          <div class="collection-confirm">
+            {#if $session.preview}<div class="collection-summary">
+                <span>You will collect</span><strong><ResourceAmount pile={$session.preview.total} /></strong
+                >{#if Object.values($session.preview.waste).some((n) => n)}<small class="warning"
+                    >Storage is full: {pileText($session.preview.waste)} will be lost.</small
+                  >{/if}
+                {#each $session.preview.effects ?? [] as effect}
+                  {#if /^(Added|Gain|Convert) \d/.test(effect.description)}
+                    <div class="collection-included">
+                      <span>{effect.source}</span><ResourceText text={effect.description} /><small
+                        >included</small
+                      >
+                    </div>
+                  {/if}
+                {/each}
+                {#if city && city.activationMood !== city.mood}<span class="activation-inline"
+                    ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
+                  >{/if}
+              </div>{/if}
+            <button
+              class="primary wide"
+              disabled={!$session.preview || $session.pending}
+              onclick={() => controller.collect()}
+              >{$session.pending ? 'Confirming…' : 'Collect resources'}<ArrowRight size={17} /></button
+            ><span class="action-cost"
+              >{($session.view?.collectActions ?? []).find(
+                (a) => JSON.stringify(a.value) === JSON.stringify($session.collectVariant),
+              )?.free
+                ? 'Free action'
+                : 'Costs 1 action'} · Activates your city</span
+            >
+          </div>
         {:else if confirmEnd}
           <h2>End turn?</h2>
           <p>You have {totalActions} unused {totalActions === 1 ? 'action' : 'actions'}.</p>
@@ -1093,6 +1164,21 @@
             terrain. One Move action lets you move up to three groups. A group is one or more units moving
             together from the same tile to the same destination. A new Move action lets units move again;
             mountains and combat can prevent this. Finish moving ends the current action.
+          </p>
+        </article>
+        <article>
+          <Ship />
+          <h3>Ships and sea movement</h3>
+          <p>
+            <ResourceText
+              text="A Port is a building, not a ship. Open that city's Recruit tab to build a ship, normally for 2 wood and one action. It appears on the sea tile beside the Port. Select the ship, choose Move, then a highlighted sea tile."
+            />
+          </p>
+          <p>
+            Starting Move costs one action; sailing normally costs no resources. The same fleet can continue
+            through adjacent sea tiles during that move. Exploration or combat ends its movement. Navigation
+            adds routes around the map's edge to the next sea space; it is not needed for ordinary sailing.
+            The ship button on the map toolbar only shows routes.
           </p>
         </article>
         <article>

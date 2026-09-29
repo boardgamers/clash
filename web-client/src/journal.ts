@@ -1,6 +1,7 @@
 import type { Game, JournalEntry, JournalToken, LoggedAction, Player, Resource } from './types.ts';
 import type { View } from './types.ts';
 import { explainEvents } from './event-journal.ts';
+import { collectionCities, explainCollection } from './collection-journal.ts';
 
 const resourceIcons: Record<string, Resource | 'action'> = {
   food: 'food',
@@ -88,9 +89,9 @@ function delta(value: number, label: string, icon: JournalToken['icon'], compact
 }
 
 function addClause(entry: JournalEntry, clause: string): void {
-  let match = clause.match(/^(Pay|Gain|Lose|Lost) (.+)$/);
+  let match = clause.match(/^(Pay|Gain|Added|Lose|Lost) (.+?)(?: with (.+))?$/);
   if (match) {
-    const sign = match[1] === 'Gain' ? 1 : -1;
+    const sign = match[1] === 'Gain' || match[1] === 'Added' ? 1 : -1;
     const quantities = match[2]
       .split(/,\s*(?:and\s+)?|\s+and\s+|\s*\+\s*/)
       .map((part) =>
@@ -100,8 +101,17 @@ function addClause(entry: JournalEntry, clause: string): void {
       entry.tokens.push(
         ...quantities.map((q) => delta(sign * Number(q![1]), q![2], resourceIcons[q![2]], true)),
       );
+      if (match[3]) entry.notes.push(`With ${match[3]}`);
       return;
     }
+  }
+  match = clause.match(/^Convert (\d+) (food|wood|ore|ideas?|gold) to (\d+) (food|wood|ore|ideas?|gold)$/);
+  if (match) {
+    entry.tokens.push(
+      delta(-Number(match[1]), match[2], resourceIcons[match[2]], true),
+      delta(Number(match[3]), match[4], resourceIcons[match[4]], true),
+    );
+    return;
   }
   match = clause.match(/^Use city ([A-Z]+\d+)$/);
   if (match) {
@@ -166,6 +176,7 @@ export function journal(
   game: Game,
   view?: Pick<View, 'eventCatalog' | 'pendingEvent' | 'players'>,
 ): JournalEntry[] {
+  const historicalCities = collectionCities(game);
   const eventNames = [
     ...new Set([
       ...(view?.eventCatalog?.map((e) => e.name) ?? []),
@@ -308,12 +319,17 @@ export function journal(
             for (const clause of match[3].split(/,(?!\s*(?:\d|and\b))\s*/))
               addClause(entry, factionText(game, clause));
           }
+          explainCollection(action, entries, historicalCities.get(id));
           for (const entry of entries)
             entry.text = [
               entry.civilization,
               entry.title,
               ...entry.tokens.map((token) => token.description),
               ...entry.notes,
+              ...(entry.collection?.effects.map(
+                (effect) =>
+                  `${effect.source} (included): ${effect.tokens.map((t) => t.description).join(', ')}`,
+              ) ?? []),
             ]
               .filter(Boolean)
               .join(' · ');

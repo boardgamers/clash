@@ -5,6 +5,7 @@
   import ResourceAmount from './ResourceAmount.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import UnitIcon from './UnitIcon.svelte';
+  import LeaderDetails from './LeaderDetails.svelte';
   import { terrainInfo } from './terrain';
   import { movementBonus } from './movement-bonus';
   let {
@@ -93,6 +94,11 @@
           />{/if}</button
       >{/each}
   </div>
+  {#each $session.view?.players
+    .find((p) => p.index === $session.seat)
+    ?.leaders?.filter((l) => $session.selectedUnits.includes(l.unit)) ?? [] as leader}
+    <LeaderDetails {leader} compact />
+  {/each}
   {#if $session.moveDestinations.length}
     <p class="movement-hint">Choose a highlighted tile.</p>
     <details class="movement-destination-list" open={$session.moveTarget !== null && !destination}>

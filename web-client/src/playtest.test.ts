@@ -170,6 +170,15 @@ test('leaders and supply replacements can be recruited through the same validate
   const recruited = query(state, { kind: 'recruit', city, units: { leader }, replaced: [] });
   state = execute(state, recruited.action);
   assert.ok(JSON.parse(state).players[seat].units.some((u: any) => u.unit_type.Leader === leader));
+  for (const observer of [seat, 1 - seat, undefined]) {
+    const publicView = JSON.parse(engine.webView(engine.stripSecret(state, observer), observer)) as View;
+    const deployed = publicView.players.find((p) => p.index === seat)!.leaders!;
+    assert.equal(deployed.length, 1);
+    assert.equal(deployed[0].id, leader);
+    assert.equal(deployed[0].position, city);
+    assert.equal(deployed[0].name, v.cityActions[0].leaders![0].name);
+    assert.deepEqual(deployed[0].abilities, v.cityActions[0].leaders![0].abilities);
+  }
   const replacement = JSON.parse(await initial());
   const q = replacement.players[engine.currentPlayer(JSON.stringify(replacement))];
   q.resources = { food: 7, ore: 7, mood_tokens: 7, culture_tokens: 7 };

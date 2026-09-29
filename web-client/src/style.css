@@ -954,6 +954,98 @@ small {
   color: var(--ink);
   font-weight: 650;
 }
+.collection-capacity,
+.collection-capacity > span,
+.collection-included,
+.collection-included > span,
+.collection-sources summary,
+.collection-sources summary > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.collection-capacity {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.collection-city-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.collection-city-picker button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--ink);
+  background: transparent;
+}
+.collection-city-picker button.active {
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 15%, transparent);
+}
+.city-activation-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--muted);
+}
+.collection-limit > .collection-capacity {
+  margin-left: 10px;
+}
+.collection-included {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 7px;
+  gap: 4px 6px;
+  font-size: 11px;
+  color: var(--ink);
+}
+.collection-included small {
+  color: var(--muted);
+  font-size: 10px;
+}
+.collection-sources {
+  margin-top: 4px;
+}
+.collection-sources summary {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 30px;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+.collection-sources summary::-webkit-details-marker {
+  display: none;
+}
+.collection-sources summary:hover {
+  color: var(--ink);
+}
+.collection-sources[open] summary > svg:last-child {
+  transform: rotate(90deg);
+}
+.collection-source {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 11px;
+}
+.journal .collection-structures {
+  margin: 2px 0 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
 .journal-event > .journal-outcome {
   margin-top: 10px;
   padding: 0 0 0 30px;

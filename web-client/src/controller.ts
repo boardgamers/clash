@@ -267,12 +267,14 @@ export class Controller {
     const units = s.view?.units?.filter((u) => u.position === position) ?? [];
     const city = s.view?.cities.find((c) => c.position === position);
     const pickedUnit = pick.player === s.seat ? units.find((u) => u.id === pick.unit) : undefined;
+    const inspectLeader =
+      (pick.kind === 'tile' || pick.kind === 'units') && units.some((u) => typeof u.type === 'object');
     if (
       canMoveOnMap(s.view, s.game) &&
       units.length &&
       (pickedUnit ||
-        (pick.kind === 'units' && pick.player === s.seat) ||
-        (!city && pick.kind === 'tile') ||
+        (pick.kind === 'units' && pick.player === s.seat && !inspectLeader) ||
+        (!city && pick.kind === 'tile' && !inspectLeader) ||
         s.mode === 'settlers')
     ) {
       this.openUnits([pickedUnit?.id ?? units.find((u) => u.carrier === null)?.id ?? units[0].id]);
@@ -367,6 +369,18 @@ export class Controller {
       selectedAdvance: null,
       collectVariant: get(this.session).view?.collectActions?.[0]?.value ?? 'Collect',
       abilitiesOpen: false,
+    });
+  }
+  switchCollectionCity(position: string) {
+    const s = get(this.session);
+    if (s.pending || s.city === position || !s.view?.cities.some((c) => c.position === position)) return;
+    this.patch({
+      city: position,
+      focus: position,
+      selection: [],
+      preview: null,
+      collectionTile: null,
+      error: '',
     });
   }
   openCities(position?: string, cityTab: Session['cityTab'] = 'build') {

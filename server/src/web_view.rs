@@ -122,6 +122,13 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                 "prerequisites":required.iter().map(|a|json!({"id":a,"name":a.name(game)})).collect::<Vec<_>>()})
         }).collect::<Vec<_>>(),
         "scoreParts": victory_points_parts(p, game).map(|(name, points)| json!({"name": name, "points": points})),
+        "leaders": p.units.iter().filter_map(|u| {
+            if let crate::unit::UnitType::Leader(leader) = u.unit_type {
+                let info = game.cache.get_leader(&leader);
+                Some(json!({"id":leader,"unit":u.id,"position":u.position,"name":info.name,
+                    "abilities":info.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()}))
+            } else { None }
+        }).collect::<Vec<_>>(),
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
@@ -364,20 +371,23 @@ fn collect_variant_preview(
         return Err("Choose at least one resource".to_string());
     }
     let origin = collect_event_origin(&kind, p);
-    let total = get_total_collection(
+    let collection = get_total_collection(
         game,
         seat,
         &origin,
         city,
         &selections,
         CostTrigger::NoModifiers,
-    )?
-    .total;
+    )?;
+    let effects = collection.info.log.iter().map(|(origin, description)| {
+        json!({"source":origin.name(game),"description":description})
+    }).collect::<Vec<_>>();
+    let total = collection.total;
     let mut after = p.resources.clone() + total.clone();
     let waste = after.apply_resource_limit(&p.resource_limit);
     let action = Action::Playing(PlayingAction::Collect(Collect::new(city, selections, kind)));
     Ok(
-        json!({"action":action,"total":total,"waste":waste,"after":after,"moodWillDecrease":city_data.is_activated()}),
+        json!({"action":action,"total":total,"effects":effects,"waste":waste,"after":after,"moodWillDecrease":city_data.is_activated()}),
     )
 }
 

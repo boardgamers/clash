@@ -9,6 +9,7 @@
   import CityFacts from './CityFacts.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
   import CityBuildings from './CityBuildings.svelte';
+  import LeaderDetails from './LeaderDetails.svelte';
   let {
     controller,
     onHighlight,
@@ -84,6 +85,11 @@
           </button>{/each}
       </div>
     {:else}<TileUnits players={$session.game?.players ?? []} {position} />{/if}
+    {#each $session.view?.players ?? [] as player}
+      {#each player.leaders?.filter((l) => l.position === position) ?? [] as leader}
+        <LeaderDetails {leader} civilization={player.civilization} />
+      {/each}
+    {/each}
     {#if origins.length}
       <div class="tile-arrivals" role="group" aria-label={`Move to ${position}`}>
         <h3><Footprints size={15} />{terrain === 'Unexplored' ? 'Explore here' : 'Move here'}</h3>

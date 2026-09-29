@@ -1,3 +1,42 @@
+.tile-leader {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+}
+.tile-leader summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+}
+.tile-leader summary::-webkit-details-marker {
+  display: none;
+}
+.tile-leader summary > small {
+  margin-left: auto;
+  color: var(--muted);
+}
+.tile-leader[open] summary > svg:last-child {
+  transform: rotate(90deg);
+}
+.tile-leader-ability {
+  margin-top: 8px;
+}
+.tile-leader-ability > strong {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+}
+.tile-leader-ability > p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink);
+}
 .board-context {
   position: absolute;
   left: 20px;
@@ -588,8 +627,21 @@
   padding: 10px 0;
 }
 .board-collection .collection-summary > small,
+.board-collection .collection-summary > .collection-included,
 .board-collection .activation-inline {
   flex-basis: 100%;
+}
+.board-collection .collection-summary > strong,
+.board-collection .collection-included {
+  margin-top: 0;
+}
+.board-collection .collection-confirm {
+  position: sticky;
+  bottom: -18px;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 8px 0 12px;
+  background: var(--paper);
 }
 @media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
   .board-interacting .player-list,
@@ -602,11 +654,14 @@
     top: auto;
     bottom: 112px;
     width: auto;
-    max-height: 45%;
+    max-height: 60%;
     padding: 14px;
   }
   .board-interacting .board-toolbar {
     width: auto;
+  }
+  .board-collection .collection-confirm {
+    bottom: -14px;
   }
 }
 @media (max-height: 500px) and (min-width: 600px) {

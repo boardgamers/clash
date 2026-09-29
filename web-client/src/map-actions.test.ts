@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { canMoveOnMap, moveOrigins } from './map-actions.ts';
 import { movementBonus } from './movement-bonus.ts';
 import { collectionYield } from './collection-yield.ts';
+import { journal } from './journal.ts';
 import type { Game, View, MoveDestination, Selection } from './types.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const initial = () =>
@@ -114,6 +115,18 @@ test('Rice Cultivation tile yields match actual collection, cap the bonus and le
   const after = JSON.parse(engine.tryMove(state, JSON.stringify(result.action), seat));
   assert.equal(after.players[seat].resources.food, 5);
   assert.equal(after.players[seat].resources.ideas, 1);
+  assert.deepEqual(result.effects, [
+    { source: 'Rice Cultivation', description: 'Added 2 food' },
+    { source: 'Public Education', description: 'Gain 1 idea' },
+  ]);
+  const collection = journal(after)
+    .reverse()
+    .find((e) => e.collection);
+  assert.deepEqual(
+    collection?.collection?.effects.map((e) => e.source),
+    ['Rice Cultivation', 'Public Education'],
+    JSON.stringify(collection),
+  );
   assert.deepEqual(
     selected.map((c) => c.pile),
     [{ food: 1 }, { food: 1 }, { food: 1 }],
