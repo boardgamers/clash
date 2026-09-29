@@ -1191,6 +1191,19 @@
           </p>
         </article>
         <article>
+          <Crown />
+          <h3>Leaders</h3>
+          <p>
+            <ResourceText
+              text="Recruit a leader for 1 mood token and 1 culture token. Recruitment costs 1 action and activates the city. Each civilization can have one leader in play."
+            />
+          </p>
+          <p>
+            Leaders have two unique abilities and count as army units. Tactics is required to move them, alone
+            or with other army units. Capturing an opponent's leader scores 2 points.
+          </p>
+        </article>
+        <article>
           <Swords />
           <h3>Battles</h3>
           <p>
