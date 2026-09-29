@@ -110,8 +110,8 @@ test('unavailable audio does not interrupt the viewer', () => {
   });
 });
 
-test('map view round-trips through BGS preferences and incoming preferences never write back', () => {
-  let saved = { sound: false, colorBlind: true, mapView: '3d' };
+test('map view and unit badges round-trip through BGS preferences and incoming preferences never write back', () => {
+  let saved = { sound: false, colorBlind: true, mapView: '3d', unitBadges: true };
   let current = readPreferences({});
   let writes = 0;
   const options = {
@@ -129,12 +129,22 @@ test('map view round-trips through BGS preferences and incoming preferences neve
   viewer.emitter.receive('preferences', saved);
   assert.equal(writes, 0);
   viewer.updatePreference('mapView', '2d');
-  assert.deepEqual(current, { locale: 'en', sound: false, colorBlind: true, topDown: true });
+  assert.deepEqual(current, {
+    locale: 'en',
+    sound: false,
+    colorBlind: true,
+    topDown: true,
+    unitBadges: true,
+  });
   assert.equal(writes, 1);
+  viewer.updatePreference('unitBadges', false);
+  assert.equal(current.unitBadges, false);
+  assert.equal(writes, 2);
   viewer.destroy();
   const reopened = createViewer(options);
   reopened.emitter.receive('preferences', saved);
   assert.equal(current.topDown, true);
+  assert.equal(current.unitBadges, false);
   reopened.emitter.receive('preferences', { ...saved, sound: true, colorBlind: false });
   assert.equal(current.sound, true);
   assert.equal(current.colorBlind, false);

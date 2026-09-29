@@ -18,13 +18,23 @@
     Map,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import { resourceNames, type Resource, type AdvanceView } from './types';
+  import ResourceAmount from './ResourceAmount.svelte';
+  import EventMarkers from './EventMarkers.svelte';
+  import { resourceNames, type Resource, type Pile, type AdvanceView } from './types';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let query = $state('');
   let category = $state('All');
+  let chosenPayment = $state<{ advance: string; payment: Pile } | null>(null);
+  const samePayment = (a: Pile, b: Pile) =>
+    (Object.keys(resourceNames) as Resource[]).every((r) => (a[r] ?? 0) === (b[r] ?? 0));
+  function costLabel(advance: AdvanceView) {
+    return advance.costAmount === 0
+      ? 'No resources'
+      : `${advance.costAmount} total: any mix of ${advance.costResources.map((r) => resourceNames[r]).join(', ')}`;
+  }
   const resourceIcons = {
     food: Wheat,
     wood: Trees,
@@ -37,6 +47,14 @@
   let advances = $derived([...($session.view?.advances ?? [])].sort((a, b) => a.order - b.order));
   let groups = $derived([...new Set(advances.map((a) => a.group))]);
   let selected = $derived(advances.find((a) => a.id === $session.selectedAdvance));
+  let selectedPayment = $derived(
+    selected?.payments.find((p) =>
+      samePayment(
+        p.payment,
+        chosenPayment?.advance === selected.id ? chosenPayment.payment : selected.payment,
+      ),
+    ) ?? selected?.payments[0],
+  );
   let visibleGroups = $derived(
     groups.filter(
       (group) =>
@@ -82,7 +100,11 @@
 >
   <header class="research-header">
     <div>
-      <h2 id="research-title">Research</h2>
+      <h2 id="research-title">
+        Research {#if $session.view?.players.find((p) => p.index === $session.seat)}<EventMarkers
+            remaining={$session.view.players.find((p) => p.index === $session.seat)!.eventTokens}
+          />{/if}
+      </h2>
       <p>Each advance scores ½ point. Branches unlock from their first advance.</p>
     </div>
     <!-- The dialog focuses its first control; avoid opening the mobile keyboard. -->
@@ -154,12 +176,18 @@
                   >{/each}</span
               >
               <span class="research-node-cost"
-                >{#if advance.owned}<span class="researched-label">Researched</span
-                  >{:else}{#each Object.entries(advance.payment) as [resource, amount]}{@const CostIcon =
-                      resourceIcons[resource as Resource]}<span
-                      ><CostIcon size={13} />{amount} {resourceNames[resource as Resource]}</span
-                    >{/each}{#if !Object.values(advance.payment).some(Boolean)}<span>No resources</span
-                    >{/if}<span class="research-availability"
+                >{#if advance.owned}<span class="researched-label">Researched</span>{:else}<span
+                    class="research-flexible-cost"
+                    title={costLabel(advance)}
+                    aria-label={costLabel(advance)}
+                  >
+                    {#if advance.costAmount === 0}No resources{:else}
+                      <b>{advance.costAmount}</b>
+                      {#each advance.costResources as resource, i}{@const CostIcon =
+                          resourceIcons[resource]}{#if i > 0}/{/if}<CostIcon size={13} />{/each}
+                      <span>any mix</span>
+                    {/if}
+                  </span><span class="research-availability"
                     >{advance.action
                       ? 'Available'
                       : parent && !advances.find((a) => a.id === parent.id)?.owned
@@ -189,21 +217,40 @@
             ? 'Ships sail through connected sea tiles. Navigation adds a clockwise or counterclockwise shortcut around the edge to the next sea area. Unexplored regions must be explored before sailing farther.'
             : selected.description}
         </p>
-        {#if selected.bonus && Object.values(selected.bonus).some(Boolean)}<small
-            >Research bonus: {pileText(selected.bonus)}</small
-          >{/if}{#if actionReason(selected.reason) && !selected.owned}<small
-            >{actionReason(selected.reason)}</small
+        {#if actionReason(selected.reason) && !selected.owned}<small>{actionReason(selected.reason)}</small
           >{/if}
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
-      <button
-        class="primary"
-        title={selected.reason ?? undefined}
-        disabled={!selected.action || $session.pending}
-        onclick={() => selected?.action && controller.submit(selected.action)}
-        >{$session.pending ? 'Confirming…' : selected.owned ? 'Researched' : `Research ${selected.name}`}
-        <span>{selected.owned ? '' : `${pileText(selected.payment)} · 1 action`}</span></button
-      >
+      <div class="research-payment">
+        {#if !selected.owned && selected.payments.length > 1}
+          <div class="research-payment-options" role="group" aria-label="Choose research payment">
+            <span>Pay</span>
+            {#each selected.payments as option}
+              <button
+                class:chosen={selectedPayment === option}
+                aria-label={`Pay ${pileText(option.payment)}`}
+                aria-pressed={selectedPayment === option}
+                disabled={$session.pending || !option.action}
+                onclick={() => (chosenPayment = { advance: selected!.id, payment: option.payment })}
+              >
+                <ResourceAmount pile={option.payment} compact />
+              </button>
+            {/each}
+          </div>
+        {/if}
+        <button
+          class="primary"
+          title={selected.reason ?? undefined}
+          disabled={!selectedPayment?.action || $session.pending}
+          onclick={() => selectedPayment?.action && controller.submit(selectedPayment.action)}
+        >
+          {$session.pending ? 'Confirming…' : selected.owned ? 'Researched' : `Research ${selected.name}`}
+          {#if !selected.owned}<span
+              >{#if selectedPayment}Pay <ResourceAmount pile={selectedPayment.payment} compact /> ·
+              {/if}1 action</span
+            >{/if}
+        </button>
+      </div>
       <button
         class="icon-button"
         aria-label="Close research details"

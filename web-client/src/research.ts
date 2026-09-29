@@ -42,7 +42,7 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-svelte';
-import type { AdvanceView } from './types';
+import type { PublicAdvance } from './types';
 
 // Short reading aids; the engine's complete rule text remains available on selection.
 const advances = {
@@ -116,7 +116,7 @@ export const groupIcons: Record<string, typeof Wheat> = {
   Autocracy: Crown,
   Theocracy: Church,
 };
-export function researchPresentation(advance: AdvanceView) {
+export function researchPresentation(advance: Pick<PublicAdvance, 'id' | 'group' | 'description'>) {
   const entry = advances[advance.id as keyof typeof advances];
   return {
     icon: entry?.[0] ?? groupIcons[advance.group] ?? BookOpen,

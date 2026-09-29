@@ -5,6 +5,8 @@ import { playerColor, playerSymbol } from './types';
 import { positionXY } from './model';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
+import { mount, unmount } from 'svelte';
+import UnitMapBadge from './UnitMapBadge.svelte';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -46,7 +48,14 @@ export class World {
   private materials = new Set<THREE.Material>();
   private geometries = new Set<THREE.BufferGeometry>();
   private textures = new Set<THREE.Texture>();
-  private labelPositions: { position: string; at: THREE.Vector3; node: HTMLButtonElement }[] = [];
+  private labelPositions: {
+    position: string;
+    at: THREE.Vector3;
+    node: HTMLButtonElement;
+    kind: 'city' | 'units';
+    offsetY?: number;
+  }[] = [];
+  private unitBadges: ReturnType<typeof mount>[] = [];
   private labelHost: HTMLDivElement;
   private center = new THREE.Vector3(4.5, 0, 8);
   private material(color: string, roughness = 1) {
@@ -275,8 +284,9 @@ export class World {
         h = this.host.clientHeight;
       for (const label of this.labelPositions) {
         const v = label.at.clone().project(this.camera);
-        label.node.style.transform = `translate(-50%, -50%) translate(${((v.x + 1) * w) / 2 + (this.topDown ? 11 : 0)}px,${((-v.y + 1) * h) / 2 - (this.topDown ? 12 : 0)}px)`;
-        label.node.style.display = v.z > 1 ? 'none' : '';
+        const cityOffset = this.topDown && label.kind === 'city';
+        label.node.style.transform = `translate(-50%, -50%) translate(${((v.x + 1) * w) / 2 + (cityOffset ? 11 : 0)}px,${((-v.y + 1) * h) / 2 + (label.offsetY ?? 0) - (cityOffset ? 12 : 0)}px)`;
+        label.node.style.display = v.z > 1 || v.z < -1 ? 'none' : '';
       }
       if (this.referenceRing.visible) {
         const v = this.referenceRing.position.clone().project(this.camera);
@@ -492,6 +502,8 @@ export class World {
     return badge;
   }
   private clearBoard() {
+    for (const badge of this.unitBadges) void unmount(badge);
+    this.unitBadges = [];
     this.board.traverse((o) => {
       if (o instanceof THREE.Mesh || o instanceof THREE.Sprite) {
         if (o instanceof THREE.Mesh) {
@@ -677,6 +689,7 @@ export class World {
             position: city.position,
             at: new THREE.Vector3(x, 1.6, z),
             node: label,
+            kind: 'city',
           });
         }
         for (const [unitIndex, unit] of (player.units ?? []).entries()) {
@@ -725,17 +738,61 @@ export class World {
           const stackIndex = (player.units ?? [])
             .slice(0, unitIndex)
             .filter((u) => u.position === unit.position).length;
-          if (s.colorBlind && stackIndex === 0) {
-            const badge = this.ownershipBadge(player.id);
-            badge.position.set(-0.08, 0.65, 0);
-            pawn.add(badge);
-          }
           pawn.position.set(
             x - 0.58 + (stackIndex % 3) * 0.23,
             0.4,
             z + 0.25 + Math.floor(stackIndex / 3) * 0.23,
           );
           this.board.add(pawn);
+        }
+      }
+      const stackRows = new Map<string, number>();
+      for (const player of s.game.players) {
+        for (const position of new Set(player.units?.map((unit) => unit.position))) {
+          if (!this.tiles.has(position)) continue;
+          const surfaceUnits = player.units!.filter((unit) => unit.position === position);
+          const units = surfaceUnits.flatMap((unit) => [
+            unit,
+            ...(unit.carried_units ?? []).map((carried) => ({ ...carried, position })),
+          ]);
+          const counts = new Map<string, { type: (typeof units)[number]['unit_type']; count: number }>();
+          for (const unit of units) {
+            const name = typeof unit.unit_type === 'string' ? unit.unit_type : unit.unit_type.Leader;
+            const group = counts.get(name) ?? { type: unit.unit_type, count: 0 };
+            group.count++;
+            counts.set(name, group);
+          }
+          const carried = surfaceUnits.reduce((sum, unit) => sum + (unit.carried_units?.length ?? 0), 0);
+          const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
+          const label = document.createElement('button');
+          label.className = 'unit-map-label';
+          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind));
+          label.setAttribute('aria-label', `Inspect ${description}`);
+          label.title = description;
+          this.unitBadges.push(
+            mount(UnitMapBadge, {
+              target: label,
+              props: { groups: [...counts.values()], symbol: s.colorBlind ? playerSymbol(player.id) : '' },
+            }),
+          );
+          label.onclick = () => {
+            if (this.canPick(position)) this.pick(position);
+          };
+          label.onpointerenter = () => this.setHovered(position, true);
+          label.onpointerleave = () => this.setHovered(null);
+          label.onfocus = () => this.setHovered(position);
+          label.onblur = () => this.setHovered(null);
+          const [x, z] = positionXY(position);
+          const row = stackRows.get(position) ?? 0;
+          stackRows.set(position, row + 1);
+          this.labelHost.append(label);
+          this.labelPositions.push({
+            position,
+            at: new THREE.Vector3(x, 0.5, z),
+            node: label,
+            kind: 'units',
+            offsetY: 15 + row * 29,
+          });
         }
       }
       if (this.selectionSignature === '') this.reset();
@@ -792,6 +849,7 @@ export class World {
       );
       this.rings.visible = false;
     } else this.rings.visible = true;
+    this.labelHost.classList.toggle('hide-unit-badges', !s.unitBadges);
     for (const label of this.labelPositions) {
       label.node.classList.toggle('selected', label.position === focusedPosition);
       label.node.disabled = !this.canPick(label.position);
@@ -805,6 +863,8 @@ export class World {
   }
   destroy() {
     this.disposed = true;
+    for (const badge of this.unitBadges) void unmount(badge);
+    this.unitBadges = [];
     this.seaOverlay.dispose();
     cancelAnimationFrame(this.frame);
     this.resize.disconnect();

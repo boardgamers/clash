@@ -1,5 +1,8 @@
 use crate::action::Action;
-use crate::advance::AdvanceAction;
+use crate::advance::{Advance, AdvanceAction};
+use crate::payment::PaymentOptions;
+use crate::resource::ResourceType;
+use crate::resource_pile::ResourcePile;
 use crate::card::HandCard;
 use crate::city::MoodState;
 use crate::collect::{
@@ -84,6 +87,15 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let players = game.players.iter().filter(|p| p.is_human()).map(|p| json!({
         "index": p.index, "name": game.player_name(p.index), "civilization": p.civilization.name, "capital":crate::map::capital_city_position(game,p),
         "score": p.victory_points(game),
+        "eventTokens": p.incident_tokens,
+        "advances": game.cache.get_advances().keys().filter(|a| p.can_use_advance(**a)).map(|a| {
+            let mut item = advance_description(game, *a);
+            item["borrowed"] = json!(!p.has_advance(*a));
+            item
+        }).chain(p.special_advances.iter().map(|a| {
+            let info = a.info(game);
+            json!({"id":a,"name":info.name,"description":info.description,"group":p.civilization.name,"order":1000,"borrowed":false})
+        })).collect::<Vec<_>>(),
         "scoreParts": victory_points_parts(p, game).map(|(name, points)| json!({"name": name, "points": points})),
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
@@ -139,6 +151,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let mut advances = game.cache.get_advances().iter().map(|(advance, info)| {
         let cost = p.advance_cost(*advance, game, CostTrigger::NoModifiers).cost;
         let payment = cost.first_valid_payment(&p.resources);
+        let payment_options = advance_payments(&cost);
         let owned = p.has_advance(*advance);
         let reason = if owned { Some("Already researched".to_string()) }
         else if !can_play { Some("Wait for your turn".to_string()) }
@@ -147,12 +160,18 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         else if !p.can_advance_free(*advance, game) { Some("Conflicts with your current advances".to_string()) }
         else if payment.is_none() { Some("Not enough resources".to_string()) } else { None };
         let action = if reason.is_none() { payment.clone().map(|payment| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment)))) } else { None };
-        let group = game.cache.get_advance_groups().iter().enumerate().find_map(|(group_index, group)| {
-            group.advances.iter().position(|a| a.advance == *advance).map(|index| (group.name.clone(), group_index * 10 + index))
-        });
-        json!({"id":advance,"name":info.name,"description":info.description,"owned":owned,"reason":reason,"payment":payment.unwrap_or_else(|| cost.default_payment()),"action":action,
-            "group":group.as_ref().map(|g| &g.0),"order":group.as_ref().map(|g| g.1),"required":info.required,
-            "bonus":info.bonus.as_ref().map(|bonus| bonus.resources()),"unlocks":info.unlocked_building.map(|building| building.to_string())})
+        let mut item = advance_description(game, *advance);
+        let resources = ResourceType::all().into_iter().filter(|r| payment_options.iter().any(|p| p.get(r) > 0))
+            .flat_map(|r| serde_json::to_value(ResourcePile::of(r, 1)).unwrap().as_object().unwrap().keys().cloned().collect::<Vec<_>>()).collect::<Vec<_>>();
+        let cost_amount = payment_options.iter().map(ResourcePile::amount).min().unwrap_or(0);
+        item.as_object_mut().unwrap().extend(json!({
+            "owned":owned,"reason":reason,"payment":payment.unwrap_or_else(|| cost.default_payment()),"action":action,
+            "costAmount":cost_amount,"costResources":resources,
+            "payments":payment_options.into_iter().filter(|payment| p.resources.has_at_least(payment)).map(|payment| {
+                json!({"action":reason.is_none().then(|| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment.clone())))),"payment":payment})
+            }).collect::<Vec<_>>()
+        }).as_object().unwrap().clone());
+        item
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
     json!({"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
@@ -167,6 +186,39 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
+}
+
+fn advance_description(game: &Game, advance: Advance) -> Value {
+    let info = advance.info(game);
+    let group = game.cache.get_advance_groups().iter().enumerate().find_map(|(group_index, group)| {
+        group.advances.iter().position(|a| a.advance == advance).map(|index| (group.name.clone(), group_index * 10 + index))
+    });
+    json!({"id":advance,"name":info.name,"description":info.description,
+        "group":group.as_ref().map(|g| &g.0),"order":group.as_ref().map(|g| g.1),"required":info.required,
+        "bonus":info.bonus.as_ref().map(|bonus| bonus.resources()),"unlocks":info.unlocked_building.map(|building| building.to_string())})
+}
+
+// Research conversions replace resources one-for-one or waive their cost. Enumerate
+// the small set of possible splits, validating every payment against the engine.
+// Keeping unaffordable splits here lets the UI describe the cost independently of stock.
+fn advance_payments(cost: &PaymentOptions) -> Vec<ResourcePile> {
+    fn visit(cost: &PaymentOptions, types: &[ResourceType], remaining: u8, pile: ResourcePile, result: &mut Vec<ResourcePile>) {
+        let Some((resource, rest)) = types.split_first() else {
+            if cost.is_valid_payment(&pile) { result.push(pile); }
+            return;
+        };
+        for amount in 0..=remaining {
+            let mut next = pile.clone();
+            next.add_type(*resource, i32::from(amount));
+            visit(cost, rest, remaining - amount, next, result);
+        }
+    }
+    let mut types = cost.possible_resource_types();
+    types.sort();
+    types.dedup();
+    let mut result = Vec::new();
+    visit(cost, &types, cost.default_payment().amount(), ResourcePile::empty(), &mut result);
+    result
 }
 
 fn exploration_decision(game: &Game, seat: usize) -> Option<Value> {

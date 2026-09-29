@@ -11,16 +11,22 @@ let queued = false;
 let journal: string[] = [];
 const send = (event: string, payload?: unknown) =>
   frame.contentWindow?.postMessage({ source: 'clash-host', event, payload }, location.origin);
-const preferences: Record<string, unknown> = { locale: 'en', sound: true, colorBlind: false, mapView: '3d' };
+const preferences: Record<string, unknown> = {
+  locale: 'en',
+  sound: true,
+  colorBlind: false,
+  mapView: '3d',
+  unitBadges: true,
+};
 try {
   const saved = JSON.parse(localStorage.getItem('clash-preview-preferences') ?? '{}');
-  for (const key of ['sound', 'colorBlind'])
+  for (const key of ['sound', 'colorBlind', 'unitBadges'])
     if (typeof saved[key] === 'boolean') preferences[key] = saved[key];
   if (saved.mapView === '2d') preferences.mapView = '2d';
 } catch {}
 function savePreference(name: string, value: unknown) {
   if (!(
-    (['sound', 'colorBlind'].includes(name) && typeof value === 'boolean') ||
+    (['sound', 'colorBlind', 'unitBadges'].includes(name) && typeof value === 'boolean') ||
     (name === 'mapView' && (value === '2d' || value === '3d'))
   ))
     return;

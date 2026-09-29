@@ -50,6 +50,7 @@ export class Controller {
     selectedAdvance: null,
     toast: '',
     topDown: false,
+    unitBadges: true,
   });
   readonly chat = new ChatController();
   readonly audio = new GameAudio();
@@ -79,6 +80,10 @@ export class Controller {
   toggleMapView() {
     const topDown = !get(this.session).topDown;
     if (this.commands.updatePreference('mapView', topDown ? '2d' : '3d')) this.patch({ topDown });
+  }
+  toggleUnitBadges() {
+    const unitBadges = !get(this.session).unitBadges;
+    if (this.commands.updatePreference('unitBadges', unitBadges)) this.patch({ unitBadges });
   }
   setGlobalPreference(name: 'sound' | 'colorBlind', enabled: boolean) {
     if (!this.commands.updatePreference(name, enabled)) return;

@@ -18,7 +18,12 @@ export interface Player {
   resources?: Pile;
   resource_limit?: Pile;
   cities?: City[];
-  units?: { position: string; unit_type: string; id: number }[];
+  units?: {
+    position: string;
+    unit_type: string | { Leader: string };
+    id: number;
+    carried_units?: { unit_type: string | { Leader: string }; id: number }[];
+  }[];
   advances?: string[];
   action_cards?: number[];
   objective_cards?: number[];
@@ -70,16 +75,22 @@ export interface CityView {
   reason: string | null;
   choices: Choice[];
 }
-export interface AdvanceView {
+export interface PublicAdvance {
   id: string;
   name: string;
   description: string;
+  group: string;
+  order: number;
+  borrowed?: boolean;
+}
+export interface AdvanceView extends PublicAdvance {
   owned: boolean;
   reason: string | null;
   payment: Pile;
+  costAmount: number;
+  costResources: Resource[];
+  payments: { payment: Pile; action: Move | null }[];
   action: Move | null;
-  group: string;
-  order: number;
   required: string | null;
   bonus: Pile | null;
   unlocks: string | null;
@@ -90,6 +101,8 @@ export interface PlayerView {
   name: string;
   civilization: string;
   score: number;
+  eventTokens: number;
+  advances: PublicAdvance[];
   scoreParts: { name: string; points: number }[];
   cities: { position: string; size: number; capacity: number; mood: string; activations: number }[];
 }
@@ -291,6 +304,7 @@ export interface Session {
   selectedAdvance: string | null;
   toast: string;
   topDown: boolean;
+  unitBadges: boolean;
 }
 export interface UnitView {
   id: number;

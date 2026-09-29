@@ -537,3 +537,79 @@ test('activation previews match actual mood changes, angry blocking and turn res
   assert.equal(view().cities[0].canActivate, false);
   assert.throws(collect, 'An angry city cannot activate twice');
 });
+
+test('research displays a stable flexible cost and offers executable food, idea, gold and mixed payments', async () => {
+  const raw = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(raw));
+  for (const resources of [{ food: 2 }, { ideas: 2 }, { gold: 2 }, { food: 1, ideas: 1 }, {}]) {
+    raw.players[seat].resources = resources;
+    const state = JSON.stringify(raw);
+    const view: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+    const research = view.advances.find((a) => a.id === 'Storage')!;
+    assert.equal(research.costAmount, 2);
+    assert.deepEqual(research.costResources, ['food', 'ideas', 'gold']);
+    if (!Object.keys(resources).length) {
+      assert.equal(research.action, null);
+      assert.deepEqual(research.payments, []);
+    } else {
+      assert.equal(research.payments.length, 1);
+      assert.deepEqual(research.payments[0].payment, resources);
+      const after = JSON.parse(engine.tryMove(state, JSON.stringify(research.payments[0].action), seat));
+      assert.ok(after.players[seat].advances.includes('Storage'));
+      assert.equal(after.players[seat].incident_tokens, 2);
+    }
+  }
+  raw.players[seat].resources = { food: 2, ideas: 2, gold: 2 };
+  const state = JSON.stringify(raw);
+  const view: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  const choices = view.advances.find((a) => a.id === 'Storage')!.payments;
+  assert.equal(choices.length, 6);
+  for (const choice of choices) {
+    const after = JSON.parse(engine.tryMove(state, JSON.stringify(choice.action), seat));
+    for (const resource of ['food', 'ideas', 'gold'] as const)
+      assert.equal(after.players[seat].resources[resource] ?? 0, 2 - (choice.payment[resource] ?? 0));
+  }
+  const waiting: View = JSON.parse(engine.webView(engine.stripSecret(state, 1 - seat), 1 - seat));
+  assert.ok(waiting.advances.every((a) => a.payments.every((p) => p.action === null)));
+  assert.ok(view.advances.find((a) => a.id === 'Farming')!.payments.every((p) => p.action === null));
+});
+
+test('research discounts produce a free payment while still consuming an action and event marker', async () => {
+  const raw = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(raw));
+  raw.players[seat].advances.push('Math', 'Engineering');
+  raw.players[seat].resources = {};
+  const state = JSON.stringify(raw);
+  const view: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+  const roads = view.advances.find((a) => a.id === 'Roads')!;
+  assert.equal(roads.costAmount, 0);
+  assert.deepEqual(roads.costResources, []);
+  assert.deepEqual(
+    roads.payments.map((p) => p.payment),
+    [{}],
+  );
+  const after = JSON.parse(engine.tryMove(state, JSON.stringify(roads.payments[0].action), seat));
+  assert.equal(after.actions_left, raw.actions_left - 1);
+  assert.equal(after.players[seat].incident_tokens, 2);
+});
+
+test('public civilization inspection includes researched and civilization advances and event markers for opponents and spectators', async () => {
+  const raw = JSON.parse(await initial());
+  raw.players[0].advances.push('Fishing', 'Engineering');
+  raw.players[0].special_advances = ['ShipConstruction'];
+  raw.players[0].incident_tokens = 1;
+  raw.players[1].great_library_advance = 'Writing';
+  const state = JSON.stringify(raw);
+  for (const seat of [0, 1, undefined]) {
+    const view: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+    assert.equal(view.players[0].eventTokens, 1);
+    assert.deepEqual(
+      view.players[0].advances.map((a) => a.id).sort(),
+      ['Farming', 'Mining', 'Fishing', 'Engineering', 'ShipConstruction'].sort(),
+    );
+    assert.ok(view.players[0].advances.every((a) => a.name && a.description && a.group));
+    assert.equal(view.players[1].advances.find((a) => a.id === 'Writing')?.borrowed, true);
+    assert.equal(view.players[0].advances.find((a) => a.id === 'Engineering')?.borrowed, false);
+    assert.ok(view.players.every((p) => p.advances.every((a) => !('action' in a) && !('payment' in a))));
+  }
+});

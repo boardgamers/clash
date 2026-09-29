@@ -1,4 +1,6 @@
 <script lang="ts">
+  import EventMarkers from './EventMarkers.svelte';
+  import TileUnits from './TileUnits.svelte';
   import { onMount } from 'svelte';
   import {
     Landmark,
@@ -36,6 +38,8 @@
     Volume2,
     VolumeX,
     Eye,
+    EyeOff,
+    Shapes,
     RotateCw,
     Zap,
     Ship,
@@ -350,8 +354,8 @@
             class="player-card"
             class:active={player.index === $session.view?.activePlayer}
             style={`--player:${playerColor(player.index, $session.colorBlind)}`}
-            title={`View ${player.civilization} victory-point breakdown`}
-            aria-label={`${player.civilization}: ${player.score} victory points. View score breakdown`}
+            title={`Inspect ${player.civilization}: advances and victory points`}
+            aria-label={`${player.civilization}: ${player.score} victory points. View advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -373,7 +377,7 @@
             ><span class="player-info"
               ><strong>{player.civilization}</strong><small
                 >{player.index === $session.seat ? 'You' : player.name}</small
-              ></span
+              ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span></span
             ><span class="player-score">{player.score}<Trophy size={10} /></span
             >{#if player.index === $session.view?.activePlayer}<span class="active-dot" title="Current player"
               ></span>{/if}
@@ -410,6 +414,7 @@
                       ? 'Coastal waters. Fishing unlocks food collection.'
                       : 'Barren terrain. Some advances unlock new ways to use it.'}
           </p>
+          <TileUnits players={$session.game?.players ?? []} position={$session.focus!} />
         </div>{/if}
       <div class="map-controls">
         <div class="sr-only" id="sea-route-help" aria-live="polite">
@@ -453,6 +458,13 @@
         ><button title="Zoom out" aria-label="Zoom out" onclick={() => world?.zoom(1.18)}
           ><Minus size={18} /></button
         ><span></span><button
+          title={$session.unitBadges ? 'Hide unit badges' : 'Show unit badges'}
+          aria-label="Unit badges"
+          aria-pressed={$session.unitBadges}
+          class:active={$session.unitBadges}
+          onclick={() => controller.toggleUnitBadges()}
+          >{#if $session.unitBadges}<Eye size={18} />{:else}<EyeOff size={18} />{/if}</button
+        ><button
           title={$session.topDown ? 'Switch to 3D view' : 'Switch to 2D overview'}
           aria-label="Toggle top-down view"
           aria-pressed={$session.topDown}
@@ -629,7 +641,7 @@
         aria-label="Color-blind mode"
         aria-pressed={$session.colorBlind}
         onclick={() => controller.setGlobalPreference('colorBlind', !$session.colorBlind)}
-        ><Eye size={19} /></button
+        ><Shapes size={19} /></button
       >
     </nav>
     {#if choiceDecision || objectiveDecision || ($session.game && !$session.view?.supportedPhase && $session.seat === $session.view?.activePlayer) || $session.mode === 'collect' || confirmEnd || ($session.error && $session.mode === 'overview')}
