@@ -1140,7 +1140,7 @@
           <h3>Turns and ages</h3>
           <p>
             Each age has three rounds. In each round, every player takes one turn with three actions. Between
-            ages, resolve objectives, gain a free advance and draw new cards.
+            ages, check objectives first, then gain a free advance and draw new cards.
           </p>
         </article>
         <article>

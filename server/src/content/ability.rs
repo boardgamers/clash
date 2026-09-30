@@ -128,6 +128,7 @@ pub fn get_all_uncached() -> Vec<Ability> {
         use_draw_replacement_wonder(),
         // civilization related
         lose_raid_resource(),
+        crate::content::civilizations::india::use_bladed_tusks(),
     ]
 }
 

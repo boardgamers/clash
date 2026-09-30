@@ -41,6 +41,12 @@ pub enum SpecialAdvance {
     CodeOfLaws,
     StarCatalogues,
     Ziggurats,
+
+    // India
+    IndianElephants,
+    Proselytism,
+    Prosperity,
+    PeaceAndPoetry,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

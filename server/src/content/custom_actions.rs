@@ -35,12 +35,18 @@ pub struct CustomActionActivation {
     #[serde(default)]
     #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     pub payment: ResourcePile,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) advance_purchase: Option<(crate::advance::Advance, crate::player_events::CostInfo)>,
 }
 
 impl CustomActionActivation {
     #[must_use]
     pub fn new(action: CustomAction, payment: ResourcePile) -> Self {
-        Self { action, payment }
+        Self {
+            action,
+            payment,
+            advance_purchase: None,
+        }
     }
 }
 
@@ -161,6 +167,9 @@ pub enum CustomActionType {
     Danegeld,
     LegendaryExplorer,
     NewColonies,
+
+    // India
+    GoldenAge,
 }
 
 impl CustomActionType {

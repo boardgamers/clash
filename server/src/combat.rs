@@ -30,6 +30,8 @@ pub enum CombatModifier {
     CancelFortressIgnoreHit,
     SteelWeaponsAttacker,
     SteelWeaponsDefender,
+    BladedTusksAttacker,
+    BladedTusksDefender,
     TrojanHorse,
     GreatWarlord,
 }

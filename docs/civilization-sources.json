@@ -42,7 +42,7 @@
         "https://boardgamegeek.com/image/7553246",
         "https://boardgamegeek.com/image/7553242"
       ],
-      "verification": "monumental-update-located",
+      "verification": "monumental-photos-verified",
       "implemented": false
     },
     {
@@ -52,7 +52,7 @@
         "https://boardgamegeek.com/image/7553244",
         "https://boardgamegeek.com/image/7553248"
       ],
-      "verification": "monumental-update-located",
+      "verification": "monumental-photos-verified",
       "implemented": false
     },
     {
@@ -76,8 +76,8 @@
         "https://boardgamegeek.com/image/8436927",
         "https://boardgamegeek.com/image/8436926"
       ],
-      "verification": "monumental-update-located",
-      "implemented": false
+      "verification": "monumental-photos-verified",
+      "implemented": true
     },
     {
       "name": "Japan",

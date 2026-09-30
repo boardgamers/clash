@@ -36,9 +36,13 @@
   const samePayment = (a: Pile, b: Pile) =>
     (Object.keys(resourceNames) as Resource[]).every((r) => (a[r] ?? 0) === (b[r] ?? 0));
   function costLabel(advance: AdvanceView) {
-    return advance.costAmount === 0
-      ? 'No resources'
-      : `${advance.costAmount} total: any mix of ${advance.costResources.map((r) => resourceNames[r]).join(', ')}`;
+    return (advance.costGroups ?? [{ amount: advance.costAmount, resources: advance.costResources }])
+      .map((group) =>
+        group.amount === 0
+          ? 'No resources'
+          : `${group.amount} ${group.resources.length > 1 ? 'total: any mix of ' : ''}${group.resources.map((r) => resourceNames[r]).join(', ')}`,
+      )
+      .join(' or ');
   }
   const resourceIcons = {
     food: Wheat,
@@ -229,10 +233,13 @@
                     aria-label={freeResearch ? 'Free advance' : costLabel(advance)}
                   >
                     {#if freeResearch}Free{:else if advance.costAmount === 0}No resources{:else}
-                      <b>{advance.costAmount}</b>
-                      {#each advance.costResources as resource, i}{@const CostIcon =
-                          resourceIcons[resource]}{#if i > 0}/{/if}<CostIcon size={13} />{/each}
-                      <span>any mix</span>
+                      {#each advance.costGroups ?? [{ amount: advance.costAmount, resources: advance.costResources }] as group, gi}
+                        {#if gi > 0}<span>or</span>{/if}<b>{group.amount}</b>
+                        {#each group.resources as resource, i}{@const CostIcon = resourceIcons[resource]}
+                          {#if i > 0}/{/if}<CostIcon size={13} />
+                        {/each}
+                        {#if group.resources.length > 1}<span>any mix</span>{/if}
+                      {/each}
                     {/if}
                   </span><span class="research-availability"
                     >{advance.action

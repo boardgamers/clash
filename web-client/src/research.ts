@@ -119,6 +119,14 @@ const civilizationIcons: Record<string, typeof Wheat> = {
   Longships: Ship,
   Raiding: Swords,
   RuneStones: Scroll,
+  Canals: Droplets,
+  CodeOfLaws: Scale,
+  StarCatalogues: Telescope,
+  Ziggurats: Church,
+  IndianElephants: Shield,
+  Proselytism: Users,
+  Prosperity: Handshake,
+  PeaceAndPoetry: Scroll,
 };
 
 export const groupIcons: Record<string, typeof Wheat> = {

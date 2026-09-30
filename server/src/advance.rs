@@ -388,6 +388,7 @@ pub(crate) fn execute_advance_action(
     game.player(player_index)
         .advance_cost(advance, game, game.execute_cost_trigger())
         .pay(game, &a.payment);
+    crate::content::civilizations::india::record_peace_and_poetry(game, player_index, &a.payment);
     gain_advance_without_payment(
         game,
         advance,

@@ -26,6 +26,8 @@ use serde::{Deserialize, Serialize};
 pub struct InfluenceCultureAttempt {
     pub selected_structure: SelectedStructure,
     pub action_type: PlayingActionType,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub starting_position: Option<Position>,
 }
 
 impl InfluenceCultureAttempt {
@@ -34,6 +36,7 @@ impl InfluenceCultureAttempt {
         Self {
             selected_structure,
             action_type,
+            starting_position: None,
         }
     }
 }
@@ -115,7 +118,15 @@ pub(crate) fn execute_influence_culture_attempt(
     let target_city_position = s.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let info = influence_culture_boost_cost(game, player_index, s, &i.action_type, false, false)?;
+    let info = influence_culture_boost_cost_from(
+        game,
+        player_index,
+        s,
+        &i.action_type,
+        false,
+        false,
+        i.starting_position,
+    )?;
 
     let player = if target_player_index == player_index {
         String::from("themselves")
@@ -125,8 +136,10 @@ pub(crate) fn execute_influence_culture_attempt(
     let start = info.starting_city_position;
     let city = if start == target_city_position {
         String::new()
-    } else {
+    } else if game.try_get_any_city(start).is_some() {
         format!(" with the city {start}")
+    } else {
+        format!(" from {start}")
     };
     let range_boost_cost = &info.range_boost_cost;
     // this cost can't be changed by the player
@@ -274,10 +287,23 @@ fn range_boost_cost(
     info: &mut InfluenceCultureInfo,
     player_index: usize,
 ) -> PaymentOptions {
-    let p = info.player(player_index, game);
+    info.roll = game.next_dice_roll().value + info.roll_boost;
+    if info.roll < INFLUENCE_MIN_ROLL
+        && crate::content::civilizations::india::buddhism_available(game, player_index, info)
+    {
+        // Buddhism resolves the reroll choice before success, failure or a boost.
+        return PaymentOptions::free();
+    }
+    resolve_influence_roll(game, info, player_index)
+}
 
-    let roll = game.next_dice_roll().value + info.roll_boost;
-    info.roll = roll;
+pub(crate) fn resolve_influence_roll(
+    game: &mut Game,
+    info: &mut InfluenceCultureInfo,
+    player_index: usize,
+) -> PaymentOptions {
+    let p = info.player(player_index, game);
+    let roll = info.roll;
     let success = roll >= INFLUENCE_MIN_ROLL;
     if success {
         p.log(
@@ -334,6 +360,26 @@ pub fn influence_culture_boost_cost(
     add_action_cost: bool,
     barbarian_takeover_check: bool,
 ) -> Result<InfluenceCultureInfo, String> {
+    influence_culture_boost_cost_from(
+        game,
+        player_index,
+        selected,
+        action_type,
+        add_action_cost,
+        barbarian_takeover_check,
+        None,
+    )
+}
+
+pub fn influence_culture_boost_cost_from(
+    game: &Game,
+    player_index: usize,
+    selected: &SelectedStructure,
+    action_type: &PlayingActionType,
+    add_action_cost: bool,
+    barbarian_takeover_check: bool,
+    starting_position: Option<Position>,
+) -> Result<InfluenceCultureInfo, String> {
     let target_city_position = selected.position;
     let structure = &selected.structure;
     let target_city = game.get_any_city(target_city_position);
@@ -363,12 +409,13 @@ pub fn influence_culture_boost_cost(
 
     let target_player_index = target_city.player_index;
 
-    let (start, range_boost) = affordable_start_city(
+    let (start, range_boost) = affordable_start_position(
         game,
         player_index,
         target_city,
         action_type,
         add_action_cost,
+        starting_position,
     )?;
 
     let origin = influence_event_origin(action_type, attacker);
@@ -500,7 +547,28 @@ pub fn affordable_start_city(
     action_type: &PlayingActionType,
     add_action_cost: bool,
 ) -> Result<(Position, u8), String> {
+    affordable_start_position(
+        game,
+        player_index,
+        target_city,
+        action_type,
+        add_action_cost,
+        None,
+    )
+}
+
+fn affordable_start_position(
+    game: &Game,
+    player_index: usize,
+    target_city: &City,
+    action_type: &PlayingActionType,
+    add_action_cost: bool,
+    selected: Option<Position>,
+) -> Result<(Position, u8), String> {
     if target_city.player_index == player_index {
+        if selected.is_some_and(|p| p != target_city.position) {
+            return Err("Reclaim buildings from their own city".into());
+        }
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);
@@ -524,27 +592,10 @@ pub fn affordable_start_city(
             }
         }
 
-        let mut start = player
-            .cities
-            .iter()
-            .filter_map(|c| (!c.influenced()).then_some((c.position, c.size())))
-            .collect_vec();
-        if player.has_special_advance(SpecialAdvance::HellenisticCulture) {
-            let extra = game
-                .players
-                .iter()
-                .flat_map(|p| {
-                    p.cities.iter().filter_map(|c| {
-                        let t = (c.position, c.size());
-                        (!c.pieces.buildings(Some(player.index)).is_empty() && !start.contains(&t))
-                            .then_some(t)
-                    })
-                })
-                .collect_vec();
-            start.extend(extra);
-        }
+        let start = influence_start_positions(game, player);
         start
             .iter()
+            .filter(|(position, _)| selected.is_none_or(|p| p == *position))
             .filter_map(|&(position, size)| {
                 let min_cost = position
                     .distance(target_city.position)
@@ -563,8 +614,47 @@ pub fn affordable_start_city(
                 Some((position, boost_cost))
             })
             .min_by_key(|(_, boost)| *boost)
-            .ok_or("No starting city available".to_string())
+            .ok_or("No influence origin available within range".to_string())
     }
+}
+
+pub(crate) fn influence_start_positions(game: &Game, player: &Player) -> Vec<(Position, usize)> {
+    let mut start = player
+        .cities
+        .iter()
+        .filter_map(|c| (!c.influenced()).then_some((c.position, c.size())))
+        .collect_vec();
+    if player.has_special_advance(SpecialAdvance::HellenisticCulture) {
+        for city in game.players.iter().flat_map(|p| &p.cities) {
+            if !city.pieces.buildings(Some(player.index)).is_empty()
+                && !start.iter().any(|(pos, _)| *pos == city.position)
+            {
+                start.push((city.position, city.size()));
+            }
+        }
+    }
+    if player.has_special_advance(SpecialAdvance::Proselytism) {
+        for (position, range) in &mut start {
+            *range += player
+                .units
+                .iter()
+                .filter(|u| u.is_settler() && u.position == *position)
+                .count();
+        }
+        for unit in player.units.iter().filter(|u| u.is_settler()) {
+            if game.try_get_any_city(unit.position).is_none()
+                && !start.iter().any(|(pos, _)| *pos == unit.position)
+            {
+                let count = player
+                    .units
+                    .iter()
+                    .filter(|u| u.is_settler() && u.position == unit.position)
+                    .count();
+                start.push((unit.position, count + 1));
+            }
+        }
+    }
+    start
 }
 
 #[must_use]

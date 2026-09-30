@@ -183,7 +183,9 @@ pub fn recruit_cost_without_replaced(
     let city = player.get_city(city_position);
 
     if city.pieces.market.is_none()
-        && (units.elephants > 0
+        && ((units.elephants > 0
+            && !(player.has_special_advance(SpecialAdvance::IndianElephants)
+                && game.map.get(city_position) == Some(&crate::map::Terrain::Forest)))
             || (units.cavalry > 0 && !is_cavalry_province_city(player, city_position, game)))
     {
         return Err("Mising building: market".to_string());

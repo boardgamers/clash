@@ -182,6 +182,10 @@ pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             game.player(seat).cities.iter().filter(|c|info.is_city_available(game,c)).map(|c|Some(c.position)).collect()
         } else { vec![None] };
         cities.into_iter().map(|city|json!({"name":info.event_origin.name(game),"description":execution.ability.description,"position":city,
+            "cost":info.cost.cost.payment_options(game.player(seat),info.event_origin.clone()).default_payment(),
+            "free":info.cost.cost.free,
+            "activatesCity":(info.action == crate::content::custom_actions::CustomActionType::GoldenAge)
+                .then(|| crate::leader::leader_position(game.player(seat))),
             "action":Action::Playing(PlayingAction::Custom(CustomAction::new(info.action,city)))})).collect::<Vec<_>>()
     }).collect()
 }
@@ -189,6 +193,7 @@ pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
 pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     use crate::cultural_influence::{
         InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
+        influence_start_positions, influence_culture_boost_cost_from,
     };
     if !can_play {
         return vec![];
@@ -196,7 +201,19 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     available_influence_actions(game,seat).into_iter().flat_map(|kind| {
         available_influence_culture(game,seat,&kind).into_iter().filter_map(|(s,r)| {
             let info = r.ok()?;
+            let origins = influence_start_positions(game,game.player(seat)).into_iter().map(|(p,_)|p)
+                .chain(std::iter::once(s.position))
+                .collect::<std::collections::BTreeSet<_>>().into_iter().filter_map(|origin| {
+                    let from = influence_culture_boost_cost_from(game,seat,&s,&kind,true,false,Some(origin)).ok()?;
+                    let mut attempt = InfluenceCultureAttempt::new(s.clone(),kind.clone());
+                    attempt.starting_position = Some(origin);
+                    Some(json!({"position":origin,"settlers":game.try_get_any_city(origin).is_none(),
+                        "reroll":crate::content::civilizations::india::buddhism_available(game,seat,&from),
+                        "payment":from.range_boost_cost.default_payment(),
+                        "action":Action::Playing(PlayingAction::InfluenceCultureAttempt(attempt))}))
+                }).collect::<Vec<_>>();
             Some(json!({"name":super::decisions::structure_name(&s.structure),"position":s.position,"origin":info.starting_city_position,"variant":kind.origin(game.player(seat)).name(game),"payment":info.range_boost_cost.default_payment(),
+                "origins":origins,
                 "action":Action::Playing(PlayingAction::InfluenceCultureAttempt(InfluenceCultureAttempt::new(s,kind.clone())))}))
         }).collect::<Vec<_>>()
     }).collect()

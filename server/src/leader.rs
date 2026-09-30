@@ -31,6 +31,11 @@ pub enum Leader {
     Hammurabi,
     Nebuchadnezzar,
     Nabopolassar,
+
+    // India
+    SriGupta,
+    Ashoka,
+    Akbar,
 }
 
 impl Leader {

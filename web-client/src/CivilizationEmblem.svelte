@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Landmark } from 'lucide-svelte';
+  import { Landmark, Flower2 } from 'lucide-svelte';
   import vikings from '../../client/assets/viking-ship-svgrepo-com.png';
   import rome from '../../client/assets/colosseum-rome-svgrepo-com.png';
   import greece from '../../client/assets/temple-building-with-columns-svgrepo-com.png';
@@ -23,4 +23,7 @@
     class="civilization-emblem"
     style={`--emblem:url("${emblems[civilization]}");width:${size}px;height:${size}px`}
   ></span>
-{:else}<Landmark {size} aria-hidden="true" />{/if}
+{:else if civilization === 'India'}<Flower2 {size} aria-hidden="true" />{:else}<Landmark
+    {size}
+    aria-hidden="true"
+  />{/if}

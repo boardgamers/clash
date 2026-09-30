@@ -98,6 +98,7 @@ export interface AdvanceView extends PublicAdvance {
   payment: Pile;
   costAmount: number;
   costResources: Resource[];
+  costGroups?: { amount: number; resources: Resource[] }[];
   payments: { payment: Pile; action: Move | null }[];
   action: Move | null;
   required: string | null;
@@ -156,11 +157,20 @@ export interface View {
     leaders: { name: string; abilities: { name: string; description: string }[] }[];
   }[];
   actionCards?: ActionCard[];
-  specialActions?: { name: string; description: string; position: string | null; action: Move }[];
+  specialActions?: {
+    name: string;
+    description: string;
+    position: string | null;
+    action: Move;
+    cost?: Pile;
+    free?: boolean;
+    activatesCity?: string | null;
+  }[];
   influence?: {
     name: string;
     position: string;
     origin: string;
+    origins?: { position: string; settlers: boolean; reroll: boolean; payment: Pile; action: Move }[];
     variant: string;
     payment: Pile;
     action: Move;
@@ -180,7 +190,13 @@ export interface View {
   advances: AdvanceView[];
   objectiveCards: {
     id: number;
-    objectives: { name: string; description: string; timing: 'Instant' | 'Status phase' }[];
+    objectives: {
+      name: string;
+      description: string;
+      timing: 'Instant' | 'Status phase';
+      conditionMet?: boolean;
+      scoringAge?: number;
+    }[];
   }[];
   wonderCards: WonderCard[];
   explorationDecision?: {

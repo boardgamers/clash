@@ -1,4 +1,5 @@
 pub(crate) mod china;
+pub(crate) mod india;
 pub(crate) mod greece;
 pub(crate) mod maya;
 pub(crate) mod rome;
@@ -21,6 +22,7 @@ pub fn get_all_uncached() -> Vec<Civilization> {
         china::china(),
         vikings::vikings(),
         babylonia::babylonia(),
+        india::india(),
         // not finished yet: maya
     ]
 }

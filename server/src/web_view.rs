@@ -154,6 +154,8 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             json!({"id": card.id, "objectives": card.objectives.iter().map(|objective| json!({
             "name": objective.name,
             "description": objective.description,
+            "conditionMet": objective.status_phase_check.as_ref().is_some_and(|check| check(game, p)),
+            "scoringAge": game.age + u32::from(crate::status_phase::get_status_phase(game).is_some_and(|phase| !matches!(phase, crate::status_phase::StatusPhaseState::CompleteObjectives))),
             "timing": match objective.get_type() {
                 ObjectiveType::Instant => "Instant",
                 ObjectiveType::StatusPhase => "Status phase",
@@ -228,9 +230,18 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         let resources = ResourceType::all().into_iter().filter(|r| payment_options.iter().any(|p| p.get(r) > 0))
             .flat_map(|r| serde_json::to_value(ResourcePile::of(r, 1)).unwrap().as_object().unwrap().keys().cloned().collect::<Vec<_>>()).collect::<Vec<_>>();
         let cost_amount = payment_options.iter().map(ResourcePile::amount).min().unwrap_or(0);
+        let cost_groups = payment_options.iter().map(ResourcePile::amount).collect::<std::collections::BTreeSet<_>>()
+            .into_iter().map(|amount| {
+                let resources = ResourceType::all().into_iter()
+                    .filter(|r| payment_options.iter().any(|p| p.amount() == amount && p.get(r) > 0))
+                    .flat_map(|r| serde_json::to_value(ResourcePile::of(r, 1)).unwrap().as_object().unwrap().keys().cloned().collect::<Vec<_>>())
+                    .collect::<Vec<_>>();
+                json!({"amount":amount,"resources":resources})
+            }).collect::<Vec<_>>();
         item.as_object_mut().unwrap().extend(json!({
             "owned":owned,"reason":reason,"payment":payment.unwrap_or_else(|| cost.default_payment()),"action":action,
             "costAmount":cost_amount,"costResources":resources,
+            "costGroups":cost_groups,
             "payments":payment_options.into_iter().filter(|payment| p.resources.has_at_least(payment)).map(|payment| {
                 json!({"action":reason.is_none().then(|| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment.clone())))),"payment":payment})
             }).collect::<Vec<_>>()
