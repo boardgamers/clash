@@ -92,7 +92,7 @@ const advances = {
   Medicine: [HeartPulse, 'Recover one resource spent after recruiting.'],
   Metallurgy: [
     Anvil,
-    'Steel Weapons is free against enemies without it. When collecting 2+ ore, replace 1 ore with gold.',
+    'Steel Weapons costs no ore against enemies without Steel Weapons. When collecting 2+ ore, replace 1 ore with 1 gold.',
   ],
   Voting: [Vote, 'Spend 1 mood to take a free Increase Happiness action.'],
   SeparationOfPower: [Scale, 'Culture tokens cannot boost influence attempts against your happy cities.'],
