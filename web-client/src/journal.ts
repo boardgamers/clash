@@ -371,7 +371,7 @@ export function journal(
                 civilization,
                 title,
                 tokens: [],
-                notes: [],
+                notes: origin === 'Place Settler' ? ['Free settler after losing a city.'] : [],
                 text: '',
               };
               entries.push(entry);
