@@ -96,22 +96,19 @@
           class:spent={i >= movesLeft}><Footprints size={14} /></span
         >{/each}
     </div>{/if}
-  {#if positions.length > 1}<details class="movement-locations">
-      <summary>Unit locations</summary>
-      <div class="settler-picker" role="group" aria-label="Unit locations">
-        {#each positions as position}<button
-            class:selected={first?.position === position}
-            aria-pressed={first?.position === position}
-            onmouseenter={() => onHighlight(position)}
-            onmouseleave={() => onHighlight(null)}
-            onfocus={() => onHighlight(position)}
-            onblur={() => onHighlight(null)}
-            onclick={() => controller.selectUnits([units.find((u) => u.position === position)!.id])}
-            >{position}<span class="unit-count">{units.filter((u) => u.position === position).length}</span
-            ></button
-          >{/each}
-      </div>
-    </details>{/if}
+  {#if positions.length > 1}<div class="settler-picker" role="group" aria-label="Unit locations">
+      {#each positions as position}<button
+          class:selected={first?.position === position}
+          aria-pressed={first?.position === position}
+          onmouseenter={() => onHighlight(position)}
+          onmouseleave={() => onHighlight(null)}
+          onfocus={() => onHighlight(position)}
+          onblur={() => onHighlight(null)}
+          onclick={() => controller.selectUnits([units.find((u) => u.position === position)!.id])}
+          >{position}<span class="unit-count">{units.filter((u) => u.position === position).length}</span
+          ></button
+        >{/each}
+    </div>{/if}
   {#if $session.view?.nomadCities?.length}<div
       class="settler-picker"
       role="group"

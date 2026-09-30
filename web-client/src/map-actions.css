@@ -272,14 +272,12 @@
 .movement-bonus > span {
   color: var(--muted);
 }
-.movement-locations > summary,
 .movement-destination-list > summary {
   cursor: pointer;
   font-size: 12px;
   color: var(--muted);
   padding: 3px 0;
 }
-.movement-locations[open] > summary,
 .movement-destination-list[open] > summary {
   margin-bottom: 10px;
 }

@@ -123,8 +123,7 @@ try {
       },
       engine.stripSecret(state, 0),
     );
-    const locations = page.locator('.movement-locations');
-    await locations.locator('summary').click();
+    const locations = page.getByRole('group', { name: 'Unit locations', exact: true });
     await locations.getByRole('button', { name: /C4/ }).click();
     const panel = page.getByRole('region', { name: 'Unit movement' });
     const passenger = panel.getByRole('button', { name: 'Disembark Sun Tzu', exact: true });
