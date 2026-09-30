@@ -22,7 +22,7 @@ fn math() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Math,
         "Math",
-        "Engineering and Roads can be bought at no food cost",
+        "You may research Engineering and Roads without paying resources. The research action cost and prerequisites still apply.",
     )
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
@@ -56,7 +56,7 @@ fn astronomy() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Astronomy,
         "Astronomy",
-        "Navigation and Cartography can be bought at no food cost",
+        "You may research Navigation and Cartography without paying resources. The research action cost and prerequisites still apply.",
     )
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
@@ -74,7 +74,7 @@ fn medicine() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Medicine,
         "Medicine",
-        "After recruiting, gain one of the paid resources back",
+        "After each Recruit action, recover 1 resource you spent on that recruitment. You must pay the full cost before receiving the refund.",
     )
     .with_advance_bonus(CultureToken)
     .add_resource_request(

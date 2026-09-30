@@ -22,7 +22,7 @@ fn fishing() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Fishing,
         "Fishing",
-        "Your cities may Collect food from one Sea space",
+        "During each Collect action, your city may collect food from one adjacent Sea space.",
     )
     .with_advance_bonus(MoodToken)
     .with_unlocked_building(Port)
@@ -41,8 +41,7 @@ fn war_ships() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::WarShips,
         "WarShips",
-        "Ignore the first hit it the first round of combat \
-        when attacking with Ships or disembarking from Ships",
+        "Cancel 1 hit against you in the first round of any naval battle, whether attacking or defending. This also applies when your army disembarks directly into a land battle.",
     )
     .add_combat_strength_listener(5, |game, c, s, role| {
         if c.first_round() && (c.is_disembarking_attacker(role, game) || c.is_sea_battle(game)) {
@@ -57,8 +56,7 @@ fn cartography() -> AdvanceBuilder {
     let mut b = AdvanceInfo::builder(
         Advance::Cartography,
         "Cartography",
-        "Gain 1 idea after a move action where you moved a Ship. \
-        If you used navigation, gain an additional 1 culture token.",
+        "Gain 1 idea per Move action in which you move at least one Ship. If you use Navigation during that action, also gain 1 culture token.",
     )
     .with_advance_bonus(CultureToken);
     b = add_cartography_bonus(b, 0, "Cartography", |_| true, ResourcePile::ideas(1));

@@ -19,7 +19,7 @@ use crate::unit::UnitType;
 pub(crate) fn persia() -> Civilization {
     Civilization::new("Persia", vec![
         SpecialAdvanceInfo::builder(SpecialAdvance::PersianElephants, SpecialAdvanceRequirement::Advance(Advance::Husbandry), "Elephants",
-            "Recruit Elephants in cities adjacent to Barren land. In the first combat round, an Elephant in your army limits the opponent's combat bonus to +2.").build(),
+            "You may recruit Elephants without a Market in your cities adjacent to Barren land. In the first combat round, an Elephant in your army limits the opponent’s combat bonus to +2.").build(),
         SpecialAdvanceInfo::builder(SpecialAdvance::Immortals, SpecialAdvanceRequirement::Advance(Advance::Draft), "Immortals",
             "Before each combat roll, pay up to 4 culture tokens for that much extra combat value.")
             .add_payment_request_listener(|e| &mut e.combat_round_start, 40, |game, p, _| {

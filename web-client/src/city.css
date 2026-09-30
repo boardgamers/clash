@@ -169,19 +169,27 @@
   gap: 12px;
 }
 .recruit-row {
-  display: flex;
-  gap: 16px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 12px;
+  align-items: start;
   border: 1px solid var(--line);
   border-radius: 7px;
-  padding: 17px;
+  padding: 13px 15px;
 }
-.recruit-row > svg {
+.recruit-unit-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
+.recruit-unit-title > svg {
   flex-shrink: 0;
   color: var(--gold);
 }
-.recruit-row > div:not(.quantity) {
-  flex: 1;
+.recruit-row.selected {
+  border-color: var(--gold);
+  background: var(--paper2);
 }
 .recruit-row strong {
   font-size: 14px;
@@ -189,13 +197,52 @@
 .recruit-row p {
   font-size: 12px;
   color: var(--muted);
-  margin: 6px 0 9px;
+  margin: 0;
+  grid-column: 1 / -1;
 }
-.recruit-row small {
+.recruit-row .recruit-availability {
   display: block;
   color: var(--muted);
   font-size: 11px;
-  margin-top: 7px;
+  margin: 0;
+  grid-column: 1 / -1;
+}
+.recruit-prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 18px;
+  grid-column: 1 / -1;
+}
+.recruit-current-cost,
+.recruit-standard-cost,
+.recruit-pay-total,
+.recruit-row .recruit-requirement {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+.recruit-current-cost,
+.recruit-pay-total {
+  font-weight: 600;
+}
+.recruit-standard-cost {
+  color: var(--muted);
+  font-size: 11px;
+}
+.recruit-total {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.recruit-row .quantity {
+  gap: 5px;
+}
+.recruit-row .quantity button {
+  width: 40px;
+  height: 40px;
 }
 .quantity {
   display: flex;
@@ -397,12 +444,50 @@
     flex-shrink: 0;
   }
   .recruit-row {
-    padding: 13px 10px;
-    gap: 10px;
-    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 6px 8px;
   }
-  .recruit-row > div:not(.quantity) {
-    min-width: 170px;
+  .recruit-dialog .city-dialog-header {
+    padding: 12px 14px 8px;
+    flex-shrink: 0;
+  }
+  .recruit-dialog .city-dialog-header h2 {
+    font-size: 24px;
+  }
+  .recruit-dialog .city-dialog-header p {
+    margin-top: 4px;
+  }
+  .recruit-dialog .city-picker,
+  .recruit-dialog .city-tabs {
+    padding: 5px 12px;
+  }
+  .recruit-dialog .city-content {
+    padding: 12px;
+  }
+  .recruit-dialog .city-rule {
+    margin-bottom: 10px;
+  }
+  .city-confirm.recruit-confirm {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 8px 12px;
+  }
+  .recruit-confirm .recruit-total strong {
+    font-size: 12px;
+  }
+  .recruit-confirm .primary {
+    padding: 12px;
+    font-size: 12px;
+    white-space: normal;
+  }
+  .recruit-confirm .build-payment {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .recruit-confirm .build-payment select {
+    max-width: 100%;
   }
   .quantity {
     margin-left: auto;

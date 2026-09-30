@@ -23,8 +23,7 @@ fn myths() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Myths,
         "Myths",
-        "Whenever an Event card asks you have to reduce the mood in a city, \
-        you may pay 1 mood token instead of reducing the mood (does not apply for Pirates).",
+        "When an event would lower the mood of your cities, you may pay 1 mood token per city to prevent its mood loss, even if the event would make it Angry directly. This does not apply to Pirates.",
     )
     .with_advance_bonus(MoodToken)
     .with_unlocked_building(Temple)
@@ -52,8 +51,7 @@ fn rituals() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Rituals,
         "Rituals",
-        "When you perform the Increase Happiness Action \
-        you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio",
+        "During an Increase Happiness action, you may replace any number of mood tokens with resources at a rate of 1 resource per mood token.",
     )
     .with_advance_bonus(CultureToken)
     .add_transient_event_listener(
@@ -81,7 +79,7 @@ fn priesthood() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Priesthood,
         "Priesthood",
-        "Once per turn, a science advance is free",
+        "Once per turn, you may research one Science advance without paying resources. The research action cost and prerequisites still apply.",
     )
     .add_transient_event_listener(
         |event| &mut event.advance_cost,

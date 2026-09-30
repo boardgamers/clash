@@ -51,8 +51,7 @@ fn sports() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Sports,
         "Sports",
-        "As an action, you may spend \
-        1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively",
+        "Spend 1 action to raise the mood of one of your cities by 1 or 2 steps. Pay 1 culture token per step, regardless of city size.",
     )
     .with_advance_bonus(MoodToken)
     .add_custom_action_with_city_checker(

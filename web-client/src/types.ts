@@ -280,7 +280,15 @@ export interface CityActions {
     moodWillDecrease: boolean;
     choices: { position: string | null; action: Move }[];
   }[];
-  recruits: { type: UnitKind; payment: Pile; reason: string | null; available: number; limit?: number }[];
+  recruits: {
+    type: UnitKind;
+    payment: Pile;
+    basePayment?: Pile;
+    costOptions?: string[];
+    reason: string | null;
+    available: number;
+    limit?: number;
+  }[];
   happiness: (ActionOffer & { steps: number; mood: string; lawgiver?: boolean })[];
 }
 export interface SettlerView {
@@ -294,6 +302,8 @@ export interface SettlerView {
 export interface RecruitPreview {
   payments?: Pile[];
   payment: Pile;
+  basePayment?: Pile;
+  costOptions?: string[];
   action: Move;
   moodWillDecrease: boolean;
 }

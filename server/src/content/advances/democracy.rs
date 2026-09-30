@@ -31,7 +31,7 @@ fn voting() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Voting,
         "Voting",
-        "As a free action, you may spend 1 mood token to use 'Increase happiness'",
+        "Take an Increase Happiness action without spending an action. Pay the normal mood cost plus 1 extra mood token in total, regardless of how many of your cities you improve.",
     )
     .add_action_modifier(
         VotingIncreaseHappiness,
@@ -48,7 +48,7 @@ fn separation_of_power() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::SeparationOfPower,
         "Separation of Power",
-        "Attempts to influence your happy cities may not be boosted by culture tokens",
+        "Opponents cannot spend culture tokens to boost the range or die roll of Influence Culture attempts against your happy cities.",
     )
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
@@ -67,8 +67,7 @@ fn civil_liberties() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::CivilLiberties,
         "Civil Liberties",
-        "As an action, you may gain 3 mood tokens. \
-            The cost of Draft is increased to 2 mood token",
+        "Spend 1 action to gain 3 mood tokens. Your Draft now costs 2 mood tokens instead of 1, still limited to one Infantry per Recruit action.",
     )
     .add_custom_action(
         CivilLiberties,
@@ -90,8 +89,7 @@ fn free_economy() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::FreeEconomy,
         "Free Economy",
-        "As a free action, you may spend 1 mood token to collect \
-            resources in one city. This must be your only collect action this turn",
+        "Pay 1 mood token to activate one of your cities and collect resources without spending an action. This must be your only Collect action that turn.",
     )
     .add_action_modifier(
         FreeEconomyCollect,

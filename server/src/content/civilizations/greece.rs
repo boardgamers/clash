@@ -37,7 +37,7 @@ fn study() -> SpecialAdvanceInfo {
         SpecialAdvance::Study,
         SpecialAdvanceRequirement::Advance(Advance::PublicEducation),
         "Study",
-        "Gain 1 idea when recruiting in a city with an Academy.",
+        "After each Recruit action in one of your cities with an Academy, gain 1 idea, regardless of the number of units recruited.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.recruit,
@@ -105,8 +105,7 @@ fn hellenistic_culture() -> SpecialAdvanceInfo {
         SpecialAdvance::HellenisticCulture,
         SpecialAdvanceRequirement::Advance(Advance::Arts),
         "Hellenistic Culture",
-        "Cultural influence: You may use any influenced city as a starting point. \
-        You may replace the cost of Arts with 2 mood tokens.",
+        "You may start Influence Culture attempts from cities containing a building in your color, including cities owned by other players. You may pay 2 mood tokens instead of the 1 culture token for Arts.",
     )
     .add_action_modifier(
         CustomActionType::HellenisticInfluenceCultureAttempt,
@@ -125,8 +124,7 @@ fn city_states() -> SpecialAdvanceInfo {
         SpecialAdvance::CityStates,
         SpecialAdvanceRequirement::AnyGovernment,
         "City States",
-        "Once per turn, when the mood of a city was decreased due to activating a city, \
-        you may instead activate another city of at least the same size and mood level.",
+        "Once per turn, when activating one of your cities would lower its mood, you may activate another of your cities instead to prevent that mood loss. The other city must be at least as large and have at least the original mood level.",
     )
     .add_position_request(
         |event| &mut event.city_activation_mood_decreased,

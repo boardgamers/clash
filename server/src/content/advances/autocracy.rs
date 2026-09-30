@@ -27,7 +27,7 @@ fn nationalism() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Nationalism,
         "Nationalism",
-        "Gain 1 mood or culture token when you recruit an army or ship unit.",
+        "After each Recruit action in which you recruit at least one army unit or Ship, gain 1 mood token or 1 culture token in total, regardless of the number of units recruited.",
     )
     .add_resource_request(
         |event| &mut event.recruit,
@@ -51,7 +51,7 @@ fn totalitarianism() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Totalitarianism,
         "Totalitarianism",
-        "Attempts to influence your cities with Army Units may not be boosted by culture tokens",
+        "Opponents cannot spend culture tokens to boost the range or die roll of Influence Culture attempts against your cities containing your army units.",
     )
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
@@ -101,8 +101,7 @@ fn forced_labor() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::ForcedLabor,
         "Forced Labor",
-        "Once per turn, as a free action, \
-        you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn",
+        "Once per turn, pay 1 mood token without spending an action to treat all your Angry cities as Neutral for the rest of your turn. Each of those cities can still be activated only once.",
     )
     .add_custom_action(
         ForcedLabor,

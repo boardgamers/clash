@@ -38,7 +38,7 @@ fn aqueduct() -> SpecialAdvanceInfo {
         SpecialAdvance::Aqueduct,
         SpecialAdvanceRequirement::Advance(Advance::Engineering),
         "Aqueduct",
-        "Ignore Famine events. Sanitation cost is reduced to 0 resources or a free action",
+        "You ignore Famine events. Research Sanitation either for 1 action with no resource cost, or for its normal resource cost without spending an action.",
     )
     .add_custom_action(
         CustomActionType::Aqueduct,
@@ -73,7 +73,7 @@ fn roman_roads() -> SpecialAdvanceInfo {
         SpecialAdvance::RomanRoads,
         SpecialAdvanceRequirement::Advance(Advance::Roads),
         "Roman Roads",
-        "Roads distance is increased to 4 if travelling between your cities",
+        "When using Roads to move between two of your cities, the range increases to 4 spaces. Pay the normal Roads cost for each unit or group.",
     )
     // is checked explicitly
     .build()
@@ -84,8 +84,7 @@ fn captivi() -> SpecialAdvanceInfo {
         SpecialAdvance::Captivi,
         SpecialAdvanceRequirement::Advance(Advance::Bartering),
         "Captivi",
-        "Gain 1 gold and 1 mood token when you win a battle. \
-        You may replace any resources with mood tokens when paying for buildings.",
+        "After you win a battle, gain 1 gold and 1 mood token. When constructing buildings, each mood token you spend can replace 1 resource.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -117,9 +116,7 @@ fn provinces() -> SpecialAdvanceInfo {
         SpecialAdvance::Provinces,
         SpecialAdvanceRequirement::AnyGovernment,
         "Provinces",
-        "You can recruit Cavalry units in any city \
-        that is at least 3 spaces away from your capital. \
-        Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.",
+        "You may recruit Cavalry without a Market in your cities at least 3 spaces from your capital. Cities you capture become Neutral, or Happy if you pay 1 culture token.",
     )
     .add_payment_request_listener(
         |event| &mut event.combat_end,

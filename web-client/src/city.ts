@@ -12,7 +12,7 @@ import {
   Shield,
   Ship,
 } from 'lucide-svelte';
-import type { RecruitSelection, UnitKind } from './types';
+import { resourceNames, type Pile, type RecruitSelection, type Resource, type UnitKind } from './types';
 import { actionReason } from './model';
 export const buildingInfo: Record<string, { icon: typeof Landmark; effect: string }> = {
   Academy: { icon: BookOpen, effect: 'Gain 2 ideas when built.' },
@@ -25,22 +25,48 @@ export const buildingInfo: Record<string, { icon: typeof Landmark; effect: strin
 };
 export const unitInfo: Record<
   UnitKind,
-  { icon: typeof Footprints; key: Exclude<keyof RecruitSelection, 'leader'>; effect: string }
+  {
+    icon: typeof Footprints;
+    key: Exclude<keyof RecruitSelection, 'leader'>;
+    effect: string;
+    requirement?: { building: string; advance: string };
+  }
 > = {
   Settler: { icon: Footprints, key: 'settlers', effect: 'Exploration · Found cities' },
   Infantry: { icon: Swords, key: 'infantry', effect: '+1 combat value on infantry face · Tactics to move' },
-  Cavalry: { icon: Flag, key: 'cavalry', effect: '+2 combat value on cavalry face · Requires Market' },
+  Cavalry: {
+    icon: Flag,
+    key: 'cavalry',
+    effect: '+2 combat value on cavalry face',
+    requirement: { building: 'Market', advance: 'Bartering' },
+  },
   Elephant: {
     icon: Shield,
     key: 'elephants',
-    effect: 'Blocks 1 hit on elephant face · 0 die value · Requires Market',
+    effect: 'Blocks 1 hit on elephant face · 0 die value',
+    requirement: { building: 'Market', advance: 'Bartering' },
   },
   Ship: {
     icon: Ship,
     key: 'ships',
-    effect: 'Naval combat · Carries 2 land units · Requires Port',
+    effect: 'Naval combat · Carries 2 land units',
+    requirement: { building: 'Port', advance: 'Fishing' },
   },
 };
+export function sameRecruitPayment(a: Pile, b: Pile) {
+  return (Object.keys(resourceNames) as Resource[]).every((r) => (a[r] ?? 0) === (b[r] ?? 0));
+}
+export function recruitCostOptions(sources: string[] = [], payment: Pile, standard: Pile) {
+  const notes = sources.map((source) =>
+    source === 'Sanitation'
+      ? 'Sanitation: 1 settler per recruitment'
+      : source === 'Draft'
+        ? 'Draft: 1 infantry per recruitment'
+        : source,
+  );
+  if ((payment.gold ?? 0) > (standard.gold ?? 0)) notes.push('Gold can replace resources');
+  return notes.join(' · ');
+}
 export function cityReason(reason: string | null, size = 1) {
   if (reason === 'Need more cities') return `Requires ${size + 1} cities to build here.`;
   if (reason === 'Invalid replacement')

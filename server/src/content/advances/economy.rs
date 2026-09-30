@@ -41,8 +41,7 @@ fn bartering() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Bartering,
         "Bartering",
-        "Once per turn, as a free action, \
-        you may spend discard an action card for 1 gold or 1 culture token.",
+        "Once per turn, discard an action card to gain 1 gold or 1 culture token without spending an action.",
     )
     .with_advance_bonus(MoodToken)
     .add_custom_action(
@@ -95,9 +94,7 @@ fn taxes() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Taxes,
         "Taxes",
-        "Once per turn, as an action, you may spend 1 mood token to gain \
-            food, wood, or ore equal to the number of cities you control. \
-            If you have the Currency advance, you may gain gold instead of food, wood, or ore.",
+        "Once per turn, spend 1 action and 1 mood token to gain any mix of food, wood and ore, totaling 1 resource per city you own. With Currency, you may also choose gold. Your cities do not activate.",
     )
     .add_custom_action(
         Taxes,

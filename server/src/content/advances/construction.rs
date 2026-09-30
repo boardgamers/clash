@@ -37,7 +37,7 @@ fn engineering() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Engineering,
         "Engineering",
-        "Immediately draw 1 wonder card. May Construct wonders in happy cities",
+        "Immediately draw 1 wonder card. You may construct wonders in your happy cities by activating the city and paying the wonder cost.",
     )
     .add_once_initializer(draw_wonder_card)
 }
@@ -46,8 +46,7 @@ fn sanitation() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Sanitation,
         "Sanitation",
-        "When Recruiting, you may spend 1 mood token to pay for 1 Settler. \
-        Ignore Pestilence and Epidemics events.",
+        "During each Recruit action, you may pay 1 mood token instead of resources for one Settler. Other units use their normal costs. You ignore Pestilence and Epidemics events.",
     )
     .with_advance_bonus(MoodToken)
     .add_transient_event_listener(
@@ -76,9 +75,7 @@ fn roads() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Roads,
         "Roads",
-        "When moving from or to a city, you may pay 1 food and 1 ore \
-    to extend the range of a group of land units by 1 and ignore terrain effects. \
-    May not be used to embark, disembark, or explore",
+        "When moving land units to or from one of your cities, you may pay 1 food and 1 ore per unit or group to move up to 2 spaces and ignore terrain penalties. Roads cannot be used to explore, embark or disembark.",
     )
     .with_advance_bonus(CultureToken)
 }

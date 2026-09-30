@@ -36,8 +36,7 @@ fn rice() -> SpecialAdvanceInfo {
         SpecialAdvance::RiceCultivation,
         SpecialAdvanceRequirement::Advance(Advance::Irrigation),
         "Rice Cultivation",
-        "Collect add additional +1 food from up to 2 Grassland spaces outside your city, \
-        if occupied by one of your settlers.",
+        "When collecting from Grassland spaces outside your city, gain 1 extra food per space containing at least one of your Settlers, up to 2 extra food per Collect action.",
     )
     .add_transient_event_listener(
         |event| &mut event.collect_total,
@@ -78,7 +77,7 @@ fn expansion() -> SpecialAdvanceInfo {
         SpecialAdvance::Expansion,
         SpecialAdvanceRequirement::Advance(Advance::Husbandry),
         "Expansion",
-        "When you recruited at least 1 settler: Every settler in your cities gains one move",
+        "After a Recruit action in which you recruit at least one Settler, you may immediately move your Settlers that are in your cities without spending another action. Each may move once; Roads can apply.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.recruit,
@@ -201,8 +200,7 @@ fn imperial_army() -> SpecialAdvanceInfo {
         SpecialAdvance::ImperialArmy,
         SpecialAdvanceRequirement::AnyGovernment,
         "Imperial Army",
-        "Once per turn, as an action, \
-        you may convert any number of settlers into infantry units, and vice versa.",
+        "Once per turn, spend 1 action to convert any number of your Settlers into Infantry, and/or your Infantry into Settlers, at their current locations.",
     )
     .add_custom_action(
         CustomActionType::ImperialArmy,

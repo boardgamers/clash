@@ -144,7 +144,7 @@ fn draft() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Draft,
         "Draft",
-        "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.",
+        "During each Recruit action, you may pay 1 mood token instead of resources for one Infantry unit. Other units use their normal costs. This can be combined with Sanitation.",
     )
     .with_advance_bonus(CultureToken)
     .add_transient_event_listener(

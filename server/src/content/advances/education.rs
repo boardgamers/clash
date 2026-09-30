@@ -34,7 +34,7 @@ fn writing() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Writing,
         "Writing",
-        "Gain 1 action and 1 objective card",
+        "Immediately draw 1 action card and 1 objective card.",
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Building::Academy)
@@ -117,8 +117,7 @@ fn free_education() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::FreeEducation,
         "Free Education",
-        "After you buy an Advance by paying for it with at least 1 gold or 1 idea, \
-        you may pay an extra 1 idea to gain 1 mood token",
+        "After buying another advance with at least 1 gold or 1 idea, you may pay 1 extra idea to gain 1 mood token. This does not apply when buying Free Education itself.",
     )
     .with_advance_bonus(MoodToken)
     .add_payment_request_listener(

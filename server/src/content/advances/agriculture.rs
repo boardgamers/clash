@@ -22,7 +22,7 @@ fn farming() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Farming,
         "Farming",
-        "Your cities may Collect food from Grassland and wood from Forest spaces",
+        "Your cities may collect food from Grassland spaces and wood from Forest spaces.",
     )
 }
 
@@ -42,7 +42,7 @@ fn irrigation() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Irrigation,
         "Irrigation",
-        "Your cities may Collect food from Barren spaces, Ignore Famine events",
+        "Your cities may collect food from Barren spaces. You ignore Famine events.",
     )
     .add_transient_event_listener(
         |event| &mut event.terrain_collect_options,

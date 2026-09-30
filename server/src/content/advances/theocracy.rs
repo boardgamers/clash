@@ -78,7 +78,7 @@ fn devotion() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Devotion,
         "Devotion",
-        "Attempts to influence your cities with a Temple may not be boosted by culture tokens",
+        "Opponents cannot spend culture tokens to boost the range or die roll of Influence Culture attempts against your cities with Temples.",
     )
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,

@@ -16,6 +16,17 @@ use crate::recruit::{Recruit, recruit_cost};
 use crate::unit::{UnitType, Units};
 use serde_json::{Value, json};
 
+fn recruit_cost_options(game: &Game, cost: &crate::player_events::CostInfo) -> Vec<String> {
+    let mut names = Vec::new();
+    for (origin, _) in &cost.info.log {
+        let name = origin.name(game);
+        if !names.contains(&name) {
+            names.push(name);
+        }
+    }
+    names
+}
+
 pub fn recruit_extended(game: &Game, seat: usize, input: &Value) -> Result<Value, String> {
     if seat != game.active_player() {
         return Err("Wait for your turn".into());
@@ -79,7 +90,10 @@ pub fn recruit_extended(game: &Game, seat: usize, input: &Value) -> Result<Value
     crate::content::civilizations::carthage::validate_recruit(game, p, &recruit)?;
     let payments = super::decisions::payment_choices(&cost.cost, &p.resources, false, false);
     Ok(
-        json!({"payment":recruit.payment,"payments":payments,"moodWillDecrease":city.is_activated(),"action":Action::Playing(PlayingAction::Recruit(recruit))}),
+        json!({"payment":recruit.payment,"payments":payments,
+            "basePayment":units.clone().to_vec().iter().map(UnitType::cost).sum::<crate::resource_pile::ResourcePile>(),
+            "costOptions":recruit_cost_options(game, &cost),
+            "moodWillDecrease":city.is_activated(),"action":Action::Playing(PlayingAction::Recruit(recruit))}),
     )
 }
 
@@ -391,8 +405,10 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             let mut units = Units::empty(); units += &unit;
             let result = crate::recruit::recruit_cost_without_replaced(game,p,&units,city.position,CostTrigger::NoModifiers);
             let reason = action_reason(game,seat,can_play,PlayingActionType::Recruit).or_else(||result.as_ref().err().cloned());
+            let cost_options = result.as_ref().map(|c| recruit_cost_options(game, c)).unwrap_or_default();
             let payment = result.map(|c|c.cost.first_valid_payment(&p.resources).unwrap_or_else(||c.cost.default_payment())).unwrap_or_else(|_|unit.cost());
-            json!({"type":unit,"payment":payment,"reason":reason,"available":p.available_units().get_amount(&unit),"limit":p.unit_limit().get_amount(&unit)})
+            json!({"type":unit,"payment":payment,"basePayment":unit.cost(),"costOptions":cost_options,
+                "reason":reason,"available":p.available_units().get_amount(&unit),"limit":p.unit_limit().get_amount(&unit)})
         }).collect::<Vec<_>>();
         let max_steps = match city.mood_state {MoodState::Happy=>0, MoodState::Neutral=>1, MoodState::Angry=>2};
         let happiness = (1..=max_steps).map(|steps| (steps, false))

@@ -31,13 +31,13 @@ pub(crate) fn india() -> Civilization {
             SpecialAdvance::IndianElephants,
             SpecialAdvanceRequirement::Advance(Advance::Husbandry),
             "Indian Elephants",
-            "Recruit Elephants in Forest cities without a Market. Elephants in non-Angry cities can establish Trade Routes.",
+            "You may recruit Elephants in your Forest cities without a Market. Your Elephants in your non-Angry cities can establish Trade Routes.",
         ).build(),
         SpecialAdvanceInfo::builder(
             SpecialAdvance::Proselytism,
             SpecialAdvanceRequirement::Advance(Advance::StateReligion),
             "Proselytism",
-            "Settlers can attempt Cultural Influence with range 2. Each additional settler in that space adds 1 range. Settlers in a city each add 1 to its influence range.",
+            "Your Settlers can start Influence Culture attempts with range 2; each additional Settler in the same space adds 1 range. Each of your Settlers in one of your cities adds 1 to that city’s influence range.",
         ).build(),
         SpecialAdvanceInfo::builder(
             SpecialAdvance::Prosperity,

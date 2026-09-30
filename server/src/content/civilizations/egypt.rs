@@ -40,7 +40,7 @@ fn flood_plains() -> SpecialAdvanceInfo {
         SpecialAdvance::FloodPlains,
         SpecialAdvanceRequirement::Advance(Advance::Irrigation),
         "Flood Plains",
-        "Collect food or wood from Barren spaces. You may found cities on Barren spaces.",
+        "Your cities may collect food or wood from Barren spaces. You may found cities on Barren spaces.",
     )
     .add_transient_event_listener(
         |e| &mut e.terrain_collect_options,

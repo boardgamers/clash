@@ -18,7 +18,7 @@
   import type { Move, Pile } from './types';
   import { pileText } from './model';
   import type { Controller } from './controller';
-  import { buildingInfo, unitInfo, cityReason } from './city';
+  import { buildingInfo, unitInfo, cityReason, sameRecruitPayment, recruitCostOptions } from './city';
   import ResourceAmount from './ResourceAmount.svelte';
   import ResourceText from './ResourceText.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
@@ -30,6 +30,13 @@
   let tab = $derived($session.cityTab);
   let building = $state<string | null>(null);
   let paymentIndex = $state(-1);
+  let content: HTMLDivElement;
+  const cityScrollKey = $derived(`${tab}:${$session.city}`);
+  $effect(() => {
+    // Tab/city changes reset scroll; quantity and payment changes preserve it.
+    cityScrollKey;
+    content?.scrollTo(0, 0);
+  });
   function submitBuild(action: Move) {
     const chosen = structuredClone(action) as { Playing: { Construct: { payment: Pile } } };
     if (buildPayment) chosen.Playing.Construct.payment = buildPayment;
@@ -82,6 +89,7 @@
 
 <dialog
   class="city-dialog"
+  class:recruit-dialog={tab === 'recruit'}
   class:happiness-dialog={tab === 'happiness'}
   use:open
   onclose={close}
@@ -134,7 +142,7 @@
         }}><item.icon size={17} />{item.label}</button
       >{/each}
   </nav>
-  <div class="city-content">
+  <div class="city-content" bind:this={content}>
     {#if city && (tab === 'recruit' || (tab === 'build' && buildActivatesCity))}<ActivationStatus
         {city}
         warning={tab === 'recruit' || (tab === 'build' && !!selected?.moodWillDecrease)}
@@ -197,15 +205,11 @@
       <div class="recruit-list">
         {#each options?.recruits ?? [] as item}{@const info = unitInfo[item.type]}{@const amount =
             $session.recruits[info.key] ?? 0}
-          <article class="recruit-row">
-            <info.icon size={24} />
-            <div>
-              <strong>{item.type}</strong>
-              <p>{info.effect}</p>
-              <ResourceAmount pile={item.payment} /><small
-                >{cityReason(item.reason) || `${item.available} in supply`}</small
-              >
-            </div>
+          {@const standard = item.basePayment ?? item.payment}
+          {@const differentCost = !sameRecruitPayment(standard, item.payment)}
+          {@const costOptions = recruitCostOptions(item.costOptions, item.payment, standard)}
+          <article class="recruit-row" class:selected={amount > 0} aria-label={item.type}>
+            <div class="recruit-unit-title"><info.icon size={20} /><strong>{item.type}</strong></div>
             <div class="quantity">
               <button
                 aria-label={`Remove ${item.type}`}
@@ -222,6 +226,23 @@
                 ><Plus size={15} /></button
               >
             </div>
+            <p class="recruit-effect">{info.effect}</p>
+            <div class="recruit-prices">
+              <span class="recruit-current-cost">For 1 <ResourceAmount pile={item.payment} /></span>
+              {#if differentCost}<span class="recruit-standard-cost"
+                  >Standard <ResourceAmount pile={standard} /></span
+                >{/if}
+            </div>
+            {#if costOptions}<p class="recruit-cost-options">Options: {costOptions}</p>{/if}
+            {#if info.requirement}<p class="recruit-requirement">
+                {#if options?.buildings.some((b) => b.name === info.requirement!.building && b.owned)}<Check
+                    size={12}
+                  />{:else}Normally requires{/if}
+                {info.requirement.building} · {info.requirement.advance} to build
+              </p>{/if}
+            <small class="recruit-availability"
+              >{cityReason(item.reason) || `${item.available} in supply`}</small
+            >
           </article>{/each}
       </div>
       {#if options?.leaders?.length}<section class="leader-recruit" aria-label="Leaders">
@@ -319,13 +340,14 @@
           >{/each}
       </div>
     </footer>{/if}
-  {#if tab === 'recruit'}<footer class="city-confirm">
-      <div>
-        <strong
-          >{count} {count === 1 ? 'unit' : 'units'}{$session.draftCard ? ' + 1 card' : ''} selected</strong
-        >{#if $session.recruitPreview}<ResourceAmount
-            pile={$session.recruitPreview.payment}
-          />{#if $session.recruitPreview.moodWillDecrease && city && city.activationMood !== city.mood}<span
+  {#if tab === 'recruit'}<footer class="city-confirm recruit-confirm">
+      <div class="recruit-total">
+        <strong>{occupiedCapacity} / {capacity} selected</strong>{#if $session.recruitPreview}<span
+            class="recruit-pay-total">You pay <ResourceAmount pile={$session.recruitPreview.payment} /></span
+          >{#if $session.recruitPreview.basePayment && !sameRecruitPayment($session.recruitPreview.basePayment, $session.recruitPreview.payment)}<span
+              class="recruit-standard-cost"
+              >Units normally <ResourceAmount pile={$session.recruitPreview.basePayment} /></span
+            >{/if}{#if $session.recruitPreview.moodWillDecrease && city && city.activationMood !== city.mood}<span
               class="activation-inline"
               ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
             >{/if}{/if}
