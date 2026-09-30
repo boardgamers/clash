@@ -6,6 +6,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
 import { positionXY } from './model';
+import { PieceModels, type BuildingKind } from './piece-models';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
 import { mount, unmount } from 'svelte';
@@ -460,39 +461,6 @@ export class World {
     this.controls.target.copy(target);
     this.controls.update();
   }
-  private building(color: string) {
-    const group = new THREE.Group();
-    const stone = this.material('#ead7ad'),
-      roof = this.material('#a86042');
-    const base = this.mesh(new THREE.BoxGeometry(0.83, 0.12, 0.66), stone);
-    base.position.y = 0.06;
-    group.add(base);
-    const hall = this.mesh(new THREE.BoxGeometry(0.54, 0.3, 0.4), stone);
-    hall.position.set(0, 0.26, 0);
-    group.add(hall);
-    const ridge = this.mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.66, 3), roof);
-    ridge.rotation.z = Math.PI / 2;
-    ridge.rotation.x = Math.PI / 2;
-    ridge.position.y = 0.51;
-    group.add(ridge);
-    for (const x of [-0.25, -0.08, 0.09, 0.26]) {
-      const column = this.mesh(new THREE.CylinderGeometry(0.033, 0.04, 0.32, 7), stone);
-      column.position.set(x, 0.28, 0.29);
-      group.add(column);
-    }
-    for (let i = 0; i < 3; i++) {
-      const step = this.mesh(new THREE.BoxGeometry(0.68 + i * 0.08, 0.04, 0.16), stone);
-      step.position.set(0, 0.12 - i * 0.025, 0.37 + i * 0.06);
-      group.add(step);
-    }
-    const pole = this.mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.85, 6), this.material('#624d30'));
-    pole.position.set(0.47, 0.5, -0.2);
-    group.add(pole);
-    const flag = this.mesh(new THREE.BoxGeometry(0.28, 0.18, 0.018), this.material(color));
-    flag.position.set(0.6, 0.84, -0.2);
-    group.add(flag);
-    return { group, flag };
-  }
   private tree(x: number, z: number, scale: number, seed: number) {
     const group = new THREE.Group();
     const trunk = this.mesh(new THREE.CylinderGeometry(0.035, 0.055, 0.4, 5), this.material('#6b6042'));
@@ -718,6 +686,12 @@ export class World {
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
       this.clearBoard();
+      const models = new PieceModels(
+        (color) => this.material(color),
+        (geo, mat) => this.mesh(geo, mat),
+      );
+      const cityPositions = new Set(s.game.players.flatMap((p) => p.cities?.map((c) => c.position) ?? []));
+      const unitPositions = new Set(s.game.players.flatMap((p) => p.units?.map((u) => u.position) ?? []));
       const coords = s.game.map.tiles.map(([p]) => positionXY(p));
       const minX = Math.min(...coords.map((c) => c[0])),
         maxX = Math.max(...coords.map((c) => c[0])),
@@ -741,25 +715,52 @@ export class World {
         this.tiles.set(position, hex);
         const terrainGroup = new THREE.Group();
         terrainGroup.position.y = height / 2;
-        this.addTerrain(terrainGroup, kind, position.charCodeAt(0));
+        // Keep the foreground clear for pieces instead of burying them in trees/peaks.
+        if (!cityPositions.has(position)) {
+          this.addTerrain(terrainGroup, kind, position.charCodeAt(0));
+          if (unitPositions.has(position) && (kind === 'Forest' || kind === 'Mountain')) {
+            terrainGroup.scale.set(0.8, 0.65, 0.6);
+            terrainGroup.position.z = -0.34;
+          }
+        }
         group.add(terrainGroup);
         this.board.add(group);
       }
+      const unitStacks = new Map<string, number>();
+      const unitsByTile = new Map<string, number>();
+      for (const player of s.game.players)
+        for (const unit of player.units ?? [])
+          unitsByTile.set(unit.position, (unitsByTile.get(unit.position) ?? 0) + 1);
       for (const player of s.game.players) {
         for (const city of player.cities ?? []) {
           const [x, z] = positionXY(city.position);
-          const { group: cityModel, flag } = this.building(playerColor(player.id, s.colorBlind));
-          cityModel.position.set(x, 0.38, z);
+          const cityModel = new THREE.Group();
+          const ownerColor = playerColor(player.id, s.colorBlind);
+          const additions = Object.entries(city.city_pieces ?? {}).filter(
+            (entry): entry is [BuildingKind, number] =>
+              entry[0] !== 'wonders' && typeof entry[1] === 'number',
+          );
+          const settlement = models.settlement(ownerColor);
+          settlement.scale.setScalar(additions.length ? 0.57 : 0.88);
+          settlement.position.set(additions.length === 1 ? -0.2 : 0, 0, -0.09);
+          cityModel.add(settlement);
+          const pole = this.mesh(new THREE.CylinderGeometry(0.018, 0.024, 1.06, 6), this.material('#624d30'));
+          pole.position.set(0.12, 0.54, -0.12);
+          cityModel.add(pole);
+          const flag = this.mesh(new THREE.BoxGeometry(0.3, 0.2, 0.025), this.material(ownerColor));
+          flag.position.set(0.27, 0.98, -0.12);
+          cityModel.add(flag);
+          cityModel.position.set(x, 0.315, z);
           cityModel.rotation.y = 0.25;
           const capital = s.view?.players.find((p) => p.index === player.id)?.capital === city.position;
           if (capital) {
             const gold = this.material('#d5af55');
             const band = this.mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.07, 12), gold);
-            band.position.set(0, 0.91, 0);
+            band.position.set(0.12, 1.12, -0.12);
             cityModel.add(band);
             for (let i = 0; i < 3; i++) {
               const point = this.mesh(new THREE.ConeGeometry(0.055, 0.15, 4), gold);
-              point.position.set((i - 1) * 0.11, 1.01, 0);
+              point.position.set(0.12 + (i - 1) * 0.11, 1.22, -0.12);
               cityModel.add(point);
             }
           }
@@ -768,32 +769,45 @@ export class World {
           let ownershipBadge: THREE.Sprite | undefined;
           if (s.colorBlind) {
             const badge = this.ownershipBadge(player.id);
-            badge.position.set(0.6, 1.05, -0.2);
+            badge.position.set(0.27, 1.27, -0.12);
             cityModel.add(badge);
             ownershipBadge = badge;
           }
-          const additions = Object.keys(city.city_pieces ?? {}).filter((k) => k !== 'wonders');
-          for (const [j, name] of additions.entries()) {
-            const annex = new THREE.Group();
-            const stone = this.material('#d5c6a0');
-            const angle = j * 2.4;
-            const tower = this.mesh(
-              name === 'obelisk'
-                ? new THREE.ConeGeometry(0.1, 0.85, 4)
-                : new THREE.BoxGeometry(0.22, name === 'fortress' ? 0.55 : 0.27, 0.26),
-              stone,
-            );
-            tower.position.y = name === 'obelisk' ? 0.42 : name === 'fortress' ? 0.27 : 0.14;
-            annex.add(tower);
-            if (name !== 'obelisk' && name !== 'fortress') {
-              const roof = this.mesh(
-                new THREE.ConeGeometry(0.23, 0.18, name === 'observatory' ? 12 : 4),
-                this.material(name === 'observatory' ? '#62887b' : '#a86042'),
-              );
-              roof.position.y = 0.35;
-              annex.add(roof);
-            }
-            annex.position.set(Math.cos(angle) * 0.66, 0, Math.sin(angle) * 0.64);
+          const slots =
+            additions.length === 1
+              ? [[0.4, 0.18]]
+              : additions.length === 2
+                ? [
+                    [-0.45, 0.18],
+                    [0.45, 0.18],
+                  ]
+                : additions.length === 3
+                  ? [
+                      [0, -0.52],
+                      [-0.43, 0.28],
+                      [0.43, 0.28],
+                    ]
+                  : [
+                      [-0.42, -0.37],
+                      [0.42, -0.37],
+                      [-0.42, 0.37],
+                      [0.42, 0.37],
+                    ];
+          const heights: BuildingKind[] = [
+            'obelisk',
+            'observatory',
+            'fortress',
+            'temple',
+            'port',
+            'academy',
+            'market',
+          ];
+          additions.sort(([a], [b]) => heights.indexOf(a) - heights.indexOf(b));
+          for (const [j, [name, buildingOwner]] of additions.entries()) {
+            const annex = models.building(name, playerColor(buildingOwner, s.colorBlind));
+            const [ax, az] = slots[j % slots.length];
+            annex.scale.setScalar(additions.length < 3 ? 0.62 : 0.55);
+            annex.position.set(ax, 0, az);
             cityModel.add(annex);
           }
           this.board.add(cityModel);
@@ -853,61 +867,53 @@ export class World {
             ),
           });
         }
-        for (const [unitIndex, unit] of (player.units ?? []).entries()) {
+        for (const unit of player.units ?? []) {
           const [x, z] = positionXY(unit.position);
-          const pawn = new THREE.Group();
+          const pawn = models.unit(unit.unit_type, playerColor(player.id, s.colorBlind), unit.pirate);
           pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id };
           this.pieces.push(pawn);
-          const color = this.material(unit.pirate ? '#343c3b' : playerColor(player.id, s.colorBlind));
-          const body = this.mesh(new THREE.ConeGeometry(0.085, 0.27, 7), color);
-          body.position.y = 0.19;
-          pawn.add(body);
-          const head = this.mesh(new THREE.SphereGeometry(0.062, 8, 6), this.material('#e4c7a1'));
-          head.position.y = 0.39;
-          pawn.add(head);
-          const base = this.mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.04, 14), this.material('#e5d19e'));
-          pawn.add(base);
-          if (unit.unit_type === 'Infantry') {
-            const spear = this.mesh(
-              new THREE.CylinderGeometry(0.013, 0.013, 0.56, 5),
-              this.material('#6b6042'),
-            );
-            spear.position.set(0.13, 0.28, 0);
-            pawn.add(spear);
-          } else if (unit.unit_type === 'Ship') {
-            const hull = this.mesh(new THREE.BoxGeometry(0.23, 0.13, 0.5), color);
-            hull.position.y = 0.07;
-            pawn.add(hull);
-            const sail = this.mesh(new THREE.BoxGeometry(0.25, 0.27, 0.018), this.material('#f4e8cc'));
-            sail.position.y = 0.4;
-            pawn.add(sail);
-          } else if (unit.unit_type === 'Cavalry' || unit.unit_type === 'Elephant') {
-            const mount = this.mesh(
-              new THREE.BoxGeometry(0.19, 0.2, 0.35),
-              this.material(unit.unit_type === 'Elephant' ? '#859187' : '#887258'),
-            );
-            mount.position.y = 0.13;
-            pawn.add(mount);
-          } else if (typeof unit.unit_type === 'object') {
-            const crown = this.mesh(
-              new THREE.CylinderGeometry(0.09, 0.075, 0.09, 6),
-              this.material('#d5af55'),
-            );
-            crown.position.y = 0.46;
-            pawn.add(crown);
-          }
-          const stackIndex = (player.units ?? [])
-            .slice(0, unitIndex)
-            .filter((u) => u.position === unit.position).length;
+          const stackIndex = unitStacks.get(unit.position) ?? 0;
+          unitStacks.set(unit.position, stackIndex + 1);
           const tile = this.tiles.get(unit.position);
           const surface = tile
             ? tile.parent!.position.y + (tile.geometry as THREE.CylinderGeometry).parameters.height / 2
             : 0.31;
-          pawn.position.set(
-            x - 0.58 + (stackIndex % 3) * 0.23,
-            unit.unit_type === 'Ship' ? surface - 0.02 : surface + 0.09,
-            z + 0.25 + Math.floor(stackIndex / 3) * 0.23,
-          );
+          const inCity = cityPositions.has(unit.position);
+          const positions = inCity
+            ? [
+                [-0.43, 0.65],
+                [0, 0.69],
+                [0.43, 0.65],
+                [-0.69, 0.03],
+                [0.69, 0.03],
+                [0, -0.68],
+              ]
+            : [
+                [-0.43, 0.4],
+                [0, 0.4],
+                [0.43, 0.4],
+                [-0.43, -0.12],
+                [0, -0.12],
+                [0.43, -0.12],
+              ];
+          const count = unitsByTile.get(unit.position)!;
+          let [ux, uz] = positions[stackIndex % positions.length];
+          if (count > positions.length) {
+            // Large mixed stacks fan out instead of drawing several units in one slot.
+            const angle = (stackIndex / count) * Math.PI * 2;
+            ux = Math.sin(angle) * 0.72;
+            uz = Math.cos(angle) * 0.66;
+          } else if (!inCity && count === 1) {
+            ux = 0;
+          }
+          const ship = unit.unit_type === 'Ship';
+          if (ship && count > 1 && count <= 4) {
+            ux = stackIndex % 2 ? 0.27 : -0.27;
+            uz = stackIndex < 2 ? 0.36 : -0.36;
+          }
+          pawn.scale.setScalar(count > positions.length ? Math.min(0.65, 5.2 / count) : ship ? 0.88 : 0.85);
+          pawn.position.set(x + ux, ship ? surface : surface + 0.02, z + uz);
+          pawn.rotation.y = -0.22;
           this.board.add(pawn);
         }
       }
