@@ -1,8 +1,19 @@
 <script lang="ts">
-  import { Landmark, Crown } from 'lucide-svelte';
+  import { Landmark, Crown, X } from 'lucide-svelte';
   import { buildingInfo } from './city';
+  import ResourceText from './ResourceText.svelte';
   import type { City, Player } from './types';
   let { city, owner, players }: { city: City; owner: number; players: Player[] } = $props();
+  let selected = $state<{ position: string; name: string } | null>(null);
+  const expanded = $derived(selected?.position === city.position ? selected.name : null);
+  const effect = $derived(
+    expanded === 'Settlement'
+      ? "The city's first piece. It adds 1 to city size, which determines collection and recruitment capacity."
+      : buildingInfo[expanded ?? '']?.effect,
+  );
+  function toggle(name: string) {
+    selected = expanded === name ? null : { position: city.position, name };
+  }
   const buildings = $derived(
     Object.entries(city.city_pieces ?? {}).flatMap(([key, player]) => {
       if (typeof player !== 'number') return [];
@@ -20,17 +31,42 @@
 </script>
 
 <ul class="city-buildings" aria-label={`Buildings at ${city.position}`}>
-  <li title="City center"><Landmark size={16} /><span>Settlement</span></li>
+  <li>
+    <button
+      class:expanded={expanded === 'Settlement'}
+      aria-expanded={expanded === 'Settlement'}
+      onclick={() => toggle('Settlement')}><Landmark size={16} /><span>Settlement</span></button
+    >
+  </li>
   {#each buildings as building}
     {@const Icon = building.info?.icon ?? Landmark}
-    <li title={building.info?.effect} class:foreign-building={building.player !== owner}>
-      <Icon size={16} /><span>{building.name}</span>
-      {#if building.player !== owner}<small
-          >· {building.civilization ?? `Player ${building.player + 1}`}</small
-        >{/if}
+    <li>
+      <button
+        title={building.info?.effect}
+        class:foreign-building={building.player !== owner}
+        class:expanded={expanded === building.name}
+        aria-expanded={expanded === building.name}
+        onclick={() => toggle(building.name)}
+      >
+        <Icon size={16} /><span>{building.name}</span>
+        {#if building.player !== owner}<small
+            >· {building.civilization ?? `Player ${building.player + 1}`}</small
+          >{/if}
+      </button>
     </li>
   {/each}
   {#each city.city_pieces?.wonders ?? [] as wonder}
     <li class="built-wonder"><Crown size={16} /><span>{wonder.replace(/([a-z])([A-Z])/g, '$1 $2')}</span></li>
   {/each}
 </ul>
+
+{#if expanded && effect}<section class="building-effect" aria-label={`${expanded} effect`}>
+    <header>
+      <strong>{expanded}</strong><button
+        class="icon-button"
+        aria-label="Close building effect"
+        onclick={() => (selected = null)}><X size={15} /></button
+      >
+    </header>
+    <p><ResourceText text={effect} /></p>
+  </section>{/if}

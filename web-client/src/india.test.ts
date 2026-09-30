@@ -22,13 +22,7 @@ async function fixture(name: string) {
   return g;
 }
 async function india(leader?: string) {
-  let g = await engine.init(
-    2,
-    [],
-    { undo: 'SamePlayer', civilization: 'ChooseCivilization' },
-    'india-rules',
-    {},
-  );
+  let g = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'india-rules', {});
   g = move(g, { ChooseCivilization: 'India' });
   g = move(g, { ChooseCivilization: 'Rome' });
   const p = g.players[seat(g)];
@@ -106,6 +100,11 @@ test('Golden Age researches a new category for culture plus resources, activates
   let after = move(g, ability.action);
   if (view(after).decision?.fields.length)
     after = move(after, { Response: { Payment: [{ culture_tokens: 1 }] } });
+  assert.equal(view(after).decision!.advanceMode, 'paid');
+  assert.deepEqual(view(after).advances.find((a) => a.id === 'Writing')!.action, {
+    Response: { SelectAdvance: 'Writing' },
+  });
+  assert.equal(view(after).advances.find((a) => a.id === 'Writing')!.costAmount, 2);
   const choices = view(after).decision!.options.map((o) => o.value);
   assert.ok(choices.includes('Writing'));
   assert.ok(!choices.includes('Husbandry'), 'Agriculture category is already started');

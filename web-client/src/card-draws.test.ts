@@ -9,7 +9,7 @@ test('card reveals detect a confirmed draw once, stay silent on initial load or 
   let raw = await engine.init(
     2,
     [],
-    { undo: 'SamePlayer', civilization: 'Random' },
+    { civilization: 'Random' },
     'clash-preview-20260927',
     {},
   );

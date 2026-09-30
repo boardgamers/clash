@@ -4,7 +4,7 @@ use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure};
-use server::game::{CivSetupOption, GameOptions, PatchOption, UndoOption};
+use server::game::{CivSetupOption, GameOptions, PatchOption};
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::leader::Leader;
 use server::structure::Structure;
@@ -35,7 +35,7 @@ fn new_game() {
         &GameSetupBuilder::new(2)
             .options(GameOptions {
                 civilization: CivSetupOption::ChooseCivilization,
-                undo: UndoOption::SamePlayer,
+                legacy_undo: None,
                 patch: PatchOption::Standard,
             })
             .build(),
@@ -357,10 +357,10 @@ fn test_construct() {
 }
 
 #[test]
-fn test_same_player_undo() {
+fn legacy_unrestricted_option_does_not_allow_undoing_an_observatory_draw() {
     JSON.test(
         "same_player_undo",
-        vec![TestAction::undoable(
+        vec![TestAction::not_undoable(
             0,
             Action::Playing(Construct(construct::Construct::new(
                 Position::from_offset("C2"),

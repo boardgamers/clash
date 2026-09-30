@@ -148,7 +148,10 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         seed: setup.seed.clone(),
         context: GameContext::Play,
         version: JSON_SCHEMA_VERSION,
-        options: setup.options.clone(),
+        options: GameOptions {
+            legacy_undo: None,
+            ..setup.options.clone()
+        },
         cache,
         state: if setup.options.civilization == CivSetupOption::ChooseCivilization {
             GameState::ChooseCivilization

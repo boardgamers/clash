@@ -18,7 +18,7 @@ export function previewApi(): Plugin {
         state = await engine.init(
           2,
           [],
-          { undo: 'SamePlayer', civilization: 'Random' },
+          { civilization: 'Random' },
           'clash-preview-20260927',
           {},
         );

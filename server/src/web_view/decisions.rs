@@ -2,7 +2,9 @@
 //! previews never execute a response or advance the random stream.
 use crate::action::Action;
 use crate::card::{HandCard, validate_card_selection};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::*;
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
@@ -12,6 +14,22 @@ use crate::unit::validate_units_selection;
 use itertools::Itertools;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
+
+// Advance requests either grant an advance, purchase it in a subsequent payment
+// request, or borrow its effect. Keep these distinctions in the shared tree.
+pub(super) fn advance_mode(game: &Game, handler: &PersistentEventHandler) -> &'static str {
+    if let PersistentEventType::CustomAction(custom) = &game.current_event().event_type {
+        match custom.action.action {
+            CustomActionType::Scholar | CustomActionType::GoldenAge => return "paid",
+            CustomActionType::GreatLibrary => return "borrow",
+            _ => {}
+        }
+    }
+    match handler.origin {
+        EventOrigin::CivilCard(33 | 34 | 41 | 42) => "paid",
+        _ => "free",
+    }
+}
 
 pub(super) fn structure_name(s: &Structure) -> String {
     match s {
@@ -232,7 +250,17 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             vec![]
         }
         PersistentEventRequest::SelectAdvance(r) => {
-            description = "Choose an advance".into();
+            description = match &h.origin {
+                EventOrigin::CivilCard(33 | 34) if h.priority == 3 =>
+                    "Choose the first of two advances from one category. Pay each research cost; event markers stay unchanged.",
+                EventOrigin::CivilCard(33 | 34) =>
+                    "Choose the second advance from the same category. Pay its research cost; event markers stay unchanged.",
+                _ => match advance_mode(game, h) {
+                    "paid" => "Choose an advance, then pay its research cost.",
+                    "borrow" => "Use one advance until the end of your turn. No research bonuses or victory points.",
+                    _ => "Choose one free advance.",
+                },
+            }.into();
             r.choices
                 .iter()
                 .map(|a| {
@@ -385,6 +413,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
         "eventContext":super::journal::decision_context(game,seat),
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),
+        "advanceMode":matches!(h.request,PersistentEventRequest::SelectAdvance(_)).then(|| advance_mode(game, h)),
         "endOfAge":crate::status_phase::get_status_phase(game).is_some()}),
     )
 }

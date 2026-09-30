@@ -16,7 +16,7 @@ async function setup(civ: string, leader?: string) {
   let g = await engine.init(
     2,
     [],
-    { undo: 'SamePlayer', civilization: 'ChooseCivilization' },
+    { civilization: 'ChooseCivilization' },
     'remaining-civilizations',
     {},
   );

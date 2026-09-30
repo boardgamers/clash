@@ -27,10 +27,12 @@
   import { resourceNames, type Resource, type Pile, type AdvanceView, type PublicAdvance } from './types';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
-  import { freeResearchDecision } from './decision-controls';
+  import { researchDecision } from './decision-controls';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
-  const freeResearch = $derived(freeResearchDecision($session.view));
+  const choice = $derived(researchDecision($session.view) ? $session.view!.decision : null);
+  const freeResearch = $derived(!!choice && choice.advanceMode === 'free');
+  const borrowing = $derived(choice?.advanceMode === 'borrow');
   let query = $state('');
   let category = $state('All');
   let chosenPayment = $state<{ advance: string; payment: Pile } | null>(null);
@@ -84,7 +86,7 @@
         (category === 'All' || group === category) && advances.some((a) => a.group === group && matches(a)),
     ),
   );
-  const selectedAction = $derived(freeResearch ? selected?.action : selectedPayment?.action);
+  const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
   function matches(advance: PublicAdvance) {
     return `${advance.name} ${advance.description} ${researchPresentation(advance).summary}`
       .toLowerCase()
@@ -135,14 +137,14 @@
   <header class="research-header">
     <div>
       <h2 id="research-title">
-        {freeResearch ? 'Free advance' : 'Research'}
+        {choice ? (choice.endOfAge ? 'Free advance' : choice.name) : 'Research'}
         {#if $session.view?.players.find((p) => p.index === $session.seat)}<EventMarkers
             remaining={$session.view.players.find((p) => p.index === $session.seat)!.eventTokens}
           />{/if}
       </h2>
       <p>
-        {freeResearch
-          ? 'End of age · Choose one advance.'
+        {choice
+          ? choice.description
           : 'Each advance scores ½ point. Branches unlock from their first advance.'}
       </p>
     </div>
@@ -213,7 +215,7 @@
                     aria-label="Researched"
                   />{:else if !advance.action && (actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
                     size={13}
-                    aria-label={parent && !parent.owned
+                    aria-label={!choice && parent && !parent.owned
                       ? `Needs ${parent.name}`
                       : actionReason(advance.reason)}
                   />{/if}</span
@@ -226,15 +228,28 @@
                     resourceIcons[resource as Resource]}<span
                     title={`Research bonus: ${amount} ${resourceNames[resource as Resource]}`}
                     ><BonusIcon size={12} />+{amount} {resourceNames[resource as Resource]}</span
-                  >{/each}</span
+                  >{/each}{#each advance.bonusEffects ?? [] as bonus}<span
+                    title={`Gain ${pileText(bonus.pile)} from ${bonus.source}`}
+                  >
+                    +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
+                  </span>{/each}</span
               >
               <span class="research-node-cost"
                 >{#if advance.owned}<span class="researched-label">Researched</span>{:else}<span
                     class="research-flexible-cost"
-                    title={freeResearch ? 'Free advance' : costLabel(advance)}
-                    aria-label={freeResearch ? 'Free advance' : costLabel(advance)}
+                    title={borrowing
+                      ? 'Borrow until end of turn'
+                      : freeResearch
+                        ? 'Free advance'
+                        : costLabel(advance)}
+                    aria-label={borrowing
+                      ? 'Borrow until end of turn'
+                      : freeResearch
+                        ? 'Free advance'
+                        : costLabel(advance)}
                   >
-                    {#if freeResearch}Free{:else if advance.costAmount === 0}No resources{:else}
+                    {#if borrowing}This turn{:else if freeResearch}Free{:else if advance.costAmount === 0}No
+                      resources{:else}
                       {#each advance.costGroups ?? [{ amount: advance.costAmount, resources: advance.costResources }] as group, gi}
                         {#if gi > 0}<span>or</span>{/if}<b>{group.amount}</b>
                         {#each group.resources as resource, i}{@const CostIcon = resourceIcons[resource]}
@@ -246,7 +261,7 @@
                   </span><span class="research-availability"
                     >{advance.action
                       ? 'Available'
-                      : parent && !advances.find((a) => a.id === parent.id)?.owned
+                      : !choice && parent && !advances.find((a) => a.id === parent.id)?.owned
                         ? `Needs ${parent.name}`
                         : actionReason(advance.reason)}</span
                   >{/if}</span
@@ -292,7 +307,7 @@
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
       <div class="research-payment">
-        {#if !freeResearch && !selected.owned && selected.payments.length > 1}
+        {#if !choice && !selected.owned && selected.payments.length > 1}
           <div class="research-payment-options" role="group" aria-label="Choose research payment">
             <span>Pay</span>
             {#each selected.payments as option}
@@ -314,12 +329,14 @@
           disabled={!selectedAction || $session.pending}
           onclick={() => selectedAction && controller.submit(selectedAction)}
         >
-          {$session.pending ? 'Confirming…' : selected.owned ? 'Researched' : `Research ${selected.name}`}
+          {$session.pending
+            ? 'Confirming…'
+            : selected.owned
+              ? 'Researched'
+              : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
           {#if !selected.owned}<span
-              >{#if freeResearch}Free{:else}{#if selectedPayment}Pay <ResourceAmount
-                    pile={selectedPayment.payment}
-                    compact
-                  /> ·
+              >{#if borrowing}Until end of turn{:else if freeResearch}Free{:else if choice}Pay research cost
+                next{:else}{#if selectedPayment}Pay <ResourceAmount pile={selectedPayment.payment} compact /> ·
                 {/if}1 action{/if}</span
             >{/if}
         </button>

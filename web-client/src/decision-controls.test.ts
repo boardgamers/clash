@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { freeResearchDecision, mapDecisionOptions, toggleDecisionSelection } from './decision-controls.ts';
+import { researchDecision, mapDecisionOptions, toggleDecisionSelection } from './decision-controls.ts';
 import type { View } from './types.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
@@ -17,7 +17,7 @@ test('free research exposes exactly the legal choices without paid actions or re
   raw.players[seat].resources = {};
   const state = JSON.stringify(raw);
   const v = view(state);
-  assert.ok(freeResearchDecision(v));
+  assert.ok(researchDecision(v));
   assert.deepEqual(
     v.advances
       .filter((a) => a.action)
@@ -34,9 +34,9 @@ test('free research exposes exactly the legal choices without paid actions or re
   assert.equal(next.actions_left, raw.actions_left);
   assert.equal(next.players[seat].resources.food ?? 0, 0);
   assert.equal(next.players[seat].resources.gold ?? 0, 0);
-  assert.ok(!freeResearchDecision(view(state, 1 - seat)));
+  assert.ok(!researchDecision(view(state, 1 - seat)));
   assert.ok(view(state, 1 - seat).advances.every((a) => !a.action));
-  assert.ok(!freeResearchDecision(JSON.parse(engine.webView(engine.stripSecret(state)))));
+  assert.ok(!researchDecision(JSON.parse(engine.webView(engine.stripSecret(state)))));
 });
 
 test('map position choices select, replace and deselect without submitting until confirmed', () => {

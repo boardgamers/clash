@@ -6,6 +6,7 @@ use crate::collect::{
     Collect, PositionCollection, collect_event_origin, possible_resource_collections,
 };
 use crate::consts::OBJECTIVE_VICTORY_POINTS;
+use crate::content::advances::AdvanceGroup;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
@@ -204,11 +205,11 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             "shogunateDraft":p.has_special_advance(crate::special_advance::SpecialAdvance::Shogunate)&&p.can_use_advance(Advance::Draft)&&!p.event_info.contains_key("Shogunate Draft"),
             "canActivate":city.can_activate(), "activationMood":after_activation.mood_state,"activationCapacity":after_activation.mood_modified_size(p)})
     }).collect::<Vec<_>>();
-    let free_advances = if seat == active && crate::status_phase::get_status_phase(game).is_some() {
+    let advance_choice = if seat == active {
         game.current_event_handler()
             .and_then(|handler| match &handler.request {
                 PersistentEventRequest::SelectAdvance(request) if handler.response.is_none() => {
-                    Some(&request.choices)
+                    Some((&request.choices, decisions::advance_mode(game, handler)))
                 }
                 _ => None,
             })
@@ -216,32 +217,35 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         None
     };
     let mut advances = game.cache.get_advances().iter().map(|(advance, info)| {
-        if let Some(choices) = free_advances {
-            let owned = p.has_advance(*advance);
-            let action = choices.contains(advance).then(|| Action::Response(EventResponse::SelectAdvance(*advance)));
-            let reason = if owned { Some("Already researched".to_string()) }
-                else if action.is_some() { None }
-                else if let Some(required) = info.required.filter(|a| !p.has_advance(*a)) { Some(format!("Requires {}", required.name(game))) }
-                else { Some("Unavailable for this choice".to_string()) };
-            let mut item = advance_description(game, *advance);
-            item.as_object_mut().unwrap().extend(json!({
-                "owned":owned,"reason":reason,"payment":{},"action":action,
-                "costAmount":0,"costResources":[],"payments":[]
-            }).as_object().unwrap().clone());
-            return item;
-        }
         let cost = p.advance_cost(*advance, game, CostTrigger::NoModifiers).cost;
         let payment = cost.first_valid_payment(&p.resources);
-        let payment_options = advance_payments(&cost);
+        let payment_options = if advance_choice.is_some_and(|(_, mode)| mode != "paid") {
+            vec![ResourcePile::empty()]
+        } else {
+            advance_payments(&cost)
+        };
         let owned = p.has_advance(*advance);
         let reason = if owned { Some("Already researched".to_string()) }
+        else if let Some((choices, _)) = advance_choice {
+            if choices.contains(advance) { None } else { Some("Unavailable for this choice".to_string()) }
+        }
         else if !can_play { Some("Wait for your turn".to_string()) }
         else if let Err(reason) = PlayingActionType::Advance.is_available(game, seat) { Some(reason) }
         else if let Some(required) = info.required.filter(|a| !p.has_advance(*a)) { Some(format!("Requires {}", required.name(game))) }
         else if !p.can_advance_free(*advance, game) { Some("Conflicts with your current advances".to_string()) }
         else if payment.is_none() { Some("Not enough resources".to_string()) } else { None };
-        let action = if reason.is_none() { payment.clone().map(|payment| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment)))) } else { None };
+        let action = if reason.is_some() { None }
+            else if advance_choice.is_some() { Some(Action::Response(EventResponse::SelectAdvance(*advance))) }
+            else { payment.clone().map(|payment| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment)))) };
         let mut item = advance_description(game, *advance);
+        let borrowing = advance_choice.is_some_and(|(_, mode)| mode == "borrow");
+        if borrowing { item["bonus"] = Value::Null; }
+        let philosophy_bonus = !owned && !borrowing && !game.is_update_patch()
+            && p.can_use_advance(Advance::Philosophy)
+            && game.cache.get_advance_group(AdvanceGroup::Science).advances.iter().any(|a| a.advance == *advance);
+        item["bonusEffects"] = if philosophy_bonus {
+            json!([{"source":"Philosophy","pile":ResourcePile::ideas(1)}])
+        } else { json!([]) };
         let resources = ResourceType::all().into_iter().chain([ResourceType::Captives]).filter(|r| payment_options.iter().any(|p| p.get(r) > 0))
             .flat_map(|r| serde_json::to_value(ResourcePile::of(r, 1)).unwrap().as_object().unwrap().keys().cloned().collect::<Vec<_>>()).collect::<Vec<_>>();
         let cost_amount = payment_options.iter().map(ResourcePile::amount).min().unwrap_or(0);
@@ -254,10 +258,10 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                 json!({"amount":amount,"resources":resources})
             }).collect::<Vec<_>>();
         item.as_object_mut().unwrap().extend(json!({
-            "owned":owned,"reason":reason,"payment":payment.unwrap_or_else(|| cost.default_payment()),"action":action,
+            "owned":owned,"reason":reason,"payment":if advance_choice.is_some_and(|(_, mode)| mode != "paid") {ResourcePile::empty()} else {payment.unwrap_or_else(|| cost.default_payment())},"action":action,
             "costAmount":cost_amount,"costResources":resources,
             "costGroups":cost_groups,
-            "payments":payment_options.into_iter().filter(|payment| p.resources.has_at_least(payment)).map(|payment| {
+            "payments":payment_options.into_iter().filter(|payment| advance_choice.is_none() && p.resources.has_at_least(payment)).map(|payment| {
                 json!({"action":reason.is_none().then(|| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment.clone())))),"payment":payment})
             }).collect::<Vec<_>>()
         }).as_object().unwrap().clone());
@@ -271,15 +275,39 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             "leaders":c.leaders.iter().map(|l|json!({"name":l.name,"abilities":l.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()})).collect::<Vec<_>>(),
             "action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>()} else {vec![]},
         "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
-        "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free})).collect::<Vec<_>>()} else {vec![]},
+        "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|{ let cost = a.cost(game,seat); json!({"value":a,"name":a.origin(p).name(game),"free":cost.free,"payment":cost.payment_options(p,a.origin(p)).default_payment()}) }).collect::<Vec<_>>()} else {vec![]},
         "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free,"surcharge":a.payment_options(game,seat).default})).collect::<Vec<_>>()} else {vec![]},
-        "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate})).collect::<Vec<_>>(),
+        "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate,"movementNotes":movement_notes(p,u)})).collect::<Vec<_>>(),
         "nomadCities":p.cities.iter().filter(|c|!crate::content::civilizations::huns::city_destinations(game,p,c.position,&[]).is_empty()).map(|c|c.position).collect::<Vec<_>>(),
         "movementLeft":if let GameState::Movement(m)=&game.state {m.movement_actions_left} else {3},
         "seaRoutes":sea_routes,
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
+}
+
+fn movement_notes(player: &crate::player::Player, unit: &crate::unit::Unit) -> Vec<&'static str> {
+    use crate::movement::MovementRestriction;
+    let mut notes = unit
+        .movement_restrictions
+        .iter()
+        .map(|restriction| match restriction {
+            MovementRestriction::Forest if player.can_use_advance(Advance::Roads) => {
+                "Forest · Attacking requires a Roads route this turn"
+            }
+            MovementRestriction::Forest => "Forest · Cannot attack this turn",
+            MovementRestriction::Mountain if player.can_use_advance(Advance::Roads) => {
+                "Mountain · Moving requires a Roads route this turn"
+            }
+            MovementRestriction::Mountain => "Mountain · Cannot move again this turn",
+            MovementRestriction::Battle => "Battle · Cannot move again this turn",
+            MovementRestriction::Navigator => "Navigator · Cannot move again this turn",
+            MovementRestriction::Fertile => "Cannot attack the Great Gardens this turn",
+        })
+        .collect::<Vec<_>>();
+    notes.sort_unstable();
+    notes.dedup();
+    notes
 }
 
 fn advance_description(game: &Game, advance: Advance) -> Value {

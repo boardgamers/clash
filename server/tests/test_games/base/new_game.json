@@ -1,6 +1,5 @@
 {
   "options": {
-    "undo": "SamePlayer",
     "civilization": "ChooseCivilization"
   },
   "version": 2,

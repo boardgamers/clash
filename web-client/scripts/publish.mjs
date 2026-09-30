@@ -22,6 +22,8 @@ async function api(url, options = {}) {
   return res.json();
 }
 const previous = await api(endpoint);
+// Undo always stops at information reveals; remove the obsolete lobby option.
+const options = (previous.options ?? []).filter((option) => option.name !== 'undo');
 const declaredPreferences = JSON.parse(await fs.readFile(path.join(root, 'bgs-preferences.json'), 'utf8'));
 const replacedPreferences = new Set([
   'ui_scale',
@@ -78,19 +80,21 @@ if (!process.argv.includes('--dry-run')) {
   const current = await api(endpoint);
   if (
     JSON.stringify(current.viewer) !== JSON.stringify(previous.viewer) ||
-    JSON.stringify(current.preferences) !== JSON.stringify(previous.preferences)
+    JSON.stringify(current.preferences) !== JSON.stringify(previous.preferences) ||
+    JSON.stringify(current.options) !== JSON.stringify(previous.options)
   )
     throw new Error('The viewer or preferences changed during upload; version metadata was not changed');
   await api(endpoint, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ viewer, preferences }),
+    body: JSON.stringify({ viewer, preferences, options }),
   });
   const saved = await api(endpoint);
   if (
     saved.viewer.url !== uploaded.url ||
     saved.viewer.topLevelVariable !== 'clash3d' ||
     JSON.stringify(saved.preferences) !== JSON.stringify(preferences) ||
+    JSON.stringify(saved.options) !== JSON.stringify(options) ||
     JSON.stringify(saved.engine) !== JSON.stringify(previous.engine)
   )
     throw new Error('Published version verification failed; inspect the saved backup');

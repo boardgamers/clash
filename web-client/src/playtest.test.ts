@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { View, Move, Decision } from './types.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
-const initial = () => engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'full-playtest', {});
+const initial = () => engine.init(2, [], { civilization: 'Random' }, 'full-playtest', {});
 const view = (state: string, seat = engine.currentPlayer(state)): View =>
   JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
 const query = (state: string, input: unknown, seat = engine.currentPlayer(state)) =>
@@ -16,7 +16,7 @@ test('civilization selection opens a playable four-player game', async () => {
   let state = await engine.init(
     4,
     [],
-    { undo: 'SamePlayer', civilization: 'ChooseCivilization' },
+    { civilization: 'ChooseCivilization' },
     'choose-civilizations',
     {},
   );

@@ -57,27 +57,11 @@ impl PatchOption {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
-pub enum UndoOption {
-    // prevent undoing when secret information is revealed (default)
-    #[default]
-    ProtectSecrets,
-    // allow undoing any action when the same player is playing
-    SamePlayer,
-}
-
-impl UndoOption {
-    #[must_use]
-    pub fn is_default(&self) -> bool {
-        self == &UndoOption::ProtectSecrets
-    }
-}
-
 #[derive(Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct GameOptions {
-    #[serde(default)]
-    #[serde(skip_serializing_if = "UndoOption::is_default")]
-    pub undo: UndoOption,
+    // Read old saves only. Cleared on load; unrestricted undo is no longer a rule.
+    #[serde(default, rename = "undo", skip_serializing)]
+    pub legacy_undo: Option<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "CivSetupOption::is_default")]
     pub civilization: CivSetupOption,
@@ -215,9 +199,7 @@ impl Game {
     }
 
     pub(crate) fn information_revealed(&mut self) {
-        if self.options.undo == UndoOption::ProtectSecrets {
-            self.lock_undo();
-        }
+        self.lock_undo();
     }
 
     pub(crate) fn player_changed(&mut self) {

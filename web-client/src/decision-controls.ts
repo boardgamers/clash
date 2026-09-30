@@ -1,7 +1,6 @@
 import type { Decision, View } from './types.ts';
 
-export const freeResearchDecision = (view: View | null | undefined) =>
-  !!(view?.decision?.endOfAge && view.decision.advanceSelection);
+export const researchDecision = (view: View | null | undefined) => !!view?.decision?.advanceSelection;
 
 // A tile must identify exactly one choice. Unit and building requests can have
 // several choices at the same position and retain their individual controls.

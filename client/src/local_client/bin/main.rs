@@ -7,7 +7,7 @@ use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::cache::Cache;
-use server::game::{CivSetupOption, Game, GameContext, GameOptions, PatchOption, UndoOption};
+use server::game::{CivSetupOption, Game, GameContext, GameOptions, PatchOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::profiling::start_profiling;
@@ -51,7 +51,7 @@ async fn main() {
         &GameSetupBuilder::new(players)
             .seed(seed)
             .options(GameOptions {
-                undo: UndoOption::SamePlayer,
+                legacy_undo: None,
                 civilization: if modes.contains(&Mode::ChooseCivilization) {
                     CivSetupOption::ChooseCivilization
                 } else {

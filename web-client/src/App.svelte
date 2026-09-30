@@ -57,7 +57,7 @@
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
   import ResearchTree from './ResearchTree.svelte';
-  import { freeResearchDecision, mapDecisionOptions } from './decision-controls';
+  import { researchDecision, mapDecisionOptions } from './decision-controls';
   import CityPanel from './CityPanel.svelte';
   import SettlerPanel from './SettlerPanel.svelte';
   import ExplorationPanel from './ExplorationPanel.svelte';
@@ -129,10 +129,21 @@
     resources.filter((r) => r !== 'captives' || !!current?.resources?.captives),
   );
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
-  const collectionFree = $derived(
+  const collectionVariant = $derived(
     ($session.view?.collectActions ?? []).find(
       (a) => JSON.stringify(a.value) === JSON.stringify($session.collectVariant),
-    )?.free ?? false,
+    ),
+  );
+
+  const collectionFree = $derived(collectionVariant?.free ?? false);
+  const collectionCost = $derived(collectionVariant?.payment ?? {});
+  const collectionCostLabel = $derived(
+    [
+      Object.values(collectionCost).some(Boolean) ? `Pay ${pileText(collectionCost)}` : '',
+      collectionFree ? '0 actions' : '1 action',
+    ]
+      .filter(Boolean)
+      .join(' · '),
   );
   let identity = $derived($session.view?.players.find((p) => p.index === $session.seat));
   let log = $derived($session.game ? journal($session.game, $session.view ?? undefined).reverse() : []);
@@ -147,7 +158,7 @@
   let totalActions = $derived($session.game?.actions_left ?? 0);
   let readyToEnd = $derived(!!$session.view?.canEndTurn && totalActions === 0);
   let researchAvailable = $derived($session.view?.advances.some((a) => !!a.action));
-  let freeResearch = $derived(freeResearchDecision($session.view));
+  let researchChoice = $derived(researchDecision($session.view));
   let mapDecision = $derived(mapDecisionOptions($session.view?.decision).length > 0);
   let cityActionsAvailable = $derived(
     $session.view?.cityActions.some(
@@ -886,7 +897,9 @@
                       preview: null,
                       error: '',
                     })}
-                  >{variant.name}{#if !variant.free}<Zap size={12} />1{/if}</button
+                  >{variant.name}{#if Object.values(variant.payment ?? {}).some(Boolean)}<ResourceAmount
+                      pile={variant.payment!}
+                    />{/if}{#if !variant.free}<Zap size={12} />1{/if}</button
                 >{/each}
             </div>{/if}
           {#if city?.ballcourts}<label class="ballcourts-toggle"
@@ -999,14 +1012,16 @@
             <button
               class="primary wide collect-submit"
               disabled={!$session.preview || $session.pending}
-              title={`${collectionFree ? 'Free action' : 'Costs 1 action'} · Activates this city`}
-              aria-label={`Collect resources${$session.preview ? `: ${pileText($session.preview.total)}` : ''} · ${collectionFree ? 'Free action' : '1 action'}`}
+              title={`${collectionCostLabel} · Activates this city`}
+              aria-label={`Collect resources${$session.preview ? `: ${pileText($session.preview.total)}` : ''} · ${collectionCostLabel}`}
               onclick={() => controller.collect()}
             >
               <span>{$session.pending ? 'Confirming…' : 'Collect'}</span>
               {#if $session.preview}<ResourceAmount pile={$session.preview.total} />{/if}
               <span class="collection-action-cost"
-                >{#if collectionFree}Free{:else}<Zap size={14} />1{/if}</span
+                >{#if Object.values(collectionCost).some(Boolean)}Pay <ResourceAmount
+                    pile={collectionCost}
+                  /><span>·</span>{/if}<Zap size={14} />{collectionFree ? 0 : 1}</span
               >
               <ArrowRight size={17} />
             </button>
@@ -1033,14 +1048,14 @@
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
     {#if $session.view?.explorationDecision}<ExplorationPanel {controller} />{/if}
-    {#if freeResearch && $session.mode !== 'research'}<section
+    {#if researchChoice && $session.mode !== 'research'}<section
         class="action-panel floating-panel decision-panel"
-        aria-label="Free advance"
+        aria-label="Choose an advance"
       >
-        <h2><GraduationCap size={21} />Free advance</h2>
+        <h2><GraduationCap size={21} />{$session.view?.decision?.name ?? 'Choose an advance'}</h2>
         <button class="primary wide" onclick={openResearch}>Choose an advance<ArrowRight size={16} /></button>
       </section>
-    {:else if $session.view?.decision && !freeResearch}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
+    {:else if $session.view?.decision && !researchChoice}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
           {controller}
           decision={$session.view.decision}
           onHighlight={(position) => world?.highlightCoordinate(position)}
@@ -1255,8 +1270,9 @@
             longer routes available through Roads and other abilities. Army movement requires Tactics.
           </p>
           <p>
-            Entering unexplored terrain reveals it. Mountains and combat can prevent further movement that
-            turn.
+            Entering unexplored terrain reveals it. Entering Mountains or fighting a battle stops those units
+            from moving again that turn. After entering a Forest, units may move again but cannot attack for
+            the rest of the turn. Roads can bypass Forest and Mountain restrictions.
           </p>
         </article>
         <article>

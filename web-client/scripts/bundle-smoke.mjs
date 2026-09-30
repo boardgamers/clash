@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url),
 const script = await readFile(new URL('../dist/viewer.js', import.meta.url), 'utf8');
 assert(!script.includes('data:application/wasm'), 'Wasm must load once as an external asset');
 const state = engine.stripSecret(
-  await engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'bundle-test', {}),
+  await engine.init(2, [], { civilization: 'Random' }, 'bundle-test', {}),
   0,
 );
 const server = createServer(async (req, res) => {

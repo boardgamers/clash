@@ -9,7 +9,7 @@ import type { View, Game } from './types.ts';
 const require = createRequire(import.meta.url);
 const engine = require('../.engine/server.js');
 async function initial() {
-  return engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'clash-preview-20260927', {});
+  return engine.init(2, [], { civilization: 'Random' }, 'clash-preview-20260927', {});
 }
 
 test('sea route guide follows Navigation perimeter rules and stops at unexplored terrain without revealing it', () => {
@@ -449,7 +449,7 @@ test('Engineering exposes the drawn wonder only to its owner and scores have an 
     const state = await engine.init(
       count,
       [],
-      { undo: 'SamePlayer', civilization: 'Random' },
+      { civilization: 'Random' },
       `score-${count}`,
       {},
     );
@@ -619,7 +619,7 @@ test('all civilizations expose four public automatic advances, exact prerequisit
   let state = await engine.init(
     4,
     [],
-    { undo: 'SamePlayer', civilization: 'ChooseCivilization' },
+    { civilization: 'ChooseCivilization' },
     'civilization-preview',
     {},
   );

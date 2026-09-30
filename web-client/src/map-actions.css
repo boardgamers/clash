@@ -79,7 +79,8 @@
   flex-wrap: wrap;
   gap: 7px;
 }
-.city-buildings > li {
+.city-buildings > li > button,
+.city-buildings > li.built-wonder {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -758,4 +759,98 @@
     max-height: calc(100% - 16px);
     height: auto;
   }
+}
+
+.movement-passengers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.movement-passengers button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+}
+.movement-passengers button.selected {
+  border-color: var(--gold);
+  background: var(--paper2);
+}
+.movement-notes {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.movement-notes p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.movement-notes svg {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.pirate-details {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.pirate-details h3,
+.pirate-details h4 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 5px;
+}
+.pirate-details h4 {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pirate-details p {
+  font-size: 12px;
+  line-height: 1.55;
+  margin: 0;
+}
+.pirate-coordinates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+.pirate-coordinates button {
+  padding: 6px 9px;
+  min-height: 32px;
+  font-size: 12px;
+}
+
+.city-buildings > li > button {
+  color: var(--ink);
+  min-height: 36px;
+}
+.city-buildings button:hover,
+.city-buildings button.expanded {
+  border-color: var(--gold);
+}
+.building-effect {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 10px 12px;
+  background: var(--paper2);
+}
+.building-effect header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.building-effect p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
 }

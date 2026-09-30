@@ -111,6 +111,7 @@ export interface AdvanceView extends PublicAdvance {
   action: Move | null;
   required: string | null;
   bonus: Pile | null;
+  bonusEffects?: { source: string; pile: Pile }[];
   unlocks: string | null;
 }
 export interface CivilizationAdvance extends PublicAdvance {
@@ -418,6 +419,7 @@ export interface MapPick {
   unit?: number;
 }
 export interface UnitView {
+  movementNotes?: string[];
   pirate?: boolean;
   id: number;
   type: string | { Leader: string };
@@ -425,6 +427,7 @@ export interface UnitView {
   carrier: number | null;
 }
 export interface ActionVariant {
+  payment?: Pile;
   value: Move;
   name: string;
   free: boolean;
@@ -471,6 +474,7 @@ export interface Decision {
     } | null;
   } | null;
   advanceSelection?: boolean;
+  advanceMode?: 'free' | 'paid' | 'borrow' | null;
   name: string;
   description: string;
   min: number;

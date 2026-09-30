@@ -9,7 +9,7 @@ import { journal } from './journal.ts';
 import type { Game, View, MoveDestination, Selection } from './types.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const initial = () =>
-  engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'clash-preview-20260927', {});
+  engine.init(2, [], { civilization: 'Random' }, 'clash-preview-20260927', {});
 const query = (state: string, seat: number, input: unknown) =>
   JSON.parse(engine.webQuery(engine.stripSecret(state, seat), seat, JSON.stringify(input)));
 const view = (state: string, seat?: number): View =>

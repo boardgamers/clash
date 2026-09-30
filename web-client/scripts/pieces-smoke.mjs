@@ -52,7 +52,7 @@ const engine = createRequire(import.meta.url)('../.engine/server.js');
 let state = await engine.init(
   2,
   [],
-  { civilization: 'ChooseCivilization', undo: 'SamePlayer' },
+  { civilization: 'ChooseCivilization' },
   'pieces-ui',
   {},
 );

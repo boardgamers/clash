@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { X, Wheat, Hammer, Users, Smile, Footprints, ArrowRight, Shield } from 'lucide-svelte';
+  import { X, Wheat, Hammer, Users, Smile, Footprints, ArrowRight, Shield, LogOut } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { canMoveOnMap } from './map-actions';
   import { terrainInfo } from './terrain';
   import TerrainIcon from './TerrainIcon.svelte';
   import UnitIcon from './UnitIcon.svelte';
   import TileUnits from './TileUnits.svelte';
+  import PirateDetails from './PirateDetails.svelte';
   import CityFacts from './CityFacts.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
   import CityBuildings from './CityBuildings.svelte';
@@ -93,12 +94,17 @@
     {#if ownUnits.length && canMove}
       <div class="tile-unit-actions" role="group" aria-label={`Move units at ${position}`}>
         {#each ownUnits as unit}<button
-            aria-label={`Move ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} from ${position}`}
+            aria-label={`${unit.carrier !== null ? 'Disembark' : 'Move'} ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} from ${position}`}
             onclick={() => controller.openUnits([unit.id])}
           >
             <UnitIcon type={unit.type} /><span
-              >{typeof unit.type === 'string' ? unit.type : unit.type.Leader} #{unit.id + 1}</span
-            ><Footprints size={16} />
+              >{unit.carrier !== null ? 'Disembark ' : ''}{typeof unit.type === 'string'
+                ? unit.type
+                : ($session.view?.players
+                    .find((p) => p.index === $session.seat)
+                    ?.leaders?.find((l) => l.unit === unit.id)?.name ?? unit.type.Leader)} #{unit.id +
+                1}</span
+            >{#if unit.carrier !== null}<LogOut size={16} />{:else}<Footprints size={16} />{/if}
           </button>{/each}
       </div>
     {:else}<TileUnits players={$session.game?.players ?? []} {position} />{/if}
@@ -113,11 +119,12 @@
         />
       {/each}
     {/each}
+    {#if $session.game}<PirateDetails game={$session.game} {position} {onHighlight} />{/if}
     {#if origins.length}
       <div class="tile-arrivals" role="group" aria-label={`Move to ${position}`}>
         <h3><Footprints size={15} />{terrain === 'Unexplored' ? 'Explore here' : 'Move here'}</h3>
         {#each origins as unit}<button
-            aria-label={`Move ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} from ${unit.position} to ${position}`}
+            aria-label={`${unit.carrier !== null ? 'Disembark' : 'Move'} ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} from ${unit.position} to ${position}`}
             onmouseenter={() => onHighlight(unit.position)}
             onmouseleave={() => onHighlight(null)}
             onfocus={() => onHighlight(unit.position)}

@@ -1,6 +1,17 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { Footprints, Landmark, X, ArrowRight, Check, Zap, Ship, Swords } from 'lucide-svelte';
+  import {
+    Footprints,
+    Landmark,
+    X,
+    ArrowRight,
+    Check,
+    Zap,
+    Ship,
+    Swords,
+    LogOut,
+    TriangleAlert,
+  } from 'lucide-svelte';
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
@@ -20,6 +31,15 @@
   const first = $derived(units.find((u) => $session.selectedUnits.includes(u.id)));
   const positions = $derived([...new Set(units.map((u) => u.position))]);
   const atPosition = $derived(units.filter((u) => u.position === ($session.movingCity ?? first?.position)));
+  const passengers = $derived(atPosition.filter((u) => u.carrier !== null));
+  const selectedUnits = $derived(units.filter((u) => $session.selectedUnits.includes(u.id)));
+  const disembarking = $derived(selectedUnits.length > 0 && selectedUnits.every((u) => u.carrier !== null));
+  const movementNotes = $derived([...new Set(selectedUnits.flatMap((u) => u.movementNotes ?? []))]);
+  const unitName = (u: (typeof units)[number]) =>
+    typeof u.type === 'string'
+      ? `${u.type} #${u.id + 1}`
+      : ($session.view?.players.find((p) => p.index === $session.seat)?.leaders?.find((l) => l.unit === u.id)
+          ?.name ?? u.type.Leader);
   const destination = $derived(
     $session.moveDestination === null ? null : $session.moveDestinations[$session.moveDestination],
   );
@@ -32,7 +52,14 @@
   function select(id: number) {
     const selected = $session.selectedUnits.includes(id)
       ? $session.selectedUnits.filter((u) => u !== id)
-      : [...$session.selectedUnits, id];
+      : [
+          ...$session.selectedUnits.filter(
+            (selected) =>
+              (units.find((u) => u.id === selected)?.type === 'Ship') ===
+              (units.find((u) => u.id === id)?.type === 'Ship'),
+          ),
+          id,
+        ];
     controller.selectUnits(selected, $session.moveTarget);
   }
 </script>
@@ -55,8 +82,8 @@
       ? `${bonus.source}: ${bonus.label.toLowerCase()}. Terrain restrictions still apply.`
       : 'Move up to 3 groups for 1 action. A new Move action lets units move again, unless terrain or combat prevents it.'}
   >
-    <Footprints size={22} />Move{#if $session.movingCity || first}<span class="movement-origin"
-        >{$session.movingCity ?? first?.position}</span
+    <Footprints size={22} />{disembarking ? 'Disembark' : 'Move'}{#if $session.movingCity || first}<span
+        class="movement-origin">{$session.movingCity ?? first?.position}</span
       >{/if}
   </h2>
   {#if bonus}<div class="movement-bonus"><strong>{bonus.source}</strong><span>{bonus.label}</span></div>{/if}
@@ -99,7 +126,7 @@
         >{/each}
     </div>{/if}
   <div class="unit-picker" role="group" aria-label="Units to move">
-    {#each atPosition as u}<button
+    {#each atPosition.filter((u) => u.carrier === null) as u}<button
         class:selected={$session.selectedUnits.includes(u.id)}
         aria-pressed={$session.selectedUnits.includes(u.id)}
         title={`${typeof u.type === 'string' ? u.type : u.type.Leader} #${u.id + 1}${u.carrier !== null ? ` · Aboard ship #${u.carrier + 1}` : ''}`}
@@ -109,6 +136,20 @@
           />{/if}</button
       >{/each}
   </div>
+  {#if passengers.length}<div class="movement-passengers" role="group" aria-label="Passengers">
+      {#each passengers as u}<button
+          class="secondary"
+          class:selected={$session.selectedUnits.includes(u.id)}
+          aria-pressed={$session.selectedUnits.includes(u.id)}
+          title={`Aboard ship #${u.carrier! + 1}`}
+          onclick={() => select(u.id)}
+        >
+          <LogOut size={16} /><UnitIcon type={u.type} />Disembark {unitName(u)}
+        </button>{/each}
+    </div>{/if}
+  {#if movementNotes.length}<div class="movement-notes" role="note">
+      {#each movementNotes as note}<p><TriangleAlert size={14} />{note}</p>{/each}
+    </div>{/if}
   {#each $session.view?.players
     .find((p) => p.index === $session.seat)
     ?.leaders?.filter((l) => $session.selectedUnits.includes(l.unit)) ?? [] as leader}
@@ -121,7 +162,9 @@
     />
   {/each}
   {#if $session.moveDestinations.length}
-    <p class="movement-hint">Choose a highlighted tile.</p>
+    <p class="movement-hint">
+      {disembarking ? 'Choose a highlighted shore tile.' : 'Choose a highlighted tile.'}
+    </p>
     <details class="movement-destination-list" open={$session.moveTarget !== null && !destination}>
       <summary
         >{$session.moveTarget && !destination
@@ -162,7 +205,9 @@
             ? 'Board at'
             : destination.terrain === 'Unexplored'
               ? 'Explore'
-              : 'Move to'}
+              : disembarking
+                ? 'Disembark at'
+                : 'Move to'}
         {destination.position}
         {#if !$session.view?.stopMovement}<span class="settler-action-cost" aria-label="Costs 1 action"
             ><Zap size={13} />1</span

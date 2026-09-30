@@ -137,6 +137,14 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         events: data.events,
         custom_ui_elements: data.custom_ui_elements,
     };
+    // Old unrestricted saves have no reliable information-reveal boundary.
+    // Seal that existing history once; subsequent safe actions can be undone.
+    if game.options.legacy_undo.take().as_deref() == Some("SamePlayer") {
+        game.undo_limit = game.log_index;
+        if !game.log.is_empty() {
+            game.information_revealed();
+        }
+    }
     for player_data in data.players {
         game.players.push(player_from_data(player_data, &game));
     }

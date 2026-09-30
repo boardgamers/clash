@@ -9,7 +9,7 @@ import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
 import { canMoveOnMap, moveOrigins } from './map-actions';
 import { movementBonus } from './movement-bonus';
-import { freeResearchDecision, mapDecisionOptions, toggleDecisionSelection } from './decision-controls';
+import { researchDecision, mapDecisionOptions, toggleDecisionSelection } from './decision-controls';
 export class Controller {
   readonly session = writable<Session>({
     decisionSelection: [],
@@ -119,7 +119,7 @@ export class Controller {
     this.raw = raw;
     this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
-    const freeResearch = freeResearchDecision(view);
+    const researchChoice = researchDecision(view);
     const newDecision = changed || JSON.stringify(view.decision) !== JSON.stringify(old.view?.decision);
     const drawn = this.cardDraws.update(old.seat, game, view);
     const bonus = movementBonus(game);
@@ -137,7 +137,7 @@ export class Controller {
       game,
       view,
       decisionSelection: newDecision ? [] : old.decisionSelection,
-      selectedAdvance: newDecision && freeResearch ? null : old.selectedAdvance,
+      selectedAdvance: newDecision && researchChoice ? null : old.selectedAdvance,
       tilePanel: old.pending || changed ? false : old.tilePanel,
       collectionTile: null,
       seaRouteStart: game.map.tiles.some(([p, t]) => p === old.seaRouteStart && t === 'Water')
@@ -162,8 +162,8 @@ export class Controller {
       selectedSettler: view.settlers.some((u) => u.id === old.selectedSettler)
         ? old.selectedSettler
         : (view.settlers[0]?.id ?? null),
-      mode: freeResearch
-        ? newDecision || !freeResearchDecision(old.view)
+      mode: researchChoice
+        ? newDecision || !researchDecision(old.view)
           ? 'research'
           : old.mode
         : view.stopMovement
@@ -258,7 +258,7 @@ export class Controller {
       const view = JSON.parse(this.engine.webView(this.raw, index)) as View;
       this.patch({
         view,
-        mode: freeResearchDecision(view) ? 'research' : view.stopMovement ? 'settlers' : 'overview',
+        mode: researchDecision(view) ? 'research' : view.stopMovement ? 'settlers' : 'overview',
         city: view.cities[0]?.position ?? null,
         focus: view.cities[0]?.position ?? null,
       });

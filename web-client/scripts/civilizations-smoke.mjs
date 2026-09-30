@@ -9,7 +9,7 @@ const ser = (g) => (typeof g === 'string' ? g : JSON.stringify(g)),
 const initial = await engine.init(
   2,
   [],
-  { civilization: 'ChooseCivilization', undo: 'SamePlayer' },
+  { civilization: 'ChooseCivilization' },
   'all-civs-ui',
   {},
 );

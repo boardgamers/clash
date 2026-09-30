@@ -30,7 +30,7 @@ async function babylonia(leader?: string) {
   let state = await engine.init(
     2,
     [],
-    { undo: 'SamePlayer', civilization: 'ChooseCivilization' },
+    { civilization: 'ChooseCivilization' },
     'babylonia-rules',
     {},
   );

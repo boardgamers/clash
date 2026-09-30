@@ -51,7 +51,7 @@ test('Expansion keeps its new settler and destination selected across repeated p
   });
   try {
     const raw = JSON.parse(
-      await engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'clash-preview-20260927', {}),
+      await engine.init(2, [], { civilization: 'Random' }, 'clash-preview-20260927', {}),
     );
     const seat = engine.currentPlayer(JSON.stringify(raw));
     raw.players[seat].civilization = 'China';
