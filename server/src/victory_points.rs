@@ -103,14 +103,37 @@ pub(crate) fn special_victory_points(p: &Player, attribution: VictoryPointAttrib
 
 #[must_use]
 pub fn victory_points_parts(player: &Player, game: &Game) -> [(&'static str, f32); 6] {
+    let independent =
+        player.has_special_advance(crate::special_advance::SpecialAdvance::CityIndependence);
+    let port_bonus = if independent {
+        game.players
+            .iter()
+            .flat_map(|p| &p.cities)
+            .filter(|c| c.pieces.port == Some(player.index))
+            .count() as f32
+            * 0.5
+    } else {
+        0.0
+    };
+    let non_scoring_advances = if independent {
+        player
+            .advances
+            .iter()
+            .filter(|a| a.info(game).government.is_some())
+            .count()
+    } else {
+        0
+    };
     [
         (
             "City pieces",
-            (player.cities.len() + player.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS,
+            (player.cities.len() + player.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS
+                + port_bonus,
         ),
         (
             "Advances",
-            (player.advances.len() + player.special_advances.len()) as f32 * ADVANCE_VICTORY_POINTS,
+            (player.advances.len() + player.special_advances.len() - non_scoring_advances) as f32
+                * ADVANCE_VICTORY_POINTS,
         ),
         (
             "Objectives",

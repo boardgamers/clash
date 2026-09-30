@@ -381,7 +381,7 @@ pub(crate) fn can_construct_wonder(
     }
     let info = wonder.info(game);
 
-    if city.mood_state != MoodState::Happy {
+    if city.effective_mood() != MoodState::Happy {
         return Err("City is not happy".to_string());
     }
     if !player.can_use_advance(Advance::Engineering) {
@@ -505,7 +505,7 @@ pub(crate) fn cities_for_wonder(
         .collect_vec()
 }
 
-fn construct_wonder(
+pub(crate) fn construct_wonder(
     game: &mut Game,
     player: &EventPlayer,
     wonder: Wonder,

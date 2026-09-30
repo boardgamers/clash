@@ -1,7 +1,16 @@
+pub(crate) mod aztecs;
+pub(crate) mod carthage;
+pub(crate) mod celts;
 pub(crate) mod china;
-pub(crate) mod india;
+pub(crate) mod construction;
+pub(crate) mod egypt;
 pub(crate) mod greece;
+pub(crate) mod huns;
+pub(crate) mod india;
+pub(crate) mod japan;
 pub(crate) mod maya;
+pub(crate) mod persia;
+pub(crate) mod phoenicia;
 pub(crate) mod rome;
 pub mod vikings;
 
@@ -23,7 +32,15 @@ pub fn get_all_uncached() -> Vec<Civilization> {
         vikings::vikings(),
         babylonia::babylonia(),
         india::india(),
-        // not finished yet: maya
+        egypt::egypt(),
+        phoenicia::phoenicia(),
+        maya::maya(),
+        persia::persia(),
+        japan::japan(),
+        huns::huns(),
+        celts::celts(),
+        aztecs::aztecs(),
+        carthage::carthage(),
     ]
 }
 pub(crate) mod babylonia;

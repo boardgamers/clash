@@ -423,8 +423,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     )
     .tactics_card(tactics_card)
     .target(CivilCardTarget::AllPlayers)
-    .add_player_request(
-        |e| &mut e.play_action_card,
+    .add_target_player_request(
         1,
         |game, p, a| {
             if a.active_player != Some(p.index) {

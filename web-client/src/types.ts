@@ -1,5 +1,5 @@
 export type Pile = Partial<
-  Record<'food' | 'wood' | 'ore' | 'ideas' | 'gold' | 'mood_tokens' | 'culture_tokens', number>
+  Record<'food' | 'wood' | 'ore' | 'ideas' | 'gold' | 'mood_tokens' | 'culture_tokens' | 'captives', number>
 >;
 export type Resource = keyof Pile;
 export type Move = string | Record<string, unknown>;
@@ -22,6 +22,7 @@ export interface Player {
   cities?: City[];
   units?: {
     position: string;
+    pirate?: boolean;
     unit_type: string | { Leader: string };
     id: number;
     carried_units?: { unit_type: string | { Leader: string }; id: number }[];
@@ -70,6 +71,11 @@ export interface Selection extends Choice {
   times: number;
 }
 export interface CityView {
+  ballcourts?: boolean;
+  draftCard?: boolean;
+  attackPirates?: boolean;
+  shogunateDraft?: boolean;
+  piratePort?: boolean;
   capital?: boolean;
   position: string;
   size: number;
@@ -91,6 +97,7 @@ export interface PublicAdvance {
   group: string;
   order: number;
   borrowed?: boolean;
+  borrowedSource?: string;
 }
 export interface AdvanceView extends PublicAdvance {
   owned: boolean;
@@ -128,7 +135,16 @@ export interface PlayerView {
   advances: PublicAdvance[];
   civilizationAdvances: CivilizationAdvance[];
   scoreParts: { name: string; points: number }[];
-  cities: { position: string; size: number; capacity: number; mood: string; activations: number }[];
+  cities: {
+    position: string;
+    size: number;
+    capacity: number;
+    mood: string;
+    activations: number;
+    protection?: number;
+    independentPort?: boolean;
+    influenceMarker?: number;
+  }[];
 }
 export interface WonderCard {
   action?: Move | null;
@@ -177,6 +193,7 @@ export interface View {
   }[];
   units?: UnitView[];
   movementLeft?: number;
+  nomadCities?: string[];
   seaRoutes?: string[][];
   activePlayer: number;
   canPlay: boolean;
@@ -250,6 +267,7 @@ export interface CityActions {
     owned: boolean;
     required: string;
     payment: Pile;
+    payments?: Pile[] | null;
     reason: string | null;
     moodWillDecrease: boolean;
     choices: { position: string | null; action: Move }[];
@@ -261,10 +279,12 @@ export interface SettlerView {
   id: number;
   position: string;
   foundReason: string | null;
+  foundFree?: boolean;
   foundAction: Move | null;
   destinations: { position: string; terrain: Terrain; payment: Pile; action: Move }[];
 }
 export interface RecruitPreview {
+  payments?: Pile[];
   payment: Pile;
   action: Move;
   moodWillDecrease: boolean;
@@ -344,6 +364,7 @@ export interface Session {
   collectionTile: string | null;
   moveTarget: string | null;
   selectedUnits: number[];
+  movingCity?: string | null;
   moveDestinations: MoveDestination[];
   moveDestination: number | null;
   cardsOpen: boolean;
@@ -361,6 +382,11 @@ export interface Session {
   explorationRotation: number | null;
   explorationPreview: number | null;
   recruits: RecruitSelection;
+  ballcourts?: boolean;
+  draftCard?: boolean;
+  attackPirates?: boolean;
+  shogunateDraft?: boolean;
+  piratePort?: boolean;
   recruitPreview: RecruitPreview | null;
   selection: Selection[];
   preview: CollectionPreview | null;
@@ -391,6 +417,7 @@ export interface MapPick {
   unit?: number;
 }
 export interface UnitView {
+  pirate?: boolean;
   id: number;
   type: string | { Leader: string };
   position: string;
@@ -408,6 +435,8 @@ export interface HappinessPreview {
   reason: string | null;
 }
 export interface MoveDestination {
+  label?: string;
+  pirateCarrier?: number;
   position: string;
   terrain: Terrain;
   payment: Pile;
@@ -471,6 +500,7 @@ export const resourceNames: Record<Resource, string> = {
   gold: 'Gold',
   mood_tokens: 'Mood',
   culture_tokens: 'Culture',
+  captives: 'Captives',
 };
 export const resources = Object.keys(resourceNames) as Resource[];
 export const playerColors = ['#5086af', '#b96c4c', '#6d9173', '#ae92b6'];

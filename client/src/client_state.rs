@@ -22,8 +22,8 @@ use server::advance::Advance;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::persistent_events::{
-    AdvanceRequest, EventResponse, MultiRequest, PersistentEventRequest, PersistentEventType,
-    PlayerRequest, UnitTypeRequest,
+    AdvanceRequest, Captive, EventResponse, MultiRequest, PersistentEventRequest,
+    PersistentEventType, PlayerRequest, UnitTypeRequest,
 };
 use server::game::{Game, GameState};
 use server::movement::{CurrentMove, MoveDestination};
@@ -63,6 +63,7 @@ pub(crate) enum ActiveDialog {
         MultiSelection<SelectedStructureInfo>,
     ),
     HandCardsRequest(MultiSelection<HandCard>),
+    CaptivesRequest(MultiSelection<Captive>),
     BoolRequest(String),
     ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
@@ -127,6 +128,7 @@ impl ActiveDialog {
             ActiveDialog::HandCardsRequest(r) => {
                 custom_phase_event_help(rc, &r.request.description)
             }
+            ActiveDialog::CaptivesRequest(r) => custom_phase_event_help(rc, &r.request.description),
             ActiveDialog::PlayerRequest(r) => custom_phase_event_help(rc, &r.description),
         }
     }
@@ -556,6 +558,9 @@ impl State {
                             panic!("ExploreResolution expected");
                         }
                     }
+                }
+                PersistentEventRequest::SelectCaptives(r) => {
+                    ActiveDialog::CaptivesRequest(MultiSelection::new(r.clone()))
                 }
                 PersistentEventRequest::SelectHandCards(r) => {
                     ActiveDialog::HandCardsRequest(MultiSelection::new(r.clone()))

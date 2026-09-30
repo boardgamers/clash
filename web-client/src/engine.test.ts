@@ -596,6 +596,7 @@ test('research discounts produce a free payment while still consuming an action 
 test('public civilization inspection includes researched and civilization advances and event markers for opponents and spectators', async () => {
   const raw = JSON.parse(await initial());
   raw.players[0].advances.push('Fishing', 'Engineering');
+  raw.players[0].civilization = 'Vikings';
   raw.players[0].special_advances = ['ShipConstruction'];
   raw.players[0].incident_tokens = 1;
   raw.players[1].great_library_advance = 'Writing';
@@ -713,6 +714,7 @@ test('automatic advances unlock with their research, with no extra action or eve
 
 test('borrowing a prerequisite from the Great Library does not unlock a civilization advance', async () => {
   const raw = JSON.parse(await initial());
+  raw.players[0].civilization = 'Vikings';
   raw.players[0].great_library_advance = 'Fishing';
   const state = JSON.stringify(raw);
   const view: View = JSON.parse(engine.webView(engine.stripSecret(state, undefined), undefined));

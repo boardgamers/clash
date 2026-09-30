@@ -21,8 +21,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |c| c.action().culture_tokens(1),
         |game, player, _| !players_with_cards(game, player.index).is_empty(),
     )
-    .add_player_request(
-        |e| &mut e.play_action_card,
+    .add_target_player_request(
         1,
         |game, player, _| {
             Some(PlayerRequest::new(

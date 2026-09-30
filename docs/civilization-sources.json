@@ -23,7 +23,7 @@
         "https://boardgamegeek.com/image/8436928"
       ],
       "verification": "monumental-photos-verified",
-      "implemented": false
+      "implemented": true
     },
     {
       "name": "Babylonia",
@@ -43,7 +43,7 @@
         "https://boardgamegeek.com/image/7553242"
       ],
       "verification": "monumental-photos-verified",
-      "implemented": false
+      "implemented": true
     },
     {
       "name": "Celts",
@@ -53,21 +53,25 @@
         "https://boardgamegeek.com/image/7553248"
       ],
       "verification": "monumental-photos-verified",
-      "implemented": false
+      "implemented": true
     },
     {
       "name": "Egypt",
       "guide": "https://boardgamegeek.com/thread/2679670",
-      "monumental_images": [],
-      "verification": "original-edition-guide-only",
-      "implemented": false
+      "monumental_images": [
+        "https://boardgamegeek.com/image/9490519"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": true
     },
     {
       "name": "Huns",
       "guide": "https://boardgamegeek.com/thread/2684906",
-      "monumental_images": [],
-      "verification": "original-edition-guide-only",
-      "implemented": false
+      "monumental_images": [
+        "https://boardgamegeek.com/image/9490522"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": true
     },
     {
       "name": "India",
@@ -82,30 +86,42 @@
     {
       "name": "Japan",
       "guide": "https://boardgamegeek.com/thread/2690159",
-      "monumental_images": [],
-      "verification": "original-edition-guide-only",
-      "implemented": false
+      "monumental_images": [
+        "https://boardgamegeek.com/image/9490524"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": true
     },
     {
       "name": "Maya",
       "guide": "https://boardgamegeek.com/thread/2692302",
-      "monumental_images": [],
-      "verification": "original-edition-guide-only",
-      "implemented": false
+      "monumental_images": [
+        "https://boardgamegeek.com/image/9490527"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": true
     },
     {
       "name": "Persia",
       "guide": "https://boardgamegeek.com/thread/2698135",
-      "monumental_images": [],
-      "verification": "original-edition-guide-only",
-      "implemented": false
+      "monumental_images": [
+        "https://boardgamegeek.com/image/9490528"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": true
     },
     {
       "name": "Phoenicia",
       "guide": "https://boardgamegeek.com/thread/2702235",
-      "monumental_images": [],
-      "verification": "original-edition-guide-only",
-      "implemented": false
+      "monumental_images": [
+        "https://boardgamegeek.com/image/9490529"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": true
     }
+  ],
+  "complete_civilization_boards": [
+    "https://boardgamegeek.com/image/9488277",
+    "https://boardgamegeek.com/image/9488278"
   ]
 }

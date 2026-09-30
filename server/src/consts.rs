@@ -45,6 +45,7 @@ pub const UNIT_LIMIT_PIRATES: Units = Units {
     leader: None,
 };
 pub const BUILDING_COST: ResourcePile = ResourcePile {
+    captives: 0,
     food: 1,
     wood: 1,
     ore: 1,

@@ -24,6 +24,9 @@ use num::Zero;
 
 pub struct City {
     pub pieces: CityPieces,
+    pub enforcer: bool,
+    pub influence_marker: Option<usize>,
+    pub nomad_mountain: bool,
     pub mood_state: MoodState,
     pub activations: u32,
     pub activation_mood_decreased: bool, // transient
@@ -38,6 +41,9 @@ impl City {
     pub fn from_data(data: CityData, player_index: usize) -> Self {
         Self {
             pieces: CityPieces::from_data(data.city_pieces),
+            enforcer: data.enforcer,
+            influence_marker: data.influence_marker,
+            nomad_mountain: data.nomad_mountain,
             mood_state: data.mood_state,
             activations: data.activations,
             angry_activation: data.angry_activation,
@@ -50,32 +56,43 @@ impl City {
 
     #[must_use]
     pub fn data(self) -> CityData {
-        CityData::new(
+        let mut data = CityData::new(
             self.pieces.data(),
             self.mood_state,
             self.activations,
             self.angry_activation,
             self.position,
             self.port_position,
-        )
+        );
+        data.enforcer = self.enforcer;
+        data.influence_marker = self.influence_marker;
+        data.nomad_mountain = self.nomad_mountain;
+        data
     }
 
     #[must_use]
     pub fn cloned_data(&self) -> CityData {
-        CityData::new(
+        let mut data = CityData::new(
             self.pieces.cloned_data(),
             self.mood_state.clone(),
             self.activations,
             self.angry_activation,
             self.position,
             self.port_position,
-        )
+        );
+        data.enforcer = self.enforcer;
+        data.influence_marker = self.influence_marker;
+        data.nomad_mountain = self.nomad_mountain;
+        data
     }
 
     #[must_use]
     pub fn new(player_index: usize, position: Position) -> Self {
         Self {
             pieces: CityPieces::default(),
+            enforcer: false,
+            influence_marker: None,
+            nomad_mountain: false,
             mood_state: Neutral,
             activations: 0,
             angry_activation: false,
@@ -87,12 +104,22 @@ impl City {
     }
 
     #[must_use]
+    pub(crate) fn effective_mood(&self) -> MoodState {
+        if self.enforcer && self.activations == 0 {
+            Happy
+        } else {
+            self.mood_state.clone()
+        }
+    }
+
     pub fn can_activate(&self) -> bool {
         !self.angry_activation
     }
 
     pub fn deactivate(&mut self) {
         self.activations = 0;
+        self.enforcer = false;
+        self.nomad_mountain = false;
         self.angry_activation = false;
     }
 
@@ -108,9 +135,19 @@ impl City {
 
     #[must_use]
     pub fn mood_modified_size(&self, player: &Player) -> usize {
-        match self.mood_state {
-            Happy => self.size() + 1,
-            Neutral => self.size(),
+        let size = self.size()
+            + usize::from(
+                self.size() == 1
+                    && self.mood_state != Angry
+                    && crate::content::civilizations::phoenicia::leader_at(
+                        player,
+                        crate::leader::Leader::Attila,
+                        self.position,
+                    ),
+            );
+        match self.effective_mood() {
+            Happy => size + 1,
+            Neutral => size,
             Angry => {
                 if player.played_once_per_turn_actions.contains(&ForcedLabor) {
                     self.size()
@@ -134,6 +171,12 @@ impl City {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CityData {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    influence_marker: Option<usize>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    enforcer: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    nomad_mountain: bool,
     #[serde(default)]
     #[serde(skip_serializing_if = "CityPiecesData::is_empty")]
     city_pieces: CityPiecesData,
@@ -162,6 +205,9 @@ impl CityData {
     ) -> Self {
         Self {
             city_pieces,
+            enforcer: false,
+            influence_marker: None,
+            nomad_mountain: false,
             mood_state,
             activations,
             angry_activation,
@@ -277,10 +323,19 @@ pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
 }
 
 pub(crate) fn activate_city(position: Position, game: &mut Game, origin: &EventOrigin) {
+    activate_city_for_collection(position, game, origin);
+    crate::content::civilizations::egypt::innovator(game, position);
+}
+
+pub(crate) fn activate_city_for_collection(
+    position: Position,
+    game: &mut Game,
+    origin: &EventOrigin,
+) {
     let city = game.get_any_city_mut(position);
     assert!(city.can_activate());
 
-    if city.mood_state == Angry {
+    if city.mood_state == Angry || city.enforcer {
         city.angry_activation = true;
     }
     let was_activated = city.is_activated();
@@ -353,6 +408,7 @@ pub(crate) fn gain_city(game: &mut Game, player: &EventPlayer, mut city: City) {
 }
 
 pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Position) -> City {
+    game.get_any_city_mut(position).influence_marker = None;
     let p = player.get_mut(game);
     let city = if let Some(pos) = p.cities.iter().position(|city| city.position == position) {
         p.cities.remove(pos)
@@ -368,6 +424,7 @@ pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Positio
 }
 
 pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    crate::content::civilizations::egypt::remove_protection(game, position);
     for b in &player.get(game).get_city(position).pieces.buildings(None) {
         lose_building(game, player, *b, position);
     }

@@ -15,6 +15,7 @@ pub(crate) fn resource_name(t: ResourceType) -> &'static str {
         ResourceType::Gold => "Gold",
         ResourceType::MoodTokens => "Mood",
         ResourceType::CultureTokens => "Culture",
+        ResourceType::Captives => "Captives",
     }
 }
 
@@ -28,6 +29,7 @@ pub(crate) fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u8> {
     add_resource(&mut m, p.gold, ResourceType::Gold);
     add_resource(&mut m, p.mood_tokens, ResourceType::MoodTokens);
     add_resource(&mut m, p.culture_tokens, ResourceType::CultureTokens);
+    add_resource(&mut m, p.captives, ResourceType::Captives);
     m
 }
 

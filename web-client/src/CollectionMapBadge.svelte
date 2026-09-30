@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Check } from 'lucide-svelte';
+  import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Link, Check } from 'lucide-svelte';
   import type { Pile, Resource } from './types';
   let { piles, selected }: { piles: Pile[]; selected: boolean } = $props();
   const icons = {
@@ -10,6 +10,7 @@
     gold: Coins,
     mood_tokens: Smile,
     culture_tokens: Drama,
+    captives: Link,
   };
 </script>
 

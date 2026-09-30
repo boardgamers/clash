@@ -153,7 +153,7 @@ where
     V: Clone + PartialEq,
 {
     b.add_resource_request_with_response(
-        event,
+        event.clone(),
         0,
         |game, p, _| {
             if !p.get(game).can_use_advance(Advance::TradeRoutes) {
@@ -178,6 +178,30 @@ where
             }
         },
     )
+    .add_resource_request(event, -1, |game, p, _| {
+        if p.get(game).active_leader() != Some(crate::leader::Leader::Pygmalion) {
+            return None;
+        }
+        let routes =
+            crate::content::advances::trade_routes::find_trade_routes(game, p.get(game), false);
+        routes
+            .iter()
+            .any(|r| {
+                r.unit_id.is_some()
+                    && crate::content::civilizations::phoenicia::leader_at(
+                        p.get(game),
+                        crate::leader::Leader::Pygmalion,
+                        r.from,
+                    )
+            })
+            .then(|| {
+                ResourceRewardRequest::new(
+                    p.reward_options()
+                        .sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
+                    "Mediterranean Trader · Extra trade income".into(),
+                )
+            })
+    })
 }
 
 fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {

@@ -5,6 +5,8 @@ import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
 const require = createRequire(import.meta.url),
   engine = require('../.engine/server.js');
+const script = await readFile(new URL('../dist/viewer.js', import.meta.url), 'utf8');
+assert(!script.includes('data:application/wasm'), 'Wasm must load once as an external asset');
 const state = engine.stripSecret(
   await engine.init(2, [], { undo: 'SamePlayer', civilization: 'Random' }, 'bundle-test', {}),
   0,

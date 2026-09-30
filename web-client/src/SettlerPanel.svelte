@@ -19,7 +19,7 @@
   const movesLeft = $derived($session.view?.movementLeft ?? 0);
   const first = $derived(units.find((u) => $session.selectedUnits.includes(u.id)));
   const positions = $derived([...new Set(units.map((u) => u.position))]);
-  const atPosition = $derived(units.filter((u) => u.position === first?.position));
+  const atPosition = $derived(units.filter((u) => u.position === ($session.movingCity ?? first?.position)));
   const destination = $derived(
     $session.moveDestination === null ? null : $session.moveDestinations[$session.moveDestination],
   );
@@ -55,7 +55,9 @@
       ? `${bonus.source}: ${bonus.label.toLowerCase()}. Terrain restrictions still apply.`
       : 'Move up to 3 groups for 1 action. A new Move action lets units move again, unless terrain or combat prevents it.'}
   >
-    <Footprints size={22} />Move{#if first}<span class="movement-origin">{first.position}</span>{/if}
+    <Footprints size={22} />Move{#if $session.movingCity || first}<span class="movement-origin"
+        >{$session.movingCity ?? first?.position}</span
+      >{/if}
   </h2>
   {#if bonus}<div class="movement-bonus"><strong>{bonus.source}</strong><span>{bonus.label}</span></div>{/if}
   {#if $session.view?.stopMovement}<div
@@ -83,6 +85,19 @@
           >{/each}
       </div>
     </details>{/if}
+  {#if $session.view?.nomadCities?.length}<div
+      class="settler-picker"
+      role="group"
+      aria-label="Nomadic cities"
+    >
+      {#each $session.view.nomadCities as position}<button
+          class:selected={$session.movingCity === position}
+          aria-pressed={$session.movingCity === position}
+          onmouseenter={() => onHighlight(position)}
+          onmouseleave={() => onHighlight(null)}
+          onclick={() => controller.openNomadCity(position)}><Landmark size={15} />{position}</button
+        >{/each}
+    </div>{/if}
   <div class="unit-picker" role="group" aria-label="Units to move">
     {#each atPosition as u}<button
         class:selected={$session.selectedUnits.includes(u.id)}
@@ -117,7 +132,7 @@
         {#each $session.moveDestinations as d, i}{#if !$session.moveTarget || !!destination || d.position === $session.moveTarget}<button
               class:selected={$session.moveDestination === i}
               aria-pressed={$session.moveDestination === i}
-              title={`${d.position} · ${terrainInfo(d.terrain).label}${d.carrier !== null ? ` · Board ship #${d.carrier + 1}` : ''}${d.attack ? ' · Attack' : ''}`}
+              title={`${d.position} · ${terrainInfo(d.terrain).label}${d.carrier != null ? ` · Board ship #${d.carrier + 1}` : ''}${d.attack ? ' · Attack' : ''}`}
               onmouseenter={() => onHighlight(d.position)}
               onmouseleave={() => onHighlight(null)}
               onfocus={() => onHighlight(d.position)}
@@ -125,7 +140,8 @@
               disabled={$session.pending}
               onclick={() => controller.patch({ moveDestination: i, moveTarget: d.position })}
               ><span><TerrainIcon terrain={d.terrain} />{d.position}</span>
-              {#if d.attack}<Swords size={15} />{:else if d.carrier !== null}<span
+              {#if d.pirateCarrier != null}<span><Ship size={15} /><small>Allied pirate</small></span
+                >{:else if d.attack}<Swords size={15} />{:else if d.carrier != null}<span
                   ><Ship size={15} /><small>#{d.carrier + 1}</small></span
                 >{:else if $session.moveDestination === i}<Check size={15} />{/if}
               {#if Object.values(d.payment).some(Boolean)}<ResourceAmount pile={d.payment} />{/if}
@@ -142,7 +158,7 @@
       >
         {destination.attack
           ? 'Attack'
-          : destination.carrier !== null
+          : destination.carrier != null || destination.pirateCarrier != null
             ? 'Board at'
             : destination.terrain === 'Unexplored'
               ? 'Explore'
@@ -155,18 +171,19 @@
     </div>{/if}
   {#if settler?.foundAction && !$session.view?.stopMovement}<div
       class="settler-found"
-      title={settler.foundReason ?? 'Costs 1 action · Replaces this settler with a city'}
+      title={settler.foundReason ??
+        (settler.foundFree ? 'Founder · Free action' : 'Costs 1 action · Replaces this settler with a city')}
     >
       <button
         class="secondary wide"
         disabled={!settler.foundAction || $session.pending}
         onclick={() => settler?.foundAction && controller.submit(settler.foundAction)}
         ><Landmark size={17} />Found city at {settler.position}<span class="settler-action-cost"
-          ><Zap size={13} />1</span
+          >{#if settler.foundFree}Free{:else}<Zap size={13} />1{/if}</span
         ></button
       >
     </div>{/if}
-  {#if !units.length}<p>Recruit units in a city to explore.</p>{/if}
+  {#if !units.length && !$session.view?.nomadCities?.length}<p>Recruit units in a city to explore.</p>{/if}
   {#if $session.view?.stopMovement}<button
       class="secondary wide finish-moving"
       disabled={$session.pending}

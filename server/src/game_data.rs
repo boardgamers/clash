@@ -242,6 +242,10 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     units: Vec<UnitData>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    captives: Vec<crate::content::civilizations::aztecs::Captive>,
+    #[serde(default, skip_serializing_if = "crate::unit::Units::is_empty")]
+    held_units: crate::unit::Units,
     civilization: String,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -381,6 +385,8 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         incident_tokens: data.incident_tokens,
         completed_objectives: data.completed_objectives,
         captured_leaders: data.captured_leaders,
+        captives: data.captives,
+        held_units: data.held_units,
         special_victory_points: data.special_victory_points,
         custom_actions: HashMap::new(),
         wonder_cards: data.wonder_cards,
@@ -430,6 +436,8 @@ pub fn player_data(player: Player) -> PlayerData {
         incident_tokens: player.incident_tokens,
         completed_objectives: player.completed_objectives,
         captured_leaders: player.captured_leaders,
+        captives: player.captives,
+        held_units: player.held_units,
         special_victory_points: player.special_victory_points,
         wonder_cards: player.wonder_cards,
         action_cards: player.action_cards,
@@ -468,6 +476,8 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         incident_tokens: player.incident_tokens,
         completed_objectives: player.completed_objectives.clone(),
         captured_leaders: player.captured_leaders.clone(),
+        captives: player.captives.clone(),
+        held_units: player.held_units.clone(),
         special_victory_points: player.special_victory_points.clone(),
         wonder_cards: player.wonder_cards.clone(),
         action_cards: player.action_cards.clone(),

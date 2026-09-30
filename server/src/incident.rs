@@ -688,6 +688,11 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             .iter()
             .any(|e| matches!(e.event_type, PersistentEventType::Incident(_)))
         {
+            if info.replaced_by_sacrifice {
+                let id = draw_and_discard_incident_card_from_pile(game, info.active_player);
+                info = IncidentInfo::new(id, info.active_player);
+                continue;
+            }
             if passed_to_player(game, &mut info) {
                 continue;
             }

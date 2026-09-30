@@ -17,6 +17,7 @@ pub enum ResourceType {
     Ideas,
     Gold,
     MoodTokens,    // is not a resource, but a token, with no limit
+    Captives,      // Held army pieces; only explicit abilities may gain or spend these.
     CultureTokens, // is not a resource, but a token, with no limit
 }
 
@@ -28,7 +29,7 @@ impl ResourceType {
 
     #[must_use]
     pub fn is_resource(&self) -> bool {
-        !self.is_token()
+        !self.is_token() && *self != ResourceType::Captives
     }
 
     #[must_use]
@@ -64,6 +65,7 @@ impl ResourceType {
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            ResourceType::Captives => write!(f, "Captives"),
             ResourceType::Food => write!(f, "Food"),
             ResourceType::Wood => write!(f, "Wood"),
             ResourceType::Ore => write!(f, "Ore"),
@@ -152,6 +154,7 @@ pub(crate) fn lose_resources(
         p.resources
     );
     p.resources -= resources.clone();
+    crate::content::civilizations::aztecs::release_captives(game, player, resources.captives);
     add_action_log_item(
         game,
         player,

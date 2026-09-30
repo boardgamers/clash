@@ -23,6 +23,18 @@ pub struct CityPieces {
 }
 
 impl CityPieces {
+    pub(crate) fn set_building_owner(&mut self, building: Building, owner: Option<usize>) {
+        match building {
+            Academy => self.academy = owner,
+            Market => self.market = owner,
+            Obelisk => self.obelisk = owner,
+            Observatory => self.observatory = owner,
+            Fortress => self.fortress = owner,
+            Port => self.port = owner,
+            Temple => self.temple = owner,
+        }
+    }
+
     ///
     ///
     /// # Panics

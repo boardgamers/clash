@@ -1,14 +1,9 @@
 use crate::action::Action;
 use crate::advance::{Advance, AdvanceAction, is_special_advance_active};
-use crate::special_advance::SpecialAdvanceRequirement;
-use crate::payment::PaymentOptions;
-use crate::resource::ResourceType;
-use crate::resource_pile::ResourcePile;
 use crate::card::HandCard;
 use crate::city::MoodState;
 use crate::collect::{
-    Collect, PositionCollection, collect_event_origin, get_total_collection,
-    possible_resource_collections,
+    Collect, PositionCollection, collect_event_origin, possible_resource_collections,
 };
 use crate::consts::OBJECTIVE_VICTORY_POINTS;
 use crate::content::persistent_events::{
@@ -16,9 +11,13 @@ use crate::content::persistent_events::{
 };
 use crate::game::{Game, GameState};
 use crate::objective_card::ObjectiveType;
+use crate::payment::PaymentOptions;
 use crate::player::CostTrigger;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
+use crate::resource::ResourceType;
+use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvanceRequirement;
 use crate::victory_points::victory_points_parts;
 use crate::wonder::Wonder;
 use serde_json::{Value, json};
@@ -33,6 +32,12 @@ pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
     }
     match input["kind"].as_str() {
         Some("decision") => decisions::preview(game, seat, &input),
+        Some("movement") if input["city"].is_string() => actions::nomad_movement(
+            game,
+            seat,
+            serde_json::from_value(input["city"].clone()).map_err(|e| e.to_string())?,
+            serde_json::from_value(input["units"].clone()).map_err(|e| e.to_string())?,
+        ),
         Some("movement") => actions::movement(
             game,
             seat,
@@ -46,6 +51,7 @@ pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
             serde_json::from_value(input["city"].clone()).map_err(|e| e.to_string())?,
             serde_json::from_value(input["selections"].clone()).map_err(|e| e.to_string())?,
             serde_json::from_value(input["variant"].clone()).map_err(|e| e.to_string())?,
+            input["ballcourts"].as_bool().unwrap_or(false),
         ),
         _ => Err("Unknown preview".into()),
     }
@@ -101,6 +107,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "advances": game.cache.get_advances().keys().filter(|a| p.can_use_advance(**a)).map(|a| {
             let mut item = advance_description(game, *a);
             item["borrowed"] = json!(!p.has_advance(*a));
+            item["borrowedSource"] = json!(if crate::content::civilizations::egypt::grants_advance(p, *a) { "Man God" } else { "Great Library" });
             item
         }).chain(p.special_advances.iter().map(|a| {
             let info = a.info(game);
@@ -129,7 +136,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                     "abilities":info.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()}))
             } else { None }
         }).collect::<Vec<_>>(),
-        "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations})).collect::<Vec<_>>()
+        "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
         return json!({"eventCatalog":event_catalog,"pendingEvent":pending_event,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
@@ -192,14 +199,22 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         choices.sort_by_key(Value::to_string);
         let reason = if !can_play { Some("Wait for your turn".to_string()) } else if !city.can_activate() { Some("This city has already been activated while angry".to_string()) } else { collect_reason.clone() };
         json!({"position":city.position,"capital":city.position == crate::map::capital_city_position(game,p),"size":city.size(),"capacity":info.max_selection,"maxPerTile":info.max_per_tile,"maxRange2":info.max_range2_tiles,"mood":city.mood_state,"activations":city.activations,"reason":reason,"choices":choices,
+            "ballcourts":crate::content::civilizations::maya::ballcourts_available(p,city.position),
+            "piratePort":crate::content::civilizations::carthage::pirate_port(game,p,city.position),
+            "shogunateDraft":p.has_special_advance(crate::special_advance::SpecialAdvance::Shogunate)&&p.can_use_advance(Advance::Draft)&&!p.event_info.contains_key("Shogunate Draft"),
             "canActivate":city.can_activate(), "activationMood":after_activation.mood_state,"activationCapacity":after_activation.mood_modified_size(p)})
     }).collect::<Vec<_>>();
     let free_advances = if seat == active && crate::status_phase::get_status_phase(game).is_some() {
-        game.current_event_handler().and_then(|handler| match &handler.request {
-            PersistentEventRequest::SelectAdvance(request) if handler.response.is_none() => Some(&request.choices),
-            _ => None,
-        })
-    } else { None };
+        game.current_event_handler()
+            .and_then(|handler| match &handler.request {
+                PersistentEventRequest::SelectAdvance(request) if handler.response.is_none() => {
+                    Some(&request.choices)
+                }
+                _ => None,
+            })
+    } else {
+        None
+    };
     let mut advances = game.cache.get_advances().iter().map(|(advance, info)| {
         if let Some(choices) = free_advances {
             let owned = p.has_advance(*advance);
@@ -227,12 +242,12 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         else if payment.is_none() { Some("Not enough resources".to_string()) } else { None };
         let action = if reason.is_none() { payment.clone().map(|payment| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment)))) } else { None };
         let mut item = advance_description(game, *advance);
-        let resources = ResourceType::all().into_iter().filter(|r| payment_options.iter().any(|p| p.get(r) > 0))
+        let resources = ResourceType::all().into_iter().chain([ResourceType::Captives]).filter(|r| payment_options.iter().any(|p| p.get(r) > 0))
             .flat_map(|r| serde_json::to_value(ResourcePile::of(r, 1)).unwrap().as_object().unwrap().keys().cloned().collect::<Vec<_>>()).collect::<Vec<_>>();
         let cost_amount = payment_options.iter().map(ResourcePile::amount).min().unwrap_or(0);
         let cost_groups = payment_options.iter().map(ResourcePile::amount).collect::<std::collections::BTreeSet<_>>()
             .into_iter().map(|amount| {
-                let resources = ResourceType::all().into_iter()
+                let resources = ResourceType::all().into_iter().chain([ResourceType::Captives])
                     .filter(|r| payment_options.iter().any(|p| p.amount() == amount && p.get(r) > 0))
                     .flat_map(|r| serde_json::to_value(ResourcePile::of(r, 1)).unwrap().as_object().unwrap().keys().cloned().collect::<Vec<_>>())
                     .collect::<Vec<_>>();
@@ -258,7 +273,8 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
         "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free})).collect::<Vec<_>>()} else {vec![]},
         "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free,"surcharge":a.payment_options(game,seat).default})).collect::<Vec<_>>()} else {vec![]},
-        "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id})).collect::<Vec<_>>(),
+        "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate})).collect::<Vec<_>>(),
+        "nomadCities":p.cities.iter().filter(|c|!crate::content::civilizations::huns::city_destinations(game,p,c.position,&[]).is_empty()).map(|c|c.position).collect::<Vec<_>>(),
         "movementLeft":if let GameState::Movement(m)=&game.state {m.movement_actions_left} else {3},
         "seaRoutes":sea_routes,
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
@@ -268,9 +284,18 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
 
 fn advance_description(game: &Game, advance: Advance) -> Value {
     let info = advance.info(game);
-    let group = game.cache.get_advance_groups().iter().enumerate().find_map(|(group_index, group)| {
-        group.advances.iter().position(|a| a.advance == advance).map(|index| (group.name.clone(), group_index * 10 + index))
-    });
+    let group =
+        game.cache
+            .get_advance_groups()
+            .iter()
+            .enumerate()
+            .find_map(|(group_index, group)| {
+                group
+                    .advances
+                    .iter()
+                    .position(|a| a.advance == advance)
+                    .map(|index| (group.name.clone(), group_index * 10 + index))
+            });
     json!({"id":advance,"name":info.name,"description":info.description,
         "group":group.as_ref().map(|g| &g.0),"order":group.as_ref().map(|g| g.1),"required":info.required,
         "bonus":info.bonus.as_ref().map(|bonus| bonus.resources()),"unlocks":info.unlocked_building.map(|building| building.to_string())})
@@ -280,9 +305,17 @@ fn advance_description(game: &Game, advance: Advance) -> Value {
 // the small set of possible splits, validating every payment against the engine.
 // Keeping unaffordable splits here lets the UI describe the cost independently of stock.
 fn advance_payments(cost: &PaymentOptions) -> Vec<ResourcePile> {
-    fn visit(cost: &PaymentOptions, types: &[ResourceType], remaining: u8, pile: ResourcePile, result: &mut Vec<ResourcePile>) {
+    fn visit(
+        cost: &PaymentOptions,
+        types: &[ResourceType],
+        remaining: u8,
+        pile: ResourcePile,
+        result: &mut Vec<ResourcePile>,
+    ) {
         let Some((resource, rest)) = types.split_first() else {
-            if cost.is_valid_payment(&pile) { result.push(pile); }
+            if cost.is_valid_payment(&pile) {
+                result.push(pile);
+            }
             return;
         };
         for amount in 0..=remaining {
@@ -295,7 +328,13 @@ fn advance_payments(cost: &PaymentOptions) -> Vec<ResourcePile> {
     types.sort();
     types.dedup();
     let mut result = Vec::new();
-    visit(cost, &types, cost.default_payment().amount(), ResourcePile::empty(), &mut result);
+    visit(
+        cost,
+        &types,
+        cost.default_payment().amount(),
+        ResourcePile::empty(),
+        &mut result,
+    );
     result
 }
 
@@ -387,7 +426,14 @@ pub fn collect_preview(
     city: Position,
     selections: Vec<PositionCollection>,
 ) -> Result<Value, String> {
-    collect_variant_preview(game, seat, city, selections, PlayingActionType::Collect)
+    collect_variant_preview(
+        game,
+        seat,
+        city,
+        selections,
+        PlayingActionType::Collect,
+        false,
+    )
 }
 
 fn collect_variant_preview(
@@ -396,6 +442,7 @@ fn collect_variant_preview(
     city: Position,
     selections: Vec<PositionCollection>,
     kind: PlayingActionType,
+    ballcourts: bool,
 ) -> Result<Value, String> {
     if seat >= game.players.len() || !game.player(seat).is_human() || seat != game.active_player() {
         return Err("Wait for your turn".to_string());
@@ -412,21 +459,37 @@ fn collect_variant_preview(
         return Err("Choose at least one resource".to_string());
     }
     let origin = collect_event_origin(&kind, p);
-    let collection = get_total_collection(
+    let collection = crate::collect::get_total_collection_with_ballcourts(
         game,
         seat,
         &origin,
         city,
         &selections,
         CostTrigger::NoModifiers,
+        ballcourts,
     )?;
-    let effects = collection.info.log.iter().map(|(origin, description)| {
-        json!({"source":origin.name(game),"description":description})
-    }).collect::<Vec<_>>();
+    if ballcourts
+        && p.resources.mood_tokens
+            < kind
+                .payment_options(game, seat)
+                .first_valid_payment(&p.resources)
+                .map_or(0, |pile| pile.mood_tokens)
+                + 1
+    {
+        return Err("Not enough mood for this action and Ballcourts".into());
+    }
+    let effects = collection
+        .info
+        .log
+        .iter()
+        .map(|(origin, description)| json!({"source":origin.name(game),"description":description}))
+        .collect::<Vec<_>>();
     let total = collection.total;
     let mut after = p.resources.clone() + total.clone();
     let waste = after.apply_resource_limit(&p.resource_limit);
-    let action = Action::Playing(PlayingAction::Collect(Collect::new(city, selections, kind)));
+    let mut collect = Collect::new(city, selections, kind);
+    collect.ballcourts = ballcourts;
+    let action = Action::Playing(PlayingAction::Collect(collect));
     Ok(
         json!({"action":action,"total":total,"effects":effects,"waste":waste,"after":after,"moodWillDecrease":city_data.is_activated()}),
     )

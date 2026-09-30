@@ -67,6 +67,7 @@ impl CombatStrength {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Default)]
 pub enum CombatEventPhase {
     AllowTacticsCard,
+    Loyalty,
     #[default]
     Default,
     RevealTacticsCard,
@@ -83,6 +84,8 @@ impl CombatEventPhase {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatRoundStart {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displaced_unit: Option<u32>,
     pub combat: Combat,
     #[serde(default)]
     #[serde(skip_serializing_if = "CombatEventPhase::is_default")]
@@ -99,6 +102,7 @@ impl CombatRoundStart {
     pub fn new(combat: Combat) -> Self {
         Self {
             combat,
+            displaced_unit: None,
             attacker_strength: CombatStrength::new(),
             defender_strength: CombatStrength::new(),
             phase: CombatEventPhase::AllowTacticsCard,
@@ -108,12 +112,17 @@ impl CombatRoundStart {
 
     #[must_use]
     pub fn is_active(&self, player: usize, action_card: u8, target: TacticsCardTarget) -> bool {
-        target.is_active(
-            player,
-            &self.combat,
-            action_card,
-            self.attacker_strength.tactics_card.as_ref(),
-        )
+        !self
+            .combat
+            .stats
+            .ignored_tactics_cards
+            .contains(&action_card)
+            && target.is_active(
+                player,
+                &self.combat,
+                action_card,
+                self.attacker_strength.tactics_card.as_ref(),
+            )
     }
 }
 
@@ -198,12 +207,13 @@ impl CombatRoundEnd {
 
     #[must_use]
     pub fn is_active(&self, player: usize, card: u8, target: TacticsCardTarget) -> bool {
-        target.is_active(
-            player,
-            &self.combat,
-            card,
-            self.attacker.tactics_card.as_ref(),
-        )
+        !self.combat.stats.ignored_tactics_cards.contains(&card)
+            && target.is_active(
+                player,
+                &self.combat,
+                card,
+                self.attacker.tactics_card.as_ref(),
+            )
     }
 
     #[must_use]
@@ -252,8 +262,9 @@ impl CombatRoundEnd {
     }
 }
 
-const ROUND_START_TYPES: &[CombatEventPhase; 4] = &[
+const ROUND_START_TYPES: &[CombatEventPhase; 5] = &[
     CombatEventPhase::AllowTacticsCard,
+    CombatEventPhase::Loyalty,
     CombatEventPhase::Default,
     CombatEventPhase::RevealTacticsCard,
     CombatEventPhase::TacticsCard,
@@ -270,6 +281,7 @@ pub(crate) fn combat_round_start(
         ROUND_START_TYPES,
         |phase| match phase {
             CombatEventPhase::AllowTacticsCard => |e| &mut e.combat_round_start_allow_tactics,
+            CombatEventPhase::Loyalty => |e| &mut e.loyalty,
             CombatEventPhase::Default => |e| &mut e.combat_round_start,
             CombatEventPhase::RevealTacticsCard => |e| &mut e.combat_round_start_reveal_tactics,
             CombatEventPhase::TacticsCard => |e| &mut e.combat_round_start_tactics,
@@ -417,6 +429,16 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
                     reveal_card,
                 )
             }
+            CombatEventPhase::Loyalty => {
+                if let Some(player) = crate::content::civilizations::celts::loyalty_controller(
+                    game,
+                    get_combat(&event_type),
+                ) {
+                    game.trigger_persistent_event(&[player], event, event_type, store_type)
+                } else {
+                    Some(event_type)
+                }
+            }
             CombatEventPhase::Done => panic!("Invalid round type"),
         })?;
     }
@@ -519,7 +541,8 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
             |event| &mut event.combat_round_end,
             1,
             move |game, player, r| {
-                let choices = r.combat.fighting_units(game, player.index).clone();
+                let mut choices = r.combat.fighting_units(game, player.index).clone();
+                choices.sort_by_key(|id| !game.player(player.index).get_unit(*id).pirate);
 
                 let role = r.role(player.index);
                 let role_str = if role.is_attacker() {

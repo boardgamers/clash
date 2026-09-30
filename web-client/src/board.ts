@@ -858,7 +858,7 @@ export class World {
           const pawn = new THREE.Group();
           pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id };
           this.pieces.push(pawn);
-          const color = this.material(playerColor(player.id, s.colorBlind));
+          const color = this.material(unit.pirate ? '#343c3b' : playerColor(player.id, s.colorBlind));
           const body = this.mesh(new THREE.ConeGeometry(0.085, 0.27, 7), color);
           body.position.y = 0.19;
           pawn.add(body);

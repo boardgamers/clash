@@ -30,8 +30,14 @@ impl CustomAction {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct CustomActionActivation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) purchase_cost: Option<crate::player_events::CostInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) selected_structure: Option<crate::content::persistent_events::SelectedStructure>,
     #[serde(flatten)]
     pub action: CustomAction,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) selected_unit: Option<(usize, u32)>,
     #[serde(default)]
     #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     pub payment: ResourcePile,
@@ -46,6 +52,9 @@ impl CustomActionActivation {
             action,
             payment,
             advance_purchase: None,
+            selected_unit: None,
+            selected_structure: None,
+            purchase_cost: None,
         }
     }
 }
@@ -170,6 +179,31 @@ pub enum CustomActionType {
 
     // India
     GoldenAge,
+
+    // Egypt
+    Beloved,
+    Constructor,
+
+    // Maya
+    Calendar,
+    Reconstruction,
+
+    // Persia
+    KingOfPersia,
+    Architect,
+    Scholar,
+    JapaneseBuddhism,
+    ShogunateDraft,
+    Enforcer,
+    TribalAllies,
+    SpreadOfFear,
+    MassSacrifice,
+    Tributes,
+    Hegemony,
+    HegemonyFounder,
+    Founder,
+    Navigator,
+    SacrificeCaptives,
 }
 
 impl CustomActionType {

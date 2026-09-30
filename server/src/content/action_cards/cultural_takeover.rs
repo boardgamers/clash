@@ -136,8 +136,15 @@ pub(crate) fn use_cultural_takeover() -> Ability {
             5,
             |c, _, game, _| {
                 if let Ok(i) = c
+                    && i.target_unit.is_none()
                     && matches!(i.structure, Structure::CityCenter)
-                    && !(is_barbarian_takeover(game, i) || i.barbarian_takeover_check)
+                    && !(is_barbarian_takeover(game, i)
+                        || i.barbarian_takeover_check
+                        || crate::content::civilizations::celts::can_mark_city(
+                            game,
+                            i.info.player,
+                            i.position,
+                        ))
                 {
                     *c = Err("City center can't be influenced".to_string());
                 }

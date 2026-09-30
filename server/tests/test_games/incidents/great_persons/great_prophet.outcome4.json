@@ -14,7 +14,8 @@
     {
       "event_type": {
         "Construct": {
-          "building": "Temple"
+          "building": "Temple",
+          "city_position": "C1"
         }
       },
       "player": 0,

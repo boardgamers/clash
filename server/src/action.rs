@@ -204,6 +204,7 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
         &(),
     );
     for p in game.human_player_ids() {
+        crate::content::civilizations::carthage::sync_pirates(game, p);
         add_dynamic_victory_points(game, p);
     }
 }
@@ -282,6 +283,7 @@ pub(crate) fn execute_custom_phase_action(
         Incident(i) => on_trigger_incident(game, i),
         StopBarbarianMovement(movable) => on_stop_barbarian_movement(game, movable),
         ActionCard(a) => on_play_action_card(game, player, a),
+        DeclareActionCard(a) => crate::content::civilizations::japan::on_declare_card(game, a)?,
         WonderCard(w) => on_play_wonder_card(game, player, w),
         SelectObjectives(c) => {
             on_objective_cards(game, player, c);

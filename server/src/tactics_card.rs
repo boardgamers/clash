@@ -346,7 +346,12 @@ fn available_tactics_cards(game: &Game, player: usize, combat: &Combat) -> Vec<H
         .collect()
 }
 
-fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: &Combat) -> bool {
+pub(crate) fn can_play_tactics_card(
+    game: &Game,
+    player: usize,
+    card: &ActionCard,
+    combat: &Combat,
+) -> bool {
     match &card.tactics_card {
         Some(card) => {
             let position_met = card

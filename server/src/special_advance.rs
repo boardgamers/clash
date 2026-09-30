@@ -47,6 +47,50 @@ pub enum SpecialAdvance {
     Proselytism,
     Prosperity,
     PeaceAndPoetry,
+
+    // Egypt
+    FloodPlains,
+    Architecture,
+    Embalming,
+    ManGod,
+
+    // Phoenicia
+    CityIndependence,
+    Biremes,
+    Alphabet,
+    CedarsAndDyes,
+
+    // Maya
+    Terracing,
+    Stelas,
+    Ballcourts,
+    Calendar,
+
+    // Persia
+    PersianElephants,
+    Immortals,
+    Zoroastrianism,
+    Banking,
+    Pottery,
+    Horsemanship,
+    Subterfuge,
+    Shogunate,
+    Nomads,
+    MountedArchers,
+    Raiders,
+    HunnicTribes,
+    TribalWarfare,
+    TribalAllies,
+    DruidicInfluence,
+    TribalTrade,
+    Captives,
+    HumanSacrifice,
+    AztecGold,
+    TributeEmpire,
+    Warbeasts,
+    Hegemony,
+    PirateAllies,
+    Mercenaries,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

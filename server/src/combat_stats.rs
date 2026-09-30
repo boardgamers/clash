@@ -11,6 +11,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatPlayerStats {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tactics_cards: Vec<u8>,
     pub position: Position,
     pub player: usize,
     #[serde(default)]
@@ -28,6 +30,7 @@ impl CombatPlayerStats {
             player,
             present,
             losses: Units::empty(),
+            tactics_cards: Vec::new(),
             position,
         }
     }
@@ -78,6 +81,8 @@ impl Battleground {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStats {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ignored_tactics_cards: Vec<u8>,
     pub round: u32, //starts with one,
     pub battleground: Battleground,
     #[serde(default)]
@@ -116,6 +121,7 @@ impl CombatStats {
             defender,
             result,
             claimed_action_cards: Vec::new(),
+            ignored_tactics_cards: Vec::new(),
             selected_card: None,
             round: 1,
             city_mood,

@@ -45,8 +45,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 })
         },
     )
-    .add_player_request(
-        |e| &mut e.play_action_card,
+    .add_target_player_request(
         0,
         |game, player, _| {
             Some(PlayerRequest::new(
@@ -149,8 +148,7 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         move |game, p, _| !opponents_not_affected_by_assassination(game, p.index).is_empty(),
     )
     .tactics_card(tactics_card)
-    .add_player_request(
-        |e| &mut e.play_action_card,
+    .add_target_player_request(
         0,
         |game, p, _| {
             Some(PlayerRequest::new(

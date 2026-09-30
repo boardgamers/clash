@@ -29,8 +29,12 @@ export function movementBonus(game: Game | null): MovementBonus | null {
     const playing = action.Playing;
     if (!playing || typeof playing !== 'object') return null;
     const key = `${age?.age}/${round?.round}/${round?.turns.length}/${i}`;
+    if ('Recruit' in playing && entry.log?.some((line) => line.includes('Mounted Archers · Move')))
+      return { source: 'Mounted Archers', label: 'Free moves for new Cavalry', key };
     if ('Recruit' in playing && entry.log?.some((line) => line.includes(': Expansion: Expansion allows')))
       return { source: 'Expansion', label: 'Free settler moves', key };
+    if ('Custom' in playing && (playing.Custom as { action?: string })?.action === 'Navigator')
+      return { source: 'Navigator', label: 'Free move with Hanno’s fleet', key };
     if ('ActionCard' in playing && playing.ActionCard === 24)
       return { source: 'Great Warlord', label: 'Bonus Move action', key };
     return null;

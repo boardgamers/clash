@@ -40,6 +40,13 @@ pub struct CivilCard {
     pub action_type: ActionCost,
     pub combat_requirement: Option<CombatRequirement>,
     pub(crate) target: CivilCardTarget,
+    pub(crate) target_choices: Option<
+        Arc<
+            dyn Fn(&Game, usize) -> Option<crate::content::persistent_events::PlayerRequest>
+                + Send
+                + Sync,
+        >,
+    >,
 }
 
 #[derive(Clone)]
@@ -80,6 +87,7 @@ impl ActionCard {
             tactics_card: None,
             action_cost: cost(ActionCostBuilder::new(None)).cost,
             target: CivilCardTarget::ActivePlayer,
+            target_choices: None,
         }
     }
 
@@ -103,9 +111,68 @@ pub struct ActionCardBuilder {
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
     target: CivilCardTarget,
+    target_choices: Option<
+        Arc<
+            dyn Fn(&Game, usize) -> Option<crate::content::persistent_events::PlayerRequest>
+                + Send
+                + Sync,
+        >,
+    >,
 }
 
 impl ActionCardBuilder {
+    /// Announce a target before Subterfuge resolves, then reuse it in the card's effect.
+    pub(crate) fn add_target_player_request(
+        mut self,
+        priority: i32,
+        request: impl Fn(
+            &mut Game,
+            &EventPlayer,
+            &mut ActionCardInfo,
+        ) -> Option<crate::content::persistent_events::PlayerRequest>
+        + Clone
+        + Send
+        + Sync
+        + 'static,
+        apply: impl Fn(
+            &mut Game,
+            &crate::ability_initializer::SelectedSingleChoice<usize>,
+            &mut ActionCardInfo,
+        ) + Clone
+        + Send
+        + Sync
+        + 'static,
+    ) -> Self {
+        let id = self.id;
+        let preview = request.clone();
+        let target = self.target;
+        self.target_choices = Some(Arc::new(move |game, player| {
+            let mut game = game.clone();
+            let p = EventPlayer::from_player(player, &game, EventOrigin::CivilCard(id));
+            let mut info = ActionCardInfo::new(
+                id,
+                None,
+                (target == CivilCardTarget::AllPlayers).then_some(player),
+            );
+            preview(&mut game, &p, &mut info)
+        }));
+        self.add_player_request(
+            |e| &mut e.play_action_card,
+            priority,
+            move |game, p, info| {
+                let mut choices = request(game, p, info)?;
+                if let Some(value) = p.get_mut(game).event_info.remove("Announced card target") {
+                    let (card, target): (u8, usize) = serde_json::from_str(&value).unwrap();
+                    if card == info.id && choices.choices.contains(&target) {
+                        choices.choices = vec![target];
+                    }
+                }
+                Some(choices)
+            },
+            apply,
+        )
+    }
+
     #[must_use]
     pub fn tactics_card(mut self, tactics_card: TacticsCardFactory) -> Self {
         self.tactics_card = Some(tactics_card(self.id));
@@ -136,6 +203,7 @@ impl ActionCardBuilder {
                 listeners: self.builder.build(),
                 action_type: self.action_cost,
                 target: self.target,
+                target_choices: self.target_choices,
             },
             self.tactics_card,
         )
@@ -205,6 +273,11 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
 }
 
 pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
+    let controller = crate::content::civilizations::celts::delegated_player(game, player.index);
+    if controller != player.index {
+        let p = EventPlayer::from_player(controller, game, player.origin.clone());
+        return gain_action_card_from_pile(game, &p);
+    }
     if player
         .get(game)
         .wonders_owned
@@ -238,6 +311,11 @@ pub(crate) fn gain_action_card(
     action_card: u8,
     from: HandCardLocation,
 ) {
+    let controller = crate::content::civilizations::celts::delegated_player(game, player.index);
+    if controller != player.index {
+        let p = EventPlayer::from_player(controller, game, player.origin.clone());
+        return gain_action_card(game, &p, action_card, from);
+    }
     player.get_mut(game).action_cards.push(action_card);
     log_card_transfer(
         game,
@@ -350,7 +428,24 @@ pub(crate) fn can_play_civil_card(game: &Game, p: &Player, id: u8) -> Result<(),
             return Err("Requirement not met".to_string());
         }
     }
-    if !(civil_card.can_play)(game, p, &ActionCardInfo::new(id, satisfying_action, None)) {
+    // Shogunate can start an action-cost card at zero actions. Its normal action
+    // allowance must also be visible to prerequisites for follow-up actions.
+    let mut preview;
+    let eligibility_game = if game.actions_left == 0
+        && !civil_card.action_type.free
+        && crate::content::civilizations::japan::shogunate_available(p)
+    {
+        preview = game.clone();
+        preview.actions_left = 1;
+        &preview
+    } else {
+        game
+    };
+    if !(civil_card.can_play)(
+        eligibility_game,
+        p,
+        &ActionCardInfo::new(id, satisfying_action, None),
+    ) {
         return Err("Cannot play action card".to_string());
     }
     Ok(())

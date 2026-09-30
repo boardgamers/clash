@@ -7,11 +7,15 @@
       .map((player) => {
         const units = (player.units?.filter((unit) => unit.position === position) ?? []).flatMap((unit) => [
           unit,
-          ...(unit.carried_units ?? []).map((carried) => ({ ...carried, position })),
+          ...(unit.carried_units ?? []).map((carried) => ({ ...carried, position, pirate: false })),
         ]);
         const groups = new Map<string, { type: string | { Leader: string }; count: number }>();
         for (const unit of units) {
-          const name = typeof unit.unit_type === 'string' ? unit.unit_type : unit.unit_type.Leader;
+          const name = unit.pirate
+            ? 'Allied pirate ship'
+            : typeof unit.unit_type === 'string'
+              ? unit.unit_type
+              : unit.unit_type.Leader;
           const group = groups.get(name) ?? { type: unit.unit_type, count: 0 };
           group.count++;
           groups.set(name, group);

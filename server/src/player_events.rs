@@ -107,6 +107,8 @@ pub(crate) struct PersistentEvents {
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
     pub pay_action: PersistentEvent<ActionPayment>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
+    pub declare_action_card:
+        PersistentEvent<crate::content::civilizations::japan::CardAnnouncement>,
     pub play_wonder_card: PersistentEvent<WonderCardInfo>,
 
     pub status_phase: PersistentEvent<StatusPhaseState>,
@@ -116,6 +118,7 @@ pub(crate) struct PersistentEvents {
     pub combat_start: PersistentEvent<Combat>,
     pub combat_round_start_allow_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_start: PersistentEvent<CombatRoundStart>,
+    pub loyalty: PersistentEvent<CombatRoundStart>,
     pub combat_round_start_reveal_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_start_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_end: PersistentEvent<CombatRoundEnd>,
@@ -144,6 +147,7 @@ impl PersistentEvents {
             explore_resolution: Event::new("explore_resolution"),
             pay_action: Event::new("pay_action"),
             play_action_card: Event::new("play_action_card"),
+            declare_action_card: Event::new("declare_action_card"),
             play_wonder_card: Event::new("play_wonder_card"),
 
             status_phase: Event::new("status_phase"),
@@ -152,6 +156,7 @@ impl PersistentEvents {
             stop_barbarian_movement: Event::new("stop_barbarian_movement"),
             combat_start: Event::new("combat_start"),
             combat_round_start: Event::new("combat_round_start"),
+            loyalty: Event::new("loyalty"),
             combat_round_start_reveal_tactics: Event::new("combat_round_start_reveal_tactics"),
             combat_round_start_allow_tactics: Event::new("combat_round_start_allow_tactics"),
             combat_round_start_tactics: Event::new("combat_round_start_tactics"),
@@ -254,6 +259,8 @@ pub struct IncidentInfo {
     #[serde(default)]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub consumed: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub replaced_by_sacrifice: bool,
 
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -277,6 +284,7 @@ impl IncidentInfo {
             active_player,
             passed: None,
             consumed: false,
+            replaced_by_sacrifice: false,
             barbarians: None,
             selected_player: None,
             selected_position: None,

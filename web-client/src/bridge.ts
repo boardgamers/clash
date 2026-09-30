@@ -1,4 +1,4 @@
-import { initSync, webView, webCollectPreview, webRecruitPreview, webQuery } from '../.bridge/server.js';
+import initWasm, { webView, webCollectPreview, webRecruitPreview, webQuery } from '../.bridge/server.js';
 import wasm from '../.bridge/server_bg.wasm?url&no-inline';
 import type { Bridge } from './types';
 let ready: Promise<Bridge> | undefined;
@@ -6,9 +6,9 @@ export function loadBridge(): Promise<Bridge> {
   return (ready ??= initialize());
 }
 async function initialize(): Promise<Bridge> {
-  const bytes = wasm.startsWith('data:')
-    ? Uint8Array.from(atob(wasm.split(',')[1]), (c) => c.charCodeAt(0))
-    : new Uint8Array(await (await fetch(wasm)).arrayBuffer());
-  initSync({ module: bytes });
+  const response = await fetch(wasm);
+  if (!response.ok) throw new Error(`Could not load the game engine (HTTP ${response.status}).`);
+  // The full engine exceeds browsers' synchronous WebAssembly compilation limit.
+  await initWasm({ module_or_path: response });
   return { webView, webCollectPreview, webRecruitPreview, webQuery };
 }

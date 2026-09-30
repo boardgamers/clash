@@ -8,6 +8,7 @@ use crate::combat::Combat;
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
+pub use crate::content::civilizations::aztecs::Captive;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::cultural_influence::InfluenceCultureInfo;
 use crate::events::EventOrigin;
@@ -40,6 +41,7 @@ pub enum PersistentEventRequest {
     SelectPositions(PositionRequest),
     SelectUnitType(UnitTypeRequest),
     SelectUnits(UnitsRequest),
+    SelectCaptives(MultiRequest<crate::content::civilizations::aztecs::Captive>),
     SelectStructures(StructuresRequest),
     SelectHandCards(HandCardsRequest),
     BoolRequest(String),
@@ -56,6 +58,7 @@ pub enum EventResponse {
     SelectPositions(Vec<Position>),
     SelectUnitType(UnitType),
     SelectUnits(Vec<u32>),
+    SelectCaptives(Vec<crate::content::civilizations::aztecs::Captive>),
     SelectHandCards(Vec<HandCard>),
     SelectStructures(Vec<SelectedStructure>),
     Bool(bool),
@@ -117,6 +120,7 @@ pub enum PersistentEventType {
     Incident(IncidentInfo),
     StopBarbarianMovement(Vec<Position>),
     ActionCard(ActionCardInfo),
+    DeclareActionCard(crate::content::civilizations::japan::CardAnnouncement),
     WonderCard(WonderCardInfo),
     DrawWonderCard(DrawWonderCard),
     SelectObjectives(SelectObjectivesInfo),
@@ -359,7 +363,9 @@ impl EventResponse {
         };
         s.response = Some(self);
         let details = game.current_event().event_type.clone();
-        execute_custom_phase_action(game, player_index, details)
+        let actor = game.current_event().player.index;
+        let _ = player_index;
+        execute_custom_phase_action(game, actor, details)
     }
 }
 

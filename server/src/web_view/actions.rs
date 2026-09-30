@@ -27,7 +27,8 @@ pub fn recruit_extended(game: &Game, seat: usize, input: &Value) -> Result<Value
         serde_json::from_value(input["replaced"].clone()).map_err(|e| e.to_string())?;
     let p = game.player(seat);
     let city = p.try_get_city(position).ok_or("Choose your city")?;
-    if units.is_empty() {
+    let draft_card = input["draftCard"].as_bool().unwrap_or(false);
+    if units.is_empty() && !draft_card {
         return Err("Choose units to recruit".into());
     }
     if units
@@ -46,20 +47,38 @@ pub fn recruit_extended(game: &Game, seat: usize, input: &Value) -> Result<Value
     {
         return Err("Choose units to replace".into());
     }
-    let cost = recruit_cost(
+    let ballcourts = input["ballcourts"].as_bool().unwrap_or(false);
+    let cost = crate::recruit::recruit_cost_with_options(
         game,
         p,
         &units,
         position,
         &replaced,
         CostTrigger::NoModifiers,
+        ballcourts,
+        draft_card,
     )?;
     let payment = cost
         .cost
         .first_valid_payment(&p.resources)
         .ok_or("Not enough resources")?;
+    let mut recruit =
+        Recruit::new(&units, position, payment.clone()).with_replaced_units(&replaced);
+    recruit.ballcourts = ballcourts;
+    recruit.draft_card = draft_card;
+    recruit.attack_pirates = input["attackPirates"].as_bool().unwrap_or(false);
+    if let Some(payment) = input.get("payment").filter(|p| !p.is_null()) {
+        let payment: crate::resource_pile::ResourcePile =
+            serde_json::from_value(payment.clone()).map_err(|e| e.to_string())?;
+        if !p.resources.has_at_least(&payment) || !cost.cost.is_valid_payment(&payment) {
+            return Err("Choose a valid recruitment payment".into());
+        }
+        recruit.payment = payment;
+    }
+    crate::content::civilizations::carthage::validate_recruit(game, p, &recruit)?;
+    let payments = super::decisions::payment_choices(&cost.cost, &p.resources, false, false);
     Ok(
-        json!({"payment":payment,"moodWillDecrease":city.is_activated(),"action":Action::Playing(PlayingAction::Recruit(Recruit::new(&units,position,payment.clone()).with_replaced_units(&replaced)))}),
+        json!({"payment":recruit.payment,"payments":payments,"moodWillDecrease":city.is_activated(),"action":Action::Playing(PlayingAction::Recruit(recruit))}),
     )
 }
 
@@ -156,6 +175,79 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
             }
         }
     }
+    if p.has_special_advance(crate::special_advance::SpecialAdvance::PirateAllies) {
+        let pirates = crate::content::civilizations::carthage::pirate_player(game);
+        if units.iter().all(|id| !p.get_unit(*id).is_ship()) {
+            for ship in &game.player(pirates).units {
+                let mut preview = game.clone();
+                let carrier = crate::content::civilizations::carthage::claim_pirate(
+                    &mut preview,
+                    seat,
+                    ship.id,
+                );
+                for route in possible_move_routes(
+                    preview.player(seat),
+                    &preview,
+                    &units,
+                    start,
+                    Some(carrier),
+                )
+                .unwrap_or_default()
+                {
+                    if route.destination != ship.position {
+                        continue;
+                    }
+                    if let Some(payment) = route.cost.first_valid_payment(&p.resources) {
+                        let mut action =
+                            MoveUnits::new(units.clone(), route.destination, None, payment.clone());
+                        action.embark_pirate = Some(ship.id);
+                        destinations.push(json!({"position":route.destination,"terrain":game.map.get(route.destination),"payment":payment,"carrier":null,"pirateCarrier":ship.id,"label":"Board allied pirate","attack":false,"action":Action::Movement(MovementAction::Move(action))}));
+                    }
+                }
+            }
+        } else if units
+            .iter()
+            .all(|id| p.get_unit(*id).is_ship() && !p.get_unit(*id).pirate)
+        {
+            let targets = game
+                .player(pirates)
+                .units
+                .iter()
+                .map(|u| u.position)
+                .chain(p.units.iter().filter(|u| u.pirate).map(|u| u.position))
+                .collect::<std::collections::BTreeSet<_>>();
+            for target in targets {
+                let mut preview = game.clone();
+                let mut action = MoveUnits::new(
+                    units.clone(),
+                    target,
+                    None,
+                    crate::resource_pile::ResourcePile::empty(),
+                );
+                action.attack_pirates = true;
+                if crate::content::civilizations::carthage::prepare_move(
+                    &mut preview,
+                    seat,
+                    &mut action,
+                )
+                .is_err()
+                {
+                    continue;
+                }
+                if let Some(route) =
+                    possible_move_routes(preview.player(seat), &preview, &units, start, None)
+                        .unwrap_or_default()
+                        .into_iter()
+                        .find(|r| r.destination == target)
+                {
+                    if let Some(payment) = route.cost.first_valid_payment(&p.resources) {
+                        action.payment = payment.clone();
+                        destinations.push(json!({"position":target,"terrain":game.map.get(target),"payment":payment,"carrier":null,"label":"Attack pirates","attack":true,"action":Action::Movement(MovementAction::Move(action))}));
+                    }
+                }
+            }
+        }
+    }
     destinations.sort_by_key(|d| d["position"].as_str().unwrap_or_default().to_owned());
     Ok(json!({"destinations":destinations}))
 }
@@ -164,7 +256,7 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     game.player(seat).action_cards.iter().filter(|id|**id!=0).map(|id| {
         let c = game.cache.get_action_card(*id);
         let reason = action_reason(game,seat,can_play,PlayingActionType::ActionCard(*id));
-        json!({"id":id,"name":c.civil_card.name,"description":c.civil_card.description,"free":c.civil_card.action_type.free,
+        json!({"id":id,"name":c.civil_card.name,"description":c.civil_card.description,"free":PlayingActionType::ActionCard(*id).cost(game,seat).free,
             "cost":PlayingActionType::ActionCard(*id).payment_options(game,seat).default,
             "tactics":c.tactics_card.as_ref().map(|t|json!({"name":t.name,"description":t.description})),
             "reason":reason,"action":reason.is_none().then(||Action::Playing(PlayingAction::ActionCard(*id)))})
@@ -193,12 +285,12 @@ pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
 pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     use crate::cultural_influence::{
         InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
-        influence_start_positions, influence_culture_boost_cost_from,
+        influence_culture_boost_cost_from, influence_start_positions,
     };
     if !can_play {
         return vec![];
     }
-    available_influence_actions(game,seat).into_iter().flat_map(|kind| {
+    let mut offers: Vec<Value> = available_influence_actions(game,seat).into_iter().flat_map(|kind| {
         available_influence_culture(game,seat,&kind).into_iter().filter_map(|(s,r)| {
             let info = r.ok()?;
             let origins = influence_start_positions(game,game.player(seat)).into_iter().map(|(p,_)|p)
@@ -216,7 +308,41 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
                 "origins":origins,
                 "action":Action::Playing(PlayingAction::InfluenceCultureAttempt(InfluenceCultureAttempt::new(s,kind.clone())))}))
         }).collect::<Vec<_>>()
-    }).collect()
+    }).collect();
+    if game
+        .player(seat)
+        .has_special_advance(crate::special_advance::SpecialAdvance::Zoroastrianism)
+    {
+        for kind in available_influence_actions(game, seat) {
+            for owner in &game.players {
+                for unit in &owner.units {
+                    let mut attempt = InfluenceCultureAttempt::new(
+                        crate::content::persistent_events::SelectedStructure::new(
+                            unit.position,
+                            crate::structure::Structure::CityCenter,
+                        ),
+                        kind.clone(),
+                    );
+                    attempt.target_unit = Some(crate::cultural_influence::InfluenceUnit {
+                        player: owner.index,
+                        unit: unit.id,
+                    });
+                    let Ok(info) =
+                        crate::cultural_influence::unit_influence_cost(game, seat, &attempt, true)
+                    else {
+                        continue;
+                    };
+                    let origins=influence_start_positions(game,game.player(seat)).into_iter().filter_map(|(pos,_)| {
+                    let mut selected=attempt.clone();selected.starting_position=Some(pos);
+                    let from=crate::cultural_influence::unit_influence_cost(game,seat,&selected,true).ok()?;
+                    Some(json!({"position":pos,"settlers":false,"reroll":false,"payment":from.range_boost_cost.default_payment(),"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(selected))}))
+                }).collect::<Vec<_>>();
+                    offers.push(json!({"name":format!("{} · {} #{}",owner.civilization.name,unit.unit_type.non_leader_name(),unit.id+1),"position":unit.position,"origin":info.starting_city_position,"variant":"Zoroastrianism","payment":info.range_boost_cost.default_payment(),"origins":origins,"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(attempt))}));
+                }
+            }
+        }
+    }
+    offers
 }
 
 fn action_reason(
@@ -245,7 +371,8 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             let choices = if reason.is_none() {positions.into_iter().map(|port| json!({"position":port,
                 "action":Action::Playing(PlayingAction::Construct(Construct::new(city.position, building, payment.clone()).with_port_position(port)))})).collect::<Vec<_>>()} else {vec![]};
             json!({"name":building.to_string(),"owned":!city.pieces.can_add_building(building),
-                "required":game.cache.get_building_advance(building).name(game),"payment":payment,"reason":reason,"choices":choices,
+                "required":game.cache.get_building_advance(building).name(game),"payment":payment,
+                "payments":super::decisions::payment_choices(&cost.cost,&p.resources,false,false),"reason":reason,"choices":choices,
                 "moodWillDecrease":cost.activate_city && city.is_activated()})
         }).collect::<Vec<_>>();
         let recruits = [UnitType::Settler,UnitType::Infantry,UnitType::Cavalry,UnitType::Elephant,UnitType::Ship].into_iter().map(|unit| {
@@ -311,9 +438,27 @@ pub fn settlers(game: &Game, seat: usize, can_move: bool) -> Vec<Value> {
                 "position":route.destination,"terrain":game.map.get(route.destination),"payment":payment,
                 "action":Action::Movement(MovementAction::Move(MoveUnits::new(vec![unit.id],route.destination,None,payment.clone())))}))).collect::<Vec<_>>() } else {vec![]};
         destinations.sort_by_key(|d|d["position"].as_str().unwrap_or_default().to_string());
-        let found_reason = action_reason(game,seat,game.state==GameState::Playing && seat==game.active_player(),PlayingActionType::FoundCity)
+        let founder = p.active_leader()==Some(crate::leader::Leader::QueenDido) && crate::leader::leader_position(p)==unit.position;
+        let found_kind=if founder {PlayingActionType::Custom(crate::content::custom_actions::CustomActionType::Founder)} else {PlayingActionType::FoundCity};
+        let found_reason = action_reason(game,seat,game.state==GameState::Playing && seat==game.active_player(),found_kind)
             .or_else(||(!unit.can_found_city(game)).then(||"Move to an empty land tile to found a city".into()));
         json!({"id":unit.id,"position":unit.position,"destinations":destinations,"foundReason":found_reason,
-            "foundAction":found_reason.is_none().then(||Action::Playing(PlayingAction::FoundCity{settler:unit.id}))})
+            "foundFree":founder,"foundAction":found_reason.is_none().then(||if founder {Action::Playing(PlayingAction::Custom(crate::content::custom_actions::CustomAction::new(crate::content::custom_actions::CustomActionType::Founder,Some(unit.position))))}else{Action::Playing(PlayingAction::FoundCity{settler:unit.id})})})
     }).collect()
+}
+
+pub(crate) fn nomad_movement(
+    game: &Game,
+    seat: usize,
+    city: Position,
+    units: Vec<u32>,
+) -> Result<Value, String> {
+    if seat != game.active_player() {
+        return Err("Wait for your turn".into());
+    }
+    let destinations=crate::content::civilizations::huns::city_destinations(game,game.player(seat),city,&units).into_iter().map(|to|{
+        let mut action=MoveUnits::new(units.clone(),to,None,crate::resource_pile::ResourcePile::empty());action.city=Some(city);
+        json!({"position":to,"terrain":game.map.get(to),"payment":{},"carrier":null,"attack":false,"action":Action::Movement(MovementAction::Move(action))})
+    }).collect::<Vec<_>>();
+    Ok(json!({"destinations":destinations}))
 }

@@ -135,10 +135,16 @@ test('Rice Cultivation tile yields match actual collection, cap the bonus and le
 });
 
 test('Expansion moves are separate from a paid Move action, and exploration preserves moved units', async () => {
-  const raw = JSON.parse(await initial());
+  let setup = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'clash-preview-20260927', {});
+  for (const civilization of ['China', 'Rome'])
+    setup = engine.tryMove(
+      setup,
+      JSON.stringify({ ChooseCivilization: civilization }),
+      engine.currentPlayer(setup),
+    );
+  const raw = JSON.parse(setup);
   const seat = engine.currentPlayer(JSON.stringify(raw));
   const p = raw.players[seat];
-  p.civilization = 'China';
   p.advances.push('Husbandry');
   p.special_advances = ['Expansion'];
   let state = JSON.stringify(raw);

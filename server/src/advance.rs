@@ -284,6 +284,12 @@ pub(crate) fn do_advance(
     let p = player.get_mut(game);
     p.advances.insert(advance);
     let t = p.incident_tokens;
+    crate::content::civilizations::egypt::change_government_ability(
+        game,
+        player_index,
+        advance,
+        true,
+    );
 
     player.log(
         game,
@@ -441,8 +447,15 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
 pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPlayer) {
     let info = advance.info(game);
     let bonus = info.bonus.clone();
+    let listeners = info.listeners.clone();
     let player_index = player.index;
-    info.listeners.clone().deinit_first(game, player_index);
+    crate::content::civilizations::egypt::change_government_ability(
+        game,
+        player_index,
+        advance,
+        false,
+    );
+    listeners.deinit_first(game, player_index);
 
     if let Some(special_advance) =
         find_non_government_special_advance(advance, game.player(player_index))
@@ -514,6 +527,10 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
 
 pub(crate) fn init_great_library(game: &mut Game, player_index: usize) {
     if let Some(advance) = game.player(player_index).great_library_advance {
+        if crate::content::civilizations::egypt::grants_advance(game.player(player_index), advance)
+        {
+            return;
+        }
         advance
             .info(game)
             .listeners

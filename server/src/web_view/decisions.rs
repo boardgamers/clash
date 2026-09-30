@@ -59,32 +59,96 @@ fn resource_field(
 
 // Present complete, engine-validated payments. Large choice spaces use direct
 // amount selectors in the viewer instead of building an unbounded list.
-fn payment_choices(cost: &PaymentOptions, stock: &ResourcePile, reward: bool, optional: bool) -> Option<Vec<ResourcePile>> {
+pub(super) fn payment_choices(
+    cost: &PaymentOptions,
+    stock: &ResourcePile,
+    reward: bool,
+    optional: bool,
+) -> Option<Vec<ResourcePile>> {
     use crate::resource::ResourceType;
-    fn visit(cost: &PaymentOptions, stock: &ResourcePile, reward: bool, types: &[ResourceType], remaining: u8,
-        pile: ResourcePile, result: &mut Vec<ResourcePile>, budget: &mut usize) -> bool {
-        if *budget == 0 || result.len() > 128 { return false; }
+    fn visit(
+        cost: &PaymentOptions,
+        stock: &ResourcePile,
+        reward: bool,
+        types: &[ResourceType],
+        remaining: u8,
+        pile: ResourcePile,
+        result: &mut Vec<ResourcePile>,
+        budget: &mut usize,
+    ) -> bool {
+        if *budget == 0 || result.len() > 128 {
+            return false;
+        }
         *budget -= 1;
         let Some((resource, rest)) = types.split_first() else {
-            if cost.is_valid_payment(&pile) { result.push(pile); }
+            if cost.is_valid_payment(&pile) {
+                result.push(pile);
+            }
             return true;
         };
-        let max = if reward { remaining } else { remaining.min(stock.get(resource)) };
+        let max = if reward {
+            remaining
+        } else {
+            remaining.min(stock.get(resource))
+        };
         for amount in 0..=max {
             let mut next = pile.clone();
             next.add_type(*resource, i32::from(amount));
-            if !visit(cost, stock, reward, rest, remaining - amount, next, result, budget) { return false; }
+            if !visit(
+                cost,
+                stock,
+                reward,
+                rest,
+                remaining - amount,
+                next,
+                result,
+                budget,
+            ) {
+                return false;
+            }
         }
         true
     }
-    // Expanding conversions need the unrestricted amount picker rather than a
-    // total capped at the printed cost.
-    if cost.conversions.iter().any(|c| c.from.iter().any(|from| c.to.amount() > from.amount())) { return None; }
+    // Keep choice cards for bounded exchanges such as Alphabet (one route can
+    // yield two ideas). Validate every candidate against the real conversion rules.
+    let mut max_amount = u16::from(cost.default_payment().amount());
+    for conversion in &cost.conversions {
+        let from = conversion
+            .from
+            .iter()
+            .map(ResourcePile::amount)
+            .filter(|n| *n > 0)
+            .min()
+            .unwrap_or(1);
+        let to = conversion.to.amount();
+        if to > from {
+            max_amount = max_amount
+                .saturating_mul(u16::from(to))
+                .div_ceil(u16::from(from));
+        }
+    }
+    let Ok(max_amount) = u8::try_from(max_amount) else {
+        return None;
+    };
     let mut types = cost.possible_resource_types();
-    types.sort(); types.dedup();
+    types.sort();
+    types.dedup();
     let mut result = vec![];
-    if !visit(cost, stock, reward, &types, cost.default_payment().amount(), ResourcePile::empty(), &mut result, &mut 10_000) { return None; }
-    if optional && !result.iter().any(ResourcePile::is_empty) { result.push(ResourcePile::empty()); }
+    if !visit(
+        cost,
+        stock,
+        reward,
+        &types,
+        max_amount,
+        ResourcePile::empty(),
+        &mut result,
+        &mut 10_000,
+    ) {
+        return None;
+    }
+    if optional && !result.iter().any(ResourcePile::is_empty) {
+        result.push(ResourcePile::empty());
+    }
     Some(result)
 }
 
@@ -101,7 +165,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
     let mut min = 1;
     let mut max = 1;
     let mut fields = vec![];
-    let p = game.player(seat);
+    let p = game.player(game.current_event().player.index);
     let options = match &h.request {
         PersistentEventRequest::ExploreResolution => return None,
         PersistentEventRequest::BoolRequest(_) => return None,
@@ -111,19 +175,39 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             return None;
         }
         PersistentEventRequest::Payment(requests) => {
-            if requests.iter().any(|r| r.name == "Pay to gain the Action Card")
+            if requests
+                .iter()
+                .any(|r| r.name == "Pay to gain the Action Card")
                 && let crate::events::EventOrigin::Incident(id) = h.origin
                 && let Some(card) = &game.cache.get_incident(id).action_card
             {
-                let text = card.civil_card.description.strip_prefix(
-                    crate::content::incidents::great_persons::GREAT_PERSON_DESCRIPTION
-                ).unwrap_or(&card.civil_card.description).trim();
-                description = format!("When played ({}): {text}",
-                    if card.civil_card.action_type.free { "free action" } else { "1 action" });
+                let text = card
+                    .civil_card
+                    .description
+                    .strip_prefix(
+                        crate::content::incidents::great_persons::GREAT_PERSON_DESCRIPTION,
+                    )
+                    .unwrap_or(&card.civil_card.description)
+                    .trim();
+                description = format!(
+                    "When played ({}): {text}",
+                    if card.civil_card.action_type.free {
+                        "free action"
+                    } else {
+                        "1 action"
+                    }
+                );
             }
             let mut available = p.resources.clone();
             for r in requests {
-                let field = resource_field(&r.cost, &r.name, r.optional, &available, false, &p.resources);
+                let field = resource_field(
+                    &r.cost,
+                    &r.name,
+                    r.optional,
+                    &available,
+                    false,
+                    &p.resources,
+                );
                 let initial: ResourcePile =
                     serde_json::from_value(field["initial"].clone()).unwrap();
                 available -= initial;
@@ -202,6 +286,26 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                         format!("{} #{} · {}", u.unit_type.name(game), id + 1, u.position),
                         "",
                         Some(u.position),
+                    )
+                })
+                .collect()
+        }
+        PersistentEventRequest::SelectCaptives(r) => {
+            min = *r.needed.start();
+            max = *r.needed.end();
+            description.clone_from(&r.description);
+            r.choices
+                .iter()
+                .map(|c| {
+                    option(
+                        c,
+                        format!(
+                            "{} · {}",
+                            game.player(c.owner).civilization.name,
+                            c.unit_type.name(game)
+                        ),
+                        "",
+                        None,
                     )
                 })
                 .collect()
@@ -349,7 +453,10 @@ pub(super) fn preview(game: &Game, seat: usize, input: &Value) -> Result<Value, 
             if payments.len() != requests.len() {
                 return Err("Choose each payment".into());
             }
-            let mut available = game.player(seat).resources.clone();
+            let mut available = game
+                .player(game.current_event().player.index)
+                .resources
+                .clone();
             for (r, p) in requests.iter().zip(&payments) {
                 if !(r.optional && p.is_empty()) && !r.cost.is_valid_payment(p) {
                     return Err(format!("Choose a valid payment for {}", r.name));
@@ -384,6 +491,9 @@ pub(super) fn preview(game: &Game, seat: usize, input: &Value) -> Result<Value, 
             let s = selected(values, &r.request)?;
             validate_units_selection(&s, game, game.player(r.player))?;
             EventResponse::SelectUnits(s)
+        }
+        PersistentEventRequest::SelectCaptives(r) => {
+            EventResponse::SelectCaptives(selected(values, r)?)
         }
         PersistentEventRequest::SelectStructures(r) => {
             let mut s = selected(values, r)?;

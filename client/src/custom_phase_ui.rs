@@ -337,3 +337,41 @@ pub(crate) fn position_request_dialog(
         NO_UPDATE
     }
 }
+
+pub(crate) fn captives_request_dialog(
+    rc: &RenderContext,
+    s: &MultiSelection<server::content::persistent_events::Captive>,
+) -> RenderResult {
+    bottom_centered_text(
+        rc,
+        &format!("{}: {} selected", s.request.description, s.selected.len()),
+    );
+    let anchor = bottom_center_anchor(rc) + vec2(0., 60.);
+    for (i, captive) in s.request.choices.iter().enumerate() {
+        let center = icon_pos((s.request.choices.len() - i) as i8 - 1, -2) + anchor;
+        let highlight = if s.selected.contains(captive) {
+            HighlightType::Primary
+        } else {
+            HighlightType::Choices
+        };
+        if draw_unit_type(rc, highlight, center, captive.unit_type, captive.owner, 20.) {
+            return StateUpdate::open_dialog(ActiveDialog::CaptivesRequest(
+                s.clone().toggle(captive.clone()),
+            ));
+        }
+        let tooltip = MultilineText::of(
+            rc,
+            &format!(
+                "{}: {}",
+                rc.game.player(captive.owner).civilization.name,
+                captive.unit_type.name(rc.game)
+            ),
+        );
+        show_tooltip_for_circle(rc, &tooltip, center, 20.);
+    }
+    if ok_button(rc, multi_select_tooltip(s, s.is_valid(), "captives")) {
+        StateUpdate::response(EventResponse::SelectCaptives(s.selected.clone()))
+    } else {
+        NO_UPDATE
+    }
+}

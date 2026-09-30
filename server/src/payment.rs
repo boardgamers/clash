@@ -74,6 +74,8 @@ impl PaymentConversion {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentOptions {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub alternatives: Vec<ResourcePile>,
     pub default: ResourcePile,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -93,6 +95,7 @@ impl PaymentOptions {
         origin: EventOrigin,
     ) -> Self {
         PaymentOptions {
+            alternatives: Vec::new(),
             default,
             conversions,
             modifiers,
@@ -102,6 +105,16 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
+        if !self.alternatives.is_empty() {
+            let mut option = self.clone();
+            option.alternatives.clear();
+            return std::iter::once(&self.default)
+                .chain(self.alternatives.iter())
+                .find_map(|cost| {
+                    option.default = cost.clone();
+                    option.first_valid_payment(available)
+                });
+        }
         let discount_left = self
             .conversions
             .iter()

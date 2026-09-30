@@ -26,7 +26,12 @@
   const publicPlayer = $derived($session.game?.players.find((p) => p.id === player?.index));
   const resources = $derived(
     Object.fromEntries(
-      Object.keys(resourceNames).map((key) => [key, publicPlayer?.resources?.[key as keyof Pile] ?? 0]),
+      Object.keys(resourceNames)
+        .filter(
+          (key) =>
+            key !== 'captives' || player?.civilization === 'Aztecs' || publicPlayer?.resources?.captives,
+        )
+        .map((key) => [key, publicPlayer?.resources?.[key as keyof Pile] ?? 0]),
     ) as Pile,
   );
   let tab = $state<'score' | 'advances' | 'cities'>('score');
@@ -150,7 +155,9 @@
               <article title={advance.description}>
                 <span class="advance-pictogram"><Icon size={21} /></span>
                 <div>
-                  <strong>{advance.name}</strong>{#if advance.borrowed}<small>Great Library</small>{/if}
+                  <strong>{advance.name}</strong>{#if advance.borrowed}<small
+                      >{advance.borrowedSource ?? 'Great Library'}</small
+                    >{/if}
                   <p><ResourceText text={presentation.summary} /></p>
                 </div>
               </article>

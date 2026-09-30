@@ -28,10 +28,13 @@ pub struct Unit {
     pub movement_restrictions: Vec<MovementRestriction>,
     pub id: u32,
     pub carrier_id: Option<u32>,
+    pub pirate: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct UnitBaseData {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub pirate: bool,
     pub unit_type: UnitType,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -59,6 +62,7 @@ impl Unit {
             movement_restrictions: Vec::new(),
             id,
             carrier_id: None,
+            pirate: false,
         }
     }
 
@@ -69,6 +73,9 @@ impl Unit {
     /// Panics if unit is at a valid position
     #[must_use]
     pub fn can_found_city(&self, game: &Game) -> bool {
+        if crate::content::civilizations::huns::raided_settler(game, self) {
+            return false;
+        }
         if !self.is_settler() {
             return false;
         }
@@ -80,11 +87,11 @@ impl Unit {
             return false;
         }
 
-        if !is_valid_city_terrain(
-            game.map
-                .get(self.position)
-                .expect("The unit should be at a valid position"),
-        ) {
+        let terrain = game.map.get(self.position).expect("Unit should be on map");
+        if !(is_valid_city_terrain(terrain)
+            || (*terrain == crate::map::Terrain::Barren
+                && player.has_special_advance(SpecialAdvance::FloodPlains)))
+        {
             return false;
         }
         player.is_city_available()
@@ -100,6 +107,7 @@ impl Unit {
         UnitData {
             position: self.position,
             data: UnitBaseData {
+                pirate: self.pirate,
                 unit_type: self.unit_type,
                 movement_restrictions: self.movement_restrictions.clone(),
                 id: self.id,
@@ -109,6 +117,7 @@ impl Unit {
                 .map(|id| {
                     let unit = player.get_unit(*id);
                     UnitBaseData {
+                        pirate: unit.pirate,
                         unit_type: unit.unit_type,
                         movement_restrictions: unit.movement_restrictions.clone(),
                         id: unit.id,
@@ -126,6 +135,7 @@ impl Unit {
             player_index,
             position: data.position,
             unit_type: base_data.unit_type,
+            pirate: base_data.pirate,
             movement_restrictions: base_data.movement_restrictions,
             id: unit_id,
             carrier_id: None,
@@ -135,6 +145,7 @@ impl Unit {
             player_index,
             position: data.position,
             unit_type: c.unit_type,
+            pirate: c.pirate,
             movement_restrictions: c.movement_restrictions,
             id: c.id,
             carrier_id: Some(unit_id),
@@ -639,6 +650,17 @@ pub(crate) fn units_killed(game: &mut Game, player_index: usize, killed_units: K
 fn kill_unit(game: &mut Game, unit_id: u32, player_index: usize, killer: Option<usize>) {
     let unit = remove_unit(player_index, unit_id, game);
     if let Leader(leader) = unit.unit_type {
+        if game
+            .player(player_index)
+            .has_special_advance(SpecialAdvance::Embalming)
+        {
+            crate::resource::gain_resources(
+                game,
+                player_index,
+                ResourcePile::culture_tokens(1),
+                EventOrigin::SpecialAdvance(SpecialAdvance::Embalming),
+            );
+        }
         Player::with_leader(leader, game, player_index, |game, leader| {
             leader.listeners.deinit(game, player_index);
         });
@@ -792,6 +814,21 @@ pub fn validate_units_selection(units: &[u32], game: &Game, p: &Player) -> Resul
     let Some(h) = &game.current_event().player.handler.as_ref() else {
         return Err("no selection handler".to_string());
     };
+    if let crate::content::persistent_events::PersistentEventType::CustomAction(a) =
+        &game.current_event().event_type
+    {
+        if matches!(
+            a.action.action,
+            crate::content::custom_actions::CustomActionType::Hegemony
+                | crate::content::custom_actions::CustomActionType::HegemonyFounder
+        ) {
+            if let Some(position) = a.action.city {
+                crate::content::civilizations::carthage::validate_landing(
+                    game, p, position, units,
+                )?;
+            }
+        }
+    }
     validate_units_selection_for_origin(units, p, &h.origin)
 }
 

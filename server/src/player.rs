@@ -1,6 +1,6 @@
 use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
-use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
+use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::ability::construct_event_origin;
 use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::events::{Event, EventOrigin, EventPlayer};
@@ -54,6 +54,8 @@ pub struct Player {
     pub cities: Vec<City>,
     pub destroyed_structures: DestroyedStructures,
     pub units: Vec<Unit>,
+    pub captives: Vec<crate::content::civilizations::aztecs::Captive>,
+    pub held_units: Units,
     pub civilization: Civilization,
     pub available_leaders: Vec<Leader>,
     pub recruited_leaders: Vec<Leader>,
@@ -109,6 +111,8 @@ impl Player {
             cities: Vec::new(),
             destroyed_structures: DestroyedStructures::new(),
             units: Vec::new(),
+            captives: Vec::new(),
+            held_units: Units::default(),
             available_leaders: all_leaders(&civilization),
             recruited_leaders: Vec::new(),
             civilization,
@@ -266,7 +270,9 @@ impl Player {
 
     #[must_use]
     pub fn can_use_advance(&self, advance: Advance) -> bool {
-        self.has_advance(advance) || self.great_library_advance.is_some_and(|a| a == advance)
+        self.has_advance(advance)
+            || self.great_library_advance.is_some_and(|a| a == advance)
+            || crate::content::civilizations::egypt::grants_advance(self, advance)
     }
 
     #[must_use]
@@ -310,8 +316,15 @@ impl Player {
     #[must_use]
     pub fn available_units(&self) -> Units {
         let mut units = self.unit_limit();
+        for (kind, count) in self.held_units.clone() {
+            for _ in 0..count {
+                units -= &kind;
+            }
+        }
         for u in &self.units {
-            units -= &u.unit_type;
+            if !u.pirate {
+                units -= &u.unit_type;
+            }
         }
         units
     }
@@ -608,12 +621,17 @@ pub(crate) fn remove_unit(player: usize, id: u32, game: &mut Game) -> Unit {
     // carried units can be transferred to another ship - which has to be selected later
     let p = game.player_mut(player);
 
-    p.units.remove(
+    let unit = p.units.remove(
         p.units
             .iter()
             .position(|unit| unit.id == id)
             .expect("unit should exist"),
-    )
+    );
+    if unit.pirate {
+        let pirates = crate::content::civilizations::carthage::pirate_player(game);
+        game.player_mut(pirates).held_units -= &UnitType::Ship;
+    }
+    unit
 }
 
 pub fn end_turn(game: &mut Game, player: usize) {
@@ -627,6 +645,9 @@ pub fn end_turn(game: &mut Game, player: usize) {
     p.played_once_per_turn_actions.clear();
     p.event_info.clear();
     if let Some(a) = p.great_library_advance.take() {
+        if crate::content::civilizations::egypt::grants_advance(game.player(player), a) {
+            return;
+        }
         a.info(game).listeners.clone().deinit(game, player);
     }
 }
@@ -636,7 +657,7 @@ pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {
         .iter()
         .filter(|u| u.is_army_unit())
         .count()
-        < STACK_LIMIT
+        < crate::content::civilizations::persia::stack_limit(p, position)
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]

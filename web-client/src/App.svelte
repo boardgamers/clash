@@ -13,6 +13,7 @@
     Coins,
     Smile,
     Drama,
+    Link,
     BookOpen,
     ScrollText,
     MessageCircle,
@@ -94,6 +95,7 @@
     gold: Coins,
     mood_tokens: Smile,
     culture_tokens: Drama,
+    captives: Link,
   };
   const journalTokenIcons = {
     ...icons,
@@ -123,6 +125,9 @@
     event: ScrollText,
   };
   let current = $derived($session.game?.players.find((p) => p.id === $session.seat));
+  const visibleResources = $derived(
+    resources.filter((r) => r !== 'captives' || !!current?.resources?.captives),
+  );
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   const collectionFree = $derived(
     ($session.view?.collectActions ?? []).find(
@@ -479,8 +484,12 @@
       >
     </nav>
     {#if current}
-      <section class="resource-bar" aria-label="Your resources">
-        {#each resources as resource}{@const Icon = icons[resource]}
+      <section
+        class="resource-bar"
+        aria-label="Your resources"
+        style={`--resource-count:${visibleResources.length}`}
+      >
+        {#each visibleResources as resource}{@const Icon = icons[resource]}
           <div
             class="resource"
             role="img"
@@ -610,8 +619,14 @@
         >
       </div>
       {#if $session.mode === 'collect'}<div class="map-instruction">
-          <Wheat size={17} /><span>Choose up to <strong>{city?.capacity}</strong> highlighted tiles</span
-          ><span class="instruction-count">{$session.selection.length} / {city?.capacity}</span>
+          <Wheat size={17} /><span
+            >Choose up to <strong
+              >{(city?.capacity ?? 0) + Number(!!$session.ballcourts && !!city?.ballcourts)}</strong
+            > highlighted tiles</span
+          ><span class="instruction-count"
+            >{$session.selection.length} / {(city?.capacity ?? 0) +
+              Number(!!$session.ballcourts && !!city?.ballcourts)}</span
+          >
         </div>{/if}
       <div class="city-dock">
         <div class="dock-intro"><Landmark size={19} /><span class="tiny-label">YOUR CITIES</span></div>
@@ -796,6 +811,7 @@
           <div class="collection-choices">
             {#each choiceDecision.choices as choice}<button
                 class="secondary wide"
+                aria-label={choice.pile ? pileText(choice.pile) : choice.name}
                 disabled={$session.pending}
                 onclick={() => controller.submit(choice.action)}
                 >{#if choice.pile}<ResourceAmount pile={choice.pile} />{:else}{choice.name}{/if}<ArrowRight
@@ -873,6 +889,14 @@
                   >{variant.name}{#if !variant.free}<Zap size={12} />1{/if}</button
                 >{/each}
             </div>{/if}
+          {#if city?.ballcourts}<label class="ballcourts-toggle"
+              ><input
+                type="checkbox"
+                checked={$session.ballcourts ?? false}
+                onchange={(e) => controller.setBallcourts(e.currentTarget.checked)}
+              />
+              Ballcourts · +1 tile <ResourceAmount pile={{ mood_tokens: 1 }} /></label
+            >{/if}
           {#if city && city.activations > 0}
             {@const Before = city.mood === 'Happy' ? Smile : city.mood === 'Angry' ? Frown : Meh}
             {@const After =
@@ -911,7 +935,9 @@
               title={`Choose from this city's tile or adjacent tiles.${city?.maxRange2 ? ` Husbandry allows up to ${city.maxRange2} land tiles two spaces away.` : ''}`}
             >
               <span
-                >Tiles <b>{$session.selection.reduce((sum, c) => sum + c.times, 0)} / {city?.capacity}</b
+                >Tiles <b
+                  >{$session.selection.reduce((sum, c) => sum + c.times, 0)} / {(city?.capacity ?? 0) +
+                    Number(!!$session.ballcourts && !!city?.ballcourts)}</b
                 ></span
               >
               {#if city}<CollectionCapacity size={city.size} mood={city.mood} />{/if}

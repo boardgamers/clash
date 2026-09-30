@@ -244,6 +244,7 @@ fn render_active_dialog(rc: &RenderContext) -> RenderResult {
         ActiveDialog::BoolRequest(d) => custom_phase_ui::bool_request_dialog(rc, d),
         ActiveDialog::PositionRequest(r) => custom_phase_ui::position_request_dialog(rc, r),
         ActiveDialog::HandCardsRequest(r) => cards_ui::select_cards_dialog(rc, r),
+        ActiveDialog::CaptivesRequest(r) => custom_phase_ui::captives_request_dialog(rc, r),
     }
 }
 

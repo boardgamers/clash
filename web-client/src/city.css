@@ -859,3 +859,26 @@
   gap: 0.4rem;
   align-items: center;
 }
+
+.build-payment {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.build-payment select {
+  max-width: 100%;
+  padding: 0.5rem;
+  background: var(--paper2);
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+}
+
+.ballcourts-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0;
+}

@@ -98,13 +98,29 @@ impl PlayingActionType {
     #[must_use]
     pub fn cost(&self, game: &Game, player: usize) -> ActionCost {
         match self {
+            PlayingActionType::Custom(CustomActionType::JapaneseBuddhism)
+                if game
+                    .player(player)
+                    .can_use_advance(crate::advance::Advance::StateReligion) =>
+            {
+                ActionCost::new(
+                    true,
+                    ActionResourceCost::resources(ResourcePile::culture_tokens(1)),
+                )
+            }
             PlayingActionType::Custom(custom_action) => game
                 .player(player)
                 .custom_action_info(*custom_action)
                 .cost
                 .cost
                 .clone(),
-            PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
+            PlayingActionType::ActionCard(id) => {
+                let mut cost = game.cache.get_civil_card(*id).action_type.clone();
+                if crate::content::civilizations::japan::shogunate_available(game.player(player)) {
+                    cost.free = true;
+                }
+                cost
+            }
             // action cost of wonder is checked later
             PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => {
                 ActionCost::new(true, ActionResourceCost::free())
@@ -170,6 +186,12 @@ impl PlayingAction {
         let playing_action_type = self.playing_action_type(p);
         if !redo {
             playing_action_type.is_available(game, player_index)?;
+        }
+        if let PlayingAction::ActionCard(id) = self {
+            return crate::content::civilizations::japan::on_declare_card(
+                game,
+                crate::content::civilizations::japan::CardAnnouncement::new(player_index, id),
+            );
         }
         let action_cost = playing_action_type.cost(game, player_index);
         if !action_cost.free {

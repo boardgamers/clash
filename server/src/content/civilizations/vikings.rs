@@ -232,7 +232,10 @@ pub(crate) fn lose_raid_resource() -> Ability {
 
 pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRoute]) {
     for r in routes {
-        let u = game.player(player).get_unit(r.unit_id);
+        let Some(id) = r.unit_id else {
+            continue;
+        };
+        let u = game.player(player).get_unit(id);
         if u.is_ship() && u.position.distance(r.to) == 1 {
             let city = game.get_any_city(r.to);
             let position = city.position;

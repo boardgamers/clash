@@ -1,7 +1,7 @@
 import { get, writable } from 'svelte/store';
 import { ChatController } from '@boardgamers/protocol/chat';
 import type { ViewerCommands } from '@boardgamers/protocol/viewer';
-import type { Bridge, Choice, Game, Move, RecruitSelection, Session, View, MapPick } from './types';
+import type { Bridge, Choice, Game, Move, RecruitSelection, Session, View, MapPick, Pile } from './types';
 import { journal } from './model';
 import { loadBridge } from './bridge';
 import { readPreferences } from './preferences';
@@ -150,6 +150,9 @@ export class Controller {
       selection: [],
       preview: null,
       recruits: {},
+      ballcourts: false,
+      draftCard: false,
+      attackPirates: false,
       recruitPreview: null,
       replacements: [],
       collectVariant: view.collectActions?.[0]?.value ?? 'Collect',
@@ -237,6 +240,9 @@ export class Controller {
       selectedAdvance: null,
       objectivesOpen: false,
       recruits: {},
+      ballcourts: false,
+      draftCard: false,
+      attackPirates: false,
       recruitPreview: null,
       selectedSettler: null,
       selectedUnits: [],
@@ -266,6 +272,9 @@ export class Controller {
     this.patch({
       city: position,
       focus: position,
+      ballcourts: false,
+      draftCard: false,
+      attackPirates: false,
       selection: [],
       preview: null,
       error: '',
@@ -341,15 +350,16 @@ export class Controller {
     const indices = s.moveDestinations.flatMap((d, i) => (d.position === position ? [i] : []));
     this.patch({ moveTarget: position, moveDestination: indices.length === 1 ? indices[0] : null });
   }
-  movementDestinations(ids: number[]) {
+  movementDestinations(ids: number[], city: string | null = null) {
     const s = get(this.session);
-    if (!ids.length || !canMoveOnMap(s.view, s.game)) return [];
-    const key = [...ids].sort((a, b) => a - b).join(',');
+    if ((!ids.length && !city) || !canMoveOnMap(s.view, s.game)) return [];
+    const key = (city ?? '') + [...ids].sort((a, b) => a - b).join(',');
     let destinations = this.moveCache.get(key);
     if (!destinations) {
       try {
         destinations = this.query<{ destinations: Session['moveDestinations'] }>({
           kind: 'movement',
+          city,
           units: ids,
         }).destinations;
       } catch {
@@ -366,7 +376,14 @@ export class Controller {
   openUnits(ids: number[], target: string | null = null) {
     if (get(this.session).pending) return;
     this.closeActivity();
-    this.patch({ mode: 'settlers', tilePanel: false, seaRoutes: false, abilitiesOpen: false, error: '' });
+    this.patch({
+      movingCity: null,
+      mode: 'settlers',
+      tilePanel: false,
+      seaRoutes: false,
+      abilitiesOpen: false,
+      error: '',
+    });
     this.selectUnits(ids, target);
   }
   selectCollectionTile(position: string) {
@@ -419,6 +436,9 @@ export class Controller {
       error: '',
       selectedAdvance: null,
       collectVariant: get(this.session).view?.collectActions?.[0]?.value ?? 'Collect',
+      ballcourts: false,
+      draftCard: false,
+      attackPirates: false,
       abilitiesOpen: false,
     });
   }
@@ -428,6 +448,9 @@ export class Controller {
     this.patch({
       city: position,
       focus: position,
+      ballcourts: false,
+      draftCard: false,
+      attackPirates: false,
       selection: [],
       preview: null,
       collectionTile: null,
@@ -443,6 +466,9 @@ export class Controller {
       abilitiesOpen: false,
       city: position ?? get(this.session).city,
       recruits: {},
+      ballcourts: false,
+      draftCard: false,
+      attackPirates: false,
       replacements: [],
       recruitPreview: null,
       error: '',
@@ -466,27 +492,53 @@ export class Controller {
     if (!this.engine || s.seat === undefined) throw new Error('Choose a player');
     return JSON.parse(this.engine.webQuery(this.raw, s.seat, JSON.stringify(input))) as T;
   }
+  openNomadCity(position: string) {
+    this.openUnits([]);
+    this.patch({ movingCity: position, focus: position });
+    this.selectUnits([]);
+  }
   selectUnits(selectedUnits: number[], target: string | null = null) {
+    const s = get(this.session);
+    const city =
+      s.movingCity &&
+      s.view?.nomadCities?.includes(s.movingCity) &&
+      selectedUnits.every((id) => s.view?.units?.find((u) => u.id === id)?.position === s.movingCity)
+        ? s.movingCity
+        : null;
     this.patch({
+      movingCity: city,
       selectedUnits,
-      moveDestinations: this.movementDestinations(selectedUnits),
+      moveDestinations: this.movementDestinations(selectedUnits, city),
       moveDestination: null,
       moveTarget: null,
     });
     if (target) this.chooseMoveDestination(target);
   }
-  setRecruits(recruits: RecruitSelection) {
+  setBallcourts(enabled: boolean) {
+    const s = get(this.session);
+    this.patch({ ballcourts: enabled, selection: [], preview: null, error: '' });
+    if (s.mode === 'city') this.setRecruits(s.recruits);
+  }
+  setDraftCard(enabled: boolean) {
+    this.patch({ draftCard: enabled });
+    this.setRecruits(get(this.session).recruits);
+  }
+  setRecruits(recruits: RecruitSelection, payment?: Pile) {
     const s = get(this.session);
     if (s.pending || s.seat === undefined || !s.city || !this.engine) return;
     this.patch({ recruits, recruitPreview: null, error: '' });
-    if (!Object.values(recruits).some(Boolean)) return;
+    if (!Object.values(recruits).some(Boolean) && !s.draftCard) return;
     try {
       this.patch({
         recruitPreview: this.query({
           kind: 'recruit',
+          attackPirates: !!s.attackPirates,
+          payment,
+          draftCard: !!s.draftCard,
           city: s.city,
           units: recruits,
           replaced: s.replacements,
+          ballcourts: !!s.ballcourts,
         }),
       });
     } catch (error) {
@@ -500,14 +552,15 @@ export class Controller {
       (c) => c.position === choice.position && JSON.stringify(c.pile) === JSON.stringify(choice.pile),
     );
     const city = s.view.cities.find((c) => c.position === s.city)!;
+    const capacity = city.capacity + Number(!!s.ballcourts && !!city.ballcourts);
     const selection = selected
-      ? selected.times < city.maxPerTile && s.selection.reduce((sum, c) => sum + c.times, 0) < city.capacity
+      ? selected.times < city.maxPerTile && s.selection.reduce((sum, c) => sum + c.times, 0) < capacity
         ? s.selection.map((c) => (c === selected ? { ...c, times: c.times + 1 } : c))
         : s.selection.filter((c) => c !== selected)
       : [...s.selection, { ...choice, times: 1 }];
-    if (selection.length > city.capacity) {
+    if (selection.length > capacity) {
       this.patch({
-        error: `Choose up to ${city.capacity} ${city.capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection first.`,
+        error: `Choose up to ${capacity} ${capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection first.`,
       });
       return;
     }
@@ -518,6 +571,7 @@ export class Controller {
             city: s.city,
             selections: selection,
             variant: s.collectVariant,
+            ballcourts: !!s.ballcourts,
           })
         : null;
       this.patch({ selection, preview, error: '' });

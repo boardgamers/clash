@@ -13,6 +13,7 @@
     Coins,
     Smile,
     Drama,
+    Link,
     Hammer,
     BookOpen,
     Map,
@@ -52,6 +53,7 @@
     gold: Coins,
     mood_tokens: Smile,
     culture_tokens: Drama,
+    captives: Link,
   };
   let advances = $derived([...($session.view?.advances ?? [])].sort((a, b) => a.order - b.order));
   let player = $derived($session.view?.players.find((p) => p.index === $session.seat));

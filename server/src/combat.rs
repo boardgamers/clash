@@ -26,6 +26,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
+    WayOfTheSwordAttacker,
+    WayOfTheSwordDefender,
     CancelFortressExtraDie,
     CancelFortressIgnoreHit,
     SteelWeaponsAttacker,
@@ -320,10 +322,20 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
             }
         }
 
-        let c = s.combat;
+        let mut c = s.combat;
 
         let a_t = s.attacker_strength.tactics_card.take();
+        if let Some(card) = a_t
+            && c.stats.attacker.present.leader == Some(crate::leader::Leader::Jimmu)
+        {
+            c.stats.attacker.tactics_cards.push(card);
+        }
         let d_t = s.defender_strength.tactics_card.take();
+        if let Some(card) = d_t
+            && c.stats.defender.present.leader == Some(crate::leader::Leader::Jimmu)
+        {
+            c.stats.defender.tactics_cards.push(card);
+        }
 
         let result = if let Some(result) = s.final_result {
             let mut round_end = CombatRoundEnd::new(
@@ -414,7 +426,10 @@ fn take_over_city(
     }
 
     for (building, owner) in pieces.building_owners() {
-        if matches!(building, Building::Obelisk) {
+        if matches!(building, Building::Obelisk)
+            || (building == Building::Port
+                && crate::content::civilizations::phoenicia::independent_port(game, owner))
+        {
             continue;
         }
         let Some(owner) = owner else {
@@ -559,6 +574,19 @@ fn apply_battle_movement_restriction(game: &mut Game, player_index: usize, unit_
 }
 
 pub(crate) fn move_with_possible_combat(game: &mut Game, player_index: usize, m: &MoveUnits) {
+    let mut joined = m.clone();
+    if m.attack_pirates {
+        if let Some(ids) = game
+            .player_mut(player_index)
+            .event_info
+            .remove("Pirate attack reinforcements")
+        {
+            joined
+                .units
+                .extend(serde_json::from_str::<Vec<u32>>(&ids).unwrap());
+        }
+    }
+    let m = &joined;
     let enemy = game.enemy_player(player_index, m.destination);
     if let Some(defender) = enemy {
         if move_to_enemy_player_tile(game, player_index, &m.units, m.destination, defender)

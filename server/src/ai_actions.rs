@@ -548,6 +548,13 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
                 .map(EventResponse::SelectPositions)
                 .collect()
         }
+        PersistentEventRequest::SelectCaptives(r) => vec![EventResponse::SelectCaptives(
+            r.choices
+                .iter()
+                .take(*r.needed.end() as usize)
+                .cloned()
+                .collect(),
+        )],
         PersistentEventRequest::SelectUnitType(t) => t
             .choices
             .iter()

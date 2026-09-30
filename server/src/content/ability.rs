@@ -129,6 +129,10 @@ pub fn get_all_uncached() -> Vec<Ability> {
         // civilization related
         lose_raid_resource(),
         crate::content::civilizations::india::use_bladed_tusks(),
+        crate::content::civilizations::japan::use_way_of_the_sword(),
+        crate::content::civilizations::japan::announce_card_target(),
+        crate::content::civilizations::celts::clear_loyalty(),
+        crate::content::civilizations::phoenicia::resolve_leader_battle_effects(),
     ]
 }
 

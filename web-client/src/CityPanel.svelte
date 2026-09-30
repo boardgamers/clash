@@ -15,6 +15,8 @@
     Layers,
     Footprints,
   } from 'lucide-svelte';
+  import type { Move, Pile } from './types';
+  import { pileText } from './model';
   import type { Controller } from './controller';
   import { buildingInfo, unitInfo, cityReason } from './city';
   import ResourceAmount from './ResourceAmount.svelte';
@@ -27,12 +29,24 @@
   const session = $derived(controller.session);
   let tab = $derived($session.cityTab);
   let building = $state<string | null>(null);
+  let paymentIndex = $state(-1);
+  function submitBuild(action: Move) {
+    const chosen = structuredClone(action) as { Playing: { Construct: { payment: Pile } } };
+    if (buildPayment) chosen.Playing.Construct.payment = buildPayment;
+    controller.submit(chosen);
+  }
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let options = $derived($session.view?.cityActions.find((c) => c.position === $session.city));
   let selected = $derived(options?.buildings.find((b) => b.name === building));
+  const buildPayment = $derived(
+    paymentIndex >= 0 ? (selected?.payments?.[paymentIndex] ?? selected?.payment) : selected?.payment,
+  );
+
   let count = $derived(
     Object.values($session.recruits).reduce<number>((a, b) => a + (typeof b === 'string' ? 1 : (b ?? 0)), 0),
   );
+  const capacity = $derived((city?.capacity ?? 0) + Number(!!$session.ballcourts && !!city?.ballcourts));
+  const occupiedCapacity = $derived(count + Number(!!$session.draftCard));
   function abilityIcon(text: string) {
     if (/battle|combat|captur|attack/i.test(text)) return Swords;
     if (/advance/i.test(text)) return GraduationCap;
@@ -120,7 +134,10 @@
             class="building-option"
             class:owned={item.owned}
             class:selected={building === item.name}
-            onclick={() => (building = item.name)}
+            onclick={() => {
+              building = item.name;
+              paymentIndex = -1;
+            }}
             aria-pressed={building === item.name}
             ><strong
               ><info.icon size={21} />{item.name}{#if item.owned}<Check size={16} />{/if}</strong
@@ -133,8 +150,36 @@
       </div>
     {:else if tab === 'recruit'}
       <p class="city-rule">
-        Recruit up to {city?.capacity} units together for 1 action. Activates this city.
+        Recruit up to {(city?.capacity ?? 0) + Number(!!$session.ballcourts && !!city?.ballcourts)} units together
+        for 1 action. Activates this city.
       </p>
+      {#if city?.ballcourts}<label class="ballcourts-toggle"
+          ><input
+            type="checkbox"
+            checked={$session.ballcourts ?? false}
+            onchange={(e) => controller.setBallcourts(e.currentTarget.checked)}
+          />
+          Ballcourts · +1 capacity <ResourceAmount pile={{ mood_tokens: 1 }} /></label
+        >{/if}
+      {#if city?.shogunateDraft}<label class="ballcourts-toggle"
+          ><input
+            type="checkbox"
+            checked={$session.draftCard ?? false}
+            disabled={!$session.draftCard && occupiedCapacity >= capacity}
+            onchange={(e) => controller.setDraftCard(e.currentTarget.checked)}
+          />
+          Shogunate · Draft an action card <ResourceAmount pile={{ mood_tokens: 1 }} /></label
+        >{/if}
+      {#if city?.piratePort}<label class="ballcourts-toggle"
+          ><input
+            type="checkbox"
+            checked={$session.attackPirates ?? false}
+            onchange={(e) => {
+              controller.patch({ attackPirates: e.currentTarget.checked });
+              controller.setRecruits($session.recruits);
+            }}
+          /> Attack pirates with recruited Ships</label
+        >{/if}
       <div class="recruit-list">
         {#each options?.recruits ?? [] as item}{@const info = unitInfo[item.type]}{@const amount =
             $session.recruits[info.key] ?? 0}
@@ -157,7 +202,7 @@
                 aria-label={`Add ${item.type}`}
                 disabled={!!item.reason ||
                   amount >= (item.limit ?? item.available) ||
-                  count >= (city?.capacity ?? 0) ||
+                  occupiedCapacity >= capacity ||
                   $session.pending}
                 onclick={() => controller.setRecruits({ ...$session.recruits, [info.key]: amount + 1 })}
                 ><Plus size={15} /></button
@@ -174,7 +219,7 @@
                   class="leader-select"
                   aria-label={`Select ${leader.name}`}
                   aria-pressed={$session.recruits.leader === leader.id}
-                  disabled={$session.pending || (!$session.recruits.leader && count >= (city?.capacity ?? 0))}
+                  disabled={$session.pending || (!$session.recruits.leader && occupiedCapacity >= capacity)}
                   onclick={() =>
                     controller.setRecruits({
                       ...$session.recruits,
@@ -227,25 +272,37 @@
   </div>
   {#if tab === 'build' && selected && !selected.owned}<footer class="city-confirm">
       <div>
-        <strong>{selected.name}</strong><ResourceAmount pile={selected.payment} /><small
+        <strong>{selected.name}</strong><ResourceAmount pile={buildPayment ?? selected.payment} /><small
           >{cityReason(selected.reason, city?.size) || 'Costs 1 action · Activates this city'}</small
         >{#if selected.moodWillDecrease && city && city.activationMood !== city.mood}<span
             class="activation-inline"
             ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
           >{/if}
       </div>
+      {#if selected.payments && selected.payments.length > 1}<label class="build-payment"
+          >Pay with
+          <select
+            aria-label={`Payment for ${selected.name}`}
+            value={paymentIndex}
+            onchange={(e) => (paymentIndex = Number(e.currentTarget.value))}
+          >
+            <option value={-1}>{pileText(selected.payment)}</option>
+            {#each selected.payments as payment, i}<option value={i}>{pileText(payment)}</option>{/each}
+          </select>
+        </label>{/if}
       <div class="port-choices">
         {#each selected.choices as choice}<button
             class="primary"
             disabled={$session.pending}
-            onclick={() => controller.submit(choice.action)}
+            onclick={() => submitBuild(choice.action)}
             >Build {selected.name}{choice.position ? ` at ${choice.position}` : ''}</button
           >{/each}
       </div>
     </footer>{/if}
   {#if tab === 'recruit'}<footer class="city-confirm">
       <div>
-        <strong>{count} {count === 1 ? 'unit' : 'units'} selected</strong
+        <strong
+          >{count} {count === 1 ? 'unit' : 'units'}{$session.draftCard ? ' + 1 card' : ''} selected</strong
         >{#if $session.recruitPreview}<ResourceAmount
             pile={$session.recruitPreview.payment}
           />{#if $session.recruitPreview.moodWillDecrease && city && city.activationMood !== city.mood}<span
@@ -253,6 +310,18 @@
               ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
             >{/if}{/if}
       </div>
+      {#if ($session.recruitPreview?.payments?.length ?? 0) > 1}<label class="build-payment"
+          >Pay with
+          <select
+            aria-label="Recruitment payment"
+            value={JSON.stringify($session.recruitPreview!.payment)}
+            onchange={(e) => controller.setRecruits($session.recruits, JSON.parse(e.currentTarget.value))}
+          >
+            {#each $session.recruitPreview!.payments! as payment}<option value={JSON.stringify(payment)}
+                >{pileText(payment)}</option
+              >{/each}
+          </select>
+        </label>{/if}
       <button
         class="primary"
         disabled={!$session.recruitPreview || $session.pending}

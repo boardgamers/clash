@@ -237,6 +237,10 @@ impl Assets {
                 load_png(include_bytes!("../assets/happy-emoji-svgrepo-com.png")),
             ),
             (
+                ResourceType::Captives,
+                load_png(include_bytes!("../assets/warrior-svgrepo-com.png")),
+            ),
+            (
                 ResourceType::CultureTokens,
                 load_png(include_bytes!("../assets/theater-drama-svgrepo-com.png")),
             ),

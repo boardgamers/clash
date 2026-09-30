@@ -186,6 +186,19 @@ fn is_visible_card_info(
 fn strip_events(game: &mut Game, player_index: Option<usize>) {
     for s in &mut game.events {
         match &mut s.event_type {
+            PersistentEventType::CustomAction(a)
+                if a.action.action
+                    == crate::content::custom_actions::CustomActionType::Calendar
+                    && Some(s.player.index) != player_index =>
+            {
+                if let Some(handler) = &mut s.player.handler {
+                    if let PersistentEventRequest::Payment(requests) = &mut handler.request {
+                        for request in requests {
+                            request.name = "Calendar · Inspecting the next event".into();
+                        }
+                    }
+                }
+            }
             PersistentEventType::CombatRoundStart(r) => {
                 if r.attacker_strength.tactics_card.is_some() {
                     // defender shouldn't see attacker's tactics card

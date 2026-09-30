@@ -6,7 +6,7 @@ use std::collections::HashSet;
 
 use crate::action::pay_action;
 use crate::combat::move_with_possible_combat;
-use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, STACK_LIMIT};
+use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS};
 use crate::content::civilizations::vikings::is_ship_construction_move;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
 use crate::events::{EventOrigin, EventPlayer};
@@ -28,6 +28,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct MoveUnits {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub attack_pirates: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub embark_pirate: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<Position>,
     pub units: Vec<u32>,
     pub destination: Position,
     #[serde(default)]
@@ -47,6 +53,9 @@ impl MoveUnits {
         payment: ResourcePile,
     ) -> Self {
         Self {
+            city: None,
+            attack_pirates: false,
+            embark_pirate: None,
             units,
             destination,
             embark_carrier_id,
@@ -64,6 +73,7 @@ pub enum MovementAction {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum MovementRestriction {
     Battle,
+    Navigator,
     Mountain,
     Forest,
     Fertile,
@@ -91,6 +101,10 @@ impl CurrentMove {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct MoveState {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub unit_only: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub moved_cities: Vec<Position>,
     pub movement_actions_left: u32,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
@@ -113,6 +127,8 @@ impl MoveState {
     #[must_use]
     pub fn new() -> Self {
         MoveState {
+            moved_cities: Vec::new(),
+            unit_only: false,
             movement_actions_left: MOVEMENT_ACTIONS,
             moved_units: Vec::new(),
             current_move: CurrentMove::None,
@@ -139,10 +155,28 @@ pub(crate) fn move_units(
     embark_carrier_id: Option<u32>,
 ) {
     let p = game.player(player_index);
-    let from = p.get_unit(units[0]).position;
+    let nomad = p
+        .event_info
+        .get("Nomads moving")
+        .map(|s| Position::from_offset(s));
+    if units.is_empty() {
+        if let Some(from) = nomad {
+            crate::content::civilizations::huns::finish_city_move(game, player_index, from, to);
+        }
+        return;
+    }
+    crate::content::civilizations::carthage::record_move(game, player_index, units);
+    let from = game.player(player_index).get_unit(units[0]).position;
     let info = MoveInfo::new(units.to_vec(), from, to);
     game.trigger_transient_event_with_game_value(player_index, |e| &mut e.before_move, &info, &());
 
+    let hannibal = crate::content::civilizations::carthage::ignores_mountains(
+        game.player(player_index),
+        units,
+    );
+    let terracing = game
+        .player(player_index)
+        .has_special_advance(SpecialAdvance::Terracing);
     let mut ask_conversion = vec![]; // from ship construction
     let mut to_ship = Units::empty();
 
@@ -159,7 +193,13 @@ pub(crate) fn move_units(
         unit.carrier_id = embark_carrier_id;
 
         if let Some(terrain) = terrain_movement_restriction(&game.map, to, unit) {
-            unit.movement_restrictions.push(terrain);
+            if !(hannibal && terrain == MovementRestriction::Mountain)
+                && !(terracing
+                    && terrain == MovementRestriction::Mountain
+                    && (unit.is_settler() || unit.unit_type.is_leader()))
+            {
+                unit.movement_restrictions.push(terrain);
+            }
         }
 
         for id in carried_units(*unit_id, &game.players[player_index]) {
@@ -167,6 +207,9 @@ pub(crate) fn move_units(
         }
     }
 
+    if let Some(from) = nomad {
+        crate::content::civilizations::huns::finish_city_move(game, player_index, from, to);
+    }
     if !to_ship.is_empty() {
         game.log(
             player_index,
@@ -287,6 +330,10 @@ pub(crate) fn execute_movement_action(
 ) -> Result<(), String> {
     let player = EventPlayer::from_player(player_index, game, move_event_origin());
     match &action {
+        Move(m) if m.city.is_some() => player.log(
+            game,
+            &format!("Move city {} to {}", m.city.unwrap(), m.destination),
+        ),
         Move(m) if m.units.is_empty() => {
             player.log(game, "Used a movement actions but moved no units");
         }
@@ -304,8 +351,13 @@ pub(crate) fn execute_movement_action(
     }
 
     match action {
-        Move(m) => {
-            execute_move_action(game, p, &m)?;
+        Move(mut m) => {
+            crate::content::civilizations::carthage::prepare_move(game, player_index, &mut m)?;
+            if m.city.is_some() {
+                crate::content::civilizations::huns::execute_city_move(game, p, &m)?;
+            } else {
+                execute_move_action(game, p, &m)?;
+            }
 
             if !has_any_moves_left(game) {
                 game.state = GameState::Playing;
@@ -331,7 +383,10 @@ fn has_any_moves_left(game: &mut Game) -> bool {
             return true;
         }
 
-        p.units.iter().any(|unit| {
+        p.cities.iter().any(|c| {
+            !crate::content::civilizations::huns::city_destinations(game, p, c.position, &[])
+                .is_empty()
+        }) || p.units.iter().any(|unit| {
             let result = possible_move_routes(p, game, &[unit.id], unit.position, None);
             result.is_ok_and(|r| !r.is_empty()) || can_embark(game, p, unit)
         })
@@ -376,6 +431,18 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
         );
     }
 
+    if dest
+        .cost
+        .modifiers
+        .contains(&EventOrigin::LeaderAbility("Beloved".to_string()))
+    {
+        crate::content::civilizations::egypt::remove_protection(game, m.destination);
+        player.log(
+            game,
+            &format!("Paid Beloved protection to enter {}", m.destination),
+        );
+    }
+
     let current_move = get_current_move(
         game,
         &m.units,
@@ -401,9 +468,20 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
     let dest_terrain = game
         .map
         .get(m.destination)
-        .expect("destination should be a valid tile");
+        .expect("destination should be a valid tile")
+        .clone();
 
-    if dest_terrain == &Unexplored {
+    if game
+        .player(player.index)
+        .event_info
+        .contains_key("Navigator active")
+    {
+        game.player_mut(player.index).event_info.insert(
+            "Navigator fleet".into(),
+            serde_json::to_string(&m.units).unwrap(),
+        );
+    }
+    if dest_terrain == Unexplored {
         move_to_unexplored_tile(game, player, &m.units, starting_position, m.destination);
     } else {
         move_with_possible_combat(game, player.index, m);
@@ -449,36 +527,54 @@ fn move_units_destinations(
     let mut movement_restrictions = vec![];
 
     for unit in &units {
-        movement_restrictions.extend(unit.movement_restrictions.iter());
+        movement_restrictions.extend(unit.movement_restrictions.iter().filter(|r| {
+            !(**r == MovementRestriction::Mountain
+                && (crate::content::civilizations::carthage::ignores_mountains(player, unit_ids)
+                    || player.has_special_advance(SpecialAdvance::Terracing)
+                        && (unit.is_settler() || unit.unit_type.is_leader())))
+        }));
         check_can_move(player, start, embark_carrier_id, unit)?;
         if unit.is_army_unit() {
             stack_size += 1;
         }
     }
 
-    Ok(
-        move_routes(start, player, unit_ids, game, embark_carrier_id, stack_size)
-            .into_iter()
-            .map(|route| {
-                let result = move_route_result(
-                    player,
-                    game,
-                    unit_ids,
-                    start,
-                    embark_carrier_id,
-                    moved_units,
-                    movement_actions_left,
-                    current_move,
-                    &units,
-                    carrier_position,
-                    stack_size,
-                    &mut movement_restrictions,
-                    &route,
-                );
-                (route, result)
-            })
-            .collect_vec(),
-    )
+    Ok({
+        let mut routes = move_routes(start, player, unit_ids, game, embark_carrier_id, stack_size);
+        if player.event_info.contains_key("Attack Pirates")
+            && game
+                .players
+                .iter()
+                .any(|p| p.civilization.is_pirates() && !p.get_units(start).is_empty())
+        {
+            routes.push(crate::move_routes::MoveRoute {
+                destination: start,
+                cost: PaymentOptions::free(),
+                ignore_terrain_movement_restrictions: false,
+            });
+        }
+        routes
+    }
+    .into_iter()
+    .map(|route| {
+        let result = move_route_result(
+            player,
+            game,
+            unit_ids,
+            start,
+            embark_carrier_id,
+            moved_units,
+            movement_actions_left,
+            current_move,
+            &units,
+            carrier_position,
+            stack_size,
+            &mut movement_restrictions,
+            &route,
+        );
+        (route, result)
+    })
+    .collect_vec())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -504,6 +600,43 @@ fn move_route_result(
     is_move_restricted(player, game, stack_size, movement_restrictions, route)?;
 
     let dest = route.destination;
+    if !crate::content::civilizations::carthage::guard_moves(player, unit_ids) {
+        return Err("Allied pirates must move with one of your colored units".into());
+    }
+    if player.event_info.contains_key("Navigator active") {
+        let carrier = player
+            .units
+            .iter()
+            .find(|u| u.unit_type == UnitType::Leader(crate::leader::Leader::Hanno))
+            .and_then(|u| u.carrier_id);
+        if !carrier.is_some_and(|id| unit_ids.contains(&id)) {
+            return Err("Navigator must move Hanno's carrier".into());
+        }
+    }
+    if game.map.is_sea(dest)
+        && player.civilization.name == "Carthage"
+        && embark_carrier_id.is_none()
+    {
+        let own = player
+            .get_units(dest)
+            .iter()
+            .filter(|u| u.is_ship() && !unit_ids.contains(&u.id))
+            .count();
+        let neutral = if player.has_special_advance(SpecialAdvance::PirateAllies)
+            && !player.event_info.contains_key("Attack Pirates")
+        {
+            game.players
+                .iter()
+                .filter(|p| p.civilization.is_pirates())
+                .map(|p| p.get_units(dest).len())
+                .sum()
+        } else {
+            0
+        };
+        if own + neutral + units.iter().filter(|u| u.is_ship()).count() > 4 {
+            return Err("Carthage may have at most 4 Ships in one space".into());
+        }
+    }
     if game.map.is_land(start)
         && player
             .get_units(dest)
@@ -511,7 +644,14 @@ fn move_route_result(
             .filter(|unit| unit.is_army_unit() && !unit.is_transported())
             .count()
             + stack_size
-            > STACK_LIMIT
+            > if units
+                .iter()
+                .any(|u| u.unit_type == UnitType::Leader(crate::leader::Leader::Xerxes))
+            {
+                5
+            } else {
+                crate::content::civilizations::persia::stack_limit(player, dest)
+            }
     {
         return Err("stack limit exceeded".to_string());
     }
@@ -539,6 +679,9 @@ fn is_move_restricted(
     movement_restrictions: &Vec<&MovementRestriction>,
     route: &MoveRoute,
 ) -> Result<(), String> {
+    if movement_restrictions.contains(&&MovementRestriction::Navigator) {
+        return Err("These units cannot move again this turn".into());
+    }
     if movement_restrictions.contains(&&MovementRestriction::Battle) {
         return Err("battle movement restriction".to_string());
     }
@@ -644,11 +787,38 @@ fn terrain_movement_restriction(
 
 #[must_use]
 fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
-    unit.is_land_based()
-        && player.units.iter().any(|u| {
-            u.is_ship()
-                && possible_move_routes(player, game, &[unit.id], u.position, Some(u.id)).is_ok()
-        })
+    if !unit.is_land_based() {
+        return false;
+    }
+    if player.units.iter().filter(|u| u.is_ship()).any(|ship| {
+        possible_move_routes(player, game, &[unit.id], unit.position, Some(ship.id))
+            .is_ok_and(|r| !r.is_empty())
+    }) {
+        return true;
+    }
+    if player.has_special_advance(crate::special_advance::SpecialAdvance::PirateAllies) {
+        let pirates = crate::content::civilizations::carthage::pirate_player(game);
+        for ship in &game.player(pirates).units {
+            let mut preview = game.clone();
+            let carrier = crate::content::civilizations::carthage::claim_pirate(
+                &mut preview,
+                player.index,
+                ship.id,
+            );
+            if possible_move_routes(
+                preview.player(player.index),
+                &preview,
+                &[unit.id],
+                unit.position,
+                Some(carrier),
+            )
+            .is_ok_and(|r| !r.is_empty())
+            {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> String {

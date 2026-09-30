@@ -15,7 +15,6 @@ use crate::log::{
     current_action_log_mut, current_turn_log, current_turn_log_mut,
 };
 use crate::movement::MoveState;
-use crate::pirates::get_pirates_player;
 use crate::player::{CostTrigger, end_turn};
 use crate::player_events::{
     PersistentEvent, PersistentEvents, TransientEvents, trigger_event_with_game_value,
@@ -315,7 +314,9 @@ impl Game {
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
         if self.map.is_sea(position) {
-            let pirate = get_pirates_player(self);
+            let Some(pirate) = self.players.iter().find(|p| p.civilization.is_pirates()) else {
+                return false;
+            };
             if !pirate.get_units(position).is_empty() {
                 return true;
             }
@@ -331,6 +332,14 @@ impl Game {
     pub fn enemy_player(&self, player_index: usize, position: Position) -> Option<usize> {
         self.players.iter().position(|player| {
             player.index != player_index
+                && !(player.civilization.is_pirates()
+                    && self
+                        .player(player_index)
+                        .has_special_advance(crate::special_advance::SpecialAdvance::PirateAllies)
+                    && !self
+                        .player(player_index)
+                        .event_info
+                        .contains_key("Attack Pirates"))
                 && (!player.get_units(position).is_empty()
                     || player.try_get_city(position).is_some())
         })
@@ -408,7 +417,7 @@ impl Game {
     #[must_use]
     pub fn active_player(&self) -> usize {
         if let Some(e) = &self.events.last() {
-            return e.player.index;
+            return crate::content::civilizations::celts::delegated_player(self, e.player.index);
         }
         self.current_player_index
     }

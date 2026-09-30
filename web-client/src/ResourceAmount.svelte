@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama } from 'lucide-svelte';
+  import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Link } from 'lucide-svelte';
   import { resourceNames, type Pile, type Resource } from './types';
   let {
     pile,
@@ -14,6 +14,7 @@
     gold: Coins,
     mood_tokens: Smile,
     culture_tokens: Drama,
+    captives: Link,
   };
 </script>
 

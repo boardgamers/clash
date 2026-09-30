@@ -216,7 +216,7 @@ small {
   grid-area: resources;
   height: 40px;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 84px));
+  grid-template-columns: repeat(var(--resource-count, 7), minmax(0, 84px));
   justify-content: center;
   align-items: center;
   border-top: 1px solid var(--line);
@@ -1452,7 +1452,7 @@ small {
   .resource-bar {
     padding: 0 16px;
     gap: 8px;
-    grid-template-columns: repeat(7, minmax(0, 84px));
+    grid-template-columns: repeat(var(--resource-count, 7), minmax(0, 84px));
   }
   .resource-icon {
     width: 25px;
@@ -1547,7 +1547,7 @@ small {
     height: 69px;
     padding: 0 11px;
     gap: 2px;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--resource-count, 7), minmax(0, 1fr));
   }
   .resource {
     flex-direction: column;
@@ -3228,7 +3228,7 @@ small {
     width: 100%;
     max-width: 760px;
     justify-self: center;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--resource-count, 7), minmax(0, 1fr));
     border-top: 0;
     gap: 8px;
   }

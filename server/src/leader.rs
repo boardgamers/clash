@@ -36,6 +36,41 @@ pub enum Leader {
     SriGupta,
     Ashoka,
     Akbar,
+
+    // Egypt
+    Cleopatra,
+    Imhotep,
+    Ramses,
+
+    // Phoenicia
+    Ithobaal,
+    Hiram,
+    Pygmalion,
+
+    // Maya
+    Pakal,
+    SiyajKak,
+    WakChanilAjaw,
+
+    // Persia
+    Cyrus,
+    Darius,
+    Xerxes,
+    GoToba,
+    Jimmu,
+    Suiko,
+    Attila,
+    Bleda,
+    Rugila,
+    Viriatus,
+    Vercingetorix,
+    Boudica,
+    Marqzen,
+    Ahuitzotl,
+    Acamapichtli,
+    QueenDido,
+    Hanno,
+    Hannibal,
 }
 
 impl Leader {

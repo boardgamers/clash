@@ -300,6 +300,7 @@ pub(crate) fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
                 MovementRestriction::Battle => {
                     notes.push("can't move again (battle)");
                 }
+                MovementRestriction::Navigator => notes.push("cannot move again this turn"),
                 MovementRestriction::Mountain => {
                     notes.push("can't move out of a Mountain this turn");
                 }

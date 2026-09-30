@@ -154,6 +154,7 @@ mod tests {
 
     fn info(max: u8, choices: HashMap<Position, HashSet<ResourcePile>>) -> CollectInfo {
         CollectInfo {
+            captive_cities: Vec::new(),
             total: ResourcePile::empty(),
             city: Position::from_offset("D3"),
             modifiers: Vec::new(),

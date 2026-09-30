@@ -31,6 +31,8 @@ pub struct ResourcePile {
     #[serde(default)]
     #[serde(skip_serializing_if = "u8::is_zero")]
     pub culture_tokens: u8,
+    #[serde(default, skip_serializing_if = "u8::is_zero")]
+    pub captives: u8,
 }
 
 impl ResourcePile {
@@ -52,6 +54,7 @@ impl ResourcePile {
             gold,
             mood_tokens,
             culture_tokens,
+            captives: 0,
         }
     }
 
@@ -65,6 +68,7 @@ impl ResourcePile {
     #[must_use]
     pub fn get(&self, resource_type: &ResourceType) -> u8 {
         match resource_type {
+            ResourceType::Captives => self.captives,
             ResourceType::Food => self.food,
             ResourceType::Wood => self.wood,
             ResourceType::Ore => self.ore,
@@ -78,6 +82,7 @@ impl ResourcePile {
     #[must_use]
     pub fn get_mut(&mut self, resource_type: &ResourceType) -> &mut u8 {
         match resource_type {
+            ResourceType::Captives => &mut self.captives,
             ResourceType::Food => &mut self.food,
             ResourceType::Wood => &mut self.wood,
             ResourceType::Ore => &mut self.ore,
@@ -95,7 +100,8 @@ impl ResourcePile {
 
     #[must_use]
     pub fn has_at_least_times(&self, other: &ResourcePile, times: u8) -> bool {
-        self.food >= other.food * times
+        self.captives >= other.captives * times
+            && self.food >= other.food * times
             && self.wood >= other.wood * times
             && self.ore >= other.ore * times
             && self.ideas >= other.ideas * times
@@ -109,6 +115,7 @@ impl ResourcePile {
     /// Panics if `resource_type` is `Discount`
     pub const fn add_type(&mut self, resource_type: ResourceType, amount: i32) {
         match resource_type {
+            ResourceType::Captives => self.captives = (self.captives as i32 + amount) as u8,
             ResourceType::Food => self.food = (self.food as i32 + amount) as u8,
             ResourceType::Wood => self.wood = (self.wood as i32 + amount) as u8,
             ResourceType::Ore => self.ore = (self.ore as i32 + amount) as u8,
@@ -159,6 +166,13 @@ impl ResourcePile {
     }
 
     #[must_use]
+    pub const fn captives(amount: u8) -> Self {
+        let mut p = Self::new(0, 0, 0, 0, 0, 0, 0);
+        p.captives = amount;
+        p
+    }
+
+    #[must_use]
     pub const fn empty() -> Self {
         Self::wood(0)
     }
@@ -191,7 +205,8 @@ impl ResourcePile {
 
     #[must_use]
     pub fn has_common_resource(&self, other: &Self) -> bool {
-        self.food > 0 && other.food > 0
+        self.captives > 0 && other.captives > 0
+            || self.food > 0 && other.food > 0
             || self.wood > 0 && other.wood > 0
             || self.ore > 0 && other.ore > 0
             || self.ideas > 0 && other.ideas > 0
@@ -202,7 +217,8 @@ impl ResourcePile {
 
     #[must_use]
     pub fn amount(&self) -> u8 {
-        self.food
+        self.captives
+            + self.food
             + self.wood
             + self.ore
             + self.ideas
@@ -219,6 +235,9 @@ impl ResourcePile {
     #[must_use]
     pub fn types(&self) -> std::vec::Vec<ResourceType> {
         let mut types = Vec::new();
+        if self.captives > 0 {
+            types.push(ResourceType::Captives);
+        }
         if self.food > 0 {
             types.push(ResourceType::Food);
         }
@@ -245,7 +264,7 @@ impl ResourcePile {
 
     #[must_use]
     pub fn times(&self, t: u8) -> Self {
-        ResourcePile::new(
+        let mut result = ResourcePile::new(
             self.food * t,
             self.wood * t,
             self.ore * t,
@@ -253,12 +272,15 @@ impl ResourcePile {
             self.gold * t,
             self.mood_tokens * t,
             self.culture_tokens * t,
-        )
+        );
+        result.captives = self.captives * t;
+        result
     }
 }
 
 impl AddAssign for ResourcePile {
     fn add_assign(&mut self, rhs: Self) {
+        self.captives += rhs.captives;
         self.food += rhs.food;
         self.wood += rhs.wood;
         self.ore += rhs.ore;
@@ -272,21 +294,15 @@ impl AddAssign for ResourcePile {
 impl Add for ResourcePile {
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        Self::new(
-            self.food + rhs.food,
-            self.wood + rhs.wood,
-            self.ore + rhs.ore,
-            self.ideas + rhs.ideas,
-            self.gold + rhs.gold,
-            self.mood_tokens + rhs.mood_tokens,
-            self.culture_tokens + rhs.culture_tokens,
-        )
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self += rhs;
+        self
     }
 }
 
 impl SubAssign for ResourcePile {
     fn sub_assign(&mut self, rhs: Self) {
+        self.captives = self.captives.saturating_sub(rhs.captives);
         self.food = self.food.saturating_sub(rhs.food);
         self.wood = self.wood.saturating_sub(rhs.wood);
         self.ore = self.ore.saturating_sub(rhs.ore);
@@ -301,15 +317,7 @@ impl Mul<u8> for ResourcePile {
     type Output = Self;
 
     fn mul(self, rhs: u8) -> Self::Output {
-        Self::new(
-            self.food * rhs,
-            self.wood * rhs,
-            self.ore * rhs,
-            self.ideas * rhs,
-            self.gold * rhs,
-            self.mood_tokens * rhs,
-            self.culture_tokens * rhs,
-        )
+        self.times(rhs)
     }
 }
 
@@ -355,6 +363,7 @@ impl Iterator for ResourceIntoIterator {
             4 => Some((ResourceType::Gold, p.gold)),
             5 => Some((ResourceType::MoodTokens, p.mood_tokens)),
             6 => Some((ResourceType::CultureTokens, p.culture_tokens)),
+            7 => Some((ResourceType::Captives, p.captives)),
             _ => None,
         }
     }
@@ -363,6 +372,13 @@ impl Iterator for ResourceIntoIterator {
 impl Display for ResourcePile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut resources = Vec::new();
+        if self.captives > 0 {
+            resources.push(format!(
+                "{} captive{}",
+                self.captives,
+                if self.captives == 1 { "" } else { "s" }
+            ));
+        }
         if self.food > 0 {
             resources.push(format!("{} food", self.food));
         }
@@ -435,6 +451,7 @@ impl CostWithDiscount {
         available.gold + self.discount >= cost.gold + resource_deficit
             && available.mood_tokens >= cost.mood_tokens
             && available.culture_tokens >= cost.culture_tokens
+            && available.captives >= cost.captives
     }
 }
 

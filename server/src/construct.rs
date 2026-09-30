@@ -78,7 +78,7 @@ pub fn can_construct(
         player,
         !discounts.contains(&ConstructDiscount::NoCityActivation) && cost_info.activate_city,
     )?;
-    if city.mood_state == MoodState::Angry {
+    if city.effective_mood() == MoodState::Angry {
         return Err("City is angry".to_string());
     }
     let can_afford = discounts.contains(&ConstructDiscount::NoResourceCost)
@@ -157,7 +157,9 @@ pub(crate) fn do_construct(
         origin,
     );
 
-    on_construct(game, player_index, ConstructInfo::new(c.city_piece));
+    let mut info = ConstructInfo::new(c.city_piece);
+    info.city_position = Some(c.city_position);
+    on_construct(game, player_index, info);
 }
 
 pub(crate) fn construct(
@@ -201,6 +203,8 @@ impl ConstructAdvanceBonus {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct ConstructInfo {
     pub building: Building,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city_position: Option<Position>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub gained_advance: Option<ConstructAdvanceBonus>,
@@ -211,6 +215,7 @@ impl ConstructInfo {
     pub fn new(building: Building) -> Self {
         Self {
             building,
+            city_position: None,
             gained_advance: None,
         }
     }

@@ -30,6 +30,8 @@ pub struct BarbariansMoveRequest {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct BarbariansEventState {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub hunnic_tribes: bool,
     #[serde(default)]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub move_units: bool,
@@ -54,6 +56,7 @@ impl BarbariansEventState {
     #[must_use]
     pub fn new() -> BarbariansEventState {
         BarbariansEventState {
+            hunnic_tribes: false,
             moved_units: Vec::new(),
             selected_position: None,
             move_units: false,
@@ -273,12 +276,24 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 |game, p, i| {
                     let state = i.barbarians.as_mut().expect("barbarians should exist");
                     if let Some(army) = state.selected_position {
-                        let choices = barbarian_march_steps(
-                            game,
-                            game.player(p.index),
-                            army,
-                            0, // stack size was already checked in last step
-                        );
+                        let choices = if state.hunnic_tribes {
+                            let barb = get_barbarians_player(game);
+                            let size = barb.get_units(army).len();
+                            army.neighbors()
+                                .into_iter()
+                                .filter(|to| {
+                                    game.map.is_land(*to)
+                                        && barb.get_units(*to).len() + size <= STACK_LIMIT
+                                })
+                                .collect()
+                        } else {
+                            barbarian_march_steps(
+                                game,
+                                game.player(p.index),
+                                army,
+                                0, // stack size was already checked in last step
+                            )
+                        };
 
                         let needed = 1..=1;
                         Some(PositionRequest::new(
@@ -450,7 +465,7 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
     )
 }
 
-fn possible_barbarians_spawns(game: &Game, player: &Player) -> Vec<Position> {
+pub(crate) fn possible_barbarians_spawns(game: &Game, player: &Player) -> Vec<Position> {
     let primary: Vec<Position> = game
         .map
         .tiles
@@ -480,7 +495,7 @@ fn possible_barbarians_spawns(game: &Game, player: &Player) -> Vec<Position> {
     secondary
 }
 
-fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
+pub(crate) fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
     let barbarian = get_barbarians_player(game);
     let avail = barbarian.available_units();
     if !barbarian_fighters().iter().any(|u| avail.has_unit(u)) {
@@ -489,7 +504,7 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
     cities_that_can_add_units(barbarian)
 }
 
-fn get_barbarian_reinforcement_choices(game: &Game, pos: Position) -> Vec<UnitType> {
+pub(crate) fn get_barbarian_reinforcement_choices(game: &Game, pos: Position) -> Vec<UnitType> {
     let barbarian = get_barbarians_player(game);
 
     let possible = if barbarian.get_units(pos).iter().any(|u| u.is_infantry()) {

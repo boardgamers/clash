@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct CombatHits {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub horse_master_value: Option<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tactics_card: Option<u8>,
@@ -36,6 +38,7 @@ impl CombatHits {
         combat_value: u8,
     ) -> CombatHits {
         CombatHits {
+            horse_master_value: None,
             tactics_card,
             opponent_hit_cancels,
             opponent_fighters,
@@ -57,6 +60,7 @@ impl CombatHits {
 }
 
 pub(crate) struct CombatRoundStats {
+    horse_master_value: Option<u8>,
     player: usize,
     opponent_str: String,
     pub(crate) fighters: u8,
@@ -82,6 +86,13 @@ impl CombatRoundStats {
             strength.extra_dies,
             strength.extra_combat_value,
             strength.deny_combat_abilities,
+            crate::content::civilizations::persia::caps_opponent_bonus(game, c, player),
+            c.stats.round == 1
+                && c.defender() == player
+                && c.defender_fortress(game)
+                && game
+                    .player(player)
+                    .has_special_advance(crate::special_advance::SpecialAdvance::Horsemanship),
             &mut log,
         );
         let log_str = roll_log_str(&log);
@@ -96,6 +107,11 @@ impl CombatRoundStats {
         .to_string();
 
         CombatRoundStats {
+            horse_master_value: (c.first_round()
+                && game.player(player).active_leader() == Some(crate::leader::Leader::Attila)
+                && c.has_leader(c.role(player), game))
+            .then_some(rolls.horse_master_value)
+            .flatten(),
             opponent_str,
             strength,
             player,
@@ -112,12 +128,13 @@ impl CombatRoundStats {
         game: &mut Game,
         tactics_card: Option<u8>,
     ) -> CombatHits {
-        let combat_hits = CombatHits::new(
+        let mut combat_hits = CombatHits::new(
             tactics_card,
             opponent.hit_cancels,
             opponent.fighters,
             self.combat_value,
         );
+        combat_hits.horse_master_value = self.horse_master_value;
         let hits = combat_hits.hits();
 
         let p = EventPlayer::from_player(self.player, game, combat_event_origin());
@@ -150,6 +167,7 @@ fn roll_log_str(log: &[String]) -> String {
 }
 
 struct CombatRolls {
+    horse_master_value: Option<u8>,
     pub combat_value: i8,
     pub hit_cancels: u8,
 }
@@ -189,6 +207,8 @@ fn roll(
     extra_dies: u8,
     extra_combat_value: i8,
     deny_combat_abilities: bool,
+    cap_bonus: bool,
+    mut horsemanship: bool,
     roll_log: &mut Vec<String>,
 ) -> CombatRolls {
     let mut dice_rolls = extra_dies;
@@ -200,9 +220,11 @@ fn roll(
     }
 
     let mut rolls = CombatRolls {
+        horse_master_value: None,
         combat_value: extra_combat_value,
         hit_cancels: 0,
     };
+    let mut bonus = extra_combat_value;
     for _ in 0..dice_rolls {
         let dice_roll =
             dice_roll_with_leader_reroll(game, &mut unit_types, deny_combat_abilities, roll_log);
@@ -214,11 +236,25 @@ fn roll(
             match dice_roll.bonus {
                 Infantry => {
                     rolls.combat_value += 1;
+                    bonus += 1;
                     add_roll_log_effect(roll_log, "+1 combat value");
                 }
                 Cavalry => {
-                    rolls.combat_value += 2;
-                    add_roll_log_effect(roll_log, "+2 combat value");
+                    let extra = if horsemanship { 3 } else { 2 };
+                    rolls.combat_value += extra;
+                    bonus += extra;
+                    add_roll_log_effect(
+                        roll_log,
+                        if horsemanship {
+                            "+3 combat value (Horsemanship)"
+                        } else {
+                            "+2 combat value"
+                        },
+                    );
+                    horsemanship = false;
+                    if rolls.horse_master_value.is_none() {
+                        rolls.horse_master_value = Some(value);
+                    }
                 }
                 Elephant => {
                     rolls.hit_cancels += 1;
@@ -230,6 +266,17 @@ fn roll(
         } else {
             add_roll_log_effect(roll_log, "no bonus");
         }
+    }
+    rolls.horse_master_value = rolls.horse_master_value.map(|v| {
+        v + if cap_bonus {
+            (bonus.min(2) - (bonus - 2).min(2)) as u8
+        } else {
+            2
+        }
+    });
+    if cap_bonus && bonus > 2 {
+        rolls.combat_value -= bonus - 2;
+        roll_log.push(format!("opponent limits combat bonus from +{bonus} to +2"));
     }
     if rolls.combat_value < 0 {
         rolls.combat_value = 0;

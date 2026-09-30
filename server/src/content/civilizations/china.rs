@@ -58,10 +58,19 @@ fn rice() -> SpecialAdvanceInfo {
 }
 
 // Shared by the collection effect and the viewer's per-tile yield preview.
-pub(crate) fn rice_cultivation_tile(game: &Game, player: usize, city: Position, tile: Position) -> bool {
+pub(crate) fn rice_cultivation_tile(
+    game: &Game,
+    player: usize,
+    city: Position,
+    tile: Position,
+) -> bool {
     tile != city
         && game.map.get(tile) == Some(&Terrain::Fertile)
-        && game.player(player).units.iter().any(|u| u.position == tile && u.is_settler())
+        && game
+            .player(player)
+            .units
+            .iter()
+            .any(|u| u.position == tile && u.is_settler())
 }
 
 fn expansion() -> SpecialAdvanceInfo {

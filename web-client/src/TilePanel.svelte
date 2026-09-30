@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X, Wheat, Hammer, Users, Smile, Footprints, ArrowRight } from 'lucide-svelte';
+  import { X, Wheat, Hammer, Users, Smile, Footprints, ArrowRight, Shield } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { canMoveOnMap } from './map-actions';
   import { terrainInfo } from './terrain';
@@ -58,6 +58,20 @@
         owner={publicOwner.id}
         players={$session.game?.players ?? []}
       />{/if}
+    {#if city?.protection}<p
+        class="city-rule"
+        title="Beloved: an attacking player pays these culture tokens before entering. The protection is then removed."
+      >
+        <Shield size={16} /> Beloved · {city.protection} culture to attack
+      </p>{/if}
+    {#if city?.independentPort}<p class="city-rule">
+        City Independence · Port 1½ VP · Protected from influence
+      </p>{/if}
+    {#if city?.influenceMarker != null}<p class="city-rule">
+        <Shield size={16} />
+        {$session.view?.players.find((p) => p.index === city?.influenceMarker)?.civilization} · Druidic Influence
+        · 1 VP
+      </p>{/if}
     {#if ownCity}
       <div class="tile-city-actions" aria-label={`City ${position} actions`}>
         <button
@@ -65,6 +79,9 @@
           title={ownCity.reason ?? 'Collect resources · 1 action'}
           onclick={() => controller.beginCollect(position)}><Wheat size={19} />Collect</button
         >
+        {#if $session.view?.nomadCities?.includes(position)}<button
+            onclick={() => controller.openNomadCity(position)}><Footprints size={19} />Move city</button
+          >{/if}
         <button onclick={() => controller.openCities(position, 'build')}><Hammer size={19} />Build</button>
         <button onclick={() => controller.openCities(position, 'recruit')}><Users size={19} />Recruit</button>
         <button onclick={() => controller.openCities(position, 'happiness')}

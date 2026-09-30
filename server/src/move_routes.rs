@@ -1,5 +1,4 @@
 use crate::advance::Advance;
-use crate::consts::STACK_LIMIT;
 use crate::content::action_cards::negotiation::negotiations_partner;
 use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relations_partner};
 use crate::events::EventOrigin;
@@ -61,6 +60,23 @@ pub(crate) fn move_routes(
     }
     add_diplomatic_relations(player, game, &mut base);
     add_negotiations(player, game, &mut base);
+    for route in &mut base {
+        if let Some(city) = game.try_get_any_city(route.destination) {
+            if city.player_index != player.index {
+                let count = crate::content::civilizations::egypt::protection(
+                    game.player(city.player_index),
+                    city.position,
+                );
+                if count > 0 {
+                    route.cost.default += ResourcePile::culture_tokens(count);
+                    route
+                        .cost
+                        .modifiers
+                        .push(EventOrigin::LeaderAbility("Beloved".to_string()));
+                }
+            }
+        }
+    }
     base
 }
 
@@ -106,24 +122,37 @@ fn reachable_with_roads(
             return vec![];
         }
 
+        let moving_xerxes = units.iter().any(|id| {
+            player.get_unit(*id).unit_type
+                == crate::unit::UnitType::Leader(crate::leader::Leader::Xerxes)
+        });
         let roman_roads = player.has_special_advance(SpecialAdvance::RomanRoads);
-        let mut routes: Vec<MoveRoute> = next_road_step(player, game, start, stack_size, |_| false)
-            .into_iter()
-            .flat_map(|middle| next_road_step(player, game, middle, stack_size, |_| true))
-            .unique()
-            .filter_map(|destination| {
-                road_route(
-                    player,
-                    start,
-                    destination,
-                    roman_roads,
-                    vec![EventOrigin::Advance(Advance::Roads)],
-                )
-            })
-            .collect();
+        let mut routes: Vec<MoveRoute> =
+            next_road_step(player, game, start, stack_size, moving_xerxes, |_| false)
+                .into_iter()
+                .flat_map(|middle| {
+                    next_road_step(player, game, middle, stack_size, moving_xerxes, |_| true)
+                })
+                .unique()
+                .filter_map(|destination| {
+                    road_route(
+                        player,
+                        start,
+                        destination,
+                        roman_roads,
+                        vec![EventOrigin::Advance(Advance::Roads)],
+                    )
+                })
+                .collect();
 
         if roman_roads {
-            routes.extend(roman_roads_routes(player, game, start, stack_size));
+            routes.extend(roman_roads_routes(
+                player,
+                game,
+                start,
+                stack_size,
+                moving_xerxes,
+            ));
         }
 
         return routes;
@@ -138,6 +167,7 @@ fn roman_roads_routes(
     game: &Game,
     start: Position,
     stack_size: usize,
+    moving_xerxes: bool,
 ) -> Vec<MoveRoute> {
     if game.try_get_any_city(start).is_none() {
         return vec![];
@@ -156,7 +186,7 @@ fn roman_roads_routes(
             let len = astar(
                 &start,
                 |p| {
-                    next_road_step(player, game, *p, stack_size, |p| *p == dst)
+                    next_road_step(player, game, *p, stack_size, moving_xerxes, |p| *p == dst)
                         .iter()
                         .map(|&n| (n, 1))
                         .collect_vec()
@@ -217,6 +247,7 @@ fn next_road_step(
     game: &Game,
     from: Position,
     stack_size: usize,
+    moving_xerxes: bool,
     allow_enemy: impl Fn(&Position) -> bool,
 ) -> Vec<Position> {
     // don't move over enemy units or cities
@@ -230,7 +261,12 @@ fn next_road_step(
                 .count();
             game.map.is_land(*to)
                 && (allow_enemy(to) || game.enemy_player(player.index, *to).is_none())
-                && on_target + stack_size <= STACK_LIMIT
+                && on_target + stack_size
+                    <= if moving_xerxes {
+                        5
+                    } else {
+                        crate::content::civilizations::persia::stack_limit(player, *to)
+                    }
         })
         .collect_vec()
 }
@@ -270,7 +306,8 @@ pub(crate) fn navigation_paths(map: &Map, start: Position) -> Vec<Vec<Position>>
         return vec![];
     }
     let perimeter = find_perimeter(map, start);
-    let target = |(_, p): &(usize, &Position)| **p != start && (map.is_sea(**p) || map.is_unexplored(**p));
+    let target =
+        |(_, p): &(usize, &Position)| **p != start && (map.is_sea(**p) || map.is_unexplored(**p));
     let first = perimeter.iter().enumerate().skip(1).find(target);
     let last = perimeter.iter().enumerate().skip(1).rfind(target);
     let mut paths = vec![];
@@ -278,7 +315,11 @@ pub(crate) fn navigation_paths(map: &Map, start: Position) -> Vec<Vec<Position>>
         paths.push(perimeter[..=i].to_vec());
     }
     if let Some((i, _)) = last {
-        paths.push(std::iter::once(start).chain(perimeter[i..].iter().rev().copied()).collect());
+        paths.push(
+            std::iter::once(start)
+                .chain(perimeter[i..].iter().rev().copied())
+                .collect(),
+        );
     }
     paths
 }
