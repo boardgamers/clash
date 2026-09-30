@@ -17,6 +17,7 @@ async function fixture(name) {
 const pending = await fixture('remove_casualties_attacker.outcome');
 const completed = await fixture('combat_all_modifiers.outcome5');
 const elephant = await fixture('direct_capture_city_metallurgy.outcome');
+const naval = await fixture('ship_combat.outcome');
 const server = createServer(async (req, res) => {
   if (req.url === '/')
     return res.end(
@@ -75,6 +76,12 @@ try {
     );
     assert.ok(await table.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
     assert.equal(await table.locator('.combat-die').count(), 6);
+    assert.equal(await table.locator('.combat-die > svg').count(), 6);
+    assert.equal(await table.locator('.combat-die.activated').count(), 4);
+    assert.equal(
+      await table.getByRole('img', { name: '6 · Infantry face · No ability activated', exact: true }).count(),
+      2,
+    );
     await page.screenshot({ path: `/tmp/clash-combat-active-${width}.png` });
     await page.evaluate((state) => host.emit('state', state), completed);
     await marker.waitFor({ state: 'hidden' });
@@ -87,12 +94,34 @@ try {
     await page.evaluate((state) => host.emit('state', state), elephant);
     await table.getByText('Blocks 1 hit').waitFor();
     assert.equal(await table.locator('.rerolled').count(), 1);
+    assert.equal(
+      await table.getByRole('img', { name: '1 · Leader face · Rerolled', exact: true }).count(),
+      1,
+    );
+    assert.equal(
+      await table
+        .getByRole('img', { name: '2 · Elephant face · -1 hits, no combat value', exact: true })
+        .count(),
+      1,
+    );
     assert.ok(await table.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.screenshot({ path: `/tmp/clash-combat-elephant-${width}.png` });
+    await page.evaluate((state) => host.emit('state', state), naval);
+    await page.waitForFunction(() => document.querySelectorAll('.combat-die').length === 3);
+    const journalButton = page.getByRole('button', { name: 'Open journal', exact: true });
+    if ((await journalButton.getAttribute('aria-expanded')) === 'false') await journalButton.click();
+    await table.waitFor();
+    await page.screenshot({ path: `/tmp/clash-combat-naval-${width}.png` });
+    assert.equal(
+      await table.getByRole('img', { name: '6 · Infantry face · No ability activated', exact: true }).count(),
+      3,
+    );
+    assert.equal(await table.locator('.combat-die.activated').count(), 0);
+    assert.equal(await table.locator('.combat-die-effect').count(), 0);
     assert.deepEqual(errors, []);
     console.log(
-      `${width}px: combat marker, paired rolls, modifiers, casualties, reroll and completed battle verified.`,
+      `${width}px: combat marker, dice numbers and faces, activated abilities, naval rolls and completed battle verified.`,
     );
     await page.close();
   }

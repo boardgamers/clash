@@ -99,13 +99,51 @@ test('each round and each separate battle retains its own casualties and result'
   );
 });
 
-test('naval rolls omit inactive die symbols and fortress-only defense can roll without units', () => {
+test('naval rolls retain inactive die faces and fortress-only defense can roll without units', () => {
   const [naval] = rounds(journal(fixture('ship_combat.outcome')));
-  assert.deepEqual(naval.attacker.dice, [{ value: 6 }, { value: 6 }]);
+  assert.deepEqual(naval.attacker.dice, [
+    { value: 6, symbol: 'Infantry' },
+    { value: 6, symbol: 'Infantry' },
+  ]);
   const [fortress] = rounds(journal(fixture('direct_capture_city_only_fortress.outcome')));
   assert.deepEqual(fortress.defender.units, []);
   assert.equal(fortress.defender.dice?.length, 1);
   assert.ok(fortress.defender.modifiers.includes('fortress added one extra die'));
+});
+
+test('identical numbers preserve different faces and distinguish used abilities from inactive faces', () => {
+  const game = fixture('remove_casualties_attacker.outcome');
+  game.log![0].rounds[0].turns[0].actions = [
+    {
+      log: [
+        'Player1: Combat: Roll 4 (cavalry, +2 combat value), 4 (elephant, -1 hits, no combat value), 4 (cavalry, no bonus) for combined combat value of 10 and gets 1 hits against defending units',
+      ],
+    },
+  ];
+  game.log_index = 1;
+  const [combat] = rounds(journal(game));
+  assert.deepEqual(combat.attacker.dice, [
+    { value: 4, symbol: 'Cavalry', effect: '+2 combat value' },
+    { value: 4, symbol: 'Elephant', effect: '-1 hits, no combat value' },
+    { value: 4, symbol: 'Cavalry' },
+  ]);
+});
+
+test('older numeric-only logs remain readable without guessing a face from the number', () => {
+  const entry: JournalEntry = {
+    id: '0-0-0-0-0',
+    age: 1,
+    round: 1,
+    kind: 'combat',
+    title: 'Combat',
+    player: 0,
+    civilization: 'Rome',
+    tokens: [],
+    notes: ['Roll 4 → combat value 4 → 0 hits against defending units'],
+    text: '',
+  };
+  const [combat] = rounds([entry]);
+  assert.deepEqual(combat.attacker.dice, [{ value: 4 }]);
 });
 
 test('undo truncation is reflected without keeping later results in the projection', () => {

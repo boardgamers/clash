@@ -39,14 +39,14 @@ function parseDice(text: string): CombatDie[] | null {
   const parts = text.split(/,\s*(?![^()]*\))/);
   const dice: CombatDie[] = [];
   for (const part of parts) {
-    const match = part.match(/^(\d+)(?: \((infantry|cavalry|elephant|leader) die symbol: (.+)\))?$/);
+    const match = part.match(/^(\d+)(?: \((infantry|cavalry|elephant|leader) (?:face|die symbol): (.+)\))?$/);
     if (!match) return null; // Leave unfamiliar engine messages readable as prose.
     dice.push({
       value: Number(match[1]),
       ...(match[2]
         ? {
             symbol: (match[2][0].toUpperCase() + match[2].slice(1)) as CombatDie['symbol'],
-            effect: match[3],
+            ...(match[3] === 'no bonus' ? {} : { effect: match[3] }),
           }
         : {}),
     });

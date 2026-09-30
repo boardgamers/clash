@@ -61,18 +61,28 @@
   align-items: center;
 }
 .combat-die {
-  width: 23px;
-  min-height: 23px;
+  min-width: 38px;
+  min-height: 26px;
+  padding: 3px 5px;
   display: inline-flex;
-  gap: 1px;
+  gap: 4px;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--line);
   border-radius: 4px;
   background: var(--paper2);
 }
+.combat-die > svg {
+  flex-shrink: 0;
+}
+.combat-die:not(.activated) > svg {
+  color: var(--muted);
+}
+.combat-die.activated {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
 .combat-die.rerolled {
-  width: 31px;
   color: var(--muted);
 }
 .combat-die.rerolled b {
@@ -106,6 +116,12 @@
   margin: 9px 0;
   font-size: 12px;
   font-weight: 600;
+}
+.combat-dice-legend {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
 }
 .journal-combat > .journal-outcome {
   margin-top: 10px;

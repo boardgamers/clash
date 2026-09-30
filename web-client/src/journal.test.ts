@@ -68,7 +68,7 @@ test('undo shortens the journal without showing retained redo outcomes or changi
   assert.equal(JSON.stringify(state.log), savedLog);
 });
 
-test('naval rolls omit unused army die symbols while preserving tactics, hits and ship losses', () => {
+test('naval rolls identify die faces separately from tactics, hits and ship losses', () => {
   const state = game([
     {
       combat_stats: { battleground: 'Sea' },
@@ -81,17 +81,19 @@ test('naval rolls omit unused army die symbols while preserving tactics, hits an
   state.players.push({ id: 3, civilization: 'Pirates' });
   const [attacker, defender] = journal(state);
   assert.deepEqual(attacker.notes, [
-    'Roll 3 → combat value 5 → 1 hit against defending units',
+    'Roll 3 (infantry face: no bonus) → combat value 5 → 1 hit against defending units',
     'Combat modifiers: High Morale added 2 combat value',
   ]);
-  assert.deepEqual(defender.notes, ['Roll 4 → combat value 4 → 0 hits against attacking units']);
+  assert.deepEqual(defender.notes, [
+    'Roll 4 (elephant face: no bonus) → combat value 4 → 0 hits against attacking units',
+  ]);
   assert.deepEqual(
     defender.tokens.map((t) => [t.value, t.label]),
     [['−1', 'ship at D3']],
   );
 });
 
-test('unfinished naval battles also omit inactive symbols on each die', () => {
+test('unfinished naval battles retain inactive faces on each die', () => {
   // Combat stats are only stored when the entire battle ends.
   const [entry] = journal(
     game([
@@ -104,7 +106,7 @@ test('unfinished naval battles also omit inactive symbols on each die', () => {
   );
   assert.deepEqual(entry.notes, [
     'Attacking with 2 ships',
-    'Roll 4, 1 → combat value 5 → 1 hit against defending units',
+    'Roll 4 (elephant face: no bonus), 1 (leader face: no bonus) → combat value 5 → 1 hit against defending units',
   ]);
 });
 
@@ -120,7 +122,7 @@ test('land rolls identify activated die symbols and preserve rerolls, bonuses an
   );
   assert.equal(
     entry.notes.join(', '),
-    'Attacking with 1 infantry, 1 elephant and 1 leader, Roll 1 (leader die symbol: re-roll), 6 (infantry die symbol: +1 combat value), 4 (elephant die symbol: -1 hits, no combat value), 5 → combat value 12 → 2 hits against defending units',
+    'Attacking with 1 infantry, 1 elephant and 1 leader, Roll 1 (leader face: re-roll), 6 (infantry face: +1 combat value), 4 (elephant face: -1 hits, no combat value), 5 (cavalry face: no bonus) → combat value 12 → 2 hits against defending units',
   );
 });
 

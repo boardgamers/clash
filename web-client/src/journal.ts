@@ -95,11 +95,9 @@ function formatCombatRolls(text: string): string {
   return text.replace(
     /\bRoll (.+?) for combined combat value of (\d+) and gets (\d+) hits against (attacking|defending) units/g,
     (_match, rolls: string, value: string, hits: string, opponent: string) => {
-      // The engine logs army symbols on every die, including naval rolls. Only
-      // show symbols that actually activated, retaining bonuses and rerolls.
-      const dice = rolls
-        .replace(/ \((?:infantry|cavalry|elephant|leader), no bonus\)/g, '')
-        .replace(/\((infantry|cavalry|elephant|leader), /g, '($1 die symbol: ');
+      // A face is part of the roll even when its ability doesn't activate.
+      // Name it explicitly so naval faces aren't mistaken for fighting units.
+      const dice = rolls.replace(/\((infantry|cavalry|elephant|leader), /g, '($1 face: ');
       return `Roll ${dice} → combat value ${value} → ${hits} ${hits === '1' ? 'hit' : 'hits'} against ${opponent} units`;
     },
   );
