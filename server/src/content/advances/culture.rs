@@ -166,6 +166,7 @@ fn use_sports(b: AbilityBuilder) -> AbilityBuilder {
                 &[(position, steps)],
                 &pile,
                 true,
+                false,
                 &a.action.action.playing_action_type(),
                 &s.origin,
             )

@@ -43,7 +43,7 @@ export function previewApi(): Plugin {
         const url = new URL(req.url ?? '/', 'http://127.0.0.1:8643');
         if (url.pathname.startsWith('/bundle/')) {
           const asset = url.pathname.slice(8);
-          if (!['viewer.js', 'engine/server.js', 'engine/server_bg.wasm'].includes(asset)) {
+          if (!['viewer.js', 'server_bg.wasm', 'engine/server.js', 'engine/server_bg.wasm'].includes(asset)) {
             res.statusCode = 404;
             res.end();
             return;

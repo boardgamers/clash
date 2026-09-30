@@ -301,7 +301,17 @@ pub(crate) fn execute_choose_civ(
 ) -> Result<(), String> {
     let player = EventPlayer::from_player(player_index, game, setup_event_origin());
     if let Action::ChooseCivilization(civ) = action {
-        game.player_mut(player_index).civilization = game.cache.get_civilization(civ);
+        let civilization = game
+            .cache
+            .get_civilizations()
+            .iter()
+            .find(|c| &c.name == civ)
+            .ok_or("Choose a playable civilization")?
+            .clone();
+        if civilization.is_used(game).is_some() {
+            return Err("Civilization already chosen".into());
+        }
+        game.player_mut(player_index).civilization = civilization;
         let p = game.player_mut(player_index);
         p.available_leaders = all_leaders(&p.civilization);
         place_home_tiles(game, &player);

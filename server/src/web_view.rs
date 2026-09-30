@@ -174,12 +174,19 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             after_activation.mood_state = match city.mood_state { MoodState::Happy => MoodState::Neutral, _ => MoodState::Angry };
         }
         let info = possible_resource_collections(game, city.position, seat, &origin, CostTrigger::NoModifiers);
-        let mut choices = info.choices.iter().flat_map(|(position, piles)| piles.iter().map(move |pile| json!({"position":position,"pile":pile,"bonuses":
+        let mut choices = info.choices.iter().flat_map(|(position, piles)| piles.iter().map(move |pile| {
+            let mut bonuses = vec![];
             if p.has_special_advance(crate::special_advance::SpecialAdvance::RiceCultivation)
                 && is_special_advance_active(crate::special_advance::SpecialAdvance::RiceCultivation, p.advances, game)
                 && crate::content::civilizations::china::rice_cultivation_tile(game, seat, city.position, *position) {
-                vec![json!({"source":"Rice Cultivation","pile":ResourcePile::food(1),"limit":2})]
-            } else {vec![]}}))).collect::<Vec<_>>();
+                bonuses.push(json!({"source":"Rice Cultivation","pile":ResourcePile::food(1),"limit":2}));
+            }
+            if pile.food == 1 && p.has_special_advance(crate::special_advance::SpecialAdvance::Canals)
+                && is_special_advance_active(crate::special_advance::SpecialAdvance::Canals, p.advances, game) {
+                bonuses.push(json!({"source":"Canals","pile":ResourcePile::food(1),"limit":1,"condition":"exactlyOneFood"}));
+            }
+            json!({"position":position,"pile":pile,"bonuses":bonuses})
+        })).collect::<Vec<_>>();
         choices.sort_by_key(Value::to_string);
         let reason = if !can_play { Some("Wait for your turn".to_string()) } else if !city.can_activate() { Some("This city has already been activated while angry".to_string()) } else { collect_reason.clone() };
         json!({"position":city.position,"capital":city.position == crate::map::capital_city_position(game,p),"size":city.size(),"capacity":info.max_selection,"maxPerTile":info.max_per_tile,"maxRange2":info.max_range2_tiles,"mood":city.mood_state,"activations":city.activations,"reason":reason,"choices":choices,
@@ -233,7 +240,10 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
     json!({"eventCatalog":event_catalog,"pendingEvent":pending_event,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "decision":decision,
-        "civilizations":if seat == active && game.state == GameState::ChooseCivilization {game.cache.get_civilizations().iter().filter(|c|c.is_human() && !game.players.iter().any(|p|p.civilization.name==c.name)).map(|c|json!({"name":c.name,"action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>()} else {vec![]},
+        "civilizations":if seat == active && game.state == GameState::ChooseCivilization {game.cache.get_civilizations().iter().filter(|c|c.is_human() && !game.players.iter().any(|p|p.civilization.name==c.name)).map(|c|json!({"name":c.name,
+            "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),
+            "leaders":c.leaders.iter().map(|l|json!({"name":l.name,"abilities":l.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()})).collect::<Vec<_>>(),
+            "action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>()} else {vec![]},
         "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
         "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free})).collect::<Vec<_>>()} else {vec![]},
         "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free,"surcharge":a.payment_options(game,seat).default})).collect::<Vec<_>>()} else {vec![]},

@@ -10,6 +10,12 @@ export function collectionYield(choice: Choice, selection: Selection[] = []): Pi
   for (const [resource, amount] of Object.entries(choice.pile))
     pile[resource as Resource] = amount! * (selected?.times ?? 1);
   for (const bonus of choice.bonuses ?? []) {
+    if (bonus.condition === 'exactlyOneFood') {
+      const food =
+        selection.reduce((total, tile) => total + (tile.pile.food ?? 0) * tile.times, 0) +
+        (selected ? 0 : (choice.pile.food ?? 0));
+      if (food !== 1) continue;
+    }
     const eligible = selection.filter((c) => c.bonuses?.some((b) => b.source === bonus.source));
     const index = selected ? eligible.indexOf(selected) : eligible.length;
     if (index >= bonus.limit) continue;
@@ -25,7 +31,9 @@ export function collectionBonusLabel(choice: Choice) {
       (b) =>
         `${Object.entries(b.pile)
           .map(([r, n]) => `+${n} ${resourceNames[r as Resource].toLowerCase()}`)
-          .join(' ')} · ${b.source} (up to ${b.limit} tiles)`,
+          .join(
+            ' ',
+          )} · ${b.source} (${b.condition === 'exactlyOneFood' ? 'when collecting exactly 1 food' : `up to ${b.limit} tiles`})`,
     )
     .join(', ');
 }

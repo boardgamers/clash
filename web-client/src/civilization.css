@@ -1,0 +1,80 @@
+.civilization-picker {
+  width: min(780px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 24px;
+}
+.civilization-picker h2 {
+  margin: 0 0 18px;
+}
+.faction-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.faction-choices button,
+.faction-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
+.faction-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0 12px;
+}
+.faction-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.civilization-picker article {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 15px;
+}
+.civilization-picker h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+.civilization-picker small {
+  color: var(--muted);
+}
+.civilization-picker p {
+  margin: 9px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.civilization-picker p strong {
+  font-size: 12px;
+}
+.civilization-picker footer {
+  position: sticky;
+  bottom: -24px;
+  margin-top: 16px;
+  padding: 10px 0 0;
+  background: var(--paper);
+}
+@media (max-width: 600px) {
+  .civilization-picker {
+    padding: 16px;
+  }
+  .faction-details {
+    grid-template-columns: 1fr;
+  }
+  .civilization-picker h2 {
+    font-size: 28px;
+  }
+  .civilization-picker footer {
+    bottom: -16px;
+  }
+}
+
+.civilization-picker button.selected {
+  border-color: var(--gold);
+  background: var(--paper2);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}

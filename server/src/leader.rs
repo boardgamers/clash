@@ -26,6 +26,11 @@ pub enum Leader {
     Ragnar,
     Erik,
     Knut,
+
+    // Babylonia
+    Hammurabi,
+    Nebuchadnezzar,
+    Nabopolassar,
 }
 
 impl Leader {

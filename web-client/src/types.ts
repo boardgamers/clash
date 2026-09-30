@@ -62,7 +62,7 @@ export interface LoggedAction {
   combat_stats?: unknown;
 }
 export interface Choice {
-  bonuses?: { source: string; pile: Pile; limit: number }[];
+  bonuses?: { source: string; pile: Pile; limit: number; condition?: 'exactlyOneFood' }[];
   position: string;
   pile: Pile;
 }
@@ -149,7 +149,12 @@ export interface View {
   collectActions?: ActionVariant[];
   happinessActions?: ActionVariant[];
   decision?: Decision | null;
-  civilizations?: { name: string; action: Move }[];
+  civilizations?: {
+    name: string;
+    action: Move;
+    advances: { name: string; description: string; requirement: string }[];
+    leaders: { name: string; abilities: { name: string; description: string }[] }[];
+  }[];
   actionCards?: ActionCard[];
   specialActions?: { name: string; description: string; position: string | null; action: Move }[];
   influence?: {
@@ -234,7 +239,7 @@ export interface CityActions {
     choices: { position: string | null; action: Move }[];
   }[];
   recruits: { type: UnitKind; payment: Pile; reason: string | null; available: number; limit?: number }[];
-  happiness: (ActionOffer & { steps: number; mood: string })[];
+  happiness: (ActionOffer & { steps: number; mood: string; lawgiver?: boolean })[];
 }
 export interface SettlerView {
   id: number;

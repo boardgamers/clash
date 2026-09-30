@@ -3,7 +3,9 @@ use crate::city::MoodState;
 use crate::city_pieces::BUILDINGS;
 use crate::construct::{Construct, can_construct, new_building_positions};
 use crate::game::{Game, GameState};
-use crate::happiness::{IncreaseHappiness, happiness_base_event_origin, happiness_cost};
+use crate::happiness::{
+    IncreaseHappiness, happiness_base_event_origin, happiness_cost_for_cities, lawgiver_city,
+};
 use crate::map::Terrain;
 use crate::movement::{MoveUnits, MovementAction, possible_move_routes};
 use crate::player::CostTrigger;
@@ -74,7 +76,6 @@ pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Valu
         serde_json::from_value(input["cities"].clone()).map_err(|e| e.to_string())?;
     let p = game.player(seat);
     let restriction = crate::happiness::happiness_city_restriction(p, &kind);
-    let mut steps = 0;
     if selections.is_empty() {
         return Err("Choose cities to improve".into());
     }
@@ -92,18 +93,26 @@ pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Valu
         {
             return Err("Choose valid happiness increases".into());
         }
-        steps += city.size() as u8 * n;
     }
     let origin = crate::happiness::happiness_event_origin(&kind, p);
-    let cost = happiness_cost(seat, steps, CostTrigger::NoModifiers, &kind, game, &origin);
+    let lawgiver = input["lawgiver"].as_bool().unwrap_or(false);
+    let cost = happiness_cost_for_cities(
+        game,
+        seat,
+        &selections,
+        lawgiver,
+        CostTrigger::NoModifiers,
+        &kind,
+        &origin,
+    )?;
     let affordable = cost.cost.first_valid_payment(&p.resources);
     let payment = affordable
         .clone()
         .unwrap_or_else(|| cost.cost.default_payment());
     let action = affordable.map(|payment| {
-        Action::Playing(PlayingAction::IncreaseHappiness(IncreaseHappiness::new(
-            selections, payment, kind,
-        )))
+        let mut increase = IncreaseHappiness::new(selections, payment, kind);
+        increase.lawgiver = lawgiver;
+        Action::Playing(PlayingAction::IncreaseHappiness(increase))
     });
     Ok(json!({
         "payment":payment,
@@ -210,7 +219,7 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     let p = game.player(seat);
     p.cities.iter().map(|city| {
         let buildings = BUILDINGS.into_iter().map(|building| {
-            let cost = p.building_cost(game, building, CostTrigger::NoModifiers);
+            let cost = p.building_cost_in_city(game, building, city.position, CostTrigger::NoModifiers);
             let payment = cost.cost.first_valid_payment(&p.resources).unwrap_or_else(|| cost.cost.default_payment());
             let positions = new_building_positions(game, building, city);
             let reason = action_reason(game, seat, can_play, PlayingActionType::Construct)
@@ -230,15 +239,21 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             json!({"type":unit,"payment":payment,"reason":reason,"available":p.available_units().get_amount(&unit),"limit":p.unit_limit().get_amount(&unit)})
         }).collect::<Vec<_>>();
         let max_steps = match city.mood_state {MoodState::Happy=>0, MoodState::Neutral=>1, MoodState::Angry=>2};
-        let happiness = (1..=max_steps).map(|steps| {
-            let kind = PlayingActionType::IncreaseHappiness;
-            let cost = happiness_cost(seat,city.size() as u8 * steps,CostTrigger::NoModifiers,&kind,game,&happiness_base_event_origin());
-            let payment = cost.cost.first_valid_payment(&p.resources);
-            let reason = action_reason(game,seat,can_play,kind.clone()).or_else(||payment.is_none().then(||"Not enough resources".into()));
-            let payment = payment.unwrap_or_else(||cost.cost.default_payment());
-            let action = reason.is_none().then(||Action::Playing(PlayingAction::IncreaseHappiness(IncreaseHappiness::new(vec![(city.position,steps)],payment.clone(),kind))));
-            json!({"steps":steps,"mood":if steps==max_steps {"Happy"} else {"Neutral"},"payment":payment,"reason":reason,"action":action})
-        }).collect::<Vec<_>>();
+        let happiness = (1..=max_steps).map(|steps| (steps, false))
+            .chain((max_steps > 0 && lawgiver_city(p) == Some(city.position)).then_some((max_steps, true)))
+            .map(|(steps, lawgiver)| {
+                let kind = PlayingActionType::IncreaseHappiness;
+                let cost = happiness_cost_for_cities(game, seat, &[(city.position,steps)], lawgiver, CostTrigger::NoModifiers, &kind, &happiness_base_event_origin()).expect("valid happiness target");
+                let payment = cost.cost.first_valid_payment(&p.resources);
+                let reason = action_reason(game,seat,can_play,kind.clone()).or_else(||payment.is_none().then(||"Not enough resources".into()));
+                let payment = payment.unwrap_or_else(||cost.cost.default_payment());
+                let action = reason.is_none().then(|| {
+                    let mut increase = IncreaseHappiness::new(vec![(city.position,steps)],payment.clone(),kind);
+                    increase.lawgiver = lawgiver;
+                    Action::Playing(PlayingAction::IncreaseHappiness(increase))
+                });
+                json!({"steps":steps,"lawgiver":lawgiver,"mood":if steps==max_steps {"Happy"} else {"Neutral"},"payment":payment,"reason":reason,"action":action})
+            }).collect::<Vec<_>>();
         let leaders = p.available_leaders.iter().map(|l|json!({"id":l,"name":l.name(game),"abilities":game.cache.get_leader(l).abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>(),"description":game.cache.get_leader(l).abilities.iter().map(|a|format!("{}: {}",a.name,a.description)).collect::<Vec<_>>().join("\n")})).collect::<Vec<_>>();
         json!({"position":city.position,"buildings":buildings,"recruits":recruits,"happiness":happiness,"leaders":leaders})
     }).collect()

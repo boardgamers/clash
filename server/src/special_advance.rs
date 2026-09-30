@@ -35,6 +35,12 @@ pub enum SpecialAdvance {
     Longships,
     Raiding,
     RuneStones,
+
+    // Babylonia
+    Canals,
+    CodeOfLaws,
+    StarCatalogues,
+    Ziggurats,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

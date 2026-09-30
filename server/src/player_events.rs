@@ -310,6 +310,8 @@ impl IncidentInfo {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CostInfo {
     pub cost: PaymentOptions,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) city_position: Option<Position>,
     pub activate_city: bool,
     pub(crate) ignore_required_advances: bool, // only used for wonder costs
     pub(crate) ignore_action_cost: bool,       // only used for wonder costs
@@ -321,6 +323,7 @@ impl CostInfo {
         let info = ActionInfo::new(player, cost.origin.clone());
         CostInfo {
             cost,
+            city_position: None,
             info,
             activate_city: true,
             ignore_required_advances: false,

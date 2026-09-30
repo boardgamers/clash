@@ -61,7 +61,7 @@ impl LeaderAbility {
                 "A: When drawing a wonder: Take {wonder} from anywhere in the game - \
                 unless already built. If a player or Envoy had {wonder}, \
                 they get to draw a new wonder instead. \
-                B: Building {wonder} costs 2 culture tokens less. \
+                B: Building {wonder} in the leader city costs 2 culture tokens less. \
                 C: Building any wonder in the leader city is a free action.",
             ),
         )
@@ -78,7 +78,7 @@ impl LeaderAbility {
             |event| &mut event.wonder_cost,
             0,
             move |i, w, game, p| {
-                if w.wonder == wonder {
+                if w.wonder == wonder && w.city_position == leader_position(game.player(w.player)) {
                     i.cost.default.culture_tokens -= 2;
                     i.info.add_log(
                         p,

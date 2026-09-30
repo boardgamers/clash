@@ -336,16 +336,33 @@ impl Player {
 
     #[must_use]
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
-        self.trigger_cost_event(
-            |e| &e.building_cost,
-            CostInfo::new(
-                self,
-                PaymentOptions::resources(self, construct_event_origin(), BUILDING_COST),
-            ),
-            &building,
-            game,
-            execute,
-        )
+        self.building_cost_at(game, building, None, execute)
+    }
+
+    #[must_use]
+    pub fn building_cost_in_city(
+        &self,
+        game: &Game,
+        building: Building,
+        city: Position,
+        execute: CostTrigger,
+    ) -> CostInfo {
+        self.building_cost_at(game, building, Some(city), execute)
+    }
+
+    fn building_cost_at(
+        &self,
+        game: &Game,
+        building: Building,
+        city: Option<Position>,
+        execute: CostTrigger,
+    ) -> CostInfo {
+        let mut cost = CostInfo::new(
+            self,
+            PaymentOptions::resources(self, construct_event_origin(), BUILDING_COST),
+        );
+        cost.city_position = city;
+        self.trigger_cost_event(|e| &e.building_cost, cost, &building, game, execute)
     }
 
     #[must_use]

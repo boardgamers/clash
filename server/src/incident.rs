@@ -631,6 +631,10 @@ pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
         .player(player_index)
         .wonders_owned
         .contains(Wonder::GreatMausoleum)
+        || game
+            .player(player_index)
+            .special_advances
+            .contains(crate::special_advance::SpecialAdvance::StarCatalogues)
     {
         on_choose_incident(game, player_index, IncidentInfo::new(0, player_index));
     } else {
@@ -643,12 +647,15 @@ pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
 }
 
 pub(crate) fn on_choose_incident(game: &mut Game, player_index: usize, info: IncidentInfo) {
-    if let Some(info) = game.trigger_persistent_event(
+    if let Some(mut info) = game.trigger_persistent_event(
         &[player_index],
         |events| &mut events.choose_incident,
         info,
         PersistentEventType::ChooseIncident,
     ) {
+        if info.incident_id == 0 {
+            info.incident_id = draw_and_discard_incident_card_from_pile(game, player_index);
+        }
         on_trigger_incident(game, info);
     }
 }

@@ -72,7 +72,7 @@ pub fn can_construct(
         return Err(format!("Missing advance: {}", advance.name(game)));
     }
 
-    let cost_info = player.building_cost(game, building, trigger);
+    let cost_info = player.building_cost_in_city(game, building, city.position, trigger);
     can_construct_anything(
         city,
         player,

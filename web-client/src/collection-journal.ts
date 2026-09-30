@@ -3,7 +3,7 @@ import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Resource } f
 type CityFacts = NonNullable<JournalEntry['collection']>['city'];
 type Collect = { city_position: string; collections: { position: string; pile: Pile; times: number }[] };
 const resources = new Set(['food', 'wood', 'ore', 'ideas', 'gold', 'mood_tokens', 'culture_tokens']);
-const bundledSources = new Set(['Public Education', 'Rice Cultivation', 'Metallurgy']);
+const bundledSources = new Set(['Public Education', 'Rice Cultivation', 'Metallurgy', 'Canals']);
 
 function collect(action: LoggedAction): Collect | undefined {
   const move = action.action;

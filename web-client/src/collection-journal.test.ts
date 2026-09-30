@@ -109,6 +109,15 @@ test('unreconciled effects stay separate, repeated tile selections count, and st
   assert.ok(entries.some((e) => e.text.includes('Could not store 2 food')));
 });
 
+test('Canals explains the extra food without duplicating the gain', () => {
+  const entries = journal(
+    game([collect([{ food: 1 }, { wood: 1 }], '2 food and 1 wood', ['Canals: Added 1 food'])]),
+  );
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].tokens.find((t) => t.icon === 'food')?.value, '+2');
+  assert.equal(entries[0].collection!.effects[0].source, 'Canals');
+});
+
 test('undone collection commands have no visible outcome', () => {
   const undone = collect([{ food: 1 }], '1 food');
   undone.log = [];

@@ -30,6 +30,13 @@ fn dogma() -> AdvanceBuilder {
         Note: Dogma Advance does not apply when you conquer a city with a Temple.",
     )
     .add_once_initializer(move |game, player| {
+        // The civilization advance unlocks in the same purchase, after this initializer.
+        // Do not discard ideas before Ziggurats can remove Dogma's limit.
+        if crate::advance::find_non_government_special_advance(Advance::Dogma, player.get(game))
+            == Some(crate::special_advance::SpecialAdvance::Ziggurats)
+        {
+            return;
+        }
         player.log(game, "Ideas limit reduced to 2");
         let p = player.get_mut(game);
         p.resource_limit.ideas = 2;

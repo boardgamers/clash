@@ -7,6 +7,7 @@
   const session = $derived(controller.session);
   let steps = $state<Record<string, number>>({});
   let variant = $state(0);
+  let lawgiverCity = $state<string | null>(null);
   const choices = $derived($session.view?.happinessActions ?? []);
   const cities = $derived($session.view?.cities ?? []);
   const singleCity = $derived(cities.length === 1);
@@ -26,6 +27,9 @@
                 [city.position, target.steps],
               ],
               variant: choices[variant].value,
+              lawgiver:
+                target.lawgiver ||
+                (lawgiverCity !== city.position && selected.some(([pos]) => pos === lawgiverCity)),
             });
             return {
               ...target,
@@ -47,6 +51,7 @@
         kind: 'happiness',
         cities: selected,
         variant: choices[variant].value,
+        lawgiver: selected.some(([pos]) => pos === lawgiverCity),
       });
     } catch (error) {
       return { action: null, payment: null, reason: String(error) };
@@ -92,27 +97,39 @@
         >
         {#if targets.length}<ArrowRight size={15} class="mood-change-arrow" />{/if}
         <div class="mood-targets" role="group" aria-label={`Happiness at ${city.position}`}>
-          {#each targets as target}{@const Icon = target.mood === 'Happy' ? Smile : Meh}
+          {#each targets as target}{@const isSelected =
+              steps[city.position] === target.steps &&
+              !!target.lawgiver === (lawgiverCity === city.position)}{@const Icon =
+              target.mood === 'Happy' ? Smile : Meh}
             <button
-              class:selected={steps[city.position] === target.steps}
+              class:selected={isSelected}
               class:primary={singleCity && !!target.action}
-              aria-label={`${singleCity ? 'Make' : 'Set'} ${city.position} ${target.mood.toLowerCase()}`}
-              aria-pressed={singleCity ? undefined : steps[city.position] === target.steps}
-              title={!singleCity && steps[city.position] === target.steps
+              aria-label={`${singleCity ? 'Make' : 'Set'} ${city.position} ${target.mood.toLowerCase()}${target.lawgiver ? ' with Lawgiver' : ''}`}
+              aria-pressed={singleCity ? undefined : isSelected}
+              title={!singleCity && isSelected
                 ? 'Remove this city from the selection'
-                : (target.reason ?? (singleCity ? 'Improve this city' : 'Cost to improve this city'))}
-              disabled={(!target.action && (singleCity || steps[city.position] !== target.steps)) ||
-                $session.pending}
+                : (target.reason ??
+                  (target.lawgiver
+                    ? 'Lawgiver: make Hammurabi’s city happy for 1 culture token'
+                    : singleCity
+                      ? 'Improve this city'
+                      : 'Cost to improve this city'))}
+              disabled={(!target.action && (singleCity || !isSelected)) || $session.pending}
               onclick={() => {
                 if (singleCity && target.action) controller.submit(target.action);
-                else
+                else {
+                  if (lawgiverCity === city.position) lawgiverCity = null;
+                  if (!isSelected && target.lawgiver) lawgiverCity = city.position;
                   steps = {
                     ...steps,
-                    [city.position]: steps[city.position] === target.steps ? 0 : target.steps,
+                    [city.position]: isSelected ? 0 : target.steps,
                   };
+                }
               }}
             >
-              <span class="mood-target-label"><Icon size={18} />{target.mood}</span>
+              <span class="mood-target-label"
+                ><Icon size={18} />{target.lawgiver ? 'Lawgiver' : target.mood}</span
+              >
               <span class="mood-target-cost"
                 ><ResourceAmount
                   pile={Object.values(target.payment).some(Boolean) ? target.payment : { mood_tokens: 0 }}
@@ -123,7 +140,7 @@
                     >{:else}<span aria-label="Costs 1 action"><Zap size={13} />1</span>{/if}{/if}
               </span>
               {#if !singleCity}<span class="mood-selection-mark" aria-hidden="true"
-                  >{#if steps[city.position] === target.steps}<Check size={12} />{/if}</span
+                  >{#if isSelected}<Check size={12} />{/if}</span
                 >{/if}
             </button>
           {:else}<span class="mood-already-happy">Happy<Check size={14} /></span>{/each}

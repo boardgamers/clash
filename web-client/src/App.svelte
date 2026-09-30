@@ -1,5 +1,6 @@
 <script lang="ts">
   import EventMarkers from './EventMarkers.svelte';
+  import CivilizationPicker from './CivilizationPicker.svelte';
   import TilePanel from './TilePanel.svelte';
   import { onMount } from 'svelte';
   import {
@@ -1022,19 +1023,7 @@
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
-    {#if $session.view?.civilizations?.length}<section
-        class="action-panel floating-panel"
-        aria-label="Choose civilization"
-      >
-        <h2>Choose civilization</h2>
-        <div class="decision-options">
-          {#each $session.view.civilizations as civilization}<button
-              disabled={$session.pending}
-              onclick={() => controller.submit(civilization.action)}
-              ><CivilizationEmblem civilization={civilization.name} />{civilization.name}</button
-            >{/each}
-        </div>
-      </section>{/if}
+    {#if $session.view?.civilizations?.length}<CivilizationPicker {controller} />{/if}
     <section
       class="activity floating-panel"
       hidden={!$session.activityOpen}

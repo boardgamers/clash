@@ -255,6 +255,7 @@ impl PlayingAction {
                 &i.happiness_increases,
                 &i.payment,
                 false,
+                i.lawgiver,
                 &i.action_type,
                 &happiness_event_origin(&i.action_type, game.player(player_index)),
             )?,

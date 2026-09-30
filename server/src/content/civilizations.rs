@@ -20,6 +20,8 @@ pub fn get_all_uncached() -> Vec<Civilization> {
         greece::greece(),
         china::china(),
         vikings::vikings(),
+        babylonia::babylonia(),
         // not finished yet: maya
     ]
 }
+pub(crate) mod babylonia;

@@ -20,9 +20,10 @@ test('civilization selection opens a playable four-player game', async () => {
     'choose-civilizations',
     {},
   );
+  const civilizationCount = view(state).civilizations!.length;
   for (let i = 0; i < 4; i++) {
     const current = view(state);
-    assert.equal(current.civilizations!.length, 4 - i);
+    assert.equal(current.civilizations!.length, civilizationCount - i);
     state = execute(state, current.civilizations![0].action);
   }
   const current = view(state);

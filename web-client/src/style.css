@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Libre+Caslon+Display&display=swap');
 @import './research.css';
+@import './civilization.css';
 @import './city.css';
 @import './map-actions.css';
 :root {

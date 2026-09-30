@@ -1,0 +1,111 @@
+{
+  "edition": "Monumental Edition",
+  "checked": "2026-09-30",
+  "rulebook": "https://wizkids.com/posters/repository/wizkids/Clash-of-Cultures---Rulebook---WEB---2021-02-05-compressed.pdf",
+  "setup": {
+    "page": 4,
+    "standard": "Random civilization and its three matching leaders",
+    "optional_variant": "Players choose distinct civilizations"
+  },
+  "deck_audit": {
+    "method": "Counts and IDs; not a behavior audit of every card",
+    "action_cards": 42,
+    "objective_cards": 38,
+    "event_cards": 58,
+    "wonders": 8
+  },
+  "civilizations": [
+    {
+      "name": "Aztecs",
+      "guide": "https://boardgamegeek.com/thread/2718487",
+      "monumental_images": [
+        "https://boardgamegeek.com/image/8436929",
+        "https://boardgamegeek.com/image/8436928"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": false
+    },
+    {
+      "name": "Babylonia",
+      "guide": "https://boardgamegeek.com/thread/2667045",
+      "monumental_images": [
+        "https://boardgamegeek.com/image/7552363",
+        "https://boardgamegeek.com/image/7552364"
+      ],
+      "verification": "monumental-photos-verified",
+      "implemented": true
+    },
+    {
+      "name": "Carthage",
+      "guide": "https://boardgamegeek.com/thread/2669902",
+      "monumental_images": [
+        "https://boardgamegeek.com/image/7553246",
+        "https://boardgamegeek.com/image/7553242"
+      ],
+      "verification": "monumental-update-located",
+      "implemented": false
+    },
+    {
+      "name": "Celts",
+      "guide": "https://boardgamegeek.com/thread/2673667",
+      "monumental_images": [
+        "https://boardgamegeek.com/image/7553244",
+        "https://boardgamegeek.com/image/7553248"
+      ],
+      "verification": "monumental-update-located",
+      "implemented": false
+    },
+    {
+      "name": "Egypt",
+      "guide": "https://boardgamegeek.com/thread/2679670",
+      "monumental_images": [],
+      "verification": "original-edition-guide-only",
+      "implemented": false
+    },
+    {
+      "name": "Huns",
+      "guide": "https://boardgamegeek.com/thread/2684906",
+      "monumental_images": [],
+      "verification": "original-edition-guide-only",
+      "implemented": false
+    },
+    {
+      "name": "India",
+      "guide": "https://boardgamegeek.com/thread/2686786",
+      "monumental_images": [
+        "https://boardgamegeek.com/image/8436927",
+        "https://boardgamegeek.com/image/8436926"
+      ],
+      "verification": "monumental-update-located",
+      "implemented": false
+    },
+    {
+      "name": "Japan",
+      "guide": "https://boardgamegeek.com/thread/2690159",
+      "monumental_images": [],
+      "verification": "original-edition-guide-only",
+      "implemented": false
+    },
+    {
+      "name": "Maya",
+      "guide": "https://boardgamegeek.com/thread/2692302",
+      "monumental_images": [],
+      "verification": "original-edition-guide-only",
+      "implemented": false
+    },
+    {
+      "name": "Persia",
+      "guide": "https://boardgamegeek.com/thread/2698135",
+      "monumental_images": [],
+      "verification": "original-edition-guide-only",
+      "implemented": false
+    },
+    {
+      "name": "Phoenicia",
+      "guide": "https://boardgamegeek.com/thread/2702235",
+      "monumental_images": [],
+      "verification": "original-edition-guide-only",
+      "implemented": false
+    }
+  ]
+}

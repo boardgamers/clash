@@ -615,10 +615,10 @@ test('public civilization inspection includes researched and civilization advanc
 });
 
 test('all civilizations expose four public automatic advances, exact prerequisites and structured leader abilities', async () => {
-  const state = await engine.init(
+  let state = await engine.init(
     4,
     [],
-    { undo: 'SamePlayer', civilization: 'Random' },
+    { undo: 'SamePlayer', civilization: 'ChooseCivilization' },
     'civilization-preview',
     {},
   );
@@ -648,6 +648,9 @@ test('all civilizations expose four public automatic advances, exact prerequisit
       RuneStones: ['Rituals'],
     },
   };
+  for (const name of Object.keys(expected)) {
+    state = engine.tryMove(state, JSON.stringify({ ChooseCivilization: name }), engine.currentPlayer(state));
+  }
   const spectator: View = JSON.parse(engine.webView(engine.stripSecret(state, undefined), undefined));
   assert.deepEqual(spectator.players.map((p) => p.civilization).sort(), Object.keys(expected).sort());
   for (const player of spectator.players) {
