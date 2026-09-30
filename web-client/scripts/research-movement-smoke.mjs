@@ -147,7 +147,9 @@ try {
       .click();
     const pirates = page.getByRole('region', { name: 'Pirate effects', exact: true });
     await pirates.waitFor();
-    assert.match(await pirates.innerText(), /1 resource, mood token or culture token in total/);
+    assert.match(await pirates.innerText(), /Blocks collection and Trade Routes/);
+    assert.doesNotMatch(await pirates.innerText(), /Raid|Naval battle/);
+    assert.ok((await pirates.boundingBox()).height < 200, 'Pirate inspection stays compact on mobile');
     assert.ok(await pirates.locator('.pirate-coordinates button').count());
     await page.screenshot({ path: '/tmp/clash-pirates-390.png' });
     await page.getByRole('button', { name: 'Close tile actions', exact: true }).click();
