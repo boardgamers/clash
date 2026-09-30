@@ -3,6 +3,7 @@
 @import './civilization.css';
 @import './city.css';
 @import './map-actions.css';
+@import './combat.css';
 :root {
   font-family: 'DM Sans', sans-serif;
   color: #343c32;

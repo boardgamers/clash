@@ -355,7 +355,8 @@
   }
   .play-layout .action-panel.floating-panel {
     top: 136px;
-    max-height: calc(100% - 150px);
+    /* Keep Journal and map controls accessible while a decision is pending. */
+    max-height: calc(100% - 254px);
   }
   .city-dialog {
     width: calc(100vw - 16px);

@@ -35,6 +35,7 @@ export interface Player {
 }
 export interface Game {
   state: unknown;
+  events?: { event_type: string | Record<string, unknown> }[];
   players: Player[];
   map: { tiles: [string, Terrain][] };
   current_player_index: number;
@@ -333,6 +334,7 @@ export interface JournalEntry {
   title: string;
   tokens: JournalToken[];
   notes: string[];
+  combat?: import('./combat-journal').CombatRound;
   collection?: {
     city?: { size: number; mood: string; structures: string[] };
     tiles: { position: string; pile: Pile; times: number }[];

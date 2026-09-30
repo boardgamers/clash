@@ -72,6 +72,8 @@
   import CityFacts from './CityFacts.svelte';
   import CollectionCapacity from './CollectionCapacity.svelte';
   import DecisionPanel from './DecisionPanel.svelte';
+  import CombatJournal from './CombatJournal.svelte';
+  import { combatJournal } from './combat-journal';
   import ActionCardsDialog from './ActionCardsDialog.svelte';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
@@ -146,7 +148,9 @@
       .join(' · '),
   );
   let identity = $derived($session.view?.players.find((p) => p.index === $session.seat));
-  let log = $derived($session.game ? journal($session.game, $session.view ?? undefined).reverse() : []);
+  let log = $derived(
+    $session.game ? combatJournal(journal($session.game, $session.view ?? undefined)).reverse() : [],
+  );
   const coordinateInteraction = {
     onCoordinate: (position: string | null) => world?.highlightCoordinate(position),
     onLocate: (position: string) => {
@@ -296,7 +300,11 @@
 
 {#snippet journalRow(entry: JournalEntry, outcome = false)}
   {@const EntryIcon = journalIcons[entry.kind]}
-  <article class:journal-event={!!entry.event} class:journal-outcome={outcome}>
+  <article
+    class:journal-event={!!entry.event}
+    class:journal-outcome={outcome}
+    class:journal-combat={!!entry.combat}
+  >
     <span
       class="journal-symbol"
       aria-hidden="true"
@@ -317,6 +325,9 @@
           /></span
         >{/if}
     </div>
+    {#if entry.combat}<CombatJournal combat={entry.combat} />
+      {#each entry.combat.outcomes as effect}{@render journalRow(effect, true)}{/each}
+    {/if}
     {#if entry.tokens.length}<div class="journal-deltas">
         {#each entry.tokens as token}{@const TokenIcon = journalTokenIcons[token.icon]}
           <span

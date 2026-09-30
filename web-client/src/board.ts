@@ -9,6 +9,9 @@ import { positionXY } from './model';
 import { PieceModels, type BuildingKind } from './piece-models';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
+import { CombatOverlay } from './combat-overlay';
+import { activeCombat } from './active-combat';
+import { Swords } from 'lucide-svelte';
 import { mount, unmount } from 'svelte';
 import UnitMapBadge from './UnitMapBadge.svelte';
 import { mapDecisionOptions } from './decision-controls';
@@ -29,6 +32,10 @@ export class World {
   private board = new THREE.Group();
   private rings = new THREE.Group();
   private seaOverlay = new SeaOverlay();
+  private combatOverlay = new CombatOverlay();
+  private combatLabel: HTMLDivElement;
+  private combatLabelText: Text;
+  private combatIcon: ReturnType<typeof mount>;
   private seaGuide = false;
   private seaPreviewAllowed = false;
   private seaRouteStart: string | null = null;
@@ -152,6 +159,15 @@ export class World {
     this.hoverRing.castShadow = false;
     this.scene.add(this.hoverRing);
     this.scene.add(this.seaOverlay.group);
+    this.scene.add(this.combatOverlay.group);
+    this.combatLabel = document.createElement('div');
+    this.combatLabel.className = 'map-combat-label';
+    this.combatLabel.hidden = true;
+    this.combatLabel.setAttribute('role', 'status');
+    this.combatIcon = mount(Swords, { target: this.combatLabel, props: { size: 14 } });
+    this.combatLabelText = document.createTextNode('');
+    this.combatLabel.append(this.combatLabelText);
+    host.append(this.combatLabel);
     const referenceMaterial = new THREE.MeshBasicMaterial({ color: '#fff3bd', depthTest: false });
     this.materials.add(referenceMaterial);
     this.referenceRing = this.mesh(new THREE.TorusGeometry(1.01, 0.045, 6, 6), referenceMaterial);
@@ -375,6 +391,11 @@ export class World {
         const v = this.referenceRing.position.clone().project(this.camera);
         this.referenceLabel.style.transform = `translate(-50%, 8px) translate(${((v.x + 1) * w) / 2}px,${((-v.y + 1) * h) / 2}px)`;
         this.referenceLabel.hidden = v.z > 1;
+      }
+      if (this.combatOverlay.group.children.length) {
+        const v = this.combatOverlay.position.clone().project(this.camera);
+        this.combatLabel.style.transform = `translate(-50%, 12px) translate(${((v.x + 1) * w) / 2}px,${((-v.y + 1) * h) / 2}px)`;
+        this.combatLabel.hidden = v.z > 1 || v.z < -1;
       }
     });
   }
@@ -653,6 +674,16 @@ export class World {
       !s.view?.objectiveDecision;
     this.seaRouteStart = s.seaRouteStart;
     this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? []);
+    const combat = activeCombat(s.game);
+    this.combatOverlay.update(combat);
+    this.combatLabel.hidden = !combat;
+    if (combat) {
+      this.combatLabelText.textContent = `Battle · ${combat.defender.position}`;
+      this.combatLabel.setAttribute(
+        'aria-label',
+        `${s.game.players[combat.attacker.player]?.civilization ?? 'Attacker'} attacks ${s.game.players[combat.defender.player]?.civilization ?? 'defender'} · ${combat.attacker.position} to ${combat.defender.position} · Round ${combat.round}`,
+      );
+    }
     this.pending = s.pending;
     const exploration = s.view?.explorationDecision;
     const placement =
@@ -1181,6 +1212,9 @@ export class World {
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
     this.seaOverlay.dispose();
+    this.combatOverlay.dispose();
+    void unmount(this.combatIcon);
+    this.combatLabel.remove();
     cancelAnimationFrame(this.frame);
     this.resize.disconnect();
     this.panelObserver.disconnect();

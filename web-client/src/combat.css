@@ -1,0 +1,131 @@
+.journal article.journal-combat {
+  padding-left: 0;
+}
+.journal-combat > .journal-symbol {
+  display: none;
+}
+.journal-combat > .journal-heading {
+  margin-bottom: 10px;
+}
+.combat-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.combat-table th,
+.combat-table td {
+  padding: 7px 6px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.combat-table tr > :first-child {
+  width: 62px;
+  padding-left: 0;
+}
+.combat-table tr > :last-child {
+  padding-right: 0;
+}
+.combat-table tbody th {
+  font-weight: 400;
+  color: var(--muted);
+}
+.combat-role {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+.combat-civilization {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.combat-civilization svg {
+  flex-shrink: 0;
+}
+.combat-units,
+.combat-dice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.combat-units > span {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+.combat-die {
+  width: 23px;
+  min-height: 23px;
+  display: inline-flex;
+  gap: 1px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper2);
+}
+.combat-die.rerolled {
+  width: 31px;
+  color: var(--muted);
+}
+.combat-die.rerolled b {
+  text-decoration: line-through;
+}
+.combat-die-effect {
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+  font-size: 11px;
+  margin-top: 5px;
+}
+.combat-die-effect > svg {
+  flex-shrink: 0;
+  align-self: center;
+}
+.combat-modifier {
+  display: block;
+  font-size: 11px;
+}
+.combat-modifier + .combat-modifier {
+  margin-top: 5px;
+}
+.combat-value {
+  font-weight: 600;
+}
+.combat-hits td {
+  font-size: 15px;
+}
+.combat-result {
+  margin: 9px 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.journal-combat > .journal-outcome {
+  margin-top: 10px;
+  padding-bottom: 0;
+}
+.map-combat-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border: 1px solid #ffdb8a;
+  border-radius: 5px;
+  background: #34382b;
+  color: #fff1c9;
+  font-size: 11px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px #0003;
+}
