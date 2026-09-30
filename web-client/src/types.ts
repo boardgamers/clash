@@ -23,6 +23,7 @@ export interface Player {
   units?: {
     position: string;
     pirate?: boolean;
+    carrier_id?: number;
     unit_type: string | { Leader: string };
     id: number;
     carried_units?: { unit_type: string | { Leader: string }; id: number }[];

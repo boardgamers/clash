@@ -138,6 +138,7 @@ pub(crate) fn execute_recruit(
 
 pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
     let city_position = r.city_position;
+    let attack_pirates = r.attack_pirates;
     if game
         .trigger_persistent_event(
             &[player_index],
@@ -163,14 +164,18 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
         if !ships.is_empty()
             && let Some(defender) = game.enemy_player(player_index, port_position)
         {
-            for ship in game
-                .player(player_index)
-                .get_units(port_position)
-                .iter()
-                .map(|unit| unit.id)
-                .collect_vec()
-            {
-                set_unit_position(player_index, ship, city_position, game);
+            // An attack on allied pirates starts in the shared sea space. Keep
+            // passengers there too, including those whose carrier became an enemy.
+            if !attack_pirates {
+                for ship in game
+                    .player(player_index)
+                    .get_units(port_position)
+                    .iter()
+                    .map(|unit| unit.id)
+                    .collect_vec()
+                {
+                    set_unit_position(player_index, ship, city_position, game);
+                }
             }
             combat::initiate_combat(game, defender, port_position, player_index, ships, false);
         }

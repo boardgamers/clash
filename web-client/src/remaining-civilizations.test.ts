@@ -803,6 +803,173 @@ async function carthageSea(leader?: string) {
   pirates.next_unit_id = 1;
   return g;
 }
+async function piratePassengers(ownPassengers = false) {
+  const g = await carthageSea(),
+    index = seat(g),
+    p = g.players[index];
+  p.action_cards = [];
+  p.units = [
+    {
+      id: 0,
+      position: 'D3',
+      unit_type: 'Ship',
+      carried_units: ownPassengers
+        ? [
+            { id: 1, unit_type: 'Settler' },
+            { id: 2, unit_type: 'Infantry' },
+          ]
+        : [],
+    },
+    {
+      id: 3,
+      position: 'D3',
+      unit_type: 'Ship',
+      pirate: true,
+      carried_units: [
+        { id: 4, unit_type: 'Infantry' },
+        { id: 5, unit_type: 'Cavalry' },
+      ],
+    },
+  ];
+  p.next_unit_id = 6;
+  const pirates = g.players.find((p: any) => p.civilization === 'Pirates');
+  pirates.units = [];
+  pirates.held_units = { ships: 1 };
+  g.dice_roll_outcomes = [2, 11];
+  return g;
+}
+function settlePirateRewards(g: any) {
+  for (let i = 0; i < 4; i++) {
+    const reward = g.events?.at(-1)?.handler?.request?.ResourceReward;
+    if (!reward) return g;
+    g = move(g, { Response: { ResourceReward: reward.reward.default } });
+  }
+  throw new Error('Pirate rewards did not finish');
+}
+test('Pirate passengers survive an attack on their carrier from the same sea space', async () => {
+  const g = await piratePassengers(),
+    index = seat(g);
+  const attack = query(g, { kind: 'movement', units: [0] }).destinations.find(
+    (d: any) => d.attack && d.position === 'D3',
+  );
+  assert.ok(attack, 'the map offers attacking an occupied allied pirate carrier');
+  const after = settlePirateRewards(move(g, attack.action));
+  assert.equal(after.actions_left, g.actions_left - 1);
+  assert.deepEqual(
+    after.players[index].units
+      .find((u: any) => u.id === 0)
+      .carried_units.map((u: any) => u.id)
+      .sort(),
+    [4, 5],
+  );
+  assert.ok(!after.players[index].units.some((u: any) => u.pirate || u.carrier_id != null));
+  assert.equal(after.players.find((p: any) => p.civilization === 'Pirates').units?.length ?? 0, 0);
+});
+test('Pirate passenger overflow lets the player choose losses and survives save/reload', async () => {
+  const g = await piratePassengers(true),
+    index = seat(g);
+  let after = move(
+    g,
+    query(g, { kind: 'movement', units: [0] }).destinations.find((d: any) => d.attack && d.position === 'D3')
+      .action,
+  );
+  after = settlePirateRewards(after);
+  const pending = view(after).decision ?? view(after).choiceDecision;
+  assert.match(pending.description, /carried units/i);
+  assert.equal(
+    pending.options.length,
+    4,
+    'all friendly passengers can be chosen, including those from the pirates',
+  );
+  after = structuredClone(after);
+  assert.equal(view(after).units.filter((u: any) => [1, 2, 4, 5].includes(u.id)).length, 4);
+  const action = query(after, { kind: 'decision', values: [1, 2] }).action;
+  assert.ok(action);
+  after = move(after, action);
+  assert.deepEqual(
+    after.players[index].units
+      .find((u: any) => u.id === 0)
+      .carried_units.map((u: any) => u.id)
+      .sort(),
+    [4, 5],
+  );
+  assert.ok(!after.players[index].units.some((u: any) => u.carrier_id != null));
+});
+test('Pirate passengers survive a winning fleet arriving from another sea space', async () => {
+  const g = await piratePassengers(),
+    index = seat(g);
+  g.players[index].units[0].position = 'D4';
+  const attack = query(g, { kind: 'movement', units: [0] }).destinations.find(
+    (d: any) => d.attack && d.position === 'D3',
+  );
+  assert.ok(attack);
+  const after = settlePirateRewards(move(g, attack.action));
+  const ship = after.players[index].units.find((u: any) => u.id === 0);
+  assert.equal(ship.position, 'D3');
+  assert.equal(ship.carried_units.length, 2);
+});
+test('Pirate passengers remain owned and visible across an interrupted naval battle', async () => {
+  const g = await piratePassengers(),
+    index = seat(g);
+  g.dice_roll_outcomes = [2, 11, 2, 2];
+  const attack = query(g, { kind: 'movement', units: [0] }).destinations.find(
+    (d: any) => d.attack && d.position === 'D3',
+  );
+  const pending = move(g, attack.action);
+  assert.equal(pending.events[0].event_type.CombatRoundEnd.combat.retreat, 'CannotRetreat');
+  assert.equal(view(pending).units.filter((u: any) => [4, 5].includes(u.id)).length, 2);
+  const after = settlePirateRewards(structuredClone(pending));
+  assert.deepEqual(after.players[index].units[0].carried_units.map((u: any) => u.id).sort(), [4, 5]);
+});
+test('Pirate passengers are lost if the attacking fleet has no surviving transport', async () => {
+  const g = await piratePassengers(),
+    index = seat(g);
+  g.dice_roll_outcomes = [11, 2];
+  const after = settlePirateRewards(
+    move(
+      g,
+      query(g, { kind: 'movement', units: [0] }).destinations.find(
+        (d: any) => d.attack && d.position === 'D3',
+      ).action,
+    ),
+  );
+  assert.equal(after.players[index].units?.length ?? 0, 0);
+  assert.equal(after.players.find((p: any) => p.civilization === 'Pirates').units.length, 1);
+  assert.match(JSON.stringify(after.log), /carried units/i);
+});
+test('Pirate passengers are rescued after recruiting a ship to attack at a Port', async () => {
+  const g = await piratePassengers(),
+    index = seat(g),
+    p = g.players[index];
+  p.units = p.units.filter((u: any) => u.pirate);
+  const offer = query(g, {
+    kind: 'recruit',
+    city: 'D2',
+    units: { ships: 1 },
+    replaced: [],
+    attackPirates: true,
+  });
+  assert.ok(offer.action);
+  const after = settlePirateRewards(move(g, offer.action));
+  assert.equal(after.players[index].units.length, 1);
+  assert.equal(after.players[index].units[0].carried_units.length, 2);
+});
+test('Pirate passengers are removed after a Port attack loses every ship', async () => {
+  const g = await piratePassengers(),
+    index = seat(g),
+    p = g.players[index];
+  p.units = p.units.filter((u: any) => u.pirate);
+  g.dice_roll_outcomes = [11, 2];
+  const offer = query(g, {
+    kind: 'recruit',
+    city: 'D2',
+    units: { ships: 1 },
+    replaced: [],
+    attackPirates: true,
+  });
+  const after = settlePirateRewards(move(g, offer.action));
+  assert.equal(after.players[index].units?.length ?? 0, 0);
+});
 test('Warbeasts replaces a resource per Elephant and Mercenaries drafts ships', async () => {
   const g = await setup('Carthage'),
     index = seat(g),

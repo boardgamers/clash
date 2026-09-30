@@ -174,7 +174,71 @@ try {
     assert.equal(app.state().players[seat(car)].resources.culture_tokens, 6);
     assert.deepEqual(app.errors, []);
     await page.close();
-    console.log(width + 'px: all 15 factions, captive exchange, and alternative recruitment payments passed');
+    cp.advances.push('Fishing', 'Navigation', 'Tactics');
+    cp.action_cards = [];
+    for (const tile of car.map.tiles) tile[1] = 'Water';
+    cp.units = [
+      {
+        id: 0,
+        position: 'D3',
+        unit_type: 'Ship',
+        carried_units: [
+          { id: 1, unit_type: 'Settler' },
+          { id: 2, unit_type: 'Infantry' },
+        ],
+      },
+      {
+        id: 3,
+        position: 'D3',
+        unit_type: 'Ship',
+        pirate: true,
+        carried_units: [
+          { id: 4, unit_type: 'Infantry' },
+          { id: 5, unit_type: 'Cavalry' },
+        ],
+      },
+    ];
+    cp.next_unit_id = 6;
+    const pirates = car.players.find((p) => p.civilization === 'Pirates');
+    pirates.units = [];
+    pirates.held_units = { ships: 1 };
+    car.dice_roll_outcomes = [2, 11];
+    let battle = JSON.parse(
+      advance(car, {
+        Movement: { Move: { units: [0], destination: 'D3', attack_pirates: true, payment: {} } },
+      }),
+    );
+    while (battle.events?.at(-1)?.handler?.request?.ResourceReward) {
+      battle = JSON.parse(
+        advance(battle, {
+          Response: { ResourceReward: battle.events.at(-1).handler.request.ResourceReward.reward.default },
+        }),
+      );
+    }
+    app = await load(width, dark, battle);
+    page = app.page;
+    const casualties = page.locator('.decision-panel');
+    await casualties.waitFor();
+    await casualties.getByRole('button', { name: /Settler #2/i }).click();
+    await casualties.getByRole('button', { name: /Infantry #3/i }).click();
+    await casualties.screenshot({ path: '/tmp/clash-pirate-passengers-' + width + '.png' });
+    assert(await casualties.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
+    await casualties.getByRole('button', { name: 'Confirm', exact: true }).click();
+    await page.waitForFunction(() => !document.querySelector('.decision-panel'));
+    assert.deepEqual(
+      app
+        .state()
+        .players[cp.id].units[0].carried_units.map((u) => u.id)
+        .sort(),
+      [4, 5],
+    );
+    assert.equal(app.moves(), 1);
+    assert.deepEqual(app.errors, []);
+    await page.close();
+    console.log(
+      width +
+        'px: all 15 factions, captive exchange, recruitment payments, and pirate passenger choices passed',
+    );
   }
 } finally {
   await browser.close();

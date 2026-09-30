@@ -528,7 +528,8 @@ fn move_to_enemy_player_tile(
             destination,
             player_index,
             unit_ids.clone(),
-            game.player(player_index).is_human(),
+            game.player(player_index).is_human()
+                && game.player(player_index).get_unit(unit_ids[0]).position != destination,
         );
         return MoveResult::Combat;
     }

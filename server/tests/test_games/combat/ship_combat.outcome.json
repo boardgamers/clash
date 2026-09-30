@@ -146,6 +146,12 @@
           "id": 0
         },
         {
+          "position": "C3",
+          "carrier_id": 7,
+          "unit_type": "Elephant",
+          "id": 2
+        },
+        {
           "position": "B3",
           "unit_type": "Settler",
           "id": 3
@@ -178,6 +184,12 @@
               "id": 1
             }
           ]
+        },
+        {
+          "position": "C3",
+          "carrier_id": 7,
+          "unit_type": "Settler",
+          "id": 22
         }
       ],
       "civilization": "Greece",

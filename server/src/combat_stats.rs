@@ -248,7 +248,11 @@ pub(crate) fn new_combat_stats(
     let a = game.player(attacker);
     let d = game.player(defender);
     let attacker_position = a.get_unit(attackers[0]).position;
-    assert_ne!(defender_position, attacker_position);
+    assert!(
+        defender_position != attacker_position
+            || (battleground == Battleground::Sea && d.civilization.is_pirates()),
+        "Only pirate ships sharing your sea space can be attacked without entering it"
+    );
 
     CombatStats::new(
         battleground,

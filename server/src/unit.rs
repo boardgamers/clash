@@ -45,6 +45,10 @@ pub struct UnitBaseData {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct UnitData {
     pub position: Position,
+    // Keep passengers whose carrier was lost while a battle or casualty choice is pending.
+    // Passengers with a surviving carrier are still nested under that ship as usual.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub carrier_id: Option<u32>,
     #[serde(flatten)]
     pub data: UnitBaseData,
     #[serde(default)]
@@ -106,6 +110,9 @@ impl Unit {
     pub(crate) fn data(&self, player: &Player) -> UnitData {
         UnitData {
             position: self.position,
+            carrier_id: self
+                .carrier_id
+                .filter(|id| player.try_get_unit(*id).is_none()),
             data: UnitBaseData {
                 pirate: self.pirate,
                 unit_type: self.unit_type,
@@ -138,7 +145,7 @@ impl Unit {
             pirate: base_data.pirate,
             movement_restrictions: base_data.movement_restrictions,
             id: unit_id,
-            carrier_id: None,
+            carrier_id: data.carrier_id,
         }]
         .into_iter()
         .chain(data.carried_units.into_iter().map(|c| Self {
@@ -711,8 +718,21 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
         })
         .collect_vec();
 
+    let rescued = embark.len();
     for (survivor, carrier) in embark {
         game.player_mut(player).get_unit_mut(survivor).carrier_id = Some(carrier);
+    }
+    if rescued > 0
+        && game
+            .player(player)
+            .event_info
+            .contains_key("Attack Pirates")
+    {
+        game.log(
+            player,
+            &EventOrigin::SpecialAdvance(SpecialAdvance::PirateAllies),
+            &format!("Rescued {rescued} passengers aboard surviving ships at {pos}"),
+        );
     }
 }
 
@@ -739,12 +759,17 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
             let capacity =
                 p.get_units(pos).iter().filter(|u| u.is_ship()).count() * ship_capacity(p) as usize;
             let to_kill = carried.len().saturating_sub(capacity) as u8;
+            let description = if p.event_info.contains_key("Attack Pirates") {
+                format!("Choose carried units to remove · {capacity} transport spaces at {pos}")
+            } else {
+                "Choose which carried units to remove".to_string()
+            };
 
             Some(UnitsRequest::new(
                 player.index,
                 carried,
                 to_kill..=to_kill,
-                "Choose which carried units to remove",
+                &description,
             ))
         },
         |game, s, e| {

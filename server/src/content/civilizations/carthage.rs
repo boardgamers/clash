@@ -5,7 +5,7 @@ use crate::advance::Advance;
 use crate::civilization::Civilization;
 use crate::content::ability::AbilityBuilder;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{PositionRequest, UnitsRequest};
+use crate::content::persistent_events::{KilledUnits, PositionRequest, UnitsRequest};
 use crate::events::EventOrigin;
 use crate::game::{Game, GameState};
 use crate::leader::{Leader, LeaderInfo, leader_position};
@@ -63,6 +63,25 @@ pub(crate) fn sync_pirates(game: &mut Game, player: usize) {
         || !game.events.is_empty()
     {
         return;
+    }
+    // Attacked pirate carriers belong to the enemy during combat. Their passengers
+    // stay with Carthage and are rescued by the surviving fleet before pirates can
+    // become allies again. This also runs after retreat and after casualty responses.
+    let stranded: std::collections::BTreeSet<_> = game
+        .player(player)
+        .units
+        .iter()
+        .filter(|u| {
+            u.carrier_id
+                .is_some_and(|id| game.player(player).try_get_unit(id).is_none())
+        })
+        .map(|u| u.position)
+        .collect();
+    for position in stranded {
+        crate::unit::units_killed(game, player, KilledUnits::new(position, None));
+        if !game.events.is_empty() {
+            return;
+        }
     }
     game.player_mut(player).event_info.remove("Attack Pirates");
     game.player_mut(player)
@@ -405,9 +424,6 @@ pub(crate) fn prepare_move(game: &mut Game, p: usize, m: &mut MoveUnits) -> Resu
             .map(|u| u.id)
             .collect();
         for id in release {
-            if !carried_units(id, game.player(p)).is_empty() {
-                return Err("Disembark passengers before attacking their pirate carrier".into());
-            }
             return_pirate(game, p, id);
         }
         let pirates = pirate_player(game);
