@@ -2166,7 +2166,61 @@ small {
   .player-list {
     left: 12px;
     top: 12px;
-    width: 120px;
+    width: clamp(118px, 35vw, 140px);
+    gap: 4px;
+  }
+  .player-card {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    grid-template-rows: 18px 14px;
+    gap: 0 5px;
+    min-height: 44px;
+    padding: 5px 7px;
+  }
+  .player-emblem {
+    grid-area: 1 / 1;
+    width: 20px;
+    height: 20px;
+  }
+  .player-emblem .civilization-emblem {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .player-info {
+    display: contents;
+  }
+  .player-info strong {
+    grid-area: 1 / 2;
+    font-size: 14px;
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .player-info small {
+    grid-area: 2 / 1 / 3 / 4;
+    padding-right: 49px;
+    font-size: 9px;
+    line-height: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .player-info .player-events {
+    grid-area: 2 / 1 / 3 / 4;
+    justify-self: end;
+    margin-left: 0;
+  }
+  .player-score {
+    grid-area: 1 / 3;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .player-score svg {
+    display: none;
+  }
+  .board-toolbar {
+    max-width: calc(100% - clamp(118px, 35vw, 140px) - 36px);
   }
   .city-dock {
     bottom: 12px;

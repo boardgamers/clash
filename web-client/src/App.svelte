@@ -508,8 +508,8 @@
             class="player-card"
             class:active={player.index === $session.view?.activePlayer}
             style={`--player:${playerColor(player.index, $session.colorBlind)}`}
-            title={`Inspect ${player.civilization}: advances and victory points`}
-            aria-label={`${player.civilization}: ${player.score} victory points. View resources, advances and scores`}
+            title={`Inspect ${player.civilization} (${player.index === $session.seat ? 'You' : player.name}): advances and victory points`}
+            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}. View resources, advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();

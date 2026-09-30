@@ -70,6 +70,7 @@ export class World {
     node: HTMLButtonElement;
     kind: 'city' | 'units' | 'destination' | 'collection';
     offsetY?: number;
+    ownershipBounds?: THREE.Vector3[];
   }[] = [];
   private unitBadges: ReturnType<typeof mount>[] = [];
   private labelHost: HTMLDivElement;
@@ -357,8 +358,16 @@ export class World {
         h = this.host.clientHeight;
       for (const label of this.labelPositions) {
         const v = label.at.clone().project(this.camera);
-        const cityOffset = this.topDown && label.kind === 'city';
-        label.node.style.transform = `translate(-50%, -50%) translate(${((v.x + 1) * w) / 2 + (cityOffset ? 11 : 0)}px,${((-v.y + 1) * h) / 2 + (label.offsetY ?? 0) - (cityOffset ? 12 : 0)}px)`;
+        let x = ((v.x + 1) * w) / 2;
+        const y = ((-v.y + 1) * h) / 2 + (label.offsetY ?? 0);
+        if (label.ownershipBounds) {
+          const flagLeft = Math.min(
+            ...label.ownershipBounds.map((point) => ((point.clone().project(this.camera).x + 1) * w) / 2),
+          );
+          // Screen-space clearance keeps the mood clear of flags at every zoom and rotation.
+          x = Math.min(x - 14, flagLeft - (this.topDown ? 9 : 11) - 4);
+        }
+        label.node.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
         label.node.style.display = v.z > 1 || v.z < -1 ? 'none' : '';
       }
       if (this.referenceRing.visible) {
@@ -482,7 +491,7 @@ export class World {
     const flag = this.mesh(new THREE.BoxGeometry(0.28, 0.18, 0.018), this.material(color));
     flag.position.set(0.6, 0.84, -0.2);
     group.add(flag);
-    return group;
+    return { group, flag };
   }
   private tree(x: number, z: number, scale: number, seed: number) {
     const group = new THREE.Group();
@@ -739,7 +748,7 @@ export class World {
       for (const player of s.game.players) {
         for (const city of player.cities ?? []) {
           const [x, z] = positionXY(city.position);
-          const cityModel = this.building(playerColor(player.id, s.colorBlind));
+          const { group: cityModel, flag } = this.building(playerColor(player.id, s.colorBlind));
           cityModel.position.set(x, 0.38, z);
           cityModel.rotation.y = 0.25;
           const capital = s.view?.players.find((p) => p.index === player.id)?.capital === city.position;
@@ -756,10 +765,12 @@ export class World {
           }
           cityModel.userData = { position: city.position, kind: 'city', player: player.id };
           this.pieces.push(cityModel);
+          let ownershipBadge: THREE.Sprite | undefined;
           if (s.colorBlind) {
             const badge = this.ownershipBadge(player.id);
             badge.position.set(0.6, 1.05, -0.2);
             cityModel.add(badge);
+            ownershipBadge = badge;
           }
           const additions = Object.keys(city.city_pieces ?? {}).filter((k) => k !== 'wonders');
           for (const [j, name] of additions.entries()) {
@@ -786,6 +797,14 @@ export class World {
             cityModel.add(annex);
           }
           this.board.add(cityModel);
+          cityModel.updateWorldMatrix(true, true);
+          const ownership = new THREE.Box3().setFromObject(flag);
+          if (ownershipBadge) {
+            const center = ownershipBadge.getWorldPosition(new THREE.Vector3());
+            // A sprite faces the camera; its enclosing cube stays safe as the camera turns.
+            ownership.expandByPoint(center.clone().addScalar(0.3));
+            ownership.expandByPoint(center.clone().addScalar(-0.3));
+          }
           const label = document.createElement('button');
           label.className = 'city-map-label';
           label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind));
@@ -824,9 +843,14 @@ export class World {
           this.labelHost.append(label);
           this.labelPositions.push({
             position: city.position,
-            at: new THREE.Vector3(x, 1.6, z),
+            at: new THREE.Vector3(x, 1.4, z),
             node: label,
             kind: 'city',
+            ownershipBounds: [ownership.min.x, ownership.max.x].flatMap((x) =>
+              [ownership.min.y, ownership.max.y].flatMap((y) =>
+                [ownership.min.z, ownership.max.z].map((z) => new THREE.Vector3(x, y, z)),
+              ),
+            ),
           });
         }
         for (const [unitIndex, unit] of (player.units ?? []).entries()) {
