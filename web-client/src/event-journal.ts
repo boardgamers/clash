@@ -1,3 +1,4 @@
+import { activeHistory } from './active-history.ts';
 import type { EventInfo, Game, JournalEntry, LoggedAction, View } from './types.ts';
 
 type Facts = { units: number; cities: number; advances: Set<string>; borrowed?: string };
@@ -16,7 +17,7 @@ function publicHistory(game: Game): Map<string, RecordAtAction> {
       },
     ]),
   );
-  const actions = (game.log ?? []).flatMap((age, a) =>
+  const actions = activeHistory(game).flatMap((age, a) =>
     age.rounds.flatMap((round, r) =>
       round.turns.flatMap((turn, t) =>
         (turn.actions ?? []).map((action, c) => ({

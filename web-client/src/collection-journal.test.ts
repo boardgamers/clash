@@ -12,7 +12,7 @@ function game(actions: LoggedAction[]): Game {
     actions_left: 1,
     age: 1,
     round: 1,
-    log_index: 0,
+    log_index: actions.length,
     log: [{ age: 1, rounds: [{ round: 1, turns: [{ turn_type: { Player: 0 }, actions }] }] }],
   };
 }

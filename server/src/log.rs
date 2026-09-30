@@ -229,15 +229,24 @@ pub struct LogSliceOptions {
 }
 
 pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
-    game.log
+    let turns: Vec<_> = game
+        .log
         .iter()
-        .flat_map(|age| {
-            age.rounds.iter().flat_map(|round| {
-                round
-                    .turns
-                    .iter()
-                    .flat_map(|player| player.actions.iter().map(|item| item.action.clone()))
-            })
+        .flat_map(|age| age.rounds.iter().flat_map(|round| &round.turns))
+        .collect();
+    turns
+        .iter()
+        .enumerate()
+        .flat_map(|(i, turn)| {
+            let limit = if i + 1 == turns.len() {
+                game.log_index
+            } else {
+                turn.actions.len()
+            };
+            turn.actions
+                .iter()
+                .take(limit)
+                .map(|item| item.action.clone())
         })
         .collect()
 }
@@ -251,15 +260,7 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
 }
 
 fn remove_redo_actions(l: &mut Vec<ActionLogAction>, action_log_index: usize) {
-    if action_log_index < l.len() {
-        // remove items from undo
-        for i in l.len()..action_log_index {
-            let item = l.get(i).expect("should have action");
-            if item.action != Action::StartTurn {
-                l.pop();
-            }
-        }
-    }
+    l.truncate(action_log_index);
 }
 
 pub(crate) fn add_action_log_item(
@@ -321,10 +322,11 @@ pub fn current_turn_log_mut(game: &mut Game) -> &mut ActionLogTurn {
 }
 
 pub(crate) fn current_action_log_mut(game: &mut Game) -> &mut ActionLogAction {
+    let index = game.log_index.checked_sub(1).expect("actions empty");
     current_turn_log_mut(game)
         .actions
-        .last_mut()
-        .expect("actions empty")
+        .get_mut(index)
+        .expect("current action should exist")
 }
 
 pub(crate) fn add_round_log(game: &mut Game, round: u32) {

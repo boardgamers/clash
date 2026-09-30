@@ -42,10 +42,31 @@ function game(actions: LoggedAction[]): Game {
     actions_left: 1,
     age: 1,
     round: 1,
-    log_index: 0,
+    log_index: actions.length,
     log: [{ age: 1, rounds: [{ round: 1, turns: [{ turn_type: { Player: 0 }, actions }] }] }],
   };
 }
+
+test('undo shortens the journal without showing retained redo outcomes or changing earlier turns', () => {
+  const state = game([
+    { log: ['Leif: Advance: Pay 1 action, Gain Storage'] },
+    { log: ['Leif: Collect: Pay 1 action, Gain 2 food'] },
+  ]);
+  state.log![0].rounds[0].turns.unshift({
+    turn_type: { Player: 1 },
+    actions: [{ log: ['Aurelia: Advance: Pay 1 action, Gain Fishing'] }],
+  });
+  const savedLog = JSON.stringify(state.log);
+  const before = journal(state);
+  assert.equal(before.length, 3);
+  state.log_index = 1;
+  assert.deepEqual(journal(state), before.slice(0, 2));
+  state.log_index = 0;
+  assert.deepEqual(journal(state), before.slice(0, 1));
+  state.log_index = 1;
+  assert.deepEqual(journal(state), before.slice(0, 2));
+  assert.equal(JSON.stringify(state.log), savedLog);
+});
 
 test('naval rolls omit unused army die symbols while preserving tactics, hits and ship losses', () => {
   const state = game([

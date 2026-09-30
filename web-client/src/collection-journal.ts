@@ -1,3 +1,4 @@
+import { activeHistory } from './active-history.ts';
 import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Resource } from './types.ts';
 
 type CityFacts = NonNullable<JournalEntry['collection']>['city'];
@@ -15,7 +16,7 @@ function collect(action: LoggedAction): Collect | undefined {
 export function collectionCities(game: Game): Map<string, CityFacts> {
   const cities = new Map<string, { structures: Set<string>; mood: string }>();
   const result = new Map<string, CityFacts>();
-  for (const [a, age] of (game.log ?? []).entries())
+  for (const [a, age] of activeHistory(game).entries())
     for (const [r, round] of age.rounds.entries())
       for (const [t, turn] of round.turns.entries())
         for (const [c, action] of (turn.actions ?? []).entries()) {

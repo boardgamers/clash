@@ -1,3 +1,4 @@
+import { activeHistory } from './active-history.ts';
 import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Player, Resource } from './types.ts';
 import type { View } from './types.ts';
 import { explainEvents } from './event-journal.ts';
@@ -241,7 +242,7 @@ export function journal(
   const eventNames = [
     ...new Set([
       ...(view?.eventCatalog?.map((e) => e.name) ?? []),
-      ...(game.log ?? []).flatMap((a) =>
+      ...activeHistory(game).flatMap((a) =>
         a.rounds.flatMap((r) =>
           r.turns.flatMap((t) =>
             (t.actions ?? []).flatMap((action) =>
@@ -254,7 +255,7 @@ export function journal(
       ),
     ]),
   ].sort((a, b) => b.length - a.length);
-  const entries = (game.log ?? []).flatMap((age, a) =>
+  const entries = activeHistory(game).flatMap((age, a) =>
     age.rounds.flatMap((round, r) =>
       round.turns.flatMap((turn, t) =>
         (turn.actions ?? []).flatMap((action, c) => {

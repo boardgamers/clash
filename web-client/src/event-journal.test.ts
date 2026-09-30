@@ -202,7 +202,7 @@ function history(actions: LoggedAction[]): Game {
     age: 1,
     round: 1,
     actions_left: 1,
-    log_index: actions.length - 1,
+    log_index: actions.length,
     log: [{ age: 1, rounds: [{ round: 1, turns: [{ turn_type: { Player: 0 }, actions }] }] }],
   };
 }
