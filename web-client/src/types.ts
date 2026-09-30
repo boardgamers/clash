@@ -358,6 +358,7 @@ export interface EventInfo {
   targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
+  automaticPayment?: boolean;
   decisionSelection: number[];
   replacements: number[];
   collectVariant: Move;
@@ -487,6 +488,10 @@ export interface Decision {
     description: string;
     position: string | null;
     terrain?: Terrain;
+    card?:
+      | { kind: 'objective'; objectives: View['objectiveCards'][number]['objectives'] }
+      | { kind: 'action'; name: string; description: string; tactics: ActionCard['tactics'] }
+      | null;
   }[];
   fields: {
     name: string;

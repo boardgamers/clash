@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
-  import { Check, CircleHelp, Sparkles, Layers, BookOpen, Ship, ChevronRight, Zap } from 'lucide-svelte';
+  import { Check, Sparkles, Layers, BookOpen, Ship, ChevronRight, Zap } from 'lucide-svelte';
   import type { Controller } from './controller';
   import type { Decision, Move, Pile, Resource } from './types';
   import { resourceNames } from './types';
   import ResourceAmount from './ResourceAmount.svelte';
   import ResourceText from './ResourceText.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
+  import DecisionOptionContent from './DecisionOptionContent.svelte';
   import { researchPresentation } from './research';
   import { mapDecisionOptions } from './decision-controls';
   import { pileText } from './model';
@@ -18,12 +19,12 @@
   }: { controller: Controller; decision: Decision; onHighlight: (position: string | null) => void } =
     $props();
   const session = $derived(controller.session);
+  const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
   const mapChoice = $derived(mapDecisionOptions(decision).length > 0);
   let payments = $state<Pile[]>(
     untrack(() => decision.fields.map((f) => ({ ...(f.choices?.length === 1 ? f.choices[0] : f.initial) }))),
   );
-  let expanded = $state<number | null>(null);
   const samePayment = (a: Pile, b: Pile) =>
     Object.keys(resourceNames).every((r) => (a[r as Resource] ?? 0) === (b[r as Resource] ?? 0));
   const emptyPayment = (p: Pile) => !Object.values(p).some(Boolean);
@@ -82,30 +83,28 @@
           ? $session.view?.advances.find((a) => a.id === option.value)
           : undefined}
       {@const Icon = advance ? researchPresentation(advance).icon : null}
-      <div class="decision-option">
-        <button
-          class:selected={selected.includes(i)}
-          aria-pressed={selected.includes(i)}
-          disabled={$session.pending ||
-            (!selected.includes(i) && decision.max > 1 && selected.length >= decision.max)}
-          onmouseenter={() => onHighlight(option.position)}
-          onmouseleave={() => onHighlight(null)}
-          onfocus={() => onHighlight(option.position)}
-          onblur={() => onHighlight(null)}
-          onclick={() => toggle(i)}
+      <button
+        class="decision-option"
+        class:has-description={!!option.description}
+        class:card-option={!!option.card}
+        class:selected={selected.includes(i)}
+        aria-label={option.name}
+        aria-describedby={option.description ? `${panelId}-option-${i}` : undefined}
+        aria-pressed={selected.includes(i)}
+        disabled={$session.pending ||
+          (!selected.includes(i) && decision.max > 1 && selected.length >= decision.max)}
+        onmouseenter={() => onHighlight(option.position)}
+        onmouseleave={() => onHighlight(null)}
+        onfocus={() => onHighlight(option.position)}
+        onblur={() => onHighlight(null)}
+        onclick={() => toggle(i)}
+      >
+        {#if option.terrain}<TerrainIcon terrain={option.terrain} />{:else if Icon}<Icon size={19} />{/if}
+        <DecisionOptionContent {option} id={`${panelId}-option-${i}`} />
+        <span class="decision-selection" aria-hidden="true"
+          >{#if selected.includes(i)}<Check size={13} />{/if}</span
         >
-          {#if option.terrain}<TerrainIcon terrain={option.terrain} />{:else if Icon}<Icon size={19} />{/if}
-          <span>{option.name}</span>{#if selected.includes(i)}<Check size={16} />{/if}
-        </button>
-        {#if option.description}<button
-            class="icon-button"
-            aria-label={`About ${option.name}`}
-            title={advance ? researchPresentation(advance).summary : option.description}
-            aria-expanded={expanded === i}
-            onclick={() => (expanded = expanded === i ? null : i)}><CircleHelp size={16} /></button
-          >{/if}
-        {#if expanded === i}<p class="decision-detail"><ResourceText text={option.description} /></p>{/if}
-      </div>
+      </button>
     {/each}
   </div>
 {/snippet}
@@ -113,6 +112,7 @@
 <section
   class="action-panel floating-panel decision-panel"
   class:board-decision={mapChoice}
+  class:card-decision={decision.options.some((option) => option.card)}
   aria-label={decision.name}
 >
   {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
@@ -264,21 +264,23 @@
         {/if}
       </div>
     {/each}
-    <button
-      class="primary wide"
-      disabled={!preview.action || $session.pending}
-      title={preview.error || 'Confirm selection'}
-      onclick={() => preview.action && controller.submit(preview.action)}
-    >
-      {selected.length === 0 && !decision.fields.length && decision.min === 0
-        ? 'Skip'
-        : mapChoice && selected.length
-          ? `Confirm ${selected.map((i) => decision.options[i].position).join(', ')}`
-          : 'Confirm'}<Check size={16} />
-    </button>
-    {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
-        {preview.error}
-      </p>{/if}
+    <div class="decision-footer">
+      <button
+        class="primary wide"
+        disabled={!preview.action || $session.pending}
+        title={preview.error || 'Confirm selection'}
+        onclick={() => preview.action && controller.submit(preview.action)}
+      >
+        {selected.length === 0 && !decision.fields.length && decision.min === 0
+          ? 'Skip'
+          : mapChoice && selected.length
+            ? `Confirm ${selected.map((i) => decision.options[i].position).join(', ')}`
+            : 'Confirm'}<Check size={16} />
+      </button>
+      {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
+          {preview.error}
+        </p>{/if}
+    </div>
   {/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>

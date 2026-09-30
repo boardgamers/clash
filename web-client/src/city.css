@@ -493,6 +493,33 @@
 .decision-panel {
   z-index: 25;
 }
+.play-layout .action-panel.floating-panel.card-decision {
+  width: min(620px, calc(100% - 40px));
+}
+.card-decision .decision-options {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+}
+.card-decision .decision-footer {
+  position: sticky;
+  bottom: -22px;
+  margin-bottom: -22px;
+  padding: 12px 0 22px;
+  background: var(--paper);
+  z-index: 1;
+}
+@media (max-width: 760px) {
+  .play-layout .action-panel.floating-panel.card-decision {
+    width: auto;
+    top: 12px;
+    max-height: calc(100% - 24px);
+    padding: 16px;
+  }
+  .card-decision .decision-footer {
+    bottom: -16px;
+    margin-bottom: -16px;
+    padding-bottom: 16px;
+  }
+}
 .decision-panel h2,
 .cards-dialog h2,
 .abilities-panel h2,
@@ -553,9 +580,7 @@
 }
 .decision-options {
   display: grid;
-  gap: 6px;
-  max-height: 42vh;
-  overflow-y: auto;
+  gap: 10px;
   margin: 12px 0;
   padding: 1px;
 }
@@ -566,7 +591,7 @@
   text-align: left;
   padding: 10px;
   border: 1px solid var(--line);
-  background: transparent;
+  background: var(--paper2);
   color: var(--ink);
   border-radius: 5px;
   cursor: pointer;
@@ -586,16 +611,35 @@
   background: #b6893920;
 }
 .decision-option {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px;
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
 }
-.decision-detail {
-  grid-column: 1/-1;
-  font-size: 12px;
-  line-height: 1.65;
-  margin: 4px 8px 10px;
-  color: var(--ink);
+.decision-options .decision-option.has-description {
+  align-items: flex-start;
+  padding: 12px;
+}
+.decision-options .decision-option > .decision-selection {
+  display: grid;
+  place-items: center;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0 2px;
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+  color: var(--paper);
+}
+.decision-option.selected > .decision-selection {
+  border-color: var(--gold);
+  background: var(--gold);
+}
+.decision-option.has-description .decision-option-name {
+  font-weight: 600;
+}
+.decision-options button:hover:not(:disabled),
+.decision-options button:focus-visible {
+  border-color: var(--gold);
 }
 .decision-payment {
   border-top: 1px solid var(--line);
@@ -881,4 +925,76 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   padding: 0.5rem 0;
+}
+
+.decision-option-content {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+.decision-card-face {
+  display: grid;
+  gap: 8px;
+}
+.decision-face-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.decision-option-content strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.decision-face-timing,
+.decision-use {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.decision-face-timing {
+  margin-top: 4px;
+}
+.decision-rule {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+.decision-alternative {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  margin: 2px 0;
+}
+.decision-alternative::before,
+.decision-alternative::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.decision-face-heading .objective-art {
+  width: 36px;
+  height: 36px;
+}
+.decision-face-heading .objective-art > svg,
+.decision-face-heading .objective-glyph {
+  width: 22px;
+  height: 22px;
+}
+.decision-face-heading .objective-art-accent {
+  width: 17px;
+  height: 17px;
+}
+.decision-face-heading .objective-art-accent svg {
+  width: 11px;
+  height: 11px;
 }

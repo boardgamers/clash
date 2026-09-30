@@ -1055,7 +1055,7 @@
         <h2><GraduationCap size={21} />{$session.view?.decision?.name ?? 'Choose an advance'}</h2>
         <button class="primary wide" onclick={openResearch}>Choose an advance<ArrowRight size={16} /></button>
       </section>
-    {:else if $session.view?.decision && !researchChoice}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
+    {:else if $session.view?.decision && !researchChoice && !$session.automaticPayment}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
           {controller}
           decision={$session.view.decision}
           onHighlight={(position) => world?.highlightCoordinate(position)}

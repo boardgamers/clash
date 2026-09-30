@@ -642,6 +642,7 @@
 }
 .board-decision .decision-options {
   max-height: 20vh;
+  overflow-y: auto;
 }
 @media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
   .play-layout .action-panel.floating-panel.board-decision {

@@ -155,7 +155,7 @@
       compact
       actions={$session.view?.specialActions}
       pending={$session.pending}
-      onUse={(action) => controller.submit(action)}
+      onUse={(action, payment) => controller.submit(action, payment)}
     />
   {/each}
   {#if $session.moveDestinations.length}

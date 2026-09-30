@@ -41,7 +41,7 @@
         class="primary wide card-play-button"
         title={card.reason ?? 'Play this card'}
         disabled={!card.action || $session.pending}
-        onclick={() => card.action && controller.submit(card.action)}
+        onclick={() => card.action && controller.submit(card.action, card.cost)}
         ><span>Play {card.name}</span>
         <span class="card-play-cost"
           >{#if card.cost && Object.values(card.cost).some(Boolean)}<ResourceAmount pile={card.cost} />{/if}

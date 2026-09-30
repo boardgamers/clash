@@ -115,7 +115,7 @@
           civilization={player.civilization}
           actions={player.index === $session.seat ? $session.view?.specialActions : []}
           pending={$session.pending}
-          onUse={(action) => controller.submit(action)}
+          onUse={(action, payment) => controller.submit(action, payment)}
         />
       {/each}
     {/each}

@@ -36,10 +36,13 @@
       <button
         class="primary wide"
         disabled={$session.pending}
-        onclick={() => controller.submit(action.action)}
+        onclick={() => controller.submit(action.action, action.cost)}
         >Use {action.name}
         <span class="ability-cost">
-          {#if action.cost && Object.values(action.cost).some(Boolean)}<ResourceAmount pile={action.cost} compact />{/if}
+          {#if action.cost && Object.values(action.cost).some(Boolean)}<ResourceAmount
+              pile={action.cost}
+              compact
+            />{/if}
           {#if action.activatesCity}<small>+ research</small>{/if}
           {#if action.free}<small>Free action</small>{:else if action.free === false}<Zap size={14} />1{/if}
         </span></button

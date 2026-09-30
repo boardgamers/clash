@@ -11,6 +11,71 @@ const fixture = (name: string) =>
 const view = (state: string, seat = engine.currentPlayer(state)): View =>
   JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
 
+test('Great Seer separates objective conditions and identifies who receives the unchosen cards', async () => {
+  for (const players of [2, 3]) {
+    const game = JSON.parse(await engine.init(players, [], {}, 'seer-choices', {}));
+    const seat = engine.currentPlayer(JSON.stringify(game));
+    game.players[seat].action_cards = [158];
+    const before = game.players.map((p: { objective_cards: number[] }) => p.objective_cards);
+    let state = engine.tryMove(JSON.stringify(game), JSON.stringify({ Playing: { ActionCard: 158 } }), seat);
+    const decision = view(state).decision!;
+    assert.equal(decision.options.length, players);
+    assert.match(decision.description, /Choose your next objective card/);
+    assert.match(
+      decision.description,
+      players === 2 ? /The other card goes to/ : /assign the remaining cards/,
+    );
+    assert.match(decision.description, /next objective draw/);
+    for (const option of decision.options) {
+      assert.equal(option.card?.kind, 'objective');
+      if (option.card?.kind !== 'objective') continue;
+      assert.equal(option.card.objectives.length, 2);
+      assert.deepEqual(option.card.objectives.map((o) => o.name).join('/'), option.name);
+      assert.ok(
+        option.card.objectives.every((o) => o.description && ['Instant', 'Status phase'].includes(o.timing)),
+      );
+    }
+    assert.ok(!view(state, (seat + 1) % players).decision);
+    while (view(state).decision?.name === 'Great Seer') {
+      const d = view(state).decision!;
+      const { action } = JSON.parse(
+        engine.webQuery(
+          engine.stripSecret(state, seat),
+          seat,
+          JSON.stringify({ kind: 'decision', values: [d.options[0].value], payments: [] }),
+        ),
+      );
+      state = engine.tryMove(state, JSON.stringify(action), seat);
+    }
+    const after = JSON.parse(state);
+    assert.deepEqual(
+      after.players.map((p: { objective_cards: number[] }) => p.objective_cards),
+      before,
+    );
+    const assigned = after.permanent_effects.find((effect: { GreatSeer?: unknown }) => effect.GreatSeer)
+      .GreatSeer.assigned_objectives;
+    assert.equal(assigned.length, players);
+    assert.equal(new Set(assigned.map((a: { player: number }) => a.player)).size, players);
+    assert.equal(
+      assigned[0].objective_card,
+      (decision.options[0].value as { ObjectiveCard: number }).ObjectiveCard,
+    );
+  }
+});
+
+test('Spy card choices expose action and battle uses separately', () => {
+  let state = engine.tryMove(fixture('action_cards/spy'), JSON.stringify({ Playing: { ActionCard: 7 } }), 0);
+  state = engine.tryMove(state, JSON.stringify({ Response: { Payment: [{ culture_tokens: 1 }] } }), 0);
+  const cards = view(state).decision!.options.filter((o) => o.card?.kind === 'action');
+  assert.ok(cards.length > 0);
+  for (const option of cards) {
+    if (option.card?.kind !== 'action') continue;
+    assert.ok(option.card.description);
+    assert.ok(option.card.tactics?.description);
+    assert.equal(option.name, `${option.card.name}/${option.card.tactics?.name}`);
+  }
+});
+
 test('free research exposes exactly the legal choices without paid actions or resource requirements', () => {
   const raw = JSON.parse(fixture('status_phase/free_advance.outcome'));
   const seat = engine.currentPlayer(JSON.stringify(raw));

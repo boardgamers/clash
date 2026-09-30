@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Crown, Sparkles, ChevronRight, ArrowRight } from 'lucide-svelte';
-  import type { PlayerView, View, Move } from './types';
+  import type { PlayerView, View, Move, Pile } from './types';
   import ResourceText from './ResourceText.svelte';
   let {
     leader,
@@ -15,7 +15,7 @@
     compact?: boolean;
     actions?: NonNullable<View['specialActions']>;
     pending?: boolean;
-    onUse?: (action: Move) => void;
+    onUse?: (action: Move, payment?: Pile) => void;
   } = $props();
 </script>
 
@@ -32,7 +32,7 @@
       <strong><Sparkles size={13} />{ability.name}</strong>
       <p><ResourceText text={ability.description} /></p>
       {#if action && onUse}
-        <button class="primary wide" disabled={pending} onclick={() => onUse?.(action.action)}>
+        <button class="primary wide" disabled={pending} onclick={() => onUse?.(action.action, action.cost)}>
           Use {ability.name}<ArrowRight size={16} />
         </button>
       {/if}

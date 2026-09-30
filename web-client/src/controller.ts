@@ -64,6 +64,7 @@ export class Controller {
   readonly audio = new GameAudio();
   private cardDraws = new CardDrawTracker();
   private submittedMove: Move | null = null;
+  private quotedActionPayment: Pile | null = null;
   private raw = '';
   private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
@@ -101,8 +102,9 @@ export class Controller {
   }
   handleError(error: unknown) {
     this.submittedMove = null;
+    this.quotedActionPayment = null;
     this.audio.play('error');
-    this.patch({ error: String(error), pending: false });
+    this.patch({ error: String(error), pending: false, automaticPayment: false });
   }
   async load(raw: unknown) {
     if (typeof raw !== 'string') throw new Error('Clash expects a serialized game state.');
@@ -119,6 +121,41 @@ export class Controller {
     this.raw = raw;
     this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
+    const quotedPayment = this.quotedActionPayment;
+    this.quotedActionPayment = null;
+    let automaticPayment: Move | null = null;
+    const decision = view.decision;
+    const field = decision?.fields[0];
+    // Continue only the exact fee already accepted on the initiating button.
+    // Optional purchases, different prices and alternative payments stay visible.
+    if (
+      old.pending &&
+      changed &&
+      quotedPayment &&
+      old.seat === view.activePlayer &&
+      decision?.name === 'Pay for action' &&
+      !decision.reward &&
+      !decision.options.length &&
+      decision.fields.length === 1 &&
+      !field!.optional &&
+      field!.choices?.length === 1
+    ) {
+      const payment = field!.choices[0];
+      const resources = new Set([...Object.keys(payment), ...Object.keys(quotedPayment)]);
+      if (
+        [...resources].every((r) => (payment[r as keyof Pile] ?? 0) === (quotedPayment[r as keyof Pile] ?? 0))
+      ) {
+        try {
+          automaticPayment = this.query<{ action: Move }>({
+            kind: 'decision',
+            values: [],
+            payments: [payment],
+          }).action;
+        } catch {
+          /* Keep the payment controls if the engine rejects the continuation. */
+        }
+      }
+    }
     const researchChoice = researchDecision(view);
     const newDecision = changed || JSON.stringify(view.decision) !== JSON.stringify(old.view?.decision);
     const drawn = this.cardDraws.update(old.seat, game, view);
@@ -146,6 +183,7 @@ export class Controller {
       city,
       focus: old.focus ?? city,
       pending: false,
+      automaticPayment: !!automaticPayment,
       error: '',
       selection: [],
       preview: null,
@@ -215,18 +253,21 @@ export class Controller {
       this.notify(`${bonus.source} · ${bonus.label}`);
     } else if (drawn.length) {
       this.audio.play('draw');
-    } else if (old.pending && changed) {
+    } else if (old.pending && changed && !automaticPayment) {
       this.audio.play(moveSound(this.submittedMove));
       this.notify('Game updated.');
     }
     this.submittedMove = null;
+    if (automaticPayment) this.submit(automaticPayment);
   }
   setPlayer(index?: number) {
     if (get(this.session).seat === index) return;
+    this.quotedActionPayment = null;
     this.moveCache.clear();
     this.cardDraws.reset();
     this.patch({
       seat: index,
+      automaticPayment: false,
       cardDraws: [],
       wondersOpen: false,
       scorePlayer: null,
@@ -579,11 +620,13 @@ export class Controller {
       this.patch({ error: String(error) });
     }
   }
-  submit(move: Move) {
+  submit(move: Move, quotedPayment?: Pile) {
     const s = get(this.session);
     if (s.pending || s.seat === undefined || s.view?.activePlayer !== s.seat) return;
     this.patch({ pending: true, error: '' });
     this.submittedMove = move;
+    this.quotedActionPayment =
+      quotedPayment && Object.values(quotedPayment).some(Boolean) ? { ...quotedPayment } : null;
     if (!this.commands.move(JSON.stringify(move))) {
       this.handleError('The action could not be sent. Please try again.');
       return;
@@ -595,7 +638,10 @@ export class Controller {
   }
   collect() {
     const s = get(this.session);
-    if (s.preview) this.submit(s.preview.action);
+    const variant = s.view?.collectActions?.find(
+      (a) => JSON.stringify(a.value) === JSON.stringify(s.collectVariant),
+    );
+    if (s.preview) this.submit(s.preview.action, variant?.payment);
   }
   setTab(tab: 'journal' | 'chat') {
     this.chat.setOpen(tab === 'chat');

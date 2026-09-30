@@ -2,10 +2,12 @@
 //! previews never execute a response or advance the random stream.
 use crate::action::Action;
 use crate::card::{HandCard, validate_card_selection};
+use crate::consts::MAX_HUMAN_PLAYERS;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::*;
 use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::objective_card::ObjectiveType;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, government_advances};
@@ -46,6 +48,37 @@ fn option(
     position: Option<crate::position::Position>,
 ) -> Value {
     json!({"value":value,"name":name.into(),"description":description.into(),"position":position})
+}
+
+fn great_seer_choice_description(game: &Game, handler: &PersistentEventHandler) -> Option<String> {
+    if handler.origin != EventOrigin::CivilCard(158) {
+        return None;
+    }
+    let order = MAX_HUMAN_PLAYERS.checked_sub(usize::try_from(handler.priority).ok()?)?;
+    let players = game.human_players_sorted(game.current_event().player.index);
+    let target = *players.get(order)?;
+    let recipient = if target == game.active_player() {
+        "your next objective card".to_string()
+    } else {
+        format!(
+            "the next objective card for {}",
+            game.player(target).civilization.name
+        )
+    };
+    let others = players
+        .iter()
+        .skip(order + 1)
+        .map(|p| game.player(*p).civilization.name.as_str())
+        .collect_vec();
+    let remaining = match others.as_slice() {
+        [] => String::new(),
+        [other] => format!(" The other card goes to {other} on their next objective draw."),
+        _ => format!(
+            " You will assign the remaining cards to {} for their next objective draws.",
+            crate::utils::format_list(&others, "", "and")
+        ),
+    };
+    Some(format!("Choose {recipient}.{remaining}"))
 }
 
 fn resource_field(
@@ -364,7 +397,8 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             }
             min = *r.needed.start();
             max = *r.needed.end();
-            description.clone_from(&r.description);
+            description =
+                great_seer_choice_description(game, h).unwrap_or_else(|| r.description.clone());
             r.choices
                 .iter()
                 .map(|card| {
@@ -389,7 +423,27 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                             .join("\n"),
                         HandCard::Wonder(w) => w.info(game).description.clone(),
                     };
-                    option(card, card.name(game), text, None)
+                    let mut choice = option(card, card.name(game), text, None);
+                    choice["card"] = match card {
+                        HandCard::ObjectiveCard(id) => {
+                            let info = game.cache.get_objective_card(*id);
+                            json!({"kind":"objective", "objectives":info.objectives.iter().map(|o| json!({
+                                "name":o.name, "description":o.description,
+                                "timing":match o.get_type() {
+                                    ObjectiveType::Instant => "Instant",
+                                    ObjectiveType::StatusPhase => "Status phase",
+                                }
+                            })).collect::<Vec<_>>()})
+                        }
+                        HandCard::ActionCard(id) => {
+                            let info = game.cache.get_action_card(*id);
+                            json!({"kind":"action", "name":info.civil_card.name,
+                                "description":info.civil_card.description,
+                                "tactics":info.tactics_card.as_ref().map(|t| json!({"name":t.name,"description":t.description}))})
+                        }
+                        HandCard::Wonder(_) => Value::Null,
+                    };
+                    choice
                 })
                 .collect()
         }
