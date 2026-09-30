@@ -36,7 +36,7 @@ pub(crate) fn legacy() -> Objective {
 fn building_lead(objective: &'static str, building: Building) -> Objective {
     Objective::builder(
         objective,
-        &format!("You have more cities with a {building} than any other player",),
+        &format!("More of your cities contain a {building} than any other player's cities. The buildings may be any color.",),
     )
     .status_phase_check(move |game, player| {
         leading_player(game, player, 1, move |p, _| buildings(p, building))
@@ -52,7 +52,7 @@ fn buildings(p: &Player, b: Building) -> usize {
 }
 
 pub(crate) fn large_civ() -> Objective {
-    Objective::builder("Large Civilization", "You have at least 6 cities")
+    Objective::builder("Large Civilization", "You own at least 6 cities.")
         .status_phase_check(|_game, player| player.cities.len() >= 6)
         .build()
 }
@@ -77,7 +77,7 @@ pub(crate) fn leading_player(
 pub(crate) fn advanced_culture() -> Objective {
     Objective::builder(
         "Advanced Culture",
-        "You have more advances than any other player - at least 6.",
+        "You have at least 6 standard advances, and more than every other player. Civilization advances do not count.",
     )
     .status_phase_check(|game, player| {
         player.advances.len() >= 6 && leading_player(game, player, 1, move |p, _| p.advances.len())
@@ -86,7 +86,7 @@ pub(crate) fn advanced_culture() -> Objective {
 }
 
 pub(crate) fn happy_population() -> Objective {
-    Objective::builder("Happy Population", "You have at least 4 happy cities.")
+    Objective::builder("Happy Population", "You own at least 4 Happy cities.")
         .status_phase_check(|_game, player| {
             player
                 .cities
@@ -101,8 +101,7 @@ pub(crate) fn happy_population() -> Objective {
 pub(crate) fn architecture() -> Objective {
     Objective::builder(
         "Architecture",
-        "You have at least 4 different types of buildings \
-        (that are not influenced by another player).",
+        "Your cities contain at least 4 different building types in your color.",
     )
     .status_phase_check(|_game, player| {
         player
@@ -117,7 +116,7 @@ pub(crate) fn architecture() -> Objective {
 }
 
 pub(crate) fn consulate() -> Objective {
-    Objective::builder("Consulate", "2 cities are culturally influenced by you.")
+    Objective::builder("Consulate", "At least 2 cities owned by other players contain buildings in your color.")
         .status_phase_check(|game, player| {
             game.players
                 .iter()
@@ -131,7 +130,7 @@ pub(crate) fn consulate() -> Objective {
 }
 
 pub(crate) fn metropolis() -> Objective {
-    Objective::builder("Metropolis", "You have at least 1 city with size 5.")
+    Objective::builder("Metropolis", "You own at least 1 city of size 5 or greater.")
         .status_phase_check(|_game, player| {
             player.cities.iter().filter(|c| c.size() >= 5).count() >= 1
         })
@@ -141,7 +140,7 @@ pub(crate) fn metropolis() -> Objective {
 pub(crate) fn expansionist() -> Objective {
     Objective::builder(
         "Expansionist",
-        "You have at least 4 cities that are not adjacent to other cities.",
+        "You own at least 4 cities that are not adjacent to any other city, including your own and barbarian cities.",
     )
     .status_phase_check(|game, player| {
         player

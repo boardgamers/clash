@@ -29,7 +29,7 @@ use std::vec;
 
 pub(crate) const GREAT_PERSON_OFFSET: u8 = 100;
 
-pub(crate) const GREAT_PERSON_DESCRIPTION: &str = "You make take the Event Card to your \
+pub(crate) const GREAT_PERSON_DESCRIPTION: &str = "You may take the Event Card to your \
  hand for 1 culture token. If you pass, any other player (in player order) may take it \
  for 2 culture tokens: Action card: ";
 

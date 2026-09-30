@@ -262,6 +262,8 @@ export interface CityActions {
     id: string;
     name: string;
     description: string;
+    reason?: string | null;
+    payment?: Pile;
     abilities: { name: string; description: string }[];
   }[];
   position: string;
@@ -272,6 +274,9 @@ export interface CityActions {
     payment: Pile;
     payments?: Pile[] | null;
     reason: string | null;
+    free?: boolean;
+    activateCity?: boolean;
+    source?: string | null;
     moodWillDecrease: boolean;
     choices: { position: string | null; action: Move }[];
   }[];

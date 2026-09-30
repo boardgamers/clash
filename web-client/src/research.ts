@@ -70,7 +70,10 @@ const advances = {
   Philosophy: [Brain, 'Gain 1 idea now, and 1 for each Science advance.'],
   Tactics: [Swords, 'Move army units and use the tactics on action cards.'],
   Siegecraft: [Castle, 'Cancel a Fortress’s extra die for 2 wood, or its hit protection for 2 ore.'],
-  SteelWeapons: [Anvil, 'Pay 1 ore for +2 combat strength in land battles; +1 versus Steel Weapons.'],
+  SteelWeapons: [
+    Anvil,
+    'Land battles: pay 1 ore for +2 combat value (+1 versus Steel Weapons). Free with Metallurgy against enemies without Steel Weapons.',
+  ],
   Draft: [Users, 'Recruit an infantry unit with 1 mood instead of resources.'],
   Myths: [Sun, 'Spend mood to prevent event-driven city mood loss, except Pirates.'],
   Rituals: [Flame, 'Use resources instead of mood when increasing happiness.'],
@@ -87,7 +90,10 @@ const advances = {
   Math: [Calculator, 'Engineering and Roads cost no food.'],
   Astronomy: [Telescope, 'Navigation and Cartography cost no food.'],
   Medicine: [HeartPulse, 'Recover one resource spent after recruiting.'],
-  Metallurgy: [Anvil, 'Improve Steel Weapons. When collecting 2+ ore, replace 1 ore with gold.'],
+  Metallurgy: [
+    Anvil,
+    'Steel Weapons is free against enemies without it. When collecting 2+ ore, replace 1 ore with gold.',
+  ],
   Voting: [Vote, 'Spend 1 mood to take a free Increase Happiness action.'],
   SeparationOfPower: [Scale, 'Culture tokens cannot boost influence attempts against your happy cities.'],
   CivilLiberties: [Heart, 'Gain 3 mood for an action. Draft now costs 2 mood per infantry.'],

@@ -25,8 +25,8 @@ pub(crate) fn great_engineer() -> ActionCard {
         26,
         "Great Engineer",
         &format!(
-            "{} Then, you may build a building in a city \
-            without spending an action and without activating it.",
+            "{} Then, you may construct a building in one of your cities. \
+            Pay its normal resource cost, without spending an additional action or activating the city.",
             great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
@@ -38,7 +38,7 @@ pub(crate) fn great_engineer() -> ActionCard {
         0,
         |_, _, _| {
             Some(
-                "Build a building in a city without spending an action and without activating it?"
+                "Construct in one of your cities at the normal resource cost, without an additional action or city activation?"
                     .to_string(),
             )
         },

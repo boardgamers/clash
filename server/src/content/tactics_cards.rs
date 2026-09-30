@@ -22,7 +22,7 @@ pub(crate) fn peltasts(id: u8) -> TacticsCard {
         id,
         "Peltasts",
         "Roll a die for each of your Army units. \
-        If you rolled a 5 or 6, ignore 1 hit",
+        If any die shows 5 or 6, cancel 1 incoming hit in total.",
     )
     .fighter_requirement(FighterRequirement::Army)
     .add_reveal_listener(7, |player, game, combat, s| {
@@ -110,7 +110,7 @@ pub(crate) fn heavy_resistance(id: u8) -> TacticsCard {
     TacticsCard::builder(
         id,
         "Heavy Resistance",
-        "Attacker gets -1 combat value for each fighting unit.",
+        "Your opponent loses 1 combat value per attacking unit in this combat round.",
     )
     .target(TacticsCardTarget::Opponent)
     .role_requirement(CombatRole::Defender)
@@ -147,7 +147,7 @@ pub(crate) fn surprise(id: u8) -> TacticsCard {
     TacticsCard::builder(
         id,
         "Surprise",
-        "Add 1 to combat value. Draw 1 action card if you killed at least 1 unit.",
+        "Add 1 to combat value. Draw 1 action card if you eliminate at least 1 enemy unit in this combat round.",
     )
     .add_reveal_listener(9, |_player, _game, _c, s| {
         s.extra_combat_value += 1;
@@ -248,7 +248,7 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
         id,
         "Tactical Retreat",
         "The battle ends after all On Reveal effects are resolved. \
-        Withdraw to an adjacent field without enemies. \
+        Withdraw your units to an adjacent land space without enemy units or cities. \
         The opponent is considered to have won the battle.",
     )
     .fighter_requirement(FighterRequirement::Army)

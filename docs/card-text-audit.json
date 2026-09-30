@@ -1,0 +1,1278 @@
+{
+  "edition": "Monumental Edition",
+  "reviewed": "2026-09-30",
+  "complete_english_deck_verified": false,
+  "method": "Check card conditions against their implemented targets, timing and costs; compare readable English card faces where available. Wording edits are not represented as verbatim transcriptions.",
+  "sources": {
+    "english-objective-photo": {
+      "url": "https://boardgamegeek.com/image/6509349/bigleaguecreative",
+      "verified": "Four readable objective halves; Conqueror requires another player's defended city."
+    },
+    "english-rulebook": {
+      "url": "https://wizkids.com/posters/repository/wizkids/Clash-of-Cultures---Rulebook---WEB---2021-02-05-compressed.pdf",
+      "pages": [
+        19,
+        30,
+        31
+      ],
+      "verified": "Card use, objective timing, Steel Weapons and Metallurgy."
+    }
+  },
+  "availability": "Searched BGG and publisher sources, including all nine pages of the Monumental Edition game image gallery. A complete readable English Action, Objective and Event deck was not located. English card scans are still needed for exact per-card verification.",
+  "objective_cards": [
+    {
+      "id": 1,
+      "objectives": [
+        {
+          "name": "Large Civilization",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Draft",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "objectives": [
+        {
+          "name": "Scientific Lead",
+          "review": "implementation-checked",
+          "english_face": "verified",
+          "printed_name": "Academic",
+          "source": "english-objective-photo"
+        },
+        {
+          "name": "Conqueror",
+          "review": "implementation-checked",
+          "english_face": "verified",
+          "printed_name": "Conqueror",
+          "source": "english-objective-photo"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "objectives": [
+        {
+          "name": "Coastal Culture",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Warmonger",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "objectives": [
+        {
+          "name": "Advanced Culture",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Warmonger",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "objectives": [
+        {
+          "name": "Religious Fervor",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "General",
+          "review": "implementation-checked",
+          "english_face": "verified",
+          "printed_name": "Warlord",
+          "source": "english-objective-photo"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "objectives": [
+        {
+          "name": "City Planner",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Great Battle",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "objectives": [
+        {
+          "name": "Eureka!",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Defiance",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "objectives": [
+        {
+          "name": "Happy Population",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Conqueror",
+          "review": "implementation-checked",
+          "english_face": "verified",
+          "printed_name": "Conqueror",
+          "source": "english-objective-photo"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "objectives": [
+        {
+          "name": "Education Lead",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Sea Blockade",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "objectives": [
+        {
+          "name": "Optimized Storage",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Naval Assault",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "objectives": [
+        {
+          "name": "Wealth",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Large Fleet",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "objectives": [
+        {
+          "name": "Ore Supplies",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Large Army",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "objectives": [
+        {
+          "name": "Wood Supplies",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Fortifications",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "objectives": [
+        {
+          "name": "Food Supplies",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Standing Army",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "objectives": [
+        {
+          "name": "Architecture",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Militarized",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "objectives": [
+        {
+          "name": "Goal Focused",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Bold",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "objectives": [
+        {
+          "name": "Colony",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Threat",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "objectives": [
+        {
+          "name": "Culture Focus",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Legendary Battle",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "objectives": [
+        {
+          "name": "Consulate",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Great Battle",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "objectives": [
+        {
+          "name": "Science Focus",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Naval Assault",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "objectives": [
+        {
+          "name": "Trade Focus",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Scavenger",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "objectives": [
+        {
+          "name": "Metropolis",
+          "review": "implementation-checked",
+          "english_face": "verified",
+          "printed_name": "Citadel",
+          "source": "english-objective-photo"
+        },
+        {
+          "name": "General",
+          "review": "implementation-checked",
+          "english_face": "verified",
+          "printed_name": "Warlord",
+          "source": "english-objective-photo"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "objectives": [
+        {
+          "name": "Seafarers",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Aggressor",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "objectives": [
+        {
+          "name": "Government",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Barbarian Conquest",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "objectives": [
+        {
+          "name": "Government",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Aggressor",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "objectives": [
+        {
+          "name": "Expansionist",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Military Might",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "objectives": [
+        {
+          "name": "City Founder",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Resistance",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "objectives": [
+        {
+          "name": "Trade Power",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Resistance",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "objectives": [
+        {
+          "name": "Shipping Routes",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Terror Regime",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "objectives": [
+        {
+          "name": "Diversified Research",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Bold",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "objectives": [
+        {
+          "name": "Culture Power",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Barbarian Conquest",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "objectives": [
+        {
+          "name": "Magnificent Culture",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Outpost",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "objectives": [
+        {
+          "name": "Star Gazers",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Horse Power",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "objectives": [
+        {
+          "name": "Traders",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Great Commander",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "objectives": [
+        {
+          "name": "Versatility",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Brutus",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "objectives": [
+        {
+          "name": "Legacy",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Ivory Tower",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "objectives": [
+        {
+          "name": "Migration",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Trample",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "objectives": [
+        {
+          "name": "High Culture",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        },
+        {
+          "name": "Sea Cleansing",
+          "review": "implementation-checked",
+          "english_face": "not-located"
+        }
+      ]
+    }
+  ],
+  "action_cards": [
+    {
+      "id": 1,
+      "name": "Quick Advance",
+      "tactics": "Peltasts",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 2,
+      "name": "Quick Advance",
+      "tactics": "Encircled",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 3,
+      "name": "Inspiration",
+      "tactics": "Encircled",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 4,
+      "name": "Inspiration",
+      "tactics": "Peltasts",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 5,
+      "name": "Hero General",
+      "tactics": "Wedge Formation",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 6,
+      "name": "Hero General",
+      "tactics": "High Morale",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 7,
+      "name": "Spy",
+      "tactics": "Heavy Resistance",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 8,
+      "name": "Spy",
+      "tactics": "High Morale",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 9,
+      "name": "Ideas",
+      "tactics": "High Ground",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 10,
+      "name": "Ideas",
+      "tactics": "Surprise",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 11,
+      "name": "Great Ideas",
+      "tactics": "Siege",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 12,
+      "name": "Great Ideas",
+      "tactics": "High Ground",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 13,
+      "name": "Mercenaries",
+      "tactics": "For the People",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 14,
+      "name": "Mercenaries",
+      "tactics": "Heavy Resistance",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 15,
+      "name": "Cultural Takeover",
+      "tactics": "Heavy Resistance",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 16,
+      "name": "Cultural Takeover",
+      "tactics": "Improved Defenses",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 17,
+      "name": "City Development",
+      "tactics": "Tactical Retreat",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 18,
+      "name": "City Development",
+      "tactics": "Peltasts",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 19,
+      "name": "Production Focus",
+      "tactics": "Tactical Retreat",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 20,
+      "name": "Production Focus",
+      "tactics": "Peltasts",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 21,
+      "name": "Explorer",
+      "tactics": "Encircled",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 22,
+      "name": "Explorer",
+      "tactics": "Defensive Formation",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 23,
+      "name": "Negotiations",
+      "tactics": "Scout",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 24,
+      "name": "Negotiations",
+      "tactics": "Martyr",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 25,
+      "name": "Leadership",
+      "tactics": "High Ground",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 26,
+      "name": "Leadership",
+      "tactics": "Archers",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 27,
+      "name": "Assassination",
+      "tactics": "High Ground",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 28,
+      "name": "Assassination",
+      "tactics": "Archers",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 29,
+      "name": "Mass Production",
+      "tactics": "Defensive Formation",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 30,
+      "name": "Mass Production",
+      "tactics": "Encircled",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 31,
+      "name": "New Plans",
+      "tactics": "Flanking",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 32,
+      "name": "New Plans",
+      "tactics": "High Morale",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 33,
+      "name": "Synergies",
+      "tactics": "Defensive Formation",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 34,
+      "name": "Synergies",
+      "tactics": "Archers",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 35,
+      "name": "Teach Us",
+      "tactics": "Defensive Formation",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 36,
+      "name": "Teach Us",
+      "tactics": "Archers",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 37,
+      "name": "Militia",
+      "tactics": "Wedge Formation",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 38,
+      "name": "Militia",
+      "tactics": "High Morale",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 39,
+      "name": "Technology Trade",
+      "tactics": "Surprise",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 40,
+      "name": "Technology Trade",
+      "tactics": "High Ground",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 41,
+      "name": "New Ideas",
+      "tactics": "High Morale",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    },
+    {
+      "id": 42,
+      "name": "New Ideas",
+      "tactics": "Flanking",
+      "review": "implementation-checked",
+      "english_face": "not-located"
+    }
+  ],
+  "event_cards": [
+    {
+      "id": 1,
+      "name": "Pestilence",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 2,
+      "name": "Epidemics",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 3,
+      "name": "Famine",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 4,
+      "name": "Famine",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 5,
+      "name": "Famine",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 6,
+      "name": "Severe famine",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 7,
+      "name": "Severe famine",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 8,
+      "name": "Severe famine",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 9,
+      "name": "A good year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 10,
+      "name": "A good year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 11,
+      "name": "A good year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 12,
+      "name": "An awesome year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 13,
+      "name": "An awesome year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 14,
+      "name": "An awesome year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 15,
+      "name": "A fantastic year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 16,
+      "name": "A fantastic year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 17,
+      "name": "A fantastic year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 27,
+      "name": "Population Boom",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 28,
+      "name": "Population Boom",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 54,
+      "name": "A successful year",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 29,
+      "name": "Vulcan",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 30,
+      "name": "Earthquake",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 31,
+      "name": "Heavy Earthquake",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 32,
+      "name": "Flood",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 33,
+      "name": "Heavy Flood",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 34,
+      "name": "Migration",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 35,
+      "name": "Migration",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 36,
+      "name": "Civil War",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 37,
+      "name": "Civil War",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 38,
+      "name": "Revolution",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 39,
+      "name": "Uprising",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 40,
+      "name": "Envoy",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 42,
+      "name": "Trojan Horse",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 41,
+      "name": "Solar Eclipse",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 44,
+      "name": "Anarchy",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 43,
+      "name": "Guillotine",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 45,
+      "name": "Scientific Trade",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 46,
+      "name": "Flourishing Trade",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 47,
+      "name": "Era of Stability",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 48,
+      "name": "Reformation",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 49,
+      "name": "Pandemics",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 50,
+      "name": "Black Death",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 51,
+      "name": "Famine: Vermin",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 52,
+      "name": "Famine: Draught",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 53,
+      "name": "Fire",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 18,
+      "name": "Great Explorer",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 19,
+      "name": "Great Artist",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 20,
+      "name": "Great Prophet",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 21,
+      "name": "Great Philosopher",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 22,
+      "name": "Great Scientist",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 23,
+      "name": "Elder Statesman",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 24,
+      "name": "Great Warlord",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 25,
+      "name": "Great Merchant",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 26,
+      "name": "Great Engineer",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 55,
+      "name": "Great Architect",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 56,
+      "name": "Great Athlete",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 57,
+      "name": "Great Diplomat",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    },
+    {
+      "id": 58,
+      "name": "Great Seer",
+      "english_face": "not-located",
+      "review": "pending-complete-source-audit"
+    }
+  ],
+  "follow_up_rule_discrepancies": [
+    {
+      "name": "Bold",
+      "issue": "The fewer-Warfare-advances branch is not gated by winning the battle. Locate the English card and add a loss regression before changing it."
+    },
+    {
+      "name": "Naval Assault / Barbarian Conquest / Aggressor",
+      "issue": "Capture/attacker requirements are missing explicit attacker-role checks in some predicates. Verify the printed requirements and cover defensive victories."
+    },
+    {
+      "name": "Sea Blockade",
+      "issue": "Current predicate includes the player's own ports and counts passengers as well as ships. Verify whether two ships must occupy one port or can occupy different ports."
+    },
+    {
+      "name": "Magnificent Culture",
+      "issue": "The status-phase predicate does not check that no other Wonder was built. Verify Monumental Edition wording before changing the condition."
+    },
+    {
+      "name": "Technology Trade",
+      "issue": "Availability checks proximity, but the subsequent partner list does not consistently enforce that range."
+    },
+    {
+      "name": "Mercenaries",
+      "issue": "Description names cities/army units for range; the code uses all owned units. Printed English wording is needed to resolve the difference."
+    }
+  ]
+}

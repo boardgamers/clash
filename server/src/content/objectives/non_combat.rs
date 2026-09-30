@@ -37,7 +37,7 @@ pub(crate) fn city_founder() -> Objective {
     let name = "City Founder";
     Objective::builder(
         name,
-        "You founded a city this at least 5 spaces away from your starting city position.",
+        "Immediately after founding a city at least 5 spaces from your starting city position.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.found_city,
@@ -53,7 +53,7 @@ pub(crate) fn city_founder() -> Objective {
 
 pub(crate) fn terror_regime() -> Objective {
     // is handled explicitly
-    Objective::builder("Terror Regime", "At least 4 cities are Angry.").build()
+    Objective::builder("Terror Regime", "At least 4 of your cities are Angry.").build()
 }
 
 pub(crate) fn magnificent_culture() -> Objective {
@@ -61,7 +61,7 @@ pub(crate) fn magnificent_culture() -> Objective {
     Objective::builder(
         name,
         "You just built a wonder OR \
-        you built have built the only wonder in the last round.",
+        you built the only Wonder built during the last round.",
     )
     .status_phase_check(|game, player| {
         last_round(game).iter().any(|p| {

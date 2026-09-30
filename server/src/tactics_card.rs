@@ -252,10 +252,33 @@ impl TacticsCardBuilder {
 
     #[must_use]
     pub fn build(self) -> TacticsCard {
+        // The printed cards express these restrictions with icons. Include them
+        // in the text as well so every viewer and card-choice prompt shows them.
+        let mut requirements = Vec::new();
+        if let Some(role) = &self.role_requirement {
+            requirements.push(match role {
+                CombatRole::Attacker => "Attacking only".to_string(),
+                CombatRole::Defender => "Defending only".to_string(),
+            });
+        }
+        if let Some(location) = &self.location_requirement {
+            requirements.push(format!("{location} battle"));
+        }
+        if !self.fighter_requirement.is_empty() {
+            requirements.push(format!(
+                "Requires your {} in the battle",
+                self.fighter_requirement.iter().map(ToString::to_string).collect::<Vec<_>>().join(" or ")
+            ));
+        }
+        let description = if requirements.is_empty() {
+            self.description
+        } else {
+            format!("{}. {}", requirements.join(" · "), self.description)
+        };
         TacticsCard {
             id: self.id,
             name: self.name,
-            description: self.description,
+            description,
             fighter_requirement: self.fighter_requirement,
             role_requirement: self.role_requirement,
             location_requirement: self.location_requirement,

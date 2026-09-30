@@ -21,10 +21,9 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
     ActionCard::builder(
         id,
         "Cultural Takeover",
-        "You may influence Barbarian cities of size 1. \
-        If successful, replace the Barbarian city with a city of your color. \
-        Replace one of the Barbarian units with a Settler or Infantry of your color. \
-        Remove the other Barbarian units.",
+        "Your next cultural influence attempt may target a size-1 barbarian city. \
+        Pay the usual influence action cost. On success, take control of the city. \
+        If it contains barbarian units, replace 1 with your own Settler or Infantry and remove the rest.",
         |c| c.free_action().no_resources(),
         |game, p, _| any_barbarian_city_can_be_influenced(game, p),
     )

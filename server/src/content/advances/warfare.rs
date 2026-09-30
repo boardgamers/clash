@@ -107,8 +107,9 @@ fn steel_weapons() -> AdvanceBuilder {
         "Immediately before a Land battle starts, \
         you may pay 1 ore to get +2 combat value in every Combat Round against an enemy \
         that does not have the Steel Weapons advance. \
-        If the enemy also has Steel Weapons, you only +1 combat value, \
-        even if the enemy does not use the ability.",
+        If the enemy also has Steel Weapons, gain only +1 combat value, \
+        even if the enemy does not use the ability. \
+        With Metallurgy, activation is free against enemies without Steel Weapons, including barbarians.",
     )
     .add_payment_request_listener(
         |e| &mut e.combat_start,
@@ -224,8 +225,9 @@ fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: Comb
 
     let add_combat_value = |s: &mut CombatStrength, value: u8| {
         s.extra_combat_value += value as i8;
-        s.roll_log
-            .push(format!("steel weapons added {value} combat value"));
+        let free = value == 2 && game.player(c.player(role)).can_use_advance(Advance::Metallurgy);
+        let benefit = if free { " (Metallurgy: no ore cost)" } else { "" };
+        s.roll_log.push(format!("steel weapons added {value} combat value{benefit}"));
     };
 
     if role.is_attacker() {

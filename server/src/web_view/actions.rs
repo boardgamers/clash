@@ -2,6 +2,7 @@ use crate::action::Action;
 use crate::city::MoodState;
 use crate::city_pieces::BUILDINGS;
 use crate::construct::{Construct, can_construct, new_building_positions};
+use crate::content::effects::{ConstructEffect, PermanentEffect};
 use crate::game::{Game, GameState};
 use crate::happiness::{
     IncreaseHappiness, happiness_base_event_origin, happiness_cost_for_cities, lawgiver_city,
@@ -360,6 +361,16 @@ fn action_reason(
 
 pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     let p = game.player(seat);
+    // These cards grant an action to offset the following Construct command.
+    // Present the extra build's net cost, not that internal action debit.
+    let construction_source = (seat == game.active_player()).then(|| {
+        game.permanent_effects.iter().find_map(|effect| match effect {
+            PermanentEffect::Construct(ConstructEffect::GreatEngineer) => Some("Great Engineer"),
+            PermanentEffect::Construct(ConstructEffect::CityDevelopment) => Some("City Development"),
+            _ => None,
+        })
+    }).flatten();
+    let free_construction = construction_source.is_some() || PlayingActionType::Construct.cost(game, seat).free;
     p.cities.iter().map(|city| {
         let buildings = BUILDINGS.into_iter().map(|building| {
             let cost = p.building_cost_in_city(game, building, city.position, CostTrigger::NoModifiers);
@@ -373,6 +384,7 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             json!({"name":building.to_string(),"owned":!city.pieces.can_add_building(building),
                 "required":game.cache.get_building_advance(building).name(game),"payment":payment,
                 "payments":super::decisions::payment_choices(&cost.cost,&p.resources,false,false),"reason":reason,"choices":choices,
+                "free":free_construction,"activateCity":cost.activate_city,"source":construction_source,
                 "moodWillDecrease":cost.activate_city && city.is_activated()})
         }).collect::<Vec<_>>();
         let recruits = [UnitType::Settler,UnitType::Infantry,UnitType::Cavalry,UnitType::Elephant,UnitType::Ship].into_iter().map(|unit| {
@@ -398,7 +410,18 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
                 });
                 json!({"steps":steps,"lawgiver":lawgiver,"mood":if steps==max_steps {"Happy"} else {"Neutral"},"payment":payment,"reason":reason,"action":action})
             }).collect::<Vec<_>>();
-        let leaders = p.available_leaders.iter().map(|l|json!({"id":l,"name":l.name(game),"abilities":game.cache.get_leader(l).abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>(),"description":game.cache.get_leader(l).abilities.iter().map(|a|format!("{}: {}",a.name,a.description)).collect::<Vec<_>>().join("\n")})).collect::<Vec<_>>();
+        let leaders = p.available_leaders.iter().map(|l| {
+            let mut units = Units::empty();
+            units += &UnitType::Leader(*l);
+            let result = crate::recruit::recruit_cost_without_replaced(game, p, &units, city.position, CostTrigger::NoModifiers);
+            let reason = action_reason(game, seat, can_play, PlayingActionType::Recruit)
+                .or_else(|| result.as_ref().err().cloned());
+            let payment = result.map(|c| c.cost.first_valid_payment(&p.resources).unwrap_or_else(|| c.cost.default_payment()))
+                .unwrap_or_else(|_| UnitType::Leader(*l).cost());
+            json!({"id":l,"name":l.name(game),"payment":payment,"reason":reason,
+                "abilities":game.cache.get_leader(l).abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>(),
+                "description":game.cache.get_leader(l).abilities.iter().map(|a|format!("{}: {}",a.name,a.description)).collect::<Vec<_>>().join("\n")})
+        }).collect::<Vec<_>>();
         json!({"position":city.position,"buildings":buildings,"recruits":recruits,"happiness":happiness,"leaders":leaders})
     }).collect()
 }

@@ -9,19 +9,23 @@ use crate::player::Player;
 use crate::unit::{Unit, UnitType};
 use itertools::Itertools;
 
+// English card face: https://boardgamegeek.com/image/6509349/bigleaguecreative
 pub(crate) fn conqueror() -> Objective {
     let name = "Conqueror";
     Objective::builder(
         name,
-        "You conquered a city with at least 1 Army unit or Fortress this turn.",
+        "Immediately after capturing another player's city defended by at least 1 army unit or a Fortress.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         1,
         |game, player, s| {
-            if s.is_winner(player.index)
+            if s.attacker.player == player.index
+                && s.is_winner(player.index)
                 && s.battleground.is_city()
                 && s.opponent_is_human(player.index, game)
+                && (s.battleground == Battleground::CityWithFortress
+                    || s.defender.fighters(s.battleground).amount() > 0)
             {
                 objective_is_ready(player.get_mut(game), name);
             }
@@ -34,8 +38,8 @@ pub(crate) fn warmonger() -> Objective {
     let name = "Warmonger";
     Objective::builder(
         name,
-        "You've completed your second combat this turn against different armies or cities, \
-        one of which you've won.",
+        "You fought at least 2 land battles this turn against different armies or cities, \
+        and won at least 1 of them.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -64,7 +68,7 @@ pub(crate) fn general() -> Objective {
     let name = "General";
     Objective::builder(
         name,
-        "You killed at least 3 enemy units in a single land combat this turn.",
+        "You eliminated at least 3 enemy army units in one land battle, including barbarian army units.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -140,7 +144,7 @@ pub(crate) fn naval_assault() -> Objective {
     let name = "Naval Assault";
     Objective::builder(
         name,
-        "You captured a city with army units that disembarked from a ship.",
+        "Immediately after capturing another player's city with your army disembarking from a ship.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -200,7 +204,7 @@ pub(crate) fn legendary_battle() -> Objective {
     let name = "Legendary Battle";
     Objective::builder(
         name,
-        "You fought a battle against a city of size 5 with at least 1 wonder.",
+        "You attacked a city of size 5 or greater containing a Wonder, with at least 3 of your army units.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -277,7 +281,7 @@ pub(crate) fn barbarian_conquest() -> Objective {
     let name = "Barbarian Conquest";
     Objective::builder(
         name,
-        "You captured a barbarian city with at least 2 army units.",
+        "Immediately after capturing a barbarian city defended by at least 2 barbarian army units.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,

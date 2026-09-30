@@ -39,7 +39,7 @@ pub(crate) fn sea_blockade() -> Objective {
 pub(crate) fn large_fleet() -> Objective {
     Objective::builder(
         "Large Fleet",
-        "You have at least 4 ships - or 2 ships and more than any other player.",
+        "You have at least 4 ships, OR at least 2 ships and more ships than every other player.",
     )
     .status_phase_check(|game, player| {
         let ships = ship_count(player);
@@ -68,7 +68,7 @@ pub(crate) fn large_army() -> Objective {
 pub(crate) fn standing_army() -> Objective {
     Objective::builder(
         "Standing Army",
-        "You have at least 4 cities with army units. \
+        "At least 4 of your cities each contain one or more of your army units. \
         Cannot be completed together with Military Might.",
     )
     .contradicting_status_phase_objective("Military Might")
@@ -91,7 +91,7 @@ pub(crate) fn standing_army() -> Objective {
 pub(crate) fn colony() -> Objective {
     Objective::builder(
         "Colony",
-        "You have at least 1 city least 5 spaces away from your starting city position. \
+        "You own a city at least 5 spaces from your starting city position. \
         Cannot be completed if you completed City Founder in the last round.",
     )
     .status_phase_check(|game, player| {
@@ -120,7 +120,7 @@ pub(crate) fn colony() -> Objective {
 pub(crate) fn threat() -> Objective {
     Objective::builder(
         "Threat",
-        "At least 4 of your army units are adjacent to another human player's city.",
+        "At least 4 of your army units are adjacent to cities owned by other players. They may be next to different cities.",
     )
     .status_phase_check(|game, player| {
         let enemy_cities = game
@@ -149,7 +149,7 @@ pub(crate) fn threat() -> Objective {
 pub(crate) fn outpost() -> Objective {
     Objective::builder(
         "Outpost",
-        "You have army units on at least 3 spaces outside, and not adjacent to cities",
+        "Your army units occupy at least 3 different spaces, each outside and not adjacent to any of your cities.",
     )
     .status_phase_check(|_game, player| {
         player
@@ -173,7 +173,7 @@ pub(crate) fn outpost() -> Objective {
 pub(crate) fn migration() -> Objective {
     Objective::builder(
         "Migration",
-        "You have settlers on at least 3 spaces outside, and not adjacent to cities",
+        "Your settlers occupy at least 3 different spaces, each outside and not adjacent to any of your cities.",
     )
     .status_phase_check(|_game, player| {
         player
@@ -210,7 +210,7 @@ pub(crate) fn military_might() -> Objective {
 pub(crate) fn trade_power() -> Objective {
     Objective::builder(
         "Trade Power",
-        "You could form at least 3 trade routes if you wanted to.\
+        "You could form at least 3 trade routes. \
         Cannot be completed together with Shipping Routes.",
     )
     .contradicting_status_phase_objective("Shipping Routes")
@@ -221,7 +221,7 @@ pub(crate) fn trade_power() -> Objective {
 pub(crate) fn shipping_routes() -> Objective {
     Objective::builder(
         "Shipping Routes",
-        "You could form at least 2 trade routes only with ships if you wanted to.\
+        "You could form at least 2 trade routes using your ships. \
         Cannot be completed together with Trade Power.",
     )
     .contradicting_status_phase_objective("Trade Power")
@@ -241,7 +241,7 @@ pub(crate) fn unit_versatility(objective: &str, unit_type: UnitType) -> Objectiv
     Objective::builder(
         objective,
         &format!(
-            "You have at least 3 army groups with at least 1 {} unit each.",
+            "You have at least 1 {} on each of at least 3 different spaces.",
             unit_type.non_leader_name()
         ),
     )

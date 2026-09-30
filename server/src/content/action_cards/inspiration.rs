@@ -74,7 +74,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Inspiration",
         "Gain 1 advance for free (without changing the Game Event counter) \
-        that a player owns who has a unit or city within range 2 of your units or cities.",
+        owned by another player with a unit or city within 2 spaces of one of your units or cities. Normal advance prerequisites apply.",
         |c| c.free_action().no_resources(),
         |game, player, _| !possible_inspiration_advances(game, player).is_empty(),
     )
@@ -138,8 +138,8 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     let mut b = ActionCard::builder(
         id,
         "Hero General",
-        "If you won a land battle this turn: Increase the mood in a city by 1. \
-        You may pay 1 mood token to increase the mood in a city by 1.",
+        "After winning a land battle this turn: Increase the mood of one of your cities by 1 step. \
+        You may then pay 1 mood token to increase the mood of the same or another of your cities by 1 step.",
         |c| c.free_action().no_resources(),
         |_game, player, _| !cities_where_mood_can_increase(player).is_empty(),
     )
@@ -210,7 +210,7 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Ideas",
-        "Gain 1 idea per Academy you own.",
+        "Gain 1 idea for each of your cities containing an Academy, regardless of its color.",
         |c| c.free_action().no_resources(),
         |_game, player, _| academies(player) > 0,
     )

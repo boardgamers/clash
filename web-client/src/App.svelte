@@ -169,6 +169,7 @@
       (c) =>
         c.buildings.some((b) => b.choices.length > 0) ||
         c.recruits.some((r) => !r.reason && r.available > 0) ||
+        c.leaders?.some((l) => l.reason === null) ||
         c.happiness.some((h) => !!h.action),
     ),
   );

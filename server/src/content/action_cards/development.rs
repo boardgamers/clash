@@ -40,7 +40,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "City Development",
-        "Construct a building without paying resources and without an action.",
+        "Construct a building in one of your cities without paying resources or spending an additional action. The city activates normally.",
         |c| c.action().culture_tokens(1),
         |game, p, _| can_construct_any_building(game, p, &[ConstructDiscount::NoResourceCost]),
     )
@@ -150,7 +150,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     let b = ActionCard::builder(
         id,
         "Explorer",
-        "Explore a tile adjacent to a one of your cities - \
+        "Explore an unexplored region adjacent to one of your cities, \
         AND/OR gain a free settler in one of your cities.",
         |c| c.action().culture_tokens(1),
         |game, player, _| {

@@ -38,6 +38,20 @@
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let options = $derived($session.view?.cityActions.find((c) => c.position === $session.city));
   let selected = $derived(options?.buildings.find((b) => b.name === building));
+  const buildActivatesCity = $derived(
+    selected
+      ? selected.activateCity !== false
+      : (options?.buildings.some((b) => b.activateCity !== false) ?? true),
+  );
+  const buildSummary = $derived(
+    [
+      selected?.source,
+      selected?.free ? 'No extra action' : 'Costs 1 action',
+      selected?.activateCity === false ? 'No city activation' : 'Activates this city',
+    ]
+      .filter(Boolean)
+      .join(' · '),
+  );
   const buildPayment = $derived(
     paymentIndex >= 0 ? (selected?.payments?.[paymentIndex] ?? selected?.payment) : selected?.payment,
   );
@@ -121,7 +135,7 @@
       >{/each}
   </nav>
   <div class="city-content">
-    {#if city && tab !== 'happiness'}<ActivationStatus
+    {#if city && (tab === 'recruit' || (tab === 'build' && buildActivatesCity))}<ActivationStatus
         {city}
         warning={tab === 'recruit' || (tab === 'build' && !!selected?.moodWillDecrease)}
       />{/if}
@@ -219,7 +233,10 @@
                   class="leader-select"
                   aria-label={`Select ${leader.name}`}
                   aria-pressed={$session.recruits.leader === leader.id}
-                  disabled={$session.pending || (!$session.recruits.leader && occupiedCapacity >= capacity)}
+                  disabled={$session.pending ||
+                    (!!leader.reason && $session.recruits.leader !== leader.id) ||
+                    (!$session.recruits.leader && occupiedCapacity >= capacity)}
+                  title={leader.reason ?? undefined}
                   onclick={() =>
                     controller.setRecruits({
                       ...$session.recruits,
@@ -228,7 +245,9 @@
                 >
                   <span class="leader-name"><Crown size={16} />{leader.name}</span>
                   <span class="leader-cost"
-                    ><span>Cost</span><ResourceAmount pile={{ mood_tokens: 1, culture_tokens: 1 }} />
+                    ><span>Cost</span><ResourceAmount
+                      pile={leader.payment ?? { mood_tokens: 1, culture_tokens: 1 }}
+                    />
                     <span class="leader-selection"
                       >{#if $session.recruits.leader === leader.id}<Check size={14} />Selected{:else}<Plus
                           size={14}
@@ -236,6 +255,7 @@
                     >
                   </span>
                 </button>
+                {#if leader.reason}<small class="reason">{leader.reason}</small>{/if}
                 <dl class="leader-abilities">
                   {#each leader.abilities as ability}{@const Icon = abilityIcon(ability.description)}
                     <div>
@@ -273,7 +293,7 @@
   {#if tab === 'build' && selected && !selected.owned}<footer class="city-confirm">
       <div>
         <strong>{selected.name}</strong><ResourceAmount pile={buildPayment ?? selected.payment} /><small
-          >{cityReason(selected.reason, city?.size) || 'Costs 1 action · Activates this city'}</small
+          >{cityReason(selected.reason, city?.size) || buildSummary}</small
         >{#if selected.moodWillDecrease && city && city.activationMood !== city.mood}<span
             class="activation-inline"
             ><strong>{city.mood} → {city.activationMood}</strong> after activation</span

@@ -16,8 +16,8 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Spy",
-        "Look at all Wonder, Action, and Objective cards of another player. \
-        You may swap one card of the same type.",
+        "Look at another player's hand of Wonder, Action, and Objective cards. \
+        You may exchange 1 card from your hand for 1 of theirs of the same type.",
         |c| c.action().culture_tokens(1),
         |game, player, _| !players_with_cards(game, player.index).is_empty(),
     )
@@ -34,7 +34,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             s.log(
                 game,
                 &format!(
-                    "Decided to looked at all Wonder, Action, and Objective cards of {}",
+                    "Looked at the Wonder, Action, and Objective cards in the hand of {}",
                     game.player_name(p)
                 ),
             );

@@ -142,7 +142,7 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Assassination",
-        "Select a player (not affected by Assassination already) \
+        "Select another player (not affected by Assassination already) \
         to lose an action in their next turn.",
         |c| c.free_action().culture_tokens(1),
         move |game, p, _| !opponents_not_affected_by_assassination(game, p.index).is_empty(),
@@ -209,7 +209,7 @@ fn mass_production(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Mass Production",
-        "You may collect from 2 additional tiles this turn. \
+        "Your next Collect action may select up to 2 additional tiles. \
         (Cannot combine with Production Focus or another Mass Production.)",
         |c| c.free_action().no_resources(),
         move |game, p, _| collect_special_action(game, p),
