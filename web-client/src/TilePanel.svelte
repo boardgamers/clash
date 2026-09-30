@@ -7,6 +7,7 @@
   import UnitIcon from './UnitIcon.svelte';
   import TileUnits from './TileUnits.svelte';
   import PirateDetails from './PirateDetails.svelte';
+  import BarbarianDetails from './BarbarianDetails.svelte';
   import CityFacts from './CityFacts.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
   import CityBuildings from './CityBuildings.svelte';
@@ -49,7 +50,9 @@
   <section class="board-context" aria-label={`Tile ${position} actions`}>
     <header>
       <TerrainIcon {terrain} size={21} />
-      <strong>{owner ? `${owner.civilization} · ${position}` : position}</strong>
+      <strong
+        >{owner || publicOwner ? `${(owner ?? publicOwner)!.civilization} · ${position}` : position}</strong
+      >
       {#if city}<CityFacts size={city.size} mood={city.mood} />{:else}<span>{terrainInfo(terrain).label}</span
         >{/if}
       <button class="icon-button" aria-label="Close tile actions" onclick={close}><X size={18} /></button>
@@ -119,7 +122,10 @@
         />
       {/each}
     {/each}
-    {#if $session.game}<PirateDetails game={$session.game} {position} {onHighlight} />{/if}
+    {#if $session.game}<PirateDetails game={$session.game} {position} {onHighlight} /><BarbarianDetails
+        game={$session.game}
+        {position}
+      />{/if}
     {#if origins.length}
       <div class="tile-arrivals" role="group" aria-label={`Move to ${position}`}>
         <h3><Footprints size={15} />{terrain === 'Unexplored' ? 'Explore here' : 'Move here'}</h3>

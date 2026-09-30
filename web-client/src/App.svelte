@@ -1180,11 +1180,31 @@
       <p class="guide-intro">Score the most points over six ages.</p>
       <div class="guide-grid">
         <article>
+          <Trophy />
+          <h3>Victory and game end</h3>
+          <p>
+            The highest total victory score wins. Add points from city pieces, advances, completed objectives,
+            wonders, events and captured leaders.
+          </p>
+          <p>
+            The game ends after Age VI’s objective checks. It also ends at an earlier age’s objective checks
+            if any player has no cities. Compare total scores in either case; there is no fixed score target.
+          </p>
+          <p>
+            The final age ends before the free advance and card draws. Select a civilization’s score to see
+            its breakdown.
+          </p>
+        </article>
+        <article>
           <Landmark />
           <h3>Scoring</h3>
           <p>
             Each settlement and building you own scores 1 point; each advance scores ½ point. Completed
             objectives score 2 points each. Wonders, events and captured leaders can add points.
+          </p>
+          <p>
+            Ties compare points from city pieces, advances, objectives, wonders, events and captured leaders,
+            in that order.
           </p>
         </article>
         <article>
@@ -1250,6 +1270,17 @@
             refill the markers. Unused markers carry over between turns. Events can grant rewards, cause
             disasters or bring barbarians and pirates.
           </p>
+        </article>
+        <article>
+          <Swords />
+          <h3>Barbarians</h3>
+          <p>Events can create a barbarian city with 1 infantry and add an extra unit to a barbarian city.</p>
+          <p>
+            A “Barbarians move” event moves nearby armies 1 land tile toward the triggering player’s cities.
+            Afterwards, barbarian cities within 2 land spaces of those cities gain 1 infantry, up to 4 units
+            per tile. If no army can move, the event tries to create a new city instead.
+          </p>
+          <p>Barbarians block collection on their tile. Some action cards also move and reinforce them.</p>
         </article>
         <article>
           <Layers />

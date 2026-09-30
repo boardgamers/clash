@@ -27,14 +27,18 @@ export const unitInfo: Record<
   UnitKind,
   { icon: typeof Footprints; key: Exclude<keyof RecruitSelection, 'leader'>; effect: string }
 > = {
-  Settler: { icon: Footprints, key: 'settlers', effect: 'Explore and found new cities.' },
-  Infantry: { icon: Swords, key: 'infantry', effect: 'Fight on land. Needs Tactics to move.' },
-  Cavalry: { icon: Flag, key: 'cavalry', effect: 'Army unit; requires a Market.' },
-  Elephant: { icon: Shield, key: 'elephants', effect: 'Army unit; requires a Market.' },
+  Settler: { icon: Footprints, key: 'settlers', effect: 'Exploration · Found cities' },
+  Infantry: { icon: Swords, key: 'infantry', effect: '+1 combat value on infantry face · Tactics to move' },
+  Cavalry: { icon: Flag, key: 'cavalry', effect: '+2 combat value on cavalry face · Requires Market' },
+  Elephant: {
+    icon: Shield,
+    key: 'elephants',
+    effect: 'Blocks 1 hit on elephant face · 0 die value · Requires Market',
+  },
   Ship: {
     icon: Ship,
     key: 'ships',
-    effect: 'Sail through connected seas. Navigation adds edge shortcuts. Requires a Port.',
+    effect: 'Naval combat · Carries 2 land units · Requires Port',
   },
 };
 export function cityReason(reason: string | null, size = 1) {

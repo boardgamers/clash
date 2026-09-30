@@ -1,4 +1,5 @@
 import { activeHistory } from './active-history.ts';
+import { explainBarbarianGains } from './barbarian-journal.ts';
 import type { EventInfo, Game, JournalEntry, LoggedAction, View } from './types.ts';
 
 type Facts = { units: number; cities: number; advances: Set<string>; borrowed?: string };
@@ -125,6 +126,7 @@ export function explainEvents(
         (info?.baseEffect === 'Gold deposits.' && next.title === 'Gold deposits'),
     );
     entry.event.outcomes = outcomes;
+    explainBarbarianGains(entry, game);
     for (const outcome of outcomes) entries.splice(entries.indexOf(outcome), 1);
     if (
       entry === triggers.at(-1) &&

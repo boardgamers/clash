@@ -826,6 +826,38 @@
   min-height: 32px;
   font-size: 12px;
 }
+.barbarian-details {
+  display: grid;
+  gap: 9px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.barbarian-details header,
+.barbarian-details h3,
+.barbarian-details p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+}
+.barbarian-details header {
+  justify-content: space-between;
+}
+.barbarian-details header > span {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.barbarian-details p {
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.barbarian-details p > svg {
+  flex-shrink: 0;
+  color: var(--muted);
+  margin-top: 2px;
+}
 
 .city-buildings > li > button {
   color: var(--ink);
