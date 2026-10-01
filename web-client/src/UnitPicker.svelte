@@ -8,6 +8,7 @@
     name: string;
     detail?: string;
     pirate?: boolean;
+    civilization?: string;
   }
 </script>
 
@@ -85,7 +86,13 @@
         onfocus={() => onHighlight(unit.position)}
         onblur={() => onHighlight(null)}
       >
-        <UnitPortrait type={unit.type} player={unit.player} pirate={unit.pirate} {colorBlind} />
+        <UnitPortrait
+          type={unit.type}
+          player={unit.player}
+          pirate={unit.pirate}
+          civilization={unit.civilization}
+          {colorBlind}
+        />
         <span class="unit-choice-check" aria-hidden="true"
           >{#if selected.includes(unit.id)}<Check size={14} />{/if}</span
         >

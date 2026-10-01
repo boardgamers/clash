@@ -117,6 +117,7 @@
       name: unitName(u),
       detail: u.carrier !== null ? `Aboard ship #${u.carrier + 1} · Disembark` : u.movementNotes?.join(' · '),
       pirate: u.pirate,
+      civilization: $session.game?.players.find((p) => p.id === $session.seat)?.civilization,
     }))}
     selected={$session.selectedUnits}
     position={origin}

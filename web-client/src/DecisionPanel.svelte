@@ -48,6 +48,7 @@
           name,
           detail: carrier != null ? `Aboard ship #${carrier + 1}` : undefined,
           pirate: unit?.pirate,
+          civilization: $session.game?.players.find((p) => p.id === target.player)?.civilization,
         },
       ];
     }),

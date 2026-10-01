@@ -8,16 +8,18 @@
     player,
     colorBlind = false,
     pirate = false,
+    civilization,
   }: {
     type: UnitView['type'];
     player: number;
     colorBlind?: boolean;
     pirate?: boolean;
+    civilization?: string;
   } = $props();
   let src = $state('');
   $effect(() => {
     try {
-      src = unitPortrait(type, playerColor(player, colorBlind), pirate);
+      src = unitPortrait(type, playerColor(player, colorBlind), pirate, civilization);
     } catch {
       src = '';
     }

@@ -773,7 +773,7 @@ export class World {
             (entry): entry is [BuildingKind, number] =>
               entry[0] !== 'wonders' && typeof entry[1] === 'number',
           );
-          const settlement = models.settlement(ownerColor);
+          const settlement = models.settlement(ownerColor, player.civilization);
           settlement.scale.setScalar(additions.length ? 0.57 : 0.88);
           settlement.position.set(additions.length === 1 ? -0.2 : 0, 0, -0.09);
           cityModel.add(settlement);
@@ -837,7 +837,11 @@ export class World {
           ];
           additions.sort(([a], [b]) => heights.indexOf(a) - heights.indexOf(b));
           for (const [j, [name, buildingOwner]] of additions.entries()) {
-            const annex = models.building(name, playerColor(buildingOwner, s.colorBlind));
+            const annex = models.building(
+              name,
+              playerColor(buildingOwner, s.colorBlind),
+              player.civilization,
+            );
             const [ax, az] = slots[j % slots.length];
             annex.scale.setScalar(additions.length < 3 ? 0.62 : 0.55);
             annex.position.set(ax, 0, az);
@@ -902,7 +906,12 @@ export class World {
         }
         for (const unit of player.units ?? []) {
           const [x, z] = positionXY(unit.position);
-          const pawn = models.unit(unit.unit_type, playerColor(player.id, s.colorBlind), unit.pirate);
+          const pawn = models.unit(
+            unit.unit_type,
+            playerColor(player.id, s.colorBlind),
+            unit.pirate,
+            player.civilization,
+          );
           pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id };
           this.pieces.push(pawn);
           const stackIndex = unitStacks.get(unit.position) ?? 0;

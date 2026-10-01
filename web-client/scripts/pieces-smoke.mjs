@@ -49,13 +49,7 @@ const gallery = await build({
   logLevel: 'silent',
 });
 const engine = createRequire(import.meta.url)('../.engine/server.js');
-let state = await engine.init(
-  2,
-  [],
-  { civilization: 'ChooseCivilization' },
-  'pieces-ui',
-  {},
-);
+let state = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'pieces-ui', {});
 for (const civ of ['China', 'Rome']) {
   state = typeof state === 'string' ? state : JSON.stringify(state);
   state = engine.tryMove(state, JSON.stringify({ ChooseCivilization: civ }), engine.currentPlayer(state));
@@ -152,8 +146,8 @@ try {
       await page.mouse.click(692, 450);
       await page.getByRole('region', { name: 'Unit movement', exact: true }).waitFor();
       assert.equal(
-        (await page.locator('.unit-picker button[aria-pressed="true"]').textContent()).trim(),
-        '#6',
+        (await page.locator('.unit-choice[aria-pressed="true"] strong').textContent()).trim(),
+        'Infantry #6',
       );
       await page.getByRole('button', { name: 'Close movement controls', exact: true }).click();
       await page.locator('.city-map-label').first().click();

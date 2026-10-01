@@ -5,8 +5,13 @@ import type { UnitView } from './types';
 // All portraits share one renderer; a large army never creates a context per unit.
 let renderer: THREE.WebGLRenderer | undefined;
 const portraits = new Map<string, string>();
-export function unitPortrait(type: UnitView['type'], color: string, pirate = false): string {
-  const key = JSON.stringify([type, color, pirate]);
+export function unitPortrait(
+  type: UnitView['type'],
+  color: string,
+  pirate = false,
+  civilization?: string,
+): string {
+  const key = JSON.stringify([type, color, pirate, civilization]);
   const cached = portraits.get(key);
   if (cached) return cached;
   renderer ??= new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -26,7 +31,7 @@ export function unitPortrait(type: UnitView['type'], color: string, pirate = fal
     },
   );
   try {
-    const model = models.unit(type, color, pirate);
+    const model = models.unit(type, color, pirate, civilization);
     const scene = new THREE.Scene();
     scene.add(model, new THREE.HemisphereLight(0xffffff, 0x76887f, 2.6));
     const light = new THREE.DirectionalLight(0xffffff, 3);
