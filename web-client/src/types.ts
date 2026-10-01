@@ -7,6 +7,7 @@ export type Terrain =
   'Forest' | 'Fertile' | 'Mountain' | 'Barren' | 'Water' | 'Unexplored' | { Exhausted: string };
 export interface City {
   position: string;
+  port_position?: string | null;
   mood_state: string;
   city_pieces?: Partial<
     Record<'academy' | 'market' | 'obelisk' | 'observatory' | 'fortress' | 'port' | 'temple', number>

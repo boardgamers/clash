@@ -19,6 +19,21 @@ pub(super) fn decision_context(game: &Game, seat: usize) -> Option<Value> {
         incident.base_effect,
         IncidentBaseEffect::PiratesSpawnAndRaid
     );
+    let pirate_phase = if pirate_raid {
+        use crate::content::persistent_events::PersistentEventRequest;
+        match (
+            &handler.request,
+            handler.priority - crate::incident::BASE_EFFECT_PRIORITY,
+        ) {
+            (PersistentEventRequest::SelectUnits(_), 5) => Some("remove"),
+            (PersistentEventRequest::SelectPositions(_), 4 | 3) => Some("place"),
+            (PersistentEventRequest::Payment(_), 2) => Some("pay"),
+            (PersistentEventRequest::SelectPositions(_), 1) => Some("mood"),
+            _ => None,
+        }
+    } else {
+        None
+    };
     let card = incident
         .action_card
         .as_ref()
@@ -37,7 +52,9 @@ pub(super) fn decision_context(game: &Game, seat: usize) -> Option<Value> {
         });
     Some(
         json!({"name":incident.name,"rules":incident.description(game),"card":card,
-        "raid":if during_base && pirate_raid {Some("Each player with a city next to pirates pays 1 resource or token. If unable to pay, lower the mood of one such city.")} else {None},
+        "piratePhase":pirate_phase,
+        "pirateShip":(pirate_phase == Some("place")).then(|| 5 - (handler.priority - crate::incident::BASE_EFFECT_PRIORITY)),
+        "raid":if pirate_phase == Some("place") || pirate_phase == Some("remove") {Some("After placement: each player with a city next to pirates pays 1 resource or token. If unable to pay, lower the mood of one such city, unless all are already Angry.")} else {None},
         "placement":if pirate_raid {Some("Place 2 pirate ships on sea spaces without player units. Place the first next to one of your cities if possible.")} else {None}}),
     )
 }

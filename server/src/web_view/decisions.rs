@@ -472,9 +472,37 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                 .collect()
         }
     };
+    let event_context = super::journal::decision_context(game, seat);
+    if let Some(context) = &event_context {
+        match context["piratePhase"].as_str() {
+            Some("place") => {
+                title = "Place pirates".into();
+                description = format!(
+                    "Ship {} of 2 · Choose a highlighted sea space.",
+                    context["pirateShip"].as_u64().unwrap_or(1)
+                );
+            }
+            Some("remove") => {
+                title = "Return pirate ships".into();
+                description =
+                    format!("Return {min} to the supply so 2 pirate ships can be placed.");
+            }
+            Some("pay") => {
+                title = "Pirate raid".into();
+                description =
+                    "Pay 1 resource or token total, regardless of city mood or number of pirates."
+                        .into();
+            }
+            Some("mood") => {
+                title = "Pirate raid".into();
+                description = "Unable to pay · Lower the mood of one highlighted city.".into();
+            }
+            _ => {}
+        }
+    }
     Some(
         json!({"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
-        "eventContext":super::journal::decision_context(game,seat),
+        "eventContext":event_context,
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
         "tacticsSelection":tactics_selection,
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),

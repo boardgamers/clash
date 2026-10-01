@@ -40,7 +40,7 @@ test('Great Seer explains the pirate raid and exposes the later card price befor
   let state = run(JSON.stringify(raw), {
     Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } },
   });
-  let sawPlacement = false;
+  let placements = 0;
   let sawBribe = false;
   let sawPurchase = false;
   for (let step = 0; step < 10; step++) {
@@ -53,14 +53,18 @@ test('Great Seer explains the pirate raid and exposes the later card price befor
     assert.deepEqual(context.card!.cost, { culture_tokens: seat === 0 ? 1 : 2 });
     assert.match(context.card!.description, /Draw 1 objective card per player/);
     if (decision.options.length) {
-      sawPlacement = true;
+      placements++;
+      assert.equal(decision.name, 'Place pirates');
+      assert.match(decision.description, /Ship 2 of 2/); // The only legal first sea space is automatic.
+      assert.match(context.raid!, /^After placement:/);
       assert.ok(context.card!.later);
       assert.match(context.placement!, /Place 2 pirate ships/);
     } else if (decision.fields.some((f) => f.name.includes('bribe'))) {
       sawBribe = true;
       assert.ok(context.card!.later);
-      assert.match(context.raid!, /pays 1 resource or token/);
-      assert.match(context.raid!, /lower the mood/);
+      assert.equal(decision.name, 'Pirate raid');
+      assert.match(decision.description, /Pay 1 resource or token total/);
+      assert.equal(context.raid, null);
     } else {
       sawPurchase = true;
       assert.equal(context.card!.later, false);
@@ -77,9 +81,27 @@ test('Great Seer explains the pirate raid and exposes the later card price befor
     ).action;
     state = run(state, action, seat);
   }
-  assert.ok(sawPlacement && sawBribe && sawPurchase);
+  assert.equal(placements, 1);
+  assert.ok(sawBribe && sawPurchase);
   assert.ok(JSON.parse(state).players[0].action_cards.includes(158));
   assert.equal(JSON.parse(state).players[0].resources.culture_tokens ?? 0, 0);
+});
+
+test('pirate supply, first placement, second placement and raid have distinct instructions', () => {
+  for (const [suffix, name, instruction] of [
+    ['', 'Return pirate ships', /Return 1 to the supply/],
+    ['1', 'Place pirates', /Ship 1 of 2/],
+    ['2', 'Place pirates', /Ship 2 of 2/],
+    ['3', 'Pirate raid', /Pay 1 resource or token total/],
+  ] as const) {
+    const state = fixture(`pirates_spawn.outcome${suffix}`);
+    const seat = engine.currentPlayer(state);
+    const decision = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat)).decision;
+    assert.equal(decision.name, name);
+    assert.match(decision.description, instruction);
+    if (suffix === '3') assert.equal(decision.eventContext.raid, null);
+    else assert.match(decision.eventContext.raid, /^After placement:/);
+  }
 });
 
 test('Epidemics explains a whiff for each civilization with fewer than two units', () => {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
-  import { Check, Sparkles, Layers, BookOpen, Ship, ChevronRight, Zap } from 'lucide-svelte';
+  import { Check, Sparkles, Layers, BookOpen, ChevronRight, Zap } from 'lucide-svelte';
   import type { Controller } from './controller';
   import type { Decision, Move, Pile } from './types';
   import { resourceNames } from './types';
@@ -160,10 +160,7 @@
     <h2><Sparkles size={21} />{decision.name}</h2>
     {#if decision.eventContext}
       {@const context = decision.eventContext}
-      <div class="decision-event-context" class:full-context={!!context.card || !!context.raid}>
-        {#if context.raid}<p class="event-raid">
-            <Ship size={17} /><ResourceText text={context.raid} />
-          </p>{/if}
+      <div class="decision-event-context" class:full-context={!!context.card}>
         {#if context.card}
           {@const card = context.card}
           <div class="event-card-offer">
@@ -182,6 +179,7 @@
               ><BookOpen size={13} />{card.name}<ChevronRight size={13} /></summary
             >
             {#if context.placement}<p>{context.placement}</p>{/if}
+            {#if context.raid}<p class="event-raid"><ResourceText text={context.raid} /></p>{/if}
             <p>
               The player who triggered the event may take the card for <ResourceAmount
                 pile={{ culture_tokens: 1 }}
@@ -201,6 +199,7 @@
               ><BookOpen size={13} />Event rules<ChevronRight size={13} /></summary
             >
             {#if context.placement}<p>{context.placement}</p>{/if}
+            {#if context.raid}<p class="event-raid"><ResourceText text={context.raid} /></p>{/if}
             {#each context.rules as rule}<p><ResourceText text={rule} /></p>{/each}
           </details>
         {/if}

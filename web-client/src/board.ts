@@ -18,6 +18,7 @@ import { Swords } from 'lucide-svelte';
 import { mount, unmount } from 'svelte';
 import UnitMapBadge from './UnitMapBadge.svelte';
 import { mapDecisionOptions } from './decision-controls';
+import { portPlacement } from './port-layout';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -317,15 +318,21 @@ export class World {
     const hit = this.raycaster.intersectObjects([...this.tiles.values(), ...this.pieces], true)[0];
     let object: THREE.Object3D | null = hit?.object ?? null;
     while (object) {
-      if (typeof object.userData.position === 'string')
+      if (typeof object.userData.position === 'string') {
+        const { cityPosition, position: waterPosition } = object.userData;
+        const inspectPort =
+          cityPosition &&
+          ((this.selectable === null && !this.seaGuide) ||
+            (this.selectable?.has(cityPosition) && !this.selectable.has(waterPosition)));
         return {
-          position: object.userData.position,
+          position: inspectPort ? cityPosition : waterPosition,
           pick: {
-            kind: object.userData.kind ?? 'tile',
+            kind: cityPosition && !inspectPort ? 'tile' : (object.userData.kind ?? 'tile'),
             player: object.userData.player,
             unit: object.userData.unit,
           },
         };
+      }
       object = object.parent;
     }
     return null;
@@ -814,6 +821,21 @@ export class World {
         group.add(terrainGroup);
         this.board.add(group);
       }
+      const portSites = new Map(
+        s.game.players.flatMap((player) =>
+          (player.cities ?? []).flatMap((city) => {
+            if (
+              city.city_pieces?.port == null ||
+              !city.port_position ||
+              !mapTiles.some(([position, terrain]) => position === city.port_position && terrain === 'Water')
+            )
+              return [];
+            const placement = portPlacement(city.position, city.port_position);
+            return placement ? [[city.position, { ...placement, water: city.port_position }] as const] : [];
+          }),
+        ),
+      );
+      const harborDirections = new Map([...portSites.values()].map((port) => [port.water, port.rotation]));
       const unitStacks = new Map<string, number>();
       const unitsByTile = new Map<string, number>();
       for (const player of s.game.players)
@@ -827,7 +849,9 @@ export class World {
           const wonders = (city.city_pieces?.wonders ?? []).filter((name) => name !== 'Hidden');
           const additions = Object.entries(city.city_pieces ?? {}).filter(
             (entry): entry is [BuildingKind, number] =>
-              entry[0] !== 'wonders' && typeof entry[1] === 'number',
+              entry[0] !== 'wonders' &&
+              typeof entry[1] === 'number' &&
+              !(entry[0] === 'port' && portSites.has(city.position)),
           );
           const settlement = models.settlement(ownerColor, player.civilization);
           settlement.scale.setScalar(additions.length ? 0.57 : 0.88);
@@ -936,6 +960,33 @@ export class World {
             });
             for (const marker of ownershipPieces) marker.position.x += 0.28;
           }
+          const portSite = portSites.get(city.position);
+          if (portSite && city.city_pieces?.port != null) {
+            const dock = new THREE.Group();
+            const port = models.building(
+              'port',
+              playerColor(city.city_pieces.port, s.colorBlind),
+              player.civilization,
+            );
+            port.scale.setScalar(0.5);
+            dock.add(port);
+            // A short sloping gangway connects the water-level wharf to its city.
+            const gangway = this.mesh(new THREE.BoxGeometry(0.16, 0.04, 0.36), this.material('#a28250'));
+            gangway.position.set(0, 0.19, -0.31);
+            gangway.rotation.x = 0.53;
+            dock.add(gangway);
+            dock.position.set(portSite.x, 0.01, portSite.z);
+            dock.rotation.y = portSite.rotation;
+            dock.userData = {
+              position: portSite.water,
+              cityPosition: city.position,
+              kind: 'city',
+              player: player.id,
+              building: 'port',
+            };
+            this.board.add(dock);
+            this.pieces.push(dock);
+          }
           this.board.add(cityModel);
           cityModel.updateWorldMatrix(true, true);
           const ownership = new THREE.Box3().setFromObject(flag);
@@ -1042,9 +1093,31 @@ export class World {
             ux = stackIndex % 2 ? 0.27 : -0.27;
             uz = stackIndex < 2 ? 0.36 : -0.36;
           }
-          pawn.scale.setScalar(count > positions.length ? Math.min(0.65, 5.2 / count) : ship ? 0.88 : 0.85);
+          const harborDirection = ship ? harborDirections.get(unit.position) : undefined;
+          const inHarbor = harborDirection !== undefined && count <= 4;
+          if (inHarbor) {
+            // Moor side by side facing away from the wharf, leaving its entrance clear.
+            const across = (stackIndex - (count - 1) / 2) * (count > 2 ? 0.3 : 0.42);
+            ux = across * Math.cos(harborDirection) + 0.08 * Math.sin(harborDirection);
+            uz = -across * Math.sin(harborDirection) + 0.08 * Math.cos(harborDirection);
+          }
+          pawn.scale.setScalar(
+            count > positions.length
+              ? Math.min(0.65, 5.2 / count)
+              : inHarbor
+                ? count === 1
+                  ? 0.8
+                  : count === 2
+                    ? 0.64
+                    : count === 3
+                      ? 0.54
+                      : 0.46
+                : ship
+                  ? 0.88
+                  : 0.85,
+          );
           pawn.position.set(x + ux, ship ? surface : surface + 0.02, z + uz);
-          pawn.rotation.y = -0.22;
+          pawn.rotation.y = inHarbor ? harborDirection : -0.22;
           this.board.add(pawn);
         }
       }
