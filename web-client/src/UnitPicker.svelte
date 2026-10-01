@@ -25,6 +25,7 @@
     pending = false,
     limit,
     colorBlind = false,
+    playerColors = [],
     label = 'Choose units',
   }: {
     choices: UnitChoice[];
@@ -36,6 +37,7 @@
     pending?: boolean;
     limit?: number;
     colorBlind?: boolean;
+    playerColors?: string[];
     label?: string;
   } = $props();
   const positions = $derived([...new Set(choices.map((u) => u.position))]);
@@ -80,6 +82,7 @@
           pirate={unit.pirate}
           civilization={unit.civilization}
           {colorBlind}
+          {playerColors}
         />
         <span class="unit-choice-check" aria-hidden="true"
           >{#if selected.includes(unit.id)}<Check size={14} />{/if}</span

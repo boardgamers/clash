@@ -845,7 +845,7 @@ export class World {
         for (const city of player.cities ?? []) {
           const [x, z] = positionXY(city.position);
           const cityModel = new THREE.Group();
-          const ownerColor = playerColor(player.id, s.colorBlind);
+          const ownerColor = playerColor(player.id, s.colorBlind, s.playerColors);
           const wonders = (city.city_pieces?.wonders ?? []).filter((name) => name !== 'Hidden');
           const additions = Object.entries(city.city_pieces ?? {}).filter(
             (entry): entry is [BuildingKind, number] =>
@@ -924,7 +924,7 @@ export class World {
           for (const [j, [name, buildingOwner]] of additions.entries()) {
             const annex = models.building(
               name,
-              playerColor(buildingOwner, s.colorBlind),
+              playerColor(buildingOwner, s.colorBlind, s.playerColors),
               player.civilization,
             );
             const [ax, az] = slots[j % slots.length];
@@ -965,7 +965,7 @@ export class World {
             const dock = new THREE.Group();
             const port = models.building(
               'port',
-              playerColor(city.city_pieces.port, s.colorBlind),
+              playerColor(city.city_pieces.port, s.colorBlind, s.playerColors),
               player.civilization,
             );
             port.scale.setScalar(0.5);
@@ -998,7 +998,7 @@ export class World {
           }
           const label = document.createElement('button');
           label.className = 'city-map-label';
-          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind));
+          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
           const mood = city.mood_state;
           label.dataset.mood = mood.toLowerCase();
           const face = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1048,7 +1048,7 @@ export class World {
           const [x, z] = positionXY(unit.position);
           const pawn = models.unit(
             unit.unit_type,
-            playerColor(player.id, s.colorBlind),
+            playerColor(player.id, s.colorBlind, s.playerColors),
             unit.pirate,
             player.civilization,
           );
@@ -1141,7 +1141,7 @@ export class World {
           const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
           const label = document.createElement('button');
           label.className = 'unit-map-label';
-          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind));
+          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
           label.setAttribute('aria-label', `Inspect ${description}`);
           label.title = description;
           this.unitBadges.push(

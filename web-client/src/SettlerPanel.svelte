@@ -122,6 +122,7 @@
     position={origin}
     pending={$session.pending}
     colorBlind={$session.colorBlind}
+    playerColors={$session.playerColors}
     label="Units to move"
     onPosition={(position) => controller.focusUnitPosition(position)}
     onSelect={select}

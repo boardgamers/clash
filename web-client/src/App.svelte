@@ -336,7 +336,7 @@
     <span
       class="journal-symbol"
       aria-hidden="true"
-      style={`--player:${playerColor(entry.player ?? 0, $session.colorBlind)}`}
+      style={`--player:${playerColor(entry.player ?? 0, $session.colorBlind, $session.playerColors)}`}
     >
       {#if entry.civilization}<CivilizationEmblem
           civilization={entry.civilization}
@@ -586,7 +586,7 @@
         {#each $session.view?.players ?? [] as player}<button
             class="player-card"
             class:active={player.index === $session.view?.activePlayer}
-            style={`--player:${playerColor(player.index, $session.colorBlind)}`}
+            style={`--player:${playerColor(player.index, $session.colorBlind, $session.playerColors)}`}
             title={`Inspect ${player.civilization} (${player.index === $session.seat ? 'You' : player.name}): advances and victory points`}
             aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}. View resources, advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
@@ -612,7 +612,14 @@
                 >{:else}<CivilizationEmblem civilization={player.civilization} size={24} />{/if}</span
             ><span class="player-info"
               ><strong>{player.civilization}</strong><small
-                >{player.index === $session.seat ? 'You' : player.name}</small
+                >{player.index === $session.seat
+                  ? 'You'
+                  : player.name}{#if $session.playerBadges?.[player.index]}<img
+                    class="supporter-badge"
+                    src={$session.playerBadges[player.index]!.url}
+                    alt={$session.playerBadges[player.index]!.label}
+                    title={$session.playerBadges[player.index]!.label}
+                  />{/if}</small
               ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span></span
             ><span class="player-score">{player.score}<Trophy size={10} /></span
             >{#if player.index === $session.view?.activePlayer}<span class="active-dot" title="Current player"

@@ -232,6 +232,7 @@
         limit={decision.max}
         pending={$session.pending}
         colorBlind={$session.colorBlind}
+        playerColors={$session.playerColors}
         label={count}
         onPosition={(position) => controller.focusDecisionPosition(position)}
         onSelect={toggle}

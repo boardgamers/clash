@@ -132,6 +132,8 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
   viewer.updatePreference('mapView', '2d');
   assert.deepEqual(current, {
     locale: 'en',
+    playerColors: [],
+    playerBadges: [],
     sound: false,
     colorBlind: true,
     topDown: true,
@@ -175,4 +177,21 @@ test('tile and control hover sounds are throttled and obey global mute', () => {
   assert.equal(voices.length, 5);
   assert.ok(voices.every((voice) => voice.stops.at(-1) === undefined));
   audio.destroy();
+});
+
+test('cosmetic preferences validate hex colours and accessibility keeps its own palette', async () => {
+  const { playerColor } = await import('./types.ts');
+  const { playerColors } = readPreferences({ bgs: { playerColors: ['#da73aa', 'url(x)'] } });
+  assert.equal(playerColor(0, false, playerColors), '#da73aa');
+  assert.equal(playerColor(0, true, playerColors), playerColor(0, true));
+  assert.deepEqual(readPreferences({ bgs: {} }).playerColors, []);
+});
+
+test('player badges use host artwork only for visible Supporters and clear when omitted', () => {
+  const supporterBadge = { url: 'https://boardgamers.space/badges/new-design.svg', label: 'Supporter' };
+  const { playerBadges } = readPreferences({
+    bgs: { players: [{ pro: true }, { pro: false }], supporterBadge },
+  });
+  assert.deepEqual(playerBadges, [supporterBadge, undefined]);
+  assert.deepEqual(readPreferences({}).playerBadges, []);
 });

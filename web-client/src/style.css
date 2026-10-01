@@ -4779,6 +4779,15 @@ small {
   }
 }
 
+.player-info .supporter-badge {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  vertical-align: -2px;
+  flex-shrink: 0;
+}
+
 .mobile-panel-minimize,
 .restore-mobile-panel {
   display: none;

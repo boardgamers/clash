@@ -12,7 +12,7 @@
     "publish:bgs": "node scripts/publish.mjs"
   },
   "dependencies": {
-    "@boardgamers/protocol": "0.6.2",
+    "@boardgamers/protocol": "0.8.1",
     "lucide-svelte": "^0.468.0",
     "svelte": "^5.0.0",
     "three": "^0.180.0"
