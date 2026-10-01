@@ -4676,6 +4676,98 @@ small {
   gap: 6px;
   font-size: 12px;
 }
+
+/* Combat choices put the playable face first; the civil action is reference only. */
+.game-shell .play-layout .action-panel.floating-panel.tactics-decision {
+  width: min(390px, calc(100% - 24px));
+  padding: 12px;
+}
+.tactics-decision .decision-options {
+  grid-template-columns: 1fr;
+}
+.tactics-choice {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper2);
+  overflow: hidden;
+}
+.tactics-choice.selected {
+  border-color: var(--gold);
+}
+.game-shell .tactics-choice .tactics-option {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  align-items: flex-start;
+}
+.tactics-option strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tactics-civil {
+  font-size: 11px;
+  color: var(--muted);
+}
+.tactics-civil summary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 6px 10px;
+  cursor: pointer;
+  list-style: none;
+}
+.tactics-civil summary::-webkit-details-marker {
+  display: none;
+}
+.tactics-civil[open] summary svg {
+  transform: rotate(90deg);
+}
+.tactics-civil > div {
+  padding: 0 10px 10px;
+}
+.tactics-civil p {
+  margin: 5px 0 0;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.game-shell .tactics-decision .decision-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+  bottom: -12px;
+  padding: 8px 0 12px;
+}
+.tactics-discard {
+  flex: 1 0 100%;
+  color: var(--muted);
+  font-size: 11px;
+}
+.game-shell .tactics-decision .decision-footer button {
+  width: auto;
+  min-width: 72px;
+  min-height: 36px;
+  padding: 7px 12px;
+  font-size: 12px;
+  gap: 10px;
+}
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
+  .game-shell .play-layout .action-panel.floating-panel.tactics-decision {
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: calc(56px + var(--mobile-bottom));
+    width: auto;
+    max-height: min(54%, 400px);
+  }
+  .game-shell .tactics-decision .decision-footer button {
+    min-height: 40px;
+  }
+}
 .game-shell .ability-map-confirm .primary {
   width: auto;
   min-width: 110px;

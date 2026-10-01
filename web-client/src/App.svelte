@@ -433,6 +433,7 @@
     $session.mode === 'settlers' ||
     $session.tilePanel ||
     !!activeCityAbility($session) ||
+    !!$session.view?.decision?.tacticsSelection ||
     mapDecision}
   class:map-decision={mapDecision}
   class:activity-open={$session.activityOpen}

@@ -11,6 +11,7 @@
   import ResourceText from './ResourceText.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import DecisionOptionContent from './DecisionOptionContent.svelte';
+  import TacticsOption from './TacticsOption.svelte';
   import UnitPicker, { type UnitChoice } from './UnitPicker.svelte';
   import { researchPresentation } from './research';
   import { mapDecisionOptions } from './decision-controls';
@@ -32,7 +33,11 @@
   );
   const description = $derived(
     combatBenefit ??
-      (decision.name === 'Place Settler' ? 'Free Settler after losing a city.' : decision.description),
+      (decision.tacticsSelection && decision.name === 'Tactics'
+        ? 'Play one battle effect or skip.'
+        : decision.name === 'Place Settler'
+          ? 'Free Settler after losing a city.'
+          : decision.description),
   );
   const pieceChoice = $derived(mapChoice && decision.options.some((option) => option.mapTarget));
   const unitChoice = $derived(pieceChoice && decision.options.every((o) => o.mapTarget?.kind === 'unit'));
@@ -147,6 +152,7 @@
   class:selection-tray={mapChoice}
   class:unit-decision={unitChoice}
   class:card-decision={decision.options.some((option) => option.card)}
+  class:tactics-decision={decision.tacticsSelection}
   aria-label={decision.name}
 >
   {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
@@ -207,10 +213,22 @@
       />
     </p>{/if}
   {#if decision.options.length}
-    {#if !mapChoice}<div class="decision-count">
+    {#if !mapChoice && !decision.tacticsSelection}<div class="decision-count">
         {count}<span>{selected.length}/{decision.max}</span>
       </div>{/if}
-    {#if unitChoice}
+    {#if decision.tacticsSelection}
+      <div class="decision-options tactics-options">
+        {#each decision.options as option, i}
+          <TacticsOption
+            {option}
+            selected={selected.includes(i)}
+            pending={$session.pending}
+            id={`${panelId}-option-${i}`}
+            onSelect={() => toggle(i)}
+          />
+        {/each}
+      </div>
+    {:else if unitChoice}
       <UnitPicker
         choices={unitChoices}
         {selected}
@@ -296,22 +314,47 @@
       </div>
     {/each}
     <div class="decision-footer" class:map-decision-footer={mapChoice}>
-      {#if mapChoice && !unitChoice}<span
-          class="map-selection-count"
-          aria-label={`${selected.length} of ${decision.max} selected`}>{selected.length}/{decision.max}</span
-        >{/if}
-      <button
-        class="primary"
-        class:wide={!mapChoice}
-        aria-label={mapChoice && selected.length ? `Confirm · ${selected.length}/${decision.max}` : undefined}
-        disabled={!preview.action || $session.pending}
-        title={preview.error || 'Confirm selection'}
-        onclick={() => preview.action && controller.submit(preview.action)}
-      >
-        {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : 'Confirm'}<Check
-          size={16}
-        />
-      </button>
+      {#if decision.tacticsSelection}
+        {#if selected.length}<small class="tactics-discard">Discards the selected card</small>{/if}
+        <button
+          class="secondary"
+          disabled={$session.pending}
+          onclick={() => {
+            const response = controller.query<{ action: Move }>({
+              kind: 'decision',
+              values: [],
+              payments: [],
+            });
+            controller.submit(response.action);
+          }}>Skip</button
+        >
+        {#if selected.length}<button
+            class="primary"
+            disabled={!preview.action || $session.pending}
+            onclick={() => preview.action && controller.submit(preview.action)}
+            >Play tactics<Check size={16} /></button
+          >{/if}
+      {:else}
+        {#if mapChoice && !unitChoice}<span
+            class="map-selection-count"
+            aria-label={`${selected.length} of ${decision.max} selected`}
+            >{selected.length}/{decision.max}</span
+          >{/if}
+        <button
+          class="primary"
+          class:wide={!mapChoice}
+          aria-label={mapChoice && selected.length
+            ? `Confirm · ${selected.length}/${decision.max}`
+            : undefined}
+          disabled={!preview.action || $session.pending}
+          title={preview.error || 'Confirm selection'}
+          onclick={() => preview.action && controller.submit(preview.action)}
+        >
+          {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : 'Confirm'}<Check
+            size={16}
+          />
+        </button>
+      {/if}
       {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
           {preview.error}
         </p>{/if}

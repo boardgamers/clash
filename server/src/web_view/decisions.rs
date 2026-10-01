@@ -217,6 +217,11 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
     let mut max = 1;
     let mut fields = vec![];
     let p = game.player(game.current_event().player.index);
+    let tactics_selection = matches!(&h.request, PersistentEventRequest::SelectHandCards(_))
+        && (matches!(
+            &h.origin,
+            EventOrigin::Advance(crate::advance::Advance::Tactics)
+        ) || matches!(&h.origin, EventOrigin::LeaderAbility(name) if name == "Loyalty"));
     let options = match &h.request {
         PersistentEventRequest::ExploreResolution => return None,
         PersistentEventRequest::BoolRequest(_) => return None,
@@ -471,6 +476,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
         json!({"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
         "eventContext":super::journal::decision_context(game,seat),
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
+        "tacticsSelection":tactics_selection,
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),
         "advanceMode":matches!(h.request,PersistentEventRequest::SelectAdvance(_)).then(|| advance_mode(game, h)),
         "endOfAge":crate::status_phase::get_status_phase(game).is_some()}),

@@ -223,7 +223,7 @@ export class World {
     const layout = host.closest('.play-layout')!;
     this.panelObserver = new MutationObserver(() => {
       const panel = layout.querySelector<HTMLElement>(
-        '.board-collection, .board-movement, .board-decision, .board-ability, .board-context',
+        '.board-collection, .board-movement, .board-decision, .board-ability, .tactics-decision, .board-context',
       );
       if (panel === this.interactionPanel) return;
       if (this.interactionPanel) this.resize.unobserve(this.interactionPanel);
@@ -640,34 +640,44 @@ export class World {
     const pieceDecision = mapChoices.some((o) => o.mapTarget);
     this.decisionPositions = decisionPositions;
     const ability = activeCityAbility(s);
+    const combat = activeCombat(s.game);
     const abilityPositions = [...new Set(ability?.offers.map((offer) => offer.position!) ?? [])];
-    this.interactionPositions = ability
-      ? abilityPositions
-      : s.mode === 'collect'
-        ? [
-            ...new Set(
-              [
-                s.city!,
-                ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? []),
-              ].filter(Boolean),
-            ),
-          ]
-        : s.mode === 'settlers'
-          ? [
-              ...new Set([
-                ...(s.unitPosition ? [s.unitPosition] : []),
-                ...(s.view?.units?.filter((u) => s.selectedUnits.includes(u.id)).map((u) => u.position) ??
-                  []),
-                ...s.moveDestinations.map((d) => d.position),
-              ]),
-            ]
-          : s.tilePanel && s.focus
-            ? [s.focus]
-            : [];
+    this.interactionPositions =
+      s.view?.decision?.tacticsSelection && combat
+        ? [combat.attacker.position, combat.defender.position]
+        : ability
+          ? abilityPositions
+          : s.mode === 'collect'
+            ? [
+                ...new Set(
+                  [
+                    s.city!,
+                    ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ??
+                      []),
+                  ].filter(Boolean),
+                ),
+              ]
+            : s.mode === 'settlers'
+              ? [
+                  ...new Set([
+                    ...(s.unitPosition ? [s.unitPosition] : []),
+                    ...(s.view?.units?.filter((u) => s.selectedUnits.includes(u.id)).map((u) => u.position) ??
+                      []),
+                    ...s.moveDestinations.map((d) => d.position),
+                  ]),
+                ]
+              : s.tilePanel && s.focus
+                ? [s.focus]
+                : [];
     this.labelHost.classList.toggle('collecting', s.mode === 'collect');
     const decisionSelected = s.decisionSelection.flatMap((i) => mapChoices[i]?.position ?? []);
     const interacting =
-      s.mode === 'collect' || s.mode === 'settlers' || s.tilePanel || mapChoices.length > 0 || !!ability;
+      s.mode === 'collect' ||
+      s.mode === 'settlers' ||
+      s.tilePanel ||
+      mapChoices.length > 0 ||
+      !!ability ||
+      !!s.view?.decision?.tacticsSelection;
     if (interacting !== this.boardInteraction) {
       this.boardInteraction = interacting;
       this.updateViewport();
@@ -685,7 +695,6 @@ export class World {
       !s.view?.objectiveDecision;
     this.seaRouteStart = s.seaRouteStart;
     this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? []);
-    const combat = activeCombat(s.game);
     this.combatOverlay.update(combat);
     this.combatLabel.hidden = !combat;
     if (combat) {

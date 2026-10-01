@@ -500,6 +500,7 @@ export interface Decision {
     } | null;
   } | null;
   advanceSelection?: boolean;
+  tacticsSelection?: boolean;
   advanceMode?: 'free' | 'paid' | 'borrow' | null;
   name: string;
   description: string;

@@ -72,6 +72,7 @@ test('Spy card choices expose action and battle uses separately', () => {
   let state = engine.tryMove(fixture('action_cards/spy'), JSON.stringify({ Playing: { ActionCard: 7 } }), 0);
   state = engine.tryMove(state, JSON.stringify({ Response: { Payment: [{ culture_tokens: 1 }] } }), 0);
   const cards = view(state).decision!.options.filter((o) => o.card?.kind === 'action');
+  assert.equal(view(state).decision!.tacticsSelection, false);
   assert.ok(cards.length > 0);
   for (const option of cards) {
     if (option.card?.kind !== 'action') continue;
@@ -80,6 +81,45 @@ test('Spy card choices expose action and battle uses separately', () => {
     assert.equal(option.name, `${option.card.name}/${option.card.tactics?.name}`);
   }
 });
+
+for (const seat of [0, 1]) {
+  test(`combat card choices use only the battle face for the ${seat ? 'defender' : 'attacker'}`, () => {
+    const game = JSON.parse(fixture('tactics_cards/peltasts'));
+    game.players[0].action_cards = [];
+    game.players[1].action_cards = [];
+    game.players[seat].action_cards = [4]; // Inspiration / Peltasts
+    game.players[seat].resources.culture_tokens = 0;
+    const state = engine.tryMove(
+      JSON.stringify(game),
+      JSON.stringify({ Movement: { Move: { units: [0], destination: 'C1', payment: {} } } }),
+      0,
+    );
+    const d = view(state, seat).decision!;
+    assert.equal(d.tacticsSelection, true);
+    assert.equal(d.options[0].card?.kind, 'action');
+    const option = d.options[0];
+    if (option.card?.kind !== 'action') throw new Error('Expected action card');
+    assert.equal(option.card.name, 'Inspiration');
+    assert.equal(option.card.tactics?.name, 'Peltasts');
+    for (const play of [true, false]) {
+      const { action } = JSON.parse(
+        engine.webQuery(
+          engine.stripSecret(state, seat),
+          seat,
+          JSON.stringify({ kind: 'decision', values: play ? [option.value] : [], payments: [] }),
+        ),
+      );
+      const after = JSON.parse(engine.tryMove(state, JSON.stringify(action), seat));
+      assert.deepEqual(
+        after.players[seat].advances,
+        game.players[seat].advances,
+        'Civil research effect must not trigger',
+      );
+      assert.equal(after.players[seat].resources.culture_tokens ?? 0, 0);
+      assert.deepEqual(after.players[seat].action_cards ?? [], play ? [] : [4]);
+    }
+  });
+}
 
 test('free research exposes exactly the legal choices without paid actions or resource requirements', () => {
   const raw = JSON.parse(fixture('status_phase/free_advance.outcome'));
