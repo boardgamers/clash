@@ -295,7 +295,7 @@
             {#each $session.view.units as unit}<button
                 class:selected={$session.replacements.includes(unit.id)}
                 aria-pressed={$session.replacements.includes(unit.id)}
-                title={`Replace ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} at ${unit.position}`}
+                title={`Replace ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} at ${unit.position}`}
                 onclick={() => {
                   controller.patch({
                     replacements: $session.replacements.includes(unit.id)
@@ -303,7 +303,10 @@
                       : [...$session.replacements, unit.id],
                   });
                   controller.setRecruits($session.recruits);
-                }}><UnitIcon type={unit.type} />#{unit.id + 1} · {unit.position}</button
+                }}
+                ><UnitIcon type={unit.type} />{typeof unit.type === 'string'
+                  ? unit.type
+                  : unit.type.Leader}</button
               >{/each}
           </div>
         </details>{/if}

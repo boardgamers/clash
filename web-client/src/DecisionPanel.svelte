@@ -35,7 +35,7 @@
         unit?.carrier_id ?? units?.find((u) => u.carried_units?.some((p) => p.id === target.unit))?.id;
       const name =
         typeof target.unitType === 'string'
-          ? `${target.unitType} #${target.unit + 1}`
+          ? target.unitType
           : ($session.view?.players
               .find((p) => p.index === target.player)
               ?.leaders?.find((l) => l.unit === target.unit)?.name ?? target.unitType.Leader);
@@ -46,7 +46,7 @@
           player: target.player,
           position: option.position,
           name,
-          detail: carrier != null ? `Aboard ship #${carrier + 1}` : undefined,
+          detail: carrier != null ? 'Aboard ship' : undefined,
           pirate: unit?.pirate,
           civilization: $session.game?.players.find((p) => p.id === target.player)?.civilization,
         },
@@ -143,6 +143,7 @@
 <section
   class="action-panel floating-panel decision-panel"
   class:board-decision={mapChoice}
+  class:selection-tray={mapChoice}
   class:unit-decision={unitChoice}
   class:card-decision={decision.options.some((option) => option.card)}
   aria-label={decision.name}
@@ -226,14 +227,7 @@
     {:else if pieceChoice}
       {@render options()}
     {:else if mapChoice}
-      <details class="decision-tile-list">
-        <summary
-          ><span>{count} on board · <strong>{selected.length}/{decision.max}</strong></span><span
-            >{pieceChoice ? 'Piece list' : 'Tile list'} <ChevronRight size={13} /></span
-          ></summary
-        >
-        {@render options()}
-      </details>
+      <p class="decision-map-hint">Choose highlighted hexes · {selected.length}/{decision.max}</p>
     {:else}
       {@render options()}
     {/if}
@@ -329,7 +323,7 @@
         {selected.length === 0 && !decision.fields.length && decision.min === 0
           ? 'Skip'
           : mapChoice && selected.length && !pieceChoice
-            ? `Confirm ${selected.map((i) => decision.options[i].position).join(', ')}`
+            ? `Confirm · ${selected.length}/${decision.max}`
             : pieceChoice && selected.length
               ? `Confirm · ${selected.length}/${decision.max}`
               : 'Confirm'}<Check size={16} />

@@ -123,19 +123,25 @@ try {
       },
       engine.stripSecret(state, 0),
     );
-    const locations = page.getByRole('group', { name: 'Unit locations', exact: true });
-    await locations.getByRole('button', { name: /C4/ }).click();
+    const chooseHex = async (position) => {
+      const hex = page.locator(`.map-hit-target[data-position="${position}"]`);
+      await hex.focus();
+      await hex.press('Enter');
+    };
+    await chooseHex('C4');
     const panel = page.getByRole('region', { name: 'Unit movement' });
-    const passenger = panel.getByRole('button', { name: 'Disembark Sun Tzu', exact: true });
+    const passenger = panel.getByRole('button', { name: /Sun Tzu.*Disembark/ });
     await passenger.click();
     assert.equal(await passenger.getAttribute('aria-pressed'), 'true');
-    assert.equal(await panel.locator('.unit-picker button[aria-pressed="true"]').count(), 0);
     assert.match(await panel.locator('h2').innerText(), /Disembark/);
-    await panel.locator('.movement-destination-list summary').click();
-    await panel.getByRole('button', { name: /C5$/ }).click();
-    assert.equal(await panel.getByRole('button', { name: /Disembark at C5/ }).isEnabled(), true);
+    await chooseHex('C5');
+    assert.equal(await panel.getByRole('button', { name: 'Disembark', exact: true }).isEnabled(), true);
     await page.screenshot({ path: '/tmp/clash-disembark-390.png' });
-    await locations.getByRole('button', { name: /E5/ }).click();
+    await chooseHex('E5');
+    await panel
+      .getByRole('button', { name: /Infantry/ })
+      .first()
+      .click();
     assert.match(await panel.locator('.movement-notes').innerText(), /Forest · Cannot attack this turn/);
     await page.screenshot({ path: '/tmp/clash-forest-390.png' });
     await page.getByRole('button', { name: 'Close movement controls', exact: true }).click();

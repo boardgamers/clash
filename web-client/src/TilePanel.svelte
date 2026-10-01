@@ -51,10 +51,11 @@
     <header>
       <TerrainIcon {terrain} size={21} />
       <strong
-        >{owner || publicOwner ? `${(owner ?? publicOwner)!.civilization} · ${position}` : position}</strong
+        >{owner || publicOwner
+          ? `${(owner ?? publicOwner)!.civilization} city`
+          : terrainInfo(terrain).label}</strong
       >
-      {#if city}<CityFacts size={city.size} mood={city.mood} />{:else}<span>{terrainInfo(terrain).label}</span
-        >{/if}
+      {#if city}<CityFacts size={city.size} mood={city.mood} />{/if}
       <button class="icon-button" aria-label="Close tile actions" onclick={close}><X size={18} /></button>
     </header>
     {#if publicCity && publicOwner}<CityBuildings
@@ -97,7 +98,7 @@
     {#if ownUnits.length && canMove}
       <div class="tile-unit-actions" role="group" aria-label={`Move units at ${position}`}>
         {#each ownUnits as unit}<button
-            aria-label={`${unit.carrier !== null ? 'Disembark' : 'Move'} ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} from ${position}`}
+            aria-label={`${unit.carrier !== null ? 'Disembark' : 'Move'} ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} from ${position}`}
             onclick={() => controller.openUnits([unit.id])}
           >
             <UnitIcon type={unit.type} /><span
@@ -105,8 +106,7 @@
                 ? unit.type
                 : ($session.view?.players
                     .find((p) => p.index === $session.seat)
-                    ?.leaders?.find((l) => l.unit === unit.id)?.name ?? unit.type.Leader)} #{unit.id +
-                1}</span
+                    ?.leaders?.find((l) => l.unit === unit.id)?.name ?? unit.type.Leader)}</span
             >{#if unit.carrier !== null}<LogOut size={16} />{:else}<Footprints size={16} />{/if}
           </button>{/each}
       </div>
@@ -130,7 +130,7 @@
       <div class="tile-arrivals" role="group" aria-label={`Move to ${position}`}>
         <h3><Footprints size={15} />{terrain === 'Unexplored' ? 'Explore here' : 'Move here'}</h3>
         {#each origins as unit}<button
-            aria-label={`${unit.carrier !== null ? 'Disembark' : 'Move'} ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} #${unit.id + 1} from ${unit.position} to ${position}`}
+            aria-label={`${unit.carrier !== null ? 'Disembark' : 'Move'} ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} from ${unit.position} to ${position}`}
             onmouseenter={() => onHighlight(unit.position)}
             onmouseleave={() => onHighlight(null)}
             onfocus={() => onHighlight(unit.position)}
@@ -140,9 +140,9 @@
               controller.openUnits([unit.id], position);
             }}
           >
-            <UnitIcon type={unit.type} /><span>#{unit.id + 1} · {unit.position}</span><ArrowRight
-              size={14}
-            />{position}
+            <UnitIcon type={unit.type} /><span
+              >{typeof unit.type === 'string' ? unit.type : unit.type.Leader}</span
+            ><ArrowRight size={14} />Move here
           </button>{/each}
       </div>
     {/if}

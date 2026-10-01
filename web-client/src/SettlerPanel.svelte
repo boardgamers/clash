@@ -36,7 +36,7 @@
   const movementNotes = $derived([...new Set(selectedUnits.flatMap((u) => u.movementNotes ?? []))]);
   const unitName = (u: (typeof units)[number]) =>
     typeof u.type === 'string'
-      ? `${u.type} #${u.id + 1}`
+      ? u.type
       : ($session.view?.players.find((p) => p.index === $session.seat)?.leaders?.find((l) => l.unit === u.id)
           ?.name ?? u.type.Leader);
   const destination = $derived(
@@ -63,38 +63,36 @@
   }
 </script>
 
-<section class="action-panel floating-panel settler-panel board-movement" aria-label="Unit movement">
-  <button
-    class="icon-button close-action"
-    aria-label="Close movement controls"
-    onclick={() =>
-      controller.patch({
-        mode: 'overview',
-        tilePanel: false,
-        moveTarget: null,
-        moveDestination: null,
-        error: '',
-      })}><X size={18} /></button
-  >
-  <h2
-    title={bonus
-      ? `${bonus.source}: ${bonus.label.toLowerCase()}. Terrain restrictions still apply.`
-      : 'Move up to 3 groups for 1 action. A new Move action lets units move again, unless terrain or combat prevents it.'}
-  >
-    <Footprints size={22} />{disembarking ? 'Disembark' : 'Move'}{#if $session.movingCity || first}<span
-        class="movement-origin">{$session.movingCity ?? first?.position}</span
+<section
+  class="action-panel floating-panel settler-panel board-movement selection-tray"
+  aria-label="Unit movement"
+>
+  <header class="movement-heading">
+    <h2><Footprints size={18} />{disembarking ? 'Disembark' : 'Move'}</h2>
+    {#if $session.view?.stopMovement}<span class="movement-remaining" title={bonus?.label}
+        >{movesLeft} {bonus ? 'bonus' : 'group'} {movesLeft === 1 ? 'move' : 'moves'} left</span
       >{/if}
-  </h2>
-  {#if bonus}<div class="movement-bonus"><strong>{bonus.source}</strong><span>{bonus.label}</span></div>{/if}
-  {#if $session.view?.stopMovement}<div
-      class="movement-markers"
-      title={`${movesLeft} ${bonus ? 'bonus' : 'group'} moves remaining`}
-      aria-label={`${movesLeft} ${bonus ? 'bonus' : 'group'} moves remaining`}
+    {#if $session.view?.stopMovement}<button
+        class="movement-done"
+        disabled={$session.pending}
+        aria-label="Finish moving"
+        onclick={() => $session.view?.stopMovement && controller.submit($session.view.stopMovement)}
+        >Done<Check size={14} /></button
+      >{/if}
+    <button
+      class="icon-button close-movement"
+      aria-label="Close movement controls"
+      onclick={() =>
+        controller.patch({
+          mode: 'overview',
+          tilePanel: false,
+          moveTarget: null,
+          moveDestination: null,
+          error: '',
+        })}><X size={18} /></button
     >
-      {#each Array.from({ length: bonus ? movesLeft : Math.max(3, movesLeft) }) as _, i}<span
-          class:spent={i >= movesLeft}><Footprints size={14} /></span
-        >{/each}
-    </div>{/if}
+  </header>
+  {#if bonus}<div class="movement-bonus"><strong>{bonus.source}</strong><span>{bonus.label}</span></div>{/if}
   {#if $session.view?.nomadCities?.length}<div
       class="settler-picker"
       role="group"
@@ -105,7 +103,7 @@
           aria-pressed={$session.movingCity === position}
           onmouseenter={() => onHighlight(position)}
           onmouseleave={() => onHighlight(null)}
-          onclick={() => controller.openNomadCity(position)}><Landmark size={15} />{position}</button
+          onclick={() => controller.openNomadCity(position)}><Landmark size={15} />Move city</button
         >{/each}
     </div>{/if}
   <UnitPicker
@@ -115,7 +113,7 @@
       player: $session.seat!,
       position: u.position,
       name: unitName(u),
-      detail: u.carrier !== null ? `Aboard ship #${u.carrier + 1} · Disembark` : u.movementNotes?.join(' · '),
+      detail: u.carrier !== null ? 'Aboard ship · Disembark' : u.movementNotes?.join(' · '),
       pirate: u.pirate,
       civilization: $session.game?.players.find((p) => p.id === $session.seat)?.civilization,
     }))}
@@ -131,48 +129,52 @@
   {#if movementNotes.length}<div class="movement-notes" role="note">
       {#each movementNotes as note}<p><TriangleAlert size={14} />{note}</p>{/each}
     </div>{/if}
-  {#each $session.view?.players
-    .find((p) => p.index === $session.seat)
-    ?.leaders?.filter((l) => $session.selectedUnits.includes(l.unit)) ?? [] as leader}
-    <LeaderDetails
-      {leader}
-      compact
-      actions={$session.view?.specialActions}
-      pending={$session.pending}
-      onUse={(action, payment) => controller.submit(action, payment)}
-    />
-  {/each}
-  {#if $session.moveDestinations.length}
-    <p class="movement-hint">
-      {disembarking ? 'Choose a highlighted shore tile.' : 'Choose a highlighted tile.'}
-    </p>
-    <details class="movement-destination-list" open={$session.moveTarget !== null && !destination}>
-      <summary
-        >{$session.moveTarget && !destination
-          ? `Choose how to enter ${$session.moveTarget}`
-          : 'Destinations'}</summary
-      >
-      <div class="settler-destinations" role="group" aria-label={`Destinations from ${first?.position}`}>
-        {#each $session.moveDestinations as d, i}{#if !$session.moveTarget || !!destination || d.position === $session.moveTarget}<button
-              class:selected={$session.moveDestination === i}
-              aria-pressed={$session.moveDestination === i}
-              title={`${d.position} · ${terrainInfo(d.terrain).label}${d.carrier != null ? ` · Board ship #${d.carrier + 1}` : ''}${d.attack ? ' · Attack' : ''}`}
-              onmouseenter={() => onHighlight(d.position)}
-              onmouseleave={() => onHighlight(null)}
-              onfocus={() => onHighlight(d.position)}
-              onblur={() => onHighlight(null)}
-              disabled={$session.pending}
-              onclick={() => controller.patch({ moveDestination: i, moveTarget: d.position })}
-              ><span><TerrainIcon terrain={d.terrain} />{d.position}</span>
-              {#if d.pirateCarrier != null}<span><Ship size={15} /><small>Allied pirate</small></span
-                >{:else if d.attack}<Swords size={15} />{:else if d.carrier != null}<span
-                  ><Ship size={15} /><small>#{d.carrier + 1}</small></span
-                >{:else if $session.moveDestination === i}<Check size={15} />{/if}
-              {#if Object.values(d.payment).some(Boolean)}<ResourceAmount pile={d.payment} />{/if}
-            </button>{/if}{/each}
-      </div>
+  {#if selectedUnits.some((u) => typeof u.type !== 'string')}
+    <details class="movement-leader-info">
+      <summary>Leader abilities</summary>
+      {#each $session.view?.players
+        .find((p) => p.index === $session.seat)
+        ?.leaders?.filter((l) => $session.selectedUnits.includes(l.unit)) ?? [] as leader}
+        <LeaderDetails
+          {leader}
+          compact
+          actions={$session.view?.specialActions}
+          pending={$session.pending}
+          onUse={(action, payment) => controller.submit(action, payment)}
+        />
+      {/each}
     </details>
-  {:else if canMove && first}<p class="settler-empty">No legal destinations for this group.</p>{/if}
+  {/if}
+  {#if $session.moveTarget && !destination && $session.moveDestinations.length}
+    <div class="settler-destinations" role="group" aria-label="Choose how to move">
+      {#each $session.moveDestinations as d, i}{#if d.position === $session.moveTarget}
+          <button
+            disabled={$session.pending}
+            onmouseenter={() => onHighlight(d.position)}
+            onmouseleave={() => onHighlight(null)}
+            onclick={() => controller.patch({ moveDestination: i })}
+          >
+            {#if d.pirateCarrier != null}<Ship size={16} />Allied pirate
+            {:else if d.carrier != null}<Ship size={16} />Board ship
+            {:else if d.attack}<Swords size={16} />Attack
+            {:else}<TerrainIcon terrain={d.terrain} />{terrainInfo(d.terrain).label}{/if}
+            {#if Object.values(d.payment).some(Boolean)}<ResourceAmount pile={d.payment} />{/if}
+          </button>
+        {/if}{/each}
+    </div>
+  {:else if !destination}
+    <p class="movement-hint">
+      {!selectedUnits.length && !$session.movingCity
+        ? 'Select units, then a highlighted hex.'
+        : $session.moveDestinations.length
+          ? disembarking
+            ? 'Choose a highlighted shore.'
+            : 'Choose a highlighted destination.'
+          : canMove
+            ? 'No legal destinations for this group.'
+            : 'No moves available.'}
+    </p>
+  {/if}
   {#if destination}<div class="settler-confirm">
       {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
       <button
@@ -183,13 +185,12 @@
         {destination.attack
           ? 'Attack'
           : destination.carrier != null || destination.pirateCarrier != null
-            ? 'Board at'
+            ? 'Board ship'
             : destination.terrain === 'Unexplored'
               ? 'Explore'
               : disembarking
-                ? 'Disembark at'
-                : 'Move to'}
-        {destination.position}
+                ? 'Disembark'
+                : 'Move here'}
         {#if !$session.view?.stopMovement}<span class="settler-action-cost" aria-label="Costs 1 action"
             ><Zap size={13} />1</span
           >{/if}<ArrowRight size={16} />
@@ -204,17 +205,11 @@
         class="secondary wide"
         disabled={!settler.foundAction || $session.pending}
         onclick={() => settler?.foundAction && controller.submit(settler.foundAction)}
-        ><Landmark size={17} />Found city at {settler.position}<span class="settler-action-cost"
+        ><Landmark size={17} />Found city here<span class="settler-action-cost"
           >{#if settler.foundFree}Free{:else}<Zap size={13} />1{/if}</span
         ></button
       >
     </div>{/if}
   {#if !units.length && !$session.view?.nomadCities?.length}<p>Recruit units in a city to explore.</p>{/if}
-  {#if $session.view?.stopMovement}<button
-      class="secondary wide finish-moving"
-      disabled={$session.pending}
-      onclick={() => $session.view?.stopMovement && controller.submit($session.view.stopMovement)}
-      >Finish moving<Check size={16} /></button
-    >{/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>

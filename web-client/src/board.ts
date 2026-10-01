@@ -6,6 +6,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
 import { positionXY } from './model';
+import { terrainInfo } from './terrain';
 import { PieceModels, type BuildingKind } from './piece-models';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
@@ -242,7 +243,8 @@ export class World {
       const board = this.host.getBoundingClientRect();
       const panel = this.interactionPanel.getBoundingClientRect();
       // Leave room for the map tools, then frame the usable area beside or above the panel.
-      const landscape = width >= 600 && height <= 500;
+      const landscape =
+        width >= 600 && height <= 500 && !this.interactionPanel.classList.contains('selection-tray');
       const left = landscape ? Math.max(8, panel.right - board.left + 12) : 12;
       const right = width - 12;
       const top = landscape ? 60 : 12;
@@ -649,6 +651,7 @@ export class World {
         : s.mode === 'settlers'
           ? [
               ...new Set([
+                ...(s.unitPosition ? [s.unitPosition] : []),
                 ...(s.view?.units?.filter((u) => s.selectedUnits.includes(u.id)).map((u) => u.position) ??
                   []),
                 ...s.moveDestinations.map((d) => d.position),
@@ -1059,7 +1062,7 @@ export class World {
       for (const pos of new Set([...selected, ...available])) {
         const [x, z] = positionXY(pos);
         const ring = this.mesh(
-          new THREE.TorusGeometry(0.99, selected.includes(pos) ? 0.06 : 0.018, 6, 6),
+          new THREE.TorusGeometry(0.99, selected.includes(pos) ? 0.05 : 0.025, 6, 6),
           new THREE.MeshBasicMaterial({ color: selected.includes(pos) ? '#ffd16b' : '#ebdab3' }),
         );
         ring.rotation.x = -Math.PI / 2;
@@ -1070,7 +1073,7 @@ export class World {
           const material = new THREE.MeshBasicMaterial({
             color: '#ffc450',
             transparent: true,
-            opacity: 0.27,
+            opacity: 0.14,
             depthWrite: false,
             side: THREE.DoubleSide,
           });
@@ -1151,7 +1154,13 @@ export class World {
     const moveMarkers = mapChoices.length
       ? decisionPositions
       : s.mode === 'settlers'
-        ? [...new Set(s.moveDestinations.map((d) => d.position))]
+        ? [
+            ...new Set([
+              ...(s.view?.units?.map((u) => u.position) ?? []),
+              ...(s.view?.nomadCities ?? []),
+              ...s.moveDestinations.map((d) => d.position),
+            ]),
+          ]
         : [];
     const markerSignature = JSON.stringify([moveMarkers, mapChoices, s.view?.decision?.name]);
     if (markerSignature !== this.moveMarkerSignature) {
@@ -1160,20 +1169,14 @@ export class World {
       this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'destination');
       for (const position of moveMarkers) {
         const label = document.createElement('button');
-        label.className = 'move-map-label';
+        label.className = 'map-hit-target';
+        label.dataset.position = position;
         label.classList.toggle('decision-map-label', mapChoices.length > 0);
-        label.textContent = position;
-        label.setAttribute(
-          'aria-label',
-          mapChoices.length
-            ? pieceDecision
-              ? `Units at ${position}`
-              : `Select tile ${position}`
-            : `Move destination ${position}`,
-        );
-        label.title = mapChoices.length
-          ? `Select ${position} · ${s.view!.decision!.name}`
-          : `Select destination ${position}`;
+        label.textContent = '';
+        const terrain = s.game.map.tiles.find(([p]) => p === position)?.[1];
+        const description = terrain ? terrainInfo(terrain).label : 'Hex';
+        label.dataset.description = description;
+        label.setAttribute('aria-label', `${pieceDecision ? 'Choose units' : 'Choose hex'} · ${description}`);
         label.onclick = () => {
           if (this.canPick(position)) this.pick(position);
         };
@@ -1218,7 +1221,6 @@ export class World {
               : decisionSelected.includes(label.position),
           ),
         );
-        label.node.textContent = `${decisionSelected.includes(label.position) ? '✓ ' : ''}${label.position}`;
       }
       label.node.disabled = !this.canPick(label.position);
     }

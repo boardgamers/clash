@@ -13,7 +13,7 @@
 </script>
 
 <script lang="ts">
-  import { Check, MapPin } from 'lucide-svelte';
+  import { Check, ChevronRight } from 'lucide-svelte';
   import UnitPortrait from './UnitPortrait.svelte';
   let {
     choices,
@@ -45,38 +45,26 @@
 
 <div class="unit-selection">
   <div class="unit-selection-heading">
-    <div class="unit-location-bar" role="group" aria-label="Unit locations">
-      {#each positions as location}
-        {@const count = choices.filter((u) => u.position === location && selected.includes(u.id)).length}
-        <button
-          class:selected={current === location}
-          aria-pressed={current === location}
-          aria-label={`Units at ${location}`}
-          disabled={pending}
-          onmouseenter={() => onHighlight(location)}
-          onmouseleave={() => onHighlight(null)}
-          onfocus={() => onHighlight(location)}
-          onblur={() => onHighlight(null)}
-          onclick={() => onPosition(location)}
-        >
-          <MapPin size={14} />{location}{#if count}<span class="location-selected"
-              ><Check size={12} />{count}</span
-            >{/if}
-        </button>
-      {/each}
-    </div>
-    <strong
+    <span
       class="unit-selection-count"
       aria-label={`${selected.length}${limit !== undefined ? ` of ${limit}` : ''} units selected`}
-      >{selected.length}{limit !== undefined ? ` / ${limit}` : ''} selected</strong
     >
+      {selected.length}{limit !== undefined ? ` / ${limit}` : ''} selected
+    </span>
+    {#if positions.length > 1}<button
+        class="next-unit-group"
+        disabled={pending}
+        aria-label="Show next group of units"
+        onclick={() => onPosition(positions[(positions.indexOf(current) + 1) % positions.length])}
+        >Next group<ChevronRight size={14} /></button
+      >{/if}
   </div>
-  <div class="unit-choice-grid" role="group" aria-label={`${label} at ${current}`}>
+  <div class="unit-choice-grid" role="group" aria-label={label}>
     {#each here as unit (unit.id)}
       <button
         class="unit-choice"
         class:selected={selected.includes(unit.id)}
-        aria-label={`${unit.name} at ${unit.position}${unit.detail ? ` · ${unit.detail}` : ''}`}
+        aria-label={`${unit.name}${unit.detail ? ` · ${unit.detail}` : ''}`}
         aria-pressed={selected.includes(unit.id)}
         disabled={pending ||
           (limit !== undefined && limit !== 1 && selected.length >= limit && !selected.includes(unit.id))}
@@ -96,8 +84,10 @@
         <span class="unit-choice-check" aria-hidden="true"
           >{#if selected.includes(unit.id)}<Check size={14} />{/if}</span
         >
-        <strong>{unit.name}</strong>
-        {#if unit.detail}<small>{unit.detail}</small>{/if}
+        <span class="unit-choice-caption"
+          ><strong>{unit.name}</strong>
+          {#if unit.detail}<small title={unit.detail}>{unit.detail.split(' · ')[0]}</small>{/if}
+        </span>
       </button>
     {/each}
   </div>

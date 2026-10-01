@@ -219,8 +219,8 @@ try {
     page = app.page;
     const casualties = page.locator('.decision-panel');
     await casualties.waitFor();
-    await casualties.getByRole('button', { name: /Settler #2/i }).click();
-    await casualties.getByRole('button', { name: /Infantry #3/i }).click();
+    await casualties.getByRole('button', { name: /Settler/i }).click();
+    await casualties.getByRole('button', { name: /Infantry/i }).click();
     await casualties.screenshot({ path: '/tmp/clash-pirate-passengers-' + width + '.png' });
     assert(await casualties.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
     await casualties.getByRole('button', { name: 'Confirm', exact: true }).click();

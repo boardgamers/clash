@@ -17,6 +17,21 @@ const browser = await chromium.launch({
   headless: true,
   args: ['--use-gl=angle', '--use-angle=swiftshader'],
 });
+async function tapHex(page, position) {
+  const target = page.locator(`.map-hit-target[data-position="${position}"]`);
+  await target.waitFor({ state: 'attached' });
+  await page.waitForTimeout(150);
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  );
+  const box = await target.boundingBox();
+  assert.ok(box, `Hex ${position} is on the board`);
+  assert.equal(await target.evaluate((el) => getComputedStyle(el).opacity), '0');
+  assert.equal(await target.evaluate((el) => getComputedStyle(el).pointerEvents), 'none');
+  assert.equal(await target.textContent(), '');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+}
 const intersects = (a, b) =>
   a &&
   b &&
@@ -27,6 +42,8 @@ try {
     [1400, 900],
     [910, 721],
     [390, 844],
+    [390, 650],
+    [320, 570],
     [320, 700],
     [900, 450],
   ]) {
@@ -66,7 +83,9 @@ try {
     await page.locator('.unit-portrait img').first().waitFor();
     assert.equal(await page.locator('.unit-choice').count(), 7);
     await page.waitForTimeout(400);
-    await page.screenshot({ path: `/tmp/clash-unit-picker-${width}.png` });
+    await page.screenshot({ path: `/tmp/clash-unit-picker-${width}x${height}.png` });
+    assert.ok((await decision.boundingBox()).height < 240, `${width}: casualty selection stays compact`);
+    assert.doesNotMatch(await decision.innerText(), /#[0-9]|\b[A-F][0-9]\b/);
     for (const selector of [
       '.map-controls',
       '.table-tools',
@@ -92,9 +111,9 @@ try {
     const box = await confirm.boundingBox();
     assert.ok(box && box.y >= 0 && box.y + box.height <= height, `${width}: Confirm remains on screen`);
     assert.equal(await confirm.isDisabled(), true);
-    await decision.getByRole('button', { name: 'Infantry #1 at C2', exact: true }).click();
+    await decision.getByRole('button', { name: 'Infantry', exact: true }).nth(0).click();
     assert.equal(await decision.locator('.unit-choice[aria-pressed=true]').count(), 1);
-    await decision.getByRole('button', { name: 'Infantry #2 at C2', exact: true }).click();
+    await decision.getByRole('button', { name: 'Infantry', exact: true }).nth(1).click();
     assert.equal(await decision.locator('.unit-choice[aria-pressed=true]').count(), 1);
     if (width <= 760) {
       await page.locator('.table-tools').getByRole('button', { name: 'Open journal', exact: true }).click();
@@ -122,23 +141,21 @@ try {
       (state) => host.emit('state', state),
       engine.stripSecret(JSON.stringify(multiple), 0),
     );
-    await decision.getByRole('button', { name: 'Infantry #1 at C2', exact: true }).click();
-    await page.locator('.world-labels').getByRole('button', { name: 'Units at B3', exact: true }).click();
+    await decision.getByRole('button', { name: 'Infantry', exact: true }).nth(0).click();
+    await tapHex(page, 'B3');
     assert.equal(await decision.locator('.unit-choice').count(), 1);
     assert.match(await decision.innerText(), /1 \/ 2 selected/);
-    await decision.getByRole('button', { name: 'Settler #8 at B3', exact: true }).click();
-    await decision
-      .getByRole('group', { name: 'Unit locations', exact: true })
-      .getByRole('button', { name: 'Units at C2', exact: true })
-      .click();
+    await decision.getByRole('button', { name: 'Settler', exact: true }).click();
+    await decision.getByRole('button', { name: 'Show next group of units', exact: true }).click();
     assert.equal(
       await decision
-        .getByRole('button', { name: 'Infantry #1 at C2', exact: true })
+        .getByRole('button', { name: 'Infantry', exact: true })
+        .nth(0)
         .getAttribute('aria-pressed'),
       'true',
     );
     assert.equal(
-      await decision.getByRole('button', { name: 'Infantry #2 at C2', exact: true }).isDisabled(),
+      await decision.getByRole('button', { name: 'Infantry', exact: true }).nth(1).isDisabled(),
       true,
     );
     await decision.getByRole('button', { name: 'Confirm · 2/2', exact: true }).click();
@@ -162,11 +179,10 @@ try {
       engine.stripSecret(JSON.stringify(movement), 0),
     );
     const movePanel = page.getByRole('region', { name: 'Unit movement', exact: true });
-    await movePanel
-      .getByRole('group', { name: 'Unit locations', exact: true })
-      .getByRole('button', { name: 'Units at D2', exact: true })
-      .click();
-    const ship = movePanel.getByRole('button', { name: 'Ship #8 at D2', exact: true });
+    await movePanel.waitFor();
+    await page.waitForTimeout(400);
+    await tapHex(page, 'D2');
+    const ship = movePanel.getByRole('button', { name: 'Ship', exact: true });
     await ship.click();
     await ship.click();
     assert.equal(
@@ -175,13 +191,19 @@ try {
       'Deselecting every unit keeps the current hex visible',
     );
     await ship.click();
-    const passenger = movePanel.getByRole('button', { name: /Cavalry #2 at D2.*Disembark/ });
+    const passenger = movePanel.getByRole('button', { name: /Cavalry.*Disembark/ });
     await passenger.click();
     assert.equal(await ship.getAttribute('aria-pressed'), 'false');
     assert.equal(await passenger.getAttribute('aria-pressed'), 'true');
     assert.match(await movePanel.locator('h2').innerText(), /Disembark/);
     await page.waitForTimeout(300);
-    await page.screenshot({ path: `/tmp/clash-unit-movement-${width}.png` });
+    await page.screenshot({ path: `/tmp/clash-unit-movement-${width}x${height}.png` });
+    assert.ok((await movePanel.boundingBox()).height < 195, `${width}: movement stays compact`);
+    assert.doesNotMatch(
+      await movePanel.innerText(),
+      /#[0-9]|\b[A-F][0-9]\b/,
+      'Selection needs no IDs or coordinates',
+    );
     for (const selector of [
       '.map-controls',
       '.table-tools',
@@ -196,9 +218,8 @@ try {
           `${width}: movement overlaps ${selector}`,
         );
     }
-    await movePanel.locator('.movement-destination-list summary').click();
-    await movePanel.locator('.settler-destinations button').first().click();
-    await movePanel.getByRole('button', { name: /^Disembark at/ }).click();
+    await tapHex(page, 'C2');
+    await movePanel.getByRole('button', { name: 'Disembark', exact: true }).click();
     const disembarked = JSON.parse(engine.tryMove(JSON.stringify(movement), JSON.stringify(sent.at(-1)), 0));
     assert.ok(
       disembarked.players[0].units.some((u) => u.id === 1 && u.position !== 'D2'),
@@ -208,6 +229,31 @@ try {
       disembarked.players[0].units.find((u) => u.id === 7).carried_units.some((u) => u.id === 2),
       'Other passenger stays aboard',
     );
+    // Tile-only decisions also stay on the board and preserve keyboard selection.
+    const tiles = JSON.parse(
+      await readFile(
+        new URL('../../server/tests/test_games/incidents/exhausted_land.outcome.json', import.meta.url),
+        'utf8',
+      ),
+    );
+    for (const npc of npcs)
+      if (!tiles.players.some((p) => p.civilization === npc.civilization))
+        tiles.players.push({ ...npc, id: tiles.players.length });
+    await page.evaluate((state) => host.emit('state', state), engine.stripSecret(JSON.stringify(tiles), 0));
+    const tilePanel = page.locator('.board-decision');
+    await tilePanel.waitFor();
+    await page.waitForTimeout(300);
+    assert.equal(await tilePanel.locator('.decision-options').count(), 0);
+    assert.doesNotMatch(await tilePanel.innerText(), /\b[A-F][0-9]\b/);
+    await tapHex(page, 'B1');
+    assert.match(await tilePanel.locator('.decision-map-hint').innerText(), /1\/1/);
+    const keyboardHex = page.locator('.map-hit-target[data-position="B2"]');
+    await keyboardHex.focus();
+    await keyboardHex.press('Enter');
+    assert.equal(await keyboardHex.getAttribute('aria-pressed'), 'true');
+    await tilePanel.getByRole('button', { name: 'Confirm · 1/1', exact: true }).click();
+    const exhausted = JSON.parse(engine.tryMove(JSON.stringify(tiles), JSON.stringify(sent.at(-1)), 0));
+    assert.equal(typeof exhausted.map.tiles.find(([p]) => p === 'B2')[1], 'object');
     assert.deepEqual(errors, []);
     console.log(
       `Unit picker ${width}×${height}: casualties across hexes, limits, passenger movement and unobstructed controls`,

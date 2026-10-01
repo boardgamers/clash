@@ -147,7 +147,7 @@ try {
       await page.getByRole('region', { name: 'Unit movement', exact: true }).waitFor();
       assert.equal(
         (await page.locator('.unit-choice[aria-pressed="true"] strong').textContent()).trim(),
-        'Infantry #6',
+        'Infantry',
       );
       await page.getByRole('button', { name: 'Close movement controls', exact: true }).click();
       await page.locator('.city-map-label').first().click();
