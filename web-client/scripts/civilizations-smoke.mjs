@@ -6,13 +6,7 @@ import { chromium } from 'playwright';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const ser = (g) => (typeof g === 'string' ? g : JSON.stringify(g)),
   seat = (g) => engine.currentPlayer(ser(g));
-const initial = await engine.init(
-  2,
-  [],
-  { civilization: 'ChooseCivilization' },
-  'all-civs-ui',
-  {},
-);
+const initial = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'all-civs-ui', {});
 const advance = (state, action) =>
   engine.tryMove(ser(state), typeof action === 'string' ? action : JSON.stringify(action), seat(state));
 async function fixture(civ) {
@@ -157,15 +151,11 @@ try {
     const city = page.getByRole('dialog');
     await city.getByRole('button', { name: 'Recruit', exact: true }).click();
     await city.getByRole('button', { name: 'Add Elephant', exact: true }).click();
-    const payment = city.getByLabel('Recruitment payment', { exact: true });
+    const payment = city.getByRole('group', { name: 'Recruitment payment', exact: true });
     await payment.waitFor();
-    assert((await payment.locator('option').count()) > 1);
-    const options = await payment
-      .locator('option')
-      .evaluateAll((els) => els.map((e) => ({ value: e.value, label: e.textContent })));
-    const culture = options.find((o) => JSON.parse(o.value).culture_tokens === 2);
-    assert(culture);
-    await payment.selectOption(culture.value);
+    if (await payment.locator('select').count())
+      await payment.getByLabel('Culture amount for Recruitment payment', { exact: true }).selectOption('2');
+    else await payment.getByRole('button', { name: /Pay 2 Culture/i }).click();
     await city.screenshot({ path: '/tmp/clash-carthage-recruit-' + width + '.png' });
     assert(await city.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
     await city.getByRole('button', { name: 'Recruit 1 unit', exact: true }).click();
@@ -220,10 +210,13 @@ try {
     const casualties = page.locator('.decision-panel');
     await casualties.waitFor();
     await casualties.getByRole('button', { name: /Settler/i }).click();
-    await casualties.getByRole('button', { name: /Infantry/i }).click();
+    await casualties
+      .getByRole('button', { name: /Infantry/i })
+      .first()
+      .click();
     await casualties.screenshot({ path: '/tmp/clash-pirate-passengers-' + width + '.png' });
     assert(await casualties.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
-    await casualties.getByRole('button', { name: 'Confirm', exact: true }).click();
+    await casualties.getByRole('button', { name: /^Confirm/ }).click();
     await page.waitForFunction(() => !document.querySelector('.decision-panel'));
     assert.deepEqual(
       app

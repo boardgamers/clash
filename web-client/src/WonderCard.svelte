@@ -1,30 +1,10 @@
 <script lang="ts">
-  import {
-    Landmark,
-    Mountain,
-    Trees,
-    LibraryBig,
-    TowerControl,
-    Castle,
-    Theater,
-    Crown,
-    GraduationCap,
-    Check,
-    Trophy,
-  } from 'lucide-svelte';
+  import { Landmark, GraduationCap, Check, Trophy } from 'lucide-svelte';
+  import { wonderIcons } from './wonder-icons';
   import ResourceAmount from './ResourceAmount.svelte';
   import type { WonderCard } from './types';
   let { card }: { card: WonderCard } = $props();
-  const icons: Record<string, typeof Landmark> = {
-    Pyramids: Mountain,
-    GreatGardens: Trees,
-    GreatLibrary: LibraryBig,
-    GreatLighthouse: TowerControl,
-    GreatWall: Castle,
-    Colosseum: Theater,
-    GreatStatue: Crown,
-  };
-  let Icon = $derived(icons[card.id] ?? Landmark);
+  let Icon = $derived(wonderIcons[card.id] ?? Landmark);
 </script>
 
 <article class="wonder-card" aria-label={`Wonder card: ${card.name}`}>
@@ -43,7 +23,8 @@
   <div class="wonder-cost"><span>Base construction cost</span><ResourceAmount pile={card.cost} /></div>
   <div class="wonder-points">
     <Trophy size={16} /><span
-      ><strong>{card.builtPoints}</strong> VP for building · <strong>{card.ownedPoints}</strong> VP for owning</span
+      ><strong>{Math.round(card.builtPoints * 10) / 10}</strong> VP for building ·
+      <strong>{card.ownedPoints}</strong> VP for owning</span
     >
   </div>
 </article>

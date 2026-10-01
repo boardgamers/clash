@@ -164,6 +164,7 @@ export interface WonderCard {
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
+  builtWonders?: Pick<WonderCard, 'id' | 'name' | 'description' | 'builtPoints' | 'ownedPoints'>[];
   eventCatalog?: EventInfo[];
   pendingEvent?: { id: number; player: number } | null;
   collectActions?: ActionVariant[];
@@ -461,6 +462,7 @@ export interface HappinessPreview {
   reason: string | null;
 }
 export interface MoveDestination {
+  terrainNotes?: string[];
   label?: string;
   pirateCarrier?: number;
   position: string;

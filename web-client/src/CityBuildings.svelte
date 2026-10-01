@@ -1,15 +1,23 @@
 <script lang="ts">
-  import { Landmark, Crown, X } from 'lucide-svelte';
+  import { Landmark, Trophy, X } from 'lucide-svelte';
+  import { wonderIcons } from './wonder-icons';
   import { buildingInfo } from './city';
   import ResourceText from './ResourceText.svelte';
-  import type { City, Player } from './types';
-  let { city, owner, players }: { city: City; owner: number; players: Player[] } = $props();
+  import type { City, Player, View } from './types';
+  let {
+    city,
+    owner,
+    players,
+    wonders = [],
+  }: { city: City; owner: number; players: Player[]; wonders?: View['builtWonders'] } = $props();
   let selected = $state<{ position: string; name: string } | null>(null);
   const expanded = $derived(selected?.position === city.position ? selected.name : null);
+  const wonder = $derived(wonders.find((card) => card.id === expanded));
   const effect = $derived(
-    expanded === 'Settlement'
-      ? "The city's first piece. It adds 1 to city size, which determines collection and recruitment capacity."
-      : buildingInfo[expanded ?? '']?.effect,
+    wonder?.description ??
+      (expanded === 'Settlement'
+        ? "The city's first piece. It adds 1 to city size, which determines collection and recruitment capacity."
+        : buildingInfo[expanded ?? '']?.effect),
   );
   function toggle(name: string) {
     selected = expanded === name ? null : { position: city.position, name };
@@ -55,18 +63,28 @@
       </button>
     </li>
   {/each}
-  {#each city.city_pieces?.wonders ?? [] as wonder}
-    <li class="built-wonder"><Crown size={16} /><span>{wonder.replace(/([a-z])([A-Z])/g, '$1 $2')}</span></li>
+  {#each city.city_pieces?.wonders ?? [] as id}
+    {@const card = wonders.find((w) => w.id === id)}
+    {@const Icon = wonderIcons[id] ?? Landmark}
+    <li>
+      <button class:expanded={expanded === id} aria-expanded={expanded === id} onclick={() => toggle(id)}
+        ><Icon size={16} /><span>{card?.name ?? id.replace(/([a-z])([A-Z])/g, '$1 $2')}</span></button
+      >
+    </li>
   {/each}
 </ul>
 
-{#if expanded && effect}<section class="building-effect" aria-label={`${expanded} effect`}>
+{#if expanded && effect}<section class="building-effect" aria-label={`${wonder?.name ?? expanded} effect`}>
     <header>
-      <strong>{expanded}</strong><button
+      <strong>{wonder?.name ?? expanded}</strong><button
         class="icon-button"
         aria-label="Close building effect"
         onclick={() => (selected = null)}><X size={15} /></button
       >
     </header>
     <p><ResourceText text={effect} /></p>
+    {#if wonder}<small class="built-wonder-points"
+        ><Trophy size={14} />{Math.round(wonder.builtPoints * 10) / 10} VP for building · {wonder.ownedPoints} VP
+        for owning</small
+      >{/if}
   </section>{/if}

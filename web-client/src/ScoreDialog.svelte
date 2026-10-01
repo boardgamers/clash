@@ -146,6 +146,7 @@
                 city={details}
                 owner={player.index}
                 players={$session.game?.players ?? []}
+                wonders={$session.view?.builtWonders}
               />{/if}
           </section>
         {:else}<p>No cities.</p>{/each}

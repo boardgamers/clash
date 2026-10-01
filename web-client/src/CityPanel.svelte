@@ -16,10 +16,10 @@
     Footprints,
   } from 'lucide-svelte';
   import type { Move, Pile } from './types';
-  import { pileText } from './model';
   import type { Controller } from './controller';
   import { buildingInfo, unitInfo, cityReason, sameRecruitPayment, recruitCostOptions } from './city';
   import ResourceAmount from './ResourceAmount.svelte';
+  import PaymentPicker from './PaymentPicker.svelte';
   import ResourceText from './ResourceText.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
   import HappinessPanel from './HappinessPanel.svelte';
@@ -323,17 +323,15 @@
             ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
           >{/if}
       </div>
-      {#if selected.payments && selected.payments.length > 1}<label class="build-payment"
-          >Pay with
-          <select
-            aria-label={`Payment for ${selected.name}`}
-            value={paymentIndex}
-            onchange={(e) => (paymentIndex = Number(e.currentTarget.value))}
-          >
-            <option value={-1}>{pileText(selected.payment)}</option>
-            {#each selected.payments as payment, i}<option value={i}>{pileText(payment)}</option>{/each}
-          </select>
-        </label>{/if}
+      {#if selected.payments && selected.payments.length > 1}<PaymentPicker
+          options={selected.payments.map((payment) => ({ payment }))}
+          value={buildPayment ?? selected.payment}
+          onChange={(payment) => {
+            paymentIndex = selected!.payments!.findIndex((p) => sameRecruitPayment(p, payment));
+          }}
+          pending={$session.pending}
+          label={`Payment for ${selected.name}`}
+        />{/if}
       <div class="port-choices">
         {#each selected.choices as choice}<button
             class="primary"
@@ -355,18 +353,13 @@
               ><strong>{city.mood} → {city.activationMood}</strong> after activation</span
             >{/if}{/if}
       </div>
-      {#if ($session.recruitPreview?.payments?.length ?? 0) > 1}<label class="build-payment"
-          >Pay with
-          <select
-            aria-label="Recruitment payment"
-            value={JSON.stringify($session.recruitPreview!.payment)}
-            onchange={(e) => controller.setRecruits($session.recruits, JSON.parse(e.currentTarget.value))}
-          >
-            {#each $session.recruitPreview!.payments! as payment}<option value={JSON.stringify(payment)}
-                >{pileText(payment)}</option
-              >{/each}
-          </select>
-        </label>{/if}
+      {#if ($session.recruitPreview?.payments?.length ?? 0) > 1}<PaymentPicker
+          options={$session.recruitPreview!.payments!.map((payment) => ({ payment }))}
+          value={$session.recruitPreview!.payment}
+          onChange={(payment) => controller.setRecruits($session.recruits, payment)}
+          pending={$session.pending}
+          label="Recruitment payment"
+        />{/if}
       <button
         class="primary"
         disabled={!$session.recruitPreview || $session.pending}

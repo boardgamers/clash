@@ -74,7 +74,7 @@ fn great_statue() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatStatue,
         "Draw 1 objective card. \
-        Once per turn, as a free action, discard an objective card from: Gain 1 action.",
+        Once per turn, as a free action, discard an objective card from your hand to gain 1 action.",
         ResourcePile::new(3, 4, 5, 0, 0, 0, 5),
         Advance::Monuments,
     )
@@ -213,7 +213,7 @@ fn great_lighthouse() -> WonderInfo {
         Wonder::GreatLighthouse,
         "Requires a port to build: \
         Activate the city: Place a ship on any sea space without enemy ships. \
-        Decide the staring player of the next turn.",
+        Decide the starting player of the next turn.",
         ResourcePile::new(3, 5, 4, 0, 0, 0, 5),
         Advance::Cartography,
     )
@@ -362,7 +362,7 @@ fn colosseum() -> WonderInfo {
     WonderInfo::builder(
         Wonder::Colosseum,
         "May pay culture tokens with mood tokens (or vice versa) - \
-        except for the building wonders.\
+        except when building wonders. \
         May increase the combat value in a land battle by 1 for 1 culture or mood token.",
         ResourcePile::new(3, 4, 5, 0, 0, 0, 5),
         Advance::Sports,

@@ -772,6 +772,7 @@ export class World {
           const [x, z] = positionXY(city.position);
           const cityModel = new THREE.Group();
           const ownerColor = playerColor(player.id, s.colorBlind);
+          const wonders = (city.city_pieces?.wonders ?? []).filter((name) => name !== 'Hidden');
           const additions = Object.entries(city.city_pieces ?? {}).filter(
             (entry): entry is [BuildingKind, number] =>
               entry[0] !== 'wonders' && typeof entry[1] === 'number',
@@ -786,6 +787,7 @@ export class World {
           const flag = this.mesh(new THREE.BoxGeometry(0.3, 0.2, 0.025), this.material(ownerColor));
           flag.position.set(0.27, 0.98, -0.12);
           cityModel.add(flag);
+          const ownershipPieces: THREE.Object3D[] = [pole, flag];
           cityModel.position.set(x, 0.315, z);
           cityModel.rotation.y = 0.25;
           const capital = s.view?.players.find((p) => p.index === player.id)?.capital === city.position;
@@ -794,10 +796,12 @@ export class World {
             const band = this.mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.07, 12), gold);
             band.position.set(0.12, 1.12, -0.12);
             cityModel.add(band);
+            ownershipPieces.push(band);
             for (let i = 0; i < 3; i++) {
               const point = this.mesh(new THREE.ConeGeometry(0.055, 0.15, 4), gold);
               point.position.set(0.12 + (i - 1) * 0.11, 1.22, -0.12);
               cityModel.add(point);
+              ownershipPieces.push(point);
             }
           }
           cityModel.userData = { position: city.position, kind: 'city', player: player.id };
@@ -808,6 +812,7 @@ export class World {
             badge.position.set(0.27, 1.27, -0.12);
             cityModel.add(badge);
             ownershipBadge = badge;
+            ownershipPieces.push(badge);
           }
           const slots =
             additions.length === 1
@@ -839,6 +844,7 @@ export class World {
             'market',
           ];
           additions.sort(([a], [b]) => heights.indexOf(a) - heights.indexOf(b));
+          const ordinary = [settlement];
           for (const [j, [name, buildingOwner]] of additions.entries()) {
             const annex = models.building(
               name,
@@ -849,6 +855,34 @@ export class World {
             annex.scale.setScalar(additions.length < 3 ? 0.62 : 0.55);
             annex.position.set(ax, 0, az);
             cityModel.add(annex);
+            ordinary.push(annex);
+          }
+          if (wonders.length) {
+            // Reserve the rear of the hex for landmarks; keep ordinary buildings,
+            // the settlement and ownership flag visible in the foreground.
+            ordinary.forEach((piece, index) => {
+              const count = Math.min(3, ordinary.length),
+                row = Math.floor(index / 3);
+              const rowCount = Math.min(3, ordinary.length - row * 3);
+              piece.scale.setScalar(ordinary.length > 3 ? 0.36 : 0.46);
+              piece.position.set(((index % count) - (rowCount - 1) / 2) * 0.43, 0, row ? 0.57 : 0.18);
+            });
+            wonders.forEach((name, index) => {
+              const landmark = models.wonder(name, ownerColor);
+              const columns = Math.min(3, wonders.length),
+                row = Math.floor(index / columns);
+              const scale =
+                wonders.length === 1 ? 0.8 : wonders.length === 2 ? 0.57 : wonders.length <= 3 ? 0.4 : 0.28;
+              landmark.scale.setScalar(scale);
+              landmark.position.set(
+                ((index % columns) - (columns - 1) / 2) * scale * 1.08,
+                0,
+                wonders.length <= 3 ? -0.33 : -0.55 + row * 0.24,
+              );
+              landmark.userData.wonder = name;
+              cityModel.add(landmark);
+            });
+            for (const marker of ownershipPieces) marker.position.x += 0.28;
           }
           this.board.add(cityModel);
           cityModel.updateWorldMatrix(true, true);

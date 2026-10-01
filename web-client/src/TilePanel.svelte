@@ -4,6 +4,7 @@
   import { canMoveOnMap } from './map-actions';
   import { terrainInfo } from './terrain';
   import TerrainIcon from './TerrainIcon.svelte';
+  import TerrainRules from './TerrainRules.svelte';
   import UnitIcon from './UnitIcon.svelte';
   import TileUnits from './TileUnits.svelte';
   import PirateDetails from './PirateDetails.svelte';
@@ -58,10 +59,12 @@
       {#if city}<CityFacts size={city.size} mood={city.mood} />{/if}
       <button class="icon-button" aria-label="Close tile actions" onclick={close}><X size={18} /></button>
     </header>
+    <TerrainRules {terrain} />
     {#if publicCity && publicOwner}<CityBuildings
         city={publicCity}
         owner={publicOwner.id}
         players={$session.game?.players ?? []}
+        wonders={$session.view?.builtWonders}
       />{/if}
     {#if city?.protection}<p
         class="city-rule"

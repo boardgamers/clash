@@ -153,6 +153,150 @@ export class PieceModels {
     return g;
   }
 
+  wonder(kind: string, owner: string) {
+    const g = new THREE.Group(),
+      stone = '#e2d4ad',
+      trim = '#f3e8c8',
+      dark = '#58645c',
+      gold = '#bc9146';
+    g.name = kind;
+    // Wonders retain their own landmark silhouette regardless of the owning civilization.
+    this.box(g, stone, 1.02, 0.06, 0.82);
+    this.box(g, owner, 1.04, 0.04, 0.84, 0, 0.08);
+    const pyramid = (width: number, height: number, x: number, y: number, z: number, color = stone) => {
+      const part = this.add(
+        g,
+        new THREE.ConeGeometry(width / Math.sqrt(2), height, 4),
+        color,
+        x,
+        y + height / 2,
+        z,
+      );
+      part.rotation.y = Math.PI / 4;
+      return part;
+    };
+    switch (kind) {
+      case 'Pyramids':
+        pyramid(0.67, 0.65, -0.14, 0.1, -0.06, '#d2b677');
+        pyramid(0.4, 0.39, 0.29, 0.1, 0.19, '#e4cc90');
+        pyramid(0.24, 0.23, -0.34, 0.1, 0.27, '#ead8a2');
+        break;
+      case 'GreatGardens':
+        for (let level = 0; level < 3; level++) {
+          const w = 0.9 - level * 0.23,
+            d = 0.67 - level * 0.17,
+            y = 0.1 + level * 0.22;
+          this.box(g, stone, w, 0.2, d, 0, y + 0.1);
+          this.box(g, '#66824c', w + 0.06, 0.06, d + 0.05, 0, y + 0.22);
+          for (const x of [-w * 0.29, w * 0.29]) this.arch(g, trim, x, y + 0.11, d / 2 + 0.01, 0.12);
+          for (const x of [-w / 2, w / 2]) this.box(g, '#3f7046', 0.075, 0.18, d * 0.6, x, y + 0.17);
+        }
+        this.box(g, '#65a9b5', 0.065, 0.54, 0.025, 0.08, 0.38, 0.36);
+        for (const x of [-0.13, 0.14]) {
+          this.cylinder(g, '#826546', 0.025, 0.18, x, 0.84);
+          const leaves = this.add(g, new THREE.ConeGeometry(0.14, 0.12, 6), '#366843', x, 0.93);
+          leaves.rotation.z = x;
+        }
+        break;
+      case 'Colosseum': {
+        // An open arena, with two tiers of arches instead of a solid cylinder.
+        for (const y of [0.12, 0.35, 0.58]) {
+          const ring = this.add(g, new THREE.TorusGeometry(0.43, 0.045, 4, 16), trim, 0, y);
+          ring.rotation.x = Math.PI / 2;
+          ring.scale.y = 0.7;
+        }
+        for (let i = 0; i < 14; i++) {
+          const a = (i * Math.PI * 2) / 14;
+          this.box(g, stone, 0.065, 0.43, 0.065, Math.sin(a) * 0.43, 0.34, Math.cos(a) * 0.3);
+          for (const y of [0.28, 0.51]) {
+            const arc = this.add(
+              g,
+              new THREE.TorusGeometry(0.065, 0.024, 4, 6, Math.PI),
+              stone,
+              Math.sin(a + Math.PI / 14) * 0.43,
+              y,
+              Math.cos(a + Math.PI / 14) * 0.3,
+            );
+            arc.rotation.y = a + Math.PI / 14;
+          }
+        }
+        const arena = this.cylinder(g, '#bb9b65', 0.36, 0.025, 0, 0.11, 0, 16);
+        arena.scale.z = 0.7;
+        break;
+      }
+      case 'GreatLibrary':
+        this.box(g, stone, 0.82, 0.35, 0.51, 0, 0.3, -0.08);
+        for (const x of [-0.38, 0.38]) {
+          this.box(g, trim, 0.17, 0.44, 0.62, x, 0.34);
+          this.box(g, '#536f7e', 0.24, 0.07, 0.68, x, 0.58);
+          this.box(g, dark, 0.075, 0.18, 0.025, x, 0.27, 0.32);
+        }
+        for (const x of [-0.23, -0.08, 0.08, 0.23]) this.cylinder(g, trim, 0.035, 0.32, x, 0.28, 0.3);
+        this.roof(g, '#466878', 0.73, 0.21, 0.61, 0.47);
+        this.box(g, trim, 0.75, 0.05, 0.66, 0, 0.46);
+        this.box(g, gold, 0.14, 0.06, 0.025, 0, 0.56, 0.32);
+        break;
+      case 'GreatLighthouse':
+        this.box(g, stone, 0.55, 0.44, 0.47, 0, 0.32);
+        this.box(g, trim, 0.61, 0.07, 0.53, 0, 0.56);
+        this.cylinder(g, stone, 0.2, 0.3, 0, 0.74, 0, 8);
+        this.cylinder(g, trim, 0.25, 0.065, 0, 0.91, 0, 8);
+        for (const x of [-0.12, 0.12])
+          for (const z of [-0.12, 0.12]) this.cylinder(g, stone, 0.022, 0.18, x, 1.02, z);
+        this.add(g, new THREE.OctahedronGeometry(0.085), '#f3b745', 0, 1.02);
+        this.add(g, new THREE.ConeGeometry(0.23, 0.15, 8), '#b87c52', 0, 1.18);
+        for (const y of [0.25, 0.43, 0.73])
+          this.box(g, dark, 0.055, 0.085, 0.025, 0, y, y > 0.6 ? 0.195 : 0.24);
+        break;
+      case 'GreatMausoleum':
+        this.box(g, trim, 0.85, 0.08, 0.68, 0, 0.14);
+        this.box(g, stone, 0.68, 0.24, 0.54, 0, 0.29);
+        this.box(g, trim, 0.77, 0.06, 0.62, 0, 0.43);
+        this.box(g, dark, 0.4, 0.26, 0.32, 0, 0.58);
+        for (const x of [-0.28, -0.09, 0.09, 0.28])
+          for (const z of [-0.23, 0.23]) this.cylinder(g, trim, 0.03, 0.28, x, 0.58, z);
+        this.box(g, trim, 0.75, 0.07, 0.61, 0, 0.74);
+        for (let i = 0; i < 4; i++)
+          this.box(g, '#8ea298', 0.67 - i * 0.13, 0.065, 0.53 - i * 0.1, 0, 0.81 + i * 0.065);
+        this.add(g, new THREE.OctahedronGeometry(0.09), gold, 0, 1.1);
+        break;
+      case 'GreatStatue': {
+        this.box(g, trim, 0.54, 0.09, 0.5, 0, 0.145);
+        this.box(g, stone, 0.36, 0.27, 0.33, 0, 0.32);
+        this.box(g, trim, 0.48, 0.07, 0.43, 0, 0.49);
+        const bronze = '#709080';
+        for (const x of [-0.085, 0.085]) this.box(g, bronze, 0.09, 0.3, 0.12, x, 0.67);
+        this.add(g, new THREE.CylinderGeometry(0.13, 0.17, 0.27, 6), bronze, 0, 0.89);
+        this.add(g, new THREE.IcosahedronGeometry(0.1, 0), bronze, 0, 1.09);
+        this.beam(g, bronze, 0.045, [-0.12, 0.97, 0], [-0.3, 1.12, 0]);
+        this.beam(g, bronze, 0.045, [0.12, 0.97, 0], [0.26, 0.77, 0.03]);
+        this.cylinder(g, gold, 0.025, 0.19, -0.3, 1.16);
+        this.add(g, new THREE.OctahedronGeometry(0.07), '#eac36b', -0.3, 1.28);
+        break;
+      }
+      case 'GreatWall':
+        for (let i = 0; i < 3; i++) {
+          const wall = new THREE.Group();
+          this.box(wall, stone, 0.39, 0.3, 0.15, 0, 0.25);
+          this.box(wall, dark, 0.39, 0.035, 0.17, 0, 0.415);
+          for (const x of [-0.15, 0, 0.15]) this.box(wall, trim, 0.075, 0.09, 0.055, x, 0.46, 0.07);
+          wall.position.set((i - 1) * 0.32, 0, i === 1 ? 0.05 : -0.08);
+          wall.rotation.y = (i - 1) * 0.4;
+          g.add(wall);
+        }
+        for (const x of [-0.37, 0.37]) {
+          this.box(g, stone, 0.22, 0.44, 0.26, x, 0.33, -0.08);
+          const tower = new THREE.Group();
+          this.roof(tower, '#8c7560', 0.34, 0.16, 0.37, 0.57);
+          tower.position.set(x, 0, -0.08);
+          g.add(tower);
+          this.box(g, dark, 0.065, 0.1, 0.025, x, 0.46, 0.055);
+        }
+        break;
+    }
+    return g;
+  }
+
   building(kind: BuildingKind, owner: string, civilization?: string) {
     const g = new THREE.Group(),
       style = pieceStyle(civilization),

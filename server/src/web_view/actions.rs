@@ -155,6 +155,47 @@ pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Valu
     }))
 }
 
+fn terrain_notes(
+    game: &Game,
+    player: &crate::player::Player,
+    units: &[u32],
+    destination: Position,
+) -> Vec<&'static str> {
+    let mut notes = vec![];
+    match game.map.get(destination) {
+        Some(Terrain::Mountain) => {
+            if crate::content::civilizations::carthage::ignores_mountains(player, units) {
+                notes.push("Hannibal with elephants: ignores the mountain movement stop.");
+            } else if player.has_special_advance(crate::special_advance::SpecialAdvance::Terracing)
+            {
+                notes.push("Terracing: settlers and leaders ignore the mountain movement stop.");
+                if units.iter().any(|id| {
+                    let u = player.get_unit(*id);
+                    !u.is_settler() && !u.is_leader()
+                }) {
+                    notes.push("Other units must stop here for the rest of the turn.");
+                }
+            } else {
+                notes.push("After entering: these units cannot move again this turn.");
+            }
+        }
+        Some(Terrain::Forest) => {
+            notes.push(
+                if units.iter().any(|id| player.get_unit(*id).is_army_unit()) {
+                    "After this move: army units may move again, but cannot make a later attack this turn."
+                } else {
+                    "No forest movement restriction for these units."
+                },
+            );
+        }
+        _ => return notes,
+    }
+    if player.can_use_advance(crate::advance::Advance::Roads) {
+        notes.push("A Roads route can bypass terrain movement restrictions.");
+    }
+    notes
+}
+
 pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, String> {
     let p = game.player(seat);
     if seat != game.active_player() || !game.events.is_empty() {
@@ -182,7 +223,7 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
     for carrier in carriers {
         for route in possible_move_routes(p, game, &units, start, carrier).unwrap_or_default() {
             if let Some(payment) = route.cost.first_valid_payment(&p.resources) {
-                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),
+                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":terrain_notes(game,p,&units,route.destination),"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),
                     "action":Action::Movement(MovementAction::Move(MoveUnits::new(units.clone(),route.destination,carrier,payment)))});
                 if !destinations.contains(&offer) {
                     destinations.push(offer);

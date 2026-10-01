@@ -3,16 +3,17 @@
   import { untrack } from 'svelte';
   import { Check, Sparkles, Layers, BookOpen, Ship, ChevronRight, Zap } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import type { Decision, Move, Pile, Resource } from './types';
+  import type { Decision, Move, Pile } from './types';
   import { resourceNames } from './types';
   import ResourceAmount from './ResourceAmount.svelte';
+  import PaymentPicker from './PaymentPicker.svelte';
+  import { samePayment } from './payment-options';
   import ResourceText from './ResourceText.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import DecisionOptionContent from './DecisionOptionContent.svelte';
   import UnitPicker, { type UnitChoice } from './UnitPicker.svelte';
   import { researchPresentation } from './research';
   import { mapDecisionOptions } from './decision-controls';
-  import { pileText } from './model';
   let {
     controller,
     decision,
@@ -59,9 +60,6 @@
   let payments = $state<Pile[]>(
     untrack(() => decision.fields.map((f) => ({ ...(f.choices?.length === 1 ? f.choices[0] : f.initial) }))),
   );
-  const samePayment = (a: Pile, b: Pile) =>
-    Object.keys(resourceNames).every((r) => (a[r as Resource] ?? 0) === (b[r as Resource] ?? 0));
-  const emptyPayment = (p: Pile) => !Object.values(p).some(Boolean);
   const directPayments = $derived.by(() => {
     const field = decision.fields.length === 1 && !decision.options.length ? decision.fields[0] : undefined;
     if (!field?.choices) return null;
@@ -76,13 +74,6 @@
       }
     });
   });
-  function paymentLabel(payment: Pile, optional: boolean) {
-    return emptyPayment(payment)
-      ? optional
-        ? 'Decline'
-        : 'Continue'
-      : `${decision.reward ? 'Gain' : 'Pay'} ${pileText(payment)}`;
-  }
   function choosePayment(i: number, payment: Pile) {
     payments = payments.map((p, j) => (i === j ? payment : p));
   }
@@ -236,21 +227,19 @@
     {#if field.name !== decision.name}<p class="decision-description">
         <ResourceText text={field.name} />
       </p>{/if}
-    <div class="payment-choices" class:single={directPayments.length === 1}>
-      {#each directPayments as choice}
-        <button
-          class="secondary"
-          aria-label={paymentLabel(choice.payment, field.optional)}
-          disabled={$session.pending || !choice.action}
-          onclick={() => choice.action && controller.submit(choice.action)}
-        >
-          {#if emptyPayment(choice.payment)}{field.optional ? 'Decline' : 'Continue'}{:else}
-            {decision.reward ? 'Gain' : 'Pay'}
-            <ResourceAmount pile={choice.payment} compact={Object.keys(choice.payment).length > 1} />
-          {/if}
-        </button>
-      {:else}<p class="inline-error">No affordable payment available.</p>{/each}
-    </div>
+    <PaymentPicker
+      options={directPayments.map((choice) => ({ payment: choice.payment, disabled: !choice.action }))}
+      value={payments[0]}
+      onChange={(payment) => choosePayment(0, payment)}
+      onPay={(payment) => {
+        const action = directPayments.find((choice) => samePayment(choice.payment, payment))?.action;
+        if (action) controller.submit(action);
+      }}
+      pending={$session.pending}
+      optional={field.optional}
+      reward={decision.reward}
+      label={field.name}
+    />
   {:else}
     {#each decision.fields as field, i}
       <div class="decision-payment">
@@ -258,28 +247,15 @@
             ><ResourceText text={field.name} /></strong
           >{/if}
         {#if field.choices}
-          <div
-            class="payment-choices"
-            class:single={field.choices.length === 1}
-            role="group"
-            aria-label={field.name}
-          >
-            {#each field.choices as payment}
-              <button
-                class="secondary"
-                class:selected={samePayment(payment, payments[i])}
-                aria-pressed={samePayment(payment, payments[i])}
-                aria-label={paymentLabel(payment, field.optional)}
-                disabled={$session.pending || field.choices.length === 1}
-                onclick={() => choosePayment(i, payment)}
-              >
-                {#if emptyPayment(payment)}{field.optional ? 'Decline' : 'Free'}{:else}<ResourceAmount
-                    pile={payment}
-                  />{/if}
-                {#if samePayment(payment, payments[i])}<Check size={14} />{/if}
-              </button>
-            {/each}
-          </div>
+          <PaymentPicker
+            options={field.choices.map((payment) => ({ payment }))}
+            value={payments[i]}
+            onChange={(payment) => choosePayment(i, payment)}
+            pending={$session.pending}
+            optional={field.optional}
+            reward={decision.reward}
+            label={field.name}
+          />
         {:else}
           {#if !decision.reward}<div class="decision-cost">
               Cost <ResourceAmount pile={field.cost} />

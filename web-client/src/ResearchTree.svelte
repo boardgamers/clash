@@ -20,6 +20,7 @@
   } from 'lucide-svelte';
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
+  import PaymentPicker from './PaymentPicker.svelte';
   import EventMarkers from './EventMarkers.svelte';
   import CivilizationAdvances from './CivilizationAdvances.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
@@ -308,20 +309,18 @@
       </div>
       <div class="research-payment">
         {#if !choice && !selected.owned && selected.payments.length > 1}
-          <div class="research-payment-options" role="group" aria-label="Choose research payment">
-            <span>Pay</span>
-            {#each selected.payments as option}
-              <button
-                class:chosen={selectedPayment === option}
-                aria-label={`Pay ${pileText(option.payment)}`}
-                aria-pressed={selectedPayment === option}
-                disabled={$session.pending || !option.action}
-                onclick={() => (chosenPayment = { advance: selected!.id, payment: option.payment })}
-              >
-                <ResourceAmount pile={option.payment} compact />
-              </button>
-            {/each}
-          </div>
+          <PaymentPicker
+            options={selected.payments.map((option) => ({
+              payment: option.payment,
+              disabled: !option.action,
+            }))}
+            value={selectedPayment?.payment ?? selected.payment}
+            onChange={(payment) => {
+              chosenPayment = { advance: selected!.id, payment };
+            }}
+            pending={$session.pending}
+            label="Research payment"
+          />
         {/if}
         <button
           class="primary"

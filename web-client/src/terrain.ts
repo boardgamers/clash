@@ -19,3 +19,12 @@ export function terrainInfo(terrain: Terrain) {
     exhausted,
   };
 }
+
+export function terrainMovementRule(terrain: Terrain) {
+  // Exhausted terrain has no Mountain/Forest movement restriction in the engine.
+  if (terrain === 'Mountain')
+    return 'After entering: units cannot move again this turn. Roads and some abilities bypass this stop.';
+  if (terrain === 'Forest')
+    return 'After entry: armies may move again, but cannot make a later attack that turn (except via Roads).';
+  return null;
+}

@@ -14,6 +14,7 @@
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
+  import TerrainRules from './TerrainRules.svelte';
   import UnitPicker from './UnitPicker.svelte';
   import LeaderDetails from './LeaderDetails.svelte';
   import { terrainInfo } from './terrain';
@@ -175,6 +176,10 @@
             : 'No moves available.'}
     </p>
   {/if}
+  {#if destination && !$session.movingCity}<TerrainRules
+      terrain={destination.terrain}
+      notes={destination.terrainNotes}
+    />{/if}
   {#if destination}<div class="settler-confirm">
       {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
       <button

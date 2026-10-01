@@ -4481,3 +4481,170 @@ small {
     min-height: 40px;
   }
 }
+
+/* Small payment sets remain direct choices; larger sets share a bounded amount picker. */
+.game-shell .compact-payments {
+  gap: 5px;
+  margin: 5px 0;
+  padding: 1px;
+  max-height: none;
+  overflow: visible;
+}
+.compact-payments.long-payments {
+  grid-template-columns: 1fr;
+}
+.game-shell .compact-payments > button {
+  min-height: 36px;
+  padding: 6px 9px;
+  font-size: 12px;
+  gap: 8px;
+  justify-content: space-between;
+  border-radius: 5px;
+}
+.compact-payments .resource-amount {
+  gap: 6px;
+  justify-content: flex-end;
+}
+.payment-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  margin: 8px 0;
+}
+.payment-fixed,
+.payment-builder-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+.payment-fixed > span:first-child {
+  color: var(--muted);
+}
+.payment-builder .resource-amount {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+.payment-builder-amounts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+}
+.payment-builder-amounts label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  min-width: 0;
+}
+.payment-builder-amounts label > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.payment-builder-amounts select {
+  background: var(--paper2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  min-height: 36px;
+  min-width: 48px;
+  padding: 5px;
+  font: inherit;
+}
+.payment-builder-hint {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.payment-builder-total {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.payment-builder-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.payment-builder-actions:empty {
+  display: none;
+}
+.game-shell .payment-builder-actions :is(.primary, .secondary) {
+  min-width: 78px;
+  width: auto;
+  min-height: 36px;
+  height: auto;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.city-confirm > :is(.compact-payments, .payment-builder) {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.city-confirm:has(> .payment-builder),
+.city-confirm:has(> .compact-payments) {
+  flex-wrap: wrap;
+}
+.research-payment .compact-payments {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) {
+  .game-shell .compact-payments > button,
+  .payment-builder-amounts select,
+  .game-shell .payment-builder-actions :is(.primary, .secondary) {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 760px) {
+  .city-confirm > :is(.compact-payments, .payment-builder) {
+    flex: none;
+    width: 100%;
+  }
+  .recruit-confirm > :is(.compact-payments, .payment-builder) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+.built-wonder-points {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.terrain-rules {
+  display: flex;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.terrain-rules > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.terrain-rules strong {
+  font-size: 11px;
+}
+.terrain-rules p {
+  margin: 2px 0;
+  font-size: inherit;
+}
+.terrain-rules small {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .game-shell .table-tools :is([aria-label='Sound'], [aria-label='Color-blind mode'], .tool-divider) {
+    display: none;
+  }
+}
