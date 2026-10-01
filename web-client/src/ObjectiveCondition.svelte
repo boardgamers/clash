@@ -28,4 +28,25 @@
     </div>
   </header>
   <p><ResourceText text={objective.description} /></p>
+  {#if objective.progress?.length}
+    <div class="objective-progress" aria-label="Current progress">
+      {#each objective.progress as progress}
+        <div class="objective-progress-row" class:met={progress.current >= progress.target}>
+          <span>{progress.label}</span>
+          <strong
+            >{#if progress.current >= progress.target}<CircleCheck
+                size={13}
+                aria-label="Target reached"
+              />{/if}{progress.current}/{progress.target}</strong
+          >
+          <meter
+            min="0"
+            max={Math.max(1, progress.target)}
+            value={Math.min(progress.current, progress.target)}
+            aria-label={progress.label}>{progress.current}/{progress.target}</meter
+          >
+        </div>
+      {/each}
+    </div>
+  {/if}
 </section>

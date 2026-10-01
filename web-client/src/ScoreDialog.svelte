@@ -18,6 +18,8 @@
   import CivilizationAdvances from './CivilizationAdvances.svelte';
   import CityBuildings from './CityBuildings.svelte';
   import CityFacts from './CityFacts.svelte';
+  import CivilizationEmblem from './CivilizationEmblem.svelte';
+  import { civilizationAccent } from './civilization-theme';
   import { researchPresentation } from './research';
   import type { Controller } from './controller';
   let { controller }: { controller: Controller } = $props();
@@ -62,6 +64,7 @@
 {#if player}
   <dialog
     class="field-guide score-dialog"
+    style:--civilization-accent={civilizationAccent(player.civilization)}
     aria-labelledby="score-title"
     use:show
     onclose={close}
@@ -75,8 +78,15 @@
     <button class="close-guide icon-button" aria-label="Close civilization details" onclick={close}
       ><X size={20} /></button
     >
-    <span class="card-eyebrow">Civilization</span>
-    <h2 id="score-title">{player.civilization} <EventMarkers remaining={player.eventTokens} /></h2>
+    <header class="civilization-hero">
+      <span class="civilization-seal"
+        ><CivilizationEmblem civilization={player.civilization} size={48} /></span
+      >
+      <div>
+        <span class="card-eyebrow">Civilization</span>
+        <h2 id="score-title">{player.civilization} <EventMarkers remaining={player.eventTokens} /></h2>
+      </div>
+    </header>
     <div class="civilization-resources" role="group" aria-label={`${player.civilization} resources`}>
       <ResourceAmount pile={resources} showZero />
     </div>

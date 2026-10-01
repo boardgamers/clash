@@ -16,6 +16,29 @@ use std::sync::Arc;
 
 type StatusPhaseCheck = Arc<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
 
+type ProgressCheck = Arc<dyn Fn(&Game, &Player) -> Vec<ObjectiveProgress> + Sync + Send>;
+
+#[derive(Serialize)]
+pub(crate) struct ObjectiveProgress {
+    label: String,
+    pub(crate) current: usize,
+    pub(crate) target: usize,
+}
+
+impl ObjectiveProgress {
+    pub(crate) fn new(label: impl Into<String>, current: usize, target: usize) -> Self {
+        Self {
+            label: label.into(),
+            current,
+            target,
+        }
+    }
+
+    fn met(&self) -> bool {
+        self.current >= self.target
+    }
+}
+
 type StatusPhaseUpdate = Arc<dyn Fn(&mut Game, &EventPlayer) + Sync + Send>;
 
 pub enum ObjectiveType {
@@ -29,6 +52,7 @@ pub struct Objective {
     pub description: String,
     pub(crate) listeners: AbilityListeners,
     pub(crate) status_phase_check: Option<StatusPhaseCheck>,
+    pub(crate) progress: Option<ProgressCheck>,
     pub(crate) status_phase_update: Option<StatusPhaseUpdate>,
     pub(crate) contradicting_status_phase_objective: Option<String>,
 }
@@ -86,6 +110,7 @@ pub struct ObjectiveBuilder {
     name: String,
     description: String,
     status_phase_check: Option<StatusPhaseCheck>,
+    progress: Option<ProgressCheck>,
     status_phase_update: Option<StatusPhaseUpdate>,
     contradicting_status_phase_objective: Option<String>,
     builder: AbilityInitializerBuilder,
@@ -98,6 +123,7 @@ impl ObjectiveBuilder {
             name: name.to_string(),
             description: description.to_string(),
             status_phase_check: None,
+            progress: None,
             status_phase_update: None,
             contradicting_status_phase_objective: None,
             builder: AbilityInitializerBuilder::new(),
@@ -110,6 +136,30 @@ impl ObjectiveBuilder {
         F: Fn(&Game, &Player) -> bool + 'static + Sync + Send,
     {
         self.status_phase_check = Some(Arc::new(f));
+        self
+    }
+
+    /// Use the same counters for scoring and the private objective progress display.
+    #[must_use]
+    pub(crate) fn status_phase_progress<F>(mut self, f: F) -> Self
+    where
+        F: Fn(&Game, &Player) -> Vec<ObjectiveProgress> + 'static + Sync + Send,
+    {
+        let progress: ProgressCheck = Arc::new(f);
+        let check = progress.clone();
+        self.status_phase_check = Some(Arc::new(move |g, p| {
+            check(g, p).iter().all(ObjectiveProgress::met)
+        }));
+        self.progress = Some(progress);
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn progress<F>(mut self, f: F) -> Self
+    where
+        F: Fn(&Game, &Player) -> Vec<ObjectiveProgress> + 'static + Sync + Send,
+    {
+        self.progress = Some(Arc::new(f));
         self
     }
 
@@ -135,6 +185,7 @@ impl ObjectiveBuilder {
             description: self.description,
             listeners: self.builder.build(),
             status_phase_check: self.status_phase_check,
+            progress: self.progress,
             status_phase_update: self.status_phase_update,
             contradicting_status_phase_objective: self.contradicting_status_phase_objective,
         }

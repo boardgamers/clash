@@ -214,6 +214,7 @@ export interface View {
       name: string;
       description: string;
       timing: 'Instant' | 'Status phase';
+      progress?: { label: string; current: number; target: number }[];
       conditionMet?: boolean;
       scoringAge?: number;
     }[];
@@ -432,9 +433,10 @@ export interface Session {
   unitBadges: boolean;
 }
 export interface MapPick {
-  kind: 'tile' | 'city' | 'unit' | 'units';
+  kind: 'tile' | 'city' | 'unit' | 'units' | 'decision';
   player?: number;
   unit?: number;
+  decisionIndex?: number;
 }
 export interface UnitView {
   movementNotes?: string[];
@@ -504,6 +506,9 @@ export interface Decision {
     name: string;
     description: string;
     position: string | null;
+    mapTarget?:
+      | { kind: 'unit'; player: number; unit: number; unitType: UnitView['type'] }
+      | { kind: 'structure'; structure: string | { Building: string } | { Wonder: string } };
     terrain?: Terrain;
     card?:
       | { kind: 'objective'; objectives: View['objectiveCards'][number]['objectives'] }

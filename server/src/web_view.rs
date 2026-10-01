@@ -162,6 +162,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             json!({"id": card.id, "objectives": card.objectives.iter().map(|objective| json!({
             "name": objective.name,
             "description": objective.description,
+            "progress": objective.progress.as_ref().map(|progress| progress(game, p)).unwrap_or_default(),
             "conditionMet": objective.status_phase_check.as_ref().is_some_and(|check| check(game, p)),
             "scoringAge": game.age + u32::from(crate::status_phase::get_status_phase(game).is_some_and(|phase| !matches!(phase, crate::status_phase::StatusPhaseState::CompleteObjectives))),
             "timing": match objective.get_type() {

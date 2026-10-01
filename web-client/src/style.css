@@ -75,12 +75,12 @@ small {
 }
 .game-shell {
   color-scheme: light;
-  --paper: #f7f3e8;
-  --paper2: #efe9da;
-  --ink: #333d34;
-  --muted: #636958;
-  --line: #dedacc;
-  --green: #2c5145;
+  --paper: #f7f9fa;
+  --paper2: #e9eff1;
+  --ink: #263c48;
+  --muted: #566c77;
+  --line: #d2dee3;
+  --green: #276b70;
   --gold: #b58a45;
   background: var(--paper);
   color: var(--ink);
@@ -1381,11 +1381,11 @@ small {
 }
 .dark {
   color-scheme: dark;
-  --paper: #272f2b;
-  --paper2: #353e33;
-  --ink: #e7e3d2;
-  --line: #444a3d;
-  --muted: #aeb298;
+  --paper: #1c2c38;
+  --paper2: #273c49;
+  --ink: #e7eff3;
+  --line: #3a5261;
+  --muted: #abc0cb;
   --gold: #d6b87e;
 }
 .dark .turn-banner {
@@ -3663,4 +3663,351 @@ small {
   gap: 0.3rem;
   font-size: 0.76rem;
   margin-top: 0.45rem;
+}
+
+/* Civilization accents stay separate from player ownership colours. */
+.game-shell .masthead {
+  border-top: 3px solid var(--civilization-accent);
+  background: linear-gradient(110deg, transparent 70%, #7293a30b), var(--paper);
+}
+.game-shell .primary {
+  background: #286871;
+  color: #fff;
+}
+.game-shell .primary:hover:not(:disabled) {
+  background: #337c85;
+}
+.game-shell .player-card {
+  overflow: hidden;
+  background: var(--paper);
+  border-color: var(--line);
+  border-left: 3px solid var(--player);
+  box-shadow: 0 3px 12px #14344219;
+}
+.game-shell .player-card.active {
+  box-shadow:
+    0 0 0 1px var(--player),
+    0 3px 12px #14344219;
+}
+.civilization-watermark {
+  position: absolute;
+  right: -9px;
+  bottom: -10px;
+  color: var(--player);
+  opacity: 0.09;
+  pointer-events: none;
+}
+.player-card > :not(.civilization-watermark):not(.active-dot) {
+  position: relative;
+}
+.game-shell .player-emblem {
+  background: var(--paper2);
+  border-radius: 9px;
+}
+.game-shell .board-toolbar,
+.game-shell .table-tools,
+.game-shell .map-controls {
+  background: var(--paper);
+  border-color: var(--line);
+  color: var(--ink);
+}
+.game-shell .turn-banner {
+  background: var(--paper2);
+  color: var(--ink);
+}
+.civilization-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px 0 16px;
+  border-bottom: 2px solid var(--civilization-accent);
+}
+.civilization-seal {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  color: var(--civilization-accent);
+  border: 1px solid currentColor;
+  outline: 1px solid currentColor;
+  outline-offset: -5px;
+  border-radius: 50%;
+  background: var(--paper2);
+}
+.game-shell .civilization-hero h2 {
+  margin: 2px 0 0;
+}
+.decision-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 8px;
+}
+.game-shell .decision-heading h2 {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+}
+.decision-heading .decision-event-context {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.decision-heading .full-context,
+.decision-heading:has(details[open]) .decision-event-context {
+  flex-basis: 100%;
+}
+.decision-heading .event-rules summary {
+  min-height: 36px;
+  padding: 6px 0;
+}
+.game-shell .decision-description {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 6px;
+}
+.decision-tile-list > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  list-style: none;
+}
+.decision-tile-list > summary > span {
+  float: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.decision-tile-list > summary::-webkit-details-marker {
+  display: none;
+}
+.decision-tile-list[open] > summary svg {
+  transform: rotate(90deg);
+}
+.game-shell .decision-tile-list {
+  margin-bottom: 6px;
+}
+.decision-piece-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 56px;
+  min-height: 42px;
+  padding: 6px 7px;
+  border: 1px solid #587686;
+  border-radius: 7px;
+  box-shadow: 0 2px 8px #13283340;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 11px;
+  pointer-events: auto;
+  z-index: 3;
+}
+.decision-piece-label.selected {
+  background: #286871;
+  border: 2px solid #b6e6e7;
+  color: white;
+}
+.decision-piece-label.selected::after {
+  content: '✓';
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  color: #245964;
+  font-size: 12px;
+}
+.world-labels.choosing-pieces :is(.city-map-label, .unit-map-label) {
+  display: none !important;
+}
+
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
+  .game-shell .action-panel.floating-panel {
+    padding: 12px;
+  }
+  .game-shell .action-panel h2 {
+    font-size: 22px;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .game-shell .decision-heading h2 {
+    margin: 0;
+  }
+  .game-shell .decision-panel .decision-count {
+    margin: 6px 0;
+    font-size: 12px;
+  }
+  .game-shell .decision-options {
+    max-height: none;
+    overflow: visible;
+    gap: 6px;
+    margin: 6px 0;
+  }
+  .game-shell .decision-options .decision-option {
+    min-height: 44px;
+    padding: 8px;
+    font-size: 13px;
+  }
+  .game-shell .decision-payment {
+    padding: 8px 0;
+  }
+  .game-shell .payment-choices {
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .game-shell .decision-footer {
+    position: sticky;
+    bottom: 0;
+    margin-bottom: 0;
+    padding: 6px 0 0;
+    box-shadow: 0 12px 0 var(--paper);
+    background: var(--paper);
+    z-index: 2;
+  }
+  .game-shell .decision-footer .primary {
+    min-height: 44px;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+  .game-shell dialog.field-guide {
+    padding: 12px;
+    width: calc(100% - 16px);
+    max-width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  .game-shell dialog.field-guide h2 {
+    font-size: 26px;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .game-shell .guide-intro {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .game-shell :is(.objective-card, .play-card, .wonder-card, .civilization-picker article) {
+    padding: 12px;
+    margin-top: 10px;
+  }
+  .game-shell :is(.objective-condition h3, .play-card h3, .wonder-card h3) {
+    font-size: 21px;
+  }
+  .game-shell .objective-divider {
+    margin: 10px 0;
+  }
+  .game-shell .guide-grid {
+    gap: 14px;
+    margin: 14px 0;
+  }
+  .game-shell .faction-tabs {
+    gap: 4px;
+    margin: 10px 0;
+  }
+  .game-shell .civilization-picker footer {
+    bottom: -12px;
+    padding-bottom: 6px;
+  }
+  .game-shell .city-content {
+    padding: 10px;
+  }
+  .game-shell .city-dialog-header {
+    padding: 10px 12px 6px;
+  }
+  .game-shell .score-summary {
+    padding: 10px 12px;
+    margin: 12px 0 4px;
+  }
+  .game-shell .score-row {
+    padding: 9px 0;
+    gap: 8px;
+  }
+  .game-shell .score-profile {
+    margin-top: 12px;
+  }
+  .game-shell .research-header {
+    padding: 10px 12px;
+  }
+  .game-shell .research-filters {
+    padding: 0 12px 8px;
+  }
+  .game-shell .civilization-hero {
+    gap: 10px;
+    padding: 4px 0 10px;
+    margin-bottom: 10px;
+  }
+  .game-shell .civilization-hero h2 {
+    margin: 0;
+  }
+  .civilization-seal {
+    width: 56px;
+    height: 56px;
+  }
+  .civilization-seal > svg,
+  .civilization-seal .civilization-emblem {
+    max-width: 36px;
+    max-height: 36px;
+  }
+}
+
+.objective-progress {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.objective-progress-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.objective-progress-row strong {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.objective-progress-row.met strong {
+  color: var(--green);
+}
+.objective-progress-row meter {
+  grid-column: 1 / -1;
+  display: block;
+  width: 100%;
+  height: 5px;
+  background: var(--paper2);
+  border: 0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.objective-progress-row meter::-webkit-meter-bar {
+  background: var(--paper2);
+  border: 0;
+  border-radius: 3px;
+}
+.objective-progress-row meter::-webkit-meter-optimum-value {
+  background: var(--green);
+}
+.objective-progress-row meter::-moz-meter-bar {
+  background: var(--green);
+}
+
+.dark .objective-progress {
+  --green: #7cc7c5;
+}
+.dark .civilization-seal {
+  color: var(--ink);
+  border-color: var(--civilization-accent);
+  outline-color: var(--civilization-accent);
 }

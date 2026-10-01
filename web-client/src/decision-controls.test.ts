@@ -2,7 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { researchDecision, mapDecisionOptions, toggleDecisionSelection } from './decision-controls.ts';
+import {
+  researchDecision,
+  mapDecisionOptions,
+  mapDecisionIndex,
+  toggleDecisionSelection,
+} from './decision-controls.ts';
 import type { View } from './types.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
@@ -231,4 +236,68 @@ test('payment choices include optional purchase/decline and complete mixed rewar
     ).action;
     assert.doesNotThrow(() => engine.tryMove(reward, JSON.stringify(action), seat));
   }
+});
+
+test('Black Death selects the exact unit on a crowded tile and only removes it on confirmation', () => {
+  const state = fixture('incidents/pandemics/black_death.outcome');
+  const d = view(state, 0).decision!;
+  const options = mapDecisionOptions(d);
+  assert.equal(options.length, 7);
+  assert.equal(new Set(options.map((o) => o.position)).size, 1);
+  const elephant = options.findIndex(
+    (o) => o.mapTarget?.kind === 'unit' && o.mapTarget.unitType === 'Elephant',
+  );
+  const target = options[elephant].mapTarget!;
+  assert.equal(target.kind, 'unit');
+  if (target.kind !== 'unit') throw new Error('Expected unit target');
+  assert.equal(
+    mapDecisionIndex(d, 'C2', { kind: 'unit', player: target.player, unit: target.unit }),
+    elephant,
+  );
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'unit', player: 1, unit: target.unit }), -1);
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'city', player: 0 }), -1);
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'units', player: 0 }), -1);
+  assert.equal(mapDecisionIndex(d, 'B2', { kind: 'decision', decisionIndex: elephant }), -1);
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'decision', decisionIndex: 99 }), -1);
+  assert.deepEqual(toggleDecisionSelection(d, [0], elephant), [elephant]);
+  const query = (values: unknown[]) =>
+    JSON.parse(
+      engine.webQuery(
+        engine.stripSecret(state, 0),
+        0,
+        JSON.stringify({ kind: 'decision', values, payments: [] }),
+      ),
+    );
+  assert.throws(() => query([]));
+  assert.throws(() => query([options[0].value, options[1].value]));
+  const { action } = query([options[elephant].value]);
+  const next = JSON.parse(engine.tryMove(state, JSON.stringify(action), 0));
+  assert.deepEqual(
+    next.players[0].units.map((u: { id: number }) => u.id),
+    JSON.parse(state)
+      .players[0].units.filter((u: { id: number }) => u.id !== target.unit)
+      .map((u: { id: number }) => u.id),
+  );
+  assert.equal(mapDecisionOptions(view(state, 1).decision).length, 0);
+  assert.equal(mapDecisionOptions(JSON.parse(engine.webView(engine.stripSecret(state))).decision).length, 0);
+});
+
+test('Earthquake offers separate building choices at the same city and respects the selection limit', () => {
+  const raw = fixture('incidents/earthquake/earthquake');
+  const state = engine.tryMove(
+    raw,
+    JSON.stringify({ Playing: { Advance: { advance: 'Storage', payment: { gold: 2 } } } }),
+    0,
+  );
+  const d = view(state, 0).decision!;
+  const options = mapDecisionOptions(d);
+  assert.ok(options.length > 3);
+  assert.ok(options.every((o) => o.mapTarget?.kind === 'structure'));
+  const sameCity = options.flatMap((o, i) => (o.position === 'C2' ? [i] : []));
+  assert.ok(sameCity.length >= 2);
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'city', player: 0 }), -1);
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'decision', decisionIndex: sameCity[1] }), sameCity[1]);
+  let selected: number[] = [];
+  for (let i = 0; i < options.length; i++) selected = toggleDecisionSelection(d, selected, i);
+  assert.equal(selected.length, d.max);
 });

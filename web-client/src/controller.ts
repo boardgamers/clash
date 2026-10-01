@@ -9,7 +9,12 @@ import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
 import { canMoveOnMap, moveOrigins } from './map-actions';
 import { movementBonus } from './movement-bonus';
-import { researchDecision, mapDecisionOptions, toggleDecisionSelection } from './decision-controls';
+import {
+  researchDecision,
+  mapDecisionOptions,
+  mapDecisionIndex,
+  toggleDecisionSelection,
+} from './decision-controls';
 export class Controller {
   readonly session = writable<Session>({
     decisionSelection: [],
@@ -327,7 +332,7 @@ export class Controller {
   selectTile(position: string, pick: MapPick = { kind: 'tile' }) {
     const s = get(this.session);
     if (mapDecisionOptions(s.view?.decision).length) {
-      const index = s.view!.decision!.options.findIndex((o) => o.position === position);
+      const index = mapDecisionIndex(s.view!.decision!, position, pick);
       if (index >= 0) this.selectDecisionOption(index);
       return;
     }

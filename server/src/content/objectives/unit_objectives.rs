@@ -1,10 +1,10 @@
 use crate::card::HandCardLocation;
 use crate::content::advances::trade_routes::find_trade_routes;
-use crate::content::objectives::city_objectives::leading_player;
+use crate::content::objectives::city_objectives::leading_progress;
 use crate::content::objectives::non_combat::last_player_round;
 use crate::log::ActionLogEntry;
 use crate::map::capital_city_position;
-use crate::objective_card::Objective;
+use crate::objective_card::{Objective, ObjectiveProgress};
 use crate::player::Player;
 use crate::unit::UnitType;
 use itertools::Itertools;
@@ -15,7 +15,7 @@ pub(crate) fn sea_blockade() -> Objective {
         "At least 2 of your ships are on the \
         port location of another player",
     )
-    .status_phase_check(|game, player| {
+    .status_phase_progress(|game, player| {
         let enemy_ports = game
             .players
             .iter()
@@ -26,12 +26,15 @@ pub(crate) fn sea_blockade() -> Objective {
             })
             .collect_vec();
 
-        player
-            .units
-            .iter()
-            .filter(|u| enemy_ports.contains(&u.position))
-            .count()
-            >= 2
+        vec![ObjectiveProgress::new(
+            "Units at port locations",
+            player
+                .units
+                .iter()
+                .filter(|u| enemy_ports.contains(&u.position))
+                .count(),
+            2,
+        )]
     })
     .build()
 }
@@ -41,9 +44,16 @@ pub(crate) fn large_fleet() -> Objective {
         "Large Fleet",
         "You have at least 4 ships, OR at least 2 ships and more ships than every other player.",
     )
-    .status_phase_check(|game, player| {
-        let ships = ship_count(player);
-        ships >= 4 || (ships >= 2 && leading_player(game, player, 1, |p, _| ship_count(p)))
+    .status_phase_progress(|game, player| {
+        let mut progress = leading_progress(
+            "Ships · 4, or at least 2 and lead by 1",
+            game,
+            player,
+            1,
+            |p, _| ship_count(p),
+        );
+        progress.target = progress.target.clamp(2, 4);
+        vec![progress]
     })
     .build()
 }
@@ -57,10 +67,14 @@ pub(crate) fn large_army() -> Objective {
         "Large Army",
         "You have at least 4 more army units than any other player.",
     )
-    .status_phase_check(|game, player| {
-        leading_player(game, player, 4, |p, _| {
-            p.units.iter().filter(|u| u.is_army_unit()).count()
-        })
+    .status_phase_progress(|game, player| {
+        vec![leading_progress(
+            "Army units · lead by 4",
+            game,
+            player,
+            4,
+            |p, _| p.units.iter().filter(|u| u.is_army_unit()).count(),
+        )]
     })
     .build()
 }
@@ -72,18 +86,21 @@ pub(crate) fn standing_army() -> Objective {
         Cannot be completed together with Military Might.",
     )
     .contradicting_status_phase_objective("Military Might")
-    .status_phase_check(|_game, player| {
-        player
-            .cities
-            .iter()
-            .filter(|c| {
-                player
-                    .get_units(c.position)
-                    .iter()
-                    .any(|u| u.is_army_unit())
-            })
-            .count()
-            >= 4
+    .status_phase_progress(|_game, player| {
+        vec![ObjectiveProgress::new(
+            "Cities with your army",
+            player
+                .cities
+                .iter()
+                .filter(|c| {
+                    player
+                        .get_units(c.position)
+                        .iter()
+                        .any(|u| u.is_army_unit())
+                })
+                .count(),
+            4,
+        )]
     })
     .build()
 }
@@ -94,6 +111,19 @@ pub(crate) fn colony() -> Objective {
         "You own a city at least 5 spaces from your starting city position. \
         Cannot be completed if you completed City Founder in the last round.",
     )
+    .progress(|game, player| {
+        let home = capital_city_position(game, player);
+        vec![ObjectiveProgress::new(
+            "Farthest city from your start",
+            player
+                .cities
+                .iter()
+                .map(|c| c.position.distance(home) as usize)
+                .max()
+                .unwrap_or(0),
+            5,
+        )]
+    })
     .status_phase_check(|game, player| {
         let home = capital_city_position(game, player);
         if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
@@ -122,7 +152,7 @@ pub(crate) fn threat() -> Objective {
         "Threat",
         "At least 4 of your army units are adjacent to cities owned by other players. They may be next to different cities.",
     )
-    .status_phase_check(|game, player| {
+    .status_phase_progress(|game, player| {
         let enemy_cities = game
             .players
             .iter()
@@ -130,7 +160,7 @@ pub(crate) fn threat() -> Objective {
             .flat_map(|p| p.cities.iter().map(|c| c.position).collect_vec())
             .collect_vec();
 
-        player
+        vec![ObjectiveProgress::new("Army units next to other cities", player
             .units
             .iter()
             .filter(|u| {
@@ -140,8 +170,7 @@ pub(crate) fn threat() -> Objective {
                         .iter()
                         .any(|n| enemy_cities.contains(n))
             })
-            .count()
-            >= 4
+            .count(), 4)]
     })
     .build()
 }
@@ -151,8 +180,8 @@ pub(crate) fn outpost() -> Objective {
         "Outpost",
         "Your army units occupy at least 3 different spaces, each outside and not adjacent to any of your cities.",
     )
-    .status_phase_check(|_game, player| {
-        player
+    .status_phase_progress(|_game, player| {
+        vec![ObjectiveProgress::new("Army-occupied spaces away from your cities", player
             .units
             .iter()
             .filter_map(|u| {
@@ -164,8 +193,7 @@ pub(crate) fn outpost() -> Objective {
                 .then_some(u.position)
             })
             .unique()
-            .count()
-            >= 3
+            .count(), 3)]
     })
     .build()
 }
@@ -175,8 +203,8 @@ pub(crate) fn migration() -> Objective {
         "Migration",
         "Your settlers occupy at least 3 different spaces, each outside and not adjacent to any of your cities.",
     )
-    .status_phase_check(|_game, player| {
-        player
+    .status_phase_progress(|_game, player| {
+        vec![ObjectiveProgress::new("Settler-occupied spaces away from your cities", player
             .units
             .iter()
             .filter_map(|u| {
@@ -188,8 +216,7 @@ pub(crate) fn migration() -> Objective {
                 .then_some(u.position)
             })
             .unique()
-            .count()
-            >= 3
+            .count(), 3)]
     })
     .build()
 }
@@ -201,8 +228,12 @@ pub(crate) fn military_might() -> Objective {
         Cannot be completed together with Standing Army.",
     )
     .contradicting_status_phase_objective("Standing Army")
-    .status_phase_check(|_game, player| {
-        player.units.iter().filter(|u| u.is_military()).count() >= 12
+    .status_phase_progress(|_game, player| {
+        vec![ObjectiveProgress::new(
+            "Army units and ships",
+            player.units.iter().filter(|u| u.is_military()).count(),
+            12,
+        )]
     })
     .build()
 }
@@ -214,7 +245,13 @@ pub(crate) fn trade_power() -> Objective {
         Cannot be completed together with Shipping Routes.",
     )
     .contradicting_status_phase_objective("Shipping Routes")
-    .status_phase_check(|game, player| find_trade_routes(game, player, false).len() >= 3)
+    .status_phase_progress(|game, player| {
+        vec![ObjectiveProgress::new(
+            "Possible trade routes",
+            find_trade_routes(game, player, false).len(),
+            3,
+        )]
+    })
     .build()
 }
 
@@ -225,7 +262,13 @@ pub(crate) fn shipping_routes() -> Objective {
         Cannot be completed together with Trade Power.",
     )
     .contradicting_status_phase_objective("Trade Power")
-    .status_phase_check(|game, player| find_trade_routes(game, player, true).len() >= 2)
+    .status_phase_progress(|game, player| {
+        vec![ObjectiveProgress::new(
+            "Possible ship trade routes",
+            find_trade_routes(game, player, true).len(),
+            2,
+        )]
+    })
     .build()
 }
 
@@ -245,15 +288,18 @@ pub(crate) fn unit_versatility(objective: &str, unit_type: UnitType) -> Objectiv
             unit_type.non_leader_name()
         ),
     )
-    .status_phase_check(move |_game, player| {
-        player
-            .units
-            .iter()
-            .filter(|u| u.unit_type == unit_type)
-            .map(|u| u.position)
-            .unique()
-            .count()
-            >= 3
+    .status_phase_progress(move |_game, player| {
+        vec![ObjectiveProgress::new(
+            format!("Spaces with {}", unit_type.non_leader_name()),
+            player
+                .units
+                .iter()
+                .filter(|u| u.unit_type == unit_type)
+                .map(|u| u.position)
+                .unique()
+                .count(),
+            3,
+        )]
     })
     .build()
 }
@@ -264,6 +310,12 @@ pub(crate) fn versatility() -> Objective {
         "You have at least 1 of each unit \
         (ship, infantry, cavalry, elephant, leader, settler)",
     )
-    .status_phase_check(|_game, player| player.units.iter().unique_by(|u| u.unit_type).count() >= 6)
+    .status_phase_progress(|_game, player| {
+        vec![ObjectiveProgress::new(
+            "Different unit types",
+            player.units.iter().unique_by(|u| u.unit_type).count(),
+            6,
+        )]
+    })
     .build()
 }

@@ -13,7 +13,7 @@ npm run build:bridge
 npm run dev
 ```
 
-Open http://127.0.0.1:8643. The preview binds to loopback and saves its disposable game under `.engine/preview-state.json`. **New game** resets that game and its local chat. Hotseat follows the active player; the player selector also supports fixed seats and spectators.
+Open http://127.0.0.1:8643. The preview binds to loopback and saves its disposable game under `.engine/preview-state.json`. **New game** resets that game and its local chat. Set `CLASH_PREVIEW_SAVE` to use a separate local fixture save. Hotseat follows the active player; the player selector also supports fixed seats and spectators.
 
 The local preview does not modify production games, catalog records, or chat rooms.
 
@@ -23,7 +23,7 @@ The local preview does not modify production games, catalog records, or chat roo
 - Named resources, storage limits, action count, city mood, and a short field guide. Select a civilization to see all six victory-point categories from the Rust scoring rules, with a link to its BGS player profile.
 - Private wonder hand with card effects, base costs, required research, and building/ownership points. New wonder and objective draws show a dismissible animated card and a sound cue; loading, changing seats, duplicate states, and undo do not replay old draws. Reduced-motion settings suppress the reveal animation.
 - City docks show activation counts. Collection and city management show activation availability and the exact next mood, with capacity and angry-city warnings before confirmation.
-- Private objective hand with distinct objective pictograms, resource icons, and concise completion timing (End of age / During play, with explanatory tooltips), read from the Rust definitions. When the engine offers an eligible objective, the player can claim points or keep the card directly in the action panel.
+- Private objective hand with live resource/research/city/unit progress counters from the scoring rules, distinct objective pictograms, resource icons, and concise completion timing (End of age / During play, with explanatory tooltips), read from the Rust definitions. When the engine offers an eligible objective, the player can claim points or keep the card directly in the action panel.
 - Collect resources: Rust supplies legal tiles, resource alternatives, capacity, total gain, waste, and an activation warning. Confirming submits the original Rust action format.
 - Research: a searchable tree with pictograms, short effect summaries, prerequisite branches, costs, bonuses, and unlocked buildings. Rust supplies the graph, full rules, payments, and action payloads; selecting an advance opens its full rule text before confirmation.
 - End turn and undo, with state and journal reconciliation.
@@ -31,6 +31,8 @@ The local preview does not modify production games, catalog records, or chat roo
 - Group movement for settlers, armies, and fleets: legal destinations, attacks, embarkation by carrier, disembarkation, Navigation, movement completion, and founding cities. Destination and collection options highlight their map tiles on hover or keyboard focus. Exploration uses the engine’s forced placements or offers both legal orientations with miniature maps and a board preview before confirmation.
 - Action cards (civil effects and tactics descriptions), wonder construction, cultural influence, and available civilization/research/wonder abilities. Free collection and happiness variants use the original engine action type.
 - Every persistent request variant has controls: adjustable payments, resource rewards, advances, players, positions, unit types/groups, structures, hand cards, government changes, yes/no, and exploration. Selection previews check membership, counts, special restrictions, and payment validity without executing a move. Combat casualties/tactics, incidents, and end-of-age decisions use these same controls. Civilization selection is also available.
+- Tile, individual unit, and structure decisions can be selected on the board, with an expandable list and explicit confirmation. Mobile decision panels and reference dialogs use compact spacing while keeping rules expandable.
+- Civilization emblems, seals and accents distinguish players against neutral light or dark panels.
 - Buildings appear around city centers; recruited units have separate positions and basic type markers.
 - BGS registration/lifecycle, player/spectator handling, theme, avatars, and the shared chat controller/panel. Chat sends, failed-send drafts, updates/deletions, mentions, read reports, editing and translation handlers are supplied by the protocol package; the host decides which features are enabled.
 - Journal entries use high-contrast text and action and resource pictograms. Setup is summarized as civilization and original starting tile. Text equivalents are published with `replaceLog` so undo cannot leave stale entries.

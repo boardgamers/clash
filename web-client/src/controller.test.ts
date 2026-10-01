@@ -242,3 +242,32 @@ test('Expansion keeps its new settler and destination selected across repeated p
     controller.destroy();
   }
 });
+
+test('board unit selection stays local, rejects other pieces and locks while a move is pending', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  const state = fixture('incidents/pandemics/black_death.outcome');
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(state, 0));
+    c.selectTile('C2', { kind: 'units', player: 0 });
+    assert.deepEqual(app.session().decisionSelection, []);
+    c.selectTile('C2', { kind: 'unit', player: 0, unit: 3 });
+    assert.deepEqual(app.session().decisionSelection, [2]);
+    assert.deepEqual(app.sent, []);
+    c.selectTile('C2', { kind: 'unit', player: 1, unit: 0 });
+    assert.deepEqual(app.session().decisionSelection, [2]);
+    c.patch({ pending: true });
+    c.selectTile('C2', { kind: 'decision', decisionIndex: 0 });
+    assert.deepEqual(app.session().decisionSelection, [2]);
+    c.patch({ pending: false });
+    c.setPlayer(1);
+    await c.load(engine.stripSecret(state, 1));
+    assert.deepEqual(app.session().decisionSelection, []);
+    c.selectTile('C2', { kind: 'decision', decisionIndex: 0 });
+    assert.deepEqual(app.session().decisionSelection, []);
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});

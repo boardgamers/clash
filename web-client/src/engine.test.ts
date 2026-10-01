@@ -446,13 +446,7 @@ test('offset hex coordinates preserve the odd-column layout', () => {
 
 test('Engineering exposes the drawn wonder only to its owner and scores have an exact breakdown for 2–4 players', async () => {
   for (const count of [2, 3, 4]) {
-    const state = await engine.init(
-      count,
-      [],
-      { civilization: 'Random' },
-      `score-${count}`,
-      {},
-    );
+    const state = await engine.init(count, [], { civilization: 'Random' }, `score-${count}`, {});
     const view: View = JSON.parse(engine.webView(engine.stripSecret(state, undefined), undefined));
     assert.equal(view.players.length, count);
     for (const player of view.players) {
@@ -616,13 +610,7 @@ test('public civilization inspection includes researched and civilization advanc
 });
 
 test('all civilizations expose four public automatic advances, exact prerequisites and structured leader abilities', async () => {
-  let state = await engine.init(
-    4,
-    [],
-    { civilization: 'ChooseCivilization' },
-    'civilization-preview',
-    {},
-  );
+  let state = await engine.init(4, [], { civilization: 'ChooseCivilization' }, 'civilization-preview', {});
   const expected: Record<string, Record<string, string[]>> = {
     Rome: {
       Aqueduct: ['Engineering'],
@@ -721,4 +709,54 @@ test('borrowing a prerequisite from the Great Library does not unlock a civiliza
   assert.equal(view.players[0].civilization, 'Vikings');
   assert.equal(view.players[0].advances.find((a) => a.id === 'Fishing')?.borrowed, true);
   assert.equal(view.players[0].civilizationAdvances.find((a) => a.id === 'ShipConstruction')!.owned, false);
+});
+
+test('objective progress uses current resources, research and changing opponents, without exposing hands', async () => {
+  const game = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(game)),
+    other = 1 - seat;
+  const p = game.players[seat];
+  p.objective_cards = [6, 10, 11, 12];
+  p.resources = { ...p.resources, food: 3, ore: 1, wood: 7, gold: 0 };
+  const objectives = () =>
+    (
+      JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(game), seat), seat)) as View
+    ).objectiveCards.flatMap((c) => c.objectives);
+  const get = (name: string) => objectives().find((o) => o.name === name)!;
+  const storage = get('Optimized Storage');
+  assert.deepEqual(
+    storage.progress?.map((p) => [p.label, p.current, p.target]),
+    [
+      ['Food', 3, 3],
+      ['Ore', 1, 3],
+      ['Wood', 7, 3],
+    ],
+  );
+  assert.equal(storage.conditionMet, false);
+  p.resources.ore = 3;
+  assert.equal(get('Optimized Storage').conditionMet, true);
+  p.resources.food = 2;
+  assert.equal(get('Optimized Storage').conditionMet, false, 'Losing resources removes eligibility');
+  const planner = get('City Planner');
+  assert.equal(planner.progress?.[0].target, 4);
+  p.advances.push('Engineering');
+  assert.equal(get('City Planner').progress?.[0].current, (planner.progress?.[0].current ?? 0) + 1);
+  const ships = (count: number) =>
+    Array.from({ length: count }, (_, id) => ({ id, position: 'C2', unit_type: 'Ship' }));
+  p.units = ships(2);
+  game.players[other].units = ships(1);
+  assert.equal(get('Large Fleet').progress?.[0].target, 2);
+  assert.equal(get('Large Fleet').conditionMet, true);
+  game.players[other].units = ships(2);
+  assert.equal(get('Large Fleet').progress?.[0].target, 3);
+  assert.equal(get('Large Fleet').conditionMet, false, 'A tie does not lead');
+  game.players[other].units = ships(6);
+  p.units = ships(4);
+  assert.equal(get('Large Fleet').progress?.[0].target, 4);
+  assert.equal(get('Large Fleet').conditionMet, true, 'Four ships satisfy the alternative condition');
+  assert.equal(get('Large Fleet').timing, 'Status phase');
+  assert.equal(get('Large Fleet').scoringAge, game.age);
+  const privateState = engine.stripSecret(JSON.stringify(game), seat);
+  assert.deepEqual(JSON.parse(engine.webView(privateState, other)).objectiveCards, []);
+  assert.deepEqual(JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(game)))).objectiveCards, []);
 });

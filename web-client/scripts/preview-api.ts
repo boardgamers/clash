@@ -8,20 +8,16 @@ export function previewApi(): Plugin {
     name: 'clash-local-preview',
     configureServer(server) {
       const engine = require(fileURLToPath(new URL('../.engine/server.js', import.meta.url)));
-      const save = fileURLToPath(new URL('../.engine/preview-state.json', import.meta.url));
+      const save =
+        process.env.CLASH_PREVIEW_SAVE ??
+        fileURLToPath(new URL('../.engine/preview-state.json', import.meta.url));
       let state: string;
       let revision = 0;
       let messages: any[] = [];
       let readAt: Record<string, number> = {};
       const persist = () => writeFileSync(save, JSON.stringify({ state, revision, messages, readAt }));
       const reset = async () => {
-        state = await engine.init(
-          2,
-          [],
-          { civilization: 'Random' },
-          'clash-preview-20260927',
-          {},
-        );
+        state = await engine.init(2, [], { civilization: 'Random' }, 'clash-preview-20260927', {});
         for (let i = 0; i < 2; i++)
           state = engine.setPlayerMetaData(state, i, { name: ['Leif', 'Aurelia'][i] });
         revision++;

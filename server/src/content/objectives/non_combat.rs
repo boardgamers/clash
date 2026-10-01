@@ -5,7 +5,7 @@ use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
 use crate::log::{ActionLogAction, ActionLogEntry, ActionLogTurn, TurnType};
 use crate::map::capital_city_position;
-use crate::objective_card::{Objective, objective_is_ready};
+use crate::objective_card::{Objective, ObjectiveProgress, objective_is_ready};
 use itertools::Itertools;
 
 pub(crate) fn draft() -> Objective {
@@ -53,7 +53,19 @@ pub(crate) fn city_founder() -> Objective {
 
 pub(crate) fn terror_regime() -> Objective {
     // is handled explicitly
-    Objective::builder("Terror Regime", "At least 4 of your cities are Angry.").build()
+    Objective::builder("Terror Regime", "At least 4 of your cities are Angry.")
+        .progress(|_, player| {
+            vec![ObjectiveProgress::new(
+                "Angry cities",
+                player
+                    .cities
+                    .iter()
+                    .filter(|c| c.mood_state == crate::city::MoodState::Angry)
+                    .count(),
+                4,
+            )]
+        })
+        .build()
 }
 
 pub(crate) fn magnificent_culture() -> Objective {

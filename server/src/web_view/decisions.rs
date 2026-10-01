@@ -342,12 +342,15 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                 .iter()
                 .map(|id| {
                     let u = game.player(r.player).get_unit(*id);
-                    option(
+                    let mut o = option(
                         id,
                         format!("{} #{} · {}", u.unit_type.name(game), id + 1, u.position),
                         "",
                         Some(u.position),
-                    )
+                    );
+                    o["mapTarget"] =
+                        json!({"kind":"unit","player":r.player,"unit":id,"unitType":u.unit_type});
+                    o
                 })
                 .collect()
         }
@@ -378,12 +381,14 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             r.choices
                 .iter()
                 .map(|s| {
-                    option(
+                    let mut o = option(
                         s,
                         format!("{} · {}", structure_name(&s.structure), s.position),
                         "",
                         Some(s.position),
-                    )
+                    );
+                    o["mapTarget"] = json!({"kind":"structure","structure":s.structure});
+                    o
                 })
                 .collect()
         }

@@ -22,6 +22,7 @@
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
   const mapChoice = $derived(mapDecisionOptions(decision).length > 0);
+  const pieceChoice = $derived(mapChoice && decision.options.some((option) => option.mapTarget));
   let payments = $state<Pile[]>(
     untrack(() => decision.fields.map((f) => ({ ...(f.choices?.length === 1 ? f.choices[0] : f.initial) }))),
   );
@@ -116,53 +117,57 @@
   aria-label={decision.name}
 >
   {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
-  <h2><Sparkles size={21} />{decision.name}</h2>
-  {#if decision.eventContext}
-    {@const context = decision.eventContext}
-    <div class="decision-event-context">
-      {#if context.raid}<p class="event-raid"><Ship size={17} /><ResourceText text={context.raid} /></p>{/if}
-      {#if context.card}
-        {@const card = context.card}
-        <div class="event-card-offer">
-          <Layers size={16} />
-          <span
-            >{card.later
-              ? card.firstOffer
-                ? 'Then: take the card'
-                : 'If passed to you'
-              : 'Take the card'}</span
-          >
-          <ResourceAmount pile={card.cost} />
-        </div>
-        <details class="event-rules">
-          <summary aria-label={`${card.name} event details`}
-            ><BookOpen size={13} />{card.name}<ChevronRight size={13} /></summary
-          >
-          {#if context.placement}<p>{context.placement}</p>{/if}
-          <p>
-            The player who triggered the event may take the card for <ResourceAmount
-              pile={{ culture_tokens: 1 }}
-            />. If they pass, other players may take it in turn order for <ResourceAmount
-              pile={{ culture_tokens: 2 }}
-            />.
-          </p>
-          <p>
-            <span class="event-card-use">Play <Zap size={13} />{card.free ? 0 : 1}</span><ResourceText
-              text={card.description}
-            />
-          </p>
-        </details>
-      {:else}
-        <details class="event-rules">
-          <summary aria-label={`${context.name} event details`}
-            ><BookOpen size={13} />Event rules<ChevronRight size={13} /></summary
-          >
-          {#if context.placement}<p>{context.placement}</p>{/if}
-          {#each context.rules as rule}<p><ResourceText text={rule} /></p>{/each}
-        </details>
-      {/if}
-    </div>
-  {/if}
+  <header class="decision-heading">
+    <h2><Sparkles size={21} />{decision.name}</h2>
+    {#if decision.eventContext}
+      {@const context = decision.eventContext}
+      <div class="decision-event-context" class:full-context={!!context.card || !!context.raid}>
+        {#if context.raid}<p class="event-raid">
+            <Ship size={17} /><ResourceText text={context.raid} />
+          </p>{/if}
+        {#if context.card}
+          {@const card = context.card}
+          <div class="event-card-offer">
+            <Layers size={16} />
+            <span
+              >{card.later
+                ? card.firstOffer
+                  ? 'Then: take the card'
+                  : 'If passed to you'
+                : 'Take the card'}</span
+            >
+            <ResourceAmount pile={card.cost} />
+          </div>
+          <details class="event-rules">
+            <summary aria-label={`${card.name} event details`}
+              ><BookOpen size={13} />{card.name}<ChevronRight size={13} /></summary
+            >
+            {#if context.placement}<p>{context.placement}</p>{/if}
+            <p>
+              The player who triggered the event may take the card for <ResourceAmount
+                pile={{ culture_tokens: 1 }}
+              />. If they pass, other players may take it in turn order for <ResourceAmount
+                pile={{ culture_tokens: 2 }}
+              />.
+            </p>
+            <p>
+              <span class="event-card-use">Play <Zap size={13} />{card.free ? 0 : 1}</span><ResourceText
+                text={card.description}
+              />
+            </p>
+          </details>
+        {:else}
+          <details class="event-rules">
+            <summary aria-label={`${context.name} event details`}
+              ><BookOpen size={13} />Event rules<ChevronRight size={13} /></summary
+            >
+            {#if context.placement}<p>{context.placement}</p>{/if}
+            {#each context.rules as rule}<p><ResourceText text={rule} /></p>{/each}
+          </details>
+        {/if}
+      </div>
+    {/if}
+  </header>
   {#if decision.description}<p class="decision-description">
       <ResourceText
         text={decision.description
@@ -176,7 +181,11 @@
       </div>{/if}
     {#if mapChoice}
       <details class="decision-tile-list">
-        <summary>Select on map · {selected.length}/{decision.max}<span>Tile list</span></summary>
+        <summary
+          ><span>{count} on board · <strong>{selected.length}/{decision.max}</strong></span><span
+            >{pieceChoice ? 'Piece list' : 'Tile list'} <ChevronRight size={13} /></span
+          ></summary
+        >
         {@render options()}
       </details>
     {:else}
@@ -273,9 +282,11 @@
       >
         {selected.length === 0 && !decision.fields.length && decision.min === 0
           ? 'Skip'
-          : mapChoice && selected.length
+          : mapChoice && selected.length && !pieceChoice
             ? `Confirm ${selected.map((i) => decision.options[i].position).join(', ')}`
-            : 'Confirm'}<Check size={16} />
+            : pieceChoice && selected.length
+              ? `Confirm · ${selected.length}/${decision.max}`
+              : 'Confirm'}<Check size={16} />
       </button>
       {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
           {preview.error}

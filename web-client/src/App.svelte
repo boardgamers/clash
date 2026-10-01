@@ -69,6 +69,7 @@
   import ResourceText from './ResourceText.svelte';
   import ObjectiveCondition from './ObjectiveCondition.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
+  import { civilizationAccent } from './civilization-theme';
   import CityFacts from './CityFacts.svelte';
   import CollectionCapacity from './CollectionCapacity.svelte';
   import DecisionPanel from './DecisionPanel.svelte';
@@ -432,6 +433,7 @@
     mapDecision}
   class:map-decision={mapDecision}
   class="game-shell"
+  style:--civilization-accent={civilizationAccent(identity?.civilization)}
 >
   <header class="masthead">
     <div class="brand-block">
@@ -556,6 +558,9 @@
             onfocus={() => {}}
             onblur={() => controller.commands.leavePlayer()}
           >
+            <span class="civilization-watermark" aria-hidden="true"
+              ><CivilizationEmblem civilization={player.civilization} size={64} /></span
+            >
             <span class="player-emblem"
               >{#if $session.colorBlind}<span class="ownership-symbol" aria-hidden="true"
                   >{playerSymbol(player.index)}</span

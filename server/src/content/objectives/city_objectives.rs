@@ -1,7 +1,7 @@
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::game::Game;
-use crate::objective_card::Objective;
+use crate::objective_card::{Objective, ObjectiveProgress};
 use crate::player::Player;
 use itertools::Itertools;
 
@@ -38,8 +38,8 @@ fn building_lead(objective: &'static str, building: Building) -> Objective {
         objective,
         &format!("More of your cities contain a {building} than any other player's cities. The buildings may be any color.",),
     )
-    .status_phase_check(move |game, player| {
-        leading_player(game, player, 1, move |p, _| buildings(p, building))
+    .status_phase_progress(move |game, player| {
+        vec![leading_progress(&format!("Cities with {building} · lead by 1"), game, player, 1, move |p, _| buildings(p, building))]
     })
     .build()
 }
@@ -53,25 +53,30 @@ fn buildings(p: &Player, b: Building) -> usize {
 
 pub(crate) fn large_civ() -> Objective {
     Objective::builder("Large Civilization", "You own at least 6 cities.")
-        .status_phase_check(|_game, player| player.cities.len() >= 6)
+        .status_phase_progress(|_game, player| {
+            vec![ObjectiveProgress::new("Cities", player.cities.len(), 6)]
+        })
         .build()
 }
 
-pub(crate) fn leading_player(
+pub(crate) fn leading_progress(
+    label: &str,
     game: &Game,
     player: &Player,
     margin: usize,
-    value: impl Fn(&Player, &Game) -> usize + 'static + Sync + Send,
-) -> bool {
-    value(player, game)
-        >= game
-            .players
+    value: impl Fn(&Player, &Game) -> usize,
+) -> ObjectiveProgress {
+    ObjectiveProgress::new(
+        label,
+        value(player, game),
+        game.players
             .iter()
             .filter(|p| p.index != player.index && p.is_human())
             .map(|p| value(p, game))
             .max()
             .unwrap_or(0)
-            + margin
+            + margin,
+    )
 }
 
 pub(crate) fn advanced_culture() -> Objective {
@@ -79,21 +84,26 @@ pub(crate) fn advanced_culture() -> Objective {
         "Advanced Culture",
         "You have at least 6 standard advances, and more than every other player. Civilization advances do not count.",
     )
-    .status_phase_check(|game, player| {
-        player.advances.len() >= 6 && leading_player(game, player, 1, move |p, _| p.advances.len())
+    .status_phase_progress(|game, player| {
+        let mut progress = leading_progress("Standard advances · at least 6, lead by 1", game, player, 1, |p, _| p.advances.len());
+        progress.target = progress.target.max(6);
+        vec![progress]
     })
     .build()
 }
 
 pub(crate) fn happy_population() -> Objective {
     Objective::builder("Happy Population", "You own at least 4 Happy cities.")
-        .status_phase_check(|_game, player| {
-            player
-                .cities
-                .iter()
-                .filter(|c| c.mood_state == MoodState::Happy)
-                .count()
-                >= 4
+        .status_phase_progress(|_game, player| {
+            vec![ObjectiveProgress::new(
+                "Happy cities",
+                player
+                    .cities
+                    .iter()
+                    .filter(|c| c.mood_state == MoodState::Happy)
+                    .count(),
+                4,
+            )]
         })
         .build()
 }
@@ -103,38 +113,59 @@ pub(crate) fn architecture() -> Objective {
         "Architecture",
         "Your cities contain at least 4 different building types in your color.",
     )
-    .status_phase_check(|_game, player| {
-        player
-            .cities
-            .iter()
-            .flat_map(|c| c.pieces.buildings(Some(player.index)))
-            .unique()
-            .count()
-            >= 4
+    .status_phase_progress(|_game, player| {
+        vec![ObjectiveProgress::new(
+            "Building types in your color",
+            player
+                .cities
+                .iter()
+                .flat_map(|c| c.pieces.buildings(Some(player.index)))
+                .unique()
+                .count(),
+            4,
+        )]
     })
     .build()
 }
 
 pub(crate) fn consulate() -> Objective {
-    Objective::builder("Consulate", "At least 2 cities owned by other players contain buildings in your color.")
-        .status_phase_check(|game, player| {
+    Objective::builder(
+        "Consulate",
+        "At least 2 cities owned by other players contain buildings in your color.",
+    )
+    .status_phase_progress(|game, player| {
+        vec![ObjectiveProgress::new(
+            "Other cities with your buildings",
             game.players
                 .iter()
                 .filter(|p| p.index != player.index)
                 .flat_map(|p| &p.cities)
                 .filter(|c| !c.pieces.buildings(Some(player.index)).is_empty())
-                .count()
-                >= 2
-        })
-        .build()
+                .count(),
+            2,
+        )]
+    })
+    .build()
 }
 
 pub(crate) fn metropolis() -> Objective {
-    Objective::builder("Metropolis", "You own at least 1 city of size 5 or greater.")
-        .status_phase_check(|_game, player| {
-            player.cities.iter().filter(|c| c.size() >= 5).count() >= 1
-        })
-        .build()
+    Objective::builder(
+        "Metropolis",
+        "You own at least 1 city of size 5 or greater.",
+    )
+    .status_phase_progress(|_game, player| {
+        vec![ObjectiveProgress::new(
+            "Largest city size",
+            player
+                .cities
+                .iter()
+                .map(|c| c.size() as usize)
+                .max()
+                .unwrap_or(0),
+            5,
+        )]
+    })
+    .build()
 }
 
 pub(crate) fn expansionist() -> Objective {
@@ -142,8 +173,8 @@ pub(crate) fn expansionist() -> Objective {
         "Expansionist",
         "You own at least 4 cities that are not adjacent to any other city, including your own and barbarian cities.",
     )
-    .status_phase_check(|game, player| {
-        player
+    .status_phase_progress(|game, player| {
+        vec![ObjectiveProgress::new("Non-adjacent cities", player
             .cities
             .iter()
             .filter(|c| {
@@ -152,8 +183,7 @@ pub(crate) fn expansionist() -> Objective {
                     .iter()
                     .all(|n| game.try_get_any_city(*n).is_none())
             })
-            .count()
-            >= 4
+            .count(), 4)]
     })
     .build()
 }
@@ -163,7 +193,15 @@ pub(crate) fn culture_power() -> Objective {
         "Culture Power",
         "You have influenced more buildings than any other player.",
     )
-    .status_phase_check(|game, player| leading_player(game, player, 1, influenced_buildings))
+    .status_phase_progress(|game, player| {
+        vec![leading_progress(
+            "Influenced buildings · lead by 1",
+            game,
+            player,
+            1,
+            influenced_buildings,
+        )]
+    })
     .build()
 }
 
