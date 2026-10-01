@@ -14,6 +14,7 @@
   import UnitPicker, { type UnitChoice } from './UnitPicker.svelte';
   import { researchPresentation } from './research';
   import { mapDecisionOptions } from './decision-controls';
+  import { steelWeaponsBenefit } from './active-combat';
   let {
     controller,
     decision,
@@ -24,8 +25,14 @@
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
   const mapChoice = $derived(mapDecisionOptions(decision).length > 0);
+  const combatBenefit = $derived(
+    decision.name === 'Steel Weapons'
+      ? steelWeaponsBenefit($session.game, $session.view, $session.view?.activePlayer ?? $session.seat)
+      : null,
+  );
   const description = $derived(
-    decision.name === 'Place Settler' ? 'Free Settler after losing a city.' : decision.description,
+    combatBenefit ??
+      (decision.name === 'Place Settler' ? 'Free Settler after losing a city.' : decision.description),
   );
   const pieceChoice = $derived(mapChoice && decision.options.some((option) => option.mapTarget));
   const unitChoice = $derived(pieceChoice && decision.options.every((o) => o.mapTarget?.kind === 'unit'));
@@ -224,7 +231,7 @@
   {/if}
   {#if directPayments}
     {@const field = decision.fields[0]}
-    {#if field.name !== decision.name}<p class="decision-description">
+    {#if field.name !== decision.name && !combatBenefit}<p class="decision-description">
         <ResourceText text={field.name} />
       </p>{/if}
     <PaymentPicker

@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { journal } from './journal.ts';
 import { combatJournal } from './combat-journal.ts';
+import { steelWeaponsBenefit } from './active-combat.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const npcs = JSON.parse(await engine.init(2, [], {}, 'card-rules', {})).players.slice(2);
@@ -82,6 +83,12 @@ for (const opponentHasSteel of [false, true]) {
     else g.players[0].advances = g.players[0].advances.filter((a: string) => a !== 'Metallurgy');
     const before = g.players[0].resources.ore;
     let after = attack(g);
+    assert.equal(
+      steelWeaponsBenefit(after, view(after), 0),
+      opponentHasSteel
+        ? '+1 combat value each round. Enemy has Steel Weapons.'
+        : '+2 combat value each round.',
+    );
     const prompt = after.events.at(-1).handler;
     assert.equal(prompt.origin.Advance, 'SteelWeapons');
     assert.deepEqual(prompt.request.Payment[0].cost.default, { ore: 1 });
@@ -89,6 +96,23 @@ for (const opponentHasSteel of [false, true]) {
     assert.equal(after.players[0].resources.ore, before - 1);
   });
 }
+
+test('Steel Weapons prompt accounts for borrowed enemy advances and either combat role', () => {
+  const g = fixture('combat/direct_capture_city_metallurgy');
+  g.players[1].great_library_advance = 'SteelWeapons';
+  const after = attack(g);
+  const publicView = view(after);
+  assert.equal(
+    steelWeaponsBenefit(after, publicView, 0),
+    '+1 combat value each round. Enemy has Steel Weapons.',
+  );
+  assert.equal(
+    steelWeaponsBenefit(after, publicView, 1),
+    '+1 combat value each round. Enemy has Steel Weapons.',
+  );
+  assert.equal(steelWeaponsBenefit(after, publicView, 2), null);
+  assert.equal(steelWeaponsBenefit({ ...after, events: [] }, publicView, 0), null);
+});
 
 test('leader-only recruitment is offered with a real cost, and unavailable cities explain why', async () => {
   let g: any = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'leader-availability', {});

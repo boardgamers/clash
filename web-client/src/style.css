@@ -4505,6 +4505,16 @@ small {
   gap: 6px;
   justify-content: flex-end;
 }
+.game-shell .compact-payments.cost-only {
+  display: flex;
+  flex-wrap: wrap;
+}
+.game-shell .compact-payments.cost-only > button {
+  flex: 0 0 auto;
+  min-width: 56px;
+  justify-content: center;
+  padding-inline: 14px;
+}
 .payment-builder {
   display: flex;
   flex-direction: column;
@@ -4646,5 +4656,33 @@ small {
 @media (max-width: 760px) {
   .game-shell .table-tools :is([aria-label='Sound'], [aria-label='Color-blind mode'], .tool-divider) {
     display: none;
+  }
+}
+
+/* City-bound abilities select existing map pieces, without coordinate cards. */
+.world-labels.choosing-ability :is(.city-map-name, .unit-map-label) {
+  display: none !important;
+}
+.ability-map-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ability-selected-city {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.game-shell .ability-map-confirm .primary {
+  width: auto;
+  min-width: 110px;
+  margin-left: auto;
+}
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
+  .board-interacting .board-ability {
+    bottom: calc(56px + var(--mobile-bottom));
   }
 }

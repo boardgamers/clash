@@ -52,7 +52,14 @@
     ) as Pile,
   );
   const long = $derived(options.some((option) => Object.values(option.payment).filter(Boolean).length > 3));
-  const emptyLabel = $derived(optional ? 'Decline' : onPay ? 'Continue' : 'Free');
+  const costOnly = $derived(
+    !!onPay &&
+      optional &&
+      !reward &&
+      options.length <= 4 &&
+      options.every((option) => Object.values(option.payment).filter(Boolean).length <= 1),
+  );
+  const emptyLabel = $derived(optional ? (costOnly ? 'No' : 'Decline') : onPay ? 'Continue' : 'Free');
   const verb = $derived(reward ? 'Gain' : 'Pay');
   function optionLabel(payment: Pile) {
     return empty(payment) ? emptyLabel : `${verb} ${pileText(payment)}`;
@@ -81,6 +88,7 @@
     class="payment-choices compact-payments"
     class:single={options.length === 1}
     class:long-payments={long}
+    class:cost-only={costOnly}
     role="group"
     aria-label={label}
   >
@@ -94,9 +102,9 @@
         onclick={() => (onPay ? onPay(option.payment) : choose(option.payment))}
       >
         {#if empty(option.payment)}{emptyLabel}{:else}
-          {#if onPay}<span>{verb}</span>{/if}<ResourceAmount
+          {#if onPay && !costOnly}<span>{verb}</span>{/if}<ResourceAmount
             pile={option.payment}
-            compact={Object.values(option.payment).filter(Boolean).length > 1}
+            compact={costOnly || Object.values(option.payment).filter(Boolean).length > 1}
           />
         {/if}
         {#if !onPay && samePayment(option.payment, value)}<Check size={14} />{/if}

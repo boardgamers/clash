@@ -393,6 +393,8 @@ export interface Session {
   moveDestination: number | null;
   cardsOpen: boolean;
   abilitiesOpen: boolean;
+  abilityChoice?: string | null;
+  abilityCity?: string | null;
   seaRoutes: boolean;
   seaRouteStart: string | null;
   game: Game | null;

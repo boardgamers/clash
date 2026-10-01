@@ -2,6 +2,7 @@ import CollectionMapBadge from './CollectionMapBadge.svelte';
 import { collectionYield, collectionBonusLabel, sameCollection } from './collection-yield';
 import type { MapPick } from './types';
 import * as THREE from 'three';
+import { activeCityAbility } from './abilities';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
@@ -222,7 +223,7 @@ export class World {
     const layout = host.closest('.play-layout')!;
     this.panelObserver = new MutationObserver(() => {
       const panel = layout.querySelector<HTMLElement>(
-        '.board-collection, .board-movement, .board-decision, .board-context',
+        '.board-collection, .board-movement, .board-decision, .board-ability, .board-context',
       );
       if (panel === this.interactionPanel) return;
       if (this.interactionPanel) this.resize.unobserve(this.interactionPanel);
@@ -393,7 +394,7 @@ export class World {
       if (this.referenceRing.visible) {
         const v = this.referenceRing.position.clone().project(this.camera);
         this.referenceLabel.style.transform = `translate(-50%, 8px) translate(${((v.x + 1) * w) / 2}px,${((-v.y + 1) * h) / 2}px)`;
-        this.referenceLabel.hidden = v.z > 1 || this.labelHost.classList.contains('choosing-pieces');
+        this.referenceLabel.hidden = v.z > 1 || this.labelHost.matches('.choosing-pieces, .choosing-ability');
       }
       if (this.combatOverlay.group.children.length) {
         const v = this.combatOverlay.position.clone().project(this.camera);
@@ -406,7 +407,7 @@ export class World {
     const target = position ?? this.pinnedReference;
     const visible = !!target && this.tiles.has(target);
     this.referenceRing.visible = visible;
-    this.referenceLabel.hidden = !visible || this.labelHost.classList.contains('choosing-pieces');
+    this.referenceLabel.hidden = !visible || this.labelHost.matches('.choosing-pieces, .choosing-ability');
     if (visible) {
       const [x, z] = positionXY(target!);
       this.referenceRing.position.set(x, 0.42, z);
@@ -638,8 +639,11 @@ export class World {
     const decisionPositions = [...new Set(mapChoices.map((o) => o.position!))];
     const pieceDecision = mapChoices.some((o) => o.mapTarget);
     this.decisionPositions = decisionPositions;
-    this.interactionPositions =
-      s.mode === 'collect'
+    const ability = activeCityAbility(s);
+    const abilityPositions = [...new Set(ability?.offers.map((offer) => offer.position!) ?? [])];
+    this.interactionPositions = ability
+      ? abilityPositions
+      : s.mode === 'collect'
         ? [
             ...new Set(
               [
@@ -662,7 +666,8 @@ export class World {
             : [];
     this.labelHost.classList.toggle('collecting', s.mode === 'collect');
     const decisionSelected = s.decisionSelection.flatMap((i) => mapChoices[i]?.position ?? []);
-    const interacting = s.mode === 'collect' || s.mode === 'settlers' || s.tilePanel || mapChoices.length > 0;
+    const interacting =
+      s.mode === 'collect' || s.mode === 'settlers' || s.tilePanel || mapChoices.length > 0 || !!ability;
     if (interacting !== this.boardInteraction) {
       this.boardInteraction = interacting;
       this.updateViewport();
@@ -672,6 +677,7 @@ export class World {
     this.seaGuide = seaGuide;
     this.seaPreviewAllowed =
       s.mode === 'overview' &&
+      !ability &&
       !s.pending &&
       !s.view?.decision &&
       !s.view?.explorationDecision &&
@@ -711,7 +717,9 @@ export class World {
                 ...(s.view?.units?.map((u) => u.position) ?? []),
                 ...s.moveDestinations.map((d) => d.position),
               ])
-            : null;
+            : ability
+              ? new Set(abilityPositions)
+              : null;
     const signature = JSON.stringify([
       mapTiles,
       s.game.players.map((p) => [p.cities, p.units]),
@@ -1066,7 +1074,9 @@ export class World {
             ? s.selection.map((c) => c.position)
             : s.tilePanel && focusedPosition
               ? [focusedPosition]
-              : [];
+              : ability && s.abilityCity
+                ? [s.abilityCity]
+                : [];
     const available = mapChoices.length
       ? decisionPositions
       : placement
@@ -1080,7 +1090,7 @@ export class World {
             ]
           : s.mode === 'collect'
             ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
-            : [];
+            : abilityPositions;
     const selectionSig = JSON.stringify([selected, available]);
     if (selectionSig !== this.selectionSignature) {
       this.selectionSignature = selectionSig;
@@ -1195,8 +1205,8 @@ export class World {
               ...s.moveDestinations.map((d) => d.position),
             ]),
           ]
-        : [];
-    const markerSignature = JSON.stringify([moveMarkers, mapChoices, s.view?.decision?.name]);
+        : abilityPositions;
+    const markerSignature = JSON.stringify([moveMarkers, mapChoices, s.view?.decision?.name, ability?.key]);
     if (markerSignature !== this.moveMarkerSignature) {
       this.moveMarkerSignature = markerSignature;
       for (const label of this.labelPositions.filter((l) => l.kind === 'destination')) label.node.remove();
@@ -1208,9 +1218,17 @@ export class World {
         label.classList.toggle('decision-map-label', mapChoices.length > 0);
         label.textContent = '';
         const terrain = s.game.map.tiles.find(([p]) => p === position)?.[1];
-        const description = terrain ? terrainInfo(terrain).label : 'Hex';
+        const city = ability && s.view?.cities.find((city) => city.position === position);
+        const description = city
+          ? `${city.mood} city · Size ${city.size}`
+          : terrain
+            ? terrainInfo(terrain).label
+            : 'Hex';
         label.dataset.description = description;
-        label.setAttribute('aria-label', `${pieceDecision ? 'Choose units' : 'Choose hex'} · ${description}`);
+        label.setAttribute(
+          'aria-label',
+          `${ability ? 'Choose city' : pieceDecision ? 'Choose units' : 'Choose hex'} · ${description}`,
+        );
         label.onclick = () => {
           if (this.canPick(position)) this.pick(position);
         };
@@ -1234,6 +1252,7 @@ export class World {
       );
       this.rings.visible = false;
     } else this.rings.visible = true;
+    this.labelHost.classList.toggle('choosing-ability', !!ability);
     this.labelHost.classList.toggle('hide-unit-badges', !s.unitBadges);
     this.labelHost.classList.toggle('choosing-pieces', pieceDecision || s.mode === 'settlers');
     for (const label of this.labelPositions) {
@@ -1244,8 +1263,12 @@ export class World {
             ? pieceDecision
               ? label.position === (s.decisionPosition ?? decisionPositions[0])
               : decisionSelected.includes(label.position)
-            : label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
+            : ability
+              ? label.position === s.abilityCity
+              : label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
         );
+      if (label.kind === 'destination' && ability)
+        label.node.setAttribute('aria-pressed', String(label.position === s.abilityCity));
       if (label.kind === 'destination' && mapChoices.length) {
         label.node.setAttribute(
           'aria-pressed',

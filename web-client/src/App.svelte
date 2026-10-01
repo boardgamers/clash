@@ -76,6 +76,7 @@
   import CombatJournal from './CombatJournal.svelte';
   import { combatJournal } from './combat-journal';
   import ActionCardsDialog from './ActionCardsDialog.svelte';
+  import { activeCityAbility } from './abilities';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
   import type { Resource, JournalEntry } from './types';
@@ -222,7 +223,8 @@
       world = new World(
         boardHost,
         (p, pick) => {
-          if ($session.activityOpen || $session.abilitiesOpen || confirmEnd) dismissMapDetails();
+          if ($session.activityOpen || ($session.abilitiesOpen && !activeCityAbility($session)) || confirmEnd)
+            dismissMapDetails();
           controller.selectTile(p, pick);
         },
         () => controller.audio.play('hover'),
@@ -430,6 +432,7 @@
   class:board-interacting={$session.mode === 'collect' ||
     $session.mode === 'settlers' ||
     $session.tilePanel ||
+    !!activeCityAbility($session) ||
     mapDecision}
   class:map-decision={mapDecision}
   class:activity-open={$session.activityOpen}
@@ -908,13 +911,8 @@
               {#each $session.view?.collectActions ?? [] as variant}<button
                   class:selected={JSON.stringify($session.collectVariant) === JSON.stringify(variant.value)}
                   aria-pressed={JSON.stringify($session.collectVariant) === JSON.stringify(variant.value)}
-                  onclick={() =>
-                    controller.patch({
-                      collectVariant: variant.value,
-                      selection: [],
-                      preview: null,
-                      error: '',
-                    })}
+                  disabled={$session.pending}
+                  onclick={() => controller.switchCollectVariant(variant.value)}
                   >{variant.name}{#if Object.values(variant.payment ?? {}).some(Boolean)}<ResourceAmount
                       pile={variant.payment!}
                     />{/if}{#if !variant.free}<Zap size={12} />1{/if}</button

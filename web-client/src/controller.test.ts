@@ -274,3 +274,71 @@ test('unit decisions open a hex without picking a casualty and lock while a move
     app.close();
   }
 });
+
+test('changing collection action keeps selected tiles and requotes the submitted action', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(fixture('advances/collect_free_economy'), 0));
+    c.beginCollect();
+    c.toggleChoice(app.session().view!.cities[0].choices[0]);
+    const selected = structuredClone(app.session().selection);
+    const normal = app.session().collectVariant;
+    const free = app.session().view!.collectActions!.find((a) => a.name === 'Free Economy')!;
+    const ordinaryAction = app.session().preview!.action;
+    c.switchCollectVariant(free.value);
+    assert.deepEqual(app.session().selection, selected);
+    assert.notDeepEqual(app.session().preview!.action, ordinaryAction);
+    assert.equal(app.sent.length, 0);
+    c.switchCollectVariant(normal);
+    assert.deepEqual(app.session().selection, selected);
+    assert.deepEqual(app.session().preview!.action, ordinaryAction);
+    c.switchCollectVariant(free.value);
+    const freeAction = app.session().preview!.action;
+    c.patch({ pending: true });
+    c.switchCollectVariant(normal);
+    assert.deepEqual(app.session().preview!.action, freeAction);
+    c.patch({ pending: false });
+    c.collect();
+    assert.deepEqual(JSON.parse(app.sent[0]), freeAction);
+  } finally {
+    app.close();
+  }
+});
+
+test('Sports chooses only an eligible map city and does not spend an action until confirmed', async () => {
+  const { groupAbilities } = await import('./abilities.ts');
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(fixture('advances/increase_happiness_sports'), 0));
+    const groups = groupAbilities(app.session().view!.specialActions);
+    const sports = groups.filter((g) => g.offer.name === 'Sports');
+    assert.equal(sports.length, 1);
+    assert.equal(sports[0].offers.length, 3);
+    c.chooseAbility(sports[0].key);
+    c.selectTile('A1'); // Happy: ineligible.
+    assert.equal(app.session().abilityCity, null);
+    c.selectTile('B1', { kind: 'city', player: 0 });
+    assert.equal(app.session().abilityCity, 'B1');
+    c.selectTile('C2', { kind: 'unit', player: 0, unit: 0 });
+    assert.equal(app.session().abilityCity, 'C2', 'Units on a city do not hijack the ability selection');
+    assert.equal(app.session().tilePanel, false);
+    assert.equal(app.session().mode, 'overview');
+    assert.equal(app.sent.length, 0);
+    c.patch({ pending: true });
+    c.selectTile('B3');
+    assert.equal(app.session().abilityCity, 'C2');
+    c.patch({ pending: false, abilitiesOpen: false });
+    assert.equal(app.session().abilityChoice, null);
+    assert.equal(app.session().abilityCity, null);
+    c.chooseAbility(sports[0].key);
+    c.selectTile('B3');
+    c.submit(sports[0].offers.find((o) => o.position === app.session().abilityCity)!.action);
+    assert.deepEqual(JSON.parse(app.sent[0]), { Playing: { Custom: { action: 'Sports', city: 'B3' } } });
+  } finally {
+    app.close();
+  }
+});

@@ -1,4 +1,4 @@
-import type { Game } from './types.ts';
+import type { Game, View } from './types.ts';
 
 export interface ActiveCombat {
   round: number;
@@ -24,4 +24,19 @@ export function activeCombat(game: Pick<Game, 'events'>): ActiveCombat | null {
       return stats;
   }
   return null;
+}
+
+/** Public advances include borrowed abilities, just as the engine's combat calculation does. */
+export function steelWeaponsBenefit(game: Game | null, view: View | null, player?: number): string | null {
+  const combat = game && activeCombat(game);
+  if (!combat || !view) return null;
+  const enemy =
+    combat.attacker.player === player
+      ? combat.defender.player
+      : combat.defender.player === player
+        ? combat.attacker.player
+        : null;
+  if (enemy === null) return null;
+  const hasSteel = view.players.find((p) => p.index === enemy)?.advances.some((a) => a.id === 'SteelWeapons');
+  return hasSteel ? '+1 combat value each round. Enemy has Steel Weapons.' : '+2 combat value each round.';
 }

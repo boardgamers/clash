@@ -9,6 +9,7 @@ import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
 import { canMoveOnMap, moveOrigins } from './map-actions';
 import { movementBonus } from './movement-bonus';
+import { activeCityAbility, groupAbilities } from './abilities';
 import {
   researchDecision,
   mapDecisionOptions,
@@ -85,7 +86,14 @@ export class Controller {
     this.chatOff = this.chat.subscribe(() => this.patch({ unread: this.chat.unread }));
   }
   patch(patch: Partial<Session>) {
-    this.session.update((s) => ({ ...s, ...patch }));
+    this.session.update((s) => {
+      const next = { ...s, ...patch };
+      if (!next.abilitiesOpen || next.mode !== 'overview') {
+        next.abilityChoice = null;
+        next.abilityCity = null;
+      }
+      return next;
+    });
   }
   setPreferences(preferences: Record<string, unknown>) {
     const next = readPreferences(preferences);
@@ -174,8 +182,13 @@ export class Controller {
     const city = view.cities.some((c) => c.position === old.city)
       ? old.city
       : (view.cities[0]?.position ?? null);
+    const ability = groupAbilities(view.specialActions).find((group) => group.key === old.abilityChoice);
     clearTimeout(this.refreshTimer);
     this.patch({
+      abilityChoice: ability?.key ?? null,
+      abilityCity: ability?.offers.some((offer) => offer.position === old.abilityCity)
+        ? old.abilityCity
+        : null,
       game,
       view,
       decisionSelection: newDecision ? [] : old.decisionSelection,
@@ -352,6 +365,12 @@ export class Controller {
     )
       return;
     this.audio.play('select');
+    const ability = activeCityAbility(s);
+    if (ability) {
+      if (ability.offers.some((offer) => offer.position === position))
+        this.patch({ abilityCity: position, error: '' });
+      return;
+    }
     if (s.seaRoutes && s.mode === 'overview') {
       if (s.game?.map.tiles.some(([p, terrain]) => p === position && terrain === 'Water'))
         this.patch({ seaRouteStart: position });
@@ -394,6 +413,21 @@ export class Controller {
     if (city) this.selectCity(position);
     this.closeActivity();
     this.patch({ focus: position, tilePanel: true, mode: 'overview', abilitiesOpen: false, error: '' });
+  }
+  chooseAbility(key: string) {
+    const s = get(this.session);
+    const group = groupAbilities(s.view?.specialActions).find((group) => group.key === key);
+    if (s.pending || !s.view?.canPlay || !group?.offers.every((offer) => offer.position)) return;
+    this.closeActivity();
+    this.patch({
+      abilitiesOpen: true,
+      abilityChoice: key,
+      abilityCity: null,
+      mode: 'overview',
+      tilePanel: false,
+      seaRoutes: false,
+      error: '',
+    });
   }
   selectDecisionOption(index: number) {
     const s = get(this.session);
@@ -519,6 +553,34 @@ export class Controller {
       attackPirates: false,
       abilitiesOpen: false,
     });
+  }
+  switchCollectVariant(variant: Move) {
+    const s = get(this.session);
+    if (
+      s.pending ||
+      s.mode !== 'collect' ||
+      !s.city ||
+      !s.view?.canPlay ||
+      !s.view.collectActions?.some((offer) => JSON.stringify(offer.value) === JSON.stringify(variant))
+    )
+      return;
+    // Requote the same tiles and resources; a failed quote must not leave the old
+    // action available or discard the player's choices.
+    this.patch({ collectVariant: variant, preview: null, error: '' });
+    if (!s.selection.length) return;
+    try {
+      this.patch({
+        preview: this.query<NonNullable<Session['preview']>>({
+          kind: 'collect',
+          city: s.city,
+          selections: s.selection,
+          variant,
+          ballcourts: !!s.ballcourts,
+        }),
+      });
+    } catch (error) {
+      this.patch({ error: String(error) });
+    }
   }
   switchCollectionCity(position: string) {
     const s = get(this.session);
