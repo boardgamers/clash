@@ -246,7 +246,7 @@ try {
     assert.equal(await tilePanel.locator('.decision-options').count(), 0);
     assert.doesNotMatch(await tilePanel.innerText(), /\b[A-F][0-9]\b/);
     await tapHex(page, 'B1');
-    assert.match(await tilePanel.locator('.decision-map-hint').innerText(), /1\/1/);
+    assert.match(await tilePanel.locator('.map-selection-count').innerText(), /1\/1/);
     const keyboardHex = page.locator('.map-hit-target[data-position="B2"]');
     await keyboardHex.focus();
     await keyboardHex.press('Enter');

@@ -4390,7 +4390,7 @@ small {
   min-height: 30px;
   flex-shrink: 0;
 }
-.game-shell .selection-tray :is(.decision-description, .decision-map-hint, .movement-hint) {
+.game-shell .selection-tray :is(.decision-description, .movement-hint) {
   margin: 0;
   padding: 0;
   font-size: 12px;
@@ -4453,4 +4453,31 @@ small {
   bottom: auto;
   padding: 7px 12px;
   pointer-events: none;
+}
+
+.game-shell .selection-tray .map-decision-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+}
+.map-selection-count {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+.game-shell .selection-tray .map-decision-footer .primary {
+  width: auto;
+  height: auto;
+  min-width: 100px;
+  gap: 12px;
+}
+.map-decision-footer .inline-error {
+  flex-basis: 100%;
+}
+@media (max-width: 760px) {
+  .game-shell .selection-tray .map-decision-footer .primary {
+    min-height: 40px;
+  }
 }

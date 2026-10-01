@@ -23,6 +23,9 @@
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
   const mapChoice = $derived(mapDecisionOptions(decision).length > 0);
+  const description = $derived(
+    decision.name === 'Place Settler' ? 'Free Settler after losing a city.' : decision.description,
+  );
   const pieceChoice = $derived(mapChoice && decision.options.some((option) => option.mapTarget));
   const unitChoice = $derived(pieceChoice && decision.options.every((o) => o.mapTarget?.kind === 'unit'));
   const unitChoices: UnitChoice[] = $derived(
@@ -200,11 +203,9 @@
       </div>
     {/if}
   </header>
-  {#if decision.description}<p class="decision-description">
+  {#if description}<p class="decision-description">
       <ResourceText
-        text={decision.description
-          .replaceAll('Status Phase', 'End of age')
-          .replaceAll('status phase', 'end of age')}
+        text={description.replaceAll('Status Phase', 'End of age').replaceAll('status phase', 'end of age')}
       />
     </p>{/if}
   {#if decision.options.length}
@@ -226,9 +227,7 @@
       />
     {:else if pieceChoice}
       {@render options()}
-    {:else if mapChoice}
-      <p class="decision-map-hint">Choose highlighted hexes · {selected.length}/{decision.max}</p>
-    {:else}
+    {:else if !mapChoice}
       {@render options()}
     {/if}
   {/if}
@@ -313,20 +312,22 @@
         {/if}
       </div>
     {/each}
-    <div class="decision-footer">
+    <div class="decision-footer" class:map-decision-footer={mapChoice}>
+      {#if mapChoice && !unitChoice}<span
+          class="map-selection-count"
+          aria-label={`${selected.length} of ${decision.max} selected`}>{selected.length}/{decision.max}</span
+        >{/if}
       <button
-        class="primary wide"
+        class="primary"
+        class:wide={!mapChoice}
+        aria-label={mapChoice && selected.length ? `Confirm · ${selected.length}/${decision.max}` : undefined}
         disabled={!preview.action || $session.pending}
         title={preview.error || 'Confirm selection'}
         onclick={() => preview.action && controller.submit(preview.action)}
       >
-        {selected.length === 0 && !decision.fields.length && decision.min === 0
-          ? 'Skip'
-          : mapChoice && selected.length && !pieceChoice
-            ? `Confirm · ${selected.length}/${decision.max}`
-            : pieceChoice && selected.length
-              ? `Confirm · ${selected.length}/${decision.max}`
-              : 'Confirm'}<Check size={16} />
+        {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : 'Confirm'}<Check
+          size={16}
+        />
       </button>
       {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
           {preview.error}
