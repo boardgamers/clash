@@ -243,7 +243,7 @@ test('Expansion keeps its new settler and destination selected across repeated p
   }
 });
 
-test('board unit selection stays local, rejects other pieces and locks while a move is pending', async () => {
+test('unit decisions open a hex without picking a casualty and lock while a move is pending', async () => {
   const app = paymentController(),
     c = app.controller;
   const state = fixture('incidents/pandemics/black_death.outcome');
@@ -252,7 +252,10 @@ test('board unit selection stays local, rejects other pieces and locks while a m
     await c.load(engine.stripSecret(state, 0));
     c.selectTile('C2', { kind: 'units', player: 0 });
     assert.deepEqual(app.session().decisionSelection, []);
+    assert.equal(app.session().decisionPosition, 'C2');
     c.selectTile('C2', { kind: 'unit', player: 0, unit: 3 });
+    assert.deepEqual(app.session().decisionSelection, []);
+    c.selectDecisionOption(2);
     assert.deepEqual(app.session().decisionSelection, [2]);
     assert.deepEqual(app.sent, []);
     c.selectTile('C2', { kind: 'unit', player: 1, unit: 0 });

@@ -9,6 +9,7 @@
   import ResourceText from './ResourceText.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import DecisionOptionContent from './DecisionOptionContent.svelte';
+  import UnitPicker, { type UnitChoice } from './UnitPicker.svelte';
   import { researchPresentation } from './research';
   import { mapDecisionOptions } from './decision-controls';
   import { pileText } from './model';
@@ -23,6 +24,34 @@
   const selected = $derived($session.decisionSelection);
   const mapChoice = $derived(mapDecisionOptions(decision).length > 0);
   const pieceChoice = $derived(mapChoice && decision.options.some((option) => option.mapTarget));
+  const unitChoice = $derived(pieceChoice && decision.options.every((o) => o.mapTarget?.kind === 'unit'));
+  const unitChoices: UnitChoice[] = $derived(
+    decision.options.flatMap((option, id) => {
+      const target = option.mapTarget;
+      if (target?.kind !== 'unit' || !option.position) return [];
+      const units = $session.game?.players.find((p) => p.id === target.player)?.units;
+      const unit = units?.find((u) => u.id === target.unit);
+      const carrier =
+        unit?.carrier_id ?? units?.find((u) => u.carried_units?.some((p) => p.id === target.unit))?.id;
+      const name =
+        typeof target.unitType === 'string'
+          ? `${target.unitType} #${target.unit + 1}`
+          : ($session.view?.players
+              .find((p) => p.index === target.player)
+              ?.leaders?.find((l) => l.unit === target.unit)?.name ?? target.unitType.Leader);
+      return [
+        {
+          id,
+          type: target.unitType,
+          player: target.player,
+          position: option.position,
+          name,
+          detail: carrier != null ? `Aboard ship #${carrier + 1}` : undefined,
+          pirate: unit?.pirate,
+        },
+      ];
+    }),
+  );
   let payments = $state<Pile[]>(
     untrack(() => decision.fields.map((f) => ({ ...(f.choices?.length === 1 ? f.choices[0] : f.initial) }))),
   );
@@ -113,6 +142,7 @@
 <section
   class="action-panel floating-panel decision-panel"
   class:board-decision={mapChoice}
+  class:unit-decision={unitChoice}
   class:card-decision={decision.options.some((option) => option.card)}
   aria-label={decision.name}
 >
@@ -179,7 +209,22 @@
     {#if !mapChoice}<div class="decision-count">
         {count}<span>{selected.length}/{decision.max}</span>
       </div>{/if}
-    {#if mapChoice}
+    {#if unitChoice}
+      <UnitPicker
+        choices={unitChoices}
+        {selected}
+        position={$session.decisionPosition ?? null}
+        limit={decision.max}
+        pending={$session.pending}
+        colorBlind={$session.colorBlind}
+        label={count}
+        onPosition={(position) => controller.focusDecisionPosition(position)}
+        onSelect={toggle}
+        {onHighlight}
+      />
+    {:else if pieceChoice}
+      {@render options()}
+    {:else if mapChoice}
       <details class="decision-tile-list">
         <summary
           ><span>{count} on board · <strong>{selected.length}/{decision.max}</strong></span><span

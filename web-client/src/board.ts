@@ -14,7 +14,6 @@ import { activeCombat } from './active-combat';
 import { Swords } from 'lucide-svelte';
 import { mount, unmount } from 'svelte';
 import UnitMapBadge from './UnitMapBadge.svelte';
-import DecisionMapBadge from './DecisionMapBadge.svelte';
 import { mapDecisionOptions } from './decision-controls';
 
 const terrainColor: Record<string, string> = {
@@ -77,14 +76,12 @@ export class World {
     position: string;
     at: THREE.Vector3;
     node: HTMLButtonElement;
-    kind: 'city' | 'units' | 'destination' | 'collection' | 'decision';
-    decisionIndex?: number;
+    kind: 'city' | 'units' | 'destination' | 'collection';
     offsetX?: number;
     offsetY?: number;
     ownershipBounds?: THREE.Vector3[];
   }[] = [];
   private unitBadges: ReturnType<typeof mount>[] = [];
-  private decisionBadges: ReturnType<typeof mount>[] = [];
   private labelHost: HTMLDivElement;
   private center = new THREE.Vector3(4.5, 0, 8);
   private material(color: string, roughness = 1) {
@@ -1006,15 +1003,19 @@ export class World {
     }
     const settler = s.view?.units?.find((u) => s.selectedUnits.includes(u.id));
     const focusedPosition =
-      s.mode === 'settlers' ? settler?.position : s.mode === 'overview' ? (s.focus ?? s.city) : s.city;
+      s.mode === 'settlers'
+        ? (s.unitPosition ?? settler?.position)
+        : s.mode === 'overview'
+          ? (s.focus ?? s.city)
+          : s.city;
     const selected = mapChoices.length
-      ? decisionSelected
+      ? [...decisionSelected, ...(pieceDecision ? [s.decisionPosition ?? decisionPositions[0]] : [])]
       : exploration
         ? exploration.destination
           ? [exploration.destination]
           : []
         : s.mode === 'settlers'
-          ? [settler?.position, s.moveTarget].filter((p): p is string => !!p)
+          ? [s.unitPosition ?? settler?.position, s.moveTarget].filter((p): p is string => !!p)
           : s.mode === 'collect'
             ? s.selection.map((c) => c.position)
             : s.tilePanel && focusedPosition
@@ -1025,7 +1026,12 @@ export class World {
       : placement
         ? placement.tiles.map(([position]) => position)
         : s.mode === 'settlers'
-          ? s.moveDestinations.map((d) => d.position)
+          ? [
+              ...new Set([
+                ...(s.view?.units?.map((u) => u.position) ?? []),
+                ...s.moveDestinations.map((d) => d.position),
+              ]),
+            ]
           : s.mode === 'collect'
             ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
             : [];
@@ -1141,23 +1147,20 @@ export class World {
     const markerSignature = JSON.stringify([moveMarkers, mapChoices, s.view?.decision?.name]);
     if (markerSignature !== this.moveMarkerSignature) {
       this.moveMarkerSignature = markerSignature;
-      for (const badge of this.decisionBadges) void unmount(badge);
-      this.decisionBadges = [];
-      for (const label of this.labelPositions.filter(
-        (l) => l.kind === 'destination' || l.kind === 'decision',
-      ))
-        label.node.remove();
-      this.labelPositions = this.labelPositions.filter(
-        (l) => l.kind !== 'destination' && l.kind !== 'decision',
-      );
-      for (const position of pieceDecision ? [] : moveMarkers) {
+      for (const label of this.labelPositions.filter((l) => l.kind === 'destination')) label.node.remove();
+      this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'destination');
+      for (const position of moveMarkers) {
         const label = document.createElement('button');
         label.className = 'move-map-label';
         label.classList.toggle('decision-map-label', mapChoices.length > 0);
         label.textContent = position;
         label.setAttribute(
           'aria-label',
-          mapChoices.length ? `Select tile ${position}` : `Move destination ${position}`,
+          mapChoices.length
+            ? pieceDecision
+              ? `Units at ${position}`
+              : `Select tile ${position}`
+            : `Move destination ${position}`,
         );
         label.title = mapChoices.length
           ? `Select ${position} · ${s.view!.decision!.name}`
@@ -1178,39 +1181,6 @@ export class World {
           kind: 'destination',
         });
       }
-      for (const position of pieceDecision ? decisionPositions : []) {
-        const choices = mapChoices.flatMap((option, index) =>
-          option.position === position ? [{ option, index }] : [],
-        );
-        const unitChoices = choices.every(({ option }) => option.mapTarget?.kind === 'unit');
-        const columns = unitChoices ? Math.min(3, choices.length) : 1;
-        for (const [n, { option, index }] of choices.entries()) {
-          const label = document.createElement('button');
-          label.className = 'decision-piece-label';
-          label.setAttribute('aria-label', `Select ${option.name}`);
-          label.title = option.name;
-          this.decisionBadges.push(mount(DecisionMapBadge, { target: label, props: { option } }));
-          label.onclick = () => {
-            if (this.canPick(position)) this.pick(position, { kind: 'decision', decisionIndex: index });
-          };
-          label.onpointerenter = () => this.setHovered(position, true);
-          label.onpointerleave = () => this.setHovered(null);
-          label.onfocus = () => this.setHovered(position);
-          label.onblur = () => this.setHovered(null);
-          this.labelHost.append(label);
-          const [x, z] = positionXY(position);
-          const rowLength = Math.min(columns, choices.length - Math.floor(n / columns) * columns);
-          this.labelPositions.push({
-            position,
-            at: new THREE.Vector3(x, 0.7, z),
-            node: label,
-            kind: 'decision',
-            decisionIndex: index,
-            offsetX: ((n % columns) - (rowLength - 1) / 2) * 61,
-            offsetY: 28 + Math.floor(n / columns) * 45,
-          });
-        }
-      }
     }
     if (seaGuide) {
       this.selectable = new Set(
@@ -1219,26 +1189,26 @@ export class World {
       this.rings.visible = false;
     } else this.rings.visible = true;
     this.labelHost.classList.toggle('hide-unit-badges', !s.unitBadges);
-    this.labelHost.classList.toggle('choosing-pieces', pieceDecision);
+    this.labelHost.classList.toggle('choosing-pieces', pieceDecision || s.mode === 'settlers');
     for (const label of this.labelPositions) {
-      if (label.kind === 'decision') {
-        const chosen = s.decisionSelection.includes(label.decisionIndex!);
-        label.node.classList.toggle('selected', chosen);
-        label.node.setAttribute('aria-pressed', String(chosen));
-        label.node.disabled =
-          !this.canPick(label.position) ||
-          (!chosen && s.view!.decision!.max > 1 && s.decisionSelection.length >= s.view!.decision!.max);
-        continue;
-      }
       if (label.kind !== 'collection')
         label.node.classList.toggle(
           'selected',
           mapChoices.length
-            ? decisionSelected.includes(label.position)
+            ? pieceDecision
+              ? label.position === (s.decisionPosition ?? decisionPositions[0])
+              : decisionSelected.includes(label.position)
             : label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
         );
       if (label.kind === 'destination' && mapChoices.length) {
-        label.node.setAttribute('aria-pressed', String(decisionSelected.includes(label.position)));
+        label.node.setAttribute(
+          'aria-pressed',
+          String(
+            pieceDecision
+              ? label.position === (s.decisionPosition ?? decisionPositions[0])
+              : decisionSelected.includes(label.position),
+          ),
+        );
         label.node.textContent = `${decisionSelected.includes(label.position) ? '✓ ' : ''}${label.position}`;
       }
       label.node.disabled = !this.canPick(label.position);
@@ -1263,8 +1233,6 @@ export class World {
   }
   destroy() {
     this.disposed = true;
-    for (const badge of this.decisionBadges) void unmount(badge);
-    this.decisionBadges = [];
     this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];

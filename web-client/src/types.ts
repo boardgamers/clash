@@ -378,6 +378,7 @@ export interface EventInfo {
 export interface Session {
   automaticPayment?: boolean;
   decisionSelection: number[];
+  decisionPosition?: string | null;
   replacements: number[];
   collectVariant: Move;
   tilePanel: boolean;
@@ -385,6 +386,7 @@ export interface Session {
   collectionTile: string | null;
   moveTarget: string | null;
   selectedUnits: number[];
+  unitPosition?: string | null;
   movingCity?: string | null;
   moveDestinations: MoveDestination[];
   moveDestination: number | null;

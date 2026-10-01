@@ -432,6 +432,7 @@
     $session.tilePanel ||
     mapDecision}
   class:map-decision={mapDecision}
+  class:activity-open={$session.activityOpen}
   class="game-shell"
   style:--civilization-accent={civilizationAccent(identity?.civilization)}
 >

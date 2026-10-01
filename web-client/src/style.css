@@ -3793,41 +3793,6 @@ small {
 .game-shell .decision-tile-list {
   margin-bottom: 6px;
 }
-.decision-piece-label {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 56px;
-  min-height: 42px;
-  padding: 6px 7px;
-  border: 1px solid #587686;
-  border-radius: 7px;
-  box-shadow: 0 2px 8px #13283340;
-  background: var(--paper);
-  color: var(--ink);
-  font-size: 11px;
-  pointer-events: auto;
-  z-index: 3;
-}
-.decision-piece-label.selected {
-  background: #286871;
-  border: 2px solid #b6e6e7;
-  color: white;
-}
-.decision-piece-label.selected::after {
-  content: '✓';
-  position: absolute;
-  top: -7px;
-  right: -5px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  color: #245964;
-  font-size: 12px;
-}
 .world-labels.choosing-pieces :is(.city-map-label, .unit-map-label) {
   display: none !important;
 }
@@ -4010,4 +3975,235 @@ small {
   color: var(--ink);
   border-color: var(--civilization-accent);
   outline-color: var(--civilization-accent);
+}
+
+/* A hex opens its pieces; selection stays in a single, scrollable panel. */
+.board-interacting .city-dock {
+  display: none;
+}
+.city-dock {
+  max-width: calc(100% - 340px);
+}
+.unit-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+.unit-location-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  padding: 2px 0;
+  scrollbar-width: thin;
+}
+.unit-location-bar button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  padding: 6px 10px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.unit-location-bar button.selected {
+  border-color: var(--gold);
+  background: var(--paper2);
+}
+.location-selected {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--green);
+  font-size: 11px;
+}
+.unit-selection-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.unit-selection-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.unit-selection-heading .unit-location-bar {
+  min-width: 0;
+  flex-shrink: 1;
+}
+.unit-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  max-height: 270px;
+  padding: 2px;
+}
+.unit-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  padding: 5px 4px 8px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper2);
+}
+.unit-choice.selected {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+  background: color-mix(in srgb, var(--gold) 13%, var(--paper));
+}
+.unit-choice strong {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.unit-choice small {
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.unit-choice-check {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+}
+.unit-choice.selected .unit-choice-check {
+  background: var(--gold);
+  color: #263d35;
+  border-color: var(--gold);
+}
+.unit-choice:focus-visible,
+.unit-location-bar button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.unit-portrait {
+  height: 68px;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+.unit-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.game-shell .action-panel.unit-decision {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.unit-decision > :not(.unit-selection) {
+  flex-shrink: 0;
+}
+.unit-decision .unit-selection {
+  flex: 1 1 auto;
+}
+.unit-decision .unit-choice-grid {
+  min-height: 80px;
+}
+.unit-decision .decision-footer {
+  margin-top: 8px;
+  padding-top: 0;
+}
+.game-shell .unit-decision .decision-description {
+  margin-bottom: 0;
+}
+.board-movement .unit-selection {
+  margin-bottom: 8px;
+}
+@media (min-width: 761px) and (min-height: 501px) {
+  .game-shell .play-layout .action-panel:is(.board-movement, .board-decision) {
+    left: 20px;
+    right: auto;
+    bottom: 18px;
+    top: auto;
+    width: min(368px, calc(100% - 420px));
+    max-height: calc(100% - 40px);
+    padding: 16px;
+  }
+  .game-shell .board-context {
+    bottom: 18px;
+  }
+}
+@media (max-width: 760px) {
+  .unit-choice-grid {
+    max-height: 230px;
+  }
+  .unit-location-bar button {
+    min-height: 36px;
+  }
+  .game-shell .action-panel.unit-decision {
+    gap: 6px;
+  }
+  .unit-decision .decision-footer {
+    margin-top: 2px;
+  }
+}
+
+.board-interacting .player-list {
+  display: none;
+}
+.game-shell .action-panel.unit-decision .decision-heading {
+  margin-bottom: 0;
+}
+.unit-portrait {
+  flex-shrink: 0;
+}
+.unit-portrait img {
+  min-height: 0;
+  min-width: 0;
+}
+.choosing-pieces .decision-map-label {
+  min-width: 30px;
+  min-height: 26px;
+  padding: 3px 6px;
+}
+.game-shell .action-panel.board-movement > .unit-selection {
+  flex-shrink: 0;
+}
+.game-shell .action-panel.unit-decision .unit-choice-grid {
+  min-height: 112px;
+}
+/* Opening the journal on a phone temporarily replaces the picker without losing its selection. */
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
+  .game-shell.activity-open .action-panel.board-decision {
+    visibility: hidden;
+  }
+  .game-shell.activity-open.map-decision .map-world {
+    pointer-events: none;
+  }
+  .game-shell.activity-open .activity.floating-panel {
+    z-index: 26;
+    bottom: calc(56px + var(--mobile-bottom));
+  }
+  .game-shell .action-panel.unit-decision:has(.event-rules[open]) {
+    overflow-y: auto;
+  }
+  .unit-decision:has(.event-rules[open]) .unit-selection {
+    flex-shrink: 0;
+  }
+  .unit-decision .event-rules[open] {
+    max-height: 130px;
+    overflow-y: auto;
+  }
 }

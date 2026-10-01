@@ -9,13 +9,12 @@
     Zap,
     Ship,
     Swords,
-    LogOut,
     TriangleAlert,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
-  import UnitIcon from './UnitIcon.svelte';
+  import UnitPicker from './UnitPicker.svelte';
   import LeaderDetails from './LeaderDetails.svelte';
   import { terrainInfo } from './terrain';
   import { movementBonus } from './movement-bonus';
@@ -29,9 +28,9 @@
   const bonus = $derived(movementBonus($session.game));
   const movesLeft = $derived($session.view?.movementLeft ?? 0);
   const first = $derived(units.find((u) => $session.selectedUnits.includes(u.id)));
-  const positions = $derived([...new Set(units.map((u) => u.position))]);
-  const atPosition = $derived(units.filter((u) => u.position === ($session.movingCity ?? first?.position)));
-  const passengers = $derived(atPosition.filter((u) => u.carrier !== null));
+  const origin = $derived(
+    $session.movingCity ?? $session.unitPosition ?? first?.position ?? units[0]?.position ?? null,
+  );
   const selectedUnits = $derived(units.filter((u) => $session.selectedUnits.includes(u.id)));
   const disembarking = $derived(selectedUnits.length > 0 && selectedUnits.every((u) => u.carrier !== null));
   const movementNotes = $derived([...new Set(selectedUnits.flatMap((u) => u.movementNotes ?? []))]);
@@ -96,19 +95,6 @@
           class:spent={i >= movesLeft}><Footprints size={14} /></span
         >{/each}
     </div>{/if}
-  {#if positions.length > 1}<div class="settler-picker" role="group" aria-label="Unit locations">
-      {#each positions as position}<button
-          class:selected={first?.position === position}
-          aria-pressed={first?.position === position}
-          onmouseenter={() => onHighlight(position)}
-          onmouseleave={() => onHighlight(null)}
-          onfocus={() => onHighlight(position)}
-          onblur={() => onHighlight(null)}
-          onclick={() => controller.selectUnits([units.find((u) => u.position === position)!.id])}
-          >{position}<span class="unit-count">{units.filter((u) => u.position === position).length}</span
-          ></button
-        >{/each}
-    </div>{/if}
   {#if $session.view?.nomadCities?.length}<div
       class="settler-picker"
       role="group"
@@ -122,28 +108,25 @@
           onclick={() => controller.openNomadCity(position)}><Landmark size={15} />{position}</button
         >{/each}
     </div>{/if}
-  <div class="unit-picker" role="group" aria-label="Units to move">
-    {#each atPosition.filter((u) => u.carrier === null) as u}<button
-        class:selected={$session.selectedUnits.includes(u.id)}
-        aria-pressed={$session.selectedUnits.includes(u.id)}
-        title={`${typeof u.type === 'string' ? u.type : u.type.Leader} #${u.id + 1}${u.carrier !== null ? ` · Aboard ship #${u.carrier + 1}` : ''}`}
-        onclick={() => select(u.id)}
-        ><UnitIcon type={u.type} /><span>#{u.id + 1}</span>{#if u.carrier !== null}<Ship
-            size={11}
-          />{/if}</button
-      >{/each}
-  </div>
-  {#if passengers.length}<div class="movement-passengers" role="group" aria-label="Passengers">
-      {#each passengers as u}<button
-          class="secondary"
-          class:selected={$session.selectedUnits.includes(u.id)}
-          aria-pressed={$session.selectedUnits.includes(u.id)}
-          title={`Aboard ship #${u.carrier! + 1}`}
-          onclick={() => select(u.id)}
-        >
-          <LogOut size={16} /><UnitIcon type={u.type} />Disembark {unitName(u)}
-        </button>{/each}
-    </div>{/if}
+  <UnitPicker
+    choices={units.map((u) => ({
+      id: u.id,
+      type: u.type,
+      player: $session.seat!,
+      position: u.position,
+      name: unitName(u),
+      detail: u.carrier !== null ? `Aboard ship #${u.carrier + 1} · Disembark` : u.movementNotes?.join(' · '),
+      pirate: u.pirate,
+    }))}
+    selected={$session.selectedUnits}
+    position={origin}
+    pending={$session.pending}
+    colorBlind={$session.colorBlind}
+    label="Units to move"
+    onPosition={(position) => controller.focusUnitPosition(position)}
+    onSelect={select}
+    {onHighlight}
+  />
   {#if movementNotes.length}<div class="movement-notes" role="note">
       {#each movementNotes as note}<p><TriangleAlert size={14} />{note}</p>{/each}
     </div>{/if}

@@ -179,6 +179,7 @@ export class Controller {
       game,
       view,
       decisionSelection: newDecision ? [] : old.decisionSelection,
+      decisionPosition: newDecision ? null : old.decisionPosition,
       selectedAdvance: newDecision && researchChoice ? null : old.selectedAdvance,
       tilePanel: old.pending || changed ? false : old.tilePanel,
       collectionTile: null,
@@ -277,6 +278,8 @@ export class Controller {
       wondersOpen: false,
       scorePlayer: null,
       decisionSelection: [],
+      decisionPosition: null,
+      unitPosition: null,
       tilePanel: false,
       collectionTile: null,
       moveTarget: null,
@@ -332,6 +335,10 @@ export class Controller {
   selectTile(position: string, pick: MapPick = { kind: 'tile' }) {
     const s = get(this.session);
     if (mapDecisionOptions(s.view?.decision).length) {
+      if (s.view!.decision!.options.some((o) => o.mapTarget)) {
+        this.focusDecisionPosition(position);
+        return;
+      }
       const index = mapDecisionIndex(s.view!.decision!, position, pick);
       if (index >= 0) this.selectDecisionOption(index);
       return;
@@ -357,6 +364,14 @@ export class Controller {
     // A destination takes priority over pieces on it (boarding or attacking).
     if (s.mode === 'settlers' && s.moveDestinations.some((d) => d.position === position)) {
       this.chooseMoveDestination(position);
+      return;
+    }
+    if (
+      s.mode === 'settlers' &&
+      pick.kind !== 'unit' &&
+      s.view?.units?.some((u) => u.position === position)
+    ) {
+      this.focusUnitPosition(position);
       return;
     }
     const units = s.view?.units?.filter((u) => u.position === position) ?? [];
@@ -389,6 +404,23 @@ export class Controller {
       decisionSelection: toggleDecisionSelection(decision, s.decisionSelection, index),
       error: '',
     });
+  }
+  focusDecisionPosition(position: string) {
+    const s = get(this.session);
+    if (
+      s.pending ||
+      s.seat !== s.view?.activePlayer ||
+      !mapDecisionOptions(s.view?.decision).some((o) => o.position === position)
+    )
+      return;
+    this.patch({ decisionPosition: position, error: '' });
+  }
+  focusUnitPosition(position: string) {
+    const s = get(this.session);
+    if (s.pending || !s.view?.units?.some((u) => u.position === position)) return;
+    const current = s.unitPosition ?? s.view.units.find((u) => s.selectedUnits.includes(u.id))?.position;
+    this.patch({ unitPosition: position, movingCity: null });
+    if (current !== position) this.selectUnits([]);
   }
   chooseMoveDestination(position: string) {
     const s = get(this.session);
@@ -554,6 +586,8 @@ export class Controller {
     this.patch({
       movingCity: city,
       selectedUnits,
+      unitPosition:
+        city ?? s.view?.units?.find((u) => selectedUnits.includes(u.id))?.position ?? s.unitPosition,
       moveDestinations: this.movementDestinations(selectedUnits, city),
       moveDestination: null,
       moveTarget: null,
