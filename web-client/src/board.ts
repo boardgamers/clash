@@ -3,6 +3,7 @@ import { collectionYield, collectionBonusLabel, sameCollection } from './collect
 import type { MapPick } from './types';
 import * as THREE from 'three';
 import { activeCityAbility } from './abilities';
+import { ExplorationOverlay } from './exploration-overlay';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
@@ -27,6 +28,9 @@ const terrainColor: Record<string, string> = {
   Unexplored: '#526f77',
 };
 export class World {
+  private explorationOverlay = new ExplorationOverlay();
+  private explorationLabel: HTMLDivElement;
+  private explorationPositions: string[] = [];
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera(36, 1, 0.1, 120);
   private renderer: THREE.WebGLRenderer;
@@ -123,6 +127,13 @@ export class World {
     this.labelHost = document.createElement('div');
     this.labelHost.className = 'world-labels';
     host.append(this.labelHost);
+    this.scene.add(this.explorationOverlay.group);
+    this.explorationLabel = document.createElement('div');
+    this.explorationLabel.className = 'map-exploration-label';
+    this.explorationLabel.textContent = 'Exploring';
+    this.explorationLabel.setAttribute('role', 'status');
+    this.explorationLabel.hidden = true;
+    host.append(this.explorationLabel);
     this.scene.add(new THREE.HemisphereLight('#fff4d8', '#386775', 2.2));
     const sun = new THREE.DirectionalLight('#ffe0a7', 3.2);
     sun.position.set(-9, 18, 8);
@@ -223,7 +234,7 @@ export class World {
     const layout = host.closest('.play-layout')!;
     this.panelObserver = new MutationObserver(() => {
       const panel = layout.querySelector<HTMLElement>(
-        '.board-collection, .board-movement, .board-decision, .board-ability, .tactics-decision, .board-context',
+        '.board-collection, .board-movement, .board-decision, .board-ability, .tactics-decision, .exploration-panel, .board-context',
       );
       if (panel === this.interactionPanel) return;
       if (this.interactionPanel) this.resize.unobserve(this.interactionPanel);
@@ -240,7 +251,7 @@ export class World {
     const width = this.host.clientWidth,
       height = this.host.clientHeight;
     if (!width || !height) return;
-    if (this.boardInteraction && this.compactMap() && this.interactionPanel) {
+    if (this.boardInteraction && this.compactMap() && this.interactionPanel?.getClientRects().length) {
       const board = this.host.getBoundingClientRect();
       const panel = this.interactionPanel.getBoundingClientRect();
       // Leave room for the map tools, then frame the usable area beside or above the panel.
@@ -401,6 +412,11 @@ export class World {
         this.combatLabel.style.transform = `translate(-50%, 12px) translate(${((v.x + 1) * w) / 2}px,${((-v.y + 1) * h) / 2}px)`;
         this.combatLabel.hidden = v.z > 1 || v.z < -1;
       }
+      if (this.explorationPositions.length) {
+        const v = this.explorationOverlay.position.clone().project(this.camera);
+        this.explorationLabel.style.transform = `translate(-50%, 8px) translate(${((v.x + 1) * w) / 2}px,${((-v.y + 1) * h) / 2}px)`;
+        this.explorationLabel.hidden = v.z > 1 || v.z < -1;
+      }
     });
   }
   highlightCoordinate(position: string | null) {
@@ -425,6 +441,19 @@ export class World {
     this.controls.update();
     this.pinnedReference = position;
     this.highlightCoordinate(position);
+  }
+  locateExploration() {
+    if (!this.explorationPositions.length) return;
+    const points = this.explorationPositions.map(positionXY);
+    const target = new THREE.Vector3(
+      points.reduce((n, p) => n + p[0], 0) / points.length,
+      0,
+      points.reduce((n, p) => n + p[1], 0) / points.length,
+    );
+    this.camera.position.add(target.clone().sub(this.controls.target));
+    this.controls.target.copy(target);
+    this.controls.update();
+    this.invalidate();
   }
   clearCoordinate() {
     this.pinnedReference = null;
@@ -641,9 +670,15 @@ export class World {
     this.decisionPositions = decisionPositions;
     const ability = activeCityAbility(s);
     const combat = activeCombat(s.game);
+    const exploration = s.view?.explorationDecision;
+    this.explorationPositions = exploration?.choices[0]?.tiles.map(([p]) => p) ?? [];
+    this.explorationOverlay.update(this.explorationPositions);
+    this.explorationLabel.hidden = !this.explorationPositions.length;
+    this.explorationLabel.dataset.positions = this.explorationPositions.join(' ');
     const abilityPositions = [...new Set(ability?.offers.map((offer) => offer.position!) ?? [])];
-    this.interactionPositions =
-      s.view?.decision?.tacticsSelection && combat
+    this.interactionPositions = exploration
+      ? this.explorationPositions
+      : s.view?.decision?.tacticsSelection && combat
         ? [combat.attacker.position, combat.defender.position]
         : ability
           ? abilityPositions
@@ -677,6 +712,7 @@ export class World {
       s.tilePanel ||
       mapChoices.length > 0 ||
       !!ability ||
+      !!exploration ||
       !!s.view?.decision?.tacticsSelection;
     if (interacting !== this.boardInteraction) {
       this.boardInteraction = interacting;
@@ -705,7 +741,6 @@ export class World {
       );
     }
     this.pending = s.pending;
-    const exploration = s.view?.explorationDecision;
     const placement =
       exploration?.choices.find(
         (choice) => choice.rotation === (s.explorationPreview ?? s.explorationRotation),
@@ -1304,6 +1339,7 @@ export class World {
       this.interactionSignature = interactionSignature;
       this.updateViewport();
       this.centerInteraction();
+      if (exploration) this.locateExploration();
     }
     this.setHovered(this.hovered);
     this.invalidate();
@@ -1315,6 +1351,8 @@ export class World {
     this.unitBadges = [];
     this.seaOverlay.dispose();
     this.combatOverlay.dispose();
+    this.explorationOverlay.dispose();
+    this.explorationLabel.remove();
     void unmount(this.combatIcon);
     this.combatLabel.remove();
     cancelAnimationFrame(this.frame);

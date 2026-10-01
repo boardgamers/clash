@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Compass, RotateCw, Check } from 'lucide-svelte';
+  import { Compass, RotateCw, Check, LocateFixed } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { positionXY } from './model';
   import TerrainIcon from './TerrainIcon.svelte';
   import { terrainInfo } from './terrain';
-  let { controller }: { controller: Controller } = $props();
+  let { controller, onLocate }: { controller: Controller; onLocate: () => void } = $props();
   const session = $derived(controller.session);
   let decision = $derived($session.view?.explorationDecision);
   let selected = $derived(
@@ -18,8 +18,12 @@
 
 {#if decision}
   <section class="action-panel floating-panel exploration-panel" aria-label="Explore terrain placement">
-    <h2><Compass size={22} /> Explore{decision.destination ? ` ${decision.destination}` : ''}</h2>
-    <p>Choose terrain placement.</p>
+    <header class="exploration-heading">
+      <h2><Compass size={20} />Explore</h2>
+      <button class="icon-button" aria-label="Locate the region being explored" onclick={onLocate}
+        ><LocateFixed size={18} /></button
+      >
+    </header>
     <div class="exploration-choices">
       {#each decision.choices as choice, i}
         {@const destinationTerrain = choice.tiles.find(
@@ -55,34 +59,30 @@
                   stroke={position === decision.destination ? '#263f33' : '#ffffff'}
                   stroke-width={position === decision.destination ? 0.1 : 0.03}
                 />
-                <g transform="translate(-.27,-.57)"
+                <g transform="translate(-.27,-.27)"
                   ><info.Icon size={0.54} strokeWidth={1.7} color="#263f33" /></g
-                >
-                <text text-anchor="middle" y=".42" fill="#263f33" font-size=".4" font-weight="650"
-                  >{position}</text
                 >
               </g>
             {/each}
           </svg>
           <span class="sr-only"
-            >{choice.tiles
-              .map(([position, terrain]) => `${position}: ${terrainInfo(terrain).label}`)
-              .join(', ')}</span
+            >{choice.tiles.map(([, terrain]) => terrainInfo(terrain).label).join(', ')}</span
           >
           {#if decision.destination && destinationTerrain}<span
               class="placement-destination"
-              title={`${decision.destination} · ${terrainInfo(destinationTerrain).label}`}
-              ><TerrainIcon terrain={destinationTerrain} size={20} />{decision.destination}</span
+              title={`Arrival terrain: ${terrainInfo(destinationTerrain).label}`}
+              ><TerrainIcon terrain={destinationTerrain} size={16} />Arrive here</span
             >{/if}
         </button>
       {/each}
     </div>
-    <button
-      class="primary wide"
-      disabled={!selected || $session.pending}
-      onclick={() => selected && controller.submit(selected.action)}
-      >Confirm placement <Check size={16} /></button
-    >
+    <div class="exploration-confirm">
+      <span>Orient the highlighted region</span><button
+        class="primary"
+        disabled={!selected || $session.pending}
+        onclick={() => selected && controller.submit(selected.action)}>Confirm <Check size={16} /></button
+      >
+    </div>
     {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
   </section>
 {/if}

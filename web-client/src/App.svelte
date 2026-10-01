@@ -77,6 +77,7 @@
   import { combatJournal } from './combat-journal';
   import ActionCardsDialog from './ActionCardsDialog.svelte';
   import { activeCityAbility } from './abilities';
+  import { mobilePanels } from './mobile-panels';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
   import type { Resource, JournalEntry } from './types';
@@ -91,6 +92,25 @@
   let boardError = $state('');
   let confirmEnd = $state(false);
   let seaTooltipDismissed = $state(false);
+  let mapMinimized = $state(false);
+  let mapModalMinimized = $state(false);
+  const panelVisibilityKey = $derived(
+    JSON.stringify([
+      $session.seat,
+      $session.game?.log_index,
+      $session.mode,
+      $session.view?.decision?.name,
+      !!$session.view?.explorationDecision,
+      $session.help,
+      $session.cardsOpen,
+      $session.wondersOpen,
+      $session.objectivesOpen,
+      $session.scorePlayer,
+      $session.abilitiesOpen,
+      $session.activityOpen,
+      $session.tab,
+    ]),
+  );
   const icons = {
     food: Wheat,
     wood: Trees,
@@ -223,7 +243,11 @@
       world = new World(
         boardHost,
         (p, pick) => {
-          if ($session.activityOpen || ($session.abilitiesOpen && !activeCityAbility($session)) || confirmEnd)
+          if (mapModalMinimized) return;
+          if (
+            !mapMinimized &&
+            ($session.activityOpen || ($session.abilitiesOpen && !activeCityAbility($session)) || confirmEnd)
+          )
             dismissMapDetails();
           controller.selectTile(p, pick);
         },
@@ -275,7 +299,7 @@
     });
   }
   function dismissMapDetails() {
-    if ($session.pending) return;
+    if ($session.pending || mapMinimized) return;
     world?.clearCoordinate();
     controller.closeActivity();
     controller.patch({ focus: $session.city, abilitiesOpen: false, seaRouteStart: null });
@@ -426,6 +450,13 @@
 {/snippet}
 
 <div
+  use:mobilePanels={{
+    key: panelVisibilityKey,
+    onChange: (minimized, modal) => {
+      mapMinimized = minimized;
+      mapModalMinimized = modal;
+    },
+  }}
   class:dark={$session.dark}
   class:colorblind={$session.colorBlind}
   class:spectating={$session.seat === undefined}
@@ -434,6 +465,8 @@
     $session.tilePanel ||
     !!activeCityAbility($session) ||
     !!$session.view?.decision?.tacticsSelection ||
+    !!$session.view?.explorationDecision ||
+    mapMinimized ||
     mapDecision}
   class:map-decision={mapDecision}
   class:activity-open={$session.activityOpen}
@@ -1064,7 +1097,10 @@
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
-    {#if $session.view?.explorationDecision}<ExplorationPanel {controller} />{/if}
+    {#if $session.view?.explorationDecision}<ExplorationPanel
+        {controller}
+        onLocate={() => world?.locateExploration()}
+      />{/if}
     {#if researchChoice && $session.mode !== 'research'}<section
         class="action-panel floating-panel decision-panel"
         aria-label="Choose an advance"

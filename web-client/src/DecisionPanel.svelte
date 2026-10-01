@@ -213,9 +213,6 @@
       />
     </p>{/if}
   {#if decision.options.length}
-    {#if !mapChoice && !decision.tacticsSelection}<div class="decision-count">
-        {count}<span>{selected.length}/{decision.max}</span>
-      </div>{/if}
     {#if decision.tacticsSelection}
       <div class="decision-options tactics-options">
         {#each decision.options as option, i}
@@ -335,6 +332,9 @@
             >Play tactics<Check size={16} /></button
           >{/if}
       {:else}
+        {#if decision.options.length && !mapChoice}<div class="decision-count">
+            {count}<span>{selected.length}/{decision.max}</span>
+          </div>{/if}
         {#if mapChoice && !unitChoice}<span
             class="map-selection-count"
             aria-label={`${selected.length} of ${decision.max} selected`}
