@@ -20,7 +20,17 @@ use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
 use city::gain_city;
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+/// Persist the deal and locks, rather than re-dealing from a seed on reconnect.
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct CivilizationDraft {
+    pub offers: Vec<Vec<String>>,
+    pub choices: Vec<Option<String>>,
+    pub ready: Vec<bool>,
+    random_map: bool,
+}
 
 #[must_use]
 pub struct GameSetup {
@@ -104,6 +114,31 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
     let mut players = create_human_players(setup, &mut rng, &cache);
 
     let starting_player = rng.range(0, players.len());
+    let civilization_draft = if setup.options.civilization == CivSetupOption::DraftThree {
+        let mut pool = cache
+            .get_civilizations()
+            .iter()
+            .filter(|c| c.can_choose())
+            .map(|c| c.name.clone())
+            .collect_vec();
+        assert!(
+            pool.len() >= setup.player_amount * 3,
+            "Not enough civilizations for three per player"
+        );
+        pool.shuffle(&mut rng);
+        Some(CivilizationDraft {
+            offers: pool
+                .chunks_exact(3)
+                .take(setup.player_amount)
+                .map(<[String]>::to_vec)
+                .collect(),
+            choices: vec![None; setup.player_amount],
+            ready: vec![false; setup.player_amount],
+            random_map: setup.random_map,
+        })
+    } else {
+        None
+    };
 
     players.push(Player::new(
         cache.get_civilization(BARBARIANS),
@@ -111,7 +146,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
     ));
     players.push(Player::new(cache.get_civilization(PIRATES), players.len()));
 
-    let (map_setup, map) = if setup.random_map {
+    let (map_setup, map) = if setup.random_map && civilization_draft.is_none() {
         let setup = get_map_setup(setup.player_amount);
         let map = Map::random_map(&mut rng, &setup);
         (Some(setup), map)
@@ -153,7 +188,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
             ..setup.options.clone()
         },
         cache,
-        state: if setup.options.civilization == CivSetupOption::ChooseCivilization {
+        state: if setup.options.civilization != CivSetupOption::Random {
             GameState::ChooseCivilization
         } else {
             GameState::Playing
@@ -161,6 +196,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         events: Vec::new(),
         players,
         map,
+        civilization_draft,
         starting_player_index: starting_player,
         current_player_index: starting_player,
         log: Vec::new(),
@@ -188,11 +224,16 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         ability::init_player(&mut game, i, all);
     }
 
-    execute_setup_round(setup, &mut game, map_setup.as_ref());
+    initialize_setup_log(&mut game);
+    if game.civilization_draft.is_none() {
+        execute_setup_round(setup.player_amount, &mut game, map_setup.as_ref());
+    } else {
+        game.information_revealed();
+    }
     game
 }
 
-fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
+fn initialize_setup_log(game: &mut Game) {
     let mut age = ActionLogAge::new(0);
     let mut round = ActionLogRound::new(0);
     let turn = ActionLogTurn::new(TurnType::Setup);
@@ -200,8 +241,10 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&Ma
     age.rounds.push(round);
     game.log.push(age);
     add_log_action(game, Action::Setup);
+}
 
-    for player_index in 0..setup.player_amount {
+fn execute_setup_round(player_amount: usize, game: &mut Game, map_setup: Option<&MapSetup>) {
+    for player_index in 0..player_amount {
         let origin = setup_event_origin();
         let player = &EventPlayer::from_player(player_index, game, origin.clone());
         player.log(
@@ -228,7 +271,8 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&Ma
 }
 
 pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
-    let h = &get_map_setup(game.human_players_count()).home_positions[player.index];
+    let h = &get_map_setup(game.players.iter().filter(|p| p.is_human()).count()).home_positions
+        [player.index];
     let home = player
         .get(game)
         .civilization
@@ -339,4 +383,95 @@ pub(crate) fn all_leaders(civilization: &Civilization) -> Vec<Leader> {
         .iter()
         .map(|leader| leader.leader)
         .collect_vec()
+}
+
+/// Only store the private lock. No civilization-dependent data or log entries
+/// are produced until the final lock, so even the first chooser stays hidden.
+pub(crate) fn execute_draft_choice(
+    game: &mut Game,
+    player: usize,
+    action: &Action,
+) -> Result<(), String> {
+    let draft = game
+        .civilization_draft
+        .as_mut()
+        .ok_or("No civilization draft")?;
+    let Action::ChooseCivilization(civilization) = action else {
+        return Err("Choose one of your three civilizations".into());
+    };
+    if player >= draft.ready.len() || draft.ready[player] {
+        return Err("This player cannot choose a civilization now".into());
+    }
+    if !draft.offers[player].contains(civilization) {
+        return Err("Choose one of your three civilizations".into());
+    }
+    draft.choices[player] = Some(civilization.clone());
+    draft.ready[player] = true;
+    finish_civilization_draft(game);
+    Ok(())
+}
+
+fn finish_civilization_draft(game: &mut Game) {
+    if !game
+        .civilization_draft
+        .as_ref()
+        .is_some_and(|d| d.ready.iter().all(|r| *r))
+    {
+        return;
+    }
+    let draft = game.civilization_draft.take().expect("draft exists");
+    for (i, choice) in draft.choices.into_iter().enumerate() {
+        let civilization = game.cache.get_civilization(&choice.expect("locked choice"));
+        let p = game.player_mut(i);
+        p.available_leaders = all_leaders(&civilization);
+        p.civilization = civilization;
+    }
+    let player_amount = draft.ready.len();
+    let map_setup = draft.random_map.then(|| get_map_setup(player_amount));
+    if let Some(setup) = &map_setup {
+        game.map = Map::random_map(&mut game.rng, setup);
+    }
+    game.state = GameState::Playing;
+    if game.dropped_players.contains(&game.starting_player_index) {
+        game.starting_player_index = (0..player_amount)
+            .find(|i| !game.dropped_players.contains(i))
+            .unwrap_or(0);
+    }
+    execute_setup_round(player_amount, game, map_setup.as_ref());
+    game.information_revealed();
+}
+
+pub(crate) fn drop_draft_player(game: &mut Game, player: usize) {
+    let draft = game.civilization_draft.as_mut().expect("draft exists");
+    if player >= draft.ready.len() || game.dropped_players.contains(&player) {
+        return;
+    }
+    if !draft.ready[player] {
+        draft.choices[player] = draft.offers[player].first().cloned();
+        draft.ready[player] = true;
+    }
+    game.dropped_players.push(player);
+    if game.dropped_players.len() == draft.ready.len() {
+        game.civilization_draft = None;
+        game.state = GameState::Finished;
+    } else {
+        finish_civilization_draft(game);
+    }
+}
+
+pub(crate) fn civilization_choices(game: &Game, player: usize) -> Vec<&Civilization> {
+    if game.state != GameState::ChooseCivilization {
+        return vec![];
+    }
+    game.cache
+        .get_civilizations()
+        .iter()
+        .filter(|c| {
+            if let Some(draft) = &game.civilization_draft {
+                !draft.ready[player] && draft.offers[player].contains(&c.name)
+            } else {
+                player == game.active_player() && c.can_choose() && c.is_used(game).is_none()
+            }
+        })
+        .collect()
 }

@@ -723,7 +723,12 @@ export class Controller {
   }
   submit(move: Move, quotedPayment?: Pile) {
     const s = get(this.session);
-    if (s.pending || s.seat === undefined || s.view?.activePlayer !== s.seat) return;
+    if (
+      s.pending ||
+      s.seat === undefined ||
+      !(s.view?.activePlayers ?? [s.view?.activePlayer]).includes(s.seat)
+    )
+      return;
     this.patch({ pending: true, error: '' });
     this.submittedMove = move;
     this.quotedActionPayment =

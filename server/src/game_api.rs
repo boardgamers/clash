@@ -112,6 +112,14 @@ pub fn civilizations(game: Game) -> Vec<String> {
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    if let Some(draft) = &mut game.civilization_draft {
+        for i in 0..draft.offers.len() {
+            if player_index != Some(i) {
+                draft.offers[i].clear();
+                draft.choices[i] = None;
+            }
+        }
+    }
     for e in &mut game.permanent_effects {
         if let PermanentEffect::GreatSeer(g) = e
             && player_index != Some(g.player)

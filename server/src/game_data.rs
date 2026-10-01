@@ -45,6 +45,8 @@ pub struct GameData {
     events: Vec<PersistentEventState>,
     players: Vec<PlayerData>,
     map: MapData,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    civilization_draft: Option<crate::game_setup::CivilizationDraft>,
     starting_player_index: usize,
     current_player_index: usize,
     #[serde(default)]
@@ -112,6 +114,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         state: data.state,
         players: Vec::new(),
         map: Map::from_data(data.map),
+        civilization_draft: data.civilization_draft,
         starting_player_index: data.starting_player_index,
         current_player_index: data.current_player_index,
         actions_left: data.actions_left,
@@ -164,6 +167,7 @@ pub fn data(game: Game) -> GameData {
         events: game.events,
         players: game.players.into_iter().map(player_data).collect(),
         map: game.map.data(),
+        civilization_draft: game.civilization_draft,
         starting_player_index: game.starting_player_index,
         current_player_index: game.current_player_index,
         log: game.log,
@@ -199,6 +203,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         events: game.events.clone(),
         players: game.players.iter().map(cloned_player_data).collect(),
         map: game.map.cloned_data(),
+        civilization_draft: game.civilization_draft.clone(),
         starting_player_index: game.starting_player_index,
         current_player_index: game.current_player_index,
         log: game.log.clone(),

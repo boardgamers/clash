@@ -94,7 +94,11 @@ pub async fn drop_player(game: String, player_index: usize) -> String {
 #[wasm_bindgen(js_name = "currentPlayer")]
 pub fn current_player(game: String) -> JsValue {
     let game = get_game(game);
-    JsValue::from_f64(game.active_player() as f64)
+    if game.civilization_draft.is_some() {
+        serde_wasm_bindgen::to_value(&game.active_players()).expect("players should serialize")
+    } else {
+        JsValue::from_f64(game.active_player() as f64)
+    }
 }
 
 #[wasm_bindgen(js_name = "logLength")]

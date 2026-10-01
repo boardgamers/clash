@@ -471,6 +471,7 @@
   class:map-decision={mapDecision}
   class:activity-open={$session.activityOpen}
   class="game-shell"
+  class:civilization-setup={!!$session.view?.civilizationDraft}
   style:--civilization-accent={civilizationAccent(identity?.civilization)}
 >
   <header class="masthead">
@@ -480,10 +481,16 @@
         onclick={() => controller.commands.openBoardgame()}
         aria-label="About Clash of Cultures"
         ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
-          >Age {['I', 'II', 'III', 'IV', 'V', 'VI'][($session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.game
-            ?.round ?? 1) > 3
-            ? 'End of age'
-            : `Round ${$session.game?.round ?? 1}/3`}</span
+          >{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {[
+              'I',
+              'II',
+              'III',
+              'IV',
+              'V',
+              'VI',
+            ][($session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.game?.round ?? 1) > 3
+              ? 'End of age'
+              : `Round ${$session.game?.round ?? 1}/3`}{/if}</span
         ></button
       >
       <p class="game-credits">
@@ -1117,7 +1124,9 @@
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
-    {#if $session.view?.civilizations?.length}<CivilizationPicker {controller} />{/if}
+    {#if $session.view?.civilizations?.length || $session.view?.civilizationDraft}<CivilizationPicker
+        {controller}
+      />{/if}
     <section
       class="activity floating-panel"
       hidden={!$session.activityOpen}

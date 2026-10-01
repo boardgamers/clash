@@ -61,6 +61,14 @@ pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
 pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let seat = seat.filter(|i| *i < game.players.len() && game.player(*i).is_human());
     let active = game.active_player();
+    let active_players = game.active_players();
+    let civilization_draft = game.civilization_draft.as_ref().map(|draft| {
+        json!({
+            "ready": draft.ready,
+            "chosen": seat.and_then(|i| draft.choices[i].clone()),
+            "waiting": seat.is_none_or(|i| draft.ready[i]),
+        })
+    });
     let playing = game.state == GameState::Playing && game.events.is_empty();
     let objective_phase = game.events.last().is_some_and(|event| {
         matches!(event.event_type, PersistentEventType::SelectObjectives(_))
@@ -154,7 +162,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"builtWonders":built_wonders,"eventCatalog":event_catalog,"pendingEvent":pending_event,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
+        return json!({"builtWonders":built_wonders,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -283,12 +291,12 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         item
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
-    json!({"eventCatalog":event_catalog,"pendingEvent":pending_event,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
+    json!({"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "builtWonders":built_wonders, "decision":decision,
-        "civilizations":if seat == active && game.state == GameState::ChooseCivilization {game.cache.get_civilizations().iter().filter(|c|c.is_human() && !game.players.iter().any(|p|p.civilization.name==c.name)).map(|c|json!({"name":c.name,
+        "civilizations":crate::game_setup::civilization_choices(game, seat).iter().map(|c|json!({"name":c.name,
             "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),
             "leaders":c.leaders.iter().map(|l|json!({"name":l.name,"abilities":l.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()})).collect::<Vec<_>>(),
-            "action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>()} else {vec![]},
+            "action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>(),
         "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
         "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|{ let cost = a.cost(game,seat); json!({"value":a,"name":a.origin(p).name(game),"free":cost.free,"payment":cost.payment_options(p,a.origin(p)).default_payment()}) }).collect::<Vec<_>>()} else {vec![]},
         "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free,"surcharge":a.payment_options(game,seat).default})).collect::<Vec<_>>()} else {vec![]},

@@ -22,8 +22,17 @@ async function api(url, options = {}) {
   return res.json();
 }
 const previous = await api(endpoint);
+const enginePath = process.argv.find((arg) => arg.startsWith('--engine='))?.slice('--engine='.length);
+const engineBytes = enginePath ? await fs.readFile(path.resolve(enginePath)) : null;
+let expectedEngine = previous.engine;
 // Undo always stops at information reveals; remove the obsolete lobby option.
-const options = (previous.options ?? []).filter((option) => option.name !== 'undo');
+const civilizationOption = JSON.parse(
+  await fs.readFile(path.join(root, 'bgs-civilization-option.json'), 'utf8'),
+);
+const options = [
+  ...(previous.options ?? []).filter((option) => !['undo', 'civilization'].includes(option.name)),
+  civilizationOption,
+];
 const declaredPreferences = JSON.parse(await fs.readFile(path.join(root, 'bgs-preferences.json'), 'utf8'));
 const replacedPreferences = new Set([
   'ui_scale',
@@ -47,6 +56,8 @@ console.log(
       sha256: hash,
       previousViewer: previous.viewer.url,
       preferences,
+      options,
+      enginePackage: enginePath ?? null,
       dryRun: process.argv.includes('--dry-run'),
     },
     null,
@@ -81,9 +92,21 @@ if (!process.argv.includes('--dry-run')) {
   if (
     JSON.stringify(current.viewer) !== JSON.stringify(previous.viewer) ||
     JSON.stringify(current.preferences) !== JSON.stringify(previous.preferences) ||
-    JSON.stringify(current.options) !== JSON.stringify(previous.options)
+    JSON.stringify(current.options) !== JSON.stringify(previous.options) ||
+    JSON.stringify(current.engine) !== JSON.stringify(previous.engine)
   )
     throw new Error('The viewer or preferences changed during upload; version metadata was not changed');
+  if (engineBytes) {
+    const uploadedEngine = await api(`${endpoint}/engine`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: engineBytes,
+    });
+    expectedEngine = uploadedEngine.engine;
+    const hosted = await fetch(expectedEngine.package.url, { signal: AbortSignal.timeout(60000) });
+    if (!hosted.ok || !Buffer.from(await hosted.arrayBuffer()).equals(engineBytes))
+      throw new Error('Hosted engine bytes do not match the release');
+  }
   await api(endpoint, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -95,8 +118,14 @@ if (!process.argv.includes('--dry-run')) {
     saved.viewer.topLevelVariable !== 'clash3d' ||
     JSON.stringify(saved.preferences) !== JSON.stringify(preferences) ||
     JSON.stringify(saved.options) !== JSON.stringify(options) ||
-    JSON.stringify(saved.engine) !== JSON.stringify(previous.engine)
+    JSON.stringify(saved.engine) !== JSON.stringify(expectedEngine)
   )
     throw new Error('Published version verification failed; inspect the saved backup');
-  console.log(JSON.stringify({ published: uploaded.url, backup, engineUnchanged: true }, null, 2));
+  console.log(
+    JSON.stringify(
+      { published: uploaded.url, backup, engineUnchanged: !engineBytes, engine: saved.engine },
+      null,
+      2,
+    ),
+  );
 }

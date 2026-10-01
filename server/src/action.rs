@@ -72,6 +72,10 @@ pub fn try_execute_action(
     action: Action,
     player_index: usize,
 ) -> Result<Game, String> {
+    if game.civilization_draft.is_some() {
+        crate::game_setup::execute_draft_choice(&mut game, player_index, &action)?;
+        return Ok(game);
+    }
     if player_index != game.active_player() {
         return Err(format!("Player {player_index} is not the active player"));
     }

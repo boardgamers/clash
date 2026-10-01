@@ -34,6 +34,7 @@ pub enum CivSetupOption {
     #[default]
     Random,
     ChooseCivilization,
+    DraftThree,
 }
 
 impl CivSetupOption {
@@ -94,6 +95,7 @@ pub struct Game {
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,
+    pub civilization_draft: Option<crate::game_setup::CivilizationDraft>,
     pub starting_player_index: usize,
     pub current_player_index: usize,
     pub log: Vec<ActionLogAge>,
@@ -404,6 +406,20 @@ impl Game {
         self.current_player_index
     }
 
+    /// All players who may submit now; setup choices are simultaneous.
+    #[must_use]
+    pub fn active_players(&self) -> Vec<usize> {
+        if let Some(draft) = &self.civilization_draft {
+            return draft
+                .ready
+                .iter()
+                .enumerate()
+                .filter_map(|(i, ready)| (!ready).then_some(i))
+                .collect();
+        }
+        vec![self.active_player()]
+    }
+
     #[must_use]
     pub(crate) fn human_players_count(&self) -> usize {
         self.players
@@ -514,6 +530,10 @@ impl Game {
     }
 
     pub fn drop_player(&mut self, player_index: usize) {
+        if self.civilization_draft.is_some() {
+            crate::game_setup::drop_draft_player(self, player_index);
+            return;
+        }
         self.dropped_players.push(player_index);
         self.add_message(&format!(
             "{} has left the game",

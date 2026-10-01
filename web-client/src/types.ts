@@ -164,6 +164,8 @@ export interface WonderCard {
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
+  activePlayers?: number[];
+  civilizationDraft?: { ready: boolean[]; chosen: string | null; waiting: boolean } | null;
   builtWonders?: Pick<WonderCard, 'id' | 'name' | 'description' | 'builtPoints' | 'ownedPoints'>[];
   eventCatalog?: EventInfo[];
   pendingEvent?: { id: number; player: number } | null;

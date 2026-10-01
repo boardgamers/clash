@@ -78,3 +78,76 @@
   background: var(--paper2);
   box-shadow: inset 0 0 0 1px var(--gold);
 }
+
+.civilization-picker .draft-intro {
+  font-size: 13px;
+  margin: 4px 0 10px;
+}
+.draft-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.draft-status > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.draft-status .ready {
+  color: var(--text);
+}
+.draft-pending {
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.draft-waiting {
+  text-align: center;
+  padding: 22px 12px;
+}
+.draft-waiting > svg {
+  margin: auto;
+}
+.civilization-picker footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.civilization-picker footer button {
+  width: auto;
+  min-height: 40px;
+  padding: 8px 12px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.civilization-setup
+  :is(
+    .player-list,
+    .resource-bar,
+    .age-track,
+    .city-dock,
+    .map-controls,
+    .board-toolbar,
+    .mobile-panel-minimize,
+    .header-actions .cards-button,
+    .header-actions .objectives-button,
+    .header-actions .wonders-button
+  ) {
+  display: none;
+}
+@media (max-width: 420px) {
+  .civilization-picker footer {
+    gap: 6px;
+  }
+  .civilization-picker footer small {
+    font-size: 10px;
+  }
+  .civilization-picker footer button {
+    font-size: 12px;
+  }
+}
