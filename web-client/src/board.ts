@@ -23,6 +23,7 @@ import { portPlacement } from './port-layout';
 import { frameDetails } from './playback';
 import { strategyTiles, strategyDescription } from './strategy';
 import StrategyMapTile from './StrategyMapTile.svelte';
+import { CivilizationFlags } from './civilization-flags';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -125,6 +126,7 @@ export class World {
   private materials = new Set<THREE.Material>();
   private geometries = new Set<THREE.BufferGeometry>();
   private textures = new Set<THREE.Texture>();
+  private civilizationFlags = new CivilizationFlags(() => this.invalidate());
   private labelPositions: {
     position: string;
     at: THREE.Vector3;
@@ -988,8 +990,21 @@ export class World {
             );
             pole.position.set(0.12, 0.54, -0.12);
             cityModel.add(pole);
-            const flag = this.mesh(new THREE.BoxGeometry(0.3, 0.2, 0.025), this.material(ownerColor));
-            flag.position.set(0.27, 0.98, -0.12);
+            const flagEdge = this.material(ownerColor);
+            const flagFace = new THREE.MeshBasicMaterial({
+              map: this.civilizationFlags.texture(player.civilization, ownerColor),
+              toneMapped: false,
+            });
+            this.materials.add(flagFace);
+            const flag = this.mesh(new THREE.BoxGeometry(0.45, 0.3, 0.025), [
+              flagEdge,
+              flagEdge,
+              flagEdge,
+              flagEdge,
+              flagFace,
+              flagFace,
+            ]);
+            flag.position.set(0.345, 0.93, -0.12);
             cityModel.add(flag);
             const ownershipPieces: THREE.Object3D[] = [pole, flag];
             cityModel.position.set(x, 0.315, z);
@@ -1611,6 +1626,7 @@ export class World {
     this.resize.disconnect();
     this.panelObserver.disconnect();
     this.controls.dispose();
+    this.civilizationFlags.dispose();
     this.renderer.domElement.removeEventListener('pointerdown', this.down);
     this.renderer.domElement.removeEventListener('pointermove', this.move);
     this.renderer.domElement.removeEventListener('pointerleave', this.leave);
