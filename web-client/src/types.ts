@@ -56,6 +56,9 @@ export interface Playback {
   frame: BoardFrame | null;
   index: number;
   total: number;
+  start: number;
+  end: number;
+  range: 'all' | 'last-turn' | 'catch-up';
   automatic: boolean;
   playing: boolean;
   animate: boolean;
@@ -475,6 +478,7 @@ export interface Session {
   toast: string;
   topDown: boolean;
   unitBadges: boolean;
+  replayAutoplay: boolean;
 }
 export interface MapPick {
   kind: 'tile' | 'city' | 'unit' | 'units' | 'decision';

@@ -10,7 +10,7 @@ import { CardDrawTracker } from './card-draws';
 import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
-import { recapStart, frameAt, frameEffects } from './playback';
+import { recapStart, lastOpponentTurn, frameAt, frameEffects } from './playback';
 import { contextualCards, type CardContext } from './contextual-cards';
 import {
   researchDecision,
@@ -67,6 +67,7 @@ export class Controller {
     toast: '',
     topDown: false,
     unitBadges: false,
+    replayAutoplay: true,
   });
   readonly chat = new ChatController();
   readonly audio = new GameAudio();
@@ -106,10 +107,27 @@ export class Controller {
     });
   }
   setPreferences(preferences: Record<string, unknown>) {
+    const old = get(this.session);
     const next = readPreferences(preferences);
     this.audio.setEnabled(next.sound);
     this.patch(next);
     if (next.analysis) this.endPlayback();
+    else if (!next.replayAutoplay && old.playback?.range === 'catch-up' && old.playback.playing) {
+      const playback = get(this.session).playback!;
+      clearTimeout(this.playbackTimer);
+      this.patch({
+        playback: { ...playback, playing: false },
+      });
+    }
+  }
+  setReplayAutoplay(enabled: boolean) {
+    this.patch({ replayAutoplay: enabled });
+    const playback = get(this.session).playback;
+    if (!enabled && playback?.range === 'catch-up') {
+      clearTimeout(this.playbackTimer);
+      this.patch({ playback: { ...playback, playing: false } });
+    }
+    this.commands.updatePreference('replayAutoplay', enabled);
   }
   toggleMapView() {
     const topDown = !get(this.session).topDown;
@@ -323,12 +341,20 @@ export class Controller {
       ? `clash:board-seen:${s.game.board_history.id}:${s.seat}`
       : null;
   }
-  private markSeen() {
+  private markSeen(cursor?: number) {
     const s = get(this.session),
       key = this.seenKey();
     if (!key || s.analysis) return;
     try {
-      localStorage.setItem(key, String(s.game?.board_history?.frames.at(-1)?.cursor ?? 0));
+      localStorage.setItem(
+        key,
+        String(
+          Math.max(
+            Number(localStorage.getItem(key)) || 0,
+            cursor ?? s.game?.board_history?.frames.at(-1)?.cursor ?? 0,
+          ),
+        ),
+      );
     } catch {}
   }
   private afterPlaybackLoad(old: Session, game: Game) {
@@ -339,7 +365,15 @@ export class Controller {
       if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback();
       else {
         const index = frameAt(frames, s.playback.frame?.cursor ?? 0);
-        this.patch({ playback: { ...s.playback, index, frame: frames[index], total: frames.length } });
+        const previous = old.game?.board_history?.frames ?? [];
+        const start = frameAt(frames, previous[s.playback.start]?.cursor ?? frames[0].cursor);
+        const end =
+          s.playback.range === 'all'
+            ? frames.length - 1
+            : frameAt(frames, previous[s.playback.end]?.cursor ?? frames.at(-1)!.cursor);
+        this.patch({
+          playback: { ...s.playback, index, start, end, frame: frames[index], total: frames.length },
+        });
       }
       return;
     }
@@ -364,9 +398,21 @@ export class Controller {
     }
     this.markSeen();
   }
-  startPlayback(automatic = false, index = 0) {
+  replayLastTurn() {
+    const s = get(this.session);
+    if (!s.game || s.pending) return;
+    const turn = lastOpponentTurn(s.game, s.seat);
+    if (turn) this.startPlayback(false, turn.start, turn.end, 'last-turn');
+  }
+  startPlayback(
+    automatic = false,
+    index = 0,
+    end?: number,
+    range: 'all' | 'last-turn' | 'catch-up' = automatic ? 'catch-up' : 'all',
+  ) {
     const s = get(this.session);
     if (s.analysis || !s.game) return;
+    clearTimeout(this.playbackTimer);
     const frames = s.game.board_history?.frames ?? [];
     this.dismissEffects(true);
     this.patch({
@@ -374,8 +420,11 @@ export class Controller {
         frame: frames[index] ?? null,
         index,
         total: frames.length,
+        start: index,
+        end: end ?? Math.max(0, frames.length - 1),
+        range,
         automatic,
-        playing: automatic,
+        playing: automatic && s.replayAutoplay,
         animate: false,
       },
       tilePanel: false,
@@ -391,13 +440,13 @@ export class Controller {
       cardDraws: [],
     });
     this.reportPlayback();
-    if (automatic) this.schedulePlayback();
+    if (automatic && s.replayAutoplay) this.schedulePlayback();
   }
   private reportPlayback() {
     const s = get(this.session),
       frames = s.game?.board_history?.frames ?? [],
       p = s.playback;
-    if (p && !p.automatic && frames.length)
+    if (p && p.range === 'all' && frames.length)
       this.commands.setReplayInfo({
         start: frames[0].cursor,
         current: p.frame?.cursor ?? frames[0].cursor,
@@ -406,12 +455,19 @@ export class Controller {
   }
   seekPlayback(cursor: number) {
     const frames = get(this.session).game?.board_history?.frames ?? [];
-    if (!get(this.session).playback) this.startPlayback();
+    if (get(this.session).playback?.range !== 'all') this.startPlayback();
     this.showPlaybackFrame(frameAt(frames, cursor), false);
   }
   stepPlayback(direction: number) {
     const p = get(this.session).playback;
-    if (p) this.showPlaybackFrame(p.index + direction, false);
+    if (p) {
+      if (p.range !== 'all') this.setReplayAutoplay(false);
+      this.showPlaybackFrame(p.index + direction, false);
+    }
+  }
+  restartPlayback() {
+    const p = get(this.session).playback;
+    if (p) this.showPlaybackFrame(p.start, get(this.session).replayAutoplay);
   }
   private showPlaybackFrame(index: number, playing: boolean) {
     clearTimeout(this.playbackTimer);
@@ -419,12 +475,7 @@ export class Controller {
       frames = s.game?.board_history?.frames ?? [],
       p = s.playback;
     if (!p || !frames.length) return;
-    if (index >= frames.length) {
-      if (p.automatic) this.endPlayback();
-      else this.patch({ playback: { ...p, playing: false } });
-      return;
-    }
-    index = Math.max(0, index);
+    index = Math.max(p.start, Math.min(index, p.end));
     this.dismissEffects(true);
     this.patch({
       playback: {
@@ -432,27 +483,28 @@ export class Controller {
         frame: frames[index],
         index,
         total: frames.length,
-        playing,
-        animate: playing && !s.reducedMotion,
+        playing: playing && index < p.end,
+        animate: index !== p.index && !s.reducedMotion,
       },
-      publicEffects: (frames[index].effects ?? []).map((e, i) => ({
+      publicEffects: (index === p.start ? [] : (frames[index].effects ?? [])).map((e, i) => ({
         ...e,
         key: `replay:${frames[index].cursor}:${i}`,
       })),
     });
     this.reportPlayback();
     this.scheduleEffect();
-    if (playing) this.schedulePlayback();
+    if (playing && index < p.end) this.schedulePlayback();
   }
   togglePlayback() {
     const s = get(this.session),
       p = s.playback;
     if (!p) return;
+    if (p.range !== 'all') this.setReplayAutoplay(!p.playing);
     if (p.playing) {
       clearTimeout(this.playbackTimer);
       this.patch({ playback: { ...p, playing: false } });
-    } else if (p.index >= p.total - 1) {
-      this.showPlaybackFrame(0, true);
+    } else if (p.index >= p.end) {
+      this.showPlaybackFrame(p.start, true);
     } else {
       this.patch({ playback: { ...p, playing: true } });
       this.schedulePlayback();
@@ -462,7 +514,8 @@ export class Controller {
     clearTimeout(this.playbackTimer);
     const s = get(this.session),
       p = s.playback;
-    const duration = Math.max(s.reducedMotion ? 500 : 1150, (p?.frame?.effects?.length ?? 0) * 1400);
+    if (!p?.playing || p.index >= p.end) return;
+    const duration = Math.max(2500, (p.frame?.effects?.length ?? 0) * 1800);
     this.playbackTimer = setTimeout(() => {
       const p = get(this.session).playback;
       if (p?.playing) this.showPlaybackFrame(p.index + 1, true);
@@ -470,11 +523,13 @@ export class Controller {
   }
   endPlayback() {
     clearTimeout(this.playbackTimer);
-    if (get(this.session).playback) {
+    const s = get(this.session),
+      p = s.playback;
+    if (p) {
       this.dismissEffects(true);
       this.patch({ playback: null });
       this.commands.clearReplayInfo?.();
-      this.markSeen();
+      this.markSeen(s.game?.board_history?.frames[p.end]?.cursor);
     }
   }
   private scheduleEffect() {

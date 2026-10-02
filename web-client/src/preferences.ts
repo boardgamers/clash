@@ -23,5 +23,6 @@ export function readPreferences(preferences: Record<string, unknown>) {
     analysis: preferences.analysis === true,
     topDown: preferences.mapView === '2d',
     unitBadges: preferences.unitBadges === true,
+    replayAutoplay: preferences.replayAutoplay !== false,
   };
 }

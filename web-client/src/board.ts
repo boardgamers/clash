@@ -19,6 +19,7 @@ import { mount, unmount } from 'svelte';
 import UnitMapBadge from './UnitMapBadge.svelte';
 import { mapDecisionOptions } from './decision-controls';
 import { portPlacement } from './port-layout';
+import { frameDetails } from './playback';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -714,6 +715,10 @@ export class World {
   update(s: Session) {
     if (!s.game) return;
     const playback = s.playback;
+    const replayPositions =
+      playback && playback.index > playback.start
+        ? frameDetails(s.game.board_history?.frames[playback.index - 1], playback.frame).positions
+        : [];
     const cursor = playback
       ? `replay:${playback.frame?.cursor}`
       : `live:${s.game.board_history?.frames.at(-1)?.cursor ?? s.game.log_index}`;
@@ -1285,21 +1290,23 @@ export class World {
         : s.mode === 'overview'
           ? (s.focus ?? s.city)
           : s.city;
-    const selected = mapChoices.length
-      ? [...decisionSelected, ...(pieceDecision ? [s.decisionPosition ?? decisionPositions[0]] : [])]
-      : exploration
-        ? exploration.destination
-          ? [exploration.destination]
-          : []
-        : s.mode === 'settlers'
-          ? [s.unitPosition ?? settler?.position, s.moveTarget].filter((p): p is string => !!p)
-          : s.mode === 'collect'
-            ? s.selection.map((c) => c.position)
-            : s.tilePanel && focusedPosition
-              ? [focusedPosition]
-              : ability && s.abilityCity
-                ? [s.abilityCity]
-                : [];
+    const selected = playback
+      ? replayPositions
+      : mapChoices.length
+        ? [...decisionSelected, ...(pieceDecision ? [s.decisionPosition ?? decisionPositions[0]] : [])]
+        : exploration
+          ? exploration.destination
+            ? [exploration.destination]
+            : []
+          : s.mode === 'settlers'
+            ? [s.unitPosition ?? settler?.position, s.moveTarget].filter((p): p is string => !!p)
+            : s.mode === 'collect'
+              ? s.selection.map((c) => c.position)
+              : s.tilePanel && focusedPosition
+                ? [focusedPosition]
+                : ability && s.abilityCity
+                  ? [s.abilityCity]
+                  : [];
     const available = mapChoices.length
       ? decisionPositions
       : placement

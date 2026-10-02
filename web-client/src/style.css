@@ -4995,17 +4995,19 @@ small {
 .playback-bar {
   position: absolute;
   z-index: 80;
-  bottom: 72px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  width: max-content;
+  width: 720px;
   max-width: calc(100% - 24px);
   padding: 12px 14px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 16px;
+  gap: 10px 16px;
 }
 .playback-description {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -5021,6 +5023,25 @@ small {
   color: var(--muted);
   font-size: 12px;
 }
+.playback-progress {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.playback-preference {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.playback-preference input {
+  width: 16px;
+  height: 16px;
+}
 .playback-transport {
   display: flex;
   gap: 2px;
@@ -5029,6 +5050,17 @@ small {
 .playback-transport button,
 .playback-exit {
   min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.playback-transport .playback-next:not(:disabled) {
+  background: var(--green);
+  color: white;
 }
 .playback-exit {
   display: flex;
@@ -5111,22 +5143,18 @@ small {
 }
 @media (max-width: 600px) {
   .playback-bar {
-    flex-wrap: wrap;
+    grid-template-columns: 1fr auto;
     gap: 8px;
-    bottom: 65px;
+    bottom: 12px;
     width: calc(100% - 24px);
     padding: 10px 12px;
-  }
-  .playback-description {
-    flex: 1;
   }
   .playback-exit {
     margin-left: auto;
   }
   .playback-transport {
-    order: 3;
-    width: 100%;
-    justify-content: center;
+    grid-column: 1 / -1;
+    gap: 6px;
   }
   .public-effect {
     top: 110px;
@@ -5140,15 +5168,13 @@ small {
   }
 }
 
-@media (max-width: 600px) {
-  .playback-bar.automatic .playback-transport {
-    order: initial;
+@media (max-width: 760px) {
+  .game-shell .table-tools .last-turn-button {
     width: auto;
+    gap: 5px;
   }
-  .playback-bar.automatic .playback-transport button:first-child,
-  .playback-bar.automatic .playback-transport button:last-of-type,
-  .playback-bar.automatic .playback-transport small {
-    display: none;
+  .game-shell .table-tools .last-turn-button > span {
+    display: inline;
   }
 }
 .contextual-cards {

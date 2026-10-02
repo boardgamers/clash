@@ -36,6 +36,7 @@ const { Controller } = (await import(
 
 function paymentController() {
   const sent: string[] = [];
+  const preferences: { name: string; value: unknown }[] = [];
   let accept = true;
   let session: Session;
   const controller = new Controller(
@@ -46,6 +47,11 @@ function paymentController() {
       },
       replaceLog: () => {},
       fetchState: () => {},
+      setReplayInfo: () => {},
+      updatePreference: (name: string, value: unknown) => {
+        preferences.push({ name, value });
+        return true;
+      },
     } as unknown as ControllerType['commands'],
     new URL('http://localhost/'),
   );
@@ -55,6 +61,7 @@ function paymentController() {
   return {
     controller,
     sent,
+    preferences,
     session: () => session,
     reject: () => {
       accept = false;
@@ -439,6 +446,80 @@ test('Sports chooses only an eligible map city and does not spend an action unti
     c.selectTile('B3');
     c.submit(sports[0].offers.find((o) => o.position === app.session().abilityCity)!.action);
     assert.deepEqual(JSON.parse(app.sent[0]), { Playing: { Custom: { action: 'Sports', city: 'B3' } } });
+  } finally {
+    app.close();
+  }
+});
+
+test('opponent recap steps animate and pause, replay stays within its turn, and completion stays open', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const frames = [
+      { cursor: 1, actor: null, title: 'Game setup' },
+      { cursor: 2, actor: 0, ended_turn: true },
+      { cursor: 3, actor: 1, title: 'Move' },
+      { cursor: 4, actor: 1, ended_turn: true },
+      { cursor: 5, actor: 0, title: 'Collect' },
+    ].map((f) => ({ players: [], tiles: [], age: 1, round: 1, ended_turn: false, title: '', ...f }));
+    c.patch({
+      game: {
+        state: 'Playing',
+        players: [],
+        map: { tiles: [] },
+        current_player_index: 0,
+        actions_left: 3,
+        age: 1,
+        round: 1,
+        log_index: 0,
+        board_history: { id: 'recap-test', frames },
+      },
+      seat: 0,
+    });
+    c.replayLastTurn();
+    assert.equal(app.session().playback!.index, 1);
+    assert.equal(app.session().playback!.end, 3);
+    assert.equal(app.session().playback!.playing, false);
+    c.stepPlayback(1);
+    assert.equal(app.session().playback!.index, 2);
+    assert.equal(app.session().playback!.animate, true);
+    assert.equal(app.session().playback!.playing, false);
+    assert.deepEqual(app.preferences.at(-1), { name: 'replayAutoplay', value: false });
+    t.mock.timers.tick(10000);
+    assert.equal(app.session().playback!.index, 2, 'manual steps wait indefinitely');
+    c.stepPlayback(-1);
+    c.stepPlayback(-1);
+    assert.equal(app.session().playback!.index, 1, 'Back stops at the start of this turn');
+    c.togglePlayback();
+    assert.equal(app.session().replayAutoplay, true);
+    t.mock.timers.tick(2499);
+    assert.equal(app.session().playback!.index, 1, 'autoplay leaves time to read');
+    t.mock.timers.tick(1);
+    assert.equal(app.session().playback!.index, 2);
+    t.mock.timers.tick(2500);
+    assert.equal(app.session().playback!.index, 3);
+    assert.equal(app.session().playback!.playing, false, 'stays open at completion');
+    t.mock.timers.tick(10000);
+    assert.equal(app.session().playback!.index, 3);
+    c.restartPlayback();
+    assert.equal(app.session().playback!.index, 1, 'Replay does not restart the whole game');
+    c.endPlayback();
+    c.startPlayback(true, 1);
+    c.setReplayAutoplay(false);
+    assert.equal(app.session().playback!.playing, false);
+    c.setPreferences({ replayAutoplay: false });
+    t.mock.timers.tick(3000);
+    assert.equal(app.session().playback!.index, 1, 'delayed preference acknowledgement keeps recap paused');
+    c.endPlayback();
+    c.setPreferences({ replayAutoplay: false });
+    c.startPlayback(true, 1);
+    assert.equal(app.session().playback!.playing, false, 'automatic catch-up obeys manual preference');
+    c.stepPlayback(1);
+    c.patch({ reducedMotion: true });
+    c.stepPlayback(1);
+    assert.equal(app.session().playback!.animate, false);
+    assert.deepEqual(app.sent, [], 'replay never submits a game move');
   } finally {
     app.close();
   }

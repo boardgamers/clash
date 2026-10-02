@@ -55,6 +55,7 @@
     CircleSlash,
     TriangleAlert,
     Hexagon,
+    History,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
@@ -88,8 +89,10 @@
   import { journal, pileText } from './model';
   import { collectionYield, collectionBonusLabel } from './collection-yield';
   import { movementBonus } from './movement-bonus';
+  import { lastOpponentTurn } from './playback';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
+  const lastTurn = $derived($session.game ? lastOpponentTurn($session.game, $session.seat) : null);
   let boardHost: HTMLDivElement;
   let world: World;
   let boardError = $state('');
@@ -856,6 +859,13 @@
       </nav>
     </div>
     <nav class="table-tools" aria-label="Table controls">
+      {#if lastTurn && !$session.analysis}<button
+          class="last-turn-button"
+          title="Step through the opponent’s last turn"
+          aria-label="Replay last turn"
+          disabled={$session.pending}
+          onclick={() => controller.replayLastTurn()}><History size={19} /><span>Last turn</span></button
+        >{/if}
       <button
         class:active={$session.activityOpen && $session.tab === 'journal'}
         title="Journal"

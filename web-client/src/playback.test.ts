@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { recapStart, frameAt, frameEffects } from './playback.ts';
+import { recapStart, lastOpponentTurn, frameAt, frameEffects, frameDetails } from './playback.ts';
 import type { BoardFrame, Game } from './types.ts';
 const frames = [
   { cursor: 10, actor: 0, ended_turn: true },
@@ -31,4 +31,81 @@ test('replay cursors clamp to the recorded range; effects identify card types on
     { player: 1, kind: 'action', label: 'Drew an action card', key: 'public-key:12:0' },
   ]);
   assert.deepEqual(frameEffects(game, 13), []);
+});
+
+test('last turn selects the latest opponent turn, even after returning or starting your own turn', () => {
+  assert.deepEqual(lastOpponentTurn(game, 0), { start: 0, end: 3 });
+  assert.equal(lastOpponentTurn(game, undefined), null);
+  const later = {
+    ...game,
+    board_history: {
+      id: 'key',
+      frames: [
+        ...frames,
+        { cursor: 14, actor: 0 },
+        { cursor: 15, actor: 0, ended_turn: true },
+      ] as BoardFrame[],
+    },
+  };
+  assert.deepEqual(lastOpponentTurn(later, 0), { start: 0, end: 3 });
+  assert.deepEqual(lastOpponentTurn(later, 1), { start: 3, end: 5 });
+  assert.deepEqual(
+    lastOpponentTurn(
+      {
+        ...game,
+        board_history: {
+          id: 'key',
+          frames: [...frames, { cursor: 14, actor: 2 }, { cursor: 15, actor: 0 }] as BoardFrame[],
+        },
+      },
+      0,
+    ),
+    { start: 3, end: 5 },
+    'responses do not split an opponent turn',
+  );
+  assert.deepEqual(
+    lastOpponentTurn({ ...game, board_history: { id: 'key', frames: frames.slice(1) } }, 0),
+    { start: 0, end: 2 },
+    'bounded history uses its earliest available position',
+  );
+  assert.equal(
+    lastOpponentTurn({ ...game, board_history: { id: 'key', frames: frames.slice(0, 1) } }, 0),
+    null,
+  );
+});
+
+test('recap captions and highlights describe public recruitment and movement without coordinates in text', () => {
+  const before = {
+    cursor: 1,
+    title: 'End turn',
+    actor: 0,
+    tiles: [['A1', 'Fertile']],
+    players: [{ id: 1, civilization: 'Greece', units: [], cities: [] }],
+  } as unknown as BoardFrame;
+  const after = {
+    ...before,
+    cursor: 2,
+    actor: 1,
+    title: 'Recruit',
+    players: [
+      {
+        ...before.players[0],
+        units: [
+          { id: 1, unit_type: 'Infantry', position: 'A1' },
+          { id: 2, unit_type: 'Infantry', position: 'A1' },
+        ],
+      },
+    ],
+  } as BoardFrame;
+  assert.deepEqual(frameDetails(before, after), {
+    caption: 'Greece · recruited 2 infantry',
+    positions: ['A1'],
+  });
+  const moved = structuredClone(after);
+  moved.title = 'Move';
+  moved.players[0].units![0].position = 'A2';
+  assert.deepEqual(frameDetails(after, moved), { caption: 'Greece · Move', positions: ['A2', 'A1'] });
+  const unchanged = structuredClone(moved);
+  unchanged.title = 'Research';
+  assert.deepEqual(frameDetails(moved, unchanged), { caption: 'Greece · Research', positions: [] });
 });

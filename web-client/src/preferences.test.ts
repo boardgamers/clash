@@ -140,6 +140,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
     colorBlind: true,
     topDown: true,
     unitBadges: true,
+    replayAutoplay: true,
   });
   assert.equal(writes, 1);
   viewer.updatePreference('unitBadges', false);
@@ -155,6 +156,12 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
   assert.equal(current.colorBlind, false);
   assert.equal(current.topDown, true);
   reopened.destroy();
+});
+
+test('opponent recap defaults to autoplay and restores the player’s manual preference', () => {
+  assert.equal(readPreferences({}).replayAutoplay, true);
+  assert.equal(readPreferences({ replayAutoplay: false }).replayAutoplay, false);
+  assert.equal(readPreferences({ replayAutoplay: true }).replayAutoplay, true);
 });
 
 test('tile and control hover sounds are throttled and obey global mute', () => {
