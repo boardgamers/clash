@@ -26,7 +26,6 @@
   import CivilizationAdvances from './CivilizationAdvances.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import ResourceText from './ResourceText.svelte';
-  import AvailabilityFilter from './AvailabilityFilter.svelte';
   import { resourceNames, type Resource, type Pile, type AdvanceView, type PublicAdvance } from './types';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
@@ -38,6 +37,12 @@
   const borrowing = $derived(choice?.advanceMode === 'borrow');
   let query = $state('');
   let category = $state('All');
+  let researchedOnly = $state(false);
+  const statusFilter = $derived(researchedOnly ? 'owned' : $session.availableOnly ? 'available' : 'all');
+  function setStatusFilter(value: string) {
+    researchedOnly = value === 'owned';
+    if (!researchedOnly) controller.setAvailableOnly(value === 'available');
+  }
   let chosenPayment = $state<{ advance: string; payment: Pile } | null>(null);
   const samePayment = (a: Pile, b: Pile) =>
     (Object.keys(resourceNames) as Resource[]).every((r) => (a[r] ?? 0) === (b[r] ?? 0));
@@ -61,16 +66,20 @@
     captives: Link,
   };
   let advances = $derived([...($session.view?.advances ?? [])].sort((a, b) => a.order - b.order));
-  const availableAdvances = $derived(advances.filter((a) => !$session.availableOnly || !!a.action));
+  const availableAdvances = $derived(
+    advances.filter((a) => (researchedOnly ? a.owned : !$session.availableOnly || !!a.action)),
+  );
   let player = $derived($session.view?.players.find((p) => p.index === $session.seat));
   let civilizationAdvances = $derived(player?.civilizationAdvances ?? []);
   let visibleCivilizationAdvances = $derived(
     category === 'All' || category === 'Civilization'
       ? civilizationAdvances.filter(
           (a) =>
-            (!$session.availableOnly ||
-              (!a.owned &&
-                a.prerequisites.some((p) => availableAdvances.some((advance) => advance.id === p.id)))) &&
+            (researchedOnly
+              ? a.owned
+              : !$session.availableOnly ||
+                (!a.owned &&
+                  a.prerequisites.some((p) => availableAdvances.some((advance) => advance.id === p.id)))) &&
             (matches(a) ||
               a.requirement.toLowerCase().includes(query.trim().toLowerCase()) ||
               a.prerequisites.some((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()))),
@@ -108,7 +117,7 @@
     return { destroy: () => node.close() };
   }
   async function showCivilizationAdvance(id: string) {
-    controller.setAvailableOnly(false);
+    setStatusFilter('all');
     query = '';
     category = 'Civilization';
     controller.patch({ selectedAdvance: null });
@@ -119,7 +128,7 @@
     });
   }
   async function prerequisite(id: string) {
-    if (!advances.find((a) => a.id === id)?.action) controller.setAvailableOnly(false);
+    if (researchedOnly || !advances.find((a) => a.id === id)?.action) setStatusFilter('all');
     query = '';
     category = advances.find((a) => a.id === id)?.group ?? 'All';
     controller.patch({ selectedAdvance: id });
@@ -170,7 +179,16 @@
   </header>
   {#if !choice}<ContextualCards {controller} context="research" />{/if}
   <nav class="research-filters" aria-label="Research categories">
-    <AvailabilityFilter {controller} />
+    <select
+      class="research-status-filter"
+      aria-label="Filter advances"
+      value={statusFilter}
+      onchange={(event) => setStatusFilter(event.currentTarget.value)}
+    >
+      <option value="available">Available</option><option value="all">All</option><option value="owned"
+        >Researched</option
+      >
+    </select>
     <button class:active={category === 'All'} onclick={() => (category = 'All')}>All advances</button>
     {#if player && civilizationAdvances.length}<button
         class:active={category === 'Civilization'}
@@ -202,7 +220,7 @@
           <article
             id={`research-${advance.id}`}
             class="research-node"
-            class:child={!$session.availableOnly && index > 0}
+            class:child={statusFilter === 'all' && index > 0}
             class:owned={advance.owned}
             class:available={!!advance.action}
             class:selected={selected?.id === advance.id}
@@ -295,14 +313,15 @@
       </section>
     {/each}
     {#if !visibleGroups.length && !visibleCivilizationAdvances.length}<p class="research-empty">
-        {$session.availableOnly
-          ? 'No research available with these filters.'
-          : query.trim()
-            ? `No advances match “${query}”.`
-            : 'No advances in this category.'}
-        {#if $session.availableOnly}<button
-            class="show-all-options"
-            onclick={() => controller.setAvailableOnly(false)}>Show all</button
+        {researchedOnly
+          ? 'No researched advances match these filters.'
+          : $session.availableOnly
+            ? 'No research available with these filters.'
+            : query.trim()
+              ? `No advances match “${query}”.`
+              : 'No advances in this category.'}
+        {#if statusFilter !== 'all'}<button class="show-all-options" onclick={() => setStatusFilter('all')}
+            >Show all</button
           >{/if}
       </p>{/if}
   </div>

@@ -480,6 +480,7 @@ export interface Session {
   selectedAdvance: string | null;
   toast: string;
   topDown: boolean;
+  strategyMap: boolean;
   unitBadges: boolean;
   replayAutoplay: boolean;
   availableOnly: boolean;

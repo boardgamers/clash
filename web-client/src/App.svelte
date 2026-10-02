@@ -56,9 +56,11 @@
     TriangleAlert,
     Hexagon,
     History,
+    Info,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
+  import { militarySummary } from './strategy';
   import ResearchTree from './ResearchTree.svelte';
   import { researchDecision, mapDecisionOptions } from './decision-controls';
   import CityPanel from './CityPanel.svelte';
@@ -639,7 +641,17 @@
                     alt={$session.playerBadges[player.index]!.label}
                     title={$session.playerBadges[player.index]!.label}
                   />{/if}</small
-              ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span></span
+              ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span
+              >{#if $session.strategyMap}{@const forces = militarySummary(
+                  ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(
+                    (p) => p.id === player.index,
+                  ) ?? { id: player.index, civilization: player.civilization },
+                )}<span
+                  class="strategy-player-forces"
+                  aria-label={`${forces.army} army units, ${forces.ships} ships${forces.aboard ? `, ${forces.aboard} army aboard` : ''}`}
+                  title="Army includes leaders and embarked troops; settlers are separate"
+                  ><Swords size={13} />{forces.army}<Ship size={13} />{forces.ships}</span
+                >{/if}</span
             ><span class="player-score">{player.score}<Trophy size={10} /></span
             >{#if player.index === $session.view?.activePlayer}<span class="active-dot" title="Current player"
               ></span>{/if}
@@ -700,23 +712,48 @@
           title="Zoom out"
           aria-label="Zoom out"
           onclick={() => world?.zoom(1.18)}><Minus size={18} /></button
-        ><span></span><button
-          class="map-secondary-control"
-          title={$session.unitBadges ? 'Hide unit badges' : 'Show unit badges'}
-          aria-label="Unit badges"
-          aria-pressed={$session.unitBadges}
-          class:active={$session.unitBadges}
-          onclick={() => controller.toggleUnitBadges()}
-          >{#if $session.unitBadges}<Eye size={18} />{:else}<EyeOff size={18} />{/if}</button
-        ><button
-          title={$session.topDown ? 'Switch to 3D view' : 'Switch to 2D overview'}
-          aria-label="Toggle top-down view"
-          aria-pressed={$session.topDown}
-          onclick={() => controller.toggleMapView()}><Layers size={18} /></button
-        ><button title="Reset camera" aria-label="Reset camera" onclick={() => world?.reset()}
+        ><span></span>{#if !$session.strategyMap}<button
+            class="map-secondary-control"
+            title={$session.unitBadges ? 'Hide unit badges' : 'Show unit badges'}
+            aria-label="Unit badges"
+            aria-pressed={$session.unitBadges}
+            class:active={$session.unitBadges}
+            onclick={() => controller.toggleUnitBadges()}
+            >{#if $session.unitBadges}<Eye size={18} />{:else}<EyeOff size={18} />{/if}</button
+          >{/if}<label class="map-view-picker"
+          ><Layers size={17} /><select
+            aria-label="Map view"
+            value={$session.strategyMap ? 'strategy' : $session.topDown ? '2d' : '3d'}
+            onchange={(event) => controller.setMapView(event.currentTarget.value as '3d' | '2d' | 'strategy')}
+          >
+            <option value="3d">3D</option><option value="2d">2D</option><option value="strategy"
+              >Strategy</option
+            >
+          </select></label
+        >
+        {#if $session.strategyMap}<details class="strategy-key">
+            <summary aria-label="Strategy map key" title="Strategy map key"><Info size={18} /></summary>
+            <div class="strategy-key-content">
+              <p>
+                <Swords size={14} />Army (including leaders) · <Ship size={14} />Ships · <Footprints
+                  size={14}
+                />Settlers
+              </p>
+              <p>Colors show city and unit owners. Army aboard ships is shown separately on the map.</p>
+              <p>
+                <Mountain size={14} />Mountains: stop after entry.<br /><Trees size={14} />Forest: no later
+                attack that turn.
+              </p>
+              <p>
+                Roads and some abilities bypass these restrictions. Terrain adds no combat value; tap a hex
+                for details.
+              </p>
+            </div>
+          </details>{/if}<button title="Reset camera" aria-label="Reset camera" onclick={() => world?.reset()}
           ><Maximize size={17} /></button
         >
       </div>
+
       {#if $session.mode === 'collect'}<div class="map-instruction">
           <Wheat size={17} /><span
             >Choose up to <strong

@@ -24,13 +24,13 @@ try {
   const saved = JSON.parse(localStorage.getItem('clash-preview-preferences') ?? '{}');
   for (const key of ['sound', 'colorBlind', 'unitBadges', 'availableOnly', 'replayAutoplay'])
     if (typeof saved[key] === 'boolean') preferences[key] = saved[key];
-  if (saved.mapView === '2d') preferences.mapView = '2d';
+  if (['2d', 'strategy'].includes(saved.mapView)) preferences.mapView = saved.mapView;
 } catch {}
 function savePreference(name: string, value: unknown) {
   if (!(
     (['sound', 'colorBlind', 'unitBadges', 'availableOnly', 'replayAutoplay'].includes(name) &&
       typeof value === 'boolean') ||
-    (name === 'mapView' && (value === '2d' || value === '3d'))
+    (name === 'mapView' && (value === '2d' || value === '3d' || value === 'strategy'))
   ))
     return;
   preferences[name] = value;

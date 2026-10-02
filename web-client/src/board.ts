@@ -21,6 +21,8 @@ import UnitMapBadge from './UnitMapBadge.svelte';
 import { mapDecisionOptions } from './decision-controls';
 import { portPlacement } from './port-layout';
 import { frameDetails } from './playback';
+import { strategyTiles, strategyDescription } from './strategy';
+import StrategyMapTile from './StrategyMapTile.svelte';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -117,6 +119,7 @@ export class World {
   >();
   private disposed = false;
   private topDown = false;
+  private strategyMap = false;
   private boardInteraction = false;
   private decisionPositions: string[] = [];
   private materials = new Set<THREE.Material>();
@@ -126,7 +129,7 @@ export class World {
     position: string;
     at: THREE.Vector3;
     node: HTMLButtonElement;
-    kind: 'city' | 'units' | 'destination' | 'collection';
+    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy';
     offsetX?: number;
     offsetY?: number;
     ownershipBounds?: THREE.Vector3[];
@@ -449,8 +452,14 @@ export class World {
           // Screen-space clearance keeps the mood clear of flags at every zoom and rotation.
           x = Math.min(x - 14, flagLeft - (this.topDown ? 9 : 11) - 4);
         }
-        label.node.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+        const edge = label.at
+          .clone()
+          .add(new THREE.Vector3(1.5, 0, 0))
+          .project(this.camera);
+        const scale = label.kind === 'strategy' ? Math.min(1.4, (Math.abs(edge.x - v.x) * w) / 2 / 96) : 1;
+        label.node.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px) scale(${scale})`;
         label.node.style.display = v.z > 1 || v.z < -1 ? 'none' : '';
+        if (label.kind === 'strategy') label.node.style.visibility = 'visible';
       }
       if (this.referenceRing.visible) {
         const v = this.referenceRing.position.clone().project(this.camera);
@@ -520,7 +529,7 @@ export class World {
     this.clearCoordinate();
     this.renderer.domElement.setAttribute(
       'aria-label',
-      `${this.topDown ? 'Overhead' : '3D'} civilization map. Select a city or terrain tile. Drag to ${this.topDown ? 'pan' : 'orbit'}; scroll to zoom.`,
+      `${this.strategyMap ? 'Strategy' : this.topDown ? 'Overhead' : '3D'} civilization map. Select a city or terrain tile. Drag to ${this.topDown ? 'pan' : 'orbit'}; scroll to zoom.`,
     );
     this.labelHost.classList.toggle('top-down', this.topDown);
     this.controls.enableRotate = !this.topDown;
@@ -542,6 +551,13 @@ export class World {
             (this.seaGuide ? 1.15 : 1),
         ),
       );
+    if (this.strategyMap && this.tiles.size) {
+      const points = [...this.tiles.keys()].map(positionXY);
+      const width = Math.max(...points.map((p) => p[0])) - Math.min(...points.map((p) => p[0])) + 2.8;
+      const height = Math.max(...points.map((p) => p[1])) - Math.min(...points.map((p) => p[1])) + 4;
+      const distance = Math.max(width / this.camera.aspect, height) / (2 * Math.tan(Math.PI / 10));
+      this.camera.position.copy(this.center).add(new THREE.Vector3(0, distance, 0.01));
+    }
     this.controls.update();
     this.invalidate();
   }
@@ -876,6 +892,7 @@ export class World {
       s.colorBlind,
       s.playerColors,
       s.playerSymbols,
+      s.strategyMap,
     ]);
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
@@ -916,7 +933,7 @@ export class World {
         const terrainGroup = new THREE.Group();
         terrainGroup.position.y = height / 2;
         // Keep the foreground clear for pieces instead of burying them in trees/peaks.
-        if (!cityPositions.has(position)) {
+        if (!s.strategyMap && !cityPositions.has(position)) {
           this.addTerrain(terrainGroup, kind, position.charCodeAt(0));
           if (unitPositions.has(position) && (kind === 'Forest' || kind === 'Mountain')) {
             terrainGroup.scale.set(0.8, 0.65, 0.6);
@@ -926,359 +943,401 @@ export class World {
         group.add(terrainGroup);
         this.board.add(group);
       }
-      const portSites = new Map(
-        s.game.players.flatMap((player) =>
-          (player.cities ?? []).flatMap((city) => {
-            if (
-              city.city_pieces?.port == null ||
-              !city.port_position ||
-              !mapTiles.some(([position, terrain]) => position === city.port_position && terrain === 'Water')
-            )
-              return [];
-            const placement = portPlacement(city.position, city.port_position);
-            return placement ? [[city.position, { ...placement, water: city.port_position }] as const] : [];
-          }),
-        ),
-      );
-      const harborDirections = new Map([...portSites.values()].map((port) => [port.water, port.rotation]));
-      const unitStacks = new Map<string, number>();
-      const unitsByTile = new Map<string, number>();
-      for (const player of s.game.players)
-        for (const unit of player.units ?? [])
-          unitsByTile.set(unit.position, (unitsByTile.get(unit.position) ?? 0) + 1);
-      for (const player of s.game.players) {
-        for (const city of player.cities ?? []) {
-          const [x, z] = positionXY(city.position);
-          const cityModel = new THREE.Group();
-          const ownerColor = playerColor(player.id, s.colorBlind, s.playerColors);
-          const wonders = (city.city_pieces?.wonders ?? []).filter((name) => name !== 'Hidden');
-          const additions = Object.entries(city.city_pieces ?? {}).filter(
-            (entry): entry is [BuildingKind, number] =>
-              entry[0] !== 'wonders' &&
-              typeof entry[1] === 'number' &&
-              !(entry[0] === 'port' && portSites.has(city.position)),
-          );
-          const settlement = models.settlement(ownerColor, player.civilization);
-          settlement.scale.setScalar(additions.length ? 0.57 : 0.88);
-          settlement.position.set(additions.length === 1 ? -0.2 : 0, 0, -0.09);
-          cityModel.add(settlement);
-          const pole = this.mesh(new THREE.CylinderGeometry(0.018, 0.024, 1.06, 6), this.material('#624d30'));
-          pole.position.set(0.12, 0.54, -0.12);
-          cityModel.add(pole);
-          const flag = this.mesh(new THREE.BoxGeometry(0.3, 0.2, 0.025), this.material(ownerColor));
-          flag.position.set(0.27, 0.98, -0.12);
-          cityModel.add(flag);
-          const ownershipPieces: THREE.Object3D[] = [pole, flag];
-          cityModel.position.set(x, 0.315, z);
-          cityModel.rotation.y = 0.25;
-          const capital = s.view?.players.find((p) => p.index === player.id)?.capital === city.position;
-          if (capital) {
-            const gold = this.material('#d5af55');
-            const band = this.mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.07, 12), gold);
-            band.position.set(0.12, 1.12, -0.12);
-            cityModel.add(band);
-            ownershipPieces.push(band);
-            for (let i = 0; i < 3; i++) {
-              const point = this.mesh(new THREE.ConeGeometry(0.055, 0.15, 4), gold);
-              point.position.set(0.12 + (i - 1) * 0.11, 1.22, -0.12);
-              cityModel.add(point);
-              ownershipPieces.push(point);
+      if (!s.strategyMap) {
+        const portSites = new Map(
+          s.game.players.flatMap((player) =>
+            (player.cities ?? []).flatMap((city) => {
+              if (
+                city.city_pieces?.port == null ||
+                !city.port_position ||
+                !mapTiles.some(
+                  ([position, terrain]) => position === city.port_position && terrain === 'Water',
+                )
+              )
+                return [];
+              const placement = portPlacement(city.position, city.port_position);
+              return placement ? [[city.position, { ...placement, water: city.port_position }] as const] : [];
+            }),
+          ),
+        );
+        const harborDirections = new Map([...portSites.values()].map((port) => [port.water, port.rotation]));
+        const unitStacks = new Map<string, number>();
+        const unitsByTile = new Map<string, number>();
+        for (const player of s.game.players)
+          for (const unit of player.units ?? [])
+            unitsByTile.set(unit.position, (unitsByTile.get(unit.position) ?? 0) + 1);
+        for (const player of s.game.players) {
+          for (const city of player.cities ?? []) {
+            const [x, z] = positionXY(city.position);
+            const cityModel = new THREE.Group();
+            const ownerColor = playerColor(player.id, s.colorBlind, s.playerColors);
+            const wonders = (city.city_pieces?.wonders ?? []).filter((name) => name !== 'Hidden');
+            const additions = Object.entries(city.city_pieces ?? {}).filter(
+              (entry): entry is [BuildingKind, number] =>
+                entry[0] !== 'wonders' &&
+                typeof entry[1] === 'number' &&
+                !(entry[0] === 'port' && portSites.has(city.position)),
+            );
+            const settlement = models.settlement(ownerColor, player.civilization);
+            settlement.scale.setScalar(additions.length ? 0.57 : 0.88);
+            settlement.position.set(additions.length === 1 ? -0.2 : 0, 0, -0.09);
+            cityModel.add(settlement);
+            const pole = this.mesh(
+              new THREE.CylinderGeometry(0.018, 0.024, 1.06, 6),
+              this.material('#624d30'),
+            );
+            pole.position.set(0.12, 0.54, -0.12);
+            cityModel.add(pole);
+            const flag = this.mesh(new THREE.BoxGeometry(0.3, 0.2, 0.025), this.material(ownerColor));
+            flag.position.set(0.27, 0.98, -0.12);
+            cityModel.add(flag);
+            const ownershipPieces: THREE.Object3D[] = [pole, flag];
+            cityModel.position.set(x, 0.315, z);
+            cityModel.rotation.y = 0.25;
+            const capital = s.view?.players.find((p) => p.index === player.id)?.capital === city.position;
+            if (capital) {
+              const gold = this.material('#d5af55');
+              const band = this.mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.07, 12), gold);
+              band.position.set(0.12, 1.12, -0.12);
+              cityModel.add(band);
+              ownershipPieces.push(band);
+              for (let i = 0; i < 3; i++) {
+                const point = this.mesh(new THREE.ConeGeometry(0.055, 0.15, 4), gold);
+                point.position.set(0.12 + (i - 1) * 0.11, 1.22, -0.12);
+                cityModel.add(point);
+                ownershipPieces.push(point);
+              }
             }
-          }
-          cityModel.userData = { position: city.position, kind: 'city', player: player.id };
-          this.pieces.push(cityModel);
-          let ownershipBadge: THREE.Sprite | undefined;
-          if (s.colorBlind) {
-            const badge = this.ownershipBadge(player.id, s.playerSymbols);
-            badge.position.set(0.27, 1.27, -0.12);
-            cityModel.add(badge);
-            ownershipBadge = badge;
-            ownershipPieces.push(badge);
-          }
-          const slots =
-            additions.length === 1
-              ? [[0.4, 0.18]]
-              : additions.length === 2
-                ? [
-                    [-0.45, 0.18],
-                    [0.45, 0.18],
-                  ]
-                : additions.length === 3
+            cityModel.userData = { position: city.position, kind: 'city', player: player.id };
+            this.pieces.push(cityModel);
+            let ownershipBadge: THREE.Sprite | undefined;
+            if (s.colorBlind) {
+              const badge = this.ownershipBadge(player.id, s.playerSymbols);
+              badge.position.set(0.27, 1.27, -0.12);
+              cityModel.add(badge);
+              ownershipBadge = badge;
+              ownershipPieces.push(badge);
+            }
+            const slots =
+              additions.length === 1
+                ? [[0.4, 0.18]]
+                : additions.length === 2
                   ? [
-                      [0, -0.52],
-                      [-0.43, 0.28],
-                      [0.43, 0.28],
+                      [-0.45, 0.18],
+                      [0.45, 0.18],
                     ]
-                  : [
-                      [-0.42, -0.37],
-                      [0.42, -0.37],
-                      [-0.42, 0.37],
-                      [0.42, 0.37],
-                    ];
-          const heights: BuildingKind[] = [
-            'obelisk',
-            'observatory',
-            'fortress',
-            'temple',
-            'port',
-            'academy',
-            'market',
-          ];
-          additions.sort(([a], [b]) => heights.indexOf(a) - heights.indexOf(b));
-          const ordinary = [settlement];
-          for (const [j, [name, buildingOwner]] of additions.entries()) {
-            const annex = models.building(
-              name,
-              playerColor(buildingOwner, s.colorBlind, s.playerColors),
-              player.civilization,
-            );
-            const [ax, az] = slots[j % slots.length];
-            annex.scale.setScalar(additions.length < 3 ? 0.62 : 0.55);
-            annex.position.set(ax, 0, az);
-            cityModel.add(annex);
-            ordinary.push(annex);
-          }
-          if (wonders.length) {
-            // Reserve the rear of the hex for landmarks; keep ordinary buildings,
-            // the settlement and ownership flag visible in the foreground.
-            ordinary.forEach((piece, index) => {
-              const count = Math.min(3, ordinary.length),
-                row = Math.floor(index / 3);
-              const rowCount = Math.min(3, ordinary.length - row * 3);
-              piece.scale.setScalar(ordinary.length > 3 ? 0.36 : 0.46);
-              piece.position.set(((index % count) - (rowCount - 1) / 2) * 0.43, 0, row ? 0.57 : 0.18);
-            });
-            wonders.forEach((name, index) => {
-              const landmark = models.wonder(name, ownerColor);
-              const columns = Math.min(3, wonders.length),
-                row = Math.floor(index / columns);
-              const scale =
-                wonders.length === 1 ? 0.8 : wonders.length === 2 ? 0.57 : wonders.length <= 3 ? 0.4 : 0.28;
-              landmark.scale.setScalar(scale);
-              landmark.position.set(
-                ((index % columns) - (columns - 1) / 2) * scale * 1.08,
-                0,
-                wonders.length <= 3 ? -0.33 : -0.55 + row * 0.24,
-              );
-              landmark.userData.wonder = name;
-              cityModel.add(landmark);
-            });
-            for (const marker of ownershipPieces) marker.position.x += 0.28;
-          }
-          const portSite = portSites.get(city.position);
-          if (portSite && city.city_pieces?.port != null) {
-            const dock = new THREE.Group();
-            const port = models.building(
+                  : additions.length === 3
+                    ? [
+                        [0, -0.52],
+                        [-0.43, 0.28],
+                        [0.43, 0.28],
+                      ]
+                    : [
+                        [-0.42, -0.37],
+                        [0.42, -0.37],
+                        [-0.42, 0.37],
+                        [0.42, 0.37],
+                      ];
+            const heights: BuildingKind[] = [
+              'obelisk',
+              'observatory',
+              'fortress',
+              'temple',
               'port',
-              playerColor(city.city_pieces.port, s.colorBlind, s.playerColors),
+              'academy',
+              'market',
+            ];
+            additions.sort(([a], [b]) => heights.indexOf(a) - heights.indexOf(b));
+            const ordinary = [settlement];
+            for (const [j, [name, buildingOwner]] of additions.entries()) {
+              const annex = models.building(
+                name,
+                playerColor(buildingOwner, s.colorBlind, s.playerColors),
+                player.civilization,
+              );
+              const [ax, az] = slots[j % slots.length];
+              annex.scale.setScalar(additions.length < 3 ? 0.62 : 0.55);
+              annex.position.set(ax, 0, az);
+              cityModel.add(annex);
+              ordinary.push(annex);
+            }
+            if (wonders.length) {
+              // Reserve the rear of the hex for landmarks; keep ordinary buildings,
+              // the settlement and ownership flag visible in the foreground.
+              ordinary.forEach((piece, index) => {
+                const count = Math.min(3, ordinary.length),
+                  row = Math.floor(index / 3);
+                const rowCount = Math.min(3, ordinary.length - row * 3);
+                piece.scale.setScalar(ordinary.length > 3 ? 0.36 : 0.46);
+                piece.position.set(((index % count) - (rowCount - 1) / 2) * 0.43, 0, row ? 0.57 : 0.18);
+              });
+              wonders.forEach((name, index) => {
+                const landmark = models.wonder(name, ownerColor);
+                const columns = Math.min(3, wonders.length),
+                  row = Math.floor(index / columns);
+                const scale =
+                  wonders.length === 1 ? 0.8 : wonders.length === 2 ? 0.57 : wonders.length <= 3 ? 0.4 : 0.28;
+                landmark.scale.setScalar(scale);
+                landmark.position.set(
+                  ((index % columns) - (columns - 1) / 2) * scale * 1.08,
+                  0,
+                  wonders.length <= 3 ? -0.33 : -0.55 + row * 0.24,
+                );
+                landmark.userData.wonder = name;
+                cityModel.add(landmark);
+              });
+              for (const marker of ownershipPieces) marker.position.x += 0.28;
+            }
+            const portSite = portSites.get(city.position);
+            if (portSite && city.city_pieces?.port != null) {
+              const dock = new THREE.Group();
+              const port = models.building(
+                'port',
+                playerColor(city.city_pieces.port, s.colorBlind, s.playerColors),
+                player.civilization,
+              );
+              port.scale.setScalar(0.5);
+              dock.add(port);
+              // A short sloping gangway connects the water-level wharf to its city.
+              const gangway = this.mesh(new THREE.BoxGeometry(0.16, 0.04, 0.36), this.material('#a28250'));
+              gangway.position.set(0, 0.19, -0.31);
+              gangway.rotation.x = 0.53;
+              dock.add(gangway);
+              dock.position.set(portSite.x, 0.01, portSite.z);
+              dock.rotation.y = portSite.rotation;
+              dock.userData = {
+                position: portSite.water,
+                cityPosition: city.position,
+                kind: 'city',
+                player: player.id,
+                building: 'port',
+              };
+              this.board.add(dock);
+              this.pieces.push(dock);
+            }
+            this.board.add(cityModel);
+            cityModel.updateWorldMatrix(true, true);
+            const ownership = new THREE.Box3().setFromObject(flag);
+            if (ownershipBadge) {
+              const center = ownershipBadge.getWorldPosition(new THREE.Vector3());
+              // A sprite faces the camera; its enclosing cube stays safe as the camera turns.
+              ownership.expandByPoint(center.clone().addScalar(0.3));
+              ownership.expandByPoint(center.clone().addScalar(-0.3));
+            }
+            const label = document.createElement('button');
+            label.className = 'city-map-label';
+            label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
+            const mood = city.mood_state;
+            label.dataset.mood = mood.toLowerCase();
+            const face = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            face.setAttribute('viewBox', '0 0 24 24');
+            face.setAttribute('aria-hidden', 'true');
+            face.setAttribute('fill', 'none');
+            face.setAttribute('stroke', 'currentColor');
+            face.setAttribute('stroke-width', '1.8');
+            face.setAttribute('stroke-linecap', 'round');
+            face.setAttribute('stroke-linejoin', 'round');
+            const outline = document.createElementNS(face.namespaceURI, 'circle');
+            outline.setAttribute('cx', '12');
+            outline.setAttribute('cy', '12');
+            outline.setAttribute('r', '9');
+            const features = document.createElementNS(face.namespaceURI, 'path');
+            features.setAttribute(
+              'd',
+              `M8 9h.01M16 9h.01 ${mood === 'Happy' ? 'M8 14q4 4 8 0' : mood === 'Angry' ? 'M8 17q4-4 8 0' : 'M8 15h8'}`,
+            );
+            face.append(outline, features);
+            const name = document.createElement('span');
+            name.className = 'city-map-name';
+            name.textContent = `${s.colorBlind ? playerSymbol(player.id, s.playerSymbols) + ' ' : ''}${player.civilization}${capital ? ' ♛' : ''} · ${city.position} · ${mood}`;
+            label.append(face, name);
+            label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position} · ${mood}`);
+            label.onclick = () => {
+              if (this.canPick(city.position)) this.pick(city.position, { kind: 'city', player: player.id });
+            };
+            label.onpointerenter = () => this.setHovered(city.position, true);
+            label.onpointerleave = () => this.setHovered(null);
+            label.onfocus = () => this.setHovered(city.position);
+            label.onblur = () => this.setHovered(null);
+            this.labelHost.append(label);
+            this.labelPositions.push({
+              position: city.position,
+              at: new THREE.Vector3(x, 1.4, z),
+              node: label,
+              kind: 'city',
+              ownershipBounds: [ownership.min.x, ownership.max.x].flatMap((x) =>
+                [ownership.min.y, ownership.max.y].flatMap((y) =>
+                  [ownership.min.z, ownership.max.z].map((z) => new THREE.Vector3(x, y, z)),
+                ),
+              ),
+            });
+          }
+          for (const unit of player.units ?? []) {
+            const [x, z] = positionXY(unit.position);
+            const pawn = models.unit(
+              unit.unit_type,
+              playerColor(player.id, s.colorBlind, s.playerColors),
+              unit.pirate,
               player.civilization,
             );
-            port.scale.setScalar(0.5);
-            dock.add(port);
-            // A short sloping gangway connects the water-level wharf to its city.
-            const gangway = this.mesh(new THREE.BoxGeometry(0.16, 0.04, 0.36), this.material('#a28250'));
-            gangway.position.set(0, 0.19, -0.31);
-            gangway.rotation.x = 0.53;
-            dock.add(gangway);
-            dock.position.set(portSite.x, 0.01, portSite.z);
-            dock.rotation.y = portSite.rotation;
-            dock.userData = {
-              position: portSite.water,
-              cityPosition: city.position,
-              kind: 'city',
-              player: player.id,
-              building: 'port',
+            pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id };
+            this.pieces.push(pawn);
+            const stackIndex = unitStacks.get(unit.position) ?? 0;
+            unitStacks.set(unit.position, stackIndex + 1);
+            const tile = this.tiles.get(unit.position);
+            const surface = tile
+              ? tile.parent!.position.y + (tile.geometry as THREE.CylinderGeometry).parameters.height / 2
+              : 0.31;
+            const inCity = cityPositions.has(unit.position);
+            const positions = inCity
+              ? [
+                  [-0.43, 0.65],
+                  [0, 0.69],
+                  [0.43, 0.65],
+                  [-0.69, 0.03],
+                  [0.69, 0.03],
+                  [0, -0.68],
+                ]
+              : [
+                  [-0.43, 0.4],
+                  [0, 0.4],
+                  [0.43, 0.4],
+                  [-0.43, -0.12],
+                  [0, -0.12],
+                  [0.43, -0.12],
+                ];
+            const count = unitsByTile.get(unit.position)!;
+            let [ux, uz] = positions[stackIndex % positions.length];
+            if (count > positions.length) {
+              // Large mixed stacks fan out instead of drawing several units in one slot.
+              const angle = (stackIndex / count) * Math.PI * 2;
+              ux = Math.sin(angle) * 0.72;
+              uz = Math.cos(angle) * 0.66;
+            } else if (!inCity && count === 1) {
+              ux = 0;
+            }
+            const ship = unit.unit_type === 'Ship';
+            if (ship && count > 1 && count <= 4) {
+              ux = stackIndex % 2 ? 0.27 : -0.27;
+              uz = stackIndex < 2 ? 0.36 : -0.36;
+            }
+            const harborDirection = ship ? harborDirections.get(unit.position) : undefined;
+            const inHarbor = harborDirection !== undefined && count <= 4;
+            if (inHarbor) {
+              // Moor side by side facing away from the wharf, leaving its entrance clear.
+              const across = (stackIndex - (count - 1) / 2) * (count > 2 ? 0.3 : 0.42);
+              ux = across * Math.cos(harborDirection) + 0.08 * Math.sin(harborDirection);
+              uz = -across * Math.sin(harborDirection) + 0.08 * Math.cos(harborDirection);
+            }
+            pawn.scale.setScalar(
+              count > positions.length
+                ? Math.min(0.65, 5.2 / count)
+                : inHarbor
+                  ? count === 1
+                    ? 0.8
+                    : count === 2
+                      ? 0.64
+                      : count === 3
+                        ? 0.54
+                        : 0.46
+                  : ship
+                    ? 0.88
+                    : 0.85,
+            );
+            pawn.position.set(x + ux, ship ? surface : surface + 0.02, z + uz);
+            pawn.rotation.y = inHarbor ? harborDirection : -0.22;
+            this.board.add(pawn);
+          }
+        }
+        const stackRows = new Map<string, number>();
+        for (const player of s.game.players) {
+          for (const position of new Set(player.units?.map((unit) => unit.position))) {
+            if (!this.tiles.has(position)) continue;
+            const surfaceUnits = player.units!.filter((unit) => unit.position === position);
+            const units = surfaceUnits.flatMap((unit) => [
+              unit,
+              ...(unit.carried_units ?? []).map((carried) => ({ ...carried, position })),
+            ]);
+            const counts = new Map<string, { type: (typeof units)[number]['unit_type']; count: number }>();
+            for (const unit of units) {
+              const name = typeof unit.unit_type === 'string' ? unit.unit_type : unit.unit_type.Leader;
+              const group = counts.get(name) ?? { type: unit.unit_type, count: 0 };
+              group.count++;
+              counts.set(name, group);
+            }
+            const carried = surfaceUnits.reduce((sum, unit) => sum + (unit.carried_units?.length ?? 0), 0);
+            const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
+            const label = document.createElement('button');
+            label.className = 'unit-map-label';
+            label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
+            label.setAttribute('aria-label', `Inspect ${description}`);
+            label.title = description;
+            this.unitBadges.push(
+              mount(UnitMapBadge, {
+                target: label,
+                props: {
+                  groups: [...counts.values()],
+                  symbol:
+                    s.colorBlind && player.civilization !== 'Pirates'
+                      ? playerSymbol(player.id, s.playerSymbols)
+                      : '',
+                  pirate: player.civilization === 'Pirates' || surfaceUnits.some((unit) => unit.pirate),
+                },
+              }),
+            );
+            label.onclick = () => {
+              if (this.canPick(position)) this.pick(position, { kind: 'units', player: player.id });
             };
-            this.board.add(dock);
-            this.pieces.push(dock);
+            label.onpointerenter = () => this.setHovered(position, true);
+            label.onpointerleave = () => this.setHovered(null);
+            label.onfocus = () => this.setHovered(position);
+            label.onblur = () => this.setHovered(null);
+            const [x, z] = positionXY(position);
+            const row = stackRows.get(position) ?? 0;
+            stackRows.set(position, row + 1);
+            this.labelHost.append(label);
+            this.labelPositions.push({
+              position,
+              at: new THREE.Vector3(x, 0.5, z),
+              node: label,
+              kind: 'units',
+              offsetY: 15 + row * 29,
+            });
           }
-          this.board.add(cityModel);
-          cityModel.updateWorldMatrix(true, true);
-          const ownership = new THREE.Box3().setFromObject(flag);
-          if (ownershipBadge) {
-            const center = ownershipBadge.getWorldPosition(new THREE.Vector3());
-            // A sprite faces the camera; its enclosing cube stays safe as the camera turns.
-            ownership.expandByPoint(center.clone().addScalar(0.3));
-            ownership.expandByPoint(center.clone().addScalar(-0.3));
-          }
-          const label = document.createElement('button');
-          label.className = 'city-map-label';
-          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
-          const mood = city.mood_state;
-          label.dataset.mood = mood.toLowerCase();
-          const face = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          face.setAttribute('viewBox', '0 0 24 24');
-          face.setAttribute('aria-hidden', 'true');
-          face.setAttribute('fill', 'none');
-          face.setAttribute('stroke', 'currentColor');
-          face.setAttribute('stroke-width', '1.8');
-          face.setAttribute('stroke-linecap', 'round');
-          face.setAttribute('stroke-linejoin', 'round');
-          const outline = document.createElementNS(face.namespaceURI, 'circle');
-          outline.setAttribute('cx', '12');
-          outline.setAttribute('cy', '12');
-          outline.setAttribute('r', '9');
-          const features = document.createElementNS(face.namespaceURI, 'path');
-          features.setAttribute(
-            'd',
-            `M8 9h.01M16 9h.01 ${mood === 'Happy' ? 'M8 14q4 4 8 0' : mood === 'Angry' ? 'M8 17q4-4 8 0' : 'M8 15h8'}`,
-          );
-          face.append(outline, features);
-          const name = document.createElement('span');
-          name.className = 'city-map-name';
-          name.textContent = `${s.colorBlind ? playerSymbol(player.id, s.playerSymbols) + ' ' : ''}${player.civilization}${capital ? ' ♛' : ''} · ${city.position} · ${mood}`;
-          label.append(face, name);
-          label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position} · ${mood}`);
-          label.onclick = () => {
-            if (this.canPick(city.position)) this.pick(city.position, { kind: 'city', player: player.id });
+        }
+      } else {
+        for (const tile of strategyTiles({ map: { tiles: mapTiles }, players: s.game.players })) {
+          const node = document.createElement('button');
+          node.className = 'strategy-map-tile';
+          node.style.visibility = 'hidden';
+          node.dataset.position = tile.position;
+          node.setAttribute('aria-label', strategyDescription(tile));
+          node.title = strategyDescription(tile);
+          node.onclick = () => {
+            if (this.canPick(tile.position)) this.pick(tile.position);
           };
-          label.onpointerenter = () => this.setHovered(city.position, true);
-          label.onpointerleave = () => this.setHovered(null);
-          label.onfocus = () => this.setHovered(city.position);
-          label.onblur = () => this.setHovered(null);
-          this.labelHost.append(label);
-          this.labelPositions.push({
-            position: city.position,
-            at: new THREE.Vector3(x, 1.4, z),
-            node: label,
-            kind: 'city',
-            ownershipBounds: [ownership.min.x, ownership.max.x].flatMap((x) =>
-              [ownership.min.y, ownership.max.y].flatMap((y) =>
-                [ownership.min.z, ownership.max.z].map((z) => new THREE.Vector3(x, y, z)),
-              ),
-            ),
-          });
-        }
-        for (const unit of player.units ?? []) {
-          const [x, z] = positionXY(unit.position);
-          const pawn = models.unit(
-            unit.unit_type,
-            playerColor(player.id, s.colorBlind, s.playerColors),
-            unit.pirate,
-            player.civilization,
-          );
-          pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id };
-          this.pieces.push(pawn);
-          const stackIndex = unitStacks.get(unit.position) ?? 0;
-          unitStacks.set(unit.position, stackIndex + 1);
-          const tile = this.tiles.get(unit.position);
-          const surface = tile
-            ? tile.parent!.position.y + (tile.geometry as THREE.CylinderGeometry).parameters.height / 2
-            : 0.31;
-          const inCity = cityPositions.has(unit.position);
-          const positions = inCity
-            ? [
-                [-0.43, 0.65],
-                [0, 0.69],
-                [0.43, 0.65],
-                [-0.69, 0.03],
-                [0.69, 0.03],
-                [0, -0.68],
-              ]
-            : [
-                [-0.43, 0.4],
-                [0, 0.4],
-                [0.43, 0.4],
-                [-0.43, -0.12],
-                [0, -0.12],
-                [0.43, -0.12],
-              ];
-          const count = unitsByTile.get(unit.position)!;
-          let [ux, uz] = positions[stackIndex % positions.length];
-          if (count > positions.length) {
-            // Large mixed stacks fan out instead of drawing several units in one slot.
-            const angle = (stackIndex / count) * Math.PI * 2;
-            ux = Math.sin(angle) * 0.72;
-            uz = Math.cos(angle) * 0.66;
-          } else if (!inCity && count === 1) {
-            ux = 0;
-          }
-          const ship = unit.unit_type === 'Ship';
-          if (ship && count > 1 && count <= 4) {
-            ux = stackIndex % 2 ? 0.27 : -0.27;
-            uz = stackIndex < 2 ? 0.36 : -0.36;
-          }
-          const harborDirection = ship ? harborDirections.get(unit.position) : undefined;
-          const inHarbor = harborDirection !== undefined && count <= 4;
-          if (inHarbor) {
-            // Moor side by side facing away from the wharf, leaving its entrance clear.
-            const across = (stackIndex - (count - 1) / 2) * (count > 2 ? 0.3 : 0.42);
-            ux = across * Math.cos(harborDirection) + 0.08 * Math.sin(harborDirection);
-            uz = -across * Math.sin(harborDirection) + 0.08 * Math.cos(harborDirection);
-          }
-          pawn.scale.setScalar(
-            count > positions.length
-              ? Math.min(0.65, 5.2 / count)
-              : inHarbor
-                ? count === 1
-                  ? 0.8
-                  : count === 2
-                    ? 0.64
-                    : count === 3
-                      ? 0.54
-                      : 0.46
-                : ship
-                  ? 0.88
-                  : 0.85,
-          );
-          pawn.position.set(x + ux, ship ? surface : surface + 0.02, z + uz);
-          pawn.rotation.y = inHarbor ? harborDirection : -0.22;
-          this.board.add(pawn);
-        }
-      }
-      const stackRows = new Map<string, number>();
-      for (const player of s.game.players) {
-        for (const position of new Set(player.units?.map((unit) => unit.position))) {
-          if (!this.tiles.has(position)) continue;
-          const surfaceUnits = player.units!.filter((unit) => unit.position === position);
-          const units = surfaceUnits.flatMap((unit) => [
-            unit,
-            ...(unit.carried_units ?? []).map((carried) => ({ ...carried, position })),
-          ]);
-          const counts = new Map<string, { type: (typeof units)[number]['unit_type']; count: number }>();
-          for (const unit of units) {
-            const name = typeof unit.unit_type === 'string' ? unit.unit_type : unit.unit_type.Leader;
-            const group = counts.get(name) ?? { type: unit.unit_type, count: 0 };
-            group.count++;
-            counts.set(name, group);
-          }
-          const carried = surfaceUnits.reduce((sum, unit) => sum + (unit.carried_units?.length ?? 0), 0);
-          const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
-          const label = document.createElement('button');
-          label.className = 'unit-map-label';
-          label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
-          label.setAttribute('aria-label', `Inspect ${description}`);
-          label.title = description;
+          node.onpointerenter = () => this.setHovered(tile.position, true);
+          node.onpointerleave = () => this.setHovered(null);
+          node.onfocus = () => this.setHovered(tile.position);
+          node.onblur = () => this.setHovered(null);
           this.unitBadges.push(
-            mount(UnitMapBadge, {
-              target: label,
+            mount(StrategyMapTile, {
+              target: node,
               props: {
-                groups: [...counts.values()],
-                symbol:
-                  s.colorBlind && player.civilization !== 'Pirates'
-                    ? playerSymbol(player.id, s.playerSymbols)
-                    : '',
-                pirate: player.civilization === 'Pirates' || surfaceUnits.some((unit) => unit.pirate),
+                tile,
+                colorBlind: s.colorBlind,
+                playerColors: s.playerColors ?? [],
+                playerSymbols: s.playerSymbols ?? [],
               },
             }),
           );
-          label.onclick = () => {
-            if (this.canPick(position)) this.pick(position, { kind: 'units', player: player.id });
-          };
-          label.onpointerenter = () => this.setHovered(position, true);
-          label.onpointerleave = () => this.setHovered(null);
-          label.onfocus = () => this.setHovered(position);
-          label.onblur = () => this.setHovered(null);
-          const [x, z] = positionXY(position);
-          const row = stackRows.get(position) ?? 0;
-          stackRows.set(position, row + 1);
-          this.labelHost.append(label);
+          this.labelHost.append(node);
+          const [x, z] = positionXY(tile.position);
           this.labelPositions.push({
-            position,
-            at: new THREE.Vector3(x, 0.5, z),
-            node: label,
-            kind: 'units',
-            offsetY: 15 + row * 29,
+            position: tile.position,
+            at: new THREE.Vector3(x, 0.4, z),
+            node,
+            kind: 'strategy',
           });
         }
       }
@@ -1516,8 +1575,9 @@ export class World {
       }
       label.node.disabled = !this.canPick(label.position);
     }
-    if (s.topDown !== this.topDown || guideChanged) {
+    if (s.topDown !== this.topDown || s.strategyMap !== this.strategyMap || guideChanged) {
       this.topDown = s.topDown;
+      this.strategyMap = s.strategyMap;
       this.reset();
     }
     const interactionSignature = JSON.stringify([

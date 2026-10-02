@@ -11,7 +11,8 @@
     "default": "3d",
     "items": [
       { "name": "3d", "label": "3D" },
-      { "name": "2d", "label": "2D overview" }
+      { "name": "2d", "label": "2D overview" },
+      { "name": "strategy", "label": "Strategy" }
     ]
   }
 ]

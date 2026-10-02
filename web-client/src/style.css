@@ -5277,3 +5277,168 @@ small {
   color: var(--muted);
   font-size: 12px;
 }
+
+.map-view-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 5px;
+}
+.map-view-picker select,
+.research-status-filter {
+  color: var(--ink);
+  background: var(--paper2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  min-height: 36px;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 12px;
+}
+.map-view-picker select {
+  width: 82px;
+}
+.research-status-filter {
+  flex-shrink: 0;
+}
+.strategy-map-tile,
+.strategy-map-tile:disabled {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0 5px;
+  border: 0;
+  color: #172c2d;
+  background: none;
+  pointer-events: auto;
+  opacity: 1;
+  transform-origin: center;
+  line-height: 1;
+}
+.strategy-map-tile:focus-visible {
+  outline: 3px solid #fff3bd;
+  border-radius: 8px;
+}
+.strategy-terrain {
+  display: flex;
+  opacity: 0.65;
+  filter: drop-shadow(0 1px 1px #ffffff77);
+}
+.strategy-terrain.important {
+  opacity: 1;
+  color: #162b29;
+}
+.strategy-owner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+  border-left: 6px solid var(--owner);
+  background: #f4f0e5;
+  color: #192b2e;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px #142b2d55;
+  padding: 4px 5px;
+}
+.strategy-city,
+.strategy-forces,
+.strategy-forces > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 18px;
+}
+.strategy-city {
+  font-size: 15px;
+}
+.strategy-forces {
+  flex-wrap: wrap;
+}
+.strategy-forces b {
+  font-size: 22px;
+}
+.strategy-forces .strategy-settlers,
+.strategy-forces .strategy-aboard {
+  font-size: 15px;
+}
+.strategy-aboard small {
+  font-size: 10px;
+}
+.strategy-symbol {
+  font-size: 14px;
+}
+.strategy-player-forces {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font:
+    600 13px 'DM Sans',
+    sans-serif;
+  color: var(--ink);
+}
+.strategy-key {
+  position: static;
+}
+.strategy-key summary {
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+.strategy-key summary::-webkit-details-marker {
+  display: none;
+}
+.strategy-key-content {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  width: min(300px, calc(100vw - 30px));
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  box-shadow: 0 3px 14px #10202444;
+}
+.strategy-key p {
+  margin: 7px 0;
+  line-height: 1.5;
+}
+.strategy-key svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+@media (max-width: 760px) {
+  .map-view-picker {
+    padding: 0;
+  }
+  .map-view-picker > svg {
+    display: none;
+  }
+  .map-view-picker select {
+    min-height: 40px;
+  }
+  .strategy-key summary {
+    width: 32px;
+    height: 40px;
+  }
+  .strategy-player-forces {
+    grid-area: 3 / 1 / 4 / 4;
+    padding-top: 3px;
+  }
+}
+.world-labels.collecting .strategy-map-tile {
+  opacity: 0.25;
+  pointer-events: none;
+}

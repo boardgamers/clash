@@ -139,6 +139,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
     sound: false,
     colorBlind: true,
     topDown: true,
+    strategyMap: false,
     unitBadges: true,
     replayAutoplay: true,
     availableOnly: true,
@@ -219,4 +220,11 @@ test('player symbol preferences update and reset without affecting resource or f
   assert.equal(playerSymbol(2, playerSymbols), playerSymbol(2));
   assert.deepEqual(readPreferences({}).playerSymbols, []);
   assert.equal(playerSymbol(0, readPreferences({ bgs: { playerSymbols: ['cross'] } }).playerSymbols), '✕');
+});
+
+test('strategy map preference persists separately from the 2D overview', () => {
+  assert.equal(readPreferences({ mapView: 'strategy' }).strategyMap, true);
+  assert.equal(readPreferences({ mapView: 'strategy' }).topDown, true);
+  assert.equal(readPreferences({ mapView: '2d' }).strategyMap, false);
+  assert.equal(readPreferences({ mapView: '3d' }).topDown, false);
 });

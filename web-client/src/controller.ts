@@ -66,6 +66,7 @@ export class Controller {
     selectedAdvance: null,
     toast: '',
     topDown: false,
+    strategyMap: false,
     unitBadges: false,
     replayAutoplay: true,
     availableOnly: true,
@@ -134,9 +135,9 @@ export class Controller {
     this.patch({ availableOnly: enabled });
     this.commands.updatePreference('availableOnly', enabled);
   }
-  toggleMapView() {
-    const topDown = !get(this.session).topDown;
-    if (this.commands.updatePreference('mapView', topDown ? '2d' : '3d')) this.patch({ topDown });
+  setMapView(view: '3d' | '2d' | 'strategy') {
+    this.patch({ topDown: view !== '3d', strategyMap: view === 'strategy' });
+    this.commands.updatePreference('mapView', view);
   }
   toggleUnitBadges() {
     const unitBadges = !get(this.session).unitBadges;
