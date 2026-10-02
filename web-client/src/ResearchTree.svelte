@@ -87,10 +87,6 @@
       : [],
   );
   let groups = $derived([...new Set(advances.map((a) => a.group))]);
-  function branchPrerequisite(group: string) {
-    const first = advances.find((a) => a.group === group);
-    return advances.find((a) => a.id === first?.required && a.group !== group);
-  }
   let selected = $derived(availableAdvances.find((a) => a.id === $session.selectedAdvance));
   let selectedPayment = $derived(
     selected?.payments.find((p) =>
@@ -104,8 +100,7 @@
     groups.filter(
       (group) =>
         (category === 'All' || group === category) &&
-        (availableAdvances.some((a) => a.group === group && matches(a)) ||
-          (category === group && !query.trim() && !!branchPrerequisite(group))),
+        availableAdvances.some((a) => a.group === group && matches(a)),
     ),
   );
   const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
@@ -138,7 +133,7 @@
       behavior: $session.reducedMotion ? 'instant' : 'smooth',
     });
   }
-  async function prerequisite(id: string) {
+  async function showAdvance(id: string) {
     if (researchedOnly || !advances.find((a) => a.id === id)?.action) setStatusFilter('all');
     query = '';
     category = advances.find((a) => a.id === id)?.group ?? 'All';
@@ -216,22 +211,12 @@
       <CivilizationAdvances
         civilization={player.civilization}
         advances={visibleCivilizationAdvances}
-        onPrerequisite={prerequisite}
+        onPrerequisite={showAdvance}
       />
     {/if}
     {#each visibleGroups as group}{@const GroupIcon = groupIcons[group] ?? BookOpen}
-      {@const requirement = branchPrerequisite(group)}
       <section class="research-branch" aria-label={group}>
-        <header class="research-branch-heading">
-          <h3><GroupIcon size={18} />{group}</h3>
-          {#if requirement}<button
-              class="research-branch-prerequisite"
-              title={`${group} prerequisite${requirement.owned ? ' · Researched' : ''}`}
-              onclick={() => prerequisite(requirement.id)}
-              >{#if requirement.owned}<Check size={12} />{:else}<ArrowRight size={12} />{/if}
-              Requires <span>{requirement.name}</span></button
-            >{/if}
-        </header>
+        <h3><GroupIcon size={18} />{group}</h3>
         {#each availableAdvances.filter((a) => a.group === group) as advance, index}{@const presentation =
             researchPresentation(advance)}{@const Icon = presentation.icon}{@const parent = advances.find(
             (a) => a.id === advance.required,
@@ -245,11 +230,6 @@
             class:selected={selected?.id === advance.id}
             class:search-muted={!!query.trim() && !matches(advance)}
           >
-            {#if index === 0 && parent && parent.id !== requirement?.id}<button
-                class="research-prerequisite"
-                onclick={() => prerequisite(parent.id)}
-                ><ArrowRight size={12} /> Requires {parent.name}</button
-              >{/if}
             <button
               class="research-pick"
               aria-label={`${advance.name}: ${presentation.summary}`}
@@ -270,52 +250,58 @@
                   />{/if}</span
               >
               <span class="research-summary"><ResourceText text={presentation.summary} /></span>
-              <span class="research-effects"
-                >{#if advance.unlocks}<span title={`Unlocks ${advance.unlocks}`}
-                    ><Hammer size={12} />{advance.unlocks}</span
-                  >{/if}{#each Object.entries(advance.bonus ?? {}) as [resource, amount]}{@const BonusIcon =
-                    resourceIcons[resource as Resource]}<span
-                    title={`Research bonus: ${amount} ${resourceNames[resource as Resource]}`}
-                    ><BonusIcon size={12} />+{amount} {resourceNames[resource as Resource]}</span
-                  >{/each}{#each advance.bonusEffects ?? [] as bonus}<span
-                    title={`Gain ${pileText(bonus.pile)} from ${bonus.source}`}
-                  >
-                    +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
-                  </span>{/each}</span
-              >
-              <span class="research-node-cost"
-                >{#if advance.owned}<span class="researched-label">Researched</span>{:else}<span
-                    class="research-flexible-cost"
-                    title={borrowing
-                      ? 'Borrow until end of turn'
-                      : freeResearch
-                        ? 'Free advance'
-                        : costLabel(advance)}
-                    aria-label={borrowing
-                      ? 'Borrow until end of turn'
-                      : freeResearch
-                        ? 'Free advance'
-                        : costLabel(advance)}
-                  >
-                    {#if borrowing}This turn{:else if freeResearch}Free{:else if advance.costAmount === 0}No
-                      resources{:else}
-                      {#each advance.costGroups ?? [{ amount: advance.costAmount, resources: advance.costResources }] as group, gi}
-                        {#if gi > 0}<span>or</span>{/if}<b>{group.amount}</b>
-                        {#each group.resources as resource, i}{@const CostIcon = resourceIcons[resource]}
-                          {#if i > 0}/{/if}<CostIcon size={13} />
-                        {/each}
-                        {#if group.resources.length > 1}<span>any mix</span>{/if}
-                      {/each}
-                    {/if}
-                  </span><span class="research-availability"
-                    >{advance.action
-                      ? 'Available'
-                      : !choice && parent && !advances.find((a) => a.id === parent.id)?.owned
-                        ? `Needs ${parent.name}`
-                        : actionReason(advance.reason)}</span
-                  >{/if}</span
-              >
             </button>
+            <div class="research-effects">
+              {#if advance.unlocks}<span title={`Unlocks ${advance.unlocks}`}
+                  ><Hammer size={12} />{advance.unlocks}</span
+                >{/if}{#each Object.entries(advance.bonus ?? {}) as [resource, amount]}{@const BonusIcon =
+                  resourceIcons[resource as Resource]}<span
+                  title={`Research bonus: ${amount} ${resourceNames[resource as Resource]}`}
+                  ><BonusIcon size={12} />+{amount} {resourceNames[resource as Resource]}</span
+                >{/each}{#each advance.bonusEffects ?? [] as bonus}<span
+                  title={`Gain ${pileText(bonus.pile)} from ${bonus.source}`}
+                >
+                  +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
+                </span>{/each}{#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
+                <span
+                  >Unlocks <button class="research-advance-link" onclick={() => showAdvance(unlocked.id)}
+                    >{unlocked.name}</button
+                  ><ArrowRight size={12} /></span
+                >
+              {/each}
+            </div>
+            <div class="research-node-cost">
+              {#if advance.owned}<span class="researched-label">Researched</span>{:else}<span
+                  class="research-flexible-cost"
+                  title={borrowing
+                    ? 'Borrow until end of turn'
+                    : freeResearch
+                      ? 'Free advance'
+                      : costLabel(advance)}
+                  aria-label={borrowing
+                    ? 'Borrow until end of turn'
+                    : freeResearch
+                      ? 'Free advance'
+                      : costLabel(advance)}
+                >
+                  {#if borrowing}This turn{:else if freeResearch}Free{:else if advance.costAmount === 0}No
+                    resources{:else}
+                    {#each advance.costGroups ?? [{ amount: advance.costAmount, resources: advance.costResources }] as group, gi}
+                      {#if gi > 0}<span>or</span>{/if}<b>{group.amount}</b>
+                      {#each group.resources as resource, i}{@const CostIcon = resourceIcons[resource]}
+                        {#if i > 0}/{/if}<CostIcon size={13} />
+                      {/each}
+                      {#if group.resources.length > 1}<span>any mix</span>{/if}
+                    {/each}
+                  {/if}
+                </span><span class="research-availability"
+                  >{#if advance.action}Available{:else if !choice && parent && !parent.owned}
+                    Needs <button class="research-advance-link" onclick={() => showAdvance(parent.id)}
+                      >{parent.name}</button
+                    >
+                  {:else}{actionReason(advance.reason)}{/if}</span
+                >{/if}
+            </div>
             {#each civilizationAdvances.filter( (a) => a.prerequisites.some((p) => p.id === advance.id) ) as special}
               <button
                 class="research-civilization-link"
@@ -329,15 +315,6 @@
             {/each}
           </article>
         {/each}
-        {#if !availableAdvances.some((a) => a.group === group)}<p class="research-empty">
-            {researchedOnly
-              ? 'No researched advances in this category.'
-              : 'No research available in this category.'}
-            {#if statusFilter !== 'all'}<button
-                class="show-all-options"
-                onclick={() => setStatusFilter('all')}>Show all</button
-              >{/if}
-          </p>{/if}
       </section>
     {/each}
     {#if !visibleGroups.length && !visibleCivilizationAdvances.length}<p class="research-empty">

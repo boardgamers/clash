@@ -81,29 +81,45 @@ try {
     await researchFilter.selectOption('all');
     assert.equal(await page.locator('.research-node').count(), v.advances.length);
     const categories = page.getByRole('navigation', { name: 'Research categories', exact: true });
-    for (const [government, prerequisite, id] of [
-      ['Democracy', 'Philosophy', 'Philosophy'],
-      ['Autocracy', 'Draft', 'Draft'],
-      ['Theocracy', 'State Religion', 'StateReligion'],
+    for (const [government, prerequisite, id, leading] of [
+      ['Democracy', 'Philosophy', 'Philosophy', 'Voting'],
+      ['Autocracy', 'Draft', 'Draft', 'Nationalism'],
+      ['Theocracy', 'State Religion', 'StateReligion', 'Dogma'],
     ]) {
       await categories.getByRole('button', { name: government, exact: true }).click();
       const branch = page.getByRole('region', { name: government, exact: true });
       await page.waitForFunction(() => document.querySelector('.research-tree').scrollTop === 0);
+      assert.equal(await branch.locator('.research-branch-prerequisite, .research-prerequisite').count(), 0);
+      const lead = page.locator(`#research-${leading}`);
+      assert.match(
+        (await lead.locator('.research-availability').innerText()).replace(/\s+/g, ' '),
+        new RegExp(`Needs ${prerequisite}`),
+      );
       if (government === 'Theocracy')
         await page.screenshot({ path: `/tmp/clash-government-prerequisite-${width}.png` });
-      await branch.getByRole('button', { name: `Requires ${prerequisite}`, exact: true }).click();
+      await lead.getByRole('button', { name: prerequisite, exact: true }).click();
       assert(await page.locator(`#research-${id}.selected`).isVisible());
       assert.equal(await page.locator('.research-detail h3').innerText(), prerequisite);
+      const unlock = page.locator(`#research-${id} .research-effects`);
+      assert.match((await unlock.innerText()).replace(/\s+/g, ' '), new RegExp(`Unlocks ${leading}`));
+      if (government === 'Democracy') {
+        await page.locator(`#research-${id}`).scrollIntoViewIfNeeded();
+        await page.screenshot({ path: `/tmp/clash-research-unlocks-${width}.png` });
+      }
+      await unlock.getByRole('button', { name: leading, exact: true }).click();
+      assert(await page.locator(`#research-${leading}.selected`).isVisible());
     }
     await researchFilter.selectOption('available');
-    await categories.getByRole('button', { name: 'Democracy', exact: true }).click();
+    await categories.getByRole('button', { name: 'Education', exact: true }).click();
     assert.equal(await page.locator('#research-Voting').count(), 0);
-    await page.getByRole('button', { name: 'Requires Philosophy', exact: true }).click();
+    await page.locator('#research-Philosophy').getByRole('button', { name: 'Voting', exact: true }).click();
     assert(
-      await page.locator('#research-Philosophy.selected').isVisible(),
-      'unavailable government links remain reachable',
+      await page.locator('#research-Voting.selected').isVisible(),
+      'forward links reveal government advances hidden by the Available filter',
     );
+    assert.equal(await researchFilter.inputValue(), 'all');
     assert.deepEqual(sent, [], 'prerequisite links only inspect research');
+    await researchFilter.selectOption('available');
     await categories.getByRole('button', { name: 'All advances', exact: true }).click();
     await page.screenshot({ path: `/tmp/clash-available-research-${width}.png` });
     await page.getByRole('button', { name: 'Close research', exact: true }).click();
