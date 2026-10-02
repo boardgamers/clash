@@ -25,6 +25,7 @@
     Plus,
     Minus,
     Maximize,
+    Minimize,
     Layers,
     Trophy,
     Flag,
@@ -42,7 +43,6 @@
     Volume2,
     VolumeX,
     Eye,
-    EyeOff,
     Shapes,
     RotateCw,
     Zap,
@@ -98,6 +98,8 @@
   let boardHost: HTMLDivElement;
   let world: World;
   let boardError = $state('');
+  let fullscreenEnabled = $state(false);
+  let fullscreen = $state(false);
   let confirmEnd = $state(false);
   let seaTooltipDismissed = $state(false);
   let mapMinimized = $state(false);
@@ -239,8 +241,15 @@
                       : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
+    fullscreenEnabled = document.fullscreenEnabled;
+    const updateFullscreen = () => {
+      fullscreen = !!document.fullscreenElement;
+    };
+    updateFullscreen();
+    document.addEventListener('fullscreenchange', updateFullscreen);
     const escape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+      if (event.key !== 'Escape' || document.fullscreenElement || document.querySelector('dialog[open]'))
+        return;
       if ($session.playback) {
         controller.endPlayback();
         return;
@@ -273,10 +282,19 @@
     }
     return () => {
       document.removeEventListener('keydown', escape);
+      document.removeEventListener('fullscreenchange', updateFullscreen);
       off?.();
       world?.destroy();
     };
   });
+  async function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      controller.patch({ error: 'Fullscreen is unavailable in this browser.' });
+    }
+  }
   function chatPanel(node: HTMLElement) {
     const panel = mountChat(node, {
       chat: controller.chat,
@@ -712,24 +730,12 @@
           title="Zoom out"
           aria-label="Zoom out"
           onclick={() => world?.zoom(1.18)}><Minus size={18} /></button
-        ><span></span>{#if !$session.strategyMap}<button
-            class="map-secondary-control"
-            title={$session.unitBadges ? 'Hide unit badges' : 'Show unit badges'}
-            aria-label="Unit badges"
-            aria-pressed={$session.unitBadges}
-            class:active={$session.unitBadges}
-            onclick={() => controller.toggleUnitBadges()}
-            >{#if $session.unitBadges}<Eye size={18} />{:else}<EyeOff size={18} />{/if}</button
-          >{/if}<label class="map-view-picker"
-          ><Layers size={17} /><select
-            aria-label="Map view"
-            value={$session.strategyMap ? 'strategy' : $session.topDown ? '2d' : '3d'}
-            onchange={(event) => controller.setMapView(event.currentTarget.value as '3d' | '2d' | 'strategy')}
-          >
-            <option value="3d">3D</option><option value="2d">2D</option><option value="strategy"
-              >Strategy</option
-            >
-          </select></label
+        ><span></span><button
+          class="map-view-toggle"
+          title={$session.strategyMap ? 'Show 3D map' : 'Show Strategy map'}
+          aria-label="Strategy map"
+          aria-pressed={$session.strategyMap}
+          onclick={() => controller.toggleMapView()}><Layers size={17} /><span>Strategy</span></button
         >
         {#if $session.strategyMap}<details class="strategy-key">
             <summary aria-label="Strategy map key" title="Strategy map key"><Info size={18} /></summary>
@@ -749,9 +755,13 @@
                 for details.
               </p>
             </div>
-          </details>{/if}<button title="Reset camera" aria-label="Reset camera" onclick={() => world?.reset()}
-          ><Maximize size={17} /></button
-        >
+          </details>{/if}
+        {#if fullscreenEnabled}<button
+            title={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            onclick={toggleFullscreen}
+            >{#if fullscreen}<Minimize size={17} />{:else}<Maximize size={17} />{/if}</button
+          >{/if}
       </div>
 
       {#if $session.mode === 'collect'}<div class="map-instruction">

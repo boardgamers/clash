@@ -22,7 +22,7 @@ export function readPreferences(preferences: Record<string, unknown>) {
     colorBlind: preferences.colorBlind === true,
     analysis: preferences.analysis === true,
     topDown: preferences.mapView === '2d' || preferences.mapView === 'strategy',
-    strategyMap: preferences.mapView === 'strategy',
+    strategyMap: preferences.mapView === '2d' || preferences.mapView === 'strategy',
     unitBadges: preferences.unitBadges === true,
     replayAutoplay: preferences.replayAutoplay !== false,
     availableOnly: preferences.availableOnly !== false,

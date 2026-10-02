@@ -88,8 +88,13 @@ try {
       },
       { raw, seat },
     );
-    const mode = page.getByRole('combobox', { name: 'Map view', exact: true });
-    await mode.selectOption('strategy');
+    const mode = page.getByRole('button', { name: 'Strategy map', exact: true });
+    assert.equal(await mode.getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.getByRole('combobox', { name: 'Map view', exact: true }).count(), 0);
+    assert.equal(await page.getByRole('button', { name: 'Unit badges', exact: true }).count(), 0);
+    assert.equal(await page.getByRole('button', { name: 'Reset camera', exact: true }).count(), 0);
+    await mode.click();
+    assert.equal(await mode.getAttribute('aria-pressed'), 'true');
     await page.locator('.strategy-map-tile').first().waitFor();
     assert.equal(await page.locator('.strategy-map-tile').count(), expected.length);
     for (const tile of expected.filter((t) => t.occupants.length))
@@ -123,13 +128,31 @@ try {
     await page.getByRole('region', { name: 'Tile B4 actions' }).waitFor();
     await page.getByRole('button', { name: 'Close tile actions', exact: true }).click();
     await page.getByRole('button', { name: 'Show all sea routes', exact: true }).click();
-    assert.equal(await mode.inputValue(), 'strategy');
+    assert.equal(await mode.getAttribute('aria-pressed'), 'true');
     await page.getByRole('button', { name: 'Show all sea routes', exact: true }).click();
-    await mode.selectOption('3d');
+    await mode.click();
+    assert.equal(await mode.getAttribute('aria-pressed'), 'false');
     assert.equal(await page.locator('.strategy-map-tile').count(), 0);
-    await mode.selectOption('2d');
-    assert.equal(await page.locator('.strategy-map-tile').count(), 0);
-    await mode.selectOption('strategy');
+    await page.evaluate(() => {
+      prefs.mapView = '2d';
+      host.emit('preferences', prefs);
+    });
+    await page.locator('.strategy-map-tile').first().waitFor();
+    assert.equal(await mode.getAttribute('aria-pressed'), 'true', 'legacy 2D opens Strategy');
+    await mode.click();
+    assert.equal(await page.evaluate(() => prefs.mapView), '3d');
+    await mode.click();
+    assert.equal(await page.evaluate(() => prefs.mapView), 'strategy');
+
+    await page.getByRole('button', { name: 'Enter fullscreen', exact: true }).click();
+    await page.waitForFunction(() => document.fullscreenElement === document.documentElement);
+    await page.getByRole('button', { name: 'Exit fullscreen', exact: true }).click();
+    await page.waitForFunction(() => !document.fullscreenElement);
+    await page.getByRole('button', { name: 'Enter fullscreen', exact: true }).click();
+    await page.waitForFunction(() => document.fullscreenElement === document.documentElement);
+    // Browser controls / Escape can exit without using our button.
+    await page.evaluate(() => document.exitFullscreen());
+    await page.getByRole('button', { name: 'Enter fullscreen', exact: true }).waitFor();
     await page.evaluate(() => {
       prefs.colorBlind = true;
       host.emit('preferences', prefs);
@@ -140,7 +163,7 @@ try {
     assert.deepEqual(sent, [], 'inspection and map views never submit moves');
     assert.deepEqual(errors, []);
     console.log(
-      `${width}px: strategy ownership, army/ship/passenger counts, pirates, color symbols, sea helper and view switching verified.`,
+      `${width}px: strategy ownership, army/ship/passenger counts, pirates, color symbols, sea helper, legacy preference, view toggle and fullscreen verified.`,
     );
     await page.close();
   }

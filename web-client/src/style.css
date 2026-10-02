@@ -5278,13 +5278,14 @@ small {
   font-size: 12px;
 }
 
-.map-view-picker {
+.game-shell .map-controls .map-view-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 5px;
+  gap: 5px;
+  width: auto;
+  padding: 0 7px;
+  font-size: 12px;
 }
-.map-view-picker select,
 .research-status-filter {
   color: var(--ink);
   background: var(--paper2);
@@ -5294,9 +5295,6 @@ small {
   padding: 4px 6px;
   font: inherit;
   font-size: 12px;
-}
-.map-view-picker select {
-  width: 82px;
 }
 .research-status-filter {
   flex-shrink: 0;
@@ -5420,15 +5418,6 @@ small {
   vertical-align: middle;
 }
 @media (max-width: 760px) {
-  .map-view-picker {
-    padding: 0;
-  }
-  .map-view-picker > svg {
-    display: none;
-  }
-  .map-view-picker select {
-    min-height: 40px;
-  }
   .strategy-key summary {
     width: 32px;
     height: 40px;

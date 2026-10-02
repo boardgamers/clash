@@ -135,13 +135,10 @@ export class Controller {
     this.patch({ availableOnly: enabled });
     this.commands.updatePreference('availableOnly', enabled);
   }
-  setMapView(view: '3d' | '2d' | 'strategy') {
-    this.patch({ topDown: view !== '3d', strategyMap: view === 'strategy' });
-    this.commands.updatePreference('mapView', view);
-  }
-  toggleUnitBadges() {
-    const unitBadges = !get(this.session).unitBadges;
-    if (this.commands.updatePreference('unitBadges', unitBadges)) this.patch({ unitBadges });
+  toggleMapView() {
+    const strategyMap = !get(this.session).strategyMap;
+    this.patch({ topDown: strategyMap, strategyMap });
+    this.commands.updatePreference('mapView', strategyMap ? 'strategy' : '3d');
   }
   setGlobalPreference(name: 'sound' | 'colorBlind', enabled: boolean) {
     if (!this.commands.updatePreference(name, enabled)) return;

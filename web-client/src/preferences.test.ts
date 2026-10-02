@@ -129,7 +129,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
   });
   viewer.emitter.receive('preferences', saved);
   assert.equal(writes, 0);
-  viewer.updatePreference('mapView', '2d');
+  viewer.updatePreference('mapView', 'strategy');
   assert.deepEqual(current, {
     analysis: false,
     locale: 'en',
@@ -139,7 +139,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
     sound: false,
     colorBlind: true,
     topDown: true,
-    strategyMap: false,
+    strategyMap: true,
     unitBadges: true,
     replayAutoplay: true,
     availableOnly: true,
@@ -222,9 +222,11 @@ test('player symbol preferences update and reset without affecting resource or f
   assert.equal(playerSymbol(0, readPreferences({ bgs: { playerSymbols: ['cross'] } }).playerSymbols), '✕');
 });
 
-test('strategy map preference persists separately from the 2D overview', () => {
+test('legacy 2D preferences open Strategy while 3D remains the default', () => {
   assert.equal(readPreferences({ mapView: 'strategy' }).strategyMap, true);
   assert.equal(readPreferences({ mapView: 'strategy' }).topDown, true);
-  assert.equal(readPreferences({ mapView: '2d' }).strategyMap, false);
+  assert.deepEqual(readPreferences({ mapView: '2d' }), readPreferences({ mapView: 'strategy' }));
+  assert.equal(readPreferences({}).strategyMap, false);
+  assert.equal(readPreferences({ mapView: '3d' }).strategyMap, false);
   assert.equal(readPreferences({ mapView: '3d' }).topDown, false);
 });
