@@ -151,7 +151,8 @@ pub(crate) fn naval_assault() -> Objective {
         6,
         |game, player, e| {
             let p = player.index;
-            if e.disembarked
+            if e.attacker.player == p
+                && e.disembarked
                 && e.opponent_is_human(p, game)
                 && e.is_winner(p)
                 && e.battleground.is_city()

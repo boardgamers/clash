@@ -304,6 +304,8 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     objective_cards: Vec<u8>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    objective_opportunities: Vec<String>,
     next_unit_id: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -418,7 +420,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         event_info: data.event_info,
         secrets: data.secrets,
         custom_data: data.custom_data,
-        objective_opportunities: Vec::new(),
+        objective_opportunities: data.objective_opportunities,
         gained_objective: None,
         great_mausoleum_action_cards: 0,
     }
@@ -460,6 +462,7 @@ pub fn player_data(player: Player) -> PlayerData {
         wonder_cards: player.wonder_cards,
         action_cards: player.action_cards,
         objective_cards: player.objective_cards,
+        objective_opportunities: player.objective_opportunities,
         next_unit_id: player.next_unit_id,
         played_once_per_turn_actions: player.played_once_per_turn_actions,
         event_info: player.event_info,
@@ -503,6 +506,7 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         wonder_cards: player.wonder_cards.clone(),
         action_cards: player.action_cards.clone(),
         objective_cards: player.objective_cards.clone(),
+        objective_opportunities: player.objective_opportunities.clone(),
         next_unit_id: player.next_unit_id,
         played_once_per_turn_actions: player.played_once_per_turn_actions.clone(),
         event_info: player.event_info.clone(),

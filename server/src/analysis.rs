@@ -85,6 +85,13 @@ pub fn create(mut game: Game, seat: Option<usize>, seed: &str) -> Result<Game, S
     game.context = GameContext::Play;
     game.messages.clear();
     game.board_history = Default::default();
+    for player in &mut game.players {
+        if Some(player.index) != seat {
+            // A queued objective identifies a private card. Simulated opponents
+            // receive different hands, so source-game claims cannot carry over.
+            player.objective_opportunities.clear();
+        }
+    }
     game.dice_roll_outcomes.clear();
     game.dice_roll_log.clear();
     game.dropped_players.clear();

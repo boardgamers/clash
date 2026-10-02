@@ -77,7 +77,7 @@ pub struct Player {
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
     pub custom_data: HashMap<String, Data>,
-    pub(crate) objective_opportunities: Vec<String>, // transient
+    pub(crate) objective_opportunities: Vec<String>, // private; survives pending choices
     pub(crate) gained_objective: Option<u8>,         // transient
     pub(crate) great_mausoleum_action_cards: u8,     // transient
 }
@@ -344,6 +344,7 @@ impl Player {
         self.wonder_cards = self.wonder_cards.iter().map(|_| Wonder::Hidden).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();
         self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
+        self.objective_opportunities.clear();
         self.secrets = Vec::new();
     }
 
