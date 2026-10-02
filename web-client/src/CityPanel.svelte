@@ -278,7 +278,9 @@
                     >
                   </span>
                 </button>
-                {#if leader.reason}<small class="reason">{leader.reason}</small>{/if}
+                {#if leader.reason && leader.reason !== 'Not enough resources'}<small class="reason"
+                    >{leader.reason}</small
+                  >{/if}
                 <dl class="leader-abilities">
                   {#each leader.abilities as ability}{@const Icon = abilityIcon(ability.description)}
                     <div>
