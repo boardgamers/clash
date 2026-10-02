@@ -62,6 +62,7 @@ try {
     }
     const a = await open(0),
       b = await open(1),
+      c = await open(2),
       spectator = await open(undefined);
     const picker = (page) => page.getByRole('dialog', { name: 'Choose your civilization' });
     const choices = (page) =>
@@ -108,18 +109,50 @@ try {
       .waitFor();
     assert.equal(await choices(b).count(), 0);
     assert.equal(JSON.parse(state).map.tiles.length, 0);
-    const last = JSON.parse(engine.webView(engine.stripSecret(state, 2), 2)).civilizations[0];
-    state = engine.tryMove(state, JSON.stringify(last.action), 2);
-    await Promise.all(pages.map(({ page, seat }) => emit(page, seat)));
+    await picker(c)
+      .getByRole('button', { name: /Lock in/ })
+      .click();
     await picker(a).waitFor({ state: 'detached' });
     await picker(b).waitFor({ state: 'detached' });
     assert.equal(await a.locator('.player-card').count(), 3);
     assert.equal(JSON.parse(state).state, 'Playing');
     assert.ok(JSON.parse(state).map.tiles.length > 0);
+    for (const { page, seat } of pages) {
+      await picker(page).waitFor({ state: 'detached' });
+      await page.locator('.city-map-label').first().waitFor();
+      // These labels are projected through the actual map camera every render.
+      // Checking only game data or player cards misses a camera poisoned by the empty draft map.
+      await page.evaluate(
+        () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      );
+      const map = await page.locator('.map-world').evaluate((el) => {
+        const bounds = el.getBoundingClientRect();
+        return [...el.querySelectorAll('.city-map-label')].map((label) => {
+          const rect = label.getBoundingClientRect();
+          return {
+            projected: !!label.style.transform && !/NaN|Infinity/.test(label.style.transform),
+            onMap:
+              rect.right > bounds.left &&
+              rect.left < bounds.right &&
+              rect.bottom > bounds.top &&
+              rect.top < bounds.bottom,
+          };
+        });
+      });
+      assert.ok(
+        map.length >= 3 && map.every((city) => city.projected),
+        `Seat ${seat}: map camera stays valid after the draft`,
+      );
+      assert.ok(
+        map.some((city) => city.onMap),
+        `Seat ${seat}: map is visible without a reload`,
+      );
+    }
+    await b.screenshot({ path: `/tmp/clash-civdraft-map-${width}.png` });
     assert.deepEqual(errors, []);
     for (const { page } of pages) await page.close();
     console.log(
-      `${width}x${height}: independent private picks, preserved selection, waiting/reconnect, spectator privacy, compact lock button and simultaneous reveal verified.`,
+      `${width}x${height}: independent private picks, preserved selection, waiting/reconnect, spectator privacy, compact lock button and visible map after simultaneous reveal verified.`,
     );
   }
 } finally {

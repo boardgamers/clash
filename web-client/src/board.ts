@@ -873,6 +873,7 @@ export class World {
       this.lastSignature = signature;
       this.settleMotion?.();
       const previous = new Map(this.pieces.map((p) => [this.pieceKey(p), p.position.clone()]));
+      const hadTiles = this.tiles.size > 0;
       this.clearBoard();
       const models = new PieceModels(
         (color) => this.material(color),
@@ -881,11 +882,14 @@ export class World {
       const cityPositions = new Set(s.game.players.flatMap((p) => p.cities?.map((c) => c.position) ?? []));
       const unitPositions = new Set(s.game.players.flatMap((p) => p.units?.map((u) => u.position) ?? []));
       const coords = s.game.map.tiles.map(([p]) => positionXY(p));
-      const minX = Math.min(...coords.map((c) => c[0])),
-        maxX = Math.max(...coords.map((c) => c[0])),
-        minZ = Math.min(...coords.map((c) => c[1])),
-        maxZ = Math.max(...coords.map((c) => c[1]));
-      this.center.set((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
+      // The civilization draft has no map yet. Empty bounds would poison the camera with NaN.
+      if (coords.length) {
+        const minX = Math.min(...coords.map((c) => c[0])),
+          maxX = Math.max(...coords.map((c) => c[0])),
+          minZ = Math.min(...coords.map((c) => c[1])),
+          maxZ = Math.max(...coords.map((c) => c[1]));
+        this.center.set((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
+      }
       for (const [position, terrain] of mapTiles) {
         const kind = typeof terrain === 'string' ? terrain : 'Barren';
         const [x, z] = positionXY(position);
@@ -1271,7 +1275,8 @@ export class World {
         }
       }
       if (animate) this.animatePieces(previous);
-      if (this.selectionSignature === '') this.reset();
+      // Frame a newly created map, including when the last opponent finishes choosing.
+      if (!hadTiles && this.tiles.size > 0) this.reset();
     }
     const settler = s.view?.units?.find((u) => s.selectedUnits.includes(u.id));
     const focusedPosition =
