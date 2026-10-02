@@ -412,6 +412,71 @@ small {
   z-index: 2;
   overflow: hidden;
 }
+.tile-hover {
+  position: absolute;
+  z-index: 7;
+  width: max-content;
+  max-width: min(300px, calc(100% - 16px));
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 4px 14px #0003;
+  pointer-events: none;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.tile-hover[hidden] {
+  display: none;
+}
+.tile-hover-terrain,
+.tile-hover-city,
+.tile-hover-owner > strong,
+.tile-hover-units,
+.tile-hover-units > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tile-hover-terrain {
+  color: var(--muted);
+  font-weight: 500;
+}
+.tile-hover-city small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+  margin-left: 4px;
+}
+.tile-hover-owner {
+  margin-top: 8px;
+  padding-left: 8px;
+  border-left: 3px solid var(--owner);
+}
+.tile-hover-owner > strong {
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+.tile-hover-units {
+  flex-wrap: wrap;
+  gap: 3px 10px;
+}
+.tile-hover-units + .tile-hover-units {
+  margin-top: 4px;
+}
+.tile-hover-units > span {
+  white-space: nowrap;
+}
+.tile-hover-units small,
+.tile-hover-empty {
+  color: var(--muted);
+  font-size: 11px;
+}
+.tile-hover-empty {
+  display: block;
+  margin-top: 3px;
+}
 .city-map-label,
 .city-map-label:disabled {
   position: absolute;
@@ -448,23 +513,7 @@ small {
   color: #a44832;
 }
 .city-map-name {
-  position: absolute;
-  bottom: calc(100% + 5px);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 6px 9px;
-  border: 1px solid #f4efde80;
-  border-bottom: 2px solid var(--player-color);
-  border-radius: 4px;
-  background: #f7f3e8f5;
-  color: #47564a;
-  box-shadow: 0 3px 13px #28483d28;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s;
-}
-.city-map-label:is(.hovered, :hover, :focus-visible) .city-map-name {
-  opacity: 1;
+  display: none;
 }
 .city-map-label:disabled {
   pointer-events: none;

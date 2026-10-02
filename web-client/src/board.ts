@@ -24,6 +24,7 @@ import { frameDetails } from './playback';
 import { strategyTiles, strategyDescription } from './strategy';
 import StrategyMapTile from './StrategyMapTile.svelte';
 import { CivilizationFlags } from './civilization-flags';
+import { TileTooltip } from './tile-hover';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -96,6 +97,7 @@ export class World {
   }
   private hoverRing: THREE.Mesh;
   private hovered: string | null = null;
+  private tileTooltip: TileTooltip;
   private referenceRing: THREE.Mesh;
   private referenceLabel: HTMLDivElement;
   private pinnedReference: string | null = null;
@@ -176,6 +178,8 @@ export class World {
     this.labelHost = document.createElement('div');
     this.labelHost.className = 'world-labels';
     host.append(this.labelHost);
+    this.tileTooltip = new TileTooltip(host);
+    this.renderer.domElement.setAttribute('aria-describedby', this.tileTooltip.node.id);
     this.scene.add(this.explorationOverlay.group);
     this.explorationLabel = document.createElement('div');
     this.explorationLabel.className = 'map-exploration-label';
@@ -389,6 +393,8 @@ export class World {
     const changed = this.hovered !== position;
     if (audible && changed && position && this.canPick(position) && !this.gesture.dragging) this.hover();
     this.hovered = position;
+    if (changed || audible || this.gesture.dragging)
+      this.tileTooltip.hover(this.gesture.dragging ? null : position);
     this.seaOverlay.setFocus(
       this.seaGuide
         ? this.seaRouteStart
@@ -414,6 +420,23 @@ export class World {
     for (const label of this.labelPositions)
       label.node.classList.toggle('hovered', label.position === position);
     if (changed) this.invalidate();
+  }
+  private bindTileHover(node: HTMLButtonElement, position: string) {
+    node.setAttribute('aria-describedby', this.tileTooltip.node.id);
+    node.onpointerenter = (event) => {
+      if (event.pointerType === 'touch') return;
+      this.tileTooltip.anchor(event.clientX, event.clientY);
+      this.setHovered(position, true);
+    };
+    node.onpointerleave = () => this.setHovered(null);
+    node.onfocus = () => {
+      if (!node.matches(':focus-visible')) return;
+      const rect = node.getBoundingClientRect();
+      this.tileTooltip.anchor(rect.right, rect.top);
+      this.setHovered(position);
+      this.tileTooltip.hover(position);
+    };
+    node.onblur = () => this.setHovered(null);
   }
   private key = (e: KeyboardEvent) => {
     if (e.key === 'Home') this.reset();
@@ -783,6 +806,7 @@ export class World {
     }
     if (!s.game) return;
     const mapChoices = mapDecisionOptions(s.view?.decision);
+    this.tileTooltip.update(s);
     const decisionPositions = [...new Set(mapChoices.map((o) => o.position!))];
     const pieceDecision = mapChoices.some((o) => o.mapTarget);
     this.decisionPositions = decisionPositions;
@@ -1170,10 +1194,7 @@ export class World {
             label.onclick = () => {
               if (this.canPick(city.position)) this.pick(city.position, { kind: 'city', player: player.id });
             };
-            label.onpointerenter = () => this.setHovered(city.position, true);
-            label.onpointerleave = () => this.setHovered(null);
-            label.onfocus = () => this.setHovered(city.position);
-            label.onblur = () => this.setHovered(null);
+            this.bindTileHover(label, city.position);
             this.labelHost.append(label);
             this.labelPositions.push({
               position: city.position,
@@ -1286,7 +1307,6 @@ export class World {
             label.className = 'unit-map-label';
             label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
             label.setAttribute('aria-label', `Inspect ${description}`);
-            label.title = description;
             this.unitBadges.push(
               mount(UnitMapBadge, {
                 target: label,
@@ -1303,10 +1323,7 @@ export class World {
             label.onclick = () => {
               if (this.canPick(position)) this.pick(position, { kind: 'units', player: player.id });
             };
-            label.onpointerenter = () => this.setHovered(position, true);
-            label.onpointerleave = () => this.setHovered(null);
-            label.onfocus = () => this.setHovered(position);
-            label.onblur = () => this.setHovered(null);
+            this.bindTileHover(label, position);
             const [x, z] = positionXY(position);
             const row = stackRows.get(position) ?? 0;
             stackRows.set(position, row + 1);
@@ -1327,14 +1344,10 @@ export class World {
           node.style.visibility = 'hidden';
           node.dataset.position = tile.position;
           node.setAttribute('aria-label', strategyDescription(tile));
-          node.title = strategyDescription(tile);
           node.onclick = () => {
             if (this.canPick(tile.position)) this.pick(tile.position);
           };
-          node.onpointerenter = () => this.setHovered(tile.position, true);
-          node.onpointerleave = () => this.setHovered(null);
-          node.onfocus = () => this.setHovered(tile.position);
-          node.onblur = () => this.setHovered(null);
+          this.bindTileHover(node, tile.position);
           this.unitBadges.push(
             mount(StrategyMapTile, {
               target: node,
@@ -1468,10 +1481,7 @@ export class World {
           label.onclick = () => {
             if (this.canPick(position)) this.pick(position);
           };
-          label.onpointerenter = () => this.setHovered(position, true);
-          label.onpointerleave = () => this.setHovered(null);
-          label.onfocus = () => this.setHovered(position);
-          label.onblur = () => this.setHovered(null);
+          this.bindTileHover(label, position);
           this.labelHost.append(label);
           const [x, z] = positionXY(position);
           this.labelPositions.push({
@@ -1541,10 +1551,7 @@ export class World {
         label.onclick = () => {
           if (this.canPick(position)) this.pick(position);
         };
-        label.onpointerenter = () => this.setHovered(position, true);
-        label.onpointerleave = () => this.setHovered(null);
-        label.onfocus = () => this.setHovered(position);
-        label.onblur = () => this.setHovered(null);
+        this.bindTileHover(label, position);
         this.labelHost.append(label);
         const [x, z] = positionXY(position);
         this.labelPositions.push({
@@ -1613,6 +1620,7 @@ export class World {
   destroy() {
     this.settleMotion?.();
     this.disposed = true;
+    this.tileTooltip.destroy();
     this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
