@@ -107,12 +107,7 @@
 .research-advance-link {
   padding: 0;
   font: inherit;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.research-advance-link:hover {
-  text-decoration-thickness: 2px;
+  color: inherit;
 }
 .research-node {
   position: relative;

@@ -125,7 +125,7 @@
   async function showCivilizationAdvance(id: string) {
     setStatusFilter('all');
     query = '';
-    category = 'Civilization';
+    if (category !== 'All') category = 'Civilization';
     controller.patch({ selectedAdvance: null });
     await tick();
     document.getElementById(`civilization-${id}`)?.scrollIntoView({
@@ -136,7 +136,7 @@
   async function showAdvance(id: string) {
     if (researchedOnly || !advances.find((a) => a.id === id)?.action) setStatusFilter('all');
     query = '';
-    category = advances.find((a) => a.id === id)?.group ?? 'All';
+    if (category !== 'All') category = advances.find((a) => a.id === id)?.group ?? 'All';
     controller.patch({ selectedAdvance: id });
     await tick();
     document.getElementById(`research-${id}`)?.scrollIntoView({
@@ -262,13 +262,7 @@
                   title={`Gain ${pileText(bonus.pile)} from ${bonus.source}`}
                 >
                   +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
-                </span>{/each}{#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
-                <span
-                  >Unlocks <button class="research-advance-link" onclick={() => showAdvance(unlocked.id)}
-                    >{unlocked.name}</button
-                  ><ArrowRight size={12} /></span
-                >
-              {/each}
+                </span>{/each}
             </div>
             <div class="research-node-cost">
               {#if advance.owned}<span class="researched-label">Researched</span>{:else}<span
@@ -296,12 +290,24 @@
                   {/if}
                 </span><span class="research-availability"
                   >{#if advance.action}Available{:else if !choice && parent && !parent.owned}
-                    Needs <button class="research-advance-link" onclick={() => showAdvance(parent.id)}
-                      >{parent.name}</button
+                    Needs <button
+                      class="research-advance-link"
+                      title={`View ${parent.name}`}
+                      onclick={() => showAdvance(parent.id)}>{parent.name}</button
                     >
                   {:else}{actionReason(advance.reason)}{/if}</span
                 >{/if}
             </div>
+            {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
+              {@const UnlockIcon = researchPresentation(unlocked).icon}
+              <button
+                class="research-civilization-link"
+                onclick={() => showAdvance(unlocked.id)}
+                title={`${unlocked.group} · ${unlocked.name}`}
+              >
+                <UnlockIcon size={14} />Unlocks {unlocked.name}<ArrowRight size={12} />
+              </button>
+            {/each}
             {#each civilizationAdvances.filter( (a) => a.prerequisites.some((p) => p.id === advance.id) ) as special}
               <button
                 class="research-civilization-link"

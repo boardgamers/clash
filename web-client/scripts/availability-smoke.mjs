@@ -100,19 +100,42 @@ try {
       await lead.getByRole('button', { name: prerequisite, exact: true }).click();
       assert(await page.locator(`#research-${id}.selected`).isVisible());
       assert.equal(await page.locator('.research-detail h3').innerText(), prerequisite);
-      const unlock = page.locator(`#research-${id} .research-effects`);
-      assert.match((await unlock.innerText()).replace(/\s+/g, ' '), new RegExp(`Unlocks ${leading}`));
+      const unlock = page
+        .locator(`#research-${id}`)
+        .getByRole('button', { name: `Unlocks ${leading}`, exact: true });
       if (government === 'Democracy') {
         await page.locator(`#research-${id}`).scrollIntoViewIfNeeded();
         await page.screenshot({ path: `/tmp/clash-research-unlocks-${width}.png` });
       }
-      await unlock.getByRole('button', { name: leading, exact: true }).click();
+      await unlock.click();
       assert(await page.locator(`#research-${leading}.selected`).isVisible());
     }
+    await categories.getByRole('button', { name: 'All advances', exact: true }).click();
+    await page
+      .locator('#research-Philosophy')
+      .getByRole('button', { name: 'Unlocks Voting', exact: true })
+      .click();
+    assert.equal(await categories.locator('button.active').innerText(), 'All advances');
+    assert(await page.locator('#research-Voting.selected').isVisible());
+    await page.locator('#research-Voting').getByRole('button', { name: 'Philosophy', exact: true }).click();
+    assert.equal(await categories.locator('button.active').innerText(), 'All advances');
+    assert(await page.locator('#research-Philosophy.selected').isVisible());
+    const special = v.players
+      .find((p) => p.index === seat)
+      .civilizationAdvances.find((a) => a.prerequisites.length);
+    const specialUnlock = page
+      .locator(`#research-${special.prerequisites[0].id} .research-civilization-link`)
+      .filter({ hasText: special.name });
+    await specialUnlock.click();
+    assert.equal(await categories.locator('button.active').innerText(), 'All advances');
+    assert(await page.locator(`#civilization-${special.id}`).isVisible());
     await researchFilter.selectOption('available');
     await categories.getByRole('button', { name: 'Education', exact: true }).click();
     assert.equal(await page.locator('#research-Voting').count(), 0);
-    await page.locator('#research-Philosophy').getByRole('button', { name: 'Voting', exact: true }).click();
+    await page
+      .locator('#research-Philosophy')
+      .getByRole('button', { name: 'Unlocks Voting', exact: true })
+      .click();
     assert(
       await page.locator('#research-Voting.selected').isVisible(),
       'forward links reveal government advances hidden by the Available filter',
