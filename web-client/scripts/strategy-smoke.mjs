@@ -52,6 +52,7 @@ try {
     [1400, 900],
     [390, 780],
     [320, 640],
+    [844, 390],
   ]) {
     const page = await browser.newPage({ viewport: { width, height } }),
       errors = [],
@@ -119,13 +120,52 @@ try {
     await page.getByLabel('Strategy map key', { exact: true }).click();
     const key = page.locator('.strategy-key-content');
     assert(await key.isVisible());
-    const keyBounds = await key.boundingBox();
-    assert(keyBounds.x >= 0 && keyBounds.x + keyBounds.width <= width);
+    const checkLegend = async () => {
+      await page.evaluate(
+        () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      );
+      const result = await key.evaluate((node) => {
+        const box = node.getBoundingClientRect();
+        const board = node.closest('.map-section').getBoundingClientRect();
+        const toolbar = document.querySelector('.table-tools').getBoundingClientRect();
+        return {
+          usableHeight: box.height >= 100,
+          insideBoard:
+            box.left >= board.left &&
+            box.right <= board.right &&
+            box.top >= board.top &&
+            box.bottom <= board.bottom,
+          clearsToolbar:
+            box.right <= toolbar.left ||
+            box.left >= toolbar.right ||
+            box.bottom <= toolbar.top ||
+            box.top >= toolbar.bottom,
+          readable: [0.1, 0.5, 0.9].every((fraction) =>
+            node.contains(
+              document.elementFromPoint(box.left + box.width / 2, box.top + box.height * fraction),
+            ),
+          ),
+        };
+      });
+      assert.deepEqual(errors, []);
+      assert.deepEqual(result, {
+        usableHeight: true,
+        insideBoard: true,
+        clearsToolbar: true,
+        readable: true,
+      });
+    };
+    await checkLegend();
+    await page.screenshot({ path: `/tmp/clash-strategy-key-${width}.png` });
     assert.match(await key.innerText(), /Terrain adds no combat value/);
     await page.getByLabel('Strategy map key', { exact: true }).click();
 
     await page.locator('.strategy-map-tile[data-position="B4"]').click();
     await page.getByRole('region', { name: 'Tile B4 actions' }).waitFor();
+    await page.getByLabel('Strategy map key', { exact: true }).click();
+    await checkLegend();
+    await page.screenshot({ path: `/tmp/clash-strategy-key-inspecting-${width}.png` });
+    await page.getByLabel('Strategy map key', { exact: true }).click();
     await page.getByRole('button', { name: 'Close tile actions', exact: true }).click();
     await page.getByRole('button', { name: 'Show all sea routes', exact: true }).click();
     assert.equal(await mode.getAttribute('aria-pressed'), 'true');

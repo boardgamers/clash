@@ -61,6 +61,7 @@
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
   import { militarySummary } from './strategy';
+  import { positionStrategyKey } from './strategy-key';
   import ResearchTree from './ResearchTree.svelte';
   import { researchDecision, mapDecisionOptions } from './decision-controls';
   import CityPanel from './CityPanel.svelte';
@@ -737,7 +738,7 @@
           aria-pressed={$session.strategyMap}
           onclick={() => controller.toggleMapView()}><Layers size={17} /><span>Strategy</span></button
         >
-        {#if $session.strategyMap}<details class="strategy-key">
+        {#if $session.strategyMap}<details class="strategy-key" use:positionStrategyKey>
             <summary aria-label="Strategy map key" title="Strategy map key"><Info size={18} /></summary>
             <div class="strategy-key-content">
               <p>

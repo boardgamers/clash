@@ -87,6 +87,10 @@
       : [],
   );
   let groups = $derived([...new Set(advances.map((a) => a.group))]);
+  function branchPrerequisite(group: string) {
+    const first = advances.find((a) => a.group === group);
+    return advances.find((a) => a.id === first?.required && a.group !== group);
+  }
   let selected = $derived(availableAdvances.find((a) => a.id === $session.selectedAdvance));
   let selectedPayment = $derived(
     selected?.payments.find((p) =>
@@ -100,7 +104,8 @@
     groups.filter(
       (group) =>
         (category === 'All' || group === category) &&
-        availableAdvances.some((a) => a.group === group && matches(a)),
+        (availableAdvances.some((a) => a.group === group && matches(a)) ||
+          (category === group && !query.trim() && !!branchPrerequisite(group))),
     ),
   );
   const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
@@ -111,6 +116,12 @@
   }
   function close() {
     if ($session.mode === 'research') controller.patch({ mode: 'overview', selectedAdvance: null });
+  }
+  async function selectCategory(value: string) {
+    category = value;
+    controller.patch({ selectedAdvance: null });
+    await tick();
+    document.querySelector('.research-tree')?.scrollTo({ top: 0, left: 0 });
   }
   function open(node: HTMLDialogElement) {
     node.showModal();
@@ -189,17 +200,15 @@
         >Researched</option
       >
     </select>
-    <button class:active={category === 'All'} onclick={() => (category = 'All')}>All advances</button>
+    <button class:active={category === 'All'} onclick={() => selectCategory('All')}>All advances</button>
     {#if player && civilizationAdvances.length}<button
         class:active={category === 'Civilization'}
-        onclick={() => {
-          category = 'Civilization';
-          controller.patch({ selectedAdvance: null });
-        }}><CivilizationEmblem civilization={player.civilization} size={16} />{player.civilization}</button
+        onclick={() => selectCategory('Civilization')}
+        ><CivilizationEmblem civilization={player.civilization} size={16} />{player.civilization}</button
       >{/if}
     {#each groups as group}{@const Icon = groupIcons[group] ?? BookOpen}<button
         class:active={category === group}
-        onclick={() => (category = group)}><Icon size={15} />{group}</button
+        onclick={() => selectCategory(group)}><Icon size={15} />{group}</button
       >{/each}
   </nav>
   <div class="research-tree" class:civilization-only={category === 'Civilization'} aria-label="Research tree">
@@ -211,8 +220,18 @@
       />
     {/if}
     {#each visibleGroups as group}{@const GroupIcon = groupIcons[group] ?? BookOpen}
+      {@const requirement = branchPrerequisite(group)}
       <section class="research-branch" aria-label={group}>
-        <h3><GroupIcon size={18} />{group}</h3>
+        <header class="research-branch-heading">
+          <h3><GroupIcon size={18} />{group}</h3>
+          {#if requirement}<button
+              class="research-branch-prerequisite"
+              title={`${group} prerequisite${requirement.owned ? ' · Researched' : ''}`}
+              onclick={() => prerequisite(requirement.id)}
+              >{#if requirement.owned}<Check size={12} />{:else}<ArrowRight size={12} />{/if}
+              Requires <span>{requirement.name}</span></button
+            >{/if}
+        </header>
         {#each availableAdvances.filter((a) => a.group === group) as advance, index}{@const presentation =
             researchPresentation(advance)}{@const Icon = presentation.icon}{@const parent = advances.find(
             (a) => a.id === advance.required,
@@ -226,7 +245,7 @@
             class:selected={selected?.id === advance.id}
             class:search-muted={!!query.trim() && !matches(advance)}
           >
-            {#if index === 0 && parent}<button
+            {#if index === 0 && parent && parent.id !== requirement?.id}<button
                 class="research-prerequisite"
                 onclick={() => prerequisite(parent.id)}
                 ><ArrowRight size={12} /> Requires {parent.name}</button
@@ -310,6 +329,15 @@
             {/each}
           </article>
         {/each}
+        {#if !availableAdvances.some((a) => a.group === group)}<p class="research-empty">
+            {researchedOnly
+              ? 'No researched advances in this category.'
+              : 'No research available in this category.'}
+            {#if statusFilter !== 'all'}<button
+                class="show-all-options"
+                onclick={() => setStatusFilter('all')}>Show all</button
+              >{/if}
+          </p>{/if}
       </section>
     {/each}
     {#if !visibleGroups.length && !visibleCivilizationAdvances.length}<p class="research-empty">

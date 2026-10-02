@@ -80,7 +80,31 @@ try {
     assert.equal(await page.locator('.research-node:not(.owned)').count(), 0);
     await researchFilter.selectOption('all');
     assert.equal(await page.locator('.research-node').count(), v.advances.length);
+    const categories = page.getByRole('navigation', { name: 'Research categories', exact: true });
+    for (const [government, prerequisite, id] of [
+      ['Democracy', 'Philosophy', 'Philosophy'],
+      ['Autocracy', 'Draft', 'Draft'],
+      ['Theocracy', 'State Religion', 'StateReligion'],
+    ]) {
+      await categories.getByRole('button', { name: government, exact: true }).click();
+      const branch = page.getByRole('region', { name: government, exact: true });
+      await page.waitForFunction(() => document.querySelector('.research-tree').scrollTop === 0);
+      if (government === 'Theocracy')
+        await page.screenshot({ path: `/tmp/clash-government-prerequisite-${width}.png` });
+      await branch.getByRole('button', { name: `Requires ${prerequisite}`, exact: true }).click();
+      assert(await page.locator(`#research-${id}.selected`).isVisible());
+      assert.equal(await page.locator('.research-detail h3').innerText(), prerequisite);
+    }
     await researchFilter.selectOption('available');
+    await categories.getByRole('button', { name: 'Democracy', exact: true }).click();
+    assert.equal(await page.locator('#research-Voting').count(), 0);
+    await page.getByRole('button', { name: 'Requires Philosophy', exact: true }).click();
+    assert(
+      await page.locator('#research-Philosophy.selected').isVisible(),
+      'unavailable government links remain reachable',
+    );
+    assert.deepEqual(sent, [], 'prerequisite links only inspect research');
+    await categories.getByRole('button', { name: 'All advances', exact: true }).click();
     await page.screenshot({ path: `/tmp/clash-available-research-${width}.png` });
     await page.getByRole('button', { name: 'Close research', exact: true }).click();
     await page.getByRole('button', { name: 'Manage cities', exact: true }).click();
@@ -108,6 +132,8 @@ try {
     await page.getByRole('button', { name: 'Close city management', exact: true }).click();
     state.actions_left = 0;
     state.players[seat].units[0].position = forest;
+    const guard = { id: state.players[seat].next_unit_id++, position: city, unit_type: 'Infantry' };
+    state.players[seat].units.unshift(guard);
     await emit();
     await page.getByRole('button', { name: 'Manage cities', exact: true }).click();
     await page.getByRole('button', { name: 'Buildings', exact: true }).click();
@@ -115,17 +141,21 @@ try {
     await page.getByRole('button', { name: 'Show all', exact: true }).click();
     assert.equal(await page.locator('.building-option').count(), offers.buildings.length);
     await page.getByRole('button', { name: 'Close city management', exact: true }).click();
-    await page.locator(`.unit-map-label[aria-label*="${forest}:"]`).click();
+    await page.getByRole('button', { name: 'Move units and found cities', exact: true }).click();
+    const movement = page.getByRole('region', { name: 'Unit movement', exact: true });
+    await movement.getByRole('button', { name: 'Show next group of units', exact: true }).click();
+    assert.equal(await movement.locator('.unit-choice[aria-pressed=true]').count(), 0);
     const found = page.getByRole('button', { name: 'Found city here', exact: false });
     await found.waitFor();
     assert(await found.isDisabled());
     await page.getByText('No actions left · Founding a city needs 1 action.', { exact: true }).waitFor();
     await page.screenshot({ path: `/tmp/clash-found-forest-${width}.png` });
     assert.deepEqual(sent, []);
-    await page.getByRole('button', { name: 'Close tile actions', exact: true }).click();
+    await movement.getByRole('button', { name: 'Show next group of units', exact: true }).click();
+    assert.equal(await found.count(), 0, 'founding does not follow the previous group');
+    await movement.getByRole('button', { name: 'Show next group of units', exact: true }).click();
     state.actions_left = 1;
     await emit();
-    await page.locator(`.unit-map-label[aria-label*="${forest}:"]`).click();
     await found.waitFor();
     assert(await found.isEnabled());
     await found.click();

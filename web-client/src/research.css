@@ -95,14 +95,37 @@
 .research-branch {
   min-width: 0;
 }
-.research-branch > h3 {
+.research-branch-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-bottom: 9px;
+}
+.research-branch-heading h3 {
   display: flex;
   align-items: center;
   gap: 9px;
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  margin-bottom: 13px;
+  margin: 0;
+}
+.research-branch-prerequisite {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.research-branch-prerequisite span {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.research-branch-prerequisite:hover span {
+  text-decoration-thickness: 2px;
 }
 .research-node {
   position: relative;

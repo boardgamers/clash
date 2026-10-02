@@ -2800,7 +2800,8 @@ small {
   display: flex;
 }
 .map-controls:has(.map-control-help:hover),
-.map-controls:has(.map-control-help button:focus-visible) {
+.map-controls:has(.map-control-help button:focus-visible),
+.map-controls:has(.strategy-key[open]) {
   z-index: 26;
 }
 .map-tooltip {
@@ -5398,9 +5399,11 @@ small {
 }
 .strategy-key-content {
   position: absolute;
-  bottom: calc(100% + 8px);
-  right: 0;
+  top: 0;
+  left: 0;
   width: min(300px, calc(100vw - 30px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;

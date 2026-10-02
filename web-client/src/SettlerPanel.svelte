@@ -44,9 +44,12 @@
   const destination = $derived(
     $session.moveDestination === null ? null : $session.moveDestinations[$session.moveDestination],
   );
-  const settler = $derived(
-    $session.selectedUnits.length === 1 ? $session.view?.settlers.find((u) => u.id === first?.id) : undefined,
-  );
+  const settler = $derived.by(() => {
+    const here = $session.view?.settlers.filter((u) => u.position === origin) ?? [];
+    return (
+      here.find((u) => $session.selectedUnits.includes(u.id)) ?? here.find((u) => u.foundAction) ?? here[0]
+    );
+  });
   const canMove = $derived(
     !!$session.view?.stopMovement || (!!$session.view?.canPlay && ($session.game?.actions_left ?? 0) > 0),
   );
