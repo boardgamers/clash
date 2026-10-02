@@ -290,10 +290,10 @@
                   {/if}
                 </span><span class="research-availability"
                   >{#if advance.action}Available{:else if !choice && parent && !parent.owned}
-                    Needs <button
+                    <button
                       class="research-advance-link"
                       title={`View ${parent.name}`}
-                      onclick={() => showAdvance(parent.id)}>{parent.name}</button
+                      onclick={() => showAdvance(parent.id)}>Needs {parent.name}</button
                     >
                   {:else}{actionReason(advance.reason)}{/if}</span
                 >{/if}

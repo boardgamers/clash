@@ -97,7 +97,7 @@ try {
       );
       if (government === 'Theocracy')
         await page.screenshot({ path: `/tmp/clash-government-prerequisite-${width}.png` });
-      await lead.getByRole('button', { name: prerequisite, exact: true }).click();
+      await lead.getByRole('button', { name: `Needs ${prerequisite}`, exact: true }).click();
       assert(await page.locator(`#research-${id}.selected`).isVisible());
       assert.equal(await page.locator('.research-detail h3').innerText(), prerequisite);
       const unlock = page
@@ -117,7 +117,10 @@ try {
       .click();
     assert.equal(await categories.locator('button.active').innerText(), 'All advances');
     assert(await page.locator('#research-Voting.selected').isVisible());
-    await page.locator('#research-Voting').getByRole('button', { name: 'Philosophy', exact: true }).click();
+    await page
+      .locator('#research-Voting')
+      .getByRole('button', { name: 'Needs Philosophy', exact: true })
+      .click();
     assert.equal(await categories.locator('button.active').innerText(), 'All advances');
     assert(await page.locator('#research-Philosophy.selected').isVisible());
     const special = v.players
