@@ -579,10 +579,11 @@ pub(crate) fn lose_wonder(
         city_position,
     );
 
-    let p = game.player_mut(player.index);
-    p.wonders_owned.remove(wonder);
+    game.player_mut(player.index).wonders_owned.remove(wonder);
 
-    p.get_city_mut(city_position)
+    // Conquest transfers the city before transferring its wonders. The piece
+    // is still at this position, even though the old owner has lost the city.
+    game.get_any_city_mut(city_position)
         .pieces
         .wonders
         .retain(|w| *w != wonder);

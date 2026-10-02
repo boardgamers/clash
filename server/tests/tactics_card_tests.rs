@@ -91,6 +91,61 @@ fn test_heavy_resistance() {
 }
 
 #[test]
+fn heavy_resistance_can_resolve_a_battle_at_a_wonder_city() {
+    use server::content::custom_actions::CustomActionType;
+    use server::game_api;
+    use server::wonder::Wonder;
+
+    let mut game = JSON.load_game("heavy_resistance");
+    let city = Position::from_offset("C1");
+    let wonders = vec![Wonder::GreatLibrary, Wonder::GreatLighthouse];
+    game.players[0].action_cards.clear();
+    game.players[1].action_cards = vec![7];
+    game.players[1].units.truncate(1);
+    game.players[1].get_city_mut(city).pieces.wonders = wonders.clone();
+    game.players[1].wonders_built = wonders.clone();
+    // Two strong attacker rolls, then a low defender roll. Heavy Resistance
+    // applies normally; resolving the round must also transfer the wonders.
+    game.dice_roll_outcomes = vec![0, 11, 11];
+    let game = game.clone(); // initialize ownership and wonder abilities
+    let game = game_api::execute(game, move_action(vec![0, 2], city), 0);
+    let game = game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+            7,
+        )])),
+        1,
+    );
+    assert!(game.player(1).try_get_city(city).is_none());
+    assert_eq!(game.player(0).get_city(city).pieces.wonders, wonders);
+    assert_eq!(
+        game.player(1).wonders_built,
+        wonders,
+        "builder credit is retained"
+    );
+    for wonder in &wonders {
+        assert!(game.player(0).wonders_owned.contains(*wonder));
+        assert!(!game.player(1).wonders_owned.contains(*wonder));
+    }
+    for ability in [
+        CustomActionType::GreatLibrary,
+        CustomActionType::GreatLighthouse,
+    ] {
+        assert!(game.player(0).custom_actions.contains_key(&ability));
+        assert!(!game.player(1).custom_actions.contains_key(&ability));
+    }
+    let restored = game.clone();
+    assert_eq!(
+        restored.player(0).wonders_owned,
+        game.player(0).wonders_owned
+    );
+    assert_eq!(
+        restored.player(1).wonders_owned,
+        game.player(1).wonders_owned
+    );
+}
+
+#[test]
 fn test_high_ground() {
     JSON.test(
         "high_ground",
