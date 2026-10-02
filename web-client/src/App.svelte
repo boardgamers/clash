@@ -608,7 +608,7 @@
             >
             <span class="player-emblem"
               >{#if $session.colorBlind}<span class="ownership-symbol" aria-hidden="true"
-                  >{playerSymbol(player.index)}</span
+                  >{playerSymbol(player.index, $session.playerSymbols)}</span
                 >{:else}<CivilizationEmblem civilization={player.civilization} size={24} />{/if}</span
             ><span class="player-info"
               ><strong>{player.civilization}</strong><small

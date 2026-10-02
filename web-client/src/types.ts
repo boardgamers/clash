@@ -1,3 +1,4 @@
+import { playerSymbolGlyph } from '@boardgamers/protocol/player-symbols';
 export type Pile = Partial<
   Record<'food' | 'wood' | 'ore' | 'ideas' | 'gold' | 'mood_tokens' | 'culture_tokens' | 'captives', number>
 >;
@@ -434,6 +435,7 @@ export interface Session {
   reducedMotion: boolean;
   colorBlind: boolean;
   playerColors?: string[];
+  playerSymbols?: string[];
   playerBadges?: ({ url: string; label: string } | undefined)[];
   sound: boolean;
   locale: string;
@@ -549,6 +551,7 @@ export const resourceNames: Record<Resource, string> = {
 export const resources = Object.keys(resourceNames) as Resource[];
 export const playerColors = ['#5086af', '#b96c4c', '#6d9173', '#ae92b6'];
 const accessiblePlayerColors = ['#0072b2', '#d55e00', '#009e73', '#cc79a7', '#746800', '#333333'];
-export const playerSymbol = (index: number) => ['●', '▲', '■', '◆', '✚', '✕'][index] ?? String(index + 1);
+export const playerSymbol = (index: number, preferred: readonly string[] = []) =>
+  playerSymbolGlyph(preferred[index], ['●', '▲', '■', '◆', '✚', '✕'][index] ?? String(index + 1));
 export const playerColor = (index: number, colorBlind: boolean, preferred: readonly string[] = []) =>
   (colorBlind ? accessiblePlayerColors[index] : preferred[index] || playerColors[index]) ?? '#bfa986';

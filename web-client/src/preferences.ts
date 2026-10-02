@@ -1,7 +1,9 @@
+import { isPlayerSymbol } from '@boardgamers/protocol/player-symbols';
 export function readPreferences(preferences: Record<string, unknown>) {
   const bgs = preferences.bgs as
     | {
         playerColors?: unknown;
+        playerSymbols?: unknown;
         players?: { pro?: boolean }[];
         supporterBadge?: { url: string; label: string };
       }
@@ -13,6 +15,9 @@ export function readPreferences(preferences: Record<string, unknown>) {
     locale: typeof preferences.locale === 'string' ? preferences.locale : 'en',
     sound: preferences.sound !== false,
     playerColors,
+    playerSymbols: Array.isArray(bgs?.playerSymbols)
+      ? bgs.playerSymbols.map((s) => (isPlayerSymbol(s) ? s : ''))
+      : [],
     playerBadges: (bgs?.players ?? []).map((player) => (player.pro ? bgs?.supporterBadge : undefined)),
     colorBlind: preferences.colorBlind === true,
     topDown: preferences.mapView === '2d',

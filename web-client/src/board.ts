@@ -606,7 +606,7 @@ export class World {
       }
     }
   }
-  private ownershipBadge(index: number) {
+  private ownershipBadge(index: number, symbols?: string[]) {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 64;
     const context = canvas.getContext('2d')!;
@@ -621,7 +621,7 @@ export class World {
     context.font = 'bold 42px system-ui';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillText(playerSymbol(index), 32, 33);
+    context.fillText(playerSymbol(index, symbols), 32, 33);
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     this.textures.add(texture);
@@ -778,6 +778,7 @@ export class World {
       s.seat,
       s.colorBlind,
       s.playerColors,
+      s.playerSymbols,
     ]);
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
@@ -885,7 +886,7 @@ export class World {
           this.pieces.push(cityModel);
           let ownershipBadge: THREE.Sprite | undefined;
           if (s.colorBlind) {
-            const badge = this.ownershipBadge(player.id);
+            const badge = this.ownershipBadge(player.id, s.playerSymbols);
             badge.position.set(0.27, 1.27, -0.12);
             cityModel.add(badge);
             ownershipBadge = badge;
@@ -1022,7 +1023,7 @@ export class World {
           face.append(outline, features);
           const name = document.createElement('span');
           name.className = 'city-map-name';
-          name.textContent = `${s.colorBlind ? playerSymbol(player.id) + ' ' : ''}${player.civilization}${capital ? ' ♛' : ''} · ${city.position} · ${mood}`;
+          name.textContent = `${s.colorBlind ? playerSymbol(player.id, s.playerSymbols) + ' ' : ''}${player.civilization}${capital ? ' ♛' : ''} · ${city.position} · ${mood}`;
           label.append(face, name);
           label.setAttribute('aria-label', `Select ${player.civilization} city ${city.position} · ${mood}`);
           label.onclick = () => {
@@ -1148,7 +1149,10 @@ export class World {
           this.unitBadges.push(
             mount(UnitMapBadge, {
               target: label,
-              props: { groups: [...counts.values()], symbol: s.colorBlind ? playerSymbol(player.id) : '' },
+              props: {
+                groups: [...counts.values()],
+                symbol: s.colorBlind ? playerSymbol(player.id, s.playerSymbols) : '',
+              },
             }),
           );
           label.onclick = () => {

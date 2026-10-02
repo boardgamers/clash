@@ -133,6 +133,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
   assert.deepEqual(current, {
     locale: 'en',
     playerColors: [],
+    playerSymbols: [],
     playerBadges: [],
     sound: false,
     colorBlind: true,
@@ -194,4 +195,14 @@ test('player badges use host artwork only for visible Supporters and clear when 
   });
   assert.deepEqual(playerBadges, [supporterBadge, undefined]);
   assert.deepEqual(readPreferences({}).playerBadges, []);
+});
+
+test('player symbol preferences update and reset without affecting resource or faction identity', async () => {
+  const { playerSymbol } = await import('./types.ts');
+  const { playerSymbols } = readPreferences({ bgs: { playerSymbols: ['star', 'hexagon', '<svg>'] } });
+  assert.equal(playerSymbol(0, playerSymbols), '★');
+  assert.equal(playerSymbol(1, playerSymbols), '⬢');
+  assert.equal(playerSymbol(2, playerSymbols), playerSymbol(2));
+  assert.deepEqual(readPreferences({}).playerSymbols, []);
+  assert.equal(playerSymbol(0, readPreferences({ bgs: { playerSymbols: ['cross'] } }).playerSymbols), '✕');
 });

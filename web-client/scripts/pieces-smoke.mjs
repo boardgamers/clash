@@ -154,6 +154,22 @@ try {
       await page.getByRole('region', { name: 'Tile C3 actions', exact: true }).waitFor();
       await page.getByRole('button', { name: 'Close tile actions', exact: true }).click();
     }
+    await page.evaluate(() =>
+      host.emit('preferences', {
+        sound: false,
+        colorBlind: true,
+        bgs: { players: [], playerColors: [], playerSymbols: ['star', 'hexagon'] },
+      }),
+    );
+    await page.waitForFunction(() => document.querySelector('.city-map-name')?.textContent.startsWith('★'));
+    await page.evaluate(() =>
+      host.emit('preferences', {
+        sound: false,
+        colorBlind: true,
+        bgs: { players: [], playerColors: [], playerSymbols: ['cross', 'hexagon'] },
+      }),
+    );
+    await page.waitForFunction(() => document.querySelector('.city-map-name')?.textContent.startsWith('✕'));
     await page.getByRole('button', { name: 'Toggle top-down view', exact: true }).click();
     await page.waitForTimeout(350);
     await page.screenshot({ path: '/tmp/clash-pieces-board-overhead-' + width + '.png' });
