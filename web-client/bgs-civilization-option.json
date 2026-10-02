@@ -6,6 +6,6 @@
   "items": [
     { "name": "Random", "label": "Random civilization" },
     { "name": "ChooseCivilization", "label": "Choose a civilization" },
-    { "name": "DraftThree", "label": "Choose 1 of 3 · simultaneous and hidden (house rule)" }
+    { "name": "DraftThree", "label": "Choose 1 of 3" }
   ]
 }
