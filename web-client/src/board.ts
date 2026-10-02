@@ -777,6 +777,7 @@ export class World {
       s.view?.players,
       s.seat,
       s.colorBlind,
+      s.playerColors,
     ]);
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
