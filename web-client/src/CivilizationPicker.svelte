@@ -24,8 +24,7 @@
   <h2 id="civilization-title">{draft ? 'Choose your civilization' : 'Choose civilization'}</h2>
   {#if draft}
     <p class="draft-intro">
-      House rule · Choose 1 of 3. Each player has a different set. Choices reveal together, then the map is
-      set up.
+      Choose 1 of 3. Each player has a different set. Choices reveal together, then the map is set up.
     </p>
     <div class="draft-status" aria-label="Civilization choices" aria-live="polite">
       {#each $session.view?.players ?? [] as player}
