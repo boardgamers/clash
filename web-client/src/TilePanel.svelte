@@ -13,6 +13,7 @@
   import ActivationStatus from './ActivationStatus.svelte';
   import CityBuildings from './CityBuildings.svelte';
   import LeaderDetails from './LeaderDetails.svelte';
+  import FoundCityAction from './FoundCityAction.svelte';
   let {
     controller,
     onHighlight,
@@ -28,6 +29,7 @@
   const publicCity = $derived(publicOwner?.cities?.find((c) => c.position === position));
   const ownCity = $derived($session.view?.cities.find((c) => c.position === position));
   const ownUnits = $derived($session.view?.units?.filter((u) => u.position === position) ?? []);
+  const settler = $derived($session.view?.settlers.find((u) => u.position === position));
   const canMove = $derived(canMoveOnMap($session.view, $session.game));
   const origins = $derived.by(() => {
     // Recompute when the filtered game state changes, never from hidden state.
@@ -114,6 +116,7 @@
           </button>{/each}
       </div>
     {:else}<TileUnits players={$session.game?.players ?? []} {position} />{/if}
+    {#if settler && !publicCity}<FoundCityAction {controller} {settler} />{/if}
     {#each $session.view?.players ?? [] as player}
       {#each player.leaders?.filter((l) => l.position === position) ?? [] as leader}
         <LeaderDetails

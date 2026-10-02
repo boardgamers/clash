@@ -4,6 +4,7 @@ import type { MapPick } from './types';
 import * as THREE from 'three';
 import { activeCityAbility } from './abilities';
 import { ExplorationOverlay } from './exploration-overlay';
+import { explorationPreview } from './exploration-preview';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
@@ -770,8 +771,9 @@ export class World {
     const ability = activeCityAbility(s);
     const combat = activeCombat(s.game);
     const exploration = s.view?.explorationDecision;
-    this.explorationPositions = exploration?.choices[0]?.tiles.map(([p]) => p) ?? [];
+    this.explorationPositions = exploration?.choices[0]?.tiles.map(([p]) => p) ?? explorationPreview(s);
     this.explorationOverlay.update(this.explorationPositions);
+    this.explorationLabel.textContent = exploration ? 'Exploring' : 'Will reveal';
     this.explorationLabel.hidden = !this.explorationPositions.length;
     this.explorationLabel.dataset.positions = this.explorationPositions.join(' ');
     const abilityPositions = [...new Set(ability?.offers.map((offer) => offer.position!) ?? [])];
@@ -798,6 +800,7 @@ export class World {
                     ...(s.view?.units?.filter((u) => s.selectedUnits.includes(u.id)).map((u) => u.position) ??
                       []),
                     ...s.moveDestinations.map((d) => d.position),
+                    ...this.explorationPositions,
                     ...(s.landingTargets ?? []),
                   ]),
                 ]

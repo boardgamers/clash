@@ -68,6 +68,7 @@ export class Controller {
     topDown: false,
     unitBadges: false,
     replayAutoplay: true,
+    availableOnly: true,
   });
   readonly chat = new ChatController();
   readonly audio = new GameAudio();
@@ -128,6 +129,10 @@ export class Controller {
       this.patch({ playback: { ...playback, playing: false } });
     }
     this.commands.updatePreference('replayAutoplay', enabled);
+  }
+  setAvailableOnly(enabled: boolean) {
+    this.patch({ availableOnly: enabled });
+    this.commands.updatePreference('availableOnly', enabled);
   }
   toggleMapView() {
     const topDown = !get(this.session).topDown;

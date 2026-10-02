@@ -17,6 +17,7 @@
   import TerrainRules from './TerrainRules.svelte';
   import UnitPicker from './UnitPicker.svelte';
   import LeaderDetails from './LeaderDetails.svelte';
+  import FoundCityAction from './FoundCityAction.svelte';
   import { terrainInfo } from './terrain';
   import { movementBonus } from './movement-bonus';
   let {
@@ -211,20 +212,9 @@
           >{/if}<ArrowRight size={16} />
       </button>
     </div>{/if}
-  {#if settler?.foundAction && !$session.view?.stopMovement}<div
-      class="settler-found"
-      title={settler.foundReason ??
-        (settler.foundFree ? 'Founder · Free action' : 'Costs 1 action · Replaces this settler with a city')}
-    >
-      <button
-        class="secondary wide"
-        disabled={!settler.foundAction || $session.pending}
-        onclick={() => settler?.foundAction && controller.submit(settler.foundAction)}
-        ><Landmark size={17} />Found city here<span class="settler-action-cost"
-          >{#if settler.foundFree}Free{:else}<Zap size={13} />1{/if}</span
-        ></button
-      >
-    </div>{/if}
+  {#if settler && !$session.game?.players.some((p) => p.cities?.some((c) => c.position === settler.position))}
+    <FoundCityAction {controller} {settler} />
+  {/if}
   {#if !units.length && !$session.view?.nomadCities?.length}<p>Recruit units in a city to explore.</p>{/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>

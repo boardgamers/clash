@@ -69,7 +69,10 @@ export interface Game {
   state: unknown;
   events?: { event_type: string | Record<string, unknown> }[];
   players: Player[];
-  map: { tiles: [string, Terrain][] };
+  map: {
+    tiles: [string, Terrain][];
+    unexplored_blocks?: { position: { top_tile: string; rotation: number } }[];
+  };
   current_player_index: number;
   actions_left: number;
   age: number;
@@ -479,6 +482,7 @@ export interface Session {
   topDown: boolean;
   unitBadges: boolean;
   replayAutoplay: boolean;
+  availableOnly: boolean;
 }
 export interface MapPick {
   kind: 'tile' | 'city' | 'unit' | 'units' | 'decision';

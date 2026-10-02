@@ -26,6 +26,7 @@
   import HappinessPanel from './HappinessPanel.svelte';
   import CityFacts from './CityFacts.svelte';
   import UnitIcon from './UnitIcon.svelte';
+  import AvailabilityFilter from './AvailabilityFilter.svelte';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let tab = $derived($session.cityTab);
@@ -45,7 +46,23 @@
   }
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let options = $derived($session.view?.cityActions.find((c) => c.position === $session.city));
-  let selected = $derived(options?.buildings.find((b) => b.name === building));
+  const visibleBuildings = $derived(
+    (options?.buildings ?? []).filter((b) => !$session.availableOnly || (!b.owned && b.choices.length > 0)),
+  );
+  const visibleRecruits = $derived(
+    (options?.recruits ?? []).filter(
+      (u) =>
+        !$session.availableOnly ||
+        ($session.recruits[unitInfo[u.type].key] ?? 0) > 0 ||
+        (!u.reason && u.available > 0),
+    ),
+  );
+  const visibleLeaders = $derived(
+    (options?.leaders ?? []).filter(
+      (l) => !$session.availableOnly || !l.reason || $session.recruits.leader === l.id,
+    ),
+  );
+  let selected = $derived(visibleBuildings.find((b) => b.name === building));
   const buildActivatesCity = $derived(
     selected
       ? selected.activateCity !== false
@@ -142,6 +159,7 @@
           controller.patch({ error: '' });
         }}><item.icon size={17} />{item.label}</button
       >{/each}
+    {#if tab !== 'happiness'}<AvailabilityFilter {controller} />{/if}
   </nav>
   <div class="city-content" bind:this={content}>
     <ContextualCards {controller} context={tab} />
@@ -154,7 +172,7 @@
         Each building adds 1 city size and 1 point. A city’s size cannot exceed your number of cities.
       </p>
       <div class="building-grid">
-        {#each options?.buildings ?? [] as item}{@const info = buildingInfo[item.name]}<button
+        {#each visibleBuildings as item}{@const info = buildingInfo[item.name]}<button
             class="building-option"
             class:owned={item.owned}
             class:selected={building === item.name}
@@ -172,6 +190,11 @@
                 >{/if}{/if}</button
           >{/each}
       </div>
+      {#if !visibleBuildings.length}<p class="availability-empty">
+          No buildings available in this city.
+          <button class="show-all-options" onclick={() => controller.setAvailableOnly(false)}>Show all</button
+          >
+        </p>{/if}
     {:else if tab === 'recruit'}
       <p class="city-rule">
         Recruit up to {(city?.capacity ?? 0) + Number(!!$session.ballcourts && !!city?.ballcourts)} units together
@@ -205,7 +228,7 @@
           /> Attack pirates with recruited Ships</label
         >{/if}
       <div class="recruit-list">
-        {#each options?.recruits ?? [] as item}{@const info = unitInfo[item.type]}{@const amount =
+        {#each visibleRecruits as item}{@const info = unitInfo[item.type]}{@const amount =
             $session.recruits[info.key] ?? 0}
           {@const standard = item.basePayment ?? item.payment}
           {@const differentCost = !sameRecruitPayment(standard, item.payment)}
@@ -247,10 +270,10 @@
             >
           </article>{/each}
       </div>
-      {#if options?.leaders?.length}<section class="leader-recruit" aria-label="Leaders">
+      {#if visibleLeaders.length}<section class="leader-recruit" aria-label="Leaders">
           <h3><Crown size={16} />Leaders</h3>
           <div class="leader-grid">
-            {#each options.leaders as leader}
+            {#each visibleLeaders as leader}
               <article class="leader-card" class:selected={$session.recruits.leader === leader.id}>
                 <button
                   class="leader-select"
@@ -278,8 +301,8 @@
                     >
                   </span>
                 </button>
-                {#if leader.reason && leader.reason !== 'Not enough resources'}<small class="reason"
-                    >{leader.reason}</small
+                {#if cityReason(leader.reason ?? null) && leader.reason !== 'Not enough resources'}<small
+                    class="reason">{cityReason(leader.reason ?? null)}</small
                   >{/if}
                 <dl class="leader-abilities">
                   {#each leader.abilities as ability}{@const Icon = abilityIcon(ability.description)}
@@ -293,6 +316,11 @@
             {/each}
           </div>
         </section>{/if}
+      {#if !visibleRecruits.length && !visibleLeaders.length}<p class="availability-empty">
+          No units available to recruit in this city.
+          <button class="show-all-options" onclick={() => controller.setAvailableOnly(false)}>Show all</button
+          >
+        </p>{/if}
       {#if $session.view?.units?.length}<details class="replacement-recruit">
           <summary>Replace units on the map</summary>
           <div class="unit-picker">

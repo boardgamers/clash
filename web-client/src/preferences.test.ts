@@ -141,6 +141,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
     topDown: true,
     unitBadges: true,
     replayAutoplay: true,
+    availableOnly: true,
   });
   assert.equal(writes, 1);
   viewer.updatePreference('unitBadges', false);
@@ -162,6 +163,11 @@ test('opponent recap defaults to autoplay and restores the player’s manual pre
   assert.equal(readPreferences({}).replayAutoplay, true);
   assert.equal(readPreferences({ replayAutoplay: false }).replayAutoplay, false);
   assert.equal(readPreferences({ replayAutoplay: true }).replayAutoplay, true);
+});
+
+test('availability filtering defaults on and restores the player’s show-all preference', () => {
+  assert.equal(readPreferences({}).availableOnly, true);
+  assert.equal(readPreferences({ availableOnly: false }).availableOnly, false);
 });
 
 test('tile and control hover sounds are throttled and obey global mute', () => {

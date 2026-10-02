@@ -26,6 +26,7 @@
   import CivilizationAdvances from './CivilizationAdvances.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import ResourceText from './ResourceText.svelte';
+  import AvailabilityFilter from './AvailabilityFilter.svelte';
   import { resourceNames, type Resource, type Pile, type AdvanceView, type PublicAdvance } from './types';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
@@ -60,20 +61,24 @@
     captives: Link,
   };
   let advances = $derived([...($session.view?.advances ?? [])].sort((a, b) => a.order - b.order));
+  const availableAdvances = $derived(advances.filter((a) => !$session.availableOnly || !!a.action));
   let player = $derived($session.view?.players.find((p) => p.index === $session.seat));
   let civilizationAdvances = $derived(player?.civilizationAdvances ?? []);
   let visibleCivilizationAdvances = $derived(
     category === 'All' || category === 'Civilization'
       ? civilizationAdvances.filter(
           (a) =>
-            matches(a) ||
-            a.requirement.toLowerCase().includes(query.trim().toLowerCase()) ||
-            a.prerequisites.some((p) => p.name.toLowerCase().includes(query.trim().toLowerCase())),
+            (!$session.availableOnly ||
+              (!a.owned &&
+                a.prerequisites.some((p) => availableAdvances.some((advance) => advance.id === p.id)))) &&
+            (matches(a) ||
+              a.requirement.toLowerCase().includes(query.trim().toLowerCase()) ||
+              a.prerequisites.some((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()))),
         )
       : [],
   );
   let groups = $derived([...new Set(advances.map((a) => a.group))]);
-  let selected = $derived(advances.find((a) => a.id === $session.selectedAdvance));
+  let selected = $derived(availableAdvances.find((a) => a.id === $session.selectedAdvance));
   let selectedPayment = $derived(
     selected?.payments.find((p) =>
       samePayment(
@@ -85,7 +90,8 @@
   let visibleGroups = $derived(
     groups.filter(
       (group) =>
-        (category === 'All' || group === category) && advances.some((a) => a.group === group && matches(a)),
+        (category === 'All' || group === category) &&
+        availableAdvances.some((a) => a.group === group && matches(a)),
     ),
   );
   const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
@@ -102,6 +108,7 @@
     return { destroy: () => node.close() };
   }
   async function showCivilizationAdvance(id: string) {
+    controller.setAvailableOnly(false);
     query = '';
     category = 'Civilization';
     controller.patch({ selectedAdvance: null });
@@ -112,6 +119,7 @@
     });
   }
   async function prerequisite(id: string) {
+    if (!advances.find((a) => a.id === id)?.action) controller.setAvailableOnly(false);
     query = '';
     category = advances.find((a) => a.id === id)?.group ?? 'All';
     controller.patch({ selectedAdvance: id });
@@ -162,6 +170,7 @@
   </header>
   {#if !choice}<ContextualCards {controller} context="research" />{/if}
   <nav class="research-filters" aria-label="Research categories">
+    <AvailabilityFilter {controller} />
     <button class:active={category === 'All'} onclick={() => (category = 'All')}>All advances</button>
     {#if player && civilizationAdvances.length}<button
         class:active={category === 'Civilization'}
@@ -186,14 +195,14 @@
     {#each visibleGroups as group}{@const GroupIcon = groupIcons[group] ?? BookOpen}
       <section class="research-branch" aria-label={group}>
         <h3><GroupIcon size={18} />{group}</h3>
-        {#each advances.filter((a) => a.group === group) as advance, index}{@const presentation =
+        {#each availableAdvances.filter((a) => a.group === group) as advance, index}{@const presentation =
             researchPresentation(advance)}{@const Icon = presentation.icon}{@const parent = advances.find(
             (a) => a.id === advance.required,
           )}
           <article
             id={`research-${advance.id}`}
             class="research-node"
-            class:child={index > 0}
+            class:child={!$session.availableOnly && index > 0}
             class:owned={advance.owned}
             class:available={!!advance.action}
             class:selected={selected?.id === advance.id}
@@ -286,7 +295,15 @@
       </section>
     {/each}
     {#if !visibleGroups.length && !visibleCivilizationAdvances.length}<p class="research-empty">
-        No advances match “{query}”.
+        {$session.availableOnly
+          ? 'No research available with these filters.'
+          : query.trim()
+            ? `No advances match “${query}”.`
+            : 'No advances in this category.'}
+        {#if $session.availableOnly}<button
+            class="show-all-options"
+            onclick={() => controller.setAvailableOnly(false)}>Show all</button
+          >{/if}
       </p>{/if}
   </div>
   {#if selected}

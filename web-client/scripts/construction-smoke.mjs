@@ -94,7 +94,10 @@ try {
         .click();
       const footer = page.locator('.city-confirm');
       await footer.getByText(label, { exact: true }).waitFor();
-      assert.equal(await footer.locator('.resource-amount svg').count(), resources ? 3 : 0);
+      assert.equal(
+        await footer.locator(':scope > div:first-child > .resource-amount svg').count(),
+        resources ? 3 : 0,
+      );
       assert.equal(await page.locator('.activation-status').count(), activation ? 1 : 0);
       if (activation) await page.getByText('This activation lowers mood.', { exact: false }).waitFor();
       assert.ok(await footer.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
