@@ -49,6 +49,25 @@ pub fn create_analysis_scenario(data: String, options: JsValue) -> Result<String
     serde_json::to_string(&value).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
+#[derive(Deserialize)]
+pub struct CreateAnalysisOptions {
+    to: usize,
+}
+
+#[wasm_bindgen(js_name = "createAnalysis")]
+pub fn create_analysis(data: String, options: JsValue) -> Result<String, JsValue> {
+    let options: CreateAnalysisOptions =
+        serde_wasm_bindgen::from_value(options).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let mut game = get_game(data);
+    if options.to != game_api::log_length(&game) {
+        return Err(JsValue::from_str(
+            "Clash analysis starts from the current position; historical board snapshots cannot be used to simulate hidden cards.",
+        ));
+    }
+    game.board_history = Default::default();
+    Ok(from_game(game))
+}
+
 #[wasm_bindgen]
 pub async fn init(
     player_amount: usize,
@@ -67,7 +86,8 @@ pub async fn init(
 pub fn execute_move(game: String, move_data: String, player_index: usize) -> String {
     let game = get_game(game);
     let action = serde_json::from_str(&move_data).expect("move should be of type action");
-    let game = game_api::execute(game, action, player_index);
+    let game = crate::board_history::execute(game, action, player_index)
+        .expect("could not execute action");
     from_game(game)
 }
 
@@ -215,7 +235,7 @@ pub fn web_collect_preview(
 #[wasm_bindgen(js_name = "tryMove")]
 pub fn try_move(data: String, action: String, player: usize) -> Result<String, JsValue> {
     let action = serde_json::from_str(&action).map_err(|e| JsValue::from_str(&e.to_string()))?;
-    crate::action::try_execute_action(get_game(data), action, player)
+    crate::board_history::execute(get_game(data), action, player)
         .map(from_game)
         .map_err(|e| JsValue::from_str(&e))
 }

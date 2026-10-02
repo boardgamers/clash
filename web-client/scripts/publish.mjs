@@ -85,7 +85,7 @@ if (!process.argv.includes('--dry-run')) {
     dependencies: { scripts: [], stylesheets: [] },
     fullScreen: true,
     fullScreenMobile: true,
-    replayable: false,
+    replayable: true,
     chat: true,
   };
   const current = await api(endpoint);

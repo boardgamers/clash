@@ -35,7 +35,34 @@ export interface Player {
   action_cards?: number[];
   objective_cards?: number[];
 }
+export interface PublicEffect {
+  player: number;
+  kind: 'action' | 'objective' | 'wonder' | 'completed';
+  label: string;
+  key?: string;
+}
+export interface BoardFrame {
+  cursor: number;
+  actor: number | null;
+  ended_turn: boolean;
+  title: string;
+  age: number;
+  round: number;
+  tiles: [string, Terrain][];
+  players: Player[];
+  effects?: PublicEffect[];
+}
+export interface Playback {
+  frame: BoardFrame | null;
+  index: number;
+  total: number;
+  automatic: boolean;
+  playing: boolean;
+  animate: boolean;
+}
 export interface Game {
+  permanent_effects?: unknown[];
+  board_history?: { id: string; frames: BoardFrame[] };
   state: unknown;
   events?: { event_type: string | Record<string, unknown> }[];
   players: Player[];
@@ -381,6 +408,11 @@ export interface EventInfo {
   targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
+  landingTargets?: string[];
+  disembarkCarriers?: number[];
+  analysis?: boolean;
+  playback?: Playback | null;
+  publicEffects?: PublicEffect[];
   automaticPayment?: boolean;
   decisionSelection: number[];
   decisionPosition?: string | null;

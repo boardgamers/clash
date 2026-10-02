@@ -10,13 +10,11 @@ use crate::log::{
 use crate::map::{BLOCKS, Block, Terrain, get_map_setup};
 use crate::utils::{Rng, Shuffle};
 
-/// Nested continuations carry private choices, including cards already removed
-/// from their piles. Until those continuations have individual reconstruction
-/// rules, reject them rather than discard them or copy their hidden payloads.
+/// Preserve public continuations. Private choices need separate reconstruction.
 #[must_use]
 pub fn can_create(game: &Game) -> bool {
     matches!(game.state, GameState::Playing | GameState::ChooseCivilization | GameState::Movement(_))
-        && game.events.is_empty()
+        && game.events.iter().all(public_continuation)
         && !game.permanent_effects.iter().any(|e| matches!(e, PermanentEffect::GreatSeer(_)))
         // Spy's prose records cannot reliably be mapped back to card identities.
         && game.players.iter().all(|p| p.secrets.is_empty())
@@ -26,6 +24,42 @@ pub fn can_create(game: &Game) -> bool {
             .flat_map(|t| &t.actions).flat_map(|a| &a.log).any(|text| {
                 text == "Reshuffling Action Card pile" || text == "Reshuffling Events pile"
             })
+}
+
+fn public_continuation(event: &crate::content::persistent_events::PersistentEventState) -> bool {
+    use crate::content::persistent_events::{
+        EventResponse, PersistentEventRequest as R, PersistentEventType as E,
+    };
+    use crate::playing_actions::PlayingAction;
+    let public_payload = match &event.event_type {
+        E::TurnStart
+        | E::Advance(_)
+        | E::Construct(_)
+        | E::Recruit(_)
+        | E::FoundCity(_)
+        | E::Collect(_)
+        | E::CityActivationMoodDecreased(_)
+        | E::ShipConstructionConversion(_)
+        | E::StopBarbarianMovement(_)
+        | E::UnitsKilled(_)
+        | E::InfluenceCulture(_)
+        | E::StatusPhase(_) => true,
+        E::PayAction(payment) => !matches!(
+            payment.action,
+            PlayingAction::ActionCard(_) | PlayingAction::WonderCard(_)
+        ),
+        _ => false,
+    };
+    public_payload
+        && event.player.handler.as_ref().is_none_or(|handler| {
+            !matches!(
+                handler.request,
+                R::SelectHandCards(_) | R::ExploreResolution
+            ) && !matches!(
+                handler.response,
+                Some(EventResponse::SelectHandCards(_) | EventResponse::ExploreResolution(_))
+            )
+        })
 }
 
 /// Build from public facts and the requesting seat's hand, never from the
@@ -38,7 +72,7 @@ pub fn create(mut game: Game, seat: Option<usize>, seed: &str) -> Result<Game, S
         return Err("Analysis requires a seed and a valid requesting seat".into());
     }
     if !can_create(&game) {
-        return Err("Analysis is unavailable during pending choices, Great Seer, remembered Spy information or after action/incident pile reshuffling".into());
+        return Err("Analysis is unavailable during this private choice, Great Seer, remembered Spy information or after action/incident pile reshuffling".into());
     }
     // Hash all supplied UTF-8 bytes; no source seed, clock or source RNG involved.
     let value = seed
@@ -50,6 +84,7 @@ pub fn create(mut game: Game, seat: Option<usize>, seed: &str) -> Result<Game, S
     seed.clone_into(&mut game.seed);
     game.context = GameContext::Play;
     game.messages.clear();
+    game.board_history = Default::default();
     game.dice_roll_outcomes.clear();
     game.dice_roll_log.clear();
     game.dropped_players.clear();

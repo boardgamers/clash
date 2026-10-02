@@ -52,8 +52,8 @@ pub(crate) fn move_routes(
         .filter(|&n| game.map.is_inside(*n))
         .map(|&n| MoveRoute::new(n, player, ResourcePile::empty(), vec![]))
         .collect();
-    if player.can_use_advance(Advance::Navigation) {
-        base.extend(reachable_with_navigation(player, units, &game.map));
+    if units.iter().all(|id| player.get_unit(*id).is_ship()) {
+        base.extend(sea_routes(player, units, game, starting));
     }
     if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
         base.extend(reachable_with_roads(player, units, game, stack_size));
@@ -271,33 +271,90 @@ fn next_road_step(
         .collect_vec()
 }
 
-#[must_use]
-fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
-    let ship = units.iter().find_map(|&id| {
-        player
-            .get_unit(id)
-            .is_ship()
-            .then_some(player.get_unit(id).position)
-            .filter(|p| {
-                // need at least one neighbor that is outside the map
-                p.neighbors().iter().any(|n| map.is_outside(*n))
-            })
-    });
-    if let Some(ship) = ship {
-        return navigation_paths(map, ship)
-            .into_iter()
-            .filter_map(|path| path.last().copied())
-            .map(|destination| {
-                MoveRoute::new(
-                    destination,
-                    player,
-                    ResourcePile::empty(),
-                    vec![EventOrigin::Advance(Advance::Navigation)],
-                )
-            })
-            .collect();
+/// A fleet may cross its connected sea area, use one Navigation passage, then
+/// cross the destination sea area. Enemy ships and unexplored regions are endpoints.
+pub(crate) fn sea_routes(
+    player: &Player,
+    units: &[u32],
+    game: &Game,
+    start: Position,
+) -> Vec<MoveRoute> {
+    use std::collections::{HashSet, VecDeque};
+    let mut seen = HashSet::new();
+    let mut queue = VecDeque::from([(start, false)]);
+    let mut routes = vec![];
+    while let Some((position, navigation)) = queue.pop_front() {
+        if !seen.insert((position, navigation)) {
+            continue;
+        }
+        if position != start {
+            routes.push(MoveRoute::new(
+                position,
+                player,
+                ResourcePile::empty(),
+                if navigation {
+                    vec![EventOrigin::Advance(Advance::Navigation)]
+                } else {
+                    vec![]
+                },
+            ));
+            if game.map.is_unexplored(position)
+                || game.enemy_player(player.index, position).is_some()
+            {
+                continue;
+            }
+            // Passing through a space must respect the same fleet stacking limit.
+            if player.civilization.name == "Carthage" {
+                let ships = player
+                    .get_units(position)
+                    .iter()
+                    .filter(|u| u.is_ship() && !units.contains(&u.id))
+                    .count();
+                let pirates = if player.has_special_advance(SpecialAdvance::PirateAllies) {
+                    game.players
+                        .iter()
+                        .filter(|p| p.civilization.is_pirates())
+                        .map(|p| p.get_units(position).len())
+                        .sum()
+                } else {
+                    0
+                };
+                if ships + pirates + units.len() > 4 {
+                    continue;
+                }
+            }
+            // Do not silently traverse diplomatic tolls or forbidden spaces.
+            if diplomatic_relations_partner(game, player.index)
+                .is_some_and(|p| !game.player(p).get_units(position).is_empty())
+                || negotiations_partner(game, player.index)
+                    .is_some_and(|p| !game.player(p).get_units(position).is_empty())
+            {
+                continue;
+            }
+        }
+        for next in position.neighbors() {
+            if game.map.is_sea(next) {
+                queue.push_back((next, navigation));
+            }
+        }
+        if !navigation && player.can_use_advance(Advance::Navigation) {
+            for path in navigation_paths(&game.map, position) {
+                if let Some(&next) = path.last() {
+                    // Adjacent seas are already reached without Navigation.
+                    if !position.is_neighbor(next) {
+                        queue.push_back((next, true));
+                    }
+                }
+            }
+        }
     }
-    vec![]
+    // A direct sea route takes precedence over a Navigation route to the same space.
+    routes.sort_by_key(|r| !r.cost.modifiers.is_empty());
+    routes
+        .into_iter()
+        .filter(|r| r.destination != start)
+        .unique_by(|r| r.destination)
+        .collect()
 }
 
 /// Visible perimeter paths, ending at the first sea or unexplored tile in each direction.

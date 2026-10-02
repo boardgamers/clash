@@ -20,6 +20,7 @@
   } from 'lucide-svelte';
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
+  import ContextualCards from './ContextualCards.svelte';
   import PaymentPicker from './PaymentPicker.svelte';
   import EventMarkers from './EventMarkers.svelte';
   import CivilizationAdvances from './CivilizationAdvances.svelte';
@@ -159,6 +160,7 @@
       /></label
     >
   </header>
+  {#if !choice}<ContextualCards {controller} context="research" />{/if}
   <nav class="research-filters" aria-label="Research categories">
     <button class:active={category === 'All'} onclick={() => (category = 'All')}>All advances</button>
     {#if player && civilizationAdvances.length}<button

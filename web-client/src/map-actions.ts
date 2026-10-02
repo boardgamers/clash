@@ -25,3 +25,21 @@ export function moveOrigins(
       destinations([unit.id]).some((route) => route.position === target),
   );
 }
+
+// Only engine-approved passenger moves are offered; the ship itself stays at sea.
+export function passengerLandings(
+  view: View | null,
+  ships: number[],
+  destinations: (ids: number[]) => MoveDestination[],
+) {
+  const passengers = (view?.units ?? []).filter((u) => u.carrier !== null && ships.includes(u.carrier));
+  if (!passengers.length) return [];
+  const groups = [passengers.map((u) => u.id), ...passengers.map((u) => [u.id])];
+  const targets = new Map<string, number[]>();
+  for (const group of groups)
+    for (const d of destinations(group)) {
+      if (d.terrain !== 'Water' && d.terrain !== 'Unexplored' && !targets.has(d.position))
+        targets.set(d.position, group);
+    }
+  return [...targets].map(([position, units]) => ({ position, units }));
+}

@@ -107,23 +107,30 @@
           onclick={() => controller.openNomadCity(position)}><Landmark size={15} />Move city</button
         >{/each}
     </div>{/if}
+  {#if $session.disembarkCarriers}<p class="movement-hint">Choose passengers · Ship stays at sea</p>{/if}
   <UnitPicker
-    choices={units.map((u) => ({
-      id: u.id,
-      type: u.type,
-      player: $session.seat!,
-      position: u.position,
-      name: unitName(u),
-      detail: u.carrier !== null ? 'Aboard ship · Disembark' : u.movementNotes?.join(' · '),
-      pirate: u.pirate,
-      civilization: $session.game?.players.find((p) => p.id === $session.seat)?.civilization,
-    }))}
+    choices={units
+      .filter(
+        (u) =>
+          !$session.disembarkCarriers ||
+          (u.carrier !== null && $session.disembarkCarriers.includes(u.carrier)),
+      )
+      .map((u) => ({
+        id: u.id,
+        type: u.type,
+        player: $session.seat!,
+        position: u.position,
+        name: unitName(u),
+        detail: u.carrier !== null ? 'Aboard ship · Disembark' : u.movementNotes?.join(' · '),
+        pirate: u.pirate,
+        civilization: $session.game?.players.find((p) => p.id === $session.seat)?.civilization,
+      }))}
     selected={$session.selectedUnits}
     position={origin}
     pending={$session.pending}
     colorBlind={$session.colorBlind}
     playerColors={$session.playerColors}
-    label="Units to move"
+    label={$session.disembarkCarriers ? 'Passengers to disembark' : 'Units to move'}
     onPosition={(position) => controller.focusUnitPosition(position)}
     onSelect={select}
     {onHighlight}
@@ -171,7 +178,9 @@
         : $session.moveDestinations.length
           ? disembarking
             ? 'Choose a highlighted shore.'
-            : 'Choose a highlighted destination.'
+            : $session.landingTargets?.length
+              ? 'Choose sea to sail, or shore to disembark.'
+              : 'Choose a highlighted destination.'
           : canMove
             ? 'No legal destinations for this group.'
             : 'No moves available.'}

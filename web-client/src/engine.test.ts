@@ -260,6 +260,12 @@ test('an eligible status objective can be claimed or kept, with correct points a
   }
   const claimed = engine.tryMove(state, JSON.stringify(decision.cards[0].action), seat);
   const claimedPlayer = JSON.parse(claimed).players[seat];
+  const publicHistory = JSON.parse(engine.stripSecret(claimed, 1 - seat)).board_history;
+  assert.ok(
+    publicHistory.frames
+      .at(-1)
+      .effects.some((e: any) => e.kind === 'completed' && e.label === 'Legacy' && e.player === seat),
+  );
   assert.ok(!claimedPlayer.objective_cards?.includes(36));
   assert.ok(claimedPlayer.completed_objectives.some((o: any) => o.card === 36 && o.name === 'Legacy'));
   const after: View = JSON.parse(engine.webView(engine.stripSecret(claimed, seat), seat));
@@ -272,6 +278,12 @@ test('an eligible status objective can be claimed or kept, with correct points a
   assert.ok(decision.skip);
   const kept = engine.tryMove(state, JSON.stringify(decision.skip), seat);
   assert.ok(JSON.parse(kept).players[seat].objective_cards.includes(36));
+  assert.ok(
+    JSON.parse(engine.stripSecret(kept, 1 - seat)).board_history.frames.every(
+      (f: any) => !f.title.includes('Legacy'),
+    ),
+    'Skipping a private objective never names it in public replay',
+  );
   const keptView: View = JSON.parse(engine.webView(engine.stripSecret(kept, seat), seat));
   assert.equal(keptView.objectiveDecision, null);
   assert.equal(

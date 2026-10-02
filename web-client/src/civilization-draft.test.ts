@@ -81,6 +81,7 @@ test('private offers and locked choices never leak through player/spectator stat
   let s = await start(3);
   const offers = Array.from({ length: 3 }, (_, i) => options(s, i));
   s = choose(s, 2, offers[2][0]);
+  assert.equal(JSON.parse(s).board_history, undefined, 'no empty-map or private draft frames');
   for (const seat of [undefined, 0, 1, 2]) {
     const stripped = engine.stripSecret(s, seat),
       g = JSON.parse(stripped);
@@ -116,6 +117,11 @@ test('submission order does not affect the map, decks, starting player or assign
   const offers = Array.from({ length: 4 }, (_, i) => options(initial, i));
   const finish = (order: number[]) => order.reduce((s, i) => choose(s, i, offers[i][0]), initial);
   assert.deepEqual(JSON.parse(finish([0, 1, 2, 3])), JSON.parse(finish([3, 1, 0, 2])));
+  const frames = JSON.parse(finish([0, 1, 2, 3])).board_history.frames;
+  assert.equal(frames.length, 1);
+  assert.equal(frames[0].actor, null);
+  assert.equal(frames[0].title, 'Game setup');
+  assert.ok(frames[0].tiles.length > 0);
 });
 
 test('a player leaving during the draft does not block the other choices', async () => {

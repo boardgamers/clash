@@ -48,6 +48,47 @@ export class World {
   private seaRouteStart: string | null = null;
   private tiles = new Map<string, THREE.Mesh>();
   private pieces: THREE.Group[] = [];
+  private motionFrame = 0;
+  private settleMotion: (() => void) | null = null;
+  private lastBoardCursor = '';
+  private wasPlayback = false;
+  private pieceKey(piece: THREE.Group) {
+    const d = piece.userData;
+    return `${d.kind}:${d.player}:${d.unit ?? d.cityPosition ?? d.position}:${d.building ?? ''}`;
+  }
+  private animatePieces(previous: Map<string, THREE.Vector3>) {
+    const moves = this.pieces
+      .map((piece) => ({
+        piece,
+        from: previous.get(this.pieceKey(piece)),
+        to: piece.position.clone(),
+        scale: piece.scale.clone(),
+      }))
+      .filter((m) => !m.from || m.from.distanceTo(m.to) > 0.02);
+    if (!moves.length) return;
+    const start = performance.now();
+    this.settleMotion = () => {
+      cancelAnimationFrame(this.motionFrame);
+      for (const m of moves) {
+        m.piece.position.copy(m.to);
+        m.piece.scale.copy(m.scale);
+      }
+      this.settleMotion = null;
+      this.invalidate();
+    };
+    const tick = () => {
+      const t = Math.min(1, (performance.now() - start) / 650),
+        eased = t * t * (3 - 2 * t);
+      for (const m of moves) {
+        if (m.from) m.piece.position.lerpVectors(m.from, m.to, eased);
+        else m.piece.scale.copy(m.scale).multiplyScalar(0.1 + 0.9 * eased);
+      }
+      this.invalidate();
+      if (t < 1) this.motionFrame = requestAnimationFrame(tick);
+      else this.settleMotion?.();
+    };
+    tick();
+  }
   private hoverRing: THREE.Mesh;
   private hovered: string | null = null;
   private referenceRing: THREE.Mesh;
@@ -642,6 +683,7 @@ export class World {
     this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'collection');
   }
   private clearBoard() {
+    this.settleMotion?.();
     this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
@@ -670,6 +712,51 @@ export class World {
     this.moveMarkerSignature = '';
   }
   update(s: Session) {
+    if (!s.game) return;
+    const playback = s.playback;
+    const cursor = playback
+      ? `replay:${playback.frame?.cursor}`
+      : `live:${s.game.board_history?.frames.at(-1)?.cursor ?? s.game.log_index}`;
+    const animate =
+      !s.reducedMotion &&
+      !!this.lastBoardCursor &&
+      cursor !== this.lastBoardCursor &&
+      (playback ? playback.animate : !this.wasPlayback);
+    if (!animate && (s.reducedMotion || !!playback !== this.wasPlayback)) this.settleMotion?.();
+    this.lastBoardCursor = cursor;
+    this.wasPlayback = !!playback;
+    if (playback) {
+      const frame = playback.frame;
+      s = {
+        ...s,
+        game: frame
+          ? {
+              ...s.game,
+              state: 'Playing',
+              events: [],
+              age: frame.age,
+              round: frame.round,
+              map: { tiles: frame.tiles },
+              players: frame.players,
+            }
+          : s.game,
+        view: null,
+        seat: undefined,
+        pending: true,
+        mode: 'overview',
+        focus: null,
+        city: null,
+        tilePanel: false,
+        seaRoutes: false,
+        seaRouteStart: null,
+        selectedUnits: [],
+        moveDestinations: [],
+        landingTargets: [],
+        selection: [],
+        decisionSelection: [],
+        abilitiesOpen: false,
+      };
+    }
     if (!s.game) return;
     const mapChoices = mapDecisionOptions(s.view?.decision);
     const decisionPositions = [...new Set(mapChoices.map((o) => o.position!))];
@@ -706,6 +793,7 @@ export class World {
                     ...(s.view?.units?.filter((u) => s.selectedUnits.includes(u.id)).map((u) => u.position) ??
                       []),
                     ...s.moveDestinations.map((d) => d.position),
+                    ...(s.landingTargets ?? []),
                   ]),
                 ]
               : s.tilePanel && s.focus
@@ -767,6 +855,7 @@ export class World {
             ? new Set([
                 ...(s.view?.units?.map((u) => u.position) ?? []),
                 ...s.moveDestinations.map((d) => d.position),
+                ...(s.landingTargets ?? []),
               ])
             : ability
               ? new Set(abilityPositions)
@@ -782,6 +871,8 @@ export class World {
     ]);
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
+      this.settleMotion?.();
+      const previous = new Map(this.pieces.map((p) => [this.pieceKey(p), p.position.clone()]));
       this.clearBoard();
       const models = new PieceModels(
         (color) => this.material(color),
@@ -1151,7 +1242,11 @@ export class World {
               target: label,
               props: {
                 groups: [...counts.values()],
-                symbol: s.colorBlind ? playerSymbol(player.id, s.playerSymbols) : '',
+                symbol:
+                  s.colorBlind && player.civilization !== 'Pirates'
+                    ? playerSymbol(player.id, s.playerSymbols)
+                    : '',
+                pirate: player.civilization === 'Pirates' || surfaceUnits.some((unit) => unit.pirate),
               },
             }),
           );
@@ -1175,6 +1270,7 @@ export class World {
           });
         }
       }
+      if (animate) this.animatePieces(previous);
       if (this.selectionSignature === '') this.reset();
     }
     const settler = s.view?.units?.find((u) => s.selectedUnits.includes(u.id));
@@ -1208,6 +1304,7 @@ export class World {
               ...new Set([
                 ...(s.view?.units?.map((u) => u.position) ?? []),
                 ...s.moveDestinations.map((d) => d.position),
+                ...(s.landingTargets ?? []),
               ]),
             ]
           : s.mode === 'collect'
@@ -1325,6 +1422,7 @@ export class World {
               ...(s.view?.units?.map((u) => u.position) ?? []),
               ...(s.view?.nomadCities ?? []),
               ...s.moveDestinations.map((d) => d.position),
+              ...(s.landingTargets ?? []),
             ]),
           ]
         : abilityPositions;
@@ -1423,6 +1521,7 @@ export class World {
     this.invalidate();
   }
   destroy() {
+    this.settleMotion?.();
     this.disposed = true;
     this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);

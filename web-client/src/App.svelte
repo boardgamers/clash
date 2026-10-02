@@ -1,4 +1,6 @@
 <script lang="ts">
+  import PlaybackPanel from './PlaybackPanel.svelte';
+  import PublicEffects from './PublicEffects.svelte';
   import EventMarkers from './EventMarkers.svelte';
   import CivilizationPicker from './CivilizationPicker.svelte';
   import TilePanel from './TilePanel.svelte';
@@ -72,6 +74,7 @@
   import { civilizationAccent } from './civilization-theme';
   import CityFacts from './CityFacts.svelte';
   import CollectionCapacity from './CollectionCapacity.svelte';
+  import ContextualCards from './ContextualCards.svelte';
   import DecisionPanel from './DecisionPanel.svelte';
   import CombatJournal from './CombatJournal.svelte';
   import { combatJournal } from './combat-journal';
@@ -233,6 +236,10 @@
   onMount(() => {
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+      if ($session.playback) {
+        controller.endPlayback();
+        return;
+      }
       if ($session.seaRoutes) controller.showSeaRoutes(false);
       if ($session.cardDraws.length) controller.patch({ cardDraws: [] });
       dismissMapDetails();
@@ -471,11 +478,13 @@
   class:map-decision={mapDecision}
   class:activity-open={$session.activityOpen}
   class="game-shell"
+  class:playing-back={!!$session.playback}
   class:civilization-setup={!!$session.view?.civilizationDraft}
   style:--civilization-accent={civilizationAccent(identity?.civilization)}
 >
   <header class="masthead">
     <div class="brand-block">
+      {#if $session.analysis}<span class="analysis-label">Analysis · Simulation</span>{/if}
       <button
         class="brand"
         onclick={() => controller.commands.openBoardgame()}
@@ -488,9 +497,12 @@
               'IV',
               'V',
               'VI',
-            ][($session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.game?.round ?? 1) > 3
+            ][($session.playback?.frame?.age ?? $session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.playback
+              ?.frame?.round ??
+              $session.game?.round ??
+              1) > 3
               ? 'End of age'
-              : `Round ${$session.game?.round ?? 1}/3`}{/if}</span
+              : `Round ${$session.playback?.frame?.round ?? $session.game?.round ?? 1}/3`}{/if}</span
         ></button
       >
       <p class="game-credits">
@@ -505,20 +517,24 @@
         >
       </p>
     </div>
-    <div class="age-track" role="group" aria-label={`Age ${$session.game?.age ?? 1} of 6`}>
+    <div
+      class="age-track"
+      role="group"
+      aria-label={`Age ${$session.playback?.frame?.age ?? $session.game?.age ?? 1} of 6`}
+    >
       {#each [1, 2, 3, 4, 5, 6] as age}
         <span
           class="age-step"
-          class:current={age === ($session.game?.age ?? 1)}
-          class:past={age < ($session.game?.age ?? 1)}
+          class:current={age === ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
+          class:past={age < ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
           title={`Age ${age} of 6`}
         >
           {['I', 'II', 'III', 'IV', 'V', 'VI'][age - 1]}
-          {#if age === ($session.game?.age ?? 1)}
+          {#if age === ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
             <small class="round-label"
-              >{($session.game?.round ?? 1) > 3
+              >{($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
                 ? 'End of age'
-                : `Round ${$session.game?.round ?? 1}/3`}</small
+                : `Round ${$session.playback?.frame?.round ?? $session.game?.round ?? 1}/3`}</small
             >
           {/if}
         </span>
@@ -735,7 +751,7 @@
     <div class="board-toolbar" aria-label="Game controls">
       <div class="turn-banner">
         <span class="turn-light"></span><strong>{actionTitle}</strong
-        >{#if !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.game?.round ?? 1) <= 3}<span
+        >{#if !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.playback?.frame?.round ?? $session.game?.round ?? 1) <= 3}<span
             class="action-markers"
             role="img"
             aria-label={`${totalActions} ${totalActions === 1 ? 'action' : 'actions'} remaining`}
@@ -966,6 +982,7 @@
                     />{/if}{#if !variant.free}<Zap size={12} />1{/if}</button
                 >{/each}
             </div>{/if}
+          <ContextualCards {controller} context="collect" />
           {#if city?.ballcourts}<label class="ballcourts-toggle"
               ><input
                 type="checkbox"
@@ -1131,7 +1148,7 @@
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
-    {#if $session.view?.civilizations?.length || $session.view?.civilizationDraft}<CivilizationPicker
+    {#if !$session.playback && ($session.view?.civilizations?.length || $session.view?.civilizationDraft)}<CivilizationPicker
         {controller}
       />{/if}
     <section
@@ -1177,12 +1194,14 @@
       ></div>
     </section>
   </main>
-  {#if $session.mode === 'research'}<ResearchTree {controller} />{/if}
-  {#if $session.mode === 'city'}<CityPanel {controller} />{/if}
+  {#if !$session.playback && $session.mode === 'research'}<ResearchTree {controller} />{/if}
+  {#if !$session.playback && $session.mode === 'city'}<CityPanel {controller} />{/if}
   {#if $session.scorePlayer !== null}<ScoreDialog {controller} />{/if}
   {#if $session.wondersOpen && $session.seat !== undefined}<WondersDialog {controller} />{/if}
   {#if $session.cardsOpen && $session.seat !== undefined}<ActionCardsDialog {controller} />{/if}
-  <CardReveal {controller} />
+  {#if !$session.playback}<CardReveal {controller} />{/if}
+  <PlaybackPanel {controller} />
+  <PublicEffects {controller} />
   {#if $session.toast}<div class="toast" role="status"><Check size={16} />{$session.toast}</div>{/if}
   {#if $session.objectivesOpen && $session.seat !== undefined}
     <dialog

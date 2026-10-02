@@ -440,7 +440,9 @@ small {
   height: 17px;
 }
 .city-map-label[data-mood='happy'] {
-  color: #3d6246;
+  color: #326b47;
+  background: #e2eddd;
+  border-color: #9bb394;
 }
 .city-map-label[data-mood='angry'] {
   color: #a44832;
@@ -4971,5 +4973,223 @@ small {
   }
   .exploration-panel .placement-map {
     height: 64px;
+  }
+}
+
+/* Playback leaves the board and camera controls available, hiding live decisions. */
+.playing-back .header-actions,
+.playing-back .resource-bar,
+.playing-back .player-list,
+.playing-back .board-toolbar,
+.playing-back .city-dock,
+.playing-back .action-panel,
+.playing-back .journal-tools,
+.playing-back .table-tools,
+.playing-back .activity,
+.playing-back .map-instruction,
+.playing-back .map-resume,
+.playing-back .map-minimize,
+.playing-back .civilization-picker {
+  display: none !important;
+}
+.playback-bar {
+  position: absolute;
+  z-index: 80;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.playback-description {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.playback-description strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+}
+.playback-description small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.playback-transport {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+.playback-transport button,
+.playback-exit {
+  min-height: 38px;
+}
+.playback-exit {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 12px;
+  white-space: nowrap;
+}
+.public-effect {
+  position: absolute;
+  z-index: 85;
+  left: 50%;
+  top: 145px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 28px);
+  width: max-content;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 6px 25px #0003;
+  padding: 12px 14px;
+  pointer-events: none;
+  animation: effect-arrive 0.3s ease-out;
+}
+.public-effect > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.public-effect small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.public-effect strong {
+  font-size: 14px;
+}
+.public-effect span {
+  font-size: 13px;
+}
+.public-effect button {
+  pointer-events: auto;
+}
+.public-effect-card {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 46px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper2);
+}
+.public-effect.completed {
+  border-color: var(--gold);
+}
+.public-effect.completed .public-effect-card {
+  color: var(--gold);
+}
+.public-effect.still {
+  animation: none;
+}
+.analysis-label {
+  font-size: 11px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+@keyframes effect-arrive {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+@media (max-width: 600px) {
+  .playback-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    bottom: 65px;
+    width: calc(100% - 24px);
+    padding: 10px 12px;
+  }
+  .playback-description {
+    flex: 1;
+  }
+  .playback-exit {
+    margin-left: auto;
+  }
+  .playback-transport {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+  .public-effect {
+    top: 110px;
+    gap: 8px;
+    padding: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-effect {
+    animation: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .playback-bar.automatic .playback-transport {
+    order: initial;
+    width: auto;
+  }
+  .playback-bar.automatic .playback-transport button:first-child,
+  .playback-bar.automatic .playback-transport button:last-of-type,
+  .playback-bar.automatic .playback-transport small {
+    display: none;
+  }
+}
+.contextual-cards {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 0.3rem 0;
+  margin-bottom: 0.4rem;
+  scrollbar-width: thin;
+}
+.contextual-cards .contextual-card {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.contextual-card strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+.contextual-card-cost,
+.contextual-card-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.contextual-card-active {
+  font-size: 0.8rem;
+  color: var(--gold);
+}
+.research-dialog > .contextual-cards {
+  margin: 0 1rem 0.4rem;
+}
+@media (max-width: 600px) {
+  .contextual-cards .contextual-card {
+    min-height: 40px;
   }
 }

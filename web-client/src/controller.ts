@@ -7,9 +7,11 @@ import { loadBridge } from './bridge';
 import { readPreferences } from './preferences';
 import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
-import { canMoveOnMap, moveOrigins } from './map-actions';
+import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
+import { recapStart, frameAt, frameEffects } from './playback';
+import { contextualCards, type CardContext } from './contextual-cards';
 import {
   researchDecision,
   mapDecisionOptions,
@@ -71,15 +73,23 @@ export class Controller {
   private cardDraws = new CardDrawTracker();
   private submittedMove: Move | null = null;
   private quotedActionPayment: Pile | null = null;
+  private cardContinuation:
+    | (Pick<
+        Session,
+        'mode' | 'city' | 'cityTab' | 'selection' | 'collectVariant' | 'ballcourts' | 'selectedAdvance'
+      > & { id: number })
+    | null = null;
   private raw = '';
   private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private refreshTimer: ReturnType<typeof setTimeout> | undefined;
   private destroyed = false;
+  private playbackTimer: ReturnType<typeof setTimeout> | undefined;
+  private effectTimer: ReturnType<typeof setTimeout> | undefined;
   private chatOff: () => void;
   constructor(
-    readonly commands: ViewerCommands<string>,
+    readonly commands: ViewerCommands<string> & { clearReplayInfo?: () => void },
     readonly assetBase: URL,
   ) {
     this.chat.setOpen(false);
@@ -99,6 +109,7 @@ export class Controller {
     const next = readPreferences(preferences);
     this.audio.setEnabled(next.sound);
     this.patch(next);
+    if (next.analysis) this.endPlayback();
   }
   toggleMapView() {
     const topDown = !get(this.session).topDown;
@@ -114,6 +125,7 @@ export class Controller {
     this.patch({ [name]: enabled });
   }
   handleError(error: unknown) {
+    this.cardContinuation = null;
     this.submittedMove = null;
     this.quotedActionPayment = null;
     this.audio.play('error');
@@ -196,6 +208,8 @@ export class Controller {
       selectedAdvance: newDecision && researchChoice ? null : old.selectedAdvance,
       tilePanel: old.pending || changed ? false : old.tilePanel,
       collectionTile: null,
+      disembarkCarriers: undefined,
+      landingTargets: [],
       seaRouteStart: game.map.tiles.some(([p, t]) => p === old.seaRouteStart && t === 'Water')
         ? old.seaRouteStart
         : null,
@@ -248,6 +262,29 @@ export class Controller {
           : view.objectiveCards.some((card) => card.id === draw.card.id),
       ),
     });
+    const continuation = this.cardContinuation;
+    if (continuation && !view.actionCards?.some((card) => card.id === continuation.id)) {
+      this.cardContinuation = null;
+      if (
+        old.pending &&
+        view.canPlay &&
+        old.seat === view.activePlayer &&
+        !view.decision &&
+        !view.choiceDecision &&
+        !view.objectiveDecision &&
+        !view.explorationDecision
+      ) {
+        const { id: _, ...resume } = continuation;
+        this.patch({ ...resume, city, cardsOpen: false });
+        if (resume.mode === 'collect') {
+          const variant =
+            view.collectActions?.find(
+              (offer) => JSON.stringify(offer.value) === JSON.stringify(resume.collectVariant),
+            )?.value ?? view.collectActions?.[0]?.value;
+          if (variant) this.switchCollectVariant(variant);
+        }
+      }
+    }
     this.commands.replaceLog(journal(game, view).map((entry) => entry.text));
     if (view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision)
       this.closeActivity();
@@ -278,9 +315,186 @@ export class Controller {
     }
     this.submittedMove = null;
     if (automaticPayment) this.submit(automaticPayment);
+    this.afterPlaybackLoad(old, game);
+  }
+  private seenKey() {
+    const s = get(this.session);
+    return s.game?.board_history && s.seat !== undefined
+      ? `clash:board-seen:${s.game.board_history.id}:${s.seat}`
+      : null;
+  }
+  private markSeen() {
+    const s = get(this.session),
+      key = this.seenKey();
+    if (!key || s.analysis) return;
+    try {
+      localStorage.setItem(key, String(s.game?.board_history?.frames.at(-1)?.cursor ?? 0));
+    } catch {}
+  }
+  private afterPlaybackLoad(old: Session, game: Game) {
+    const s = get(this.session),
+      frames = game.board_history?.frames ?? [];
+    if (s.analysis || !frames.length) return;
+    if (s.playback) {
+      if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback();
+      else {
+        const index = frameAt(frames, s.playback.frame?.cursor ?? 0);
+        this.patch({ playback: { ...s.playback, index, frame: frames[index], total: frames.length } });
+      }
+      return;
+    }
+    if (!old.game) {
+      let seen = 0;
+      try {
+        seen = Number(localStorage.getItem(this.seenKey() ?? '')) || 0;
+      } catch {}
+      const start = recapStart(game, s.seat, seen);
+      if (start !== null) {
+        this.startPlayback(true, start);
+        return;
+      }
+    } else if (old.game.board_history?.id === game.board_history?.id) {
+      const effects = frameEffects(game, old.game.board_history?.frames.at(-1)?.cursor ?? 0).filter(
+        (e) => e.kind === 'completed' || e.kind === 'action' || e.player !== s.seat,
+      );
+      if (effects.length) {
+        this.patch({ publicEffects: [...(s.publicEffects ?? []), ...effects] });
+        this.scheduleEffect();
+      }
+    }
+    this.markSeen();
+  }
+  startPlayback(automatic = false, index = 0) {
+    const s = get(this.session);
+    if (s.analysis || !s.game) return;
+    const frames = s.game.board_history?.frames ?? [];
+    this.dismissEffects(true);
+    this.patch({
+      playback: {
+        frame: frames[index] ?? null,
+        index,
+        total: frames.length,
+        automatic,
+        playing: automatic,
+        animate: false,
+      },
+      tilePanel: false,
+      activityOpen: false,
+      mode: 'overview',
+      cardsOpen: false,
+      objectivesOpen: false,
+      wondersOpen: false,
+      abilitiesOpen: false,
+      help: false,
+      scorePlayer: null,
+      seaRoutes: false,
+      cardDraws: [],
+    });
+    this.reportPlayback();
+    if (automatic) this.schedulePlayback();
+  }
+  private reportPlayback() {
+    const s = get(this.session),
+      frames = s.game?.board_history?.frames ?? [],
+      p = s.playback;
+    if (p && !p.automatic && frames.length)
+      this.commands.setReplayInfo({
+        start: frames[0].cursor,
+        current: p.frame?.cursor ?? frames[0].cursor,
+        end: frames.at(-1)!.cursor,
+      });
+  }
+  seekPlayback(cursor: number) {
+    const frames = get(this.session).game?.board_history?.frames ?? [];
+    if (!get(this.session).playback) this.startPlayback();
+    this.showPlaybackFrame(frameAt(frames, cursor), false);
+  }
+  stepPlayback(direction: number) {
+    const p = get(this.session).playback;
+    if (p) this.showPlaybackFrame(p.index + direction, false);
+  }
+  private showPlaybackFrame(index: number, playing: boolean) {
+    clearTimeout(this.playbackTimer);
+    const s = get(this.session),
+      frames = s.game?.board_history?.frames ?? [],
+      p = s.playback;
+    if (!p || !frames.length) return;
+    if (index >= frames.length) {
+      if (p.automatic) this.endPlayback();
+      else this.patch({ playback: { ...p, playing: false } });
+      return;
+    }
+    index = Math.max(0, index);
+    this.dismissEffects(true);
+    this.patch({
+      playback: {
+        ...p,
+        frame: frames[index],
+        index,
+        total: frames.length,
+        playing,
+        animate: playing && !s.reducedMotion,
+      },
+      publicEffects: (frames[index].effects ?? []).map((e, i) => ({
+        ...e,
+        key: `replay:${frames[index].cursor}:${i}`,
+      })),
+    });
+    this.reportPlayback();
+    this.scheduleEffect();
+    if (playing) this.schedulePlayback();
+  }
+  togglePlayback() {
+    const s = get(this.session),
+      p = s.playback;
+    if (!p) return;
+    if (p.playing) {
+      clearTimeout(this.playbackTimer);
+      this.patch({ playback: { ...p, playing: false } });
+    } else if (p.index >= p.total - 1) {
+      this.showPlaybackFrame(0, true);
+    } else {
+      this.patch({ playback: { ...p, playing: true } });
+      this.schedulePlayback();
+    }
+  }
+  private schedulePlayback() {
+    clearTimeout(this.playbackTimer);
+    const s = get(this.session),
+      p = s.playback;
+    const duration = Math.max(s.reducedMotion ? 500 : 1150, (p?.frame?.effects?.length ?? 0) * 1400);
+    this.playbackTimer = setTimeout(() => {
+      const p = get(this.session).playback;
+      if (p?.playing) this.showPlaybackFrame(p.index + 1, true);
+    }, duration);
+  }
+  endPlayback() {
+    clearTimeout(this.playbackTimer);
+    if (get(this.session).playback) {
+      this.dismissEffects(true);
+      this.patch({ playback: null });
+      this.commands.clearReplayInfo?.();
+      this.markSeen();
+    }
+  }
+  private scheduleEffect() {
+    if (this.effectTimer || !get(this.session).publicEffects?.length) return;
+    this.effectTimer = setTimeout(() => {
+      this.effectTimer = undefined;
+      this.dismissEffects();
+    }, 1400);
+  }
+  dismissEffects(all = false) {
+    clearTimeout(this.effectTimer);
+    this.effectTimer = undefined;
+    this.patch({ publicEffects: all ? [] : (get(this.session).publicEffects ?? []).slice(1) });
+    if (!all) this.scheduleEffect();
   }
   setPlayer(index?: number) {
     if (get(this.session).seat === index) return;
+    this.cardContinuation = null;
+    this.endPlayback();
+    this.dismissEffects(true);
     this.quotedActionPayment = null;
     this.moveCache.clear();
     this.cardDraws.reset();
@@ -308,6 +522,8 @@ export class Controller {
       recruitPreview: null,
       selectedSettler: null,
       selectedUnits: [],
+      landingTargets: [],
+      disembarkCarriers: undefined,
       moveDestinations: [],
       moveDestination: null,
       cardsOpen: false,
@@ -328,6 +544,8 @@ export class Controller {
         const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);
         if (next) this.selectUnits([next.id]);
       }
+      const loaded = get(this.session);
+      if (index !== undefined && loaded.game) this.afterPlaybackLoad({ ...loaded, game: null }, loaded.game);
     }
   }
   selectCity(position: string) {
@@ -346,6 +564,7 @@ export class Controller {
     });
   }
   selectTile(position: string, pick: MapPick = { kind: 'tile' }) {
+    if (get(this.session).playback) return;
     const s = get(this.session);
     if (mapDecisionOptions(s.view?.decision).length) {
       if (s.view!.decision!.options.some((o) => o.mapTarget)) {
@@ -379,6 +598,17 @@ export class Controller {
     if (s.mode === 'collect') {
       this.selectCollectionTile(position);
       return;
+    }
+    if (s.mode === 'settlers' && s.landingTargets?.includes(position)) {
+      const ships = s.selectedUnits.filter((id) => s.view?.units?.find((u) => u.id === id)?.type === 'Ship');
+      const landing = passengerLandings(s.view, ships, (ids) => this.movementDestinations(ids)).find(
+        (d) => d.position === position,
+      );
+      if (landing) {
+        this.patch({ disembarkCarriers: ships });
+        this.selectUnits(landing.units, position);
+        return;
+      }
     }
     // A destination takes priority over pieces on it (boarding or attacking).
     if (s.mode === 'settlers' && s.moveDestinations.some((d) => d.position === position)) {
@@ -443,6 +673,7 @@ export class Controller {
     const s = get(this.session);
     if (
       s.pending ||
+      !!s.playback ||
       s.seat !== s.view?.activePlayer ||
       !mapDecisionOptions(s.view?.decision).some((o) => o.position === position)
     )
@@ -453,7 +684,7 @@ export class Controller {
     const s = get(this.session);
     if (s.pending || !s.view?.units?.some((u) => u.position === position)) return;
     const current = s.unitPosition ?? s.view.units.find((u) => s.selectedUnits.includes(u.id))?.position;
-    this.patch({ unitPosition: position, movingCity: null });
+    this.patch({ unitPosition: position, movingCity: null, disembarkCarriers: undefined });
     if (current !== position) this.selectUnits([]);
   }
   chooseMoveDestination(position: string) {
@@ -490,6 +721,7 @@ export class Controller {
     this.closeActivity();
     this.patch({
       movingCity: null,
+      disembarkCarriers: undefined,
       mode: 'settlers',
       tilePanel: false,
       seaRoutes: false,
@@ -645,7 +877,12 @@ export class Controller {
       selectedUnits.every((id) => s.view?.units?.find((u) => u.id === id)?.position === s.movingCity)
         ? s.movingCity
         : null;
+    const ships = selectedUnits.filter((id) => s.view?.units?.find((u) => u.id === id)?.type === 'Ship');
     this.patch({
+      landingTargets: passengerLandings(s.view, ships, (ids) => this.movementDestinations(ids)).map(
+        (d) => d.position,
+      ),
+      disembarkCarriers: ships.length ? undefined : s.disembarkCarriers,
       movingCity: city,
       selectedUnits,
       unitPosition:
@@ -725,6 +962,7 @@ export class Controller {
     const s = get(this.session);
     if (
       s.pending ||
+      s.playback ||
       s.seat === undefined ||
       !(s.view?.activePlayers ?? [s.view?.activePlayer]).includes(s.seat)
     )
@@ -741,6 +979,23 @@ export class Controller {
       this.commands.fetchState();
       this.patch({ error: 'Waiting for the game to confirm your action…' });
     }, 8000);
+  }
+  playContextualCard(id: number, context: CardContext) {
+    const s = get(this.session);
+    if (s.pending || s.playback) return;
+    const card = contextualCards(s.view, context).find((offer) => offer.card.id === id)?.card;
+    if (!card?.action) return;
+    this.cardContinuation = {
+      id,
+      mode: s.mode,
+      city: s.city,
+      cityTab: s.cityTab,
+      selection: structuredClone(s.selection),
+      collectVariant: s.collectVariant,
+      ballcourts: s.ballcourts,
+      selectedAdvance: s.selectedAdvance,
+    };
+    this.submit(card.action, card.cost);
   }
   collect() {
     const s = get(this.session);
@@ -764,6 +1019,8 @@ export class Controller {
   }
   destroy() {
     this.destroyed = true;
+    clearTimeout(this.playbackTimer);
+    clearTimeout(this.effectTimer);
     clearTimeout(this.timer);
     clearTimeout(this.refreshTimer);
     this.chatOff();

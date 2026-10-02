@@ -61,7 +61,7 @@ cargo test -p server --lib web_view
 
 After building, `http://127.0.0.1:8643/?built` loads the production IIFE bundle inside the preview host.
 
-`dist/viewer.js` contains the interface and styles. Upload `dist/server_bg.wasm` beside it for the Rust bridge. It exports `window.clash3d.launch(selector)` and uses string state/move payloads, matching the existing engine. Configure `topLevelVariable: "clash3d"`, `fullScreen: true`, `chat: true`, and `replayable: false`. No extra runtime scripts or stylesheets are needed. Fonts currently load from Google Fonts; system fonts remain available if blocked.
+`dist/viewer.js` contains the interface and styles. Upload `dist/server_bg.wasm` beside it for the Rust bridge. It exports `window.clash3d.launch(selector)` and uses string state/move payloads, matching the existing engine. Configure `topLevelVariable: "clash3d"`, `fullScreen: true`, `chat: true`, and `replayable: true`. No extra runtime scripts or stylesheets are needed. Fonts currently load from Google Fonts; system fonts remain available if blocked.
 
 ## Publish to BGS
 
@@ -76,7 +76,7 @@ The script uploads the viewer, verifies the hosted bytes, then updates the versi
 
 ## Remaining playtest work
 
-Automated scenarios cover a complete six-age sequence, mixed rewards, government changes, combat casualties/tactics, wonder construction, action cards, influence, civilization abilities, army/fleet movement and transport, leaders/replacements, and free/multi-city actions. This is playtest coverage, not an exhaustive check of every civilization/card interaction. Ordinary research, construction and recruitment still choose the engine's first valid resource payment; explicit payment requests allow resource adjustments. Models for buildings and units are preliminary. Full replay and analysis controls are not advertised. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
+Automated scenarios cover a complete six-age sequence, mixed rewards, government changes, combat casualties/tactics, wonder construction, action cards, influence, civilization abilities, army/fleet movement and transport, leaders/replacements, and free/multi-city actions. This is playtest coverage, not an exhaustive check of every civilization/card interaction. Ordinary research, construction and recruitment still choose the engine's first valid resource payment; explicit payment requests allow resource adjustments. Models for buildings and units are preliminary. Replay shows the most recent 192 recorded public board positions. Existing saves start recording on their next action; earlier positions are unavailable. Catch-up plays unseen opponent actions automatically, with Skip. Analysis branches start from the current position, resample hidden state independently, and preserve supported public pending choices; private continuations, remembered Spy information and refilled card piles remain unsupported. The interface text is currently English; existing game translations need to be wired into the new presentation layer. Advanced accessibility preferences still need a separate pass.
 
 Before public release: play through unusual civilization/card combinations, verify against an actual BGS staging game (including reconnects, moderation, translation, and read-state persistence), and test larger multiplayer boards on mobile hardware.
 

@@ -131,6 +131,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
   assert.equal(writes, 0);
   viewer.updatePreference('mapView', '2d');
   assert.deepEqual(current, {
+    analysis: false,
     locale: 'en',
     playerColors: [],
     playerSymbols: [],

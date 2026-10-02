@@ -672,7 +672,30 @@ export class PieceModels {
       this.box(g, sailColor, 0.4, 0.4, 0.018, 0, 0.55);
       if (kind === 'longship')
         for (const x of [-0.16, 0, 0.16]) this.box(g, owner, 0.07, 0.4, 0.025, x, 0.55);
-      else this.box(g, pirate ? '#f3e6c7' : owner, 0.1, 0.31, 0.025, 0, 0.55);
+      else if (pirate) {
+        const skull = new THREE.Shape();
+        skull.moveTo(-0.065, -0.015);
+        skull.bezierCurveTo(-0.14, 0.055, -0.1, 0.15, 0, 0.15);
+        skull.bezierCurveTo(0.1, 0.15, 0.14, 0.055, 0.065, -0.015);
+        skull.lineTo(0.055, -0.065);
+        skull.lineTo(-0.055, -0.065);
+        skull.closePath();
+        for (const x of [-0.045, 0.045]) {
+          const eye = new THREE.Path();
+          eye.absellipse(x, 0.06, 0.027, 0.033, 0, Math.PI * 2, true);
+          skull.holes.push(eye);
+        }
+        const nose = new THREE.Path();
+        nose.moveTo(0, 0.035);
+        nose.lineTo(-0.016, 0.002);
+        nose.lineTo(0.016, 0.002);
+        nose.closePath();
+        skull.holes.push(nose);
+        for (const side of [-1, 1]) {
+          const mark = this.add(g, new THREE.ShapeGeometry(skull), '#f3e6c7', 0, 0.51, side * 0.015);
+          mark.rotation.y = side < 0 ? Math.PI : 0;
+        }
+      } else this.box(g, owner, 0.1, 0.31, 0.025, 0, 0.55);
       this.beam(g, style.wood, 0.025, [-0.24, 0.76, 0], [0.24, 0.76, 0]);
       if (civilization === 'Carthage')
         for (const x of [-0.1, 0.1]) this.box(g, style.trim, 0.025, 0.32, 0.025, x, 0.55);
@@ -681,6 +704,7 @@ export class PieceModels {
   }
 
   unit(kind: UnitKind, owner: string, pirate = false, civilization?: string) {
+    pirate ||= civilization === 'Pirates';
     const g = new THREE.Group(),
       style = pieceStyle(civilization),
       skin = '#e9c7a0',

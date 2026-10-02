@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ContextualCards from './ContextualCards.svelte';
   import {
     X,
     Landmark,
@@ -143,6 +144,7 @@
       >{/each}
   </nav>
   <div class="city-content" bind:this={content}>
+    <ContextualCards {controller} context={tab} />
     {#if city && (tab === 'recruit' || (tab === 'build' && buildActivatesCity))}<ActivationStatus
         {city}
         warning={tab === 'recruit' || (tab === 'build' && !!selected?.moodWillDecrease)}

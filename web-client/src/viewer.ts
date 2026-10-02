@@ -9,7 +9,17 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
   const style = document.createElement('style');
   style.textContent = css;
   document.head.append(style);
-  const controller = new Controller(commands, assetBase);
+  const controller = new Controller(
+    {
+      ...commands,
+      clearReplayInfo() {
+        // BGS clears its replay toolbar with null. Protocol 0.9 types only the open
+        // range, so use the host's existing close message until it exposes this API.
+        if (window.parent !== window) window.parent.postMessage({ type: 'replay:info', data: null }, '*');
+      },
+    },
+    assetBase,
+  );
   const app = mount(App, { target, props: { controller } });
   const unlockAudio = (event: Event) => {
     if (event.isTrusted) controller.audio.unlock();
@@ -41,6 +51,15 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
     async onState(state) {
       await controller.load(state);
       await tick();
+    },
+    onReplayStart() {
+      controller.startPlayback();
+    },
+    onReplayTo(index) {
+      controller.seekPlayback(index);
+    },
+    onReplayEnd() {
+      controller.endPlayback();
     },
     onPlayer({ index }) {
       controller.setPlayer(index);

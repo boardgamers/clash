@@ -26,6 +26,7 @@ pub mod ai_collect;
 pub mod ai_missions;
 pub mod analysis;
 pub mod barbarians;
+pub mod board_history;
 pub mod cache;
 pub mod card;
 pub mod city;

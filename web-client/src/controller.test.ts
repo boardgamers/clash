@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { build } from 'esbuild';
 import type { Controller as ControllerType } from './controller';
 import type { Session } from './types';
+import { contextualCards, activeCollectionCard } from './contextual-cards.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 // Bundle the actual controller so Node can run its browser TypeScript imports.
@@ -74,6 +75,106 @@ const fixture = (name: string) => {
       game.players.push({ ...npc, id: game.players.length });
   return JSON.stringify(game);
 };
+
+test('Mass Production from Collect adds two tiles and keeps the chosen city, tiles and Free Economy', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/collect_free_economy'));
+    game.players[0].action_cards = [29, 19];
+    let raw = JSON.stringify(game);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    c.beginCollect();
+    const economy = app.session().view!.collectActions!.find((a) => a.name === 'Free Economy')!;
+    c.switchCollectVariant(economy.value);
+    const city = app.session().view!.cities.find((city) => city.position === app.session().city)!;
+    c.toggleChoice(city.choices[0]);
+    const selection = structuredClone(app.session().selection);
+    assert.ok(contextualCards(app.session().view, 'collect').some((o) => o.card.name === 'Mass Production'));
+    c.playContextualCard(29, 'collect');
+    c.playContextualCard(29, 'collect');
+    assert.equal(app.sent.length, 1, 'a card cannot be sent twice');
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.deepEqual(app.session().selection, selection, 'unchanged snapshots keep the local choices');
+    raw = engine.tryMove(raw, app.sent[0], 0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().mode, 'collect');
+    assert.equal(app.session().city, city.position);
+    assert.deepEqual(app.session().selection, selection);
+    assert.deepEqual(app.session().collectVariant, economy.value);
+    assert.ok(app.session().preview?.action);
+    assert.equal(
+      app.session().view!.cities.find((c) => c.position === city.position)!.capacity,
+      city.capacity + 2,
+    );
+    assert.equal(activeCollectionCard(app.session().game), 'Mass Production · +2 tiles');
+    assert.deepEqual(
+      contextualCards(app.session().view, 'collect'),
+      [],
+      'Production Focus cannot stack with Mass Production',
+    );
+    c.collect();
+    raw = engine.tryMove(raw, app.sent[1], 0);
+    await c.load(engine.stripSecret(raw, 0));
+    // The displayed Free Economy fee may be a separate engine continuation.
+    if (app.sent.length > 2) raw = engine.tryMove(raw, app.sent[2], 0);
+    assert.equal(activeCollectionCard(JSON.parse(raw)), null, 'boost is consumed by collection');
+  } finally {
+    app.close();
+  }
+});
+
+test('a rejected contextual card leaves the collection draft intact', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/collect_free_economy'));
+    game.players[0].action_cards = [19];
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.beginCollect();
+    c.toggleChoice(app.session().view!.cities[0].choices[0]);
+    const selection = structuredClone(app.session().selection);
+    app.reject();
+    c.playContextualCard(19, 'collect');
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().mode, 'collect');
+    assert.deepEqual(app.session().selection, selection);
+    assert.ok(app.session().error);
+  } finally {
+    app.close();
+  }
+});
+
+test('research card shortcut keeps the card’s advance choice instead of returning to normal research', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(await engine.init(2, [], { civilization: 'Random' }, 'contextual-research', {}));
+    const seat = game.current_player_index;
+    game.players[seat].action_cards = [1];
+    game.players[seat].resources.culture_tokens = 2;
+    let raw = JSON.stringify(game);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    c.patch({ mode: 'research' });
+    c.playContextualCard(1, 'research');
+    raw = engine.tryMove(raw, app.sent[0], seat);
+    await c.load(engine.stripSecret(raw, seat));
+    if (app.sent.length > 1) {
+      raw = engine.tryMove(raw, app.sent[1], seat);
+      await c.load(engine.stripSecret(raw, seat));
+    }
+    assert.equal(app.session().mode, 'research');
+    assert.equal(app.session().view!.decision!.advanceSelection, true);
+    assert.equal(app.session().view!.decision!.advanceMode, 'free');
+    assert.deepEqual(contextualCards(app.session().view, 'research'), []);
+  } finally {
+    app.close();
+  }
+});
 
 test('Free Economy pays the displayed fee once, with no second click or duplicate snapshot submission', async () => {
   const app = paymentController(),

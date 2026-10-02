@@ -465,6 +465,21 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
         move_state.current_move = CurrentMove::None;
     }
 
+    // A fleet commits its Move before exploration changes the visible sea areas.
+    // Cartography deduplicates per action, including the later physical move.
+    if m.units
+        .iter()
+        .all(|id| game.player(player.index).get_unit(*id).is_ship())
+    {
+        let info = MoveInfo::new(m.units.clone(), starting_position, m.destination);
+        game.trigger_transient_event_with_game_value(
+            player.index,
+            |e| &mut e.before_move,
+            &info,
+            &(),
+        );
+    }
+
     let dest_terrain = game
         .map
         .get(m.destination)

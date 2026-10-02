@@ -101,7 +101,16 @@ fn add_cartography_bonus(
                 let unit = p.get(game).get_unit(*id);
                 if unit.is_ship() {
                     ship = true;
-                    if !unit.position.is_neighbor(i.to) {
+                    if crate::move_routes::sea_routes(p.get(game), &i.units, game, i.from)
+                        .iter()
+                        .find(|route| route.destination == i.to)
+                        .is_some_and(|route| {
+                            route
+                                .cost
+                                .modifiers
+                                .contains(&crate::events::EventOrigin::Advance(Advance::Navigation))
+                        })
+                    {
                         navigation = true;
                     }
                 }

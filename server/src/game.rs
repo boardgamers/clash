@@ -99,6 +99,7 @@ pub struct Game {
     pub starting_player_index: usize,
     pub current_player_index: usize,
     pub log: Vec<ActionLogAge>,
+    pub board_history: crate::board_history::BoardHistory,
     // index for the next action log
     pub log_index: usize,
     pub undo_limit: usize,

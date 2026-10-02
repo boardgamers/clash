@@ -20,6 +20,7 @@ export function readPreferences(preferences: Record<string, unknown>) {
       : [],
     playerBadges: (bgs?.players ?? []).map((player) => (player.pro ? bgs?.supporterBadge : undefined)),
     colorBlind: preferences.colorBlind === true,
+    analysis: preferences.analysis === true,
     topDown: preferences.mapView === '2d',
     unitBadges: preferences.unitBadges === true,
   };
