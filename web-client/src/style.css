@@ -486,8 +486,8 @@ small {
   opacity: 1;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 19px;
+  height: 19px;
   white-space: nowrap;
   border: 1px solid #f7f3e8c9;
   border-radius: 50%;
@@ -496,13 +496,20 @@ small {
   font:
     500 10px 'DM Sans',
     sans-serif;
-  padding: 2px;
+  padding: 0;
   box-shadow: 0 1px 5px #28483d30;
   transition: box-shadow 0.12s;
 }
 .city-map-label > svg {
   width: 17px;
   height: 17px;
+}
+/* Keep the original tap area around the tighter visible badge. */
+.city-map-label::after {
+  content: '';
+  position: absolute;
+  inset: -2.5px;
+  border-radius: inherit;
 }
 .city-mood {
   display: inline-flex;
