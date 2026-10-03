@@ -91,7 +91,8 @@
           >
         </div>
         <span
-          class="mood-current"
+          class="mood-current city-mood"
+          data-mood={city.mood.toLowerCase()}
           title={`Currently ${city.mood.toLowerCase()}`}
           aria-label={`Currently ${city.mood.toLowerCase()}`}><CurrentMood size={21} /></span
         >
@@ -128,7 +129,8 @@
               }}
             >
               <span class="mood-target-label"
-                ><Icon size={18} />{target.lawgiver ? 'Lawgiver' : target.mood}</span
+                ><span class="city-mood" data-mood={target.mood.toLowerCase()}><Icon size={18} /></span
+                >{target.lawgiver ? 'Lawgiver' : target.mood}</span
               >
               <span class="mood-target-cost"
                 ><ResourceAmount

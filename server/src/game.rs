@@ -58,6 +58,28 @@ impl PatchOption {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
+pub enum GameLength {
+    #[default]
+    Standard,
+    Epic,
+}
+
+impl GameLength {
+    #[must_use]
+    pub fn ages(&self) -> u32 {
+        match self {
+            Self::Standard => crate::consts::AGES,
+            Self::Epic => 10,
+        }
+    }
+
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &Self::Standard
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct GameOptions {
     // Read old saves only. Cleared on load; unrestricted undo is no longer a rule.
@@ -69,6 +91,8 @@ pub struct GameOptions {
     #[serde(default)]
     #[serde(skip_serializing_if = "PatchOption::is_default")]
     pub patch: PatchOption,
+    #[serde(default, skip_serializing_if = "GameLength::is_default")]
+    pub length: GameLength,
 }
 
 impl GameOptions {

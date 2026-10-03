@@ -13,7 +13,13 @@
 
 <span class="collection-capacity" title={label} aria-label={label}>
   <span title={structures?.join(' + ')}><Landmark size={13} aria-hidden="true" />{size}</span>
-  {#if mood === 'Happy'}+ <span><Mood size={14} aria-hidden="true" />1</span>
-  {:else if mood === 'Angry'}→ <span><Mood size={14} aria-hidden="true" />1</span>
+  {#if mood === 'Happy'}+ <span
+      ><span class="city-mood" data-mood={mood.toLowerCase()}><Mood size={14} aria-hidden="true" /></span
+      >1</span
+    >
+  {:else if mood === 'Angry'}→ <span
+      ><span class="city-mood" data-mood={mood.toLowerCase()}><Mood size={14} aria-hidden="true" /></span
+      >1</span
+    >
   {:else}<Mood size={14} aria-hidden="true" />{/if}
 </span>

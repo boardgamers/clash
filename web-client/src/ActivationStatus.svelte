@@ -31,9 +31,11 @@
     <p>Already activated while angry. Wait until next turn or improve its happiness.</p>
   {:else if warning && decreases}
     <div class="activation-mood">
-      <Before size={17} />{city.mood}<ArrowRight size={15} /><After size={17} /><strong
-        >{city.activationMood}</strong
-      >
+      <span class="city-mood" data-mood={city.mood.toLowerCase()}><Before size={17} /></span
+      >{city.mood}<ArrowRight size={15} /><span
+        class="city-mood"
+        data-mood={city.activationMood.toLowerCase()}><After size={17} /></span
+      ><strong>{city.activationMood}</strong>
     </div>
     <p>
       This activation lowers mood. Afterwards, this city’s base collection and recruitment capacity is {city.activationCapacity}.

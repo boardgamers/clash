@@ -37,6 +37,7 @@ fn new_game() {
                 civilization: CivSetupOption::ChooseCivilization,
                 legacy_undo: None,
                 patch: PatchOption::Standard,
+                ..GameOptions::default()
             })
             .build(),
     );

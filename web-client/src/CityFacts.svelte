@@ -8,5 +8,7 @@
   <span title={`Size ${size}`} aria-label={`Size ${size}`}
     ><Landmark size={12} aria-hidden="true" />{size}</span
   >
-  <span title={mood} aria-label={mood}><Mood size={15} aria-hidden="true" /></span>
+  <span class="city-mood" data-mood={mood.toLowerCase()} title={mood} aria-label={mood}
+    ><Mood size={15} aria-hidden="true" /></span
+  >
 </span>

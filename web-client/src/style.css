@@ -504,13 +504,29 @@ small {
   width: 17px;
   height: 17px;
 }
+.city-mood {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+.city-mood[data-mood='happy'],
 .city-map-label[data-mood='happy'] {
   color: #326b47;
+}
+.city-map-label[data-mood='happy'] {
   background: #e2eddd;
   border-color: #9bb394;
 }
+.city-mood[data-mood='angry'],
 .city-map-label[data-mood='angry'] {
   color: #a44832;
+}
+/* Fill only the face outline; the mouth and eyes stay light and readable. */
+:is(.city-map-label, .city-mood):is([data-mood='happy'], [data-mood='angry']) svg > circle {
+  fill: currentColor;
+}
+:is(.city-map-label, .city-mood):is([data-mood='happy'], [data-mood='angry']) svg > :is(path, line) {
+  stroke: #fff8e9;
 }
 .city-map-name {
   display: none;

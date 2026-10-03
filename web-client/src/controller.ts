@@ -70,6 +70,7 @@ export class Controller {
     unitBadges: false,
     replayAutoplay: true,
     availableOnly: true,
+    skipRazeCity: false,
   });
   readonly chat = new ChatController();
   readonly audio = new GameAudio();
@@ -83,6 +84,7 @@ export class Controller {
       > & { id: number })
     | null = null;
   private raw = '';
+  private skippedRazeState = '';
   private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -121,6 +123,40 @@ export class Controller {
         playback: { ...playback, playing: false },
       });
     }
+    this.trySkipRazeCity();
+  }
+  private trySkipRazeCity() {
+    const s = get(this.session),
+      d = s.view?.decision;
+    if (
+      !s.skipRazeCity ||
+      s.analysis ||
+      s.playback ||
+      s.pending ||
+      s.error ||
+      s.seat === undefined ||
+      s.view?.activePlayer !== s.seat ||
+      !d?.endOfAge ||
+      d.name !== 'Raze city' ||
+      d.min !== 0 ||
+      d.max !== 1 ||
+      d.fields.length ||
+      this.skippedRazeState === this.raw
+    )
+      return;
+    // Query the same empty selection as Skip. Never repeat a failed automatic submission.
+    try {
+      const { action } = this.query<{ action: Move }>({ kind: 'decision', values: [], payments: [] });
+      this.skippedRazeState = this.raw;
+      this.submit(action);
+    } catch {
+      // Leave the normal decision available if this state cannot be skipped.
+    }
+  }
+  setSkipRazeCity(enabled: boolean) {
+    this.patch({ skipRazeCity: enabled });
+    this.commands.updatePreference('skipRazeCity', enabled);
+    if (enabled) this.trySkipRazeCity();
   }
   setReplayAutoplay(enabled: boolean) {
     this.patch({ replayAutoplay: enabled });
@@ -337,6 +373,7 @@ export class Controller {
     this.submittedMove = null;
     if (automaticPayment) this.submit(automaticPayment);
     this.afterPlaybackLoad(old, game);
+    this.trySkipRazeCity();
   }
   private seenKey() {
     const s = get(this.session);
@@ -365,7 +402,7 @@ export class Controller {
       frames = game.board_history?.frames ?? [];
     if (s.analysis || !frames.length) return;
     if (s.playback) {
-      if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback();
+      if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback(false);
       else {
         const index = frameAt(frames, s.playback.frame?.cursor ?? 0);
         const previous = old.game?.board_history?.frames ?? [];
@@ -524,7 +561,7 @@ export class Controller {
       if (p?.playing) this.showPlaybackFrame(p.index + 1, true);
     }, duration);
   }
-  endPlayback() {
+  endPlayback(resumeDecisions = true) {
     clearTimeout(this.playbackTimer);
     const s = get(this.session),
       p = s.playback;
@@ -533,6 +570,7 @@ export class Controller {
       this.patch({ playback: null });
       this.commands.clearReplayInfo?.();
       this.markSeen(s.game?.board_history?.frames[p.end]?.cursor);
+      if (resumeDecisions) this.trySkipRazeCity();
     }
   }
   private scheduleEffect() {
@@ -551,7 +589,7 @@ export class Controller {
   setPlayer(index?: number) {
     if (get(this.session).seat === index) return;
     this.cardContinuation = null;
-    this.endPlayback();
+    this.endPlayback(false);
     this.dismissEffects(true);
     this.quotedActionPayment = null;
     this.moveCache.clear();
@@ -604,6 +642,7 @@ export class Controller {
       }
       const loaded = get(this.session);
       if (index !== undefined && loaded.game) this.afterPlaybackLoad({ ...loaded, game: null }, loaded.game);
+      this.trySkipRazeCity();
     }
   }
   selectCity(position: string) {

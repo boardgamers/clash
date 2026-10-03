@@ -64,6 +64,7 @@ export interface Playback {
   animate: boolean;
 }
 export interface Game {
+  options?: { length?: 'Standard' | 'Epic' };
   permanent_effects?: unknown[];
   board_history?: { id: string; frames: BoardFrame[] };
   state: unknown;
@@ -484,6 +485,7 @@ export interface Session {
   unitBadges: boolean;
   replayAutoplay: boolean;
   availableOnly: boolean;
+  skipRazeCity: boolean;
 }
 export interface MapPick {
   kind: 'tile' | 'city' | 'unit' | 'units' | 'decision';

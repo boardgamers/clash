@@ -29,9 +29,11 @@ let expectedEngine = previous.engine;
 const civilizationOption = JSON.parse(
   await fs.readFile(path.join(root, 'bgs-civilization-option.json'), 'utf8'),
 );
+const lengthOption = JSON.parse(await fs.readFile(path.join(root, 'bgs-length-option.json'), 'utf8'));
 const options = [
-  ...(previous.options ?? []).filter((option) => !['undo', 'civilization'].includes(option.name)),
+  ...(previous.options ?? []).filter((option) => !['undo', 'civilization', 'length'].includes(option.name)),
   civilizationOption,
+  lengthOption,
 ];
 const declaredPreferences = JSON.parse(await fs.readFile(path.join(root, 'bgs-preferences.json'), 'utf8'));
 const replacedPreferences = new Set([

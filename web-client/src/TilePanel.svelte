@@ -61,7 +61,7 @@
       {#if city}<CityFacts size={city.size} mood={city.mood} />{/if}
       <button class="icon-button" aria-label="Close tile actions" onclick={close}><X size={18} /></button>
     </header>
-    <TerrainRules {terrain} />
+    <TerrainRules {terrain} showHeading={!!(owner || publicOwner)} />
     {#if publicCity && publicOwner}<CityBuildings
         city={publicCity}
         owner={publicOwner.id}
@@ -157,14 +157,17 @@
         role="group"
         aria-label={`Collect at ${position}`}
       >
+        <span class="tile-harvest-label"><Wheat size={16} />Collect</span>
         {#each collectors as c}<button
+            aria-label={`Collect with ${c.mood.toLowerCase()} city, size ${c.size}, capacity ${c.capacity}`}
+            title={`${c.mood} city · Size ${c.size} · Capacity ${c.capacity}`}
             onclick={() => controller.collectFromTile(c.position, position)}
             onmouseenter={() => onHighlight(c.position)}
             onmouseleave={() => onHighlight(null)}
             onfocus={() => onHighlight(c.position)}
             onblur={() => onHighlight(null)}
           >
-            <Wheat size={16} />Collect with {c.position}<ArrowRight size={14} />
+            <CityFacts size={c.size} mood={c.mood} />
           </button>{/each}
       </div>{/if}
   </section>

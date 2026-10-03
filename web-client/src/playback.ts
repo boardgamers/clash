@@ -1,4 +1,6 @@
-import type { BoardFrame, Game } from './types.ts';
+import type { BoardFrame, Game, Pile, View } from './types.ts';
+import { resourceNames } from './types.ts';
+import { activeHistory } from './active-history.ts';
 
 export function recapStart(game: Game, seat: number | undefined, seen = 0): number | null {
   const frames = game.board_history?.frames ?? [];
@@ -32,8 +34,13 @@ export function lastOpponentTurn(game: Game, seat: number | undefined) {
   return null;
 }
 
-/** Describe and highlight only changes present in public board snapshots. */
-export function frameDetails(before: BoardFrame | undefined, frame: BoardFrame | null) {
+/** Describe public board changes and the journal entries belonging to each frame. */
+export function frameDetails(
+  before: BoardFrame | undefined,
+  frame: BoardFrame | null,
+  game?: Game | null,
+  advances: View['advances'] = [],
+) {
   if (!frame) return { caption: 'No recorded positions yet.', positions: [] as string[] };
   const actor = frame.players.find((p) => p.id === frame.actor)?.civilization;
   const positions = new Set<string>();
@@ -90,6 +97,61 @@ export function frameDetails(before: BoardFrame | undefined, frame: BoardFrame |
               `${count} ${name}${count > 1 && !['infantry', 'cavalry'].includes(name) ? 's' : ''}`,
           )
           .join(', ');
+  }
+  // Read only the public log interval for this frame, never the current player's hand
+  // or later turns. This also enriches recordings made before detailed captions existed.
+  if (before && game) {
+    const items = activeHistory(game)
+      .flatMap((age) => age.rounds.flatMap((round) => round.turns.flatMap((turn) => turn.actions ?? [])))
+      .slice(before.cursor, frame.cursor)
+      .flatMap((action) => action.items ?? []);
+    const details: string[] = [];
+    const readable = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2');
+    for (const player of frame.players) {
+      const own = items.filter((item) => item.player === player.id);
+      const gained = [
+        ...new Set(
+          own.filter((item) => item.Advance?.balance === 'Gain').map((item) => item.Advance!.advance),
+        ),
+      ];
+      if (gained.length)
+        details.push(
+          `${player.id === frame.actor ? '' : player.civilization + ': '}researched ${gained
+            .map((id) => advances.find((a) => a.id === id)?.name ?? readable(id))
+            .join(', ')}`,
+        );
+      if (player.id !== frame.actor) continue;
+      if (frame.title === 'Build' || frame.title === 'Build wonder') {
+        const built = own.flatMap((item) => {
+          const structure = item.Structure;
+          if (
+            structure?.balance !== 'Gain' ||
+            !structure.structure ||
+            typeof structure.structure !== 'object'
+          )
+            return [];
+          const value = Object.values(structure.structure)[0];
+          return typeof value === 'string' ? [readable(value)] : [];
+        });
+        if (built.length) details.push('built ' + [...new Set(built)].join(', '));
+      }
+      if (frame.title === 'Collect') {
+        const pile: Pile = {};
+        for (const item of own)
+          if (item.Resources?.balance === 'Gain') {
+            for (const [resource, value] of Object.entries(item.Resources.resources))
+              pile[resource as keyof Pile] = (pile[resource as keyof Pile] ?? 0) + value;
+          }
+        const resources = Object.entries(pile)
+          .filter(([, value]) => value > 0)
+          .map(([resource, value]) => `${value} ${resourceNames[resource as keyof Pile].toLowerCase()}`);
+        if (resources.length) details.push('collected ' + resources.join(', '));
+      }
+    }
+    if (details.length)
+      description = ['Research', 'Build', 'Build wonder', 'Collect'].includes(frame.title)
+        ? details.join(' · ')
+        : [description, ...details].join(' · ');
   }
   return { caption: actor ? `${actor} · ${description}` : description, positions: [...positions] };
 }

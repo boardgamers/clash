@@ -4,6 +4,7 @@
   import ResourceAmount from './ResourceAmount.svelte';
   import type { Controller } from './controller';
   import { actionReason } from './model';
+  import { handCardDescription } from './card-text';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   const close = () => controller.patch({ cardsOpen: false });
@@ -35,22 +36,25 @@
   {/if}
   {#each $session.view?.actionCards ?? [] as card}
     <article class="play-card">
-      <h3>{card.name}</h3>
-      <p><ResourceText text={card.description} /></p>
-      <button
-        class="primary wide card-play-button"
-        title={card.reason ?? 'Play this card'}
-        disabled={!card.action || $session.pending}
-        onclick={() => card.action && controller.submit(card.action, card.cost)}
-        ><span>Play {card.name}</span>
-        <span class="card-play-cost"
-          >{#if card.cost && Object.values(card.cost).some(Boolean)}<ResourceAmount pile={card.cost} />{/if}
-          <span
-            aria-label={card.free ? 'Free action' : 'Costs 1 action'}
-            title={card.free ? 'Free action' : 'Costs 1 action'}><Zap size={13} />{card.free ? 0 : 1}</span
-          ></span
-        ></button
-      >
+      <header class="play-card-header">
+        <h3>{card.name}</h3>
+        <button
+          class="primary card-play-button"
+          aria-label={`Play ${card.name}`}
+          title={card.reason ?? 'Play this card'}
+          disabled={!card.action || $session.pending}
+          onclick={() => card.action && controller.submit(card.action, card.cost)}
+          ><span>Play</span>
+          <span class="card-play-cost"
+            >{#if card.cost && Object.values(card.cost).some(Boolean)}<ResourceAmount pile={card.cost} />{/if}
+            <span
+              aria-label={card.free ? 'Free action' : 'Costs 1 action'}
+              title={card.free ? 'Free action' : 'Costs 1 action'}><Zap size={13} />{card.free ? 0 : 1}</span
+            ></span
+          ></button
+        >
+      </header>
+      <p><ResourceText text={handCardDescription(card.description)} /></p>
       {#if actionReason(card.reason)}<small>{actionReason(card.reason)}</small>{/if}
       {#if card.tactics}<section class="card-battle-use" aria-label={`Battle use: ${card.tactics.name}`}>
           <div class="card-use-label"><Swords size={15} />Or · Battle use</div>

@@ -26,5 +26,6 @@ export function readPreferences(preferences: Record<string, unknown>) {
     unitBadges: preferences.unitBadges === true,
     replayAutoplay: preferences.replayAutoplay !== false,
     availableOnly: preferences.availableOnly !== false,
+    skipRazeCity: preferences.skipRazeCity === true,
   };
 }

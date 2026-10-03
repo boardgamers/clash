@@ -121,3 +121,55 @@ fn test_keep_government() {
         ],
     );
 }
+
+#[test]
+fn epic_continues_after_six_ages_and_ends_after_ten() {
+    use server::game::{GameLength, GameState};
+    for (age, finished) in [(6, false), (9, false), (10, true)] {
+        let mut game = JSON.load_game("end_game");
+        game.options.length = GameLength::Epic;
+        game.age = age;
+        let game = server::game_api::execute(game, Action::Playing(PlayingAction::EndTurn), 0);
+        assert_eq!(
+            matches!(game.state, GameState::Finished),
+            finished,
+            "age {age}"
+        );
+        if !finished {
+            assert!(game.events.iter().any(|event| matches!(
+                event.event_type,
+                server::content::persistent_events::PersistentEventType::StatusPhase(_)
+            )));
+        }
+    }
+}
+
+#[test]
+fn length_defaults_to_standard_and_survives_save_load() {
+    use server::game::{GameLength, GameOptions};
+    let options: GameOptions = serde_json::from_str("{}").unwrap();
+    assert_eq!(options.length.ages(), 6);
+    assert_eq!(
+        serde_json::to_value(&options).unwrap(),
+        serde_json::json!({})
+    );
+    let options: GameOptions = serde_json::from_str(r#"{"length":"Epic"}"#).unwrap();
+    let game = server::game_api::init(2, "epic-save".to_owned(), options);
+    let data = common::to_json(&game);
+    let value: serde_json::Value = serde_json::from_str(&data).unwrap();
+    assert_eq!(value["options"]["length"], "Epic");
+    let data: server::game_data::GameData = serde_json::from_str(&data).unwrap();
+    let cache = server::cache::Cache::new(&data.options);
+    let restored = server::game::Game::from_data(data, cache, server::game::GameContext::Play);
+    assert!(restored.options.length == GameLength::Epic);
+    assert_eq!(restored.options.length.ages(), 10);
+}
+
+#[test]
+fn epic_preserves_early_ending_when_a_player_has_no_cities() {
+    let mut game = JSON.load_game("end_game");
+    game.options.length = server::game::GameLength::Epic;
+    game.players[1].cities.clear();
+    let game = server::game_api::execute(game, Action::Playing(PlayingAction::EndTurn), 0);
+    assert!(server::game_api::ended(&game));
+}

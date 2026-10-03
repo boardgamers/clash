@@ -886,8 +886,15 @@
   padding: 18px 0;
   border-top: 1px solid var(--line);
 }
-.play-card > h3 {
-  margin: 0 0 8px;
+.play-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.play-card-header h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
 }
 .play-card p,
 .ability-offer p {
@@ -902,8 +909,10 @@
   color: var(--muted);
 }
 .card-play-button {
-  justify-content: space-between;
-  gap: 12px;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 6px 10px;
+  gap: 8px;
 }
 .card-play-cost,
 .card-play-cost > span {
@@ -931,9 +940,6 @@
 .card-battle-use h4 {
   margin: 6px 0;
   font-size: 13px;
-}
-.play-card > .primary {
-  margin: 12px 0 6px;
 }
 .play-card > small {
   color: var(--muted);
@@ -1083,4 +1089,13 @@
 .decision-face-heading .objective-art-accent svg {
   width: 11px;
   height: 11px;
+}
+
+.skip-raze-preference {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  font-size: 12px;
+  color: var(--muted);
 }

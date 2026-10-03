@@ -7,7 +7,12 @@
   const playback = $derived($session.playback);
   const frame = $derived(playback?.frame);
   const details = $derived(
-    frameDetails($session.game?.board_history?.frames[(playback?.index ?? 0) - 1], frame ?? null),
+    frameDetails(
+      $session.game?.board_history?.frames[(playback?.index ?? 0) - 1],
+      frame ?? null,
+      $session.game,
+      $session.view?.advances,
+    ),
   );
   const atStart = $derived(!!playback && playback.index === playback.start);
   const atEnd = $derived(!!playback && playback.index >= playback.end);

@@ -154,14 +154,12 @@
   background: var(--paper2);
 }
 .tile-unit-actions,
-.tile-arrivals,
-.tile-harvest {
+.tile-arrivals {
   display: grid;
   gap: 7px;
 }
 .tile-unit-actions > button,
-.tile-arrivals > button,
-.tile-harvest > button {
+.tile-arrivals > button {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -170,6 +168,28 @@
   border-radius: 5px;
   font-size: 12px;
   text-align: left;
+}
+.tile-harvest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+}
+.tile-harvest-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 3px;
+}
+.tile-harvest > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
 }
 .tile-unit-actions > button > span,
 .tile-arrivals > button > span {

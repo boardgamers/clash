@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
 use crate::city::raze_city;
-use crate::consts::AGES;
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType,
@@ -95,7 +94,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
 
         phase = match phase {
             CompleteObjectives => {
-                if game.age == AGES
+                if game.age >= game.options.length.ages()
                     || game
                         .players
                         .iter()

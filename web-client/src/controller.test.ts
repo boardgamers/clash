@@ -562,3 +562,99 @@ test('opponent recap steps animate and pause, replay stays within its turn, and 
     app.close();
   }
 });
+
+test('end-of-age razing stays optional by default; opting out keeps every city once', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const raw = fixture('status_phase/raze_city_decline');
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().view!.decision!.name, 'Raze city');
+    assert.equal(app.sent.length, 0);
+    c.setSkipRazeCity(true);
+    assert.deepEqual(app.preferences, [{ name: 'skipRazeCity', value: true }]);
+    assert.equal(app.sent.length, 1);
+    assert.deepEqual(JSON.parse(app.sent[0]), { Response: { SelectPositions: [] } });
+    await c.load(engine.stripSecret(raw, 0));
+    c.setPreferences({ skipRazeCity: true });
+    assert.equal(app.sent.length, 1, 'duplicate snapshots and preferences never send twice');
+    const next = engine.tryMove(raw, app.sent[0], 0);
+    assert.deepEqual(JSON.parse(next).players[0].cities, JSON.parse(raw).players[0].cities);
+    await c.load(engine.stripSecret(next, 0));
+    assert.equal(app.sent.length, 1, 'does not skip an opponent decision');
+    const afterOpponent = engine.tryMove(next, app.sent[0], 1);
+    await c.load(engine.stripSecret(afterOpponent, 0));
+    assert.notEqual(app.session().view!.decision?.name, 'Raze city');
+    assert.equal(app.sent.length, 1, 'does not skip the next end-of-age decision');
+  } finally {
+    app.close();
+  }
+});
+
+test('saved skip preference works when state arrives later, but never for spectators or analysis', async () => {
+  for (const mode of ['play', 'spectator', 'analysis']) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      c.setPreferences({ skipRazeCity: true, analysis: mode === 'analysis' });
+      if (mode !== 'spectator') c.setPlayer(0);
+      await c.load(
+        engine.stripSecret(fixture('status_phase/raze_city_decline'), mode === 'spectator' ? undefined : 0),
+      );
+      assert.equal(app.sent.length, mode === 'play' ? 1 : 0, mode);
+    } finally {
+      app.close();
+    }
+  }
+});
+
+test('failed automatic razing skip stays available manually and is never retried in a loop', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(0);
+    const raw = engine.stripSecret(fixture('status_phase/raze_city_decline'), 0);
+    await c.load(raw);
+    app.reject();
+    c.setSkipRazeCity(true);
+    assert.equal(app.sent.length, 1);
+    assert.equal(app.session().pending, false);
+    assert.ok(app.session().error);
+    c.patch({ error: '' });
+    c.setPreferences({ skipRazeCity: true });
+    await c.load(raw);
+    assert.equal(app.sent.length, 1);
+    assert.equal(app.session().view!.decision!.name, 'Raze city');
+  } finally {
+    app.close();
+  }
+});
+
+test('replay postpones automatic razing skip until returning to the game', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(fixture('status_phase/raze_city_decline'), 0));
+    c.patch({
+      playback: {
+        frame: null,
+        index: 0,
+        total: 1,
+        start: 0,
+        end: 0,
+        range: 'all',
+        automatic: false,
+        playing: false,
+        animate: false,
+      },
+    });
+    c.setSkipRazeCity(true);
+    assert.equal(app.sent.length, 0);
+    c.endPlayback();
+    assert.equal(app.sent.length, 1);
+  } finally {
+    app.close();
+  }
+});

@@ -310,6 +310,17 @@
         {/if}
       </div>
     {/each}
+    {#if decision.endOfAge && decision.name === 'Raze city' && decision.min === 0}
+      <label class="skip-raze-preference">
+        <input
+          type="checkbox"
+          checked={$session.skipRazeCity}
+          disabled={$session.pending}
+          onchange={(event) => controller.setSkipRazeCity(event.currentTarget.checked)}
+        />
+        Keep all cities; skip this step in future ages
+      </label>
+    {/if}
     <div class="decision-footer" class:map-decision-footer={mapChoice}>
       {#if decision.tacticsSelection}
         {#if selected.length}<small class="tactics-discard">Discards the selected card</small>{/if}

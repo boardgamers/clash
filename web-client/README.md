@@ -72,7 +72,7 @@ npm run publish:bgs -- --version=1 --dry-run
 npm run publish:bgs -- --version=1
 ```
 
-The script uploads the viewer, verifies the hosted bytes, then updates the version's viewer configuration and preference declarations from `bgs-preferences.json` and civilization setup choices from `bgs-civilization-option.json`. The shared `sound` and `colorBlind` declarations expose BGS's global controls; `mapView` is saved per user for Clash. Obsolete scale, zoom, and color-profile controls are replaced. The script preserves the engine (unless passed `--engine=/path/to/package.tgz`), visibility, and unrelated preference declarations, checks for concurrent changes, and saves the previous version document under `.engine/releases/` for rollback. Publishing is separate from pushing Git commits. The GitHub workflow builds and tests the viewer and retains the bundle as an artifact; it does not publish automatically.
+The script uploads the viewer, verifies the hosted bytes, then updates the version's viewer configuration and preference declarations from `bgs-preferences.json` and civilization setup choices from `bgs-civilization-option.json`, and game length choices from `bgs-length-option.json`. The shared `sound` and `colorBlind` declarations expose BGS's global controls; `mapView` is saved per user for Clash. Obsolete scale, zoom, and color-profile controls are replaced. The script preserves the engine (unless passed `--engine=/path/to/package.tgz`), visibility, and unrelated preference declarations, checks for concurrent changes, and saves the previous version document under `.engine/releases/` for rollback. Publishing is separate from pushing Git commits. The GitHub workflow builds and tests the viewer and retains the bundle as an artifact; it does not publish automatically.
 
 ## Remaining playtest work
 
@@ -89,3 +89,7 @@ Before public release: play through unusual civilization/card combinations, veri
 The protocol dependency is AGPL-3.0-only. The engine retains its existing licensing.
 
 Viewer releases: see [uploading the complete viewer build](docs/viewer-publishing.md).
+
+Game length defaults to six ages. Epic games use ten ages; existing saves without a length option retain six. The viewer age track follows the saved option. Publish an engine that supports the length option alongside the setup metadata.
+
+The opt-in `skipRazeCity` preference skips only the optional end-of-age razing decision by submitting its empty selection. It is available in BGS preferences and in that decision. It never acts for spectators, in analysis or during replay, and a rejected automatic submission leaves the decision available.

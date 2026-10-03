@@ -109,3 +109,94 @@ test('recap captions and highlights describe public recruitment and movement wit
   unchanged.title = 'Research';
   assert.deepEqual(frameDetails(moved, unchanged), { caption: 'Greece · Research', positions: [] });
 });
+
+test('recap names researched advances from its public log interval, including old recordings', () => {
+  const before = {
+    cursor: 1,
+    actor: 0,
+    title: 'End turn',
+    tiles: [],
+    players: [{ id: 1, civilization: 'Greece', units: [], cities: [] }],
+  } as unknown as BoardFrame;
+  const after = { ...before, cursor: 2, actor: 1, title: 'Research' };
+  const history = {
+    log_index: 3,
+    log: [
+      {
+        age: 1,
+        rounds: [
+          {
+            round: 1,
+            turns: [
+              {
+                turn_type: { Player: 1 },
+                actions: [
+                  { items: [{ player: 1, Advance: { advance: 'Navigation', balance: 'Gain' } }] },
+                  {
+                    items: [
+                      { player: 1, Advance: { advance: 'SteelWeapons', balance: 'Gain' } },
+                      { player: 1, Advance: { advance: 'Dogma', balance: 'Loss' } },
+                    ],
+                  },
+                  { items: [{ player: 1, Advance: { advance: 'Metallurgy', balance: 'Gain' } }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as Game;
+  assert.equal(frameDetails(before, after, history).caption, 'Greece · researched Steel Weapons');
+  assert.equal(
+    frameDetails(before, after, { ...history, log_index: 1 }).caption,
+    'Greece · Research',
+    'undone research is not presented',
+  );
+});
+
+test('recap details name construction and collected amounts without exposing coordinates or cards', () => {
+  const before = {
+    cursor: 0,
+    actor: 0,
+    title: 'End turn',
+    tiles: [],
+    players: [{ id: 1, civilization: 'Greece', units: [], cities: [] }],
+  } as unknown as BoardFrame;
+  const game = {
+    log_index: 1,
+    log: [
+      {
+        age: 1,
+        rounds: [
+          {
+            round: 1,
+            turns: [
+              {
+                turn_type: { Player: 1 },
+                actions: [
+                  {
+                    items: [
+                      {
+                        player: 1,
+                        Structure: { structure: { Building: 'Academy' }, balance: 'Gain', position: 'A1' },
+                      },
+                      { player: 1, Resources: { resources: { food: 2, wood: 1 }, balance: 'Gain' } },
+                      { player: 1, HandCard: { to: { Hand: 1 }, card: { ActionCard: 123 } } },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as Game;
+  const after = { ...before, cursor: 1, actor: 1, title: 'Build' };
+  assert.equal(frameDetails(before, after, game).caption, 'Greece · built Academy');
+  assert.equal(
+    frameDetails(before, { ...after, title: 'Collect' }, game).caption,
+    'Greece · collected 2 food, 1 wood',
+  );
+});

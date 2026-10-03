@@ -93,6 +93,7 @@
   import { collectionYield, collectionBonusLabel } from './collection-yield';
   import { movementBonus } from './movement-bonus';
   import { lastOpponentTurn } from './playback';
+  import { ageCount, ageLabel } from './game-length';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   const lastTurn = $derived($session.game ? lastOpponentTurn($session.game, $session.seat) : null);
@@ -514,17 +515,9 @@
         onclick={() => controller.commands.openBoardgame()}
         aria-label="About Clash of Cultures"
         ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
-          >{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {[
-              'I',
-              'II',
-              'III',
-              'IV',
-              'V',
-              'VI',
-            ][($session.playback?.frame?.age ?? $session.game?.age ?? 1) - 1] ?? 'VI'} · {($session.playback
-              ?.frame?.round ??
-              $session.game?.round ??
-              1) > 3
+          >{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {ageLabel(
+              $session.playback?.frame?.age ?? $session.game?.age ?? 1,
+            )} · {($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
               ? 'End of age'
               : `Round ${$session.playback?.frame?.round ?? $session.game?.round ?? 1}/3`}{/if}</span
         ></button
@@ -544,16 +537,16 @@
     <div
       class="age-track"
       role="group"
-      aria-label={`Age ${$session.playback?.frame?.age ?? $session.game?.age ?? 1} of 6`}
+      aria-label={`Age ${$session.playback?.frame?.age ?? $session.game?.age ?? 1} of ${ageCount($session.game)}`}
     >
-      {#each [1, 2, 3, 4, 5, 6] as age}
+      {#each Array.from({ length: ageCount($session.game) }, (_, i) => i + 1) as age}
         <span
           class="age-step"
           class:current={age === ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
           class:past={age < ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
-          title={`Age ${age} of 6`}
+          title={`Age ${age} of ${ageCount($session.game)}`}
         >
-          {['I', 'II', 'III', 'IV', 'V', 'VI'][age - 1]}
+          {ageLabel(age)}
           {#if age === ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
             <small class="round-label"
               >{($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
@@ -1061,7 +1054,11 @@
                 {#if city.canActivate && city.mood !== city.activationMood}<span
                     class="collection-mood-change"
                     aria-label={`${city.mood} becomes ${city.activationMood}`}
-                    ><Before size={16} /><ArrowRight size={13} /><After size={16} /></span
+                    ><span class="city-mood" data-mood={city.mood.toLowerCase()}><Before size={16} /></span
+                    ><ArrowRight size={13} /><span
+                      class="city-mood"
+                      data-mood={city.activationMood.toLowerCase()}><After size={16} /></span
+                    ></span
                   >{/if}
                 <ChevronRight size={14} />
               </summary>
