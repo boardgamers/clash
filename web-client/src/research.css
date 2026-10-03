@@ -104,6 +104,45 @@
   font-weight: 600;
   margin-bottom: 13px;
 }
+.government-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+.government-rule {
+  display: grid;
+  gap: 4px;
+  margin: -3px 0 13px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.government-rule:empty {
+  display: none;
+}
+.government-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.government-locked .research-node {
+  border-style: dashed;
+  background: var(--paper2);
+}
+.government-locked .research-pick,
+.government-locked .research-effects {
+  opacity: 0.7;
+}
+.government-locked .research-pick:hover,
+.government-locked .research-pick:focus-visible,
+.government-locked .research-node.selected .research-pick {
+  opacity: 1;
+}
 .research-advance-link {
   padding: 0;
   font: inherit;

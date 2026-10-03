@@ -99,7 +99,10 @@ const advances = {
     Anvil,
     'Before a land battle, pay 1 ore for +2 combat value each round, or +1 if the enemy has Steel Weapons. With Metallurgy, pay no ore against enemies without Steel Weapons.',
   ],
-  Draft: [Users, 'Each Recruit action: pay 1 mood token instead of resources for one infantry unit.'],
+  Draft: [
+    Users,
+    'Each Recruit action: pay 1 mood token instead of resources for only 1 infantry. Additional infantry use normal costs.',
+  ],
   Myths: [
     Sun,
     'When an event would lower your cities’ mood, pay 1 mood token per city you want to protect. Does not apply to Pirates.',

@@ -66,6 +66,23 @@
     captives: Link,
   };
   let advances = $derived([...($session.view?.advances ?? [])].sort((a, b) => a.order - b.order));
+  const governmentGroups = ['Democracy', 'Autocracy', 'Theocracy'];
+  const currentGovernment = $derived(
+    advances.find((a) => a.owned && governmentGroups.includes(a.group))?.group,
+  );
+  function governmentLocked(group: string) {
+    return (
+      !!currentGovernment &&
+      governmentGroups.includes(group) &&
+      group !== currentGovernment &&
+      !advances.some((a) => a.group === group && a.action)
+    );
+  }
+  function unavailableReason(advance: AdvanceView) {
+    return !advance.owned && governmentLocked(advance.group)
+      ? `Your government is ${currentGovernment}. Switch to ${advance.group} at the end of an age for 1 mood token + 1 culture token. You must meet its prerequisite; your government advances are replaced with the same number from the new government.`
+      : actionReason(advance.reason);
+  }
   const availableAdvances = $derived(
     advances.filter((a) => (researchedOnly ? a.owned : !$session.availableOnly || !!a.action)),
   );
@@ -100,7 +117,8 @@
     groups.filter(
       (group) =>
         (category === 'All' || group === category) &&
-        availableAdvances.some((a) => a.group === group && matches(a)),
+        (availableAdvances.some((a) => a.group === group && matches(a)) ||
+          (category === group && governmentLocked(group) && !researchedOnly)),
     ),
   );
   const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
@@ -215,8 +233,27 @@
       />
     {/if}
     {#each visibleGroups as group}{@const GroupIcon = groupIcons[group] ?? BookOpen}
-      <section class="research-branch" aria-label={group}>
-        <h3><GroupIcon size={18} />{group}</h3>
+      {@const lockedGovernment = governmentLocked(group)}
+      <section class="research-branch" class:government-locked={lockedGovernment} aria-label={group}>
+        <h3>
+          <GroupIcon size={18} />{group}
+          {#if group === currentGovernment}<span class="government-label"
+              ><Check size={12} />Current government</span
+            >
+          {:else if lockedGovernment}<LockKeyhole size={13} aria-label="Government unavailable" />{/if}
+        </h3>
+        {#if governmentGroups.includes(group)}<p class="government-rule">
+            {#if lockedGovernment}
+              <span>Only one government at a time.</span>
+              <span class="government-switch"
+                >Switch at end of age · <ResourceAmount pile={{ mood_tokens: 1, culture_tokens: 1 }} /></span
+              >
+            {:else if !currentGovernment}Only one government at a time. You can switch at the end of an age.{/if}
+          </p>{/if}
+        {#if lockedGovernment && statusFilter === 'available'}<button
+            class="show-all-options"
+            onclick={() => setStatusFilter('all')}>Show advances</button
+          >{/if}
         {#each availableAdvances.filter((a) => a.group === group) as advance, index}{@const presentation =
             researchPresentation(advance)}{@const Icon = presentation.icon}{@const parent = advances.find(
             (a) => a.id === advance.required,
@@ -242,11 +279,13 @@
                 >{#if advance.owned}<Check
                     size={16}
                     aria-label="Researched"
-                  />{:else if !advance.action && (actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
+                  />{:else if !advance.action && (lockedGovernment || actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
                     size={13}
-                    aria-label={!choice && parent && !parent.owned
-                      ? `Needs ${parent.name}`
-                      : actionReason(advance.reason)}
+                    aria-label={lockedGovernment
+                      ? 'Switch government at end of age'
+                      : !choice && parent && !parent.owned
+                        ? `Needs ${parent.name}`
+                        : actionReason(advance.reason)}
                   />{/if}</span
               >
               <span class="research-summary"><ResourceText text={presentation.summary} /></span>
@@ -295,7 +334,7 @@
                       title={`View ${parent.name}`}
                       onclick={() => showAdvance(parent.id)}>Needs {parent.name}</button
                     >
-                  {:else}{actionReason(advance.reason)}{/if}</span
+                  {:else if !lockedGovernment}{actionReason(advance.reason)}{/if}</span
                 >{/if}
             </div>
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
@@ -352,8 +391,7 @@
             ? 'Ships sail through connected sea tiles. Navigation adds a clockwise or counterclockwise shortcut around the edge to the next sea area. Unexplored regions must be explored before sailing farther.'
             : selected.description}
         </p>
-        {#if actionReason(selected.reason) && !selected.owned}<small>{actionReason(selected.reason)}</small
-          >{/if}
+        {#if unavailableReason(selected) && !selected.owned}<small>{unavailableReason(selected)}</small>{/if}
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
       <div class="research-payment">
@@ -373,7 +411,7 @@
         {/if}
         <button
           class="primary"
-          title={selected.reason ?? undefined}
+          title={unavailableReason(selected) || undefined}
           disabled={!selectedAction || $session.pending}
           onclick={() => selectedAction && controller.submit(selectedAction)}
         >
