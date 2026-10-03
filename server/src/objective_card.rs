@@ -50,6 +50,7 @@ pub enum ObjectiveType {
 pub struct Objective {
     pub name: String,
     pub description: String,
+    pub(crate) requires_player_combat: bool,
     pub(crate) listeners: AbilityListeners,
     pub(crate) status_phase_check: Option<StatusPhaseCheck>,
     pub(crate) progress: Option<ProgressCheck>,
@@ -83,7 +84,7 @@ impl Objective {
 #[derive(Clone)]
 pub struct ObjectiveCard {
     pub id: u8,
-    pub objectives: [Objective; 2],
+    pub objectives: Vec<Objective>,
 }
 
 impl ObjectiveCard {
@@ -91,7 +92,7 @@ impl ObjectiveCard {
     pub fn new(id: u8, first: Objective, second: Objective) -> Self {
         Self {
             id,
-            objectives: [first, second],
+            objectives: vec![first, second],
         }
     }
 
@@ -102,13 +103,14 @@ impl ObjectiveCard {
 
     #[must_use]
     pub fn name(&self) -> String {
-        format!("{}/{}", self.objectives[0].name, self.objectives[1].name)
+        self.objectives.iter().map(|o| &o.name).join("/")
     }
 }
 
 pub struct ObjectiveBuilder {
     name: String,
     description: String,
+    requires_player_combat: bool,
     status_phase_check: Option<StatusPhaseCheck>,
     progress: Option<ProgressCheck>,
     status_phase_update: Option<StatusPhaseUpdate>,
@@ -122,12 +124,19 @@ impl ObjectiveBuilder {
         Self {
             name: name.to_string(),
             description: description.to_string(),
+            requires_player_combat: false,
             status_phase_check: None,
             progress: None,
             status_phase_update: None,
             contradicting_status_phase_objective: None,
             builder: AbilityInitializerBuilder::new(),
         }
+    }
+
+    #[must_use]
+    pub(crate) fn requires_player_combat(mut self) -> Self {
+        self.requires_player_combat = true;
+        self
     }
 
     #[must_use]
@@ -183,6 +192,7 @@ impl ObjectiveBuilder {
         Objective {
             name: self.name,
             description: self.description,
+            requires_player_combat: self.requires_player_combat,
             listeners: self.builder.build(),
             status_phase_check: self.status_phase_check,
             progress: self.progress,

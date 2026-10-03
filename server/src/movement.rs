@@ -698,7 +698,11 @@ fn is_move_restricted(
         return Err("battle movement restriction".to_string());
     }
     let dest = route.destination;
-    let attack = game.enemy_player(player.index, dest).is_some();
+    let enemy = game.enemy_player(player.index, dest);
+    if enemy.is_some_and(|defender| !game.can_attack_player(player.index, defender)) {
+        return Err("Builder: you cannot attack another player's units or cities".into());
+    }
+    let attack = enemy.is_some();
     if attack && game.map.is_land(dest) && stack_size == 0 {
         return Err("no army units to attack".to_string());
     }

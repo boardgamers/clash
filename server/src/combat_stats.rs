@@ -248,10 +248,16 @@ pub(crate) fn new_combat_stats(
     let a = game.player(attacker);
     let d = game.player(defender);
     let attacker_position = a.get_unit(attackers[0]).position;
+    // A converted Persian unit fights the remaining army in the space where it
+    // was converted; it has not moved into that space from a neighboring tile.
+    let converted_army = battleground == Battleground::Land
+        && attackers.len() == 1
+        && a.has_special_advance(crate::special_advance::SpecialAdvance::Zoroastrianism);
     assert!(
         defender_position != attacker_position
-            || (battleground == Battleground::Sea && d.civilization.is_pirates()),
-        "Only pirate ships sharing your sea space can be attacked without entering it"
+            || (battleground == Battleground::Sea && d.civilization.is_pirates())
+            || converted_army,
+        "Combat in a shared space requires pirate ships or a converted army unit"
     );
 
     CombatStats::new(

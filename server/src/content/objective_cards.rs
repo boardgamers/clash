@@ -23,13 +23,14 @@ use crate::content::objectives::unit_objectives::{
     colony, horse_power, ivory_tower, large_army, large_fleet, migration, military_might, outpost,
     sea_blockade, shipping_routes, standing_army, threat, trade_power, versatility,
 };
+use crate::game::{GameOptions, GameVariant};
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;
 
 #[must_use]
-pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
-    let all = vec![
+pub(crate) fn get_all_uncached(options: &GameOptions) -> Vec<ObjectiveCard> {
+    let mut all = vec![
         ObjectiveCard::new(1, large_civ(), draft()),
         ObjectiveCard::new(2, science_lead(), conqueror()),
         ObjectiveCard::new(3, coastal_lead(), warmonger()),
@@ -69,6 +70,12 @@ pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(37, migration(), trample()),
         ObjectiveCard::new(38, high_culture(), sea_cleansing()),
     ];
+    if options.variant == GameVariant::Builder {
+        for card in &mut all {
+            card.objectives.retain(|o| !o.requires_player_combat);
+        }
+        all.retain(|card| !card.objectives.is_empty());
+    }
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),
         all.len(),

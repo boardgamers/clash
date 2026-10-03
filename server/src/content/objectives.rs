@@ -6,14 +6,15 @@ pub(crate) mod resource_objectives;
 pub(crate) mod unit_objectives;
 
 use crate::content::objective_cards;
+use crate::game::GameOptions;
 use crate::objective_card::Objective;
 use itertools::Itertools;
 
 #[must_use]
-pub(crate) fn get_all_uncached() -> Vec<Objective> {
-    let mut all = objective_cards::get_all_uncached()
+pub(crate) fn get_all_uncached(options: &GameOptions) -> Vec<Objective> {
+    let mut all = objective_cards::get_all_uncached(options)
         .into_iter()
-        .flat_map(|card| card.objectives.map(|o| (o.name.clone(), o)))
+        .flat_map(|card| card.objectives.into_iter().map(|o| (o.name.clone(), o)))
         .collect_vec();
     all.sort_by_key(|(name, _)| name.clone());
     all.dedup_by_key(|(name, _)| name.clone());

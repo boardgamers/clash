@@ -1,0 +1,10 @@
+{
+  "label": "Variant",
+  "type": "select",
+  "name": "variant",
+  "default": "Standard",
+  "items": [
+    { "name": "Standard", "label": "Standard" },
+    { "name": "Builder", "label": "Builder — no military attacks between players" }
+  ]
+}

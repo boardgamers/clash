@@ -93,6 +93,22 @@ pub struct GameOptions {
     pub patch: PatchOption,
     #[serde(default, skip_serializing_if = "GameLength::is_default")]
     pub length: GameLength,
+    #[serde(default, skip_serializing_if = "GameVariant::is_default")]
+    pub variant: GameVariant,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
+pub enum GameVariant {
+    #[default]
+    Standard,
+    Builder,
+}
+
+impl GameVariant {
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &Self::Standard
+    }
 }
 
 impl GameOptions {
@@ -352,6 +368,13 @@ impl Game {
                 && (!player.get_units(position).is_empty()
                     || player.try_get_city(position).is_some())
         })
+    }
+
+    #[must_use]
+    pub fn can_attack_player(&self, attacker: usize, defender: usize) -> bool {
+        self.options.variant != GameVariant::Builder
+            || !self.player(attacker).is_human()
+            || !self.player(defender).is_human()
     }
 
     pub fn add_info_log_item(&mut self, info: &str) {

@@ -104,14 +104,14 @@ impl Cache {
                 .map(|action_card| (action_card.id, action_card))
                 .collect(),
 
-            all_objective_cards: objective_cards::get_all_uncached(),
-            objective_cards_by_id: objective_cards::get_all_uncached()
+            all_objective_cards: objective_cards::get_all_uncached(options),
+            objective_cards_by_id: objective_cards::get_all_uncached(options)
                 .into_iter()
                 .map(|objective_card| (objective_card.id, objective_card))
                 .collect(),
 
-            all_objectives: objectives::get_all_uncached(),
-            objectives_by_name: objectives::get_all_uncached()
+            all_objectives: objectives::get_all_uncached(options),
+            objectives_by_name: objectives::get_all_uncached(options)
                 .into_iter()
                 .map(|objective| (objective.name.clone(), objective))
                 .collect(),

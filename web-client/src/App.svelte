@@ -515,7 +515,7 @@
         onclick={() => controller.commands.openBoardgame()}
         aria-label="About Clash of Cultures"
         ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
-          >{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {ageLabel(
+          >{#if $session.game?.options?.variant === 'Builder'}Builder · {/if}{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {ageLabel(
               $session.playback?.frame?.age ?? $session.game?.age ?? 1,
             )} · {($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
               ? 'End of age'
@@ -1309,7 +1309,12 @@
         ><X size={20} /></button
       >
       <h2>How to play</h2>
-      <p class="guide-intro">Score the most points over six ages.</p>
+      <p class="guide-intro">Score the most points over {ageCount($session.game)} ages.</p>
+      {#if $session.game?.options?.variant === 'Builder'}
+        <p class="guide-intro"><strong>Builder:</strong> You cannot attack another player's units or cities. Barbarians
+          and pirates remain, and Cultural Influence is allowed. Objectives requiring battles
+          against other players are removed; their cards keep any remaining objective.</p>
+      {/if}
       <div class="guide-grid">
         <article>
           <Trophy />
@@ -1319,7 +1324,7 @@
             wonders, events and captured leaders.
           </p>
           <p>
-            The game ends after Age VI’s objective checks. It also ends at an earlier age’s objective checks
+            The game ends after Age {ageLabel(ageCount($session.game))}’s objective checks. It also ends at an earlier age’s objective checks
             if any player has no cities. Compare total scores in either case; there is no fixed score target.
           </p>
           <p>

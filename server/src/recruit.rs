@@ -328,6 +328,14 @@ fn recruit_cost_options(
     if units.ships > 0 && city.pieces.port.is_none() {
         return Err("Mising building: port".to_string());
     }
+    if units.ships > 0
+        && city
+            .port_position
+            .and_then(|port| game.enemy_player(player.index, port))
+            .is_some_and(|defender| !game.can_attack_player(player.index, defender))
+    {
+        return Err("Builder: you cannot recruit ships into another player's fleet".into());
+    }
 
     for (t, a) in units.clone() {
         let avail = player.unit_limit().get_amount(&t);

@@ -16,6 +16,7 @@ pub(crate) fn conqueror() -> Objective {
         name,
         "Immediately after capturing another player's city defended by at least 1 army unit or a Fortress.",
     )
+    .requires_player_combat()
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         1,
@@ -120,6 +121,7 @@ pub(crate) fn defiance() -> Objective {
         name,
         "You won a battle against a human player despite having fewer units than them.",
     )
+    .requires_player_combat()
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         5,
@@ -146,6 +148,7 @@ pub(crate) fn naval_assault() -> Objective {
         name,
         "Immediately after capturing another player's city with your army disembarking from a ship.",
     )
+    .requires_player_combat()
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         6,
@@ -236,6 +239,7 @@ pub(crate) fn scavenger() -> Objective {
         name,
         "You killed a settler or ship that could have been used for Trade Routes.",
     )
+    .requires_player_combat()
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         9,
@@ -354,6 +358,7 @@ pub(crate) fn great_commander() -> Objective {
 pub(crate) fn brutus() -> Objective {
     let name = "Brutus";
     Objective::builder(name, "You killed a leader and 2 army units in a battle.")
+        .requires_player_combat()
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_end,
             14,

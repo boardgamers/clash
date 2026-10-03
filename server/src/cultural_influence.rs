@@ -792,6 +792,9 @@ pub(crate) fn unit_influence_cost(
     {
         return Err("No matching unit available".into());
     }
+    if !game.can_attack_player(player, owner.index) && owner.get_units(unit.position).len() > 1 {
+        return Err("Builder: this conversion would start a battle with another player".into());
+    }
     let dummy_city = City::new(target.player, unit.position);
     let (start, boost) = affordable_start_position(
         game,

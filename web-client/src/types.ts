@@ -64,7 +64,7 @@ export interface Playback {
   animate: boolean;
 }
 export interface Game {
-  options?: { length?: 'Standard' | 'Epic' };
+  options?: { length?: 'Standard' | 'Epic'; variant?: 'Standard' | 'Builder' };
   permanent_effects?: unknown[];
   board_history?: { id: string; frames: BoardFrame[] };
   state: unknown;
