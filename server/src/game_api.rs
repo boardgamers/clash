@@ -62,12 +62,13 @@ pub fn log_length(game: &Game) -> usize {
 
 #[must_use]
 pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Action> {
-    let l = linear_action_log(game);
-    match options.end {
-        Some(end) => &l[options.start..=end],
-        None => &l[options.start..],
-    }
-    .to_vec()
+    let log = linear_action_log(game);
+    // BGS requests the post-move delta using the pre-move length, which can be
+    // beyond the end after undo. Only return entries still in the active log.
+    let end = options
+        .end
+        .map_or(log.len(), |end| end.saturating_add(1).min(log.len()));
+    log.get(options.start..end).unwrap_or_default().to_vec()
 }
 
 #[must_use]

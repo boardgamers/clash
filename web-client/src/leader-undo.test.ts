@@ -33,7 +33,11 @@ test('recruiting and undoing Pakal restores resources, recruitment and construct
   );
   const recruited = engine.tryMove(raw, JSON.stringify(quote.action), seat);
   assert(view(recruited).players[seat].leaders.some((leader: { id: string }) => leader.id === 'Pakal'));
+  const logCursor = engine.logLength(recruited);
   const undone = engine.tryMove(recruited, JSON.stringify('Undo'), seat);
+  // BGS requests the move response's journal delta after persisting the undo.
+  assert(engine.logLength(undone) < logCursor);
+  assert.deepEqual(engine.logSlice(undone, { start: logCursor, player: seat }), []);
   assert.deepEqual(JSON.parse(undone).players[seat].resources, game.players[seat].resources);
   assert.deepEqual(view(undone).cityActions, before.cityActions);
   assert.equal(view(undone).players[seat].leaders.length, 0);
