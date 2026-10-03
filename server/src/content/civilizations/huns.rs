@@ -64,6 +64,23 @@ pub(crate) fn city_destinations(
     from: Position,
     units: &[u32],
 ) -> Vec<Position> {
+    if !game.events.is_empty() {
+        return vec![];
+    }
+    city_move_routes(game, p, from, units)
+}
+
+pub(crate) fn has_city_moves_left(game: &Game, p: &Player) -> bool {
+    let moving_from = p.event_info.get("Nomads moving");
+    p.cities.iter().any(|city| {
+        // Exploration temporarily blocks input, not the other cities' remaining moves.
+        // The city still at its origin during that choice has already used its move.
+        moving_from.is_none_or(|from| *from != city.position.to_string())
+            && !city_move_routes(game, p, city.position, &[]).is_empty()
+    })
+}
+
+fn city_move_routes(game: &Game, p: &Player, from: Position, units: &[u32]) -> Vec<Position> {
     let Some(city) = p.try_get_city(from) else {
         return vec![];
     };
@@ -72,7 +89,6 @@ pub(crate) fn city_destinations(
         || city.mood_state == MoodState::Angry
         || !city.can_activate()
         || city.nomad_mountain
-        || !game.events.is_empty()
     {
         return vec![];
     }

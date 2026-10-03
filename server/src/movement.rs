@@ -383,10 +383,7 @@ fn has_any_moves_left(game: &mut Game) -> bool {
             return true;
         }
 
-        p.cities.iter().any(|c| {
-            !crate::content::civilizations::huns::city_destinations(game, p, c.position, &[])
-                .is_empty()
-        }) || p.units.iter().any(|unit| {
+        crate::content::civilizations::huns::has_city_moves_left(game, p) || p.units.iter().any(|unit| {
             let result = possible_move_routes(p, game, &[unit.id], unit.position, None);
             result.is_ok_and(|r| !r.is_empty()) || can_embark(game, p, unit)
         })
