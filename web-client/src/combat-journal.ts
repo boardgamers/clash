@@ -12,6 +12,7 @@ export interface CombatSide {
   dice?: CombatDie[];
   value?: number;
   hits?: number;
+  cancelledHits?: { before: number; reasons: string[] };
   modifiers: string[];
   tactics?: string;
 }
@@ -21,6 +22,26 @@ export interface CombatRound {
   defender: CombatSide;
   result?: string;
   outcomes: JournalEntry[];
+}
+
+const cancelsHits = (text: string) =>
+  /\b(?:cancels?|cancelled|canceled|ignores?|ignored|blocks?|blocked) (?:one|a|\d+|the first) hits?\b/i.test(
+    text,
+  );
+
+function explainCancelledHits(side: CombatSide, opponent: CombatSide) {
+  if (side.value === undefined || side.hits === undefined || !opponent.units) return;
+  const reasons = [
+    ...(opponent.dice
+      ?.filter((die) => die.effect === '-1 hits, no combat value')
+      .map(() => 'Elephant blocks 1 hit') ?? []),
+    ...opponent.modifiers.filter(cancelsHits),
+  ];
+  const fighters = opponent.units.reduce((n, unit) => n + (unit.type === 'Settler' ? 0 : unit.count), 0);
+  const before = Math.min(Math.floor(side.value / 5), fighters);
+  // The logged hit count already includes these cancellations. Explain the reduction;
+  // never subtract it again or mistake the enemy unit cap for a cancelled hit.
+  if (reasons.length && before > side.hits) side.cancelledHits = { before, reasons };
 }
 
 function unitCounts(text: string): NonNullable<CombatSide['units']> {
@@ -179,14 +200,18 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
       // Only move known roll modifiers into the table; keep other effects below.
       const remainder: string[] = [];
       for (const clause of clauses) {
-        if (/combat value|extra die|(?:cancelled|ignored) (?:one |a |\d+ )?hit/i.test(clause))
-          target.modifiers.push(clause);
+        if (/combat value|extra die/i.test(clause) || cancelsHits(clause)) target.modifiers.push(clause);
         else remainder.push(clause);
       }
       text = remainder.join(', ');
     }
     if (entry.tokens.length || text) current!.combat!.outcomes.push({ ...entry, notes: text ? [text] : [] });
     latest();
+  }
+  for (const entry of output) {
+    if (!entry.combat) continue;
+    explainCancelledHits(entry.combat.attacker, entry.combat.defender);
+    explainCancelledHits(entry.combat.defender, entry.combat.attacker);
   }
   return output;
 }

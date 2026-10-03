@@ -112,6 +112,10 @@
 .combat-hits td {
   font-size: 15px;
 }
+.combat-hits s {
+  margin-right: 5px;
+  color: var(--muted);
+}
 .combat-result {
   margin: 9px 0;
   font-size: 12px;

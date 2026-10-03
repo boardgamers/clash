@@ -73,7 +73,14 @@
         >{/each}</tr
     >
     <tr class="combat-hits"
-      ><th scope="row">Hits dealt</th>{#each sides as side}<td><b>{side.hits ?? '—'}</b></td>{/each}</tr
+      ><th scope="row">Hits dealt</th>{#each sides as side}<td
+          title={side.cancelledHits?.reasons.join(' · ')}
+          aria-label={side.cancelledHits
+            ? `${side.cancelledHits.before} before cancellation; ${side.hits} hits dealt. ${side.cancelledHits.reasons.join('. ')}`
+            : undefined}
+          >{#if side.cancelledHits}<s aria-hidden="true">{side.cancelledHits.before}</s>
+          {/if}<b>{side.hits ?? '—'}</b></td
+        >{/each}</tr
     >
   </tbody>
 </table>

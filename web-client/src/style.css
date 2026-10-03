@@ -3468,7 +3468,7 @@ small {
   margin-left: auto;
   white-space: nowrap;
 }
-.world-labels.collecting :is(.city-map-label, .unit-map-label) {
+.world-labels.collecting :is(.city-map-label:not(.collection-city), .unit-map-label) {
   display: none !important;
 }
 
@@ -5479,7 +5479,7 @@ small {
     padding-top: 3px;
   }
 }
-.world-labels.collecting .strategy-map-tile {
+.world-labels.collecting .strategy-map-tile:not(.collection-city) {
   opacity: 0.25;
   pointer-events: none;
 }

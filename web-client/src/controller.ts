@@ -654,7 +654,9 @@ export class Controller {
       return;
     }
     if (s.mode === 'collect') {
-      this.selectCollectionTile(position);
+      if (position !== s.city && s.view?.cities.some((city) => city.position === position))
+        this.switchCollectionCity(position);
+      else this.selectCollectionTile(position);
       return;
     }
     if (s.mode === 'settlers' && s.landingTargets?.includes(position)) {

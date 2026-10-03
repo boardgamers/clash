@@ -36,8 +36,44 @@ test('unfinished combat compares both armies and uses engine hits, including the
   assert.equal(combat.attacker.hits, 2); // Capped by two defending fighters, not floor(26/5).
   assert.equal(combat.defender.value, 14);
   assert.equal(combat.defender.hits, 2);
+  assert.equal(combat.attacker.cancelledHits, undefined, 'The enemy unit cap is not a cancelled hit');
   assert.equal(combat.result, undefined);
   assert.equal(JSON.stringify(entries), snapshot);
+});
+
+test('Sun Shield shows the original enemy hit beside the already-cancelled result', () => {
+  const game = fixture('remove_casualties_attacker.outcome');
+  game.log![0].rounds[0].turns[0].actions = [
+    {
+      log: [
+        'Combat round 1',
+        'Player1: Combat: Attacking with 1 infantry',
+        'Player2: Combat: Defending with Pakal',
+        'Player1: Combat: Roll 5 (infantry, +1 combat value) for combined combat value of 6 and gets 0 hits against defending units',
+        'Player2: Combat: Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units, Combat modifiers: Sun Shield cancels 1 hit',
+        'Defender wins',
+      ],
+    },
+  ];
+  game.log_index = 1;
+  const entries = journal(game),
+    original = JSON.stringify(entries);
+  const [combat] = rounds(entries);
+  assert.equal(combat.attacker.hits, 0, 'Keep the authoritative result; do not apply Sun Shield twice');
+  assert.deepEqual(combat.attacker.cancelledHits, { before: 1, reasons: ['Sun Shield cancels 1 hit'] });
+  assert.equal(combat.defender.hits, 1, 'Maya still deals its hit');
+  assert.equal(combat.defender.cancelledHits, undefined);
+  assert.deepEqual(combat.defender.modifiers, ['Sun Shield cancels 1 hit']);
+  assert.equal(JSON.stringify(entries), original);
+
+  game.log![0].rounds[0].turns[0].actions[0].log = game.log![0].rounds[0].turns[0].actions[0].log!.filter(
+    (line) => !line.includes('Defending with'),
+  );
+  assert.equal(
+    rounds(journal(game))[0].attacker.cancelledHits,
+    undefined,
+    'Unknown unit caps are not guessed',
+  );
 });
 
 test('rosters, tactics and rolls combine across payment prompts without treating captures as modifiers', () => {

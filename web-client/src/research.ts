@@ -149,7 +149,7 @@ const advances = {
   ],
   Medicine: [
     HeartPulse,
-    'After each Recruit action, recover 1 resource you paid. You must afford the full cost first.',
+    'After each Recruit action, recover 1 resource you paid (not mood or culture tokens). You must afford the full cost first.',
   ],
   Metallurgy: [
     Anvil,

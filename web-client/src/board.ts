@@ -900,7 +900,10 @@ export class World {
       : s.view?.decision
         ? new Set(decisionPositions)
         : s.mode === 'collect'
-          ? new Set(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
+          ? new Set([
+              ...(s.view?.cities.map((c) => c.position) ?? []),
+              ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? []),
+            ])
           : s.mode === 'settlers'
             ? new Set([
                 ...(s.view?.units?.map((u) => u.position) ?? []),
@@ -1572,6 +1575,13 @@ export class World {
     this.labelHost.classList.toggle('hide-unit-badges', !s.unitBadges);
     this.labelHost.classList.toggle('choosing-pieces', pieceDecision || s.mode === 'settlers');
     for (const label of this.labelPositions) {
+      label.node.classList.toggle(
+        'collection-city',
+        s.mode === 'collect' &&
+          (label.kind === 'city' || label.kind === 'strategy') &&
+          label.position !== s.city &&
+          !!s.view?.cities.some((city) => city.position === label.position),
+      );
       if (label.kind !== 'collection')
         label.node.classList.toggle(
           'selected',

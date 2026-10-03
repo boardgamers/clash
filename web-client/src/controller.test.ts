@@ -415,6 +415,44 @@ test('changing collection action keeps selected tiles and requotes the submitted
   }
 });
 
+test('clicking another owned city on the map switches collection without spending an action', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(fixture('advances/collect_free_economy'), 0));
+    c.beginCollect('A1');
+    const free = app.session().view!.collectActions!.find((a) => a.name === 'Free Economy')!;
+    c.switchCollectVariant(free.value);
+    c.selectTile('B1');
+    assert.ok(app.session().preview?.action);
+    assert.ok(!app.session().view!.cities[0].choices.some((choice) => choice.position === 'C2'));
+    c.patch({ collectionTile: 'B1' });
+    c.selectTile('C2', { kind: 'city', player: 0 });
+    assert.equal(app.session().mode, 'collect');
+    assert.equal(app.session().city, 'C2');
+    assert.equal(app.session().focus, 'C2');
+    assert.equal(app.session().tilePanel, false);
+    assert.deepEqual(app.session().collectVariant, free.value);
+    assert.deepEqual(app.session().selection, []);
+    assert.equal(app.session().preview, null);
+    assert.equal(app.session().collectionTile, null);
+    c.selectTile('B2');
+    assert.ok(app.session().preview?.action, 'The newly selected city supplies the collection choices');
+    c.selectTile('C1', { kind: 'city', player: 1 });
+    assert.equal(app.session().city, 'C2', 'An opponent city cannot become the collecting city');
+    c.patch({ pending: true });
+    c.selectTile('A1');
+    assert.equal(app.session().city, 'C2', 'Pending actions block city switching');
+    c.patch({ pending: false });
+    c.selectTile('A1');
+    assert.equal(app.session().city, 'A1', 'Clicking the city hex also switches collection');
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
 test('Sports chooses only an eligible map city and does not spend an action until confirmed', async () => {
   const { groupAbilities } = await import('./abilities.ts');
   const app = paymentController(),
