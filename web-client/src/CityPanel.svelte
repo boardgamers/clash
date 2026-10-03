@@ -232,6 +232,7 @@
             $session.recruits[info.key] ?? 0}
           {@const standard = item.basePayment ?? item.payment}
           {@const differentCost = !sameRecruitPayment(standard, item.payment)}
+          {@const usesDraft = item.costOptions?.includes('Draft') && (item.payment.mood_tokens ?? 0) > 0}
           {@const costOptions = recruitCostOptions(item.costOptions, item.payment, standard)}
           <article class="recruit-row" class:selected={amount > 0} aria-label={item.type}>
             <div class="recruit-unit-title"><info.icon size={20} /><strong>{item.type}</strong></div>
@@ -253,9 +254,13 @@
             </div>
             <p class="recruit-effect">{info.effect}</p>
             <div class="recruit-prices">
-              <span class="recruit-current-cost">For 1 <ResourceAmount pile={item.payment} /></span>
+              <span class="recruit-current-cost"
+                >{usesDraft ? 'Draft · 1 infantry only' : 'For 1'}
+                <ResourceAmount pile={item.payment} /></span
+              >
               {#if differentCost}<span class="recruit-standard-cost"
-                  >Standard <ResourceAmount pile={standard} /></span
+                  >{usesDraft ? 'Normal cost per infantry' : 'Standard'}
+                  <ResourceAmount pile={standard} /></span
                 >{/if}
             </div>
             {#if costOptions}<p class="recruit-cost-options">Options: {costOptions}</p>{/if}

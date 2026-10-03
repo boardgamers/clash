@@ -61,7 +61,7 @@ export function recruitCostOptions(sources: string[] = [], payment: Pile, standa
     source === 'Sanitation'
       ? 'Sanitation: 1 settler per recruitment'
       : source === 'Draft'
-        ? 'Draft: 1 infantry per recruitment'
+        ? 'Draft: mood tokens pay for only 1 infantry per Recruit action. Additional infantry use normal costs.'
         : source,
   );
   if ((payment.gold ?? 0) > (standard.gold ?? 0)) notes.push('Gold can replace resources');
