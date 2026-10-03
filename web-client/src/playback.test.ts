@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { recapStart, lastOpponentTurn, frameAt, frameEffects, frameDetails } from './playback.ts';
-import type { BoardFrame, Game } from './types.ts';
+import type { BoardFrame, Game, LoggedAction } from './types.ts';
 const frames = [
   { cursor: 10, actor: 0, ended_turn: true },
   { cursor: 11, actor: 1 },
@@ -199,4 +199,89 @@ test('recap details name construction and collected amounts without exposing coo
     frameDetails(before, { ...after, title: 'Collect' }, game).caption,
     'Greece · collected 2 food, 1 wood',
   );
+});
+
+test('older recaps name the public civilization ability, including free leader actions', () => {
+  const before = {
+    cursor: 1,
+    actor: 0,
+    title: 'End turn',
+    tiles: [],
+    players: [{ id: 1, civilization: 'Carthage', units: [], cities: [] }],
+  } as unknown as BoardFrame;
+  const after = { ...before, cursor: 2, actor: 1, title: 'Civilization ability' };
+  for (const [id, name, start] of [
+    ['Hegemony', 'Hegemony', 'Pay 1 action, Start action, Choose a Ship'],
+    ['Founder', 'Founder', 'Start action'],
+    ['HegemonyFounder', 'Founder', 'Start action in city D2'],
+  ]) {
+    const action: LoggedAction = {
+      action: { Playing: { Custom: { action: id, city: 'D2' } } },
+      log: [`Player2: ${name}: ${start}`],
+    };
+    const game = {
+      log_index: 3,
+      log: [
+        {
+          age: 1,
+          rounds: [
+            {
+              round: 1,
+              turns: [
+                {
+                  turn_type: { Player: 1 },
+                  actions: [
+                    { ...action, log: ['Player2: Previous ability: Start action'] },
+                    action,
+                    { ...action, log: ['Player2: Later ability: Start action'] },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as Game;
+    assert.equal(frameDetails(before, after, game).caption, `Carthage · ${name}`);
+    assert.equal(
+      frameDetails(before, after, { ...game, log_index: 1 }).caption,
+      'Carthage · Civilization ability',
+      'undone entries are excluded',
+    );
+    assert.equal(
+      frameDetails(before, { ...after, title: 'Navigator' }, game).caption,
+      'Carthage · Navigator',
+      'new recordings keep their authoritative ability name',
+    );
+  }
+});
+
+test('legacy ability captions fall back safely when the start entry is unavailable', () => {
+  const before = { cursor: 0, tiles: [], players: [] } as unknown as BoardFrame;
+  const after = { ...before, cursor: 1, title: 'Civilization ability' };
+  const game = {
+    log_index: 1,
+    log: [
+      {
+        age: 1,
+        rounds: [
+          {
+            round: 1,
+            turns: [
+              {
+                turn_type: { Player: 0 },
+                actions: [
+                  {
+                    action: { Playing: { Custom: { action: 'Hegemony' } } },
+                    log: ['Player1: Secret card title: Drew a card'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as unknown as Game;
+  assert.equal(frameDetails(before, after, game).caption, 'Civilization ability');
 });

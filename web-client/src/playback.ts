@@ -101,10 +101,25 @@ export function frameDetails(
   // Read only the public log interval for this frame, never the current player's hand
   // or later turns. This also enriches recordings made before detailed captions existed.
   if (before && game) {
-    const items = activeHistory(game)
+    const actions = activeHistory(game)
       .flatMap((age) => age.rounds.flatMap((round) => round.turns.flatMap((turn) => turn.actions ?? [])))
-      .slice(before.cursor, frame.cursor)
-      .flatMap((action) => action.items ?? []);
+      .slice(before.cursor, frame.cursor);
+    const items = actions.flatMap((action) => action.items ?? []);
+    if (frame.title === 'Civilization ability') {
+      // Older frames kept a generic title. The public start entry already names
+      // the advance or leader ability, including free actions with no cost item.
+      for (const action of actions) {
+        const playing = typeof action.action === 'object' && action.action?.Playing;
+        if (!playing || typeof playing !== 'object' || !('Custom' in playing)) continue;
+        const name = action.log
+          ?.map((line) => line.match(/: ([^:]+): (?:.*?, )?Start action(?: in city [A-Z]\d+)?(?:,|$)/)?.[1])
+          .find(Boolean);
+        if (name) {
+          description = name;
+          break;
+        }
+      }
+    }
     const details: string[] = [];
     const readable = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2');
     for (const player of frame.players) {

@@ -135,7 +135,13 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
     }
     let undo = matches!(action, Action::Undo);
     let ended_turn = matches!(action, Action::Playing(PlayingAction::EndTurn));
-    let label = if matches!(action, Action::Response(_)) {
+    let label = if let Action::Playing(PlayingAction::Custom(custom)) = &action {
+        game.player(player)
+            .custom_actions
+            .get(&custom.action)
+            .map(|info| info.event_origin.name(&game))
+            .unwrap_or_else(|| title(&action))
+    } else if matches!(action, Action::Response(_)) {
         game.events
             .last()
             .and_then(|event| event.player.handler.as_ref())

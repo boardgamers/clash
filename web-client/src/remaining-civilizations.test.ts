@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
+import { frameDetails } from './playback.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const serialize = (g: any) => (typeof g === 'string' ? g : JSON.stringify(g));
 const seat = (g: any) => engine.currentPlayer(serialize(g));
@@ -1044,6 +1045,18 @@ test('Hegemony uses a ship to found a city and lets its passengers disembark', a
     g,
     view(g).specialActions.find((a: any) => a.id === 'Hegemony' || a.name === 'Hegemony').action,
   );
+  assert.equal(after.board_history.frames.at(-1).title, 'Hegemony');
+  assert.equal(
+    JSON.parse(engine.stripSecret(serialize(after), 1 - index)).board_history.frames.at(-1).title,
+    'Hegemony',
+  );
+  const publicGame = JSON.parse(engine.stripSecret(serialize(after), 1 - index));
+  const frames = publicGame.board_history.frames;
+  assert.equal(
+    frameDetails(frames.at(-2), { ...frames.at(-1), title: 'Civilization ability' }, publicGame).caption,
+    'Carthage · Hegemony',
+    'existing recordings use the ability name from the public journal',
+  );
   if (view(after).choiceDecision?.description.includes('new city'))
     after = move(after, { Response: { SelectPositions: ['E3'] } });
   assert.match((view(after).decision ?? view(after).choiceDecision).description, /passengers/);
@@ -1063,12 +1076,14 @@ test('Dido can found a city at zero actions and Hanno can sail once for free', a
   )[0];
   for (const u of p.units) u.position = destination;
   const after = move(g, view(g).specialActions.find((a: any) => a.name === 'Founder').action);
+  assert.equal(after.board_history.frames.at(-1).title, 'Founder');
   assert.equal(after.actions_left, 0);
   assert.equal(after.players[index].cities.length, 2);
   const sea = await carthageSea('Hanno'),
     sp = sea.players[seat(sea)];
   sea.players.find((p: any) => p.civilization === 'Pirates').units = [];
   let sailing = move(sea, view(sea).specialActions.find((a: any) => a.name === 'Navigator').action);
+  assert.equal(sailing.board_history.frames.at(-1).title, 'Navigator');
   sailing = move(
     sailing,
     query(sailing, { kind: 'movement', units: [0] }).destinations.find((d: any) => d.position === 'D4')
