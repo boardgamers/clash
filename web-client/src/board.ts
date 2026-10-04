@@ -26,7 +26,6 @@ import StrategyMapTile from './StrategyMapTile.svelte';
 import { CivilizationFlags } from './civilization-flags';
 import { TileTooltip } from './tile-hover';
 import { strategyHome, strategyFrame } from './strategy-camera';
-import ExhaustedTerrain from './ExhaustedTerrain.svelte';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -139,7 +138,7 @@ export class World {
     position: string;
     at: THREE.Vector3;
     node: HTMLButtonElement;
-    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy' | 'terrain';
+    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy';
     offsetX?: number;
     offsetY?: number;
     ownershipBounds?: THREE.Vector3[];
@@ -1025,25 +1024,6 @@ export class World {
             line.position.set(i * 0.25, 0.03, i * 0.25);
             line.rotation.y = Math.PI / 4;
             terrainGroup.add(line);
-          }
-          if (!s.strategyMap) {
-            const compact = cityPositions.has(position) || unitPositions.has(position);
-            const node = document.createElement('button');
-            node.className = 'exhausted-map-tile';
-            node.dataset.position = position;
-            node.setAttribute('aria-label', terrainInfo(terrain).label);
-            node.onclick = () => {
-              if (this.canPick(position)) this.pick(position);
-            };
-            this.bindTileHover(node, position);
-            this.unitBadges.push(mount(ExhaustedTerrain, { target: node, props: { terrain, compact } }));
-            this.labelHost.append(node);
-            this.labelPositions.push({
-              position,
-              at: new THREE.Vector3(x + (compact ? 0.55 : 0), 0.5, z + (compact ? 0.3 : 0)),
-              node,
-              kind: 'terrain',
-            });
           }
         }
         // Keep the foreground clear for pieces instead of burying them in trees/peaks.
