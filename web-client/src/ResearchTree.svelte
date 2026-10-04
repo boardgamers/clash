@@ -315,6 +315,7 @@
             researchPresentation(advance)}{@const Icon = presentation.icon}{@const parent = advances.find(
             (a) => a.id === advance.required,
           )}
+          {@const warnsEvent = !reference && !!advance.triggersEvent}
           <article
             id={`research-${advance.id}`}
             class="research-node"
@@ -328,6 +329,7 @@
               class="research-pick"
               aria-label={`${advance.name}: ${presentation.summary}`}
               aria-pressed={selected?.id === advance.id}
+              aria-describedby={warnsEvent ? `research-${advance.id}-event` : undefined}
               title={advance.description}
               onclick={() => selectAdvance(advance.id)}
             >
@@ -385,13 +387,20 @@
                     {/each}
                   {/if}
                 </span><span class="research-availability"
-                  >{#if advance.action}Available{:else if !choice && parent && !parent.owned}
+                  >{#if advance.action}{#if !warnsEvent}<span>Available</span
+                      >{/if}{:else if !choice && parent && !parent.owned}
                     <button
                       class="research-advance-link"
                       title={`View ${parent.name}`}
                       onclick={() => showAdvance(parent.id)}>Needs {parent.name}</button
                     >
-                  {:else if !lockedGovernment}{actionReason(advance.reason)}{/if}</span
+                  {:else if !lockedGovernment}<span>{actionReason(advance.reason)}</span>{/if}
+                  {#if warnsEvent}<span
+                      id={`research-${advance.id}-event`}
+                      class="research-event-warning"
+                      title="Uses your last event marker. The event resolves after research bonuses and choices."
+                      ><ScrollText size={12} aria-hidden="true" />Triggers an event</span
+                    >{/if}</span
                 >{/if}
             </div>
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}

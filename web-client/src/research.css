@@ -282,8 +282,19 @@
 }
 .research-node-cost .research-availability {
   margin-left: auto;
+  flex-direction: column;
+  align-items: flex-end;
   color: var(--muted);
   text-align: right;
+}
+.research-event-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #855016;
+}
+.dark .research-event-warning {
+  color: var(--gold);
 }
 .available .research-availability {
   color: #456c3f;

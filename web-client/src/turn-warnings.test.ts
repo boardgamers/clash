@@ -99,7 +99,7 @@ test('Prosperity can use uncapped mood tokens instead of overflowing resources',
   assert.equal(view(g).endTurnTradeWarning, null);
 });
 
-test('research warns only when a selectable advance uses the last event marker', () => {
+test('research warns when a selectable advance uses the last event marker', () => {
   const g = fixture('advances/writing');
   for (const remaining of [3, 2, 1]) {
     g.players[0].incident_tokens = remaining;
@@ -112,6 +112,22 @@ test('research warns only when a selectable advance uses the last event marker',
   assert.ok(farming.action);
   const after = move(g, farming.action);
   assert.equal(after.players[0].incident_tokens, 3);
+});
+
+test('unaffordable research still explains that it would use the last event marker', () => {
+  const g = fixture('advances/writing');
+  g.players[0].resources = {};
+  g.players[0].incident_tokens = 1;
+  const advances = view(g).advances;
+  const unaffordable = advances.filter((a) => a.reason === 'Not enough resources');
+  assert.ok(unaffordable.length);
+  for (const advance of unaffordable) {
+    assert.equal(advance.action, null, 'the warning never enables research');
+    assert.equal(advance.triggersEvent, true, advance.name);
+  }
+  assert.ok(advances.filter((a) => a.owned).every((a) => !a.triggersEvent));
+  g.players[0].incident_tokens = 2;
+  assert.ok(view(g).advances.every((a) => !a.triggersEvent));
 });
 
 test('card advances and Great Library do not warn even with one marker left', () => {
