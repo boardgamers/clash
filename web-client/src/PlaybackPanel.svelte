@@ -2,6 +2,7 @@
   import { Play, Pause, ChevronLeft, ChevronRight, History, RotateCcw, X } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { frameDetails } from './playback';
+  import BattlePlayback from './BattlePlayback.svelte';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   const playback = $derived($session.playback);
@@ -21,6 +22,7 @@
 
 {#if playback}
   <section class="playback-bar floating-panel" aria-label="Board replay">
+    {#if $session.battles?.length}<BattlePlayback {controller} />{/if}
     <div class="playback-description" aria-live="polite">
       <strong
         ><History size={16} />{playback.range === 'catch-up'

@@ -163,14 +163,14 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
       ? units[1] === 'Attacking'
         ? 'attacker'
         : 'defender'
-      : roll
-        ? roll[4] === 'defending'
-          ? 'attacker'
-          : 'defender'
-        : current?.combat?.attacker.player === entry.player
-          ? 'attacker'
-          : current?.combat?.defender.player === entry.player
-            ? 'defender'
+      : current?.combat?.attacker.player === entry.player
+        ? 'attacker'
+        : current?.combat?.defender.player === entry.player
+          ? 'defender'
+          : roll
+            ? roll[4] === 'defending'
+              ? 'attacker'
+              : 'defender'
             : null;
     if (!role) {
       output.push(entry);

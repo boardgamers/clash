@@ -7,6 +7,8 @@ export class CombatOverlay {
   readonly group = new THREE.Group();
   readonly position = new THREE.Vector3();
   private signature = '';
+  private animation = 0;
+  private finish: (() => void) | null = null;
   private material = new THREE.MeshBasicMaterial({
     color: '#ffdb8a',
     depthTest: false,
@@ -50,11 +52,51 @@ export class CombatOverlay {
       object.renderOrder = 8;
     });
   }
+  /** A single expanding impact wave, with no camera shake or flashing. */
+  pulse(invalidate: () => void) {
+    this.finish?.();
+    if (!this.signature) return;
+    const material = new THREE.MeshBasicMaterial({
+      color: '#ffd98a',
+      transparent: true,
+      opacity: 0.8,
+      depthTest: false,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const wave = new THREE.Mesh(new THREE.RingGeometry(0.45, 0.52, 48), material);
+    wave.rotation.x = -Math.PI / 2;
+    wave.position.copy(this.position).add(new THREE.Vector3(0, 0.08, 0));
+    wave.renderOrder = 9;
+    this.group.add(wave);
+    const start = performance.now();
+    this.finish = () => {
+      cancelAnimationFrame(this.animation);
+      this.group.remove(wave);
+      wave.geometry.dispose();
+      material.dispose();
+      this.finish = null;
+      invalidate();
+    };
+    const tick = () => {
+      const t = Math.min(1, (performance.now() - start) / 1350);
+      wave.scale.setScalar(0.3 + t * 3.4);
+      material.opacity = (1 - t) * 0.8;
+      invalidate();
+      if (t < 1) this.animation = requestAnimationFrame(tick);
+      else this.finish?.();
+    };
+    tick();
+  }
   private clear() {
+    this.finish?.();
     this.group.traverse((object) => {
       if (object instanceof THREE.Mesh) object.geometry.dispose();
     });
     this.group.clear();
+  }
+  stopAnimation() {
+    this.finish?.();
   }
   dispose() {
     this.clear();

@@ -49,6 +49,7 @@ export class World {
   private combatLabel: HTMLDivElement;
   private combatLabelText: Text;
   private combatIcon: ReturnType<typeof mount>;
+  private battleKey = '';
   private seaGuide = false;
   private seaPreviewAllowed = false;
   private seaRouteStart: string | null = null;
@@ -757,6 +758,7 @@ export class World {
   update(s: Session) {
     if (!s.game) return;
     const playback = s.playback;
+    const battle = s.battles?.[0];
     const replayPositions =
       playback && playback.index > playback.start
         ? frameDetails(s.game.board_history?.frames[playback.index - 1], playback.frame).positions
@@ -811,7 +813,7 @@ export class World {
     const pieceDecision = mapChoices.some((o) => o.mapTarget);
     this.decisionPositions = decisionPositions;
     const ability = activeCityAbility(s);
-    const combat = activeCombat(s.game);
+    const combat = battle?.location ?? (playback ? (playback.frame?.combat ?? null) : activeCombat(s.game));
     const exploration = s.view?.explorationDecision;
     this.explorationPositions = exploration?.choices[0]?.tiles.map(([p]) => p) ?? explorationPreview(s);
     this.explorationOverlay.update(this.explorationPositions);
@@ -877,9 +879,22 @@ export class World {
     this.seaRouteStart = s.seaRouteStart;
     this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? []);
     this.combatOverlay.update(combat);
+    if (s.reducedMotion || !battle) this.combatOverlay.stopAnimation();
+    if (battle?.key !== this.battleKey) {
+      this.battleKey = battle?.key ?? '';
+      if (battle && combat && s.battleAnimate && !s.reducedMotion)
+        this.combatOverlay.pulse(() => this.invalidate());
+      if (battle?.location && playback && !s.reducedMotion) {
+        const [x, z] = positionXY(battle.location.defender.position);
+        const target = new THREE.Vector3(x, 0, z);
+        this.camera.position.add(target.clone().sub(this.controls.target));
+        this.controls.target.copy(target);
+        this.controls.update();
+      }
+    }
     this.combatLabel.hidden = !combat;
     if (combat) {
-      this.combatLabelText.textContent = `Battle · ${combat.defender.position}`;
+      this.combatLabelText.textContent = battle?.combat.result ?? `Battle · Round ${combat.round}`;
       this.combatLabel.setAttribute(
         'aria-label',
         `${s.game.players[combat.attacker.player]?.civilization ?? 'Attacker'} attacks ${s.game.players[combat.defender.player]?.civilization ?? 'defender'} · ${combat.attacker.position} to ${combat.defender.position} · Round ${combat.round}`,

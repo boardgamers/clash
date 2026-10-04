@@ -658,3 +658,120 @@ test('replay postpones automatic razing skip until returning to the game', async
     app.close();
   }
 });
+
+test('Redo restores an undone collection, remains private to the active seat, and clears on a different move', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    let raw = fixture('advances/collect_free_economy');
+    c.setPlayer(0);
+    const action = {
+      Playing: {
+        Collect: {
+          city_position: 'C2',
+          collections: [{ position: 'B1', pile: { ore: 1 }, times: 1 }],
+          action_type: 'Collect',
+        },
+      },
+    };
+    raw = engine.tryMove(raw, JSON.stringify(action), 0);
+    const collected = JSON.parse(raw);
+    raw = engine.tryMove(raw, JSON.stringify('Undo'), 0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().view!.canRedo, true);
+    assert.equal(JSON.parse(engine.webView(engine.stripSecret(raw, 1), 1)).canRedo, false);
+    c.submit('Redo');
+    assert.equal(app.sent.at(-1), '"Redo"');
+    raw = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().view!.canRedo, false);
+    assert.deepEqual(JSON.parse(raw).players[0].resources, collected.players[0].resources);
+    assert.equal(JSON.parse(raw).board_history.frames.at(-1).title, 'Collect');
+    assert.equal(app.session().view!.canUndo, true);
+    raw = engine.tryMove(raw, JSON.stringify('Undo'), 0);
+    raw = engine.tryMove(
+      raw,
+      JSON.stringify({ Playing: { Advance: { advance: 'Storage', payment: { food: 1, ideas: 1 } } } }),
+      0,
+    );
+    assert.equal(JSON.parse(engine.webView(engine.stripSecret(raw, 0), 0)).canRedo, false);
+  } finally {
+    app.close();
+  }
+});
+
+test('battle playback queues rounds, slows autoplay, keeps manual results and cancels on seek or skip', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('combat/retreat_no.outcome1'));
+    const base = {
+      actor: 0,
+      ended_turn: false,
+      title: 'Battle',
+      age: 1,
+      round: 1,
+      tiles: game.map.tiles,
+      players: game.players,
+    };
+    game.board_history = {
+      id: 'battle-controller',
+      frames: [0, 1, 2].map((cursor) => ({ ...base, cursor })),
+    };
+    c.patch({ game, seat: 0 });
+    c.startPlayback();
+    c.stepPlayback(1);
+    assert.equal(app.session().battles![0].combat.round, 1);
+    assert.equal(app.session().battleAnimate, true);
+    t.mock.timers.tick(10000);
+    assert.equal(app.session().battles!.length, 1, 'manual result remains readable');
+    assert.equal(app.session().playback!.index, 1);
+    c.togglePlayback();
+    t.mock.timers.tick(3000);
+    assert.equal(app.session().playback!.index, 1, 'battle gets longer than the ordinary 2.5 seconds');
+    t.mock.timers.tick(2000);
+    assert.equal(app.session().playback!.index, 2);
+    assert.equal(app.session().battles![0].combat.result, 'Greece wins');
+    c.stepPlayback(-1);
+    assert.equal(app.session().battleAnimate, false, 'Back inspects without reroll animation');
+    assert.equal(app.session().battles![0].combat.result, undefined, 'no future result');
+    c.patch({ reducedMotion: true });
+    c.stepPlayback(1);
+    assert.equal(app.session().battleAnimate, false);
+    c.endPlayback();
+    assert.deepEqual(app.session().battles, []);
+    t.mock.timers.tick(20000);
+    assert.deepEqual(app.session().battles, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('the first battle recorded in an older game animates live and stores only public battlefield metadata', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    let raw = fixture('combat/ship_combat');
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().battles?.length ?? 0, 0);
+    const expected = JSON.parse(fixture('combat/ship_combat.outcome'));
+    const action = expected.log[0].rounds[0].turns[0].actions[0].action;
+    raw = engine.tryMove(raw, JSON.stringify(action), 0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().battles!.length, 1);
+    assert.equal(app.session().battles![0].combat.attacker.value, 12);
+    const combat = JSON.parse(raw).board_history.frames.at(-1).combat;
+    assert.deepEqual(combat, {
+      round: 1,
+      attacker: { player: 0, position: 'C3' },
+      defender: { player: 1, position: 'D2' },
+    });
+    assert.deepEqual(JSON.parse(engine.stripSecret(raw, 1)).board_history.frames.at(-1).combat, combat);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().battles!.length, 1, 'refresh must not enqueue the battle twice');
+  } finally {
+    app.close();
+  }
+});

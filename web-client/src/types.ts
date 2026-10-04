@@ -42,6 +42,7 @@ export interface PublicEffect {
   key?: string;
 }
 export interface BoardFrame {
+  combat?: import('./active-combat').ActiveCombat;
   cursor: number;
   actor: number | null;
   ended_turn: boolean;
@@ -300,6 +301,7 @@ export interface View {
     skip: Move | null;
   } | null;
   canUndo: boolean;
+  canRedo?: boolean;
   canEndTurn: boolean;
 }
 export interface CollectionPreview {
@@ -448,6 +450,8 @@ export interface Session {
   analysis?: boolean;
   playback?: Playback | null;
   publicEffects?: PublicEffect[];
+  battles?: import('./battle-playback').BattleCue[];
+  battleAnimate?: boolean;
   automaticPayment?: boolean;
   decisionSelection: number[];
   decisionPosition?: string | null;

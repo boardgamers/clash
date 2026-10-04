@@ -1,5 +1,6 @@
 <script lang="ts">
   import PlaybackPanel from './PlaybackPanel.svelte';
+  import BattlePlayback from './BattlePlayback.svelte';
   import PublicEffects from './PublicEffects.svelte';
   import EventMarkers from './EventMarkers.svelte';
   import CivilizationPicker from './CivilizationPicker.svelte';
@@ -33,6 +34,7 @@
     ChevronRight,
     Hourglass,
     Undo2,
+    Redo2,
     GraduationCap,
     Target,
     MapPin,
@@ -792,7 +794,7 @@
           >{/each}
       </div>
     </section>
-    <div class="board-toolbar" aria-label="Game controls">
+    <div class="board-toolbar" class:has-redo={$session.view?.canRedo} aria-label="Game controls">
       <div class="turn-banner">
         <span class="turn-light"></span><strong>{actionTitle}</strong
         >{#if !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.playback?.frame?.round ?? $session.game?.round ?? 1) <= 3}<span
@@ -884,6 +886,12 @@
           disabled={!$session.view?.canUndo || $session.pending}
           onclick={() => controller.submit('Undo')}><Undo2 size={19} /><span>Undo</span></button
         >
+        {#if $session.view?.canRedo}<button
+            title="Redo last undone action"
+            aria-label="Redo last undone action"
+            disabled={$session.pending}
+            onclick={() => controller.submit('Redo')}><Redo2 size={19} /><span>Redo</span></button
+          >{/if}
         <button
           class:active={confirmEnd}
           class:end-turn-ready={readyToEnd}
@@ -1248,6 +1256,9 @@
         use:chatPanel
       ></div>
     </section>
+    {#if !$session.playback && $session.battles?.length}<div class="live-battle floating-panel">
+        <BattlePlayback {controller} />
+      </div>{/if}
   </main>
   {#if !$session.playback && $session.mode === 'research'}<ResearchTree {controller} />{/if}
   {#if !$session.playback && $session.mode === 'city'}<CityPanel {controller} />{/if}

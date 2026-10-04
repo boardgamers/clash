@@ -25,6 +25,8 @@ impl BoardHistory {
 }
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct BoardFrame {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub combat: Option<BoardCombat>,
     pub cursor: usize,
     pub actor: Option<usize>,
     pub ended_turn: bool,
@@ -35,6 +37,42 @@ pub struct BoardFrame {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub effects: Vec<BoardEffect>,
     pub players: Vec<BoardPlayer>,
+}
+// Only public battlefield locations; never pending tactics or hidden event data.
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub struct BoardCombat {
+    pub round: u32,
+    pub attacker: BoardCombatSide,
+    pub defender: BoardCombatSide,
+}
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub struct BoardCombatSide {
+    pub player: usize,
+    pub position: Position,
+}
+fn board_combat(game: &Game) -> Option<BoardCombat> {
+    use crate::content::persistent_events::PersistentEventType;
+    for event in game.events.iter().rev() {
+        let stats = match &event.event_type {
+            PersistentEventType::CombatStart(c) => &c.stats,
+            PersistentEventType::CombatRoundStart(r) => &r.combat.stats,
+            PersistentEventType::CombatRoundEnd(r) => &r.combat.stats,
+            PersistentEventType::CombatEnd(_) => return None,
+            _ => continue,
+        };
+        return Some(BoardCombat {
+            round: stats.round,
+            attacker: BoardCombatSide {
+                player: stats.attacker.player,
+                position: stats.attacker.position,
+            },
+            defender: BoardCombatSide {
+                player: stats.defender.player,
+                position: stats.defender.position,
+            },
+        });
+    }
+    None
 }
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct BoardEffect {
@@ -51,6 +89,7 @@ pub struct BoardPlayer {
 }
 fn snapshot(game: &Game, actor: Option<usize>, title: String, ended_turn: bool) -> BoardFrame {
     BoardFrame {
+        combat: board_combat(game),
         effects: vec![],
         cursor: log_length(game),
         actor,
@@ -134,16 +173,24 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
         history.frames.push(before);
     }
     let undo = matches!(action, Action::Undo);
-    let ended_turn = matches!(action, Action::Playing(PlayingAction::EndTurn));
-    let label = if let Action::Playing(PlayingAction::Custom(custom)) = &action {
+    let recorded = if matches!(action, Action::Redo) {
+        crate::log::current_turn_log(&game)
+            .actions
+            .get(game.log_index)
+            .map_or(&action, |a| &a.action)
+    } else {
+        &action
+    };
+    let ended_turn = matches!(recorded, Action::Playing(PlayingAction::EndTurn));
+    let label = if let Action::Playing(PlayingAction::Custom(custom)) = recorded {
         game.player(player)
             .special_actions
             .get(&crate::content::custom_actions::SpecialAction::Custom(
                 custom.action,
             ))
             .map(|info| info.event_origin.name(&game))
-            .unwrap_or_else(|| title(&action))
-    } else if matches!(action, Action::Response(_)) {
+            .unwrap_or_else(|| title(recorded))
+    } else if matches!(recorded, Action::Response(_)) {
         game.events
             .last()
             .and_then(|event| event.player.handler.as_ref())
@@ -157,9 +204,9 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
                 )
             })
             .map(|handler| handler.origin.name(&game))
-            .unwrap_or_else(|| title(&action))
+            .unwrap_or_else(|| title(recorded))
     } else {
-        title(&action)
+        title(recorded)
     };
     let mut next = try_execute_action(game, action, player)?;
     // Simultaneous setup belongs to everyone, regardless of who locked in last.

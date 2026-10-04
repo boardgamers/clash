@@ -11,6 +11,7 @@ import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
 import { recapStart, lastOpponentTurn, frameAt, frameEffects } from './playback';
+import { battleCues, battleCursor, BATTLE_DURATION, type BattleCue } from './battle-playback';
 import { contextualCards, type CardContext } from './contextual-cards';
 import {
   researchDecision,
@@ -92,6 +93,7 @@ export class Controller {
   private destroyed = false;
   private playbackTimer: ReturnType<typeof setTimeout> | undefined;
   private effectTimer: ReturnType<typeof setTimeout> | undefined;
+  private battleTimer: ReturnType<typeof setTimeout> | undefined;
   private chatOff: () => void;
   constructor(
     readonly commands: ViewerCommands<string> & { clearReplayInfo?: () => void },
@@ -405,6 +407,7 @@ export class Controller {
       if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback(false);
       else {
         const index = frameAt(frames, s.playback.frame?.cursor ?? 0);
+        if (frames[index]?.cursor !== s.playback.frame?.cursor) this.showBattles([]);
         const previous = old.game?.board_history?.frames ?? [];
         const start = frameAt(frames, previous[s.playback.start]?.cursor ?? frames[0].cursor);
         const end =
@@ -427,7 +430,14 @@ export class Controller {
         this.startPlayback(true, start);
         return;
       }
-    } else if (old.game.board_history?.id === game.board_history?.id) {
+    } else if (!old.game.board_history?.id || old.game.board_history?.id === game.board_history?.id) {
+      const before = battleCursor(old.game);
+      const after = battleCursor(game);
+      if (after < before) this.showBattles([]);
+      else {
+        const battles = battleCues(game, before, after, s.view);
+        if (battles.length) this.showBattles([...(s.battles ?? []), ...battles]);
+      }
       const effects = frameEffects(game, old.game.board_history?.frames.at(-1)?.cursor ?? 0).filter(
         (e) => e.kind === 'completed' || e.kind === 'action' || e.player !== s.seat,
       );
@@ -435,7 +445,7 @@ export class Controller {
         this.patch({ publicEffects: [...(s.publicEffects ?? []), ...effects] });
         this.scheduleEffect();
       }
-    }
+    } else this.showBattles([]);
     this.markSeen();
   }
   replayLastTurn() {
@@ -455,6 +465,7 @@ export class Controller {
     clearTimeout(this.playbackTimer);
     const frames = s.game.board_history?.frames ?? [];
     this.dismissEffects(true);
+    this.showBattles([]);
     this.patch({
       playback: {
         frame: frames[index] ?? null,
@@ -517,6 +528,9 @@ export class Controller {
     if (!p || !frames.length) return;
     index = Math.max(p.start, Math.min(index, p.end));
     this.dismissEffects(true);
+    const battles =
+      index > p.start ? battleCues(s.game!, frames[index - 1].cursor, frames[index].cursor, s.view) : [];
+    this.showBattles(battles, index === p.index + 1);
     this.patch({
       playback: {
         ...p,
@@ -555,7 +569,11 @@ export class Controller {
     const s = get(this.session),
       p = s.playback;
     if (!p?.playing || p.index >= p.end) return;
-    const duration = Math.max(2500, (p.frame?.effects?.length ?? 0) * 1800);
+    const duration = Math.max(
+      2500,
+      (p.frame?.effects?.length ?? 0) * 1800,
+      (s.battles?.length ?? 0) * BATTLE_DURATION + 500,
+    );
     this.playbackTimer = setTimeout(() => {
       const p = get(this.session).playback;
       if (p?.playing) this.showPlaybackFrame(p.index + 1, true);
@@ -567,6 +585,7 @@ export class Controller {
       p = s.playback;
     if (p) {
       this.dismissEffects(true);
+      this.showBattles([]);
       this.patch({ playback: null });
       this.commands.clearReplayInfo?.();
       this.markSeen(s.game?.board_history?.frames[p.end]?.cursor);
@@ -579,6 +598,23 @@ export class Controller {
       this.effectTimer = undefined;
       this.dismissEffects();
     }, 1400);
+  }
+  private showBattles(battles: BattleCue[], animate = true) {
+    clearTimeout(this.battleTimer);
+    this.patch({ battles, battleAnimate: animate && !get(this.session).reducedMotion });
+    this.scheduleBattle();
+  }
+  private scheduleBattle() {
+    if (!get(this.session).battles?.length) return;
+    this.battleTimer = setTimeout(() => {
+      const s = get(this.session);
+      if (s.playback && s.battles?.length === 1) return; // Keep the result readable when stepping manually.
+      this.patch({ battles: s.battles?.slice(1) ?? [] });
+      this.scheduleBattle();
+    }, BATTLE_DURATION);
+  }
+  dismissBattles() {
+    this.showBattles([]);
   }
   dismissEffects(all = false) {
     clearTimeout(this.effectTimer);
@@ -1117,6 +1153,7 @@ export class Controller {
     this.timer = setTimeout(() => this.patch({ toast: '' }), 4000);
   }
   destroy() {
+    clearTimeout(this.battleTimer);
     this.destroyed = true;
     clearTimeout(this.playbackTimer);
     clearTimeout(this.effectTimer);
