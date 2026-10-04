@@ -115,7 +115,7 @@ pub(crate) fn japan() -> Civilization {
                     p.get_mut(game).event_info.insert("Pottery".into(),"used".into());p.gain_resources(game,ResourcePile::culture_tokens(1));
                 }
             }).build(),
-        SpecialAdvanceInfo::builder(SpecialAdvance::Horsemanship,SpecialAdvanceRequirement::Advance(Advance::Husbandry),"Horsemanship","You may recruit Cavalry in your cities with a Fortress without a Market. In round 1 when defending a Fortress, one of your Cavalry die abilities adds +3 combat value instead of +2.").build(),
+        SpecialAdvanceInfo::builder(SpecialAdvance::Horsemanship,SpecialAdvanceRequirement::Advance(Advance::Husbandry),"Horsemanship","You may recruit Cavalry in your cities with a Fortress without a Market. In round 1 when defending a Fortress, one of your Cavalry dice-symbol abilities adds +3 combat value instead of +2.").build(),
         SpecialAdvanceInfo::builder(SpecialAdvance::Subterfuge,SpecialAdvanceRequirement::Advance(Advance::Tactics),"Subterfuge","Discard an action card to cancel another player's non-combat action card when their units or cities are within 2 spaces of your cities or armies. The cancelled card is discarded; its costs are not paid.")
             .add_hand_card_request(|e|&mut e.declare_action_card,10,|game,p,a|{
                 if a.cancelled||a.player==p.index||!near_opponent(game,p.get(game),a.player)||p.get(game).action_cards.is_empty(){return None;}

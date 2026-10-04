@@ -128,7 +128,7 @@ pub(crate) fn high_ground(id: u8) -> TacticsCard {
     TacticsCard::builder(
         id,
         "High Ground",
-        "Unless you attack a city: Your opponent can't use combat abilities.",
+        "Unless you attack a city: Your opponent can't use dice-symbol abilities this round.",
     )
     .location_requirement(CombatLocation::Land)
     .checker(|player, game, combat| {
@@ -137,7 +137,7 @@ pub(crate) fn high_ground(id: u8) -> TacticsCard {
     .target(TacticsCardTarget::Opponent)
     .add_reveal_listener(4, |_player, _game, _combat, s| {
         s.roll_log
-            .push("High Ground prevents opponent from using combat abilities".to_string());
+            .push("High Ground prevents opponent from using dice-symbol abilities".to_string());
         s.deny_combat_abilities = true;
     })
     .build()
@@ -168,7 +168,7 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
         id,
         "Siege",
         "Gain 1 to your combat value. \
-            Your opponent can't use combat abilities unless they pay 2 food.",
+            Your opponent can't use dice-symbol abilities this round unless they pay 2 food.",
     )
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Attacker)
@@ -187,7 +187,7 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
                 if p.can_afford(&cost) {
                     return Some(vec![PaymentRequest::optional(
                         cost,
-                        "Pay 2 food to use combat abilities this round",
+                        "Pay 2 food to use dice-symbol abilities this round",
                     )]);
                 }
                 apply_siege(game, s, player.index);
@@ -199,7 +199,7 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
             if pile.is_empty() {
                 apply_siege(game, r, s.player_index);
             } else {
-                s.log(game, "Can use combat abilities this round");
+                s.log(game, "Can use dice-symbol abilities this round");
             }
         },
     )
@@ -213,7 +213,7 @@ fn apply_siege(game: &mut Game, r: &mut CombatRoundStart, player: usize) {
         r,
         |_game, _combat, s: &mut CombatStrength, _role| {
             s.roll_log
-                .push("Siege prevents opponent from using combat abilities".to_string());
+                .push("Siege prevents opponent from using dice-symbol abilities".to_string());
             s.deny_combat_abilities = true;
         },
     );

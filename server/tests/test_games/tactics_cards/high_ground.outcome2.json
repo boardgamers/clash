@@ -355,7 +355,7 @@
                         "hits": 1,
                         "combat_modifiers": [
                           "Peltasts rolls a 6 and ignored a hit",
-                          "High Ground prevents opponent from using combat abilities"
+                          "High Ground prevents opponent from using dice-symbol abilities"
                         ]
                       },
                       "origin": {

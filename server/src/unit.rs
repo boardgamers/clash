@@ -272,19 +272,19 @@ impl UnitType {
             Settler => "A unit that can found cities.".to_string(),
             Ship => "Can fight ships. Can carry 2 land units.".to_string(),
             Infantry => format!(
-                "Army unit. Combat abilities: +1 combat values on {}",
+                "Army unit. Dice-symbol ability: +1 combat value on {}",
                 Self::sides(Infantry)
             ),
             Cavalry => format!(
-                "Army unit. Combat abilities: +2 combat values on {}",
+                "Army unit. Dice-symbol ability: +2 combat value on {}",
                 Self::sides(Cavalry)
             ),
             Elephant => format!(
-                "Army unit. Combat abilities: -1 hit but no combat value on {}",
+                "Army unit. Dice-symbol ability: -1 hit but no combat value on {}",
                 Self::sides(Elephant)
             ),
             Leader(_) => format!(
-                "Army unit. Combat abilities: Reroll the die until you get a \
+                "Army unit. Dice-symbol ability: Reroll the die until you get a \
              non-leader roll on {}",
                 Self::sides(unit::LEADER_UNIT)
             ),

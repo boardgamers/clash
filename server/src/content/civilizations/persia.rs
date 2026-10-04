@@ -61,10 +61,10 @@ fn darius() -> LeaderInfo {
 }
 fn xerxes() -> LeaderInfo {
     LeaderInfo::new(Leader::Xerxes, "Xerxes",
-        LeaderAbility::builder("Mighty Army", "Xerxes' space can hold 5 army units. While his army has 5 units, it cannot play tactics cards or use die combat abilities.")
+        LeaderAbility::builder("Mighty Army", "Xerxes' space can hold 5 army units. While his army has 5 units, it cannot play tactics cards or use dice-symbol abilities.")
             .add_simple_persistent_event_listener(|e| &mut e.combat_round_start_allow_tactics, 100, |game,p,r| {
                 if r.combat.has_leader(r.combat.role(p.index),game) && r.combat.fighting_units(game,p.index).len() == 5 {
-                    update_combat_strength(game,p.index,r,|_,_,s,_| { s.deny_tactics_card=true; s.deny_combat_abilities=true; s.roll_log.push("Mighty Army: five units, no tactics or die abilities".into()); });
+                    update_combat_strength(game,p.index,r,|_,_,s,_| { s.deny_tactics_card=true; s.deny_combat_abilities=true; s.roll_log.push("Mighty Army: five units, no tactics or dice-symbol abilities".into()); });
                 }
             }).build(),
         LeaderAbility::builder("Great Builder", "Wonders in Xerxes' city cost 2 fewer resources or culture tokens, in any mix.")

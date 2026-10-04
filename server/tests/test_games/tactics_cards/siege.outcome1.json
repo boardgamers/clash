@@ -340,7 +340,7 @@
                         "combat_value": 12,
                         "hits": 1,
                         "combat_modifiers": [
-                          "Siege prevents opponent from using combat abilities"
+                          "Siege prevents opponent from using dice-symbol abilities"
                         ]
                       },
                       "origin": {
