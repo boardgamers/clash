@@ -10,7 +10,12 @@
 </script>
 
 {#if offers.length || active}
-  <div class="contextual-cards" role="group" aria-label="Useful action cards">
+  <div
+    class="contextual-cards"
+    class:after-battle-cards={context === 'after-battle'}
+    role="group"
+    aria-label={context === 'after-battle' ? 'Cards available after battle' : 'Useful action cards'}
+  >
     {#if active}<span class="contextual-card-active"><Check size={14} />{active}</span>{/if}
     {#each offers as { card, benefit } (card.id)}
       <button
@@ -19,7 +24,9 @@
         title={`${card.description}\nDiscard this card after use.${card.tactics ? ` Also gives up ${card.tactics.name}, its battle effect.` : ''}`}
         onclick={() => controller.playContextualCard(card.id, context)}
       >
-        <Layers size={14} /><span>Play {card.name}</span><strong>{benefit}</strong>
+        <Layers size={14} /><span>{context === 'after-battle' ? card.name : `Play ${card.name}`}</span><strong
+          >{benefit}</strong
+        >
         {#if offers.filter((o) => o.card.name === card.name).length > 1 && card.tactics}
           <small>({card.tactics.name})</small>
         {/if}

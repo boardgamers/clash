@@ -203,6 +203,125 @@ test('research card shortcut keeps the card’s advance choice instead of return
   }
 });
 
+async function victoriousDefender() {
+  const game = JSON.parse(await engine.init(2, [], {}, 'after-battle-cards', {}));
+  const seat = game.current_player_index;
+  const player = game.players[seat];
+  player.action_cards = [11, 5]; // Great Ideas and Hero General
+  player.resources.ideas = 0;
+  player.cities[0].mood_state = 'Neutral';
+  game.actions_left = 0; // Both are free actions, even after the last main action.
+  const turn = game.log.at(-1).rounds.at(-1).turns.at(-1);
+  const stats = {
+    round: 1,
+    battleground: 'Land',
+    attacker: { position: 'B2', player: 2, present: { infantry: 1 }, losses: { infantry: 1 } },
+    defender: { position: player.cities[0].position, player: seat, present: { infantry: 2 } },
+    result: 'DefenderWins',
+  };
+  turn.actions = [{ action: 'StartTurn', player: seat, combat_stats: stats }];
+  game.log_index = 1;
+  return { game, seat, stats, turn };
+}
+
+test('post-battle cards are suggested for a barbarian defensive victory and stay optional', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const { game, seat } = await victoriousDefender();
+    let raw = JSON.stringify(game);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    assert.deepEqual(
+      contextualCards(app.session().view, 'after-battle').map((o) => o.card.name),
+      ['Great Ideas', 'Hero General'],
+    );
+    assert.deepEqual(app.sent, [], 'a suggestion must not play or discard the card automatically');
+    c.playContextualCard(11, 'after-battle');
+    c.playContextualCard(11, 'after-battle');
+    assert.equal(app.sent.length, 1);
+    raw = engine.tryMove(raw, app.sent[0], seat);
+    await c.load(engine.stripSecret(raw, seat));
+    assert.equal(JSON.parse(raw).players[seat].resources.ideas, 2);
+    assert.equal(JSON.parse(raw).actions_left, 0);
+    assert.ok(!contextualCards(app.session().view, 'after-battle').some((o) => o.card.id === 11));
+  } finally {
+    app.close();
+  }
+});
+
+test('post-battle suggestions follow engine eligibility, turn timing and undo', async () => {
+  const original = await victoriousDefender();
+  const offers = (game: typeof original.game, seat: number | undefined = original.seat) =>
+    contextualCards(
+      JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(game), seat), seat)),
+      'after-battle',
+    );
+  for (const [label, mutate] of [
+    [
+      'loss',
+      (g: typeof original.game) => {
+        g.log.at(-1).rounds.at(-1).turns.at(-1).actions[0].combat_stats.result = 'AttackerWins';
+      },
+    ],
+    [
+      'draw',
+      (g: typeof original.game) => {
+        g.log.at(-1).rounds.at(-1).turns.at(-1).actions[0].combat_stats.result = 'Draw';
+      },
+    ],
+    [
+      'naval battle',
+      (g: typeof original.game) => {
+        g.log.at(-1).rounds.at(-1).turns.at(-1).actions[0].combat_stats.battleground = 'Sea';
+      },
+    ],
+    [
+      'unfinished Move action',
+      (g: typeof original.game) => {
+        g.state = { Movement: { movement_actions_left: 1 } };
+      },
+    ],
+    [
+      'undone battle',
+      (g: typeof original.game) => {
+        g.log_index = 0;
+      },
+    ],
+    [
+      'previous turn',
+      (g: typeof original.game) => {
+        g.log
+          .at(-1)
+          .rounds.at(-1)
+          .turns.push({ turn_type: { Player: original.seat } });
+        g.log_index = 0;
+      },
+    ],
+    [
+      'opponent’s turn',
+      (g: typeof original.game) => {
+        g.current_player_index = 1 - original.seat;
+      },
+    ],
+    [
+      'another player’s victory',
+      (g: typeof original.game) => {
+        g.log.at(-1).rounds.at(-1).turns.at(-1).actions[0].combat_stats.defender.player = 1 - original.seat;
+      },
+    ],
+  ] as const) {
+    const game = structuredClone(original.game);
+    mutate(game);
+    assert.deepEqual(offers(game), [], label);
+  }
+  const full = structuredClone(original.game);
+  full.players[original.seat].resources.ideas = full.players[original.seat].resource_limit.ideas;
+  assert.ok(!offers(full).some((o) => o.card.name === 'Great Ideas'), 'no suggestion at the ideas limit');
+  const spectator = JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(original.game))));
+  assert.deepEqual(contextualCards(spectator, 'after-battle'), []);
+});
+
 test('Free Economy pays the displayed fee once, with no second click or duplicate snapshot submission', async () => {
   const app = paymentController(),
     c = app.controller;

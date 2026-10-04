@@ -417,6 +417,7 @@ pub fn combat_requirement_met(
         .iter()
         .position(|a| {
             if let Some(stats) = &a.combat_stats
+                && (stats.attacker.player == player || stats.defender.player == player)
                 && requirement(stats, game.player(player))
                 && !stats.claimed_action_cards.contains(&sister_card)
             {

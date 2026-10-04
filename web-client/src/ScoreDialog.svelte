@@ -18,11 +18,12 @@
   import CivilizationAdvances from './CivilizationAdvances.svelte';
   import CityBuildings from './CityBuildings.svelte';
   import CityFacts from './CityFacts.svelte';
+  import LeaderDetails from './LeaderDetails.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import { civilizationAccent } from './civilization-theme';
   import { researchPresentation } from './research';
   import type { Controller } from './controller';
-  let { controller }: { controller: Controller } = $props();
+  let { controller, onLocate }: { controller: Controller; onLocate: (position: string) => void } = $props();
   const session = $derived(controller.session);
   let player = $derived($session.view?.players.find((p) => p.index === $session.scorePlayer));
   const publicPlayer = $derived($session.game?.players.find((p) => p.id === player?.index));
@@ -36,7 +37,7 @@
         .map((key) => [key, publicPlayer?.resources?.[key as keyof Pile] ?? 0]),
     ) as Pile,
   );
-  let tab = $state<'score' | 'advances' | 'cities'>('score');
+  let tab = $state<'score' | 'advances' | 'cities' | 'leaders'>('score');
   let advances = $derived(
     [...(player?.advances ?? [])].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
   );
@@ -107,6 +108,13 @@
       >
         <Landmark size={16} /> Cities <span>{player.cities.length}</span>
       </button>
+      <button
+        class:active={tab === 'leaders'}
+        aria-pressed={tab === 'leaders'}
+        onclick={() => (tab = 'leaders')}
+      >
+        <Crown size={16} /> Leaders <span>{player.leaders?.length ?? 0}</span>
+      </button>
     </nav>
     {#if tab === 'score'}
       <div class="score-summary">
@@ -150,6 +158,26 @@
               />{/if}
           </section>
         {:else}<p>No cities.</p>{/each}
+      </div>
+    {:else if tab === 'leaders'}
+      <div class="public-leaders">
+        {#each player.leaders ?? [] as leader (leader.id)}
+          <section aria-label={leader.name}>
+            <div class="public-leader-status">
+              <span>In play</span>
+              <button
+                class="secondary"
+                disabled={$session.pending}
+                aria-label={`Show ${leader.name} on the map`}
+                onclick={() => {
+                  close();
+                  onLocate(leader.position);
+                }}><MapPin size={15} />Show on map</button
+              >
+            </div>
+            <LeaderDetails {leader} />
+          </section>
+        {:else}<p class="muted">No leader in play.</p>{/each}
       </div>
     {:else}
       {#if player.civilizationAdvances.length}<CivilizationAdvances

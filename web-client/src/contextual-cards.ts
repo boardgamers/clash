@@ -1,6 +1,6 @@
 import type { ActionCard, Game, View } from './types';
 
-export type CardContext = 'collect' | 'research' | 'build' | 'recruit' | 'happiness';
+export type CardContext = 'collect' | 'research' | 'build' | 'recruit' | 'happiness' | 'after-battle';
 const suggestions: Record<string, { context: CardContext; benefit: string }> = {
   'Mass Production': { context: 'collect', benefit: '+2 tiles' },
   'Production Focus': { context: 'collect', benefit: 'Reuse tiles' },
@@ -21,7 +21,10 @@ export function contextualCards(view: View | null, context: CardContext) {
   if (!view?.canPlay) return [];
   return (view.actionCards ?? []).flatMap((card: ActionCard) => {
     const suggestion = suggestions[card.name];
-    return card.action && suggestion?.context === context ? [{ card, benefit: suggestion.benefit }] : [];
+    const matches =
+      suggestion?.context === context ||
+      (context === 'after-battle' && (card.name === 'Great Ideas' || card.name === 'Hero General'));
+    return card.action && suggestion && matches ? [{ card, benefit: suggestion.benefit }] : [];
   });
 }
 

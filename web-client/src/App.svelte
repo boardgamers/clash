@@ -961,6 +961,7 @@
           }}><Flag size={19} /><span>End turn</span></button
         >
       </nav>
+      {#if !$session.playback}<ContextualCards {controller} context="after-battle" />{/if}
     </div>
     <nav class="table-tools" aria-label="Table controls">
       {#if lastTurn && !$session.analysis}<button
@@ -1322,7 +1323,10 @@
     />
   {:else if !$session.playback && $session.mode === 'research'}<ResearchTree {controller} />{/if}
   {#if !$session.playback && $session.mode === 'city'}<CityPanel {controller} />{/if}
-  {#if $session.scorePlayer !== null}<ScoreDialog {controller} />{/if}
+  {#if $session.scorePlayer !== null}<ScoreDialog
+      {controller}
+      onLocate={(position) => world?.locateCoordinate(position)}
+    />{/if}
   {#if $session.wondersOpen && $session.seat !== undefined}<WondersDialog {controller} />{/if}
   {#if $session.cardsOpen && $session.seat !== undefined}<ActionCardsDialog {controller} />{/if}
   {#if !$session.playback}<CardReveal {controller} />{/if}

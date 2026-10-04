@@ -3407,6 +3407,7 @@ small {
 }
 .civilization-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin: 14px 0;
   border-bottom: 1px solid var(--line);
@@ -3422,6 +3423,25 @@ small {
 .civilization-tabs button.active {
   border-bottom-color: currentColor;
   background: var(--paper2);
+}
+.public-leaders {
+  display: grid;
+  gap: 16px;
+}
+.public-leader-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.public-leader-status button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  font-size: 12px;
 }
 .public-advances {
   display: grid;
@@ -5370,6 +5390,23 @@ small {
 }
 .research-dialog > .contextual-cards {
   margin: 0 1rem 0.4rem;
+}
+.board-toolbar > .after-battle-cards {
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 4px 6px 6px;
+  border-top: 1px solid var(--line);
+}
+.after-battle-cards .contextual-card {
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 11px;
+}
+.after-battle-cards .contextual-card > small {
+  color: var(--muted);
 }
 @media (max-width: 600px) {
   .contextual-cards .contextual-card {
