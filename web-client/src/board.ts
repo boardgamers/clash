@@ -25,6 +25,8 @@ import { strategyTiles, strategyDescription } from './strategy';
 import StrategyMapTile from './StrategyMapTile.svelte';
 import { CivilizationFlags } from './civilization-flags';
 import { TileTooltip } from './tile-hover';
+import { strategyHome, strategyFrame } from './strategy-camera';
+import ExhaustedTerrain from './ExhaustedTerrain.svelte';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -124,6 +126,9 @@ export class World {
   private disposed = false;
   private topDown = false;
   private strategyMap = false;
+  private strategySeat?: number;
+  private strategyHome?: string;
+  private strategyGame?: string;
   private boardInteraction = false;
   private decisionPositions: string[] = [];
   private materials = new Set<THREE.Material>();
@@ -134,7 +139,7 @@ export class World {
     position: string;
     at: THREE.Vector3;
     node: HTMLButtonElement;
-    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy';
+    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy' | 'terrain';
     offsetX?: number;
     offsetY?: number;
     ownershipBounds?: THREE.Vector3[];
@@ -482,7 +487,10 @@ export class World {
           .clone()
           .add(new THREE.Vector3(1.5, 0, 0))
           .project(this.camera);
-        const scale = label.kind === 'strategy' ? Math.min(1.4, (Math.abs(edge.x - v.x) * w) / 2 / 96) : 1;
+        const scale =
+          label.kind === 'strategy'
+            ? Math.min(1.4, Math.hypot((edge.x - v.x) * w, (edge.y - v.y) * h) / 2 / 96)
+            : 1;
         label.node.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px) scale(${scale})`;
         label.node.style.display = v.z > 1 || v.z < -1 ? 'none' : '';
         if (label.kind === 'strategy') label.node.style.visibility = 'visible';
@@ -546,7 +554,7 @@ export class World {
   }
   zoom(factor: number) {
     const direction = this.camera.position.clone().sub(this.controls.target);
-    direction.multiplyScalar(factor).clampLength(8, 55);
+    direction.multiplyScalar(factor).clampLength(this.controls.minDistance, this.controls.maxDistance);
     this.camera.position.copy(this.controls.target).add(direction);
     this.controls.update();
     this.invalidate();
@@ -563,6 +571,12 @@ export class World {
     this.controls.maxPolarAngle = this.topDown ? 0 : Math.PI * 0.43;
     this.controls.touches.ONE = this.topDown ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
     this.controls.mouseButtons.LEFT = this.topDown ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+    this.controls.maxDistance = 55;
+    this.camera.far = 120;
+    if (this.scene.fog instanceof THREE.Fog) {
+      this.scene.fog.near = 55;
+      this.scene.fog.far = 105;
+    }
     this.controls.target.copy(this.center);
     this.camera.position
       .copy(this.center)
@@ -578,12 +592,23 @@ export class World {
         ),
       );
     if (this.strategyMap && this.tiles.size) {
-      const points = [...this.tiles.keys()].map(positionXY);
-      const width = Math.max(...points.map((p) => p[0])) - Math.min(...points.map((p) => p[0])) + 2.8;
-      const height = Math.max(...points.map((p) => p[1])) - Math.min(...points.map((p) => p[1])) + 4;
-      const distance = Math.max(width / this.camera.aspect, height) / (2 * Math.tan(Math.PI / 10));
-      this.camera.position.copy(this.center).add(new THREE.Vector3(0, distance, 0.01));
+      const { angle, center, distance } = strategyFrame(
+        [...this.tiles.keys()],
+        this.strategyHome,
+        this.camera.aspect,
+      );
+      this.controls.maxDistance = Math.max(55, distance * 1.3);
+      this.camera.far = Math.max(120, this.controls.maxDistance + 20);
+      if (this.scene.fog instanceof THREE.Fog) {
+        this.scene.fog.near = this.controls.maxDistance + 10;
+        this.scene.fog.far = this.controls.maxDistance + 60;
+      }
+      this.controls.target.set(center[0], 0, center[1]);
+      this.camera.position
+        .copy(this.controls.target)
+        .add(new THREE.Vector3(Math.sin(angle) * 0.01, distance, Math.cos(angle) * 0.01));
     }
+    this.camera.updateProjectionMatrix();
     this.controls.update();
     this.invalidate();
   }
@@ -757,6 +782,17 @@ export class World {
   }
   update(s: Session) {
     if (!s.game) return;
+    // Keep the viewer's home orientation when replay temporarily clears the interactive seat.
+    const home = strategyHome(s.game, s.seat);
+    const orientationChanged =
+      this.strategySeat !== s.seat ||
+      this.strategyGame !== s.game.board_history?.id ||
+      (!this.strategyHome && !!home);
+    if (orientationChanged) {
+      this.strategySeat = s.seat;
+      this.strategyGame = s.game.board_history?.id;
+      this.strategyHome = home;
+    }
     const playback = s.playback;
     const battle = s.battles?.[0];
     const replayPositions =
@@ -960,12 +996,17 @@ export class World {
         this.center.set((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
       }
       for (const [position, terrain] of mapTiles) {
-        const kind = typeof terrain === 'string' ? terrain : 'Barren';
+        const exhausted = typeof terrain !== 'string';
+        const kind = exhausted ? terrain.Exhausted : terrain;
         const [x, z] = positionXY(position);
         const height = kind === 'Water' ? 0.13 : kind === 'Unexplored' ? 0.27 : 0.43;
         const group = new THREE.Group();
         group.position.set(x, height / 2 - 0.12, z);
-        const top = this.material(terrainColor[kind]);
+        const top = this.material(
+          exhausted
+            ? `#${new THREE.Color(terrainColor[kind]).lerp(new THREE.Color('#8d7c7c'), 0.6).getHexString()}`
+            : terrainColor[kind],
+        );
         const side = this.material(
           kind === 'Unexplored' ? '#4c7378' : kind === 'Water' ? '#4c8a91' : '#837655',
         );
@@ -976,8 +1017,37 @@ export class World {
         this.tiles.set(position, hex);
         const terrainGroup = new THREE.Group();
         terrainGroup.position.y = height / 2;
+        if (exhausted) {
+          // Hatching distinguishes depletion from barren ground without implying normal terrain restrictions.
+          const hatch = this.material('#5f5052');
+          for (let i = -1; i <= 1; i++) {
+            const line = this.mesh(new THREE.BoxGeometry(i === 0 ? 1.5 : 1.05, 0.016, 0.045), hatch);
+            line.position.set(i * 0.25, 0.03, i * 0.25);
+            line.rotation.y = Math.PI / 4;
+            terrainGroup.add(line);
+          }
+          if (!s.strategyMap) {
+            const compact = cityPositions.has(position) || unitPositions.has(position);
+            const node = document.createElement('button');
+            node.className = 'exhausted-map-tile';
+            node.dataset.position = position;
+            node.setAttribute('aria-label', terrainInfo(terrain).label);
+            node.onclick = () => {
+              if (this.canPick(position)) this.pick(position);
+            };
+            this.bindTileHover(node, position);
+            this.unitBadges.push(mount(ExhaustedTerrain, { target: node, props: { terrain, compact } }));
+            this.labelHost.append(node);
+            this.labelPositions.push({
+              position,
+              at: new THREE.Vector3(x + (compact ? 0.55 : 0), 0.5, z + (compact ? 0.3 : 0)),
+              node,
+              kind: 'terrain',
+            });
+          }
+        }
         // Keep the foreground clear for pieces instead of burying them in trees/peaks.
-        if (!s.strategyMap && !cityPositions.has(position)) {
+        if (!exhausted && !s.strategyMap && !cityPositions.has(position)) {
           this.addTerrain(terrainGroup, kind, position.charCodeAt(0));
           if (unitPositions.has(position) && (kind === 'Forest' || kind === 'Mountain')) {
             terrainGroup.scale.set(0.8, 0.65, 0.6);
@@ -1622,7 +1692,12 @@ export class World {
       }
       label.node.disabled = !this.canPick(label.position);
     }
-    if (s.topDown !== this.topDown || s.strategyMap !== this.strategyMap || guideChanged) {
+    if (
+      s.topDown !== this.topDown ||
+      s.strategyMap !== this.strategyMap ||
+      guideChanged ||
+      (s.strategyMap && orientationChanged)
+    ) {
       this.topDown = s.topDown;
       this.strategyMap = s.strategyMap;
       this.reset();

@@ -4235,9 +4235,6 @@ small {
   }
 }
 
-.board-interacting .player-list {
-  display: none;
-}
 .game-shell .action-panel.unit-decision .decision-heading {
   margin-bottom: 0;
 }
@@ -5403,6 +5400,33 @@ small {
 .strategy-terrain.important {
   opacity: 1;
   color: #162b29;
+}
+.exhausted-terrain {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 4px;
+  border: 1px dashed #786364;
+  border-radius: 4px;
+  background: #eee6df;
+  color: #503c3e;
+  font-size: 10px;
+  line-height: 1;
+}
+.exhausted-map-tile,
+.exhausted-map-tile:disabled {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  opacity: 1;
+}
+.exhausted-map-tile:focus-visible {
+  outline: 2px solid #fff3bd;
+  border-radius: 4px;
 }
 .strategy-owner {
   display: flex;

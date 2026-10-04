@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Swords, Ship, Footprints, Landmark, Shield, Skull } from 'lucide-svelte';
   import TerrainIcon from './TerrainIcon.svelte';
+  import ExhaustedTerrain from './ExhaustedTerrain.svelte';
   import { playerColor, playerSymbol } from './types';
   import type { StrategyTile } from './strategy';
   let {
@@ -11,12 +12,14 @@
   }: { tile: StrategyTile; colorBlind: boolean; playerColors: string[]; playerSymbols: string[] } = $props();
 </script>
 
-<span class="strategy-terrain" class:important={tile.terrain === 'Forest' || tile.terrain === 'Mountain'}
-  ><TerrainIcon
-    terrain={tile.terrain}
-    size={tile.terrain === 'Forest' || tile.terrain === 'Mountain' ? 30 : 18}
-  /></span
->
+{#if typeof tile.terrain !== 'string'}<ExhaustedTerrain terrain={tile.terrain} />{:else}
+  <span class="strategy-terrain" class:important={tile.terrain === 'Forest' || tile.terrain === 'Mountain'}
+    ><TerrainIcon
+      terrain={tile.terrain}
+      size={tile.terrain === 'Forest' || tile.terrain === 'Mountain' ? 30 : 18}
+    /></span
+  >
+{/if}
 {#each tile.occupants as occupant}
   <span class="strategy-owner" style={`--owner:${playerColor(occupant.player.id, colorBlind, playerColors)}`}>
     {#if colorBlind}<span class="strategy-symbol">{playerSymbol(occupant.player.id, playerSymbols)}</span
