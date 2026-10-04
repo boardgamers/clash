@@ -105,6 +105,10 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
+        self.find_payment(available, false)
+    }
+
+    fn find_payment(&self, available: &ResourcePile, exact: bool) -> Option<ResourcePile> {
         if !self.alternatives.is_empty() {
             let mut option = self.clone();
             option.alternatives.clear();
@@ -112,7 +116,7 @@ impl PaymentOptions {
                 .chain(self.alternatives.iter())
                 .find_map(|cost| {
                     option.default = cost.clone();
-                    option.first_valid_payment(available)
+                    option.find_payment(available, exact)
                 });
         }
         let discount_left = self
@@ -130,7 +134,13 @@ impl PaymentOptions {
                 }
             })
             .sum::<u8>();
-        if discount_left == 0 && available.has_at_least(&self.default) {
+        if discount_left == 0
+            && if exact {
+                available == &self.default
+            } else {
+                available.has_at_least(&self.default)
+            }
+        {
             return Some(self.default.clone());
         }
         let may_overpay = self.conversions.iter().any(|c| {
@@ -144,21 +154,23 @@ impl PaymentOptions {
             .iter()
             .permutations(self.conversions.len())
             .find_map(|conversions| {
-                can_convert(
+                find_conversion(
                     available,
                     &self.default,
                     &conversions,
                     0,
                     discount_left,
                     may_overpay,
+                    exact,
                 )
             })
     }
 
     #[must_use]
     pub fn is_valid_payment(&self, payment: &ResourcePile) -> bool {
-        self.first_valid_payment(payment)
-            .is_some_and(|p| &p == payment)
+        // An affordable subset is not necessarily the chosen payment. Keep
+        // searching when optional discounts or alternatives allow paying more.
+        self.find_payment(payment, true).is_some()
     }
 
     #[must_use]
@@ -401,7 +413,32 @@ pub fn can_convert(
     discount_left: u8,
     may_overpay: bool,
 ) -> Option<ResourcePile> {
-    if available.has_at_least(current) && (discount_left == 0 || may_overpay) {
+    find_conversion(
+        available,
+        current,
+        conversions,
+        skip_from,
+        discount_left,
+        may_overpay,
+        false,
+    )
+}
+
+fn find_conversion(
+    available: &ResourcePile,
+    current: &ResourcePile,
+    conversions: &[&PaymentConversion],
+    skip_from: usize,
+    discount_left: u8,
+    may_overpay: bool,
+    exact: bool,
+) -> Option<ResourcePile> {
+    if (if exact {
+        available == current
+    } else {
+        available.has_at_least(current)
+    }) && (discount_left == 0 || may_overpay)
+    {
         return Some(current.clone());
     }
 
@@ -410,13 +447,14 @@ pub fn can_convert(
     }
     let conversion = &conversions[0];
     if skip_from >= conversion.from.len() {
-        return can_convert(
+        return find_conversion(
             available,
             current,
             &conversions[1..],
             0,
             discount_left,
             may_overpay,
+            exact,
         );
     }
     let from = &conversion.from[skip_from];
@@ -430,13 +468,14 @@ pub fn can_convert(
         if !current.has_at_least_times(from, amount)
             || (conversion.to.is_empty() && amount > discount_left)
         {
-            return can_convert(
+            return find_conversion(
                 available,
                 current,
                 conversions,
                 skip_from + 1,
                 discount_left,
                 may_overpay,
+                exact,
             );
         }
 
@@ -451,13 +490,14 @@ pub fn can_convert(
             discount_left
         };
 
-        let can = can_convert(
+        let can = find_conversion(
             available,
             &current,
             conversions,
             skip_from + 1,
             new_discount_left,
             may_overpay,
+            exact,
         );
         if can.is_some() {
             return can;
@@ -497,6 +537,43 @@ pub(crate) fn base_resources() -> Vec<ResourcePile> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn optional_token_discount_accepts_every_exact_payment_in_the_range() {
+        use super::*;
+        let mut cost = payment_options_sum(
+            4,
+            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
+            check_event_origin(),
+        );
+        cost.conversions.push(PaymentConversion::resource_options(
+            vec![
+                ResourcePile::mood_tokens(1),
+                ResourcePile::culture_tokens(1),
+            ],
+            ResourcePile::empty(),
+            PaymentConversionType::MayOverpay(3),
+        ));
+        for mood in 0..=5 {
+            for culture in 0..=5 {
+                let payment =
+                    ResourcePile::mood_tokens(mood) + ResourcePile::culture_tokens(culture);
+                assert_eq!(
+                    cost.is_valid_payment(&payment),
+                    (1..=4).contains(&(mood + culture)),
+                    "{payment}"
+                );
+            }
+        }
+        assert!(!cost.is_valid_payment(&ResourcePile::gold(2)));
+        assert!(!cost.is_valid_payment(&(ResourcePile::culture_tokens(2) + ResourcePile::food(1))));
+        // Affordability may choose a cheaper valid subset. Explicit validation must
+        // still accept the full amount the player elected to spend for points.
+        assert_eq!(
+            cost.first_valid_payment(&ResourcePile::culture_tokens(2)),
+            Some(ResourcePile::culture_tokens(1))
+        );
+    }
+
     use super::*;
     use crate::events::check_event_origin;
 
@@ -807,6 +884,12 @@ mod tests {
         ];
         for test_case in test_cases {
             for (i, valid) in test_case.valid.iter().enumerate() {
+                assert!(
+                    test_case.options.is_valid_payment(valid),
+                    "{} valid {}",
+                    test_case.name,
+                    i
+                );
                 assert_eq!(
                     Some(valid.clone()),
                     test_case.options.first_valid_payment(valid),
@@ -816,6 +899,12 @@ mod tests {
                 );
             }
             for (i, invalid) in test_case.invalid.iter().enumerate() {
+                assert!(
+                    !test_case.options.is_valid_payment(invalid),
+                    "{} invalid {}",
+                    test_case.name,
+                    i
+                );
                 assert_ne!(
                     Some(invalid.clone()),
                     test_case.options.first_valid_payment(invalid),

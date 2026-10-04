@@ -68,7 +68,9 @@
       role={compactResources ? 'img' : undefined}
       aria-label={compactResources ? part.text : undefined}
       title={compactResources ? part.text : undefined}
-      ><Icon size={14} aria-hidden="true" />{compactResources ? part.text.split(' ')[0] : part.text}</span
+      ><Icon size={14} aria-hidden="true" />{compactResources
+        ? part.text.split(/\s+(?=[a-z])/i)[0]
+        : part.text}</span
     >{:else if part.position && positions?.has(part.position) && onCoordinate}<button
       class="coordinate-link"
       title={`Highlight ${part.position} · Click to center on the map`}

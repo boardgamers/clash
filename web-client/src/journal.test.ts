@@ -20,6 +20,23 @@ test('reference text can add icons to resource names without changing journal pa
 });
 import type { Game, LoggedAction } from './types.ts';
 
+test('resource ranges stay together with their icon rather than splitting the endpoints', () => {
+  for (const amount of ['1-4', '1–4', '1 – 4', '0.5–2']) {
+    const text = `Pay ${amount} mood or culture tokens. Then gain 2 ideas.`;
+    const parts = journalParts(text);
+    assert.equal(parts.map((p) => p.text).join(''), text);
+    assert.deepEqual(
+      parts.filter((p) => p.resource),
+      [
+        { text: `${amount} mood`, resource: 'mood_tokens' },
+        { text: '2 ideas', resource: 'ideas' },
+      ],
+    );
+    assert.deepEqual(parts[0], { text: 'Pay ' });
+    assert.equal(journalParts(`Pay ${amount} culture tokens`, true)[1].text, `${amount} culture tokens`);
+  }
+});
+
 test('map references preserve surrounding text and avoid matching names or resource amounts', () => {
   const text = 'Move from D2 to E8; gain 3 food. Player1 has 2 ideas.';
   const parts = journalParts(text);

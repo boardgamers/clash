@@ -33,8 +33,8 @@ export function journalParts(text: string, namedResources = false): TextPart[] {
     'culture tokens': 'culture_tokens',
   };
   const pattern = namedResources
-    ? /\b(?:\d+(?:\.\d+)? )?(food|wood|ore|ideas?|gold|mood tokens?|culture tokens?|captives?)\b|\b([A-Z]\d+)\b/gi
-    : /\b\d+(?:\.\d+)? (food|wood|ore|ideas?|gold|mood(?: tokens?)?|culture(?: tokens?)?|captives?)\b|\b([A-Z]\d+)\b/g;
+    ? /\b(?:\d+(?:\.\d+)?(?:\s*[-–]\s*\d+(?:\.\d+)?)? )?(food|wood|ore|ideas?|gold|mood tokens?|culture tokens?|captives?)\b|\b([A-Z]\d+)\b/gi
+    : /\b\d+(?:\.\d+)?(?:\s*[-–]\s*\d+(?:\.\d+)?)? (food|wood|ore|ideas?|gold|mood(?: tokens?)?|culture(?: tokens?)?|captives?)\b|\b([A-Z]\d+)\b/g;
   const parts: TextPart[] = [];
   let offset = 0;
   for (const match of text.matchAll(pattern)) {
