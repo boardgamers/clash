@@ -43,9 +43,24 @@ pub enum PlayerType {
     Barbarian,
 }
 
+#[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerSettings {
+    // None distinguishes an old save from an explicit opt-out.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub skip_raze_city: Option<bool>,
+}
+
+impl PlayerSettings {
+    pub fn is_empty(&self) -> bool {
+        self.skip_raze_city.is_none()
+    }
+}
+
 pub struct Player {
     pub(crate) name: Option<String>,
     pub index: usize,
+    pub settings: PlayerSettings,
     pub resources: ResourcePile,
     pub resource_limit: ResourcePile,
     // transient, only for the current turn, only the active player can gain resources
@@ -96,6 +111,7 @@ impl Player {
     pub fn new(civilization: Civilization, index: usize) -> Self {
         Self {
             name: None,
+            settings: PlayerSettings::default(),
             index,
             resources: ResourcePile::empty(),
             resource_limit: ResourcePile::empty(),
@@ -333,6 +349,7 @@ impl Player {
     }
 
     pub fn strip_secret(&mut self, game: &Game) {
+        self.settings = PlayerSettings::default();
         self.wonder_cards = self.wonder_cards.iter().map(|_| Wonder::Hidden).collect();
         self.action_cards = self
             .action_cards

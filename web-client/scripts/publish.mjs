@@ -41,6 +41,7 @@ const options = [
 ];
 const declaredPreferences = JSON.parse(await fs.readFile(path.join(root, 'bgs-preferences.json'), 'utf8'));
 const replacedPreferences = new Set([
+  'skipRazeCity', // Migrated from account preferences to engine-managed player settings.
   'ui_scale',
   'world_zoom_factor',
   'color_profile',
@@ -49,6 +50,11 @@ const replacedPreferences = new Set([
 const preferences = [
   ...(previous.preferences ?? []).filter((pref) => !replacedPreferences.has(pref.name)),
   ...declaredPreferences,
+];
+const declaredSettings = JSON.parse(await fs.readFile(path.join(root, 'bgs-settings.json'), 'utf8'));
+const settings = [
+  ...(previous.settings ?? []).filter((setting) => !declaredSettings.some((s) => s.name === setting.name)),
+  ...declaredSettings,
 ];
 const bytes = await fs.readFile(path.join(root, 'dist/viewer.js'));
 if (bytes.length > 25 * 1024 * 1024) throw new Error('Viewer exceeds the BGS upload limit');
@@ -62,6 +68,7 @@ console.log(
       sha256: hash,
       previousViewer: previous.viewer.url,
       preferences,
+      settings,
       options,
       enginePackage: enginePath ?? null,
       dryRun: process.argv.includes('--dry-run'),
@@ -98,6 +105,7 @@ if (!process.argv.includes('--dry-run')) {
   if (
     JSON.stringify(current.viewer) !== JSON.stringify(previous.viewer) ||
     JSON.stringify(current.preferences) !== JSON.stringify(previous.preferences) ||
+    JSON.stringify(current.settings) !== JSON.stringify(previous.settings) ||
     JSON.stringify(current.options) !== JSON.stringify(previous.options) ||
     JSON.stringify(current.engine) !== JSON.stringify(previous.engine)
   )
@@ -116,13 +124,14 @@ if (!process.argv.includes('--dry-run')) {
   await api(endpoint, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ viewer, preferences, options }),
+    body: JSON.stringify({ viewer, preferences, settings, options }),
   });
   const saved = await api(endpoint);
   if (
     saved.viewer.url !== uploaded.url ||
     saved.viewer.topLevelVariable !== 'clash3d' ||
     JSON.stringify(saved.preferences) !== JSON.stringify(preferences) ||
+    JSON.stringify(saved.settings) !== JSON.stringify(settings) ||
     JSON.stringify(saved.options) !== JSON.stringify(options) ||
     JSON.stringify(saved.engine) !== JSON.stringify(expectedEngine)
   )

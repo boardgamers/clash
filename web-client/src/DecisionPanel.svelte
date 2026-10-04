@@ -322,7 +322,7 @@
         {/if}
       </div>
     {/each}
-    {#if decision.endOfAge && decision.name === 'Raze city' && decision.min === 0}
+    {#if !$session.analysis && decision.endOfAge && decision.name === 'Raze city' && decision.min === 0}
       <label class="skip-raze-preference">
         <input
           type="checkbox"

@@ -3,12 +3,6 @@
   { "name": "unitBadges", "label": "Unit badges", "type": "checkbox", "default": false },
   { "name": "availableOnly", "label": "Show available actions only", "type": "checkbox", "default": true },
   { "name": "replayAutoplay", "label": "Autoplay opponent recap", "type": "checkbox", "default": true },
-  {
-    "name": "skipRazeCity",
-    "label": "Skip end-of-age razing (keep all cities)",
-    "type": "checkbox",
-    "default": false
-  },
   { "name": "colorBlind", "label": "Color-blind mode", "type": "checkbox", "default": false },
   {
     "name": "mapView",

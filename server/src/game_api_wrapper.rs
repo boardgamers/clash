@@ -26,6 +26,39 @@ fn from_game(game: Game) -> String {
     serde_json::to_string(&game.data()).expect("game should be serializable")
 }
 
+// BGS saves these separately from moves. Do not advance the game here: its
+// settings endpoint does not update the active player, timers or move log.
+#[wasm_bindgen(js_name = "setPlayerSettings")]
+pub fn set_player_settings(
+    data: String,
+    player: usize,
+    settings: JsValue,
+) -> Result<String, JsValue> {
+    let settings: crate::player::PlayerSettings =
+        serde_wasm_bindgen::from_value(settings).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let mut game = get_game(data);
+    let p = game
+        .players
+        .get_mut(player)
+        .filter(|p| p.is_human())
+        .ok_or_else(|| JsValue::from_str("Invalid player"))?;
+    if settings.skip_raze_city.is_some() {
+        p.settings.skip_raze_city = settings.skip_raze_city;
+    }
+    Ok(from_game(game))
+}
+
+#[wasm_bindgen(js_name = "playerSettings")]
+pub fn player_settings(data: String, player: usize) -> Result<JsValue, JsValue> {
+    let game = get_game(data);
+    let p = game
+        .players
+        .get(player)
+        .filter(|p| p.is_human())
+        .ok_or_else(|| JsValue::from_str("Invalid player"))?;
+    serde_wasm_bindgen::to_value(&p.settings).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
 #[derive(Deserialize)]
 pub struct AnalysisOptions {
     player: Option<usize>,
@@ -65,6 +98,9 @@ pub fn create_analysis(data: String, options: JsValue) -> Result<String, JsValue
         ));
     }
     game.board_history = Default::default();
+    for player in &mut game.players {
+        player.settings = Default::default();
+    }
     Ok(from_game(game))
 }
 

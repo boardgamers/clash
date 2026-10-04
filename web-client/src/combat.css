@@ -312,14 +312,17 @@
   }
 }
 .board-toolbar.has-redo .board-actions {
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(10, minmax(0, 1fr));
 }
 .play-layout .board-toolbar.has-redo {
-  width: 400px;
+  width: 540px;
 }
 @media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
   .play-layout .board-toolbar.has-redo {
     width: 236px;
+  }
+  .board-toolbar.has-redo .board-actions {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
   }
   .play-layout .live-battle {
     top: 100px;

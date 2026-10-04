@@ -41,6 +41,7 @@ const { Controller } = (await import(
 function paymentController() {
   const sent: string[] = [];
   const preferences: { name: string; value: unknown }[] = [];
+  const settings: { name: string; value: unknown }[] = [];
   let accept = true;
   let session: Session;
   const controller = new Controller(
@@ -52,6 +53,10 @@ function paymentController() {
       replaceLog: () => {},
       fetchState: () => {},
       setReplayInfo: () => {},
+      updateSetting: (name: string, value: unknown) => {
+        settings.push({ name, value });
+        return accept;
+      },
       updatePreference: (name: string, value: unknown) => {
         preferences.push({ name, value });
         return true;
@@ -66,6 +71,7 @@ function paymentController() {
     controller,
     sent,
     preferences,
+    settings,
     session: () => session,
     reject: () => {
       accept = false;
@@ -1003,97 +1009,203 @@ test('opponent recap steps animate and pause, replay stays within its turn, and 
   }
 });
 
-test('end-of-age razing stays optional by default; opting out keeps every city once', async () => {
+test('explicit keep-cities choice saves engine settings before answering the current decision', async () => {
   const app = paymentController(),
     c = app.controller;
   try {
     const raw = fixture('status_phase/raze_city_decline');
     c.setPlayer(0);
     await c.load(engine.stripSecret(raw, 0));
-    assert.equal(app.session().view!.decision!.name, 'Raze city');
-    assert.equal(app.sent.length, 0);
+    c.setSettings({});
     c.setSkipRazeCity(true);
-    assert.deepEqual(app.preferences, [{ name: 'skipRazeCity', value: true }]);
-    assert.equal(app.sent.length, 1);
+    assert.deepEqual(app.settings, [{ name: 'skipRazeCity', value: true }]);
+    assert.deepEqual(app.preferences, []);
+    assert.equal(app.sent.length, 0, 'wait for server acknowledgement');
+    c.setSettings({ skipRazeCity: true });
     assert.deepEqual(JSON.parse(app.sent[0]), { Response: { SelectPositions: [] } });
+    c.setSettings({ skipRazeCity: true });
     await c.load(engine.stripSecret(raw, 0));
-    c.setPreferences({ skipRazeCity: true });
-    assert.equal(app.sent.length, 1, 'duplicate snapshots and preferences never send twice');
-    const next = engine.tryMove(raw, app.sent[0], 0);
-    assert.deepEqual(JSON.parse(next).players[0].cities, JSON.parse(raw).players[0].cities);
-    await c.load(engine.stripSecret(next, 0));
-    assert.equal(app.sent.length, 1, 'does not skip an opponent decision');
-    const afterOpponent = engine.tryMove(next, app.sent[0], 1);
-    await c.load(engine.stripSecret(afterOpponent, 0));
-    assert.notEqual(app.session().view!.decision?.name, 'Raze city');
-    assert.equal(app.sent.length, 1, 'does not skip the next end-of-age decision');
+    assert.equal(app.sent.length, 1, 'never auto-submit from repeated settings or state');
   } finally {
     app.close();
   }
 });
 
-test('saved skip preference works when state arrives later, but never for spectators or analysis', async () => {
+test('saved engine settings never make the viewer automatically submit game moves', async () => {
   for (const mode of ['play', 'spectator', 'analysis']) {
     const app = paymentController(),
       c = app.controller;
     try {
-      c.setPreferences({ skipRazeCity: true, analysis: mode === 'analysis' });
+      c.setPreferences({ analysis: mode === 'analysis' });
       if (mode !== 'spectator') c.setPlayer(0);
+      c.setSettings({ skipRazeCity: true });
       await c.load(
         engine.stripSecret(fixture('status_phase/raze_city_decline'), mode === 'spectator' ? undefined : 0),
       );
-      assert.equal(app.sent.length, mode === 'play' ? 1 : 0, mode);
+      c.setPreferences({ sound: false });
+      assert.equal(app.session().skipRazeCity, true, 'unrelated preferences leave saved setting alone');
+      assert.deepEqual(app.sent, []);
+      assert.deepEqual(app.settings, []);
     } finally {
       app.close();
     }
   }
 });
 
-test('failed automatic razing skip stays available manually and is never retried in a loop', async () => {
-  const app = paymentController(),
-    c = app.controller;
-  try {
-    c.setPlayer(0);
-    const raw = engine.stripSecret(fixture('status_phase/raze_city_decline'), 0);
-    await c.load(raw);
-    app.reject();
-    c.setSkipRazeCity(true);
-    assert.equal(app.sent.length, 1);
-    assert.equal(app.session().pending, false);
-    assert.ok(app.session().error);
-    c.patch({ error: '' });
-    c.setPreferences({ skipRazeCity: true });
-    await c.load(raw);
-    assert.equal(app.sent.length, 1);
-    assert.equal(app.session().view!.decision!.name, 'Raze city');
-  } finally {
-    app.close();
+test('legacy opt-in migrates once regardless of delivery order, preserving explicit opt-outs', async () => {
+  for (const order of [
+    'settings-first',
+    'preferences-first',
+    'state-first',
+    'explicit-false',
+    'analysis',
+    'spectator',
+  ]) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const prefs = () => c.setPreferences({ skipRazeCity: true, analysis: order === 'analysis' });
+      const settings = () => c.setSettings(order === 'explicit-false' ? { skipRazeCity: false } : {});
+      const load = async () => {
+        if (order !== 'spectator') c.setPlayer(0);
+        await c.load(
+          engine.stripSecret(
+            fixture('status_phase/raze_city_decline'),
+            order === 'spectator' ? undefined : 0,
+          ),
+        );
+      };
+      if (order === 'state-first') {
+        await load();
+        settings();
+        prefs();
+      } else if (order === 'settings-first') {
+        settings();
+        prefs();
+        await load();
+      } else {
+        prefs();
+        settings();
+        await load();
+      }
+      prefs();
+      settings();
+      assert.equal(
+        app.settings.length,
+        ['explicit-false', 'analysis', 'spectator'].includes(order) ? 0 : 1,
+        order,
+      );
+      assert.deepEqual(app.sent, []);
+    } finally {
+      app.close();
+    }
   }
 });
 
-test('replay postpones automatic razing skip until returning to the game', async () => {
+test('failed setting update leaves the current razing decision available', async () => {
   const app = paymentController(),
     c = app.controller;
   try {
     c.setPlayer(0);
     await c.load(engine.stripSecret(fixture('status_phase/raze_city_decline'), 0));
-    c.patch({
-      playback: {
-        frame: null,
-        index: 0,
-        total: 1,
-        start: 0,
-        end: 0,
-        range: 'all',
-        automatic: false,
-        playing: false,
-        animate: false,
-      },
-    });
+    app.reject();
     c.setSkipRazeCity(true);
-    assert.equal(app.sent.length, 0);
-    c.endPlayback();
-    assert.equal(app.sent.length, 1);
+    c.setSettings({ skipRazeCity: true });
+    assert.deepEqual(app.sent, []);
+    assert.equal(app.session().view!.decision!.name, 'Raze city');
+    assert.ok(app.session().error);
+  } finally {
+    app.close();
+  }
+});
+
+test('engine skips an offline player’s end-of-age raze choice after another player moves', () => {
+  const raw = fixture('status_phase/raze_city_decline');
+  assert.deepEqual(engine.playerSettings(raw, 1), {}, 'old saves have no explicit choice');
+  const saved = engine.setPlayerSettings(raw, 1, { skipRazeCity: true });
+  assert.deepEqual(engine.playerSettings(saved, 1), { skipRazeCity: true });
+  assert.equal(
+    engine.currentPlayer(saved),
+    engine.currentPlayer(raw),
+    'settings alone cannot advance the turn',
+  );
+  const answer = JSON.stringify({ Response: { SelectPositions: [] } });
+  const after = engine.tryMove(saved, answer, 0);
+  assert.notEqual(JSON.parse(engine.webView(after, engine.currentPlayer(after))).decision?.name, 'Raze city');
+  assert.deepEqual(JSON.parse(after).players[1].cities, JSON.parse(raw).players[1].cities);
+  assert.deepEqual(JSON.parse(after).players[1].resources, JSON.parse(raw).players[1].resources);
+  const frames = JSON.parse(after).board_history.frames;
+  assert.equal(frames.at(-1).actor, 1, 'the offline player’s response is recorded for replay');
+  assert.equal(frames.at(-1).title, 'Raze city');
+  const optedOut = engine.setPlayerSettings(saved, 1, { skipRazeCity: false });
+  const manual = engine.tryMove(optedOut, answer, 0);
+  assert.equal(engine.currentPlayer(manual), 1);
+  assert.equal(JSON.parse(engine.webView(manual, 1)).decision.name, 'Raze city');
+  assert.throws(() => engine.setPlayerSettings(raw, 99, { skipRazeCity: true }));
+  assert.throws(() => engine.setPlayerSettings(raw, 1, { skipRazeCity: 'true' }));
+  const publicState = JSON.parse(engine.stripSecret(saved, 0));
+  assert.equal(publicState.players[1].settings, undefined, 'private setting stays private');
+  assert.deepEqual(
+    engine.playerSettings(engine.createAnalysis(saved, { to: engine.logLength(saved) }), 1),
+    {},
+  );
+});
+
+test('player settings survive undoing and redoing an unrelated game move', () => {
+  const raw = fixture('advances/collect_free_economy');
+  const action = {
+    Playing: {
+      Collect: {
+        city_position: 'C2',
+        collections: [{ position: 'B1', pile: { ore: 1 }, times: 1 }],
+        action_type: 'Collect',
+      },
+    },
+  };
+  const moved = engine.tryMove(raw, JSON.stringify(action), 0);
+  const saved = engine.setPlayerSettings(moved, 0, { skipRazeCity: true });
+  const undone = engine.tryMove(saved, JSON.stringify('Undo'), 0);
+  assert.deepEqual(engine.playerSettings(undone, 0), { skipRazeCity: true });
+  const redone = engine.tryMove(undone, JSON.stringify('Redo'), 0);
+  assert.deepEqual(engine.playerSettings(redone, 0), { skipRazeCity: true });
+});
+
+test('Huns can start city-only movement and select other Nomad cities directly on the map', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    let g = JSON.parse(
+      await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'nomads-exploration', {}),
+    );
+    for (const civilization of ['Huns', 'Rome']) {
+      g = JSON.parse(
+        engine.tryMove(
+          JSON.stringify(g),
+          JSON.stringify({ ChooseCivilization: civilization }),
+          engine.currentPlayer(JSON.stringify(g)),
+        ),
+      );
+    }
+    g.players[0].civilization = 'Huns';
+    g.players[0].advances.push('Storage');
+    g.players[0].units = [];
+    g.players[0].cities = ['C2', 'D1'].map((position) => ({ position, mood_state: 'Neutral' }));
+    g.actions_left = 2;
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    assert.equal(app.session().view!.units?.length, 0);
+    assert.deepEqual(app.session().view!.nomadCities, ['C2', 'D1']);
+    c.openSettlers();
+    assert.equal(app.session().movingCity, 'C2');
+    assert.ok(app.session().moveDestinations.length);
+    c.selectTile('D1', { kind: 'city', player: 0 });
+    assert.equal(app.session().movingCity, 'D1');
+    assert.ok(app.session().moveDestinations.length);
+    const dest = app.session().moveDestinations.find((d) => d.terrain !== 'Unexplored')!;
+    assert.ok(dest);
+    c.selectTile(dest.position);
+    // A legal destination remains a move, rather than selecting the city beneath it.
+    assert.ok(app.sent.length || app.session().moveDestination || app.session().moveTarget);
   } finally {
     app.close();
   }
@@ -1248,4 +1360,45 @@ test('real Taxes commands load as one replay action with public resources and pe
   } finally {
     app.close();
   }
+});
+
+test('engine resolves consecutive offline raze choices and records responses that replay without settings', async () => {
+  const game = JSON.parse(await engine.init(3, [], { civilization: 'Random' }, 'auto-multi', {}));
+  game.round = 3;
+  game.current_player_index = (game.starting_player_index + 2) % 3;
+  game.actions_left = 0;
+  let raw = JSON.stringify(game);
+  for (let seat = 0; seat < 3; seat++) raw = engine.setPlayerSettings(raw, seat, { skipRazeCity: true });
+  raw = engine.tryMove(raw, JSON.stringify({ Playing: 'EndTurn' }), engine.currentPlayer(raw));
+  for (let i = 0; i < 2; i++) {
+    const seat = engine.currentPlayer(raw);
+    const decision = JSON.parse(engine.webView(raw, seat)).decision;
+    assert.equal(decision.name, 'Free Advance', 'unrelated choices remain manual');
+    raw = engine.tryMove(
+      raw,
+      JSON.stringify({ Response: { SelectAdvance: decision.options[0].value } }),
+      seat,
+    );
+  }
+  const seat = engine.currentPlayer(raw);
+  const decision = JSON.parse(engine.webView(raw, seat)).decision;
+  const advance = JSON.stringify({ Response: { SelectAdvance: decision.options[0].value } });
+  const after = engine.tryMove(raw, advance, seat);
+  assert.equal(
+    JSON.parse(engine.webView(after, engine.currentPlayer(after))).decision.name,
+    'Determine First Player',
+    'all three raze choices are skipped, while the next choice remains manual',
+  );
+  const frames = JSON.parse(after).board_history.frames.filter((f: any) => f.title === 'Raze city');
+  assert.equal(frames.length, 3);
+  let manual = raw;
+  for (let seat = 0; seat < 3; seat++)
+    manual = engine.setPlayerSettings(manual, seat, { skipRazeCity: false });
+  manual = engine.tryMove(manual, advance, seat);
+  for (const frame of frames) {
+    assert.equal(engine.currentPlayer(manual), frame.actor);
+    manual = engine.tryMove(manual, JSON.stringify({ Response: { SelectPositions: [] } }), frame.actor);
+  }
+  for (const key of ['age', 'round', 'state', 'events', 'current_player_index', 'actions_left'])
+    assert.deepEqual(JSON.parse(manual)[key], JSON.parse(after)[key], key);
 });

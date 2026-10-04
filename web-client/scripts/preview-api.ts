@@ -82,6 +82,15 @@ export function previewApi(): Plugin {
             body = JSON.parse(text || '{}');
           }
           if (url.pathname === '/api/reset' && req.method === 'POST') await reset();
+          if (url.pathname === '/api/settings' && req.method === 'POST') {
+            if (body.seat !== 0 && body.seat !== 1) throw Error('Choose a player.');
+            if (body.name !== 'skipRazeCity' || typeof body.value !== 'boolean')
+              throw Error('Invalid setting.');
+            state = engine.setPlayerSettings(state, body.seat, { [body.name]: body.value });
+            persist();
+            res.end(JSON.stringify({ settings: engine.playerSettings(state, body.seat) }));
+            return;
+          }
           if (url.pathname === '/api/move' && req.method === 'POST') {
             if (body.revision !== revision) throw Error('The game changed. Please choose your action again.');
             if (!Number.isInteger(body.seat) || body.seat !== engine.currentPlayer(state))
@@ -124,6 +133,7 @@ export function previewApi(): Plugin {
           res.end(
             JSON.stringify({
               state: engine.stripSecret(state, seat),
+              settings: seat === undefined ? null : engine.playerSettings(state, seat),
               seat,
               revision,
               messages,

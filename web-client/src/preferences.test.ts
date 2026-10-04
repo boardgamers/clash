@@ -143,7 +143,6 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
     unitBadges: true,
     replayAutoplay: true,
     availableOnly: true,
-    skipRazeCity: false,
   });
   assert.equal(writes, 1);
   viewer.updatePreference('unitBadges', false);
@@ -232,9 +231,6 @@ test('legacy 2D preferences open Strategy while 3D remains the default', () => {
   assert.equal(readPreferences({ mapView: '3d' }).topDown, false);
 });
 
-test('end-of-age razing skip is opt-in and accepts only an explicit enabled preference', () => {
-  assert.equal(readPreferences({}).skipRazeCity, false);
-  assert.equal(readPreferences({ skipRazeCity: true }).skipRazeCity, true);
-  assert.equal(readPreferences({ skipRazeCity: 'true' }).skipRazeCity, false);
-  assert.equal(readPreferences({ skipRazeCity: false }).skipRazeCity, false);
+test('account preferences cannot overwrite the engine-managed razing setting', () => {
+  assert.equal('skipRazeCity' in readPreferences({ skipRazeCity: true }), false);
 });

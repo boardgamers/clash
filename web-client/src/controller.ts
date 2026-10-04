@@ -98,7 +98,10 @@ export class Controller {
       > & { id: number })
     | null = null;
   private raw = '';
-  private skippedRazeState = '';
+  private playerSettings: Record<string, unknown> | null = null;
+  private legacySkipRaze = false;
+  private migratedSkipRaze = false;
+  private keepCitiesRequest: { seat: number; raw: string } | null = null;
   private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -131,6 +134,7 @@ export class Controller {
   }
   setPreferences(preferences: Record<string, unknown>) {
     const old = get(this.session);
+    this.legacySkipRaze = preferences.skipRazeCity === true;
     const next = readPreferences(preferences);
     this.audio.setEnabled(next.sound);
     this.patch(next);
@@ -142,40 +146,65 @@ export class Controller {
         playback: { ...playback, playing: false },
       });
     }
-    this.trySkipRazeCity();
+    this.migrateRazeSetting();
   }
-  private trySkipRazeCity() {
-    const s = get(this.session),
-      d = s.view?.decision;
+  setSettings(settings: Record<string, unknown> | null) {
+    this.playerSettings = settings;
+    this.patch({ skipRazeCity: settings?.skipRazeCity === true });
+    const request = this.keepCitiesRequest;
+    this.keepCitiesRequest = null;
+    const s = get(this.session);
+    // Only the explicit "Keep all cities" checkbox also answers a current
+    // decision. Receiving saved settings must never submit a background move.
     if (
-      !s.skipRazeCity ||
+      settings?.skipRazeCity === true &&
+      request &&
+      request.seat === s.seat &&
+      request.raw === this.raw &&
+      !s.analysis &&
+      !s.playback &&
+      !s.pending &&
+      s.view?.activePlayer === s.seat &&
+      s.view.decision?.name === 'Raze city' &&
+      s.view.decision.endOfAge &&
+      s.view.decision.min === 0
+    ) {
+      try {
+        const { action } = this.query<{ action: Move }>({ kind: 'decision', values: [], payments: [] });
+        this.submit(action);
+      } catch {
+        /* The regular Skip button remains available. */
+      }
+    }
+    this.migrateRazeSetting();
+  }
+  private migrateRazeSetting() {
+    const s = get(this.session);
+    if (
+      !this.legacySkipRaze ||
+      this.migratedSkipRaze ||
+      !this.playerSettings ||
+      this.playerSettings.skipRazeCity !== undefined ||
+      s.game?.players.find((p) => p.id === s.seat)?.settings?.skipRazeCity !== undefined ||
       s.analysis ||
-      s.playback ||
-      s.pending ||
-      s.error ||
       s.seat === undefined ||
-      s.view?.activePlayer !== s.seat ||
-      !d?.endOfAge ||
-      d.name !== 'Raze city' ||
-      d.min !== 0 ||
-      d.max !== 1 ||
-      d.fields.length ||
-      this.skippedRazeState === this.raw
+      !s.game ||
+      !s.view
     )
       return;
-    // Query the same empty selection as Skip. Never repeat a failed automatic submission.
-    try {
-      const { action } = this.query<{ action: Move }>({ kind: 'decision', values: [], payments: [] });
-      this.skippedRazeState = this.raw;
-      this.submit(action);
-    } catch {
-      // Leave the normal decision available if this state cannot be skipped.
-    }
+    // One-time migration from the old account preference, once this player's
+    // saved game settings arrive. An explicit false always wins.
+    this.migratedSkipRaze = true;
+    this.commands.updateSetting('skipRazeCity', true);
   }
   setSkipRazeCity(enabled: boolean) {
-    this.patch({ skipRazeCity: enabled });
-    this.commands.updatePreference('skipRazeCity', enabled);
-    if (enabled) this.trySkipRazeCity();
+    const s = get(this.session);
+    if (s.analysis || s.playback || s.pending || s.seat === undefined) return;
+    this.keepCitiesRequest = enabled ? { seat: s.seat, raw: this.raw } : null;
+    if (!this.commands.updateSetting('skipRazeCity', enabled)) {
+      this.keepCitiesRequest = null;
+      this.patch({ error: 'Could not save the city setting. Please try again.' });
+    }
   }
   setReplayAutoplay(enabled: boolean) {
     this.patch({ replayAutoplay: enabled });
@@ -201,6 +230,7 @@ export class Controller {
     this.patch({ [name]: enabled });
   }
   handleError(error: unknown) {
+    this.keepCitiesRequest = null;
     this.cardContinuation = null;
     this.submittedMove = null;
     this.quotedActionPayment = null;
@@ -411,7 +441,7 @@ export class Controller {
     this.submittedMove = null;
     if (automaticPayment) this.submit(automaticPayment);
     this.afterPlaybackLoad(old, game);
-    this.trySkipRazeCity();
+    this.migrateRazeSetting();
   }
   private seenKey() {
     const s = get(this.session);
@@ -440,7 +470,7 @@ export class Controller {
       frames = game.board_history?.frames ?? [];
     if (s.analysis || !frames.length) return;
     if (s.playback) {
-      if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback(false);
+      if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback();
       else {
         const index = frameAt(frames, s.playback.frame?.cursor ?? 0);
         if (frames[index]?.cursor !== s.playback.frame?.cursor) this.showBattles([]);
@@ -615,7 +645,7 @@ export class Controller {
       if (p?.playing) this.showPlaybackFrame(p.index + 1, true);
     }, duration);
   }
-  endPlayback(resumeDecisions = true) {
+  endPlayback() {
     clearTimeout(this.playbackTimer);
     const s = get(this.session),
       p = s.playback;
@@ -625,7 +655,6 @@ export class Controller {
       this.patch({ playback: null });
       this.commands.clearReplayInfo?.();
       this.markSeen(s.game?.board_history?.frames[p.end]?.cursor);
-      if (resumeDecisions) this.trySkipRazeCity();
     }
   }
   private scheduleEffect() {
@@ -660,8 +689,12 @@ export class Controller {
   }
   setPlayer(index?: number) {
     if (get(this.session).seat === index) return;
+    if (get(this.session).seat !== undefined) this.playerSettings = null;
+    this.migratedSkipRaze = false;
+    this.keepCitiesRequest = null;
+    this.patch({ skipRazeCity: this.playerSettings?.skipRazeCity === true });
     this.cardContinuation = null;
-    this.endPlayback(false);
+    this.endPlayback();
     this.dismissEffects(true);
     this.quotedActionPayment = null;
     this.moveCache.clear();
@@ -718,7 +751,7 @@ export class Controller {
       }
       const loaded = get(this.session);
       if (index !== undefined && loaded.game) this.afterPlaybackLoad({ ...loaded, game: null }, loaded.game);
-      this.trySkipRazeCity();
+      this.migrateRazeSetting();
     }
   }
   selectCity(position: string) {
@@ -792,6 +825,15 @@ export class Controller {
     // A destination takes priority over pieces on it (boarding or attacking).
     if (s.mode === 'settlers' && s.moveDestinations.some((d) => d.position === position)) {
       this.chooseMoveDestination(position);
+      return;
+    }
+    if (
+      (s.mode === 'settlers' || s.view?.stopMovement) &&
+      pick.kind !== 'unit' &&
+      pick.kind !== 'units' &&
+      s.view?.nomadCities?.includes(position)
+    ) {
+      this.openNomadCity(position);
       return;
     }
     if (s.mode === 'settlers' && s.view?.units?.some((u) => u.position === position)) {
@@ -1098,8 +1140,14 @@ export class Controller {
   }
   openSettlers() {
     const s = get(this.session);
-    const position =
-      s.view?.units?.find((u) => u.position === s.focus)?.position ?? s.view?.units?.[0]?.position;
+    const cities = s.view?.nomadCities ?? [];
+    const positions = [...new Set(s.view?.units?.map((u) => u.position) ?? [])];
+    const movable = positions.filter((p) => this.movementDestinations(this.defaultMovementGroup(p)).length);
+    if ((s.focus && cities.includes(s.focus)) || (!movable.length && cities.length)) {
+      this.openNomadCity(s.focus && cities.includes(s.focus) ? s.focus : cities[0]);
+      return;
+    }
+    const position = movable.find((p) => p === s.focus) ?? movable[0] ?? positions[0];
     this.openUnits(
       s.selectedUnits.length ? s.selectedUnits : position ? this.defaultMovementGroup(position) : [],
     );
@@ -1110,6 +1158,9 @@ export class Controller {
     return JSON.parse(this.engine.webQuery(this.raw, s.seat, JSON.stringify(input))) as T;
   }
   openNomadCity(position: string) {
+    const s = get(this.session);
+    if (s.pending || s.playback || !s.view?.nomadCities?.includes(position) || !canMoveOnMap(s.view, s.game))
+      return;
     this.openUnits([]);
     this.patch({ movingCity: position, focus: position });
     this.selectUnits([]);

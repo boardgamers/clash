@@ -17,6 +17,7 @@ export interface City {
 }
 export interface Player {
   id: number;
+  settings?: { skipRazeCity?: boolean };
   name?: string;
   civilization: string;
   resources?: Pile;

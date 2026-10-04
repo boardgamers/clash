@@ -151,7 +151,43 @@ fn title(action: &Action) -> String {
     .to_owned()
 }
 
-pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, String> {
+pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String> {
+    let undo = matches!(action, Action::Undo);
+    let mut game = execute_one(game, action, player)?;
+    // Save automatic responses as ordinary actions. Replay then reproduces them
+    // without needing past settings; undo never immediately replays a skipped choice.
+    while !undo && game.context == crate::game::GameContext::Play && auto_keep_cities(&game) {
+        let player = game.active_player();
+        game = execute_one(
+            game,
+            Action::Response(
+                crate::content::persistent_events::EventResponse::SelectPositions(vec![]),
+            ),
+            player,
+        )?;
+    }
+    Ok(game)
+}
+
+fn auto_keep_cities(game: &Game) -> bool {
+    use crate::content::persistent_events::{PersistentEventRequest, PersistentEventType};
+    let Some(event) = game.events.last() else {
+        return false;
+    };
+    matches!(
+        event.event_type,
+        PersistentEventType::StatusPhase(crate::status_phase::StatusPhaseState::RazeSize1City)
+    ) && game.player(game.active_player()).settings.skip_raze_city == Some(true)
+        && event.player.handler.as_ref().is_some_and(|handler| {
+            matches!(&handler.origin, crate::events::EventOrigin::Ability(name) if name == "Raze city")
+                && matches!(
+                    &handler.request,
+                    PersistentEventRequest::SelectPositions(request) if request.needed == (0..=1)
+                )
+        })
+}
+
+fn execute_one(mut game: Game, action: Action, player: usize) -> Result<Game, String> {
     let choosing_civilization = matches!(game.state, crate::game::GameState::ChooseCivilization);
     // Kept outside the undo patch: undo trims playback; it never creates new history.
     let mut history = std::mem::take(&mut game.board_history);

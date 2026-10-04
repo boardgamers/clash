@@ -18,7 +18,6 @@ const preferences: Record<string, unknown> = {
   mapView: '3d',
   unitBadges: false,
   availableOnly: true,
-  skipRazeCity: false,
   replayAutoplay: true,
 };
 try {
@@ -29,9 +28,7 @@ try {
 } catch {}
 function savePreference(name: string, value: unknown) {
   if (!(
-    (['sound', 'colorBlind', 'unitBadges', 'availableOnly', 'replayAutoplay', 'skipRazeCity'].includes(
-      name,
-    ) &&
+    (['sound', 'colorBlind', 'unitBadges', 'availableOnly', 'replayAutoplay'].includes(name) &&
       typeof value === 'boolean') ||
     (name === 'mapView' && (value === '3d' || value === 'strategy'))
   ))
@@ -60,6 +57,7 @@ async function refresh(force = false) {
       seat = data.seat;
       send('player', { index: seat });
       send('state', data.state);
+      send('settings', data.settings);
     }
     send('chat:state', {
       canSend: seat !== undefined,
@@ -113,6 +111,15 @@ addEventListener('message', async (event) => {
   }
   if (kind === 'fetchState') await refresh(true);
   if (kind === 'update:preference') savePreference(payload.name, payload.value);
+  if (kind === 'update:setting') {
+    try {
+      const data = await post('/api/settings', { name: payload.name, value: payload.value, seat });
+      send('settings', data.settings);
+    } catch (error) {
+      showError(String(error));
+      send('error', String(error));
+    }
+  }
   if (kind === 'move') {
     try {
       showError('');

@@ -13,7 +13,7 @@ use crate::leader::Leader;
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
 use crate::objective_card::{CompletedObjective, init_objective_card};
-use crate::player::{Data, Player};
+use crate::player::{Data, Player, PlayerSettings};
 use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitData};
@@ -244,6 +244,8 @@ fn is_string_zero(s: &String) -> bool {
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct PlayerData {
+    #[serde(default, skip_serializing_if = "PlayerSettings::is_empty")]
+    settings: PlayerSettings,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     name: Option<String>,
@@ -381,6 +383,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
     let civilization = game.cache.get_civilization(&data.civilization);
     Player {
         name: data.name,
+        settings: data.settings,
         index: data.id,
         resources: data.resources,
         resource_limit: data.resource_limit,
@@ -440,6 +443,7 @@ pub fn player_data(player: Player) -> PlayerData {
         .collect();
     PlayerData {
         name: player.name,
+        settings: player.settings,
         id: player.index,
         resources: player.resources,
         resource_limit: player.resource_limit,
@@ -484,6 +488,7 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         .collect();
     PlayerData {
         name: player.name.clone(),
+        settings: player.settings.clone(),
         id: player.index,
         resources: player.resources.clone(),
         resource_limit: player.resource_limit.clone(),

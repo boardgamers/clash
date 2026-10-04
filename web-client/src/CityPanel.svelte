@@ -177,7 +177,7 @@
           class:active={c.position === $session.city}
           onclick={() => {
             building = null;
-            controller.openCities(c.position);
+            controller.openCities(c.position, tab);
           }}><Landmark size={14} />{c.position}<CityFacts size={c.size} mood={c.mood} /></button
         >{/each}
     </nav>{/if}

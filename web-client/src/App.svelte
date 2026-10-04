@@ -261,7 +261,9 @@
   );
   let settlersAvailable = $derived(
     !!$session.view?.stopMovement ||
-      (!!$session.view?.canPlay && totalActions > 0 && !!$session.view?.units?.length),
+      (!!$session.view?.canPlay &&
+        totalActions > 0 &&
+        (!!$session.view?.units?.length || !!$session.view?.nomadCities?.length)),
   );
   let abilitiesAvailable = $derived(
     !!$session.view?.specialActions?.length || !!$session.view?.influence?.length,
@@ -968,7 +970,7 @@
             />{/if}</button
         >
         <button
-          class:active={$session.mode === 'city' || $session.mode === 'happiness'}
+          class:active={$session.mode === 'city' && $session.cityTab === 'build'}
           class:inspect-only={!cityActionsAvailable}
           aria-label="Manage cities"
           title={cityActionsAvailable
@@ -986,10 +988,34 @@
             />{/if}</button
         >
         <button
+          class="desktop-action"
+          class:active={$session.mode === 'city' && $session.cityTab === 'recruit'}
+          aria-label="Recruit units"
+          title="Recruit units · 1 action"
+          disabled={!$session.view?.canPlay || !city || $session.pending}
+          onclick={() => {
+            confirmEnd = false;
+            controller.openCities(undefined, 'recruit');
+          }}><Users size={21} /><span>Recruit</span></button
+        >
+        <button
+          class="desktop-action"
+          class:active={$session.mode === 'happiness'}
+          aria-label="Increase happiness"
+          title="Increase happiness · Select cities on the map"
+          disabled={!$session.view?.canPlay || !city || $session.pending}
+          onclick={() => {
+            confirmEnd = false;
+            controller.beginHappiness();
+          }}><Smile size={21} /><span>Happiness</span></button
+        >
+        <button
           class:active={$session.mode === 'settlers'}
           class:inspect-only={!settlersAvailable}
           aria-label="Move units and found cities"
-          title="Move armies, settlers and ships · Found cities"
+          title={$session.view?.nomadCities?.length
+            ? 'Move units or Nomad cities · Found cities'
+            : 'Move armies, settlers and ships · Found cities'}
           disabled={$session.seat === undefined}
           onclick={() => {
             confirmEnd = false;

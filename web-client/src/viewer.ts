@@ -67,6 +67,9 @@ export const viewer = registerViewer<string, string>('clash3d', ({ target, ...co
     onAvatars(avatars) {
       controller.patch({ avatars });
     },
+    onSettings(settings) {
+      controller.setSettings(settings);
+    },
     onPreferences(prefs) {
       controller.setPreferences(prefs);
     },

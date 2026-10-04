@@ -1034,6 +1034,7 @@ export class World {
             : s.mode === 'settlers'
               ? new Set([
                   ...(s.view?.units?.map((u) => u.position) ?? []),
+                  ...(s.view?.nomadCities ?? []),
                   ...s.moveDestinations.map((d) => d.position),
                   ...(s.landingTargets ?? []),
                 ])
