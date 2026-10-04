@@ -114,7 +114,7 @@ test('research warns when a selectable advance uses the last event marker', () =
   assert.equal(after.players[0].incident_tokens, 3);
 });
 
-test('unaffordable research still explains that it would use the last event marker', () => {
+test('unaffordable research does not show an event warning even with the last marker', () => {
   const g = fixture('advances/writing');
   g.players[0].resources = {};
   g.players[0].incident_tokens = 1;
@@ -122,8 +122,8 @@ test('unaffordable research still explains that it would use the last event mark
   const unaffordable = advances.filter((a) => a.reason === 'Not enough resources');
   assert.ok(unaffordable.length);
   for (const advance of unaffordable) {
-    assert.equal(advance.action, null, 'the warning never enables research');
-    assert.equal(advance.triggersEvent, true, advance.name);
+    assert.equal(advance.action, null);
+    assert.equal(advance.triggersEvent, false, advance.name);
   }
   assert.ok(advances.filter((a) => a.owned).every((a) => !a.triggersEvent));
   g.players[0].incident_tokens = 2;

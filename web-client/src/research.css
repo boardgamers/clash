@@ -282,8 +282,6 @@
 }
 .research-node-cost .research-availability {
   margin-left: auto;
-  flex-direction: column;
-  align-items: flex-end;
   color: var(--muted);
   text-align: right;
 }
