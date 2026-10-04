@@ -8,8 +8,8 @@ use crate::hex_ui::HexFeature;
 use crate::layout_ui::{
     bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
 };
-use crate::log_ui::MultilineText;
 use crate::move_ui::{MoveIntent, movable_units};
+use crate::multiline::MultilineText;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
@@ -120,12 +120,12 @@ fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
 }
 
 pub(crate) fn pan_and_zoom(state: &mut State) {
-    let new_zoom = state.world_camera.zoom + mouse_wheel_speed() * 0.0006;
+    let new_zoom = state.world_zoom + mouse_wheel_speed() * 0.0006;
     let max = 0.005;
     let min = 0.0005;
-    let x = new_zoom.x.min(max).max(min);
-    if x < max && x > min {
-        state.world_camera.zoom = new_zoom;
+    let zoom = new_zoom.min(max).max(min);
+    if zoom < max && zoom > min {
+        state.world_zoom = new_zoom;
     }
 
     let pan_map = is_mouse_button_down(MouseButton::Left);

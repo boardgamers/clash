@@ -199,6 +199,10 @@
                       "ActionCard": 3
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 3
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -231,18 +235,13 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
                         "CivilCard": 3
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Inspiration/Encircled",
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Inspiration: Gain Storage without taking an event token"
                   ]
                 }
               ]

@@ -393,8 +393,21 @@
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player1: End Turn: 3 actions left"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -411,6 +424,7 @@
               "actions": [
                 {
                   "action": "StartTurn",
+                  "player": 1,
                   "items": [
                     {
                       "player": 0,
@@ -426,6 +440,27 @@
                     },
                     {
                       "player": 1,
+                      "Text": "ship at E7 traded with city D6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "settler at E7 traded with city E6",
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Raided Player1 at D6",
+                      "origin": {
+                        "SpecialAdvance": "Raiding"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -435,21 +470,40 @@
                       "origin": {
                         "Advance": "TradeRoutes"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Market: Gain 1 gold",
-                    "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6, Gain 2 food",
-                    "Player2: Raiding: Raided Player1 at D6",
-                    "Player2: Waste: Could not store 1 food"
                   ]
                 },
                 {
                   "action": {
                     "Playing": "EndTurn"
                   },
-                  "log": [
-                    "Player2: End Turn: 3 actions left"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "End Turn"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss",
+                        "amount": 3
+                      },
+                      "origin": {
+                        "Ability": "End Turn"
+                      }
+                    }
                   ]
                 }
               ]
@@ -469,6 +523,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -476,16 +531,21 @@
                         "resources": {
                           "food": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
+                      "origin": {
+                        "Ability": "Viking Raids"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Lose 1 food",
                       "origin": {
                         "Ability": "Viking Raids"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Viking Raids: Pay 1 food, Lose 1 food"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

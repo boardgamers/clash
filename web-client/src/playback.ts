@@ -111,9 +111,22 @@ export function frameDetails(
       for (const action of actions) {
         const playing = typeof action.action === 'object' && action.action?.Playing;
         if (!playing || typeof playing !== 'object' || !('Custom' in playing)) continue;
-        const name = action.log
-          ?.map((line) => line.match(/: ([^:]+): (?:.*?, )?Start action(?: in city [A-Z]\d+)?(?:,|$)/)?.[1])
-          .find(Boolean);
+        const special = (playing.Custom as { action?: string })?.action;
+        const structuredName =
+          special &&
+          action.items?.find((item) =>
+            Object.values(item.origin ?? {}).some(
+              (name) => typeof name === 'string' && name.replaceAll(' ', '') === special,
+            ),
+          )?.origin;
+        const name =
+          (structuredName &&
+            Object.values(structuredName)
+              .find((name): name is string => typeof name === 'string')
+              ?.replace(/([a-z])([A-Z])/g, '$1 $2')) ??
+          action.log
+            ?.map((line) => line.match(/: ([^:]+): (?:.*?, )?Start action(?: in city [A-Z]\d+)?(?:,|$)/)?.[1])
+            .find(Boolean);
         if (name) {
           description = name;
           break;

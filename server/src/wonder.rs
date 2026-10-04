@@ -208,9 +208,10 @@ pub(crate) fn on_draw_wonder_card(game: &mut Game, player_index: usize, draw: Dr
     );
 }
 
-pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
+pub(crate) fn draw_wonder_from_pile(game: &mut Game, player: &EventPlayer) -> Option<Wonder> {
     draw_card_from_pile(
         game,
+        player,
         "Wonders",
         |game| &mut game.wonders_left,
         |_| Vec::new(),
@@ -322,7 +323,7 @@ fn player_with_wonder_card(game: &Game, wonder: Wonder) -> Option<usize> {
 }
 
 fn gain_wonder_from_pile(game: &mut Game, player: &EventPlayer) {
-    if let Some(w) = draw_wonder_from_pile(game) {
+    if let Some(w) = draw_wonder_from_pile(game, player) {
         gain_wonder_card(game, player, w, HandCardLocation::DrawPile);
     }
 }
@@ -433,21 +434,14 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |e| &mut e.play_wonder_card,
             11,
             move |game, p, i| {
-                p.log(game, &format!("Play the wonder card {}", i.wonder.name()));
-
                 Some(PositionRequest::new(
                     cities_for_wonder(i.wonder, game, p.get(game), i.cost.clone()),
                     1..=1,
                     "Select city to build wonder",
                 ))
             },
-            |game, s, i| {
-                let position = s.choice[0];
-                i.selected_position = Some(position);
-                s.log(
-                    game,
-                    &format!("Decided to build {} in city {position}", i.wonder.name(),),
-                );
+            |_game, s, i| {
+                i.selected_position = Some(s.choice[0]);
             },
         )
         .add_payment_request_listener(
@@ -534,13 +528,13 @@ pub(crate) fn gain_wonder(
     wonder: Wonder,
     city_position: Position,
 ) {
-    player.log(game, &format!("Gain {} at {city_position}", wonder.name()));
     log_structure(
         game,
         player,
         Structure::Wonder(wonder),
         ActionLogBalance::Gain,
         city_position,
+        None,
     );
     let p = player.get_mut(game);
     p.get_city_mut(city_position).pieces.wonders.push(wonder);
@@ -570,13 +564,13 @@ pub(crate) fn lose_wonder(
         "Player does not own the wonder to lose it"
     );
 
-    player.log(game, &format!("Lose {} at {city_position}", wonder.name()));
     log_structure(
         game,
         player,
         Structure::Wonder(wonder),
         ActionLogBalance::Loss,
         city_position,
+        None,
     );
 
     game.player_mut(player.index).wonders_owned.remove(wonder);
@@ -625,7 +619,7 @@ fn remove_public_wonder(game: &mut Game) {
 }
 
 pub(crate) fn draw_public_wonder(game: &mut Game, player: &EventPlayer) {
-    if let Some(wonder) = draw_wonder_from_pile(game) {
+    if let Some(wonder) = draw_wonder_from_pile(game, player) {
         player.log(
             game,
             &format!("{} is now available to be taken by anyone", wonder.name()),
@@ -656,7 +650,7 @@ pub(crate) fn use_draw_replacement_wonder() -> Ability {
         |game, p, ()| {
             let player = p.get_mut(game);
             if player.event_info.remove(DRAW_REPLACEMENT_WONDER).is_some() {
-                add_start_turn_action_if_needed(game);
+                add_start_turn_action_if_needed(game, game.active_player());
                 p.log(game, "Draw a replacement wonder card");
                 draw_wonder_card(game, p);
             }

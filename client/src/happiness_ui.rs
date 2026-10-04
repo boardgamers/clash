@@ -1,4 +1,4 @@
-use crate::action_buttons::base_or_custom_action;
+use crate::action_buttons::base_or_modified_action;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
@@ -66,7 +66,7 @@ pub(crate) fn open_increase_happiness_dialog(
     actions: &[PlayingActionType],
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> RenderResult {
-    base_or_custom_action(rc, actions, "Increase happiness", |custom| {
+    base_or_modified_action(rc, actions, "Increase happiness", |custom| {
         ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(rc, custom)))
     })
 }

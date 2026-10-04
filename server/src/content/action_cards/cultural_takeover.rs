@@ -7,7 +7,7 @@ use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{SelectedStructure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::cultural_influence::{
-    InfluenceCultureInfo, available_influence_actions, influence_culture_boost_cost,
+    InfluenceCultureAttemptInfo, available_influence_actions, influence_culture_boost_cost,
 };
 use crate::game::Game;
 use crate::player::{Player, gain_unit, remove_unit};
@@ -104,6 +104,7 @@ fn any_barbarian_city_can_be_influenced(game: &Game, p: &Player) -> bool {
                     i,
                     true,
                     true,
+                    c.player_index,
                 )
                 .is_ok()
             })
@@ -138,7 +139,7 @@ pub(crate) fn use_cultural_takeover() -> Ability {
                     && i.target_unit.is_none()
                     && matches!(i.structure, Structure::CityCenter)
                     && !(is_barbarian_takeover(game, i)
-                        || i.barbarian_takeover_check
+                        || i.barbarian_takeover
                         || crate::content::civilizations::celts::can_mark_city(
                             game,
                             i.info.player,
@@ -168,7 +169,7 @@ pub(crate) fn use_cultural_takeover() -> Ability {
         .build()
 }
 
-fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
+fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureAttemptInfo) -> bool {
     let city = game.get_any_city(c.position);
     city.player_index == get_barbarians_player(game).index
         && city.size() == 1

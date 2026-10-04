@@ -209,6 +209,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -235,6 +239,22 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -250,7 +270,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -261,18 +282,25 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
-                    "Player1: Combat: Gain 1 gold, Gain city C1",
-                    "Player2: Combat: Lose city C1",
-                    "Player1: Waste: Could not store 1 gold"
                   ]
                 },
                 {
@@ -280,6 +308,10 @@
                     "Playing": {
                       "ActionCard": 11
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 11
                   },
                   "items": [
                     {
@@ -309,10 +341,6 @@
                         "CivilCard": 11
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Great Ideas/Siege",
-                    "Player1: Great Ideas: Gain 2 ideas"
                   ]
                 }
               ]

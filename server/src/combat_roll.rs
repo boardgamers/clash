@@ -3,6 +3,7 @@ use crate::combat_listeners::CombatStrength;
 use crate::content::ability::combat_event_origin;
 use crate::events::EventPlayer;
 use crate::game::Game;
+use crate::log::{ActionLogEntry, ActionLogEntryCombatRoll};
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry};
 use crate::unit::{LEADER_UNIT, UnitType, Units};
 use num::Zero;
@@ -59,12 +60,20 @@ impl CombatHits {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct UnitCombatRoll {
+    pub value: u8,
+    pub unit_type: UnitType,
+    pub bonus: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub combat_bonus: Option<u8>,
+}
+
 pub(crate) struct CombatRoundStats {
     horse_master_value: Option<u8>,
     player: usize,
-    opponent_str: String,
     pub(crate) fighters: u8,
-    log_str: String,
+    rolls: Vec<UnitCombatRoll>,
     combat_value: u8,
     hit_cancels: u8,
     strength: CombatStrength,
@@ -78,7 +87,7 @@ impl CombatRoundStats {
         strength: CombatStrength,
     ) -> CombatRoundStats {
         let fighting = c.fighting_units(game, player);
-        let mut log = vec![];
+        let mut unit_rolls = vec![];
         let rolls = roll(
             game,
             player,
@@ -93,18 +102,10 @@ impl CombatRoundStats {
                 && game
                     .player(player)
                     .has_special_advance(crate::special_advance::SpecialAdvance::Horsemanship),
-            &mut log,
+            &mut unit_rolls,
         );
-        let log_str = roll_log_str(&log);
         let combat_value = rolls.combat_value as u8;
         let hit_cancels = rolls.hit_cancels + strength.hit_cancels;
-
-        let opponent_str = if c.defender() == player {
-            "attacking"
-        } else {
-            "defending"
-        }
-        .to_string();
 
         CombatRoundStats {
             horse_master_value: (c.first_round()
@@ -112,10 +113,9 @@ impl CombatRoundStats {
                 && c.has_leader(c.role(player), game))
             .then_some(rolls.horse_master_value)
             .flatten(),
-            opponent_str,
             strength,
             player,
-            log_str,
+            rolls: unit_rolls,
             combat_value,
             hit_cancels,
             fighters: fighting.len() as u8,
@@ -135,35 +135,18 @@ impl CombatRoundStats {
             self.combat_value,
         );
         combat_hits.horse_master_value = self.horse_master_value;
-        let hits = combat_hits.hits();
 
-        let p = EventPlayer::from_player(self.player, game, combat_event_origin());
-        p.log(
+        EventPlayer::new(self.player, combat_event_origin()).add_log_entry(
             game,
-            &format!(
-                "Roll {} for combined combat value of {} and gets {} hits against {} units",
-                self.log_str, self.combat_value, hits, self.opponent_str,
-            ),
+            ActionLogEntry::CombatRoll(ActionLogEntryCombatRoll {
+                rolls: self.rolls.clone(),
+                combat_value: self.combat_value,
+                hits: combat_hits.hits(),
+                combat_modifiers: self.strength.roll_log.clone(),
+            }),
         );
-
-        if !self.strength.roll_log.is_empty() {
-            p.log(
-                game,
-                &format!(
-                    "Combat modifiers: {}",
-                    roll_log_str(&self.strength.roll_log)
-                ),
-            );
-        }
         combat_hits
     }
-}
-
-fn roll_log_str(log: &[String]) -> String {
-    if log.is_empty() {
-        return String::from("no dice");
-    }
-    log.join(", ")
 }
 
 struct CombatRolls {
@@ -209,7 +192,7 @@ fn roll(
     deny_combat_abilities: bool,
     cap_bonus: bool,
     mut horsemanship: bool,
-    roll_log: &mut Vec<String>,
+    roll_log: &mut Vec<UnitCombatRoll>,
 ) -> CombatRolls {
     let mut dice_rolls = extra_dies;
     let mut unit_types = Units::empty();
@@ -237,20 +220,16 @@ fn roll(
                 Infantry => {
                     rolls.combat_value += 1;
                     bonus += 1;
-                    add_roll_log_effect(roll_log, "+1 combat value");
+                    add_bonus(roll_log);
                 }
                 Cavalry => {
                     let extra = if horsemanship { 3 } else { 2 };
                     rolls.combat_value += extra;
                     bonus += extra;
-                    add_roll_log_effect(
-                        roll_log,
-                        if horsemanship {
-                            "+3 combat value (Horsemanship)"
-                        } else {
-                            "+2 combat value"
-                        },
-                    );
+                    add_bonus(roll_log);
+                    if horsemanship {
+                        roll_log.last_mut().expect("cavalry roll").combat_bonus = Some(3);
+                    }
                     horsemanship = false;
                     if rolls.horse_master_value.is_none() {
                         rolls.horse_master_value = Some(value);
@@ -259,12 +238,10 @@ fn roll(
                 Elephant => {
                     rolls.hit_cancels += 1;
                     rolls.combat_value -= value as i8;
-                    add_roll_log_effect(roll_log, "-1 hits, no combat value");
+                    add_bonus(roll_log);
                 }
                 _ => (),
             }
-        } else {
-            add_roll_log_effect(roll_log, "no bonus");
         }
     }
     rolls.horse_master_value = rolls.horse_master_value.map(|v| {
@@ -276,7 +253,11 @@ fn roll(
     });
     if cap_bonus && bonus > 2 {
         rolls.combat_value -= bonus - 2;
-        roll_log.push(format!("opponent limits combat bonus from +{bonus} to +2"));
+        game.log(
+            player_index,
+            &combat_event_origin(),
+            &format!("opponent limits combat bonus from +{bonus} to +2"),
+        );
     }
     if rolls.combat_value < 0 {
         rolls.combat_value = 0;
@@ -288,7 +269,7 @@ fn dice_roll_with_leader_reroll(
     game: &mut Game,
     unit_types: &mut Units,
     deny_combat_abilities: bool,
-    roll_log: &mut Vec<String>,
+    roll_log: &mut Vec<UnitCombatRoll>,
 ) -> CombatDieRoll {
     let side = roll_die(game, roll_log);
 
@@ -303,7 +284,7 @@ fn dice_roll_with_leader_reroll(
 
     // if used, the leader grants unlimited rerolls of 1s
     loop {
-        add_roll_log_effect(roll_log, "re-roll");
+        add_bonus(roll_log);
         let side = roll_die(game, roll_log);
 
         if side.bonus != LEADER_UNIT {
@@ -312,13 +293,17 @@ fn dice_roll_with_leader_reroll(
     }
 }
 
-fn add_roll_log_effect(roll_log: &mut [String], effect: &str) {
-    use std::fmt::Write as _;
-    let _ = write!(roll_log[roll_log.len() - 1], "{effect})");
+fn add_bonus(roll_log: &mut [UnitCombatRoll]) {
+    roll_log.last_mut().expect("entry not found").bonus = true;
 }
 
-fn roll_die(game: &mut Game, roll_log: &mut Vec<String>) -> CombatDieRoll {
+fn roll_die(game: &mut Game, roll_log: &mut Vec<UnitCombatRoll>) -> CombatDieRoll {
     let roll = game.next_dice_roll();
-    roll_log.push(format!("{} ({}, ", roll.value, roll.bonus.generic_name()));
-    roll.clone()
+    roll_log.push(UnitCombatRoll {
+        value: roll.value,
+        unit_type: roll.bonus,
+        bonus: false,
+        combat_bonus: None,
+    });
+    roll
 }

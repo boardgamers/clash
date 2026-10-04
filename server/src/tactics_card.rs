@@ -267,7 +267,11 @@ impl TacticsCardBuilder {
         if !self.fighter_requirement.is_empty() {
             requirements.push(format!(
                 "Requires your {} in the battle",
-                self.fighter_requirement.iter().map(ToString::to_string).collect::<Vec<_>>().join(" or ")
+                self.fighter_requirement
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(" or ")
             ));
         }
         let description = if requirements.is_empty() {

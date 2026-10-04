@@ -84,7 +84,7 @@ fn calendar() -> SpecialAdvanceInfo {
         "As a free action, look at the next event. You may pay 1 culture token to put it at the bottom of the deck, then use Calendar again.")
         .add_custom_action(CustomActionType::Calendar, |c| c.any_times().free_action().no_resources(), |b| b
             .add_persistent_event_listener(|e| &mut e.custom_action, 0, |game, p, _| {
-                let id = crate::card::draw_card_from_pile(game, "Events", |g| &mut g.incidents_left,
+                let id = crate::card::draw_card_from_pile(game, p, "Events", |g| &mut g.incidents_left,
                     |g| g.cache.get_incidents().iter().map(|i| i.id).collect(),
                     |p| p.action_cards.iter().filter_map(|id| id.checked_sub(crate::content::incidents::great_persons::GREAT_PERSON_OFFSET)).collect()).expect("event deck");
                 game.incidents_left.insert(0, id);
@@ -152,6 +152,7 @@ fn influence_targets(game: &Game, p: &Player) -> Vec<SelectedStructure> {
                 &crate::playing_actions::PlayingActionType::InfluenceCultureAttempt,
                 false,
                 false,
+                game.get_any_city(target.position).player_index,
                 Some(pos),
             )
             .is_ok()

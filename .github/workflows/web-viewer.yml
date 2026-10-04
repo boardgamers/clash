@@ -3,7 +3,7 @@ on:
   pull_request:
     paths: ['web-client/**', 'server/**', 'Cargo.*', '.github/workflows/web-viewer.yml']
   push:
-    branches: [feat/3d-web-viewer]
+    branches: [main, feat/3d-web-viewer]
 jobs:
   verify:
     runs-on: ubuntu-latest

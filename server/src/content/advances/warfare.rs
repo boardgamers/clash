@@ -225,9 +225,17 @@ fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: Comb
 
     let add_combat_value = |s: &mut CombatStrength, value: u8| {
         s.extra_combat_value += value as i8;
-        let free = value == 2 && game.player(c.player(role)).can_use_advance(Advance::Metallurgy);
-        let benefit = if free { " (Metallurgy: no ore cost)" } else { "" };
-        s.roll_log.push(format!("steel weapons added {value} combat value{benefit}"));
+        let free = value == 2
+            && game
+                .player(c.player(role))
+                .can_use_advance(Advance::Metallurgy);
+        let benefit = if free {
+            " (Metallurgy: no ore cost)"
+        } else {
+            ""
+        };
+        s.roll_log
+            .push(format!("steel weapons added {value} combat value{benefit}"));
     };
 
     if role.is_attacker() {

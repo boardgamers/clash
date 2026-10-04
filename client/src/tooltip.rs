@@ -1,6 +1,6 @@
 use crate::client_state::{CameraMode, MousePosition, NO_UPDATE, State};
 use crate::layout_ui::rect_from;
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use macroquad::color::Color;
 use macroquad::input::mouse_position;

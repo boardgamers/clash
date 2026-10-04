@@ -5,7 +5,7 @@ use crate::card::{HandCard, HandCardLocation, all_action_hand_cards, all_objecti
 use crate::city::{MoodState, set_city_mood};
 use crate::civilization::Civilization;
 use crate::content::ability::AbilityBuilder;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionType, PlayingActionModifier};
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
@@ -265,7 +265,7 @@ fn caesar() -> LeaderInfo {
                 to increase happiness in the leader city.",
         )
         .add_action_modifier(
-            CustomActionType::StatesmanIncreaseHappiness,
+            PlayingActionModifier::StatesmanIncreaseHappiness,
             |c| c.any_times().free_action().no_resources(),
             PlayingActionType::IncreaseHappiness,
         )
@@ -326,9 +326,9 @@ fn sulla() -> LeaderInfo {
             .add_transient_event_listener(
                 |event| &mut event.on_influence_culture_attempt,
                 6,
-                |r, city, game, _| {
+                |r, city, game, p| {
                     if let Ok(info) = r
-                        && info.is_defender
+                        && info.is_defender(p.index)
                         && leader_position(game.player(city.player_index)) == city.position
                     {
                         *r =

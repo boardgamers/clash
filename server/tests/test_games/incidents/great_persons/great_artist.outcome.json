@@ -5,6 +5,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 19,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0,
           "barbarians": {}
         }
@@ -265,11 +268,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -281,7 +288,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -303,19 +310,50 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Great Artist",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 19
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot move - will try to spawn a new city instead",
+                      "origin": {
+                        "Incident": 19
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Barbarians cannot spawn a new city",
+                      "origin": {
+                        "Incident": 19
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Cannot afford to buy Great Artist",
+                      "origin": {
+                        "Incident": 19
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
-                    "A new game event has been triggered: Great Artist",
-                    "Player1: Great Artist: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Cannot afford to buy Great Artist"
                   ]
                 }
               ]

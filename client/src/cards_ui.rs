@@ -3,7 +3,7 @@ use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
 use crate::layout_ui::{bottom_centered_text, button_pressed, rect_from};
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
@@ -58,7 +58,7 @@ impl SelectionInfo {
 
 pub(crate) fn show_cards(rc: &RenderContext) -> RenderResult {
     let p = rc.shown_player;
-    let cards = hand_cards(p, &HandCardType::get_all());
+    let cards = hand_cards(p, &HandCardType::get_all_and_public(), rc.game);
     let size = vec2(180., 30.);
 
     let selection = match &rc.state.active_dialog {

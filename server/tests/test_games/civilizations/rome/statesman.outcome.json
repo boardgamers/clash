@@ -262,10 +262,16 @@
                           "mood_tokens": 2
                         },
                         "action_type": {
-                          "Custom": "StatesmanIncreaseHappiness"
+                          "Special": {
+                            "Modifier": "StatesmanIncreaseHappiness"
+                          }
                         }
                       }
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "LeaderAbility": "Statesman"
                   },
                   "items": [
                     {
@@ -284,15 +290,12 @@
                         "resources": {
                           "mood_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "LeaderAbility": "Statesman"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Statesman: City A1 became Neutral, Pay 2 mood tokens"
                   ]
                 }
               ]

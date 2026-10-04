@@ -1,7 +1,7 @@
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType, SELECT_RADIUS};

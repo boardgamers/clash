@@ -85,7 +85,6 @@ test('Philosophy adds a sourced idea bonus to Science cards and it matches the a
   assert.equal(after.players[0].resources.culture_tokens, p.resources.culture_tokens + 1);
   p.advances = p.advances.filter((a: string) => a !== 'Philosophy');
   assert.ok(view(g).advances.every((a) => !a.bonusEffects?.length));
-
 });
 
 test('Great Library uses the shared tree without promising research bonuses or applying prerequisites', () => {
@@ -107,9 +106,7 @@ test('Great Library uses the shared tree without promising research bonuses or a
 
 test('Free Economy exposes its mood cost before collect is submitted', () => {
   const v = view(fixture('advances/collect_free_economy'));
-  const economy = v.collectActions!.find(
-    (a) => typeof a.value === 'object' && a.value.Custom === 'FreeEconomyCollect',
-  )!;
+  const economy = v.collectActions!.find((a) => a.name === 'Free Economy')!;
   assert.equal(economy.free, true);
   assert.deepEqual(economy.payment, { mood_tokens: 1 });
   assert.deepEqual(v.collectActions!.find((a) => a.value === 'Collect')!.payment, {});

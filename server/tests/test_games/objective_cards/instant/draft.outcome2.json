@@ -233,11 +233,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Recruit"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -249,7 +253,7 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -262,20 +266,24 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
+                      "origin": {
+                        "Advance": "Draft"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Recruit"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Recruit: Pay 1 action, Pay 1 mood token with Draft, Gain 1 infantry at A1",
-                    "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
                   ]
                 },
                 {
@@ -292,11 +300,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Recruit"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -308,7 +320,7 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -318,6 +330,13 @@
                           "Advance": "Draft"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
+                      "origin": {
+                        "Advance": "Draft"
+                      }
                     },
                     {
                       "player": 0,
@@ -335,16 +354,13 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Recruit"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Recruit: Pay 1 action, Pay 1 mood token with Draft, City A1 became Neutral, Gain 1 infantry at A1",
-                    "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
                   ]
                 },
                 {
@@ -357,6 +373,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -376,9 +393,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Draft using Large Civilization/Draft"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

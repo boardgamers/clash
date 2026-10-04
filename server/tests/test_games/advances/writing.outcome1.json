@@ -282,11 +282,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -299,7 +303,7 @@
                           "food": 1,
                           "gold": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -351,17 +355,15 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Writing",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 1
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Advance: Pay 1 action, Pay 1 food and 1 gold, Gain Writing and take an event token (1 left)",
-                    "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
                   ]
                 },
                 {
@@ -379,11 +381,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Construct Building"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -397,7 +403,7 @@
                           "wood": 1,
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -410,7 +416,8 @@
                           "Building": "Academy"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -428,10 +435,6 @@
                         "Ability": "Academy"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, Gain Academy at A1",
-                    "Player1: Academy: Gain 2 ideas"
                   ]
                 }
               ]

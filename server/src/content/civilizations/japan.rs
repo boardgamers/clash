@@ -82,7 +82,7 @@ pub(crate) fn on_declare_card(game: &mut Game, a: CardAnnouncement) -> Result<()
     if !a.shogunate && !game.cache.get_civil_card(a.card).action_type.free {
         pay_action(
             game,
-            &EventPlayer::from_player(a.player, game, EventOrigin::CivilCard(a.card)),
+            &EventPlayer::new(a.player, EventOrigin::CivilCard(a.card)),
         );
     }
     PlayingAction::ActionCard(a.card).execute_without_action_cost(game, a.player)

@@ -7,8 +7,9 @@ use crate::layout_ui::{
     bottom_centered_text_with_offset, bottom_right_texture, button_pressed,
     draw_scaled_icon_with_tooltip, icon_pos, top_center_anchor, top_center_texture,
 };
-use crate::log_ui::{MultilineText, multiline_label};
+use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::tooltip::show_tooltip_for_circle;
@@ -27,7 +28,7 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource::ResourceType;
-use server::status_phase::get_status_phase;
+use server::status_phase::{get_status_phase, status_phase_type};
 use server::victory_points::victory_points_parts;
 
 pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
@@ -68,7 +69,7 @@ pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
         }
 
         let tooltip = if rc.state.control_player.is_some_and(|p| p == pl.index) {
-            format!("{pl} (You)")
+            format!("{} (You)", pl.get_name())
         } else {
             pl.get_name()
         };
@@ -185,7 +186,7 @@ pub(crate) fn show_top_left(rc: &RenderContext, painter: &mut ColumnLabelPainter
         _ => painter.label(&format!("Age {}", game.age)),
     }
     if let Some(s) = get_status_phase(game) {
-        painter.label(&format!("Status Phase: {s}"));
+        painter.label(&format!("Status Phase: {}", status_phase_type(s)));
     } else {
         painter.label(&format!("Round {}", game.round));
     }
@@ -281,7 +282,7 @@ impl<'a> ColumnLabelPainter<'a> {
 
     pub fn label(&mut self, text: &str) {
         let rc = self.rc;
-        multiline_label(rc.state, text, self.max_column_width, |label| {
+        multiline_label(rc.state, text, self.max_column_width, |_, label| {
             self.used_column_width = self
                 .used_column_width
                 .max(rc.state.measure_text(label).width);

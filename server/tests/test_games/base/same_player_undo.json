@@ -1,7 +1,4 @@
 {
-  "options": {
-    "undo": "SamePlayer"
-  },
   "state": "Playing",
   "players": [
     {

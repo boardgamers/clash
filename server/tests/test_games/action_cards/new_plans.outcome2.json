@@ -210,11 +210,15 @@
                       "ActionCard": 31
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 31
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 31
@@ -235,10 +239,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: New Plans: Pay 1 action, Pay 1 culture token",
-                    "Player1: Action Card: Play New Plans/Flanking"
                   ]
                 },
                 {
@@ -251,6 +251,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -258,7 +259,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 31
@@ -295,9 +296,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: New Plans: Pay 1 culture token, Draw an objective card, Draw an objective card"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -312,6 +311,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -344,9 +344,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: New Plans: Shuffle an objective card back into the draw pile, Reshuffled a card from the draw pile back into the draw pile"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

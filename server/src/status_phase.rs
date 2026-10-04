@@ -9,7 +9,7 @@ use crate::content::persistent_events::{
     trigger_persistent_event_with_listener,
 };
 use crate::events::{EventOrigin, EventPlayer};
-use crate::log::{TurnType, add_turn_log};
+use crate::log::{TurnType, add_start_turn_action_if_needed, add_turn_log};
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
@@ -21,6 +21,16 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash, Copy)]
+pub enum StatusPhaseStateType {
+    CompleteObjectives,
+    FreeAdvance,
+    DrawCards,
+    RazeSize1City,
+    ChangeGovernmentType,
+    DetermineFirstPlayer,
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum StatusPhaseState {
     CompleteObjectives,
@@ -31,15 +41,15 @@ pub enum StatusPhaseState {
     DetermineFirstPlayer(usize),
 }
 
-impl Display for StatusPhaseState {
+impl Display for StatusPhaseStateType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            StatusPhaseState::CompleteObjectives => write!(f, "Complete Objectives"),
-            StatusPhaseState::FreeAdvance => write!(f, "Free Advance"),
-            StatusPhaseState::DrawCards => write!(f, "Draw Cards"),
-            StatusPhaseState::RazeSize1City => write!(f, "Raze Size 1 City"),
-            StatusPhaseState::ChangeGovernmentType(_) => write!(f, "Change Government"),
-            StatusPhaseState::DetermineFirstPlayer(_) => write!(f, "Determine First Player"),
+            StatusPhaseStateType::CompleteObjectives => write!(f, "Complete Objectives"),
+            StatusPhaseStateType::FreeAdvance => write!(f, "Free Advance"),
+            StatusPhaseStateType::DrawCards => write!(f, "Draw Cards"),
+            StatusPhaseStateType::RazeSize1City => write!(f, "Raze Size 1 City"),
+            StatusPhaseStateType::ChangeGovernmentType => write!(f, "Change Government"),
+            StatusPhaseStateType::DetermineFirstPlayer => write!(f, "Determine First Player"),
         }
     }
 }
@@ -71,19 +81,31 @@ pub fn get_status_phase(game: &Game) -> Option<&StatusPhaseState> {
 }
 
 pub(crate) fn enter_status_phase(game: &mut Game) {
-    add_turn_log(game, TurnType::StatusPhase);
-    play_status_phase(game, StatusPhaseState::CompleteObjectives);
+    play_status_phase(game, StatusPhaseState::CompleteObjectives, false);
 }
 
-pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
+pub(crate) fn status_phase_response(game: &mut Game, phase: StatusPhaseState) {
+    play_status_phase(game, phase, true);
+}
+
+fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState, response: bool) {
     use StatusPhaseState::*;
 
     loop {
+        let t = status_phase_type(&phase);
+        if game.events.is_empty() {
+            add_turn_log(game, TurnType::StatusPhase(t));
+            // needed for draw cards
+            if response {
+                add_start_turn_action_if_needed(game, game.active_player());
+            }
+            game.player_changed();
+        }
         phase = match trigger_persistent_event_with_listener(
             game,
             &game.human_players_sorted(game.starting_player_index),
             |events| &mut events.status_phase,
-            &game.cache.status_phase_handler(&phase).listeners.clone(),
+            &game.cache.status_phase_handler(&t).listeners.clone(),
             phase,
             PersistentEventType::StatusPhase,
             TriggerPersistentEventParams::default(),
@@ -322,10 +344,11 @@ where
                 p.log(
                     game,
                     &format!(
-                        "{p} changed their government from {} to {}",
+                        "{} changed their government from {} to {}",
                         p.get(game)
                             .government(game)
                             .expect("player should have a government before changing it"),
+                        p.name(game),
                         c.new_government
                     ),
                 );
@@ -494,6 +517,18 @@ fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
         })
         .expect("no player found")
         .index
+}
+
+#[must_use]
+pub fn status_phase_type(p: &StatusPhaseState) -> StatusPhaseStateType {
+    match p {
+        StatusPhaseState::CompleteObjectives => StatusPhaseStateType::CompleteObjectives,
+        StatusPhaseState::FreeAdvance => StatusPhaseStateType::FreeAdvance,
+        StatusPhaseState::DrawCards => StatusPhaseStateType::DrawCards,
+        StatusPhaseState::RazeSize1City => StatusPhaseStateType::RazeSize1City,
+        StatusPhaseState::ChangeGovernmentType(_) => StatusPhaseStateType::ChangeGovernmentType,
+        StatusPhaseState::DetermineFirstPlayer(_) => StatusPhaseStateType::DetermineFirstPlayer,
+    }
 }
 
 #[cfg(test)]

@@ -270,10 +270,16 @@
                           "mood_tokens": 6
                         },
                         "action_type": {
-                          "Custom": "VotingIncreaseHappiness"
+                          "Special": {
+                            "Modifier": "VotingIncreaseHappiness"
+                          }
                         }
                       }
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "Voting"
                   },
                   "items": [
                     {
@@ -302,15 +308,12 @@
                         "resources": {
                           "mood_tokens": 6
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Voting"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Voting: Pay 1 mood token, City C2 became Neutral, City B3 became Happy, Pay 6 mood tokens"
                   ]
                 }
               ]

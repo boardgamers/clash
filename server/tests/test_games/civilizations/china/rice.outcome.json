@@ -257,11 +257,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Collect"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -283,11 +287,14 @@
                           "Advance": "Irrigation"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Added 1 food",
+                      "origin": {
+                        "SpecialAdvance": "RiceCultivation"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Collect: Pay 1 action, Use city B3, Gain 2 food with Irrigation",
-                    "Player1: Rice Cultivation: Added 1 food"
                   ]
                 }
               ]

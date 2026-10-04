@@ -288,6 +288,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -310,6 +314,20 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C3",
+                        "destination": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -325,7 +343,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "B2"
+                        "position": "B2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -336,7 +355,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "B2"
+                        "position": "B2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -349,7 +369,8 @@
                           "Building": "Port"
                         },
                         "balance": "Loss",
-                        "position": "B2"
+                        "position": "B2",
+                        "port_position": "C3"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -362,7 +383,8 @@
                           "Building": "Port"
                         },
                         "balance": "Gain",
-                        "position": "B2"
+                        "position": "B2",
+                        "port_position": "C3"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -384,19 +406,25 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Place Settler"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Move: disembarked 1 cavalry and 1 elephant from C3 to B2",
-                    "Player1: Combat: Gain 2 gold, Gain city B2, Gain Port at B2 at the water tile C3, City B2 became Angry",
-                    "Player2: Combat: Lose city B2, Lose Port at B2",
-                    "Player2: Place Settler: Gain 1 settler at C1",
-                    "Player1: Waste: Could not store 2 gold"
                   ]
                 },
                 {
@@ -409,6 +437,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -428,9 +457,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Complete Objectives: Complete Naval Assault using Optimized Storage/Naval Assault"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

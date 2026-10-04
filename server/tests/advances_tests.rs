@@ -8,7 +8,9 @@ use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::{PositionCollection, possible_resource_collections};
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
-use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::content::custom_actions::{
+    CustomAction, CustomActionType, PlayingActionModifier, SpecialAction,
+};
 use server::content::persistent_events::{EventResponse, SelectedStructure};
 use server::cultural_influence::InfluenceCultureAttempt;
 use server::events::{EventOrigin, check_event_origin};
@@ -227,7 +229,9 @@ fn test_increase_happiness_voting() {
                         (Position::from_offset("B3"), 2),
                     ],
                     ResourcePile::mood_tokens(6),
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                    PlayingActionType::Special(SpecialAction::Modifier(
+                        PlayingActionModifier::VotingIncreaseHappiness,
+                    )),
                 ),
             )),
         )],
@@ -247,7 +251,9 @@ fn test_increase_happiness_voting_rituals() {
                         (Position::from_offset("B3"), 2),
                     ],
                     ResourcePile::new(1, 0, 1, 3, 1, 0, 0),
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                    PlayingActionType::Special(SpecialAction::Modifier(
+                        PlayingActionModifier::VotingIncreaseHappiness,
+                    )),
                 ),
             )),
         )],
@@ -611,17 +617,21 @@ fn test_collect_free_economy() {
                         PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
                         PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
                     ],
-                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+                    PlayingActionType::Special(SpecialAction::Modifier(
+                        PlayingActionModifier::FreeEconomyCollect,
+                    )),
                 ))),
             )
             .skip_json(),
             TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1)))
+                .skip_json()
                 .with_post_assert(|game| {
                     // no production focus
                     let result =
                         PlayingActionType::ActionCard(19).is_available(&game, game.active_player());
                     assert!(result.is_err());
                 }),
+            TestAction::undoable(0, Action::Response(EventResponse::Bool(true))),
         ],
     );
 }
@@ -639,7 +649,9 @@ fn test_cultural_influence_instant_with_arts() {
                             Position::from_offset("C2"),
                             Structure::Building(Fortress),
                         ),
-                        PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+                        PlayingActionType::Special(SpecialAction::Modifier(
+                            PlayingActionModifier::ArtsInfluenceCultureAttempt,
+                        )),
                     ),
                 )),
             )

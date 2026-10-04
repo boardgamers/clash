@@ -350,7 +350,24 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "items": [
+                    {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "start": "F7",
+                        "destination": "D8"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
                     {
                       "player": 1,
                       "Resources": {
@@ -358,7 +375,7 @@
                           "food": 1,
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -369,9 +386,6 @@
                         }
                       ]
                     }
-                  ],
-                  "log": [
-                    "Player2: Move: marched 1 settler from F7 to D8 on roads for 1 food and 1 ore, Pay 1 food and 1 ore with Roads"
                   ]
                 }
               ]

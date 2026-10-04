@@ -95,7 +95,7 @@ test('private offers and locked choices never leak through player/spectator stat
     assert.deepEqual(g.civilization_draft.ready, [false, false, true]);
     assert.equal(view(s, seat).civilizationDraft.chosen, seat === 2 ? offers[2][0] : null);
     assert.ok(engine.factions(s).every((c: string) => c === 'Choose Civilization'));
-    assert.deepEqual(engine.logSlice(s, { start: 0, player: seat }), ['Setup']);
+    assert.deepEqual(engine.logSlice(s, { start: 0, player: seat }), []);
   }
 });
 

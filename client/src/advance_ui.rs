@@ -1,7 +1,7 @@
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::{button_pressed, top_centered_text};
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use crate::unit_ui::add_unit_description;

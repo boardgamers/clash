@@ -198,6 +198,10 @@
                       "ActionCard": 2
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 2
+                  },
                   "items": [
                     {
                       "player": 0,
@@ -214,10 +218,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Quick Advance/Encircled",
-                    "Player1: Quick Advance: Pay 1 culture token"
                   ]
                 },
                 {
@@ -230,6 +230,7 @@
                       ]
                     }
                   },
+                    "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -237,16 +238,14 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 2
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Quick Advance: Pay 1 culture token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -254,6 +253,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -271,7 +271,7 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -279,10 +279,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Quick Advance: Gain Storage without taking an event token"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

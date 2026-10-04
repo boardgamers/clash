@@ -63,7 +63,7 @@ fn test_large_civ() {
                 ])),
             )
             .skip_json(),
-            TestAction::undoable(
+            TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(7),
@@ -103,7 +103,7 @@ fn test_standing_army() {
         "standing_army",
         vec![
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn)).skip_json(),
-            TestAction::undoable(
+            TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(14),

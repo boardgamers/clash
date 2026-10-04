@@ -366,11 +366,15 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -382,7 +386,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -404,19 +408,29 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "triggers the event Great Explorer",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Exhausted the land in position E8",
+                      "origin": {
+                        "Incident": 18
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player2: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
-                    "Player2: Storage: Gain 1 mood token",
-                    "A new game event has been triggered: Great Explorer",
-                    "Player2: Great Explorer: Exhausted the land in position E8"
                   ]
                 },
                 {
@@ -429,6 +443,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -436,7 +451,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Incident": 18
@@ -458,9 +473,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Great Explorer: Pay 1 culture token, Gain Great Explorer from the current event"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -468,11 +481,15 @@
                       "ActionCard": 118
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "CivilCard": 118
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 118
@@ -509,18 +526,13 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Fishing",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
                         "CivilCard": 118
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Great Explorer: Pay 1 action, Gain Fishing without taking an event token",
-                    "Player2: Action Card: Play Great Explorer",
-                    "Player2: Fishing: Gain 1 mood token"
                   ]
                 },
                 {
@@ -531,9 +543,17 @@
                       ]
                     }
                   },
-                  "log": [
-                    "Player2: Great Explorer: Explored B6"
-                  ]
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Explored B6",
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    }
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -541,9 +561,43 @@
                       "ExploreResolution": 0
                     }
                   },
-                  "log": [
-                    "Player2: Explore Resolution: Chose rotation 0, Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
-                  ]
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Chose rotation 0",
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Explore": {
+                        "tiles": [
+                          [
+                            "B6",
+                            "Fertile"
+                          ],
+                          [
+                            "A7",
+                            "Fertile"
+                          ],
+                          [
+                            "C7",
+                            "Fertile"
+                          ],
+                          [
+                            "B7",
+                            "Barren"
+                          ]
+                        ]
+                      },
+                      "origin": {
+                        "Ability": "Explore Resolution"
+                      }
+                    }
+                  ],
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -553,9 +607,17 @@
                       ]
                     }
                   },
-                  "log": [
-                    "Player2: Great Explorer: Decided to build a city A7"
-                  ]
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Decided to build a city A7",
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    }
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -567,6 +629,7 @@
                       ]
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -574,7 +637,7 @@
                         "resources": {
                           "food": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 118
@@ -585,16 +648,15 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "A7"
+                        "position": "A7",
+                        "port_position": null
                       },
                       "origin": {
                         "CivilCard": 118
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Great Explorer: Pay 2 food, Gain city A7"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

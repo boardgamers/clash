@@ -137,8 +137,10 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
     let ended_turn = matches!(action, Action::Playing(PlayingAction::EndTurn));
     let label = if let Action::Playing(PlayingAction::Custom(custom)) = &action {
         game.player(player)
-            .custom_actions
-            .get(&custom.action)
+            .special_actions
+            .get(&crate::content::custom_actions::SpecialAction::Custom(
+                custom.action,
+            ))
             .map(|info| info.event_origin.name(&game))
             .unwrap_or_else(|| title(&action))
     } else if matches!(action, Action::Response(_)) {
@@ -232,7 +234,7 @@ fn effects(game: &Game, from: usize) -> Vec<BoardEffect> {
                 return None;
             };
             let kind = match card.card_type() {
-                HandCardType::Action => "action",
+                HandCardType::Action | HandCardType::Public => "action",
                 HandCardType::Objective => "objective",
                 HandCardType::Wonder => "wonder",
             };

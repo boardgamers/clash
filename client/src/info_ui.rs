@@ -4,7 +4,7 @@ use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::event_ui::event_help_tooltip;
 use crate::layout_ui::button_pressed;
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use itertools::Itertools;
 use macroquad::color::Color;

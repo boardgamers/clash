@@ -125,9 +125,8 @@ pub(crate) fn execute_recruit(
             .insert("Shogunate Draft".into(), "used".into());
         crate::action_card::gain_action_card_from_pile(
             game,
-            &crate::events::EventPlayer::from_player(
+            &crate::events::EventPlayer::new(
                 player_index,
-                game,
                 crate::events::EventOrigin::SpecialAdvance(SpecialAdvance::Shogunate),
             ),
         );

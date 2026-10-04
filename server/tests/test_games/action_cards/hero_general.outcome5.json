@@ -206,11 +206,46 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
-                    "Combat round 1",
-                    "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
-                    "Player2: Combat: Defending with 2 infantry"
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Move": {
+                        "units": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "start": "C2",
+                        "destination": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRound": {
+                        "attackers": {
+                          "settlers": 2,
+                          "infantry": 2,
+                          "cavalry": 1,
+                          "elephants": 1
+                        },
+                        "defending_player": 1,
+                        "defenders": {
+                          "infantry": 2
+                        },
+                        "round": 1
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
                   ]
                 },
                 {
@@ -219,6 +254,7 @@
                       "SelectHandCards": []
                     }
                   },
+                  "player": 0,
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -250,13 +286,93 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Text": "Did not play a Tactics Card",
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": true
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          },
+                          {
+                            "value": 6,
+                            "unit_type": "Infantry",
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 26,
+                        "hits": 2
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "CombatRoll": {
+                        "rolls": [
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          },
+                          {
+                            "value": 1,
+                            "unit_type": {
+                              "Leader": "Alexander"
+                            },
+                            "bonus": false
+                          }
+                        ],
+                        "combat_value": 2,
+                        "hits": 0
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove all defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "C1"
                       },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "wins the battle",
                       "origin": {
                         "Ability": "Combat"
                       }
@@ -278,7 +394,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -289,27 +406,37 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
-                  "log": [
-                    "Player1: Tactics: Did not play a Tactics Card",
-                    "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold, Gain city C1",
-                    "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 2 infantry at C1, Lose city C1",
-                    "Player2: Choose Casualties: Remove all defending units",
-                    "Attacker wins",
-                    "Player1: Waste: Could not store 1 gold"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 5
                     }
+                  },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 5
                   },
                   "items": [
                     {
@@ -327,9 +454,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Action Card: Play Hero General/Wedge Formation"
                   ]
                 },
                 {
@@ -340,6 +464,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -352,9 +477,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Hero General: City C1 became Neutral"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -366,6 +489,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -373,16 +497,14 @@
                         "resources": {
                           "mood_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 5
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Hero General: Pay 1 mood token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -392,6 +514,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -404,9 +527,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Hero General: City C2 became Happy"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

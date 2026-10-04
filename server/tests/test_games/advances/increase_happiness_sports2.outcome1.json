@@ -263,19 +263,20 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "Sports"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "Sports"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Sports: Pay 1 action, Start action in city C2"
                   ]
                 },
                 {
@@ -288,6 +289,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -295,7 +297,7 @@
                         "resources": {
                           "culture_tokens": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Sports"
@@ -312,9 +314,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Sports: Pay 2 culture tokens, City C2 became Happy"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

@@ -8,7 +8,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{PlayingActionType, base_or_modified_available};
 use crate::position::Position;
 use crate::resource::gain_resources_with_modifiers;
 use crate::resource_pile::ResourcePile;
@@ -216,11 +216,6 @@ pub(crate) fn execute_collect(
     c: &Collect,
 ) -> Result<(), String> {
     let origin = collect_event_origin(&c.action_type, game.player(player_index));
-    game.log(
-        player_index,
-        &origin,
-        &format!("Use city {}", c.city_position),
-    );
 
     let mut i = get_total_collection_with_ballcourts(
         game,
@@ -238,6 +233,7 @@ pub(crate) fn execute_collect(
             ResourcePile::mood_tokens(1),
             EventOrigin::SpecialAdvance(crate::special_advance::SpecialAdvance::Ballcourts),
             vec![],
+            crate::log::ActionLogBalance::Pay,
         );
     }
     let city = game.players[player_index].get_city_mut(c.city_position);
@@ -354,10 +350,7 @@ pub fn possible_resource_collections(
         .events
         .transient
         .terrain_collect_options;
-    let modifiers =
-        event
-            .get()
-            .trigger_with_modifiers(&mut terrain_options, &(), &(), &mut (), trigger);
+    let modifiers = event.trigger_with_modifiers(&mut terrain_options, &(), &(), &mut (), trigger);
 
     let collect_options = city_pos
         .neighbors()
@@ -444,9 +437,8 @@ pub fn available_collect_actions_for_city(
             .into_iter()
             .filter(|action| {
                 *action
-                    != PlayingActionType::Custom(
-                        crate::content::custom_actions::CustomActionType::Tributes,
-                    )
+                    != crate::content::custom_actions::PlayingActionModifier::Tributes
+                        .playing_action_type()
                     || crate::content::civilizations::aztecs::tributes_city(
                         game.player(player),
                         position,
@@ -460,7 +452,7 @@ pub fn available_collect_actions_for_city(
 
 #[must_use]
 pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(game, player, &PlayingActionType::Collect)
+    base_or_modified_available(game, player, &PlayingActionType::Collect)
 }
 
 pub(crate) fn collect_event_origin(

@@ -1,7 +1,7 @@
 use common::{JsonTest, move_action, payment_response};
 use server::action::{Action, execute_action};
 use server::collect::{Collect, PositionCollection};
-use server::content::custom_actions::CustomActionType::FreeEconomyCollect;
+use server::content::custom_actions::PlayingActionModifier::FreeEconomyCollect;
 use server::game::Game;
 use server::game_api;
 use server::log::{LogSliceOptions, current_turn_log_mut};
@@ -36,7 +36,7 @@ fn collect(action_type: PlayingActionType) -> Action {
 #[test]
 fn undone_collect_does_not_block_free_economy() {
     let start = JsonTest::new("advances").load_game("collect_free_economy");
-    let free = PlayingActionType::Custom(FreeEconomyCollect);
+    let free = FreeEconomyCollect.playing_action_type();
     assert!(free.is_available(&start, 0).is_ok());
     let game = execute_action(start.clone(), collect(PlayingActionType::Collect), 0);
     assert!(free.is_available(&game, 0).is_err());
@@ -74,8 +74,8 @@ fn repeated_undo_redo_and_branching_keep_the_correct_action_log() {
     assert_eq!(game_api::log_length(&game), game_api::log_length(&start));
     game = execute_action(game, Action::Redo, 0);
     let actions = &current_turn_log_mut(&mut game).actions;
-    assert!(!actions[0].log.is_empty());
-    assert!(actions[1].log.is_empty());
+    assert!(!actions[0].items.is_empty());
+    assert!(actions[1].items.is_empty());
     assert_eq!(
         game_api::log_length(&game),
         game_api::log_length(&start) + 1

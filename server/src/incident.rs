@@ -16,6 +16,7 @@ use crate::content::persistent_events::{
 };
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
+use crate::log::{ActionLogEntry, ActionLogItem};
 use crate::map::Terrain;
 use crate::payment::{PaymentConversion, PaymentConversionType};
 use crate::pirates::pirates_spawn_and_raid;
@@ -626,7 +627,7 @@ impl AbilityInitializerSetup for IncidentBuilder {
     }
 }
 
-pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
+pub(crate) fn trigger_incident(game: &mut Game, player_index: usize, origin: EventOrigin) {
     if game
         .player(player_index)
         .wonders_owned
@@ -636,11 +637,19 @@ pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
             .special_advances
             .contains(crate::special_advance::SpecialAdvance::StarCatalogues)
     {
-        on_choose_incident(game, player_index, IncidentInfo::new(0, player_index));
+        on_choose_incident(
+            game,
+            player_index,
+            IncidentInfo::new(0, player_index, origin),
+        );
     } else {
         let info = IncidentInfo::new(
-            draw_and_discard_incident_card_from_pile(game, player_index),
+            draw_and_discard_incident_card_from_pile(
+                game,
+                &EventPlayer::new(player_index, origin.clone()),
+            ),
             player_index,
+            origin,
         );
         on_trigger_incident(game, info);
     }
@@ -654,7 +663,10 @@ pub(crate) fn on_choose_incident(game: &mut Game, player_index: usize, info: Inc
         PersistentEventType::ChooseIncident,
     ) {
         if info.incident_id == 0 {
-            info.incident_id = draw_and_discard_incident_card_from_pile(game, player_index);
+            info.incident_id = draw_and_discard_incident_card_from_pile(
+                game,
+                &EventPlayer::new(player_index, info.cause.clone()),
+            );
         }
         on_trigger_incident(game, info);
     }
@@ -662,9 +674,14 @@ pub(crate) fn on_choose_incident(game: &mut Game, player_index: usize, info: Inc
 
 pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     loop {
-        let log: Option<String> = play_base_effect(&info).then_some(format!(
-            "A new game event has been triggered: {}",
-            game.cache.get_incident(info.incident_id).name
+        let log: Option<ActionLogItem> = play_base_effect(&info).then_some(ActionLogItem::new(
+            info.active_player,
+            ActionLogEntry::message(format!(
+                "triggers the event {}",
+                game.cache.get_incident(info.incident_id).name
+            )),
+            info.cause.clone(),
+            vec![],
         ));
         info = match trigger_persistent_event_with_listener(
             game,
@@ -689,8 +706,11 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             .any(|e| matches!(e.event_type, PersistentEventType::Incident(_)))
         {
             if info.replaced_by_sacrifice {
-                let id = draw_and_discard_incident_card_from_pile(game, info.active_player);
-                info = IncidentInfo::new(id, info.active_player);
+                let id = draw_and_discard_incident_card_from_pile(
+                    game,
+                    &EventPlayer::new(info.active_player, info.cause.clone()),
+                );
+                info = IncidentInfo::new(id, info.active_player, info.cause.clone());
                 continue;
             }
             if passed_to_player(game, &mut info) {
@@ -701,9 +721,13 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     }
 }
 
-pub(crate) fn draw_and_discard_incident_card_from_pile(game: &mut Game, player: usize) -> u8 {
+pub(crate) fn draw_and_discard_incident_card_from_pile(
+    game: &mut Game,
+    player: &EventPlayer,
+) -> u8 {
     let id = draw_card_from_pile(
         game,
+        player,
         "Events",
         |g| &mut g.incidents_left,
         |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
@@ -722,7 +746,7 @@ pub(crate) fn draw_and_discard_incident_card_from_pile(game: &mut Game, player: 
     )
     .expect("incident should exist");
 
-    discard_card(|g| &mut g.incidents_discarded, id, player, game);
+    discard_card(|g| &mut g.incidents_discarded, id, player.index, game);
     id
 }
 

@@ -9,7 +9,7 @@ use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
 use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;

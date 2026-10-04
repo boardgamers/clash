@@ -127,7 +127,9 @@
       ],
       "next_unit_id": 10,
       "played_once_per_turn_actions": [
-        "Theaters"
+        {
+          "Custom": "Theaters"
+        }
       ]
     },
     {
@@ -284,9 +286,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Theaters: Start action"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Advance": "Theaters"
+                  }
                 },
                 {
                   "action": {
@@ -298,6 +301,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -305,7 +309,7 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Theaters"
@@ -324,9 +328,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Theaters: Pay 1 culture token, Gain 1 mood token"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

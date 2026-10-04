@@ -102,14 +102,14 @@ fn human_sacrifice() -> SpecialAdvanceInfo {
                     let p=s.player();
                     // Put the chosen pieces first so the shared payment path returns exactly these pieces.
                     let held=&mut p.get_mut(game).captives;held.sort_by_key(|c|!s.choice.contains(c));
-                    let amount=s.choice.len() as u8;lose_resources(game,p.index,ResourcePile::captives(amount),s.origin.clone(),vec![]);
+                    let amount=s.choice.len() as u8;lose_resources(game,p.index,ResourcePile::captives(amount),s.origin.clone(),vec![],crate::log::ActionLogBalance::Pay);
                     a.payment=ResourcePile::captives(amount);
                 })
             .add_resource_request(|e|&mut e.custom_action,1,|_,p,a|Some(crate::content::persistent_events::ResourceRewardRequest::new(p.reward_options().tokens(a.payment.captives),"Human Sacrifice · Gain mood or culture tokens".into()))),
             |_,p|!p.captives.is_empty())
         .add_transient_event_listener(|e|&mut e.general_payment_conversions,15,|conversions,(),(),_|conversions.push(PaymentConversion::resource_options(vec![ResourcePile::mood_tokens(1),ResourcePile::culture_tokens(1)],ResourcePile::captives(1),PaymentConversionType::Unlimited)))
         .add_bool_request(|e|&mut e.incident,10000,|game,p,i|(i.active_player==p.index&&!i.consumed&&i.passed.is_none()&&p.get(game).resources.captives>0).then(||format!("Human Sacrifice · Sacrifice 1 captive to cancel {} and draw another event?",game.cache.get_incident(i.incident_id).name)),|game,s,i|{
-            if s.choice {lose_resources(game,s.player_index,ResourcePile::captives(1),s.origin.clone(),vec![]);i.consumed=true;i.replaced_by_sacrifice=true;s.log(game,"Sacrificed a captive: the entire event and its icon are cancelled");}
+            if s.choice {lose_resources(game,s.player_index,ResourcePile::captives(1),s.origin.clone(),vec![],crate::log::ActionLogBalance::Pay);i.consumed=true;i.replaced_by_sacrifice=true;s.log(game,"Sacrificed a captive: the entire event and its icon are cancelled");}
         }).build()
 }
 fn aztec_gold() -> SpecialAdvanceInfo {
@@ -227,7 +227,7 @@ fn acamapichtli() -> LeaderInfo {
             .add_transient_event_listener(|e|&mut e.building_cost,14,|i,_,game,p|growth(i,game,p))
             .add_transient_event_listener(|e|&mut e.wonder_cost,14,|i,_,game,p|growth(i,game,p)).build(),
         LeaderAbility::builder("Tributes","Once per turn, pay 2 mood tokens to Collect from Acamapichtli's city as a free action, if its size is 3 or less.")
-            .add_action_modifier(CustomActionType::Tributes,|c|c.once_per_turn().free_action().resources(ResourcePile::mood_tokens(2)),crate::playing_actions::PlayingActionType::Collect).build())
+            .add_action_modifier(crate::content::custom_actions::PlayingActionModifier::Tributes,|c|c.once_per_turn().free_action().resources(ResourcePile::mood_tokens(2)),crate::playing_actions::PlayingActionType::Collect).build())
 }
 fn ahuitzotl() -> LeaderInfo {
     LeaderInfo::new(Leader::Ahuitzotl,"Ahuitzotl",

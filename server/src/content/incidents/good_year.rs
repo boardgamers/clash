@@ -147,7 +147,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u8, good_year_type: &GoodYear
                 |p, _, _| p.resources.food < p.resource_limit.food,
                 i as i32,
                 move |game, s, _| {
-                    s.other_player(s.choice, game)
+                    s.other_player(s.choice)
                         .gain_resources(game, ResourcePile::food(1));
                 },
             );

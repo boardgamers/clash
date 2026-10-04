@@ -10,10 +10,11 @@ use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 pub use crate::content::civilizations::aztecs::Captive;
 use crate::content::custom_actions::CustomActionActivation;
-use crate::cultural_influence::InfluenceCultureInfo;
+use crate::cultural_influence::InfluenceCultureBoostInfo;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
+use crate::log::ActionLogItem;
 use crate::map::Rotation;
 use crate::objective_card::{SelectObjectivesInfo, present_instant_objective_cards};
 use crate::payment::{PaymentOptions, ResourceReward};
@@ -104,7 +105,7 @@ impl PersistentEventPlayer {
 pub enum PersistentEventType {
     Collect(CollectInfo),
     ExploreResolution(ExploreResolutionState),
-    InfluenceCulture(InfluenceCultureInfo),
+    InfluenceCultureBoost(InfluenceCultureBoostInfo),
     UnitsKilled(KilledUnits),
     CombatStart(Combat),
     CombatRoundStart(CombatRoundStart),
@@ -371,7 +372,7 @@ impl EventResponse {
 
 #[derive(Debug, Clone)]
 pub struct TriggerPersistentEventParams<V> {
-    pub log: Option<String>,
+    pub log: Option<ActionLogItem>,
     pub next_player: fn(&mut V) -> (),
     pub origin_override: Option<EventOrigin>,
 }
@@ -416,7 +417,7 @@ where
         .is_none_or(|s| s.event_type != current_event_type)
     {
         if let Some(log) = params.log {
-            game.add_info_log_item(&log);
+            game.add_log_item(log);
         }
         game.events.push(PersistentEventState::new(
             players[0],

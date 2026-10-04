@@ -234,9 +234,17 @@
                       "SelectPositions": []
                     }
                   },
-                  "log": [
-                    "Player1: Raze city: Did not raze a city"
-                  ]
+                  "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Did not raze a city",
+                      "origin": {
+                        "Ability": "Raze city"
+                      }
+                    }
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -244,9 +252,39 @@
                       "SelectPositions": []
                     }
                   },
-                  "log": [
-                    "Player2: Raze city: Did not raze a city"
-                  ]
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Did not raze a city",
+                      "origin": {
+                        "Ability": "Raze city"
+                      }
+                    }
+                  ],
+                  "active_events": 1
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "ChangeGovernmentType"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "DetermineFirstPlayer"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
                 }
               ]
             }
@@ -255,8 +293,8 @@
       ]
     }
   ],
-  "log_index": 2,
-  "undo_limit": 2,
+  "log_index": 1,
+  "undo_limit": 1,
   "actions_left": 3,
   "round": 1,
   "age": 1,

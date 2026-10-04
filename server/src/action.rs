@@ -9,22 +9,23 @@ use crate::construct::on_construct;
 use crate::content::custom_actions::on_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
-use crate::events::EventPlayer;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::explore::ask_explore_resolution;
 use crate::game::GameState;
 use crate::game::{Game, GameContext};
 use crate::game_setup::execute_choose_civ;
 use crate::incident::{on_choose_incident, on_trigger_incident};
 use crate::log::{
-    ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action, current_turn_log_mut,
+    ActionLogBalance, ActionLogEntry, ActionLogItem, add_action_log_item, add_log_action,
+    current_turn_log_mut,
 };
 use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
-use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
+use crate::objective_card::{complete_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
-use crate::status_phase::play_status_phase;
+use crate::status_phase::status_phase_response;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::units_killed;
 use crate::victory_points::add_dynamic_victory_points;
@@ -38,8 +39,7 @@ pub enum Action {
     Response(EventResponse),
     Undo,
     Redo,
-    StartTurn, // created for trade routes
-    Setup,     // Game setup
+    StartTurn, // created for trade routes and status phase
     ChooseCivilization(String),
 }
 
@@ -131,9 +131,14 @@ pub fn execute_without_undo(
         && !matches!(action, Action::Response(_))
     {
         // ignore missing response in replay
-        game.add_info_log_item(&format!(
-            "interrupted {} events in replay due to a missing response",
-            game.events.len()
+        game.add_log_item(ActionLogItem::new(
+            player_index,
+            ActionLogEntry::message(format!(
+                "interrupted {} events in replay due to a missing response",
+                game.events.len()
+            )),
+            EventOrigin::Ability("replay".to_string()),
+            vec![],
         ));
         game.events.clear();
     }
@@ -159,10 +164,6 @@ pub fn execute_without_undo(
 
 pub(crate) fn after_action(game: &mut Game, player_index: usize) {
     check_for_waste(game);
-
-    if let Some(o) = game.player_mut(player_index).gained_objective.take() {
-        gain_objective_card(game, player_index, o);
-    }
 
     if game
         .player(player_index)
@@ -249,7 +250,7 @@ pub(crate) fn execute_custom_phase_action(
         ExploreResolution(r) => {
             ask_explore_resolution(game, player, r);
         }
-        InfluenceCulture(r) => {
+        InfluenceCultureBoost(r) => {
             on_cultural_influence(game, player, r);
         }
         UnitsKilled(k) => units_killed(game, player, k),
@@ -269,7 +270,7 @@ pub(crate) fn execute_custom_phase_action(
         CombatEnd(s) => {
             on_end_combat(game, s);
         }
-        StatusPhase(s) => play_status_phase(game, s),
+        StatusPhase(s) => status_phase_response(game, s),
         TurnStart => game.on_start_turn(),
         PayAction(a) => {
             a.on_pay_action(game, player, game.current_event().origin_override.clone())?;
@@ -360,24 +361,21 @@ pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
     add_action_log_item(
         game,
         player.index,
-        ActionLogEntry::action(ActionLogBalance::Gain),
+        ActionLogEntry::action(ActionLogBalance::Gain, 1),
         player.origin.clone(),
         vec![],
     );
-    player.log(game, "Gain 1 action");
 }
 
 pub(crate) fn lose_action(game: &mut Game, player: &EventPlayer) {
-    subtract_action(game, player);
-    player.log(game, "Lose 1 action");
+    subtract_action(game, player, ActionLogBalance::Loss);
 }
 
 pub(crate) fn pay_action(game: &mut Game, player: &EventPlayer) {
-    subtract_action(game, player);
-    player.log(game, "Pay 1 action");
+    subtract_action(game, player, ActionLogBalance::Pay);
 }
 
-fn subtract_action(game: &mut Game, player: &EventPlayer) {
+fn subtract_action(game: &mut Game, player: &EventPlayer, balance: ActionLogBalance) {
     if game.actions_left == 0 && game.context == GameContext::Replay {
         return;
     }
@@ -386,7 +384,7 @@ fn subtract_action(game: &mut Game, player: &EventPlayer) {
     add_action_log_item(
         game,
         player.index,
-        ActionLogEntry::action(ActionLogBalance::Loss),
+        ActionLogEntry::action(balance, 1),
         player.origin.clone(),
         vec![],
     );

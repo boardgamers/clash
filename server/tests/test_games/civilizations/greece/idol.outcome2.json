@@ -431,9 +431,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Idol: Start action, Pay 1 culture token"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "LeaderAbility": "Idol"
+                  }
                 },
                 {
                   "action": {
@@ -445,6 +446,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -452,10 +454,17 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "LeaderAbility": "Idol"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Decided to play Spy as a free action",
+                      "origin": {
+                        "Ability": "Idol"
                       }
                     },
                     {
@@ -474,11 +483,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Idol: Pay 1 culture token, Decided to play Spy as a free action",
-                    "Player1: Action Card: Play Spy/Heavy Resistance",
-                    "Player1: Spy: Pay 1 culture token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -490,6 +495,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -497,16 +503,21 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
+                      "origin": {
+                        "CivilCard": 7
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Looked at the Wonder, Action, and Objective cards in the hand of Player2",
                       "origin": {
                         "CivilCard": 7
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Spy: Pay 1 culture token, Decided to looked at all Wonder, Action, and Objective cards of Player2"
-                  ]
+                  "active_events": 2
                 }
               ]
             }

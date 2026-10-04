@@ -1,4 +1,4 @@
-use crate::log_ui::MultilineText;
+use crate::multiline::MultilineText;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::WHITE;

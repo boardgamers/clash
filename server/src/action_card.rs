@@ -54,15 +54,17 @@ pub struct ActionCard {
     pub id: u8,
     pub civil_card: CivilCard,
     pub tactics_card: Option<TacticsCard>,
+    pub public: bool,
 }
 
 impl ActionCard {
     #[must_use]
-    fn new(id: u8, civil_card: CivilCard, tactics_card: Option<TacticsCard>) -> Self {
+    fn new(id: u8, civil_card: CivilCard, tactics_card: Option<TacticsCard>, public: bool) -> Self {
         Self {
             id,
             civil_card,
             tactics_card,
+            public,
         }
     }
 
@@ -88,6 +90,7 @@ impl ActionCard {
             action_cost: cost(ActionCostBuilder::new(None)).cost,
             target: CivilCardTarget::ActivePlayer,
             target_choices: None,
+            public: false,
         }
     }
 
@@ -108,6 +111,7 @@ pub struct ActionCardBuilder {
     action_cost: ActionCost,
     can_play: CanPlayCard,
     combat_requirement: Option<CombatRequirement>,
+    public: bool,
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
     target: CivilCardTarget,
@@ -148,7 +152,7 @@ impl ActionCardBuilder {
         let target = self.target;
         self.target_choices = Some(Arc::new(move |game, player| {
             let mut game = game.clone();
-            let p = EventPlayer::from_player(player, &game, EventOrigin::CivilCard(id));
+            let p = EventPlayer::new(player, EventOrigin::CivilCard(id));
             let mut info = ActionCardInfo::new(
                 id,
                 None,
@@ -171,6 +175,12 @@ impl ActionCardBuilder {
             },
             apply,
         )
+    }
+
+    #[must_use]
+    pub fn public(mut self, public: bool) -> Self {
+        self.public = public;
+        self
     }
 
     #[must_use]
@@ -206,6 +216,7 @@ impl ActionCardBuilder {
                 target_choices: self.target_choices,
             },
             self.tactics_card,
+            self.public,
         )
     }
 }
@@ -275,7 +286,7 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
 pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
     let controller = crate::content::civilizations::celts::delegated_player(game, player.index);
     if controller != player.index {
-        let p = EventPlayer::from_player(controller, game, player.origin.clone());
+        let p = EventPlayer::new(controller, player.origin.clone());
         return gain_action_card_from_pile(game, &p);
     }
     if player
@@ -290,14 +301,15 @@ pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) 
 }
 
 pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
-    if let Some(c) = draw_action_card_from_pile(game) {
+    if let Some(c) = draw_action_card_from_pile(game, player) {
         gain_action_card(game, player, c, HandCardLocation::DrawPile);
     }
 }
 
-fn draw_action_card_from_pile(game: &mut Game) -> Option<u8> {
+fn draw_action_card_from_pile(game: &mut Game, player: &EventPlayer) -> Option<u8> {
     draw_card_from_pile(
         game,
+        player,
         "Action Card",
         |g| &mut g.action_cards_left,
         |g| g.cache.get_action_cards().iter().map(|c| c.id).collect(),
@@ -313,7 +325,7 @@ pub(crate) fn gain_action_card(
 ) {
     let controller = crate::content::civilizations::celts::delegated_player(game, player.index);
     if controller != player.index {
-        let p = EventPlayer::from_player(controller, game, player.origin.clone());
+        let p = EventPlayer::new(controller, player.origin.clone());
         return gain_action_card(game, &p, action_card, from);
     }
     player.get_mut(game).action_cards.push(action_card);
@@ -394,7 +406,7 @@ pub fn combat_requirement_met(
     action_card_id: u8,
     requirement: &CombatRequirement,
 ) -> Option<usize> {
-    let sister_card = if action_card_id % 2 == 0 {
+    let sister_card = if action_card_id.is_multiple_of(2) {
         action_card_id - 1
     } else {
         action_card_id + 1

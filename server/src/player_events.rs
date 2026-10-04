@@ -8,7 +8,9 @@ use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::{KilledUnits, PaymentRequest};
-use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
+use crate::cultural_influence::{
+    InfluenceCultureAttemptInfo, InfluenceCultureBoostInfo, InfluenceCultureOutcome,
+};
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -49,7 +51,8 @@ impl PlayerEvents {
 }
 
 pub(crate) struct TransientEvents {
-    pub on_influence_culture_attempt: Event<Result<InfluenceCultureInfo, String>, City, Game>,
+    pub on_influence_culture_attempt:
+        Event<Result<InfluenceCultureAttemptInfo, String>, City, Game>,
     pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
     pub before_move: Event<Game, MoveInfo>,
 
@@ -103,7 +106,7 @@ pub(crate) struct PersistentEvents {
     pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
     pub found_city: PersistentEvent<Position>,
-    pub influence_culture: PersistentEvent<InfluenceCultureInfo>,
+    pub influence_culture_boost: PersistentEvent<InfluenceCultureBoostInfo>,
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
     pub pay_action: PersistentEvent<ActionPayment>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
@@ -143,7 +146,7 @@ impl PersistentEvents {
             advance: Event::new("advance"),
             recruit: Event::new("recruit"),
             found_city: Event::new("found_city"),
-            influence_culture: Event::new("influence_culture"),
+            influence_culture_boost: Event::new("influence_culture"),
             explore_resolution: Event::new("explore_resolution"),
             pay_action: Event::new("pay_action"),
             play_action_card: Event::new("play_action_card"),
@@ -252,6 +255,7 @@ impl IncidentPlayerInfo {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
     pub incident_id: u8,
+    pub cause: EventOrigin,
     pub active_player: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -278,7 +282,7 @@ pub struct IncidentInfo {
 
 impl IncidentInfo {
     #[must_use]
-    pub fn new(incident_id: u8, active_player: usize) -> IncidentInfo {
+    pub fn new(incident_id: u8, active_player: usize, cause: EventOrigin) -> IncidentInfo {
         IncidentInfo {
             incident_id,
             active_player,
@@ -289,6 +293,7 @@ impl IncidentInfo {
             selected_player: None,
             selected_position: None,
             player: IncidentPlayerInfo::new(),
+            cause,
         }
     }
 
@@ -366,6 +371,7 @@ pub struct OnAdvanceInfo {
     pub take_incident_token: bool,
 }
 
+#[derive(Clone)]
 pub struct MoveInfo {
     pub units: Vec<u32>,
     pub from: Position,
@@ -379,32 +385,28 @@ impl MoveInfo {
     }
 }
 
-pub(crate) fn trigger_event_with_game_value<U, V, W>(
+pub(crate) fn trigger_event_with_game_value<U: Clone, V: Clone, W: Clone + PartialEq>(
     game: &mut Game,
     player_index: usize,
     event: impl Fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
     info: &U,
     details: &V,
     extra_value: &mut W,
-) where
-    W: Clone + PartialEq,
-{
-    let e = event(&mut game.players[player_index].events).take();
-    e.trigger(game, info, details, extra_value);
-    event(&mut game.players[player_index].events).set(e);
+) {
+    event(&mut game.players[player_index].events)
+        .clone()
+        .trigger(game, info, details, extra_value);
 }
 
-pub(crate) fn trigger_event_with_game_info<U: Clone + PartialEq, V, W>(
+pub(crate) fn trigger_event_with_game_info<U: Clone + PartialEq, V: Clone, W: Clone + PartialEq>(
     game: &mut Game,
     player_index: usize,
     event: impl Fn(&mut PlayerEvents) -> &mut Event<U, Game, V, W>,
     info: &mut U,
     details: &V,
     extra_value: &mut W,
-) where
-    W: Clone + PartialEq,
-{
-    let e = event(&mut game.players[player_index].events).take();
-    e.trigger(info, game, details, extra_value);
-    event(&mut game.players[player_index].events).set(e);
+) {
+    event(&mut game.players[player_index].events)
+        .clone()
+        .trigger(info, game, details, extra_value);
 }

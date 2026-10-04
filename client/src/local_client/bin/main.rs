@@ -26,7 +26,7 @@ enum Mode {
 async fn main() {
     start_profiling();
 
-    set_window_size(1200, 600);
+    set_window_size(1800, 1600);
 
     let mut args: Vec<String> = env::args().collect();
     args.remove(0); // program name
@@ -57,7 +57,8 @@ async fn main() {
                 } else {
                     CivSetupOption::Random
                 },
-                patch: PatchOption::BalancePatch,
+                patch: PatchOption::Standard,
+                ..GameOptions::default()
             })
             .build(),
     );

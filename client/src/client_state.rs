@@ -17,6 +17,7 @@ use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::{RenderContext, RenderStage};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
+use serde::{Deserialize, Serialize};
 use server::action::Action;
 use server::advance::Advance;
 use server::card::HandCard;
@@ -112,11 +113,11 @@ impl ActiveDialog {
             ActiveDialog::StructuresRequest(d, r) => {
                 if let Some(b) = d {
                     let v = vec!["Click on a building to influence its culture".to_string()];
-                    if let PlayingActionType::Custom(c) = &b.action_type {
+                    if let PlayingActionType::Special(c) = &b.action_type {
                         let mut r = v.clone();
                         r.extend(event_help(
                             rc,
-                            &rc.shown_player.custom_action_info(*c).event_origin,
+                            &rc.shown_player.special_action_info(c).event_origin,
                         ));
                     }
                     v
@@ -338,6 +339,12 @@ pub(crate) enum CameraMode {
     World,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub enum ColorProfile {
+    Standard,
+    HighContrast,
+}
+
 use crate::info_ui::InfoDialog;
 #[cfg(not(target_arch = "wasm32"))]
 use server::ai::AI;
@@ -349,18 +356,21 @@ pub struct State {
     pub show_player: usize,
     pub(crate) active_dialog: ActiveDialog,
     pub(crate) pending_update: Option<PendingUpdate>,
-    pub world_camera: Camera2D,
-    pub ui_camera: Camera2D,
+    pub(crate) world_camera: Camera2D,
+    pub(crate) world_zoom: f32,
+    pub world_zoom_factor: f32,
+    pub(crate) ui_camera: Camera2D,
     pub ui_scale: f32,
     pub raw_screen_size: Vec2,
-    pub screen_size: Vec2, // scaled by ui_scale
+    pub(crate) screen_size: Vec2, // scaled by ui_scale
     pub(crate) mouse_positions: Vec<MousePosition>,
-    pub focused_tile: Option<Position>,
-    pub show_permanent_effects: bool,
+    pub(crate) focused_tile: Option<Position>,
+    pub(crate) show_permanent_effects: bool,
     pub ai_autoplay: bool,
-    pub pan_map: bool,
+    pub(crate) pan_map: bool,
     #[cfg(not(target_arch = "wasm32"))]
     pub ai_players: Vec<AI>,
+    pub color_profile: ColorProfile,
 }
 
 pub const ZOOM: f32 = 0.001;
@@ -377,12 +387,13 @@ impl State {
             control_player: None,
             show_player: 0,
             world_camera: Camera2D {
-                zoom: vec2(ZOOM, ZOOM),
                 offset: OFFSET,
                 ..Default::default()
             },
             ui_camera: Camera2D::default(),
             ui_scale: 1.0,
+            world_zoom_factor: 1.0,
+            world_zoom: ZOOM,
             raw_screen_size: vec2(0., 0.),
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
@@ -392,6 +403,7 @@ impl State {
             ai_autoplay: false,
             #[cfg(not(target_arch = "wasm32"))]
             ai_players: vec![],
+            color_profile: ColorProfile::Standard,
         }
     }
 
@@ -589,11 +601,11 @@ impl State {
     }
 
     pub(crate) fn draw_text(&self, text: &str, x: f32, y: f32) {
-        self.draw_text_with_color(text, x, y, BLACK);
+        self.draw_text_ex(text, x, y, BLACK, FONT_SIZE);
     }
 
-    pub(crate) fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
-        if crate::localization::draw(text, FONT_SIZE, x, y, color) {
+    pub(crate) fn draw_text_ex(&self, text: &str, x: f32, y: f32, color: Color, font_size: u16) {
+        if crate::localization::draw(text, font_size, x, y, color) {
             return;
         }
         draw_text_ex(
@@ -602,7 +614,7 @@ impl State {
             y,
             TextParams {
                 font: Some(&self.assets.font),
-                font_size: FONT_SIZE,
+                font_size,
                 color,
                 ..Default::default()
             },

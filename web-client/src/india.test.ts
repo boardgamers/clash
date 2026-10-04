@@ -1,3 +1,4 @@
+import { readableHistory } from './structured-log.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -154,7 +155,7 @@ test('Proselytism exposes settler origins, adds range and rejects a forged origi
   assert.throws(() => move(g, attempt), /origin|range/);
   const after = move(g, settler.action);
   assert.equal(after.players[1].cities[0].city_pieces.temple, 0);
-  assert.match(JSON.stringify(after.log), /from B3/);
+  assert.match(JSON.stringify(readableHistory(after).log), /from B3/);
   g.players[0].advances = g.players[0].advances.filter((a: string) => a !== 'StateReligion');
   assert.ok(
     !view(g)
@@ -272,7 +273,12 @@ test('Bladed Tusks persists after Akbar dies and is optional before battle', asy
   after = move(after, { Response: { SelectUnits: [0] } });
   assert.ok(!after.players[0].units.some((u: any) => u.unit_type?.Leader === 'Akbar'));
   after = move(after, { Response: { Bool: false } });
-  const last = after.log.at(-1).rounds.at(-1).turns.at(-1).actions.at(-1).log.join(' ');
+  const last = readableHistory(after)
+    .log!.at(-1)!
+    .rounds.at(-1)!
+    .turns.at(-1)!
+    .actions!.at(-1)!
+    .log!.join(' ');
   assert.match(last, /Combat round 2/);
   assert.match(last, /Bladed Tusks adds \+2 combat value/);
 });

@@ -265,6 +265,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -282,7 +283,9 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -290,11 +293,26 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "triggers the event A good year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians spawn",
+                      "origin": {
+                        "Incident": 11
+                      }
+                    },
+                    {
                       "player": 2,
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "B3"
+                        "position": "B3",
+                        "port_position": null
                       },
                       "origin": {
                         "Incident": 11
@@ -306,20 +324,15 @@
                         "units": {
                           "infantry": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "B3"
                       },
                       "origin": {
                         "Incident": 11
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
-                    "A new game event has been triggered: A good year",
-                    "Player1: A good year: Base effect: Barbarians spawn",
-                    "Barbarians: A good year: Gain city B3, Gain 1 infantry at B3"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -327,6 +340,7 @@
                       "SelectUnitType": "Elephant"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 2,
@@ -334,7 +348,8 @@
                         "units": {
                           "elephants": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "B3"
                       },
                       "origin": {
                         "Incident": 11
@@ -365,11 +380,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Barbarians: A good year: Gain 1 elephant at B3",
-                    "Player1: A good year: Gain 1 food",
-                    "Player2: A good year: Gain 1 food"
-                  ]
+                  "active_events": 2
                 }
               ]
             }

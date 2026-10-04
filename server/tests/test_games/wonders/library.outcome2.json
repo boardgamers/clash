@@ -202,7 +202,9 @@
       ],
       "next_unit_id": 8,
       "played_once_per_turn_actions": [
-        "GreatLibrary"
+        {
+          "Custom": "GreatLibrary"
+        }
       ]
     },
     {
@@ -321,9 +323,10 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player1: Great Library: Start action"
-                  ]
+                  "player": 0,
+                  "origin": {
+                    "Wonder": "GreatLibrary"
+                  }
                 },
                 {
                   "action": {
@@ -331,9 +334,17 @@
                       "SelectAdvance": "Engineering"
                     }
                   },
-                  "log": [
-                    "Player1: Great Library: Use Engineering for the turn"
-                  ]
+                  "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Use Engineering for the turn",
+                      "origin": {
+                        "Ability": "Great Library"
+                      }
+                    }
+                  ],
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -341,19 +352,20 @@
                       "WonderCard": "Pyramids"
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Build Wonder"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Build Wonder"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2, Pay 1 action"
                   ]
                 }
               ]

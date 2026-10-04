@@ -12,6 +12,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 54,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0,
           "barbarians": {}
         }
@@ -249,6 +252,7 @@
                       "SelectAdvance": "Storage"
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -266,20 +270,31 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Free Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event A successful year",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Pirates spawn",
+                      "origin": {
+                        "Incident": 54
+                      }
                     }
                   ],
-                  "log": [
-                    "Player1: Storage: Gain 1 mood token",
-                    "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)",
-                    "A new game event has been triggered: A successful year",
-                    "Player1: A successful year: Base effect: Pirates spawn"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -289,9 +304,17 @@
                       ]
                     }
                   },
-                  "log": [
-                    "Player1: A successful year: Removed a Pirate Ships at D1"
-                  ]
+                  "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Removed a Pirate Ships at D1",
+                      "origin": {
+                        "Incident": 54
+                      }
+                    }
+                  ],
+                  "active_events": 2
                 },
                 {
                   "action": {
@@ -301,6 +324,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 2,
@@ -308,16 +332,15 @@
                         "units": {
                           "ships": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A2"
                       },
                       "origin": {
                         "Incident": 54
                       }
                     }
                   ],
-                  "log": [
-                    "Pirates: A successful year: Gain 1 ship at A2"
-                  ]
+                  "active_events": 2
                 }
               ]
             }

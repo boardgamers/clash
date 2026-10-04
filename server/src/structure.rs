@@ -31,8 +31,14 @@ pub(crate) fn log_gain_city(
     structure: Structure,
     position: Position,
 ) {
-    player.log(game, &format!("Gain city {position}"));
-    log_structure(game, player, structure, ActionLogBalance::Gain, position);
+    log_structure(
+        game,
+        player,
+        structure,
+        ActionLogBalance::Gain,
+        position,
+        None,
+    );
 }
 
 pub(crate) fn log_lose_city(
@@ -41,8 +47,14 @@ pub(crate) fn log_lose_city(
     structure: Structure,
     position: Position,
 ) {
-    player.log(game, &format!("Lose city {position}"));
-    log_structure(game, player, structure, ActionLogBalance::Loss, position);
+    log_structure(
+        game,
+        player,
+        structure,
+        ActionLogBalance::Loss,
+        position,
+        None,
+    );
 }
 
 pub(crate) fn log_structure(
@@ -51,11 +63,12 @@ pub(crate) fn log_structure(
     structure: Structure,
     balance: ActionLogBalance,
     position: Position,
+    port_position: Option<Position>,
 ) {
     add_action_log_item(
         game,
         player.index,
-        ActionLogEntry::structure(structure, balance, position),
+        ActionLogEntry::structure(structure, balance, position, port_position),
         player.origin.clone(),
         vec![],
     );

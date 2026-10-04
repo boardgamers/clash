@@ -85,16 +85,43 @@ export interface Game {
   log_index: number;
 }
 export interface LoggedAction {
+  player?: number;
   action?: Move;
   log?: string[];
   items?: {
     player: number;
     origin?: Record<string, unknown>;
-    Action?: { balance: string };
+    Text?: string;
+    Move?: { units: Record<string, number | string>; start: string; destination: string };
+    Explore?: { tiles: [string, unknown][] };
+    CombatRound?: {
+      round: number;
+      attackers: Record<string, number | string>;
+      defenders: Record<string, number | string>;
+      defending_player: number;
+    };
+    CombatRoll?: {
+      rolls: {
+        value: number;
+        unit_type: string | { Leader: string };
+        bonus: boolean;
+        combat_bonus?: number;
+      }[];
+      combat_value: number;
+      hits: number;
+      combat_modifiers?: string[];
+    };
+    InfluenceCultureAttempt?: { position: string; starting_city_position: string; structure: unknown };
+    Action?: { balance: string; amount?: number };
     Structure?: { structure: unknown; balance: string; position: string };
-    HandCard?: { to: unknown };
-    Advance?: { advance: string; balance: string; take_incident_token?: boolean };
-    Units?: { units: Record<string, number | string>; balance: string };
+    HandCard?: { card?: unknown; from?: unknown; to: unknown };
+    Advance?: {
+      advance: string;
+      balance: string;
+      take_incident_token?: boolean;
+      incident_token?: 'NoChange' | { Take: number };
+    };
+    Units?: { units: Record<string, number | string>; balance: string; position?: string };
     Resources?: { resources: Pile; balance: string };
     MoodChange?: { city: string; mood: string };
   }[];
@@ -200,6 +227,7 @@ export interface WonderCard {
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
+  logOriginNames?: Record<string, string>;
   activePlayers?: number[];
   civilizationDraft?: { ready: boolean[]; chosen: string | null; waiting: boolean } | null;
   builtWonders?: Pick<WonderCard, 'id' | 'name' | 'description' | 'builtPoints' | 'ownedPoints'>[];

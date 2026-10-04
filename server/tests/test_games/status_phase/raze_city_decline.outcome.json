@@ -238,9 +238,17 @@
                       "SelectPositions": []
                     }
                   },
-                  "log": [
-                    "Player1: Raze city: Did not raze a city"
-                  ]
+                  "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Text": "Did not raze a city",
+                      "origin": {
+                        "Ability": "Raze city"
+                      }
+                    }
+                  ],
+                  "active_events": 1
                 }
               ]
             }

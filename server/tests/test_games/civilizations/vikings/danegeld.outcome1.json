@@ -99,7 +99,9 @@
       ],
       "next_unit_id": 10,
       "played_once_per_turn_actions": [
-        "Taxes"
+        {
+          "Custom": "Taxes"
+        }
       ]
     },
     {
@@ -270,19 +272,20 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "LeaderAbility": "Danegeld"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "LeaderAbility": "Danegeld"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Danegeld: Pay 1 action, Start action"
                   ]
                 },
                 {
@@ -293,6 +296,7 @@
                       }
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -315,12 +319,21 @@
                       "origin": {
                         "Ability": "Danegeld"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 4
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
                   ],
-                  "log": [
-                    "Player1: Danegeld: Gain 4 food, City E2 became Neutral",
-                    "Player1: Waste: Could not store 4 food"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

@@ -10,7 +10,7 @@ use crate::combat::CombatModifier;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest};
-use crate::cultural_influence::{InfluenceCultureInfo, resolve_influence_roll};
+use crate::cultural_influence::{InfluenceCultureAttemptInfo, resolve_influence_roll};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
@@ -171,7 +171,11 @@ fn sri_gupta() -> LeaderInfo {
     )
 }
 
-pub(crate) fn buddhism_available(game: &Game, player: usize, info: &InfluenceCultureInfo) -> bool {
+pub(crate) fn buddhism_available(
+    game: &Game,
+    player: usize,
+    info: &InfluenceCultureAttemptInfo,
+) -> bool {
     let p = game.player(player);
     !p.event_info.contains_key(BUDDHISM)
         && p.units.iter().any(|u| {
@@ -190,15 +194,15 @@ fn ashoka() -> LeaderInfo {
         LeaderAbility::builder(BUDDHISM,
             "Once per turn, reroll Cultural Influence from Ashoka's city if it has a Temple or the target is a Temple.")
         .add_bool_request(
-            |e| &mut e.influence_culture, 1,
+            |e| &mut e.influence_culture_boost, 1,
             |game, p, info| (info.roll < crate::consts::INFLUENCE_MIN_ROLL
-                && buddhism_available(game, p.index, info))
+                && buddhism_available(game, p.index, &info.attempt))
                 .then(|| format!("Buddhism · Rolled {}. Reroll?", info.roll)),
             |game, s, info| {
                 if s.choice {
                     let previous = info.roll;
-                    info.roll = game.next_dice_roll().value + info.roll_boost;
-                    info.info.info.insert(BUDDHISM.into(), "used".into());
+                    info.roll = game.next_dice_roll().value + info.attempt.roll_boost;
+                    info.attempt.info.info.insert(BUDDHISM.into(), "used".into());
                     game.player_mut(s.player_index).event_info.insert(BUDDHISM.into(), "used".into());
                     s.log(game, &format!("Rerolled Cultural Influence: {previous} → {}", info.roll));
                 }

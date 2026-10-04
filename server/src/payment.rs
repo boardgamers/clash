@@ -283,10 +283,7 @@ impl Display for PaymentOptions {
             }
             match conversion.payment_conversion_type {
                 PaymentConversionType::Unlimited => {}
-                PaymentConversionType::MayOverpay(i) => {
-                    write!(f, " (up to: {i})")?;
-                }
-                PaymentConversionType::MayNotOverpay(i) => {
+                PaymentConversionType::MayOverpay(i) | PaymentConversionType::MayNotOverpay(i) => {
                     write!(f, " (up to: {i})")?;
                 }
             }

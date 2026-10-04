@@ -2,6 +2,10 @@
 
 ![Lines of code](https://img.shields.io/tokei/lines/github/boardgamers/clash)
 
+## Play online at
+
+[boardgamers.space](https://boardgamers.space)
+
 ## Client
 
 ### Run native client

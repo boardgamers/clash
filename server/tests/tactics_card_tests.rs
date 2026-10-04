@@ -131,8 +131,12 @@ fn heavy_resistance_can_resolve_a_battle_at_a_wonder_city() {
         CustomActionType::GreatLibrary,
         CustomActionType::GreatLighthouse,
     ] {
-        assert!(game.player(0).custom_actions.contains_key(&ability));
-        assert!(!game.player(1).custom_actions.contains_key(&ability));
+        assert!(game.player(0).special_actions.contains_key(
+            &server::content::custom_actions::SpecialAction::Custom(ability)
+        ));
+        assert!(!game.player(1).special_actions.contains_key(
+            &server::content::custom_actions::SpecialAction::Custom(ability)
+        ));
     }
     let restored = game.clone();
     assert_eq!(

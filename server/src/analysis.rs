@@ -21,8 +21,8 @@ pub fn can_create(game: &Game) -> bool {
         // These discard arrays are lifetime archives, not current-cycle piles.
         // Once a pile has refilled, their exclusions are no longer sufficient.
         && !game.log.iter().flat_map(|a| &a.rounds).flat_map(|r| &r.turns)
-            .flat_map(|t| &t.actions).flat_map(|a| &a.log).any(|text| {
-                text == "Reshuffling Action Card pile" || text == "Reshuffling Events pile"
+            .flat_map(|t| &t.actions).flat_map(|a| &a.items).any(|item| {
+                matches!(&item.entry, crate::log::ActionLogEntry::Text(text) if text == "Reshuffling Action Card pile" || text == "Reshuffling Events pile")
             })
 }
 
@@ -42,7 +42,7 @@ fn public_continuation(event: &crate::content::persistent_events::PersistentEven
         | E::ShipConstructionConversion(_)
         | E::StopBarbarianMovement(_)
         | E::UnitsKilled(_)
-        | E::InfluenceCulture(_)
+        | E::InfluenceCultureBoost(_)
         | E::StatusPhase(_) => true,
         E::PayAction(payment) => !matches!(
             payment.action,
@@ -330,7 +330,7 @@ fn retain_rule_facts(game: &mut Game) {
                 source_turn.actions.len()
             };
             for a in source_turn.actions.iter().take(limit) {
-                let mut fact = ActionLogAction::new(Action::StartTurn);
+                let mut fact = ActionLogAction::new(Action::StartTurn, a.player, None, 0);
                 fact.combat_stats = a.combat_stats.clone().map(|mut s| {
                     s.claimed_action_cards.clear();
                     s.selected_card = None;
@@ -426,7 +426,12 @@ mod tests {
                                     vec![HandCard::ActionCard(37)],
                                 ),
                             );
-                            a.log.push("source secret".into());
+                            a.items.push(ActionLogItem::new(
+                                a.player,
+                                crate::log::ActionLogEntry::Text("source secret".into()),
+                                EventOrigin::Ability("test".into()),
+                                vec![],
+                            ));
                             a.undo = serde_json::from_value(serde_json::json!([{"op":"replace","path":"/seed","value":"undo secret"}])).unwrap();
                         }
                     }
@@ -459,9 +464,9 @@ mod tests {
             game = game_api::execute(game, Action::Playing(PlayingAction::EndTurn), p);
         }
         let p = game.active_player();
-        crate::log::add_start_turn_action_if_needed(&mut game);
-        let player =
-            crate::events::EventPlayer::from_player(p, &game, EventOrigin::Ability("test".into()));
+        let active = game.active_player();
+        crate::log::add_start_turn_action_if_needed(&mut game, active);
+        let player = crate::events::EventPlayer::new(p, EventOrigin::Ability("test".into()));
         let before = game.players[p].action_cards.len();
         crate::action_card::gain_action_card_from_pile(&mut game, &player);
         assert_eq!(game.players[p].action_cards.len(), before + 1);
@@ -522,7 +527,8 @@ mod tests {
     fn publicly_revealed_opponent_card_stays_in_their_hand() {
         let mut source = game_api::init(2, "source".into(), GameOptions::default());
         let id = source.players[1].action_cards[0];
-        crate::log::add_start_turn_action_if_needed(&mut source);
+        let active = source.active_player();
+        crate::log::add_start_turn_action_if_needed(&mut source, active);
         crate::log::add_action_log_item(
             &mut source,
             1,
@@ -575,12 +581,12 @@ mod tests {
     #[test]
     fn fails_closed_after_action_pile_refill() {
         let mut game = game_api::init(2, "source".into(), GameOptions::default());
-        crate::log::add_start_turn_action_if_needed(&mut game);
+        let active = game.active_player();
+        crate::log::add_start_turn_action_if_needed(&mut game, active);
         game.action_cards_left.clear();
         game.action_cards_discarded = game.cache.get_action_cards().iter().map(|c| c.id).collect();
         let p = game.active_player();
-        let player =
-            crate::events::EventPlayer::from_player(p, &game, EventOrigin::Ability("test".into()));
+        let player = crate::events::EventPlayer::new(p, EventOrigin::Ability("test".into()));
         crate::action_card::gain_action_card_from_pile(&mut game, &player);
         assert!(!game.action_cards_left.is_empty());
         assert!(!can_create(&game));

@@ -286,6 +286,10 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Move"
+                  },
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -306,8 +310,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "Move": {
+                        "units": {
+                          "leader": "Ragnar"
+                        },
+                        "start": "E2",
+                        "destination": "D1"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Move"
@@ -330,7 +347,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "D1"
+                        "position": "D1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -341,7 +359,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "D1"
+                        "position": "D1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -375,20 +394,25 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "B2"
                       },
                       "origin": {
                         "Ability": "Place Settler"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Waste"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Move: marched Ragnar Lodbrok from E2 to D1, Pay 1 action",
-                    "Player1: Combat: Gain 1 gold, Gain city D1, City D1 became Angry",
-                    "Player2: Combat: Lose city D1",
-                    "Player1: Prey: Gain 2 gold",
-                    "Player2: Place Settler: Gain 1 settler at B2",
-                    "Player1: Waste: Could not store 1 gold"
                   ]
                 }
               ]

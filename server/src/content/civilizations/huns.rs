@@ -184,7 +184,7 @@ pub(crate) fn finish_city_move(game: &mut Game, player: usize, from: Position, t
         Some(Terrain::Mountain) => ResourcePile::ore(1),
         _ => ResourcePile::empty(),
     };
-    let p = EventPlayer::from_player(player, game, origin);
+    let p = EventPlayer::new(player, origin);
     p.log(game, &format!("Moved city {from} to {to}"));
     if !pile.is_empty() {
         p.gain_resources(game, pile);

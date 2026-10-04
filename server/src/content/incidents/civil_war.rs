@@ -275,7 +275,7 @@ fn envoy() -> Incident {
         |_p, _, _| true,
         0,
         |game, s, _| {
-            s.other_player(s.choice, game)
+            s.other_player(s.choice)
                 .gain_resources(game, ResourcePile::culture_tokens(1));
         },
     )

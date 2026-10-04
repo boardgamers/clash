@@ -353,8 +353,24 @@
                       }
                     }
                   },
-                  "log": [
-                    "Player2: Move: sailed 1 ship from B3 to F2"
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Move"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Move": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "start": "B3",
+                        "destination": "F2"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
                   ]
                 }
               ]

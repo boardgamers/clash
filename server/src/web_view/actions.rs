@@ -89,12 +89,10 @@ pub fn recruit_extended(game: &Game, seat: usize, input: &Value) -> Result<Value
     }
     crate::content::civilizations::carthage::validate_recruit(game, p, &recruit)?;
     let payments = super::decisions::payment_choices(&cost.cost, &p.resources, false, false);
-    Ok(
-        json!({"payment":recruit.payment,"payments":payments,
+    Ok(json!({"payment":recruit.payment,"payments":payments,
             "basePayment":units.clone().to_vec().iter().map(UnitType::cost).sum::<crate::resource_pile::ResourcePile>(),
             "costOptions":recruit_cost_options(game, &cost),
-            "moodWillDecrease":city.is_activated(),"action":Action::Playing(PlayingAction::Recruit(recruit))}),
-    )
+            "moodWillDecrease":city.is_activated(),"action":Action::Playing(PlayingAction::Recruit(recruit))}))
 }
 
 pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Value, String> {
@@ -320,21 +318,21 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
 }
 
 pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
-    use crate::content::custom_actions::{CustomAction, CustomActionExecution};
+    use crate::content::custom_actions::{CustomAction, SpecialActionExecution};
     if !can_play {
         return vec![];
     }
     game.available_custom_actions(seat).iter().flat_map(|info| {
-        let CustomActionExecution::Action(execution) = &info.execution else { return vec![]; };
+        let SpecialActionExecution::Action(execution) = &info.execution else { return vec![]; };
         let cities = if info.city_bound().is_some() {
             game.player(seat).cities.iter().filter(|c|info.is_city_available(game,c)).map(|c|Some(c.position)).collect()
         } else { vec![None] };
         cities.into_iter().map(|city|json!({"name":info.event_origin.name(game),"description":execution.ability.description,"position":city,
             "cost":info.cost.cost.payment_options(game.player(seat),info.event_origin.clone()).default_payment(),
             "free":info.cost.cost.free,
-            "activatesCity":(info.action == crate::content::custom_actions::CustomActionType::GoldenAge)
+            "activatesCity":(info.custom_action_type() == crate::content::custom_actions::CustomActionType::GoldenAge)
                 .then(|| crate::leader::leader_position(game.player(seat))),
-            "action":Action::Playing(PlayingAction::Custom(CustomAction::new(info.action,city)))})).collect::<Vec<_>>()
+            "action":Action::Playing(PlayingAction::Custom(CustomAction::new(info.custom_action_type(),city)))})).collect::<Vec<_>>()
     }).collect()
 }
 
@@ -352,7 +350,7 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             let origins = influence_start_positions(game,game.player(seat)).into_iter().map(|(p,_)|p)
                 .chain(std::iter::once(s.position))
                 .collect::<std::collections::BTreeSet<_>>().into_iter().filter_map(|origin| {
-                    let from = influence_culture_boost_cost_from(game,seat,&s,&kind,true,false,Some(origin)).ok()?;
+                    let from = influence_culture_boost_cost_from(game,seat,&s,&kind,true,false,game.get_any_city(s.position).player_index,Some(origin)).ok()?;
                     let mut attempt = InfluenceCultureAttempt::new(s.clone(),kind.clone());
                     attempt.starting_position = Some(origin);
                     Some(json!({"position":origin,"settlers":game.try_get_any_city(origin).is_none(),
@@ -418,14 +416,23 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     let p = game.player(seat);
     // These cards grant an action to offset the following Construct command.
     // Present the extra build's net cost, not that internal action debit.
-    let construction_source = (seat == game.active_player()).then(|| {
-        game.permanent_effects.iter().find_map(|effect| match effect {
-            PermanentEffect::Construct(ConstructEffect::GreatEngineer) => Some("Great Engineer"),
-            PermanentEffect::Construct(ConstructEffect::CityDevelopment) => Some("City Development"),
-            _ => None,
+    let construction_source = (seat == game.active_player())
+        .then(|| {
+            game.permanent_effects
+                .iter()
+                .find_map(|effect| match effect {
+                    PermanentEffect::Construct(ConstructEffect::GreatEngineer) => {
+                        Some("Great Engineer")
+                    }
+                    PermanentEffect::Construct(ConstructEffect::CityDevelopment) => {
+                        Some("City Development")
+                    }
+                    _ => None,
+                })
         })
-    }).flatten();
-    let free_construction = construction_source.is_some() || PlayingActionType::Construct.cost(game, seat).free;
+        .flatten();
+    let free_construction =
+        construction_source.is_some() || PlayingActionType::Construct.cost(game, seat).free;
     p.cities.iter().map(|city| {
         let buildings = BUILDINGS.into_iter().map(|building| {
             let cost = p.building_cost_in_city(game, building, city.position, CostTrigger::NoModifiers);
@@ -519,7 +526,7 @@ pub fn settlers(game: &Game, seat: usize, can_move: bool) -> Vec<Value> {
                 "action":Action::Movement(MovementAction::Move(MoveUnits::new(vec![unit.id],route.destination,None,payment.clone())))}))).collect::<Vec<_>>() } else {vec![]};
         destinations.sort_by_key(|d|d["position"].as_str().unwrap_or_default().to_string());
         let founder = p.active_leader()==Some(crate::leader::Leader::QueenDido) && crate::leader::leader_position(p)==unit.position;
-        let found_kind=if founder {PlayingActionType::Custom(crate::content::custom_actions::CustomActionType::Founder)} else {PlayingActionType::FoundCity};
+        let found_kind=if founder {crate::content::custom_actions::CustomActionType::Founder.playing_action_type()} else {PlayingActionType::FoundCity};
         let found_reason = action_reason(game,seat,game.state==GameState::Playing && seat==game.active_player(),found_kind)
             .or_else(||(!unit.can_found_city(game)).then(||"Move to an empty land tile to found a city".into()));
         json!({"id":unit.id,"position":unit.position,"destinations":destinations,"foundReason":found_reason,

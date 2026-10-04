@@ -238,9 +238,28 @@
                       "SelectPositions": []
                     }
                   },
-                  "log": [
-                    "Player2: Raze city: Did not raze a city"
-                  ]
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Text": "Did not raze a city",
+                      "origin": {
+                        "Ability": "Raze city"
+                      }
+                    }
+                  ],
+                  "active_events": 1
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "ChangeGovernmentType"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
                 },
                 {
                   "action": {
@@ -250,21 +269,38 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
                       "Resources": {
                         "resources": {},
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Keep current government",
                       "origin": {
                         "Ability": "Change Government"
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Change Government: Pay nothing, Keep current government"
-                  ]
+                  "active_events": 1
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "DetermineFirstPlayer"
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
                 }
               ]
             }
@@ -273,7 +309,7 @@
       ]
     }
   ],
-  "log_index": 2,
+  "log_index": 1,
   "undo_limit": 1,
   "actions_left": 3,
   "round": 1,

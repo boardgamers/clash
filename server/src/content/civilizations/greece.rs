@@ -9,7 +9,7 @@ use crate::combat_listeners::CombatStrength;
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::AdvanceGroup;
 use crate::content::advances::warfare::draft_cost;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionType, PlayingActionModifier, SpecialAction};
 use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
 use crate::events::check_event_origin;
 use crate::game::Game;
@@ -108,11 +108,13 @@ fn hellenistic_culture() -> SpecialAdvanceInfo {
         "You may start Influence Culture attempts from cities containing a building in your color, including cities owned by other players. You may pay 2 mood tokens instead of the 1 culture token for Arts.",
     )
     .add_action_modifier(
-        CustomActionType::HellenisticInfluenceCultureAttempt,
+        PlayingActionModifier::HellenisticInfluenceCultureAttempt,
         |c| {
-            c.once_per_turn_mutually_exclusive(CustomActionType::ArtsInfluenceCultureAttempt)
-                .free_action()
-                .resources(ResourcePile::mood_tokens(2))
+            c.once_per_turn_mutually_exclusive(SpecialAction::Modifier(
+                PlayingActionModifier::ArtsInfluenceCultureAttempt,
+            ))
+            .free_action()
+            .resources(ResourcePile::mood_tokens(2))
         },
         PlayingActionType::InfluenceCultureAttempt,
     )

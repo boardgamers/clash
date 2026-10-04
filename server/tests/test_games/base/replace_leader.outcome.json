@@ -283,11 +283,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Recruit"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -300,7 +304,7 @@
                           "mood_tokens": 1,
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -312,7 +316,8 @@
                         "units": {
                           "leader": "Sulla"
                         },
-                        "balance": "Loss"
+                        "balance": "Loss",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -334,15 +339,13 @@
                         "units": {
                           "leader": "Augustus"
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Recruit"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Recruit: Pay 1 action, Pay 1 mood token and 1 culture token, Lost Sulla at A1, City A1 became Neutral, Gain Augustus at A1"
                   ]
                 }
               ]

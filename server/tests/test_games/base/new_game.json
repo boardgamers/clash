@@ -387,10 +387,15 @@
           "round": 0,
           "turns": [
             {
-              "turn_type": "Setup",
+              "turn_type": {
+                "Setup": {
+                  "player": 0
+                }
+              },
               "actions": [
                 {
-                  "action": "Setup",
+                  "action": "StartTurn",
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -408,7 +413,7 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Farming",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -419,7 +424,7 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Mining",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -461,7 +466,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "D2"
+                        "position": "D2",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Setup"
@@ -483,12 +489,28 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "D2"
                       },
                       "origin": {
                         "Ability": "Setup"
                       }
-                    },
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "Setup": {
+                  "player": 1
+                }
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1,
+                  "items": [
                     {
                       "player": 1,
                       "Resources": {
@@ -505,7 +527,7 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Farming",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -516,7 +538,7 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Mining",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Gain"
                       },
                       "origin": {
@@ -558,7 +580,8 @@
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "D7"
+                        "position": "D7",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Setup"
@@ -580,42 +603,20 @@
                         "units": {
                           "settlers": 1
                         },
-                        "balance": "Gain"
+                        "balance": "Gain",
+                        "position": "D7"
                       },
                       "origin": {
                         "Ability": "Setup"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Setup: Play as Choose Civilization, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D2, City D2 became Happy, Gain 1 settler at D2",
-                    "Player2: Setup: Play as Choose Civilization, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D7, City D7 became Happy, Gain 1 settler at D7"
                   ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "age": 1,
-      "rounds": [
-        {
-          "round": 1,
-          "turns": [
-            {
-              "turn_type": {
-                "Player": 0
-              },
-              "actions": [
+                },
                 {
                   "action": {
                     "ChooseCivilization": "Vikings"
                   },
-                  "log": [
-                    "Player1: Setup: Play as Vikings"
-                  ]
+                  "player": 0
                 }
               ]
             }
@@ -624,14 +625,12 @@
       ]
     }
   ],
-  "log_index": 1,
-  "undo_limit": 1,
+  "log_index": 2,
+  "undo_limit": 2,
   "actions_left": 3,
   "round": 1,
-  "age": 1,
-  "messages": [
-    "Age 1 has started"
-  ],
+  "age": 0,
+  "messages": [],
   "rng": "187713005158128829250871947649707797698",
   "wonders_left": [
     "GreatGardens",

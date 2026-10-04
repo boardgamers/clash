@@ -216,12 +216,8 @@ pub(crate) fn innovator(game: &mut Game, position: Position) {
     let player = game.get_any_city(position).player_index;
     let p = game.player(player);
     if p.active_leader() == Some(Leader::Imhotep) && leader_position(p) == position {
-        EventPlayer::from_player(
-            player,
-            game,
-            EventOrigin::LeaderAbility("Innovator".to_string()),
-        )
-        .gain_resources(game, ResourcePile::ideas(1));
+        EventPlayer::new(player, EventOrigin::LeaderAbility("Innovator".to_string()))
+            .gain_resources(game, ResourcePile::ideas(1));
     }
 }
 

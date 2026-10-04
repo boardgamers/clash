@@ -122,7 +122,10 @@ for (const seat of [0, 1]) {
 }
 
 test('free research exposes exactly the legal choices without paid actions or resource requirements', () => {
-  const raw = JSON.parse(fixture('status_phase/free_advance.outcome'));
+  const initial = fixture('status_phase/free_advance');
+  const raw = JSON.parse(
+    engine.tryMove(initial, JSON.stringify({ Playing: 'EndTurn' }), engine.currentPlayer(initial)),
+  );
   const seat = engine.currentPlayer(JSON.stringify(raw));
   raw.players[seat].resources = {};
   const state = JSON.stringify(raw);

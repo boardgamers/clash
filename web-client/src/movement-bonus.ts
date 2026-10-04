@@ -1,3 +1,4 @@
+import { readableHistory } from './structured-log.ts';
 import type { Game } from './types.ts';
 
 export interface MovementBonus {
@@ -10,7 +11,7 @@ export interface MovementBonus {
 // Undone actions remain in older saves, but their logs and items are cleared.
 export function movementBonus(game: Game | null): MovementBonus | null {
   if (!game?.state || typeof game.state !== 'object' || !('Movement' in game.state)) return null;
-  const age = game.log?.at(-1);
+  const age = readableHistory(game).log?.at(-1);
   const round = age?.rounds.at(-1);
   const turn = round?.turns.at(-1);
   const actions = turn?.actions ?? [];
@@ -21,7 +22,10 @@ export function movementBonus(game: Game | null): MovementBonus | null {
     if (!action || typeof action !== 'object') continue;
     if ('Movement' in action) {
       // A paid move starts a fresh allowance, even after Expansion in the same turn.
-      if (action.Movement === 'Stop' || entry.items?.some((item) => item.Action?.balance === 'Loss'))
+      if (
+        action.Movement === 'Stop' ||
+        entry.items?.some((item) => ['Loss', 'Pay'].includes(item.Action?.balance ?? ''))
+      )
         return null;
       continue;
     }

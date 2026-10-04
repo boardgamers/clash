@@ -125,7 +125,8 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
             ? `${current.combat.defender.civilization ?? 'Defender'} wins`
             : 'Draw';
       latest();
-      current = undefined;
+      // Captures and casualty choices can follow the winner announcement.
+      // Keep this battle until the next round marker or turn.
       continue;
     }
     if (entry.title === 'Tactics' && current?.combat) {

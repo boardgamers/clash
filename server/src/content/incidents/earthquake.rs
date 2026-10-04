@@ -204,7 +204,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &E
     let o = game.player_mut(owner);
     o.gain_event_victory_points(2.0, origin);
     o.destroyed_structures.add_building(b);
-    let player = EventPlayer::from_player(city_owner, game, origin.clone());
+    let player = EventPlayer::new(city_owner, origin.clone());
     lose_building(game, &player, b, position);
     game.log(
         owner,
@@ -219,11 +219,7 @@ fn destroy_wonder_for_points(
     wonder: Wonder,
     origin: &EventOrigin,
 ) {
-    let p = &EventPlayer::from_player(
-        game.get_any_city(position).player_index,
-        game,
-        origin.clone(),
-    );
+    let p = &EventPlayer::new(game.get_any_city(position).player_index, origin.clone());
     destroy_wonder(game, p, wonder, position);
 
     let a = wonder.info(game).owned_victory_points;

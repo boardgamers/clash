@@ -65,7 +65,14 @@ fn random_actions_iteration(mut rng: Rng, cache: Cache) {
         game_setup::setup_game_with_cache(&GameSetupBuilder::new(2).seed(seed).build(), cache);
     game.context = GameContext::AI;
     let mut ai_actions = AiActions::new();
+    let mut moves = 0;
     loop {
+        moves += 1;
+        if moves > 10_000 {
+            let file = format!("random-stalled-{}", game.seed);
+            write_result(&to_json(&game), &GamePath::new(".", &file));
+            panic!("random game exceeded 10000 actions; state stored in {file}.json");
+        }
         if matches!(game.state, GameState::Finished) {
             break;
         }

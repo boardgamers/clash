@@ -1,3 +1,4 @@
+import { readableHistory } from './structured-log.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -27,13 +28,7 @@ async function fixture(name: string) {
 }
 
 async function babylonia(leader?: string) {
-  let state = await engine.init(
-    2,
-    [],
-    { civilization: 'ChooseCivilization' },
-    'babylonia-rules',
-    {},
-  );
+  let state = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'babylonia-rules', {});
   state = engine.tryMove(
     state,
     JSON.stringify({ ChooseCivilization: 'Babylonia' }),
@@ -98,7 +93,7 @@ test('Canals adds food only when the entire collection contains exactly one food
   assert.equal(none.total.food ?? 0, 0);
   const after = move(game, mixed.action);
   assert.equal(after.players[seat(game)].resources.food, 2);
-  assert.match(JSON.stringify(after.log), /Canals.*Added 1 food/);
+  assert.match(JSON.stringify(after.log), /Added 1 food.*Canals/);
   // Focused Collection permits two resources from one tile; that already meets 2 food.
   const raw = await fixture('civilizations/china/rice');
   raw.players[0].civilization = 'Babylonia';
@@ -164,7 +159,10 @@ test('Star Catalogues asks for its reward before revealing or removing an event 
   const after = move(pending, { Response: { ResourceReward: { ideas: 1 } } });
   assert.equal(after.incidents_left.length, beforeDeck.length - 1);
   assert.ok((after.players[seat(game)].resources.ideas ?? 0) >= 1);
-  assert.equal(JSON.stringify(after.log).match(/Star Catalogues.*?Gain 1 idea/g)?.length, 1);
+  assert.equal(
+    JSON.stringify(readableHistory(after).log).match(/Star Catalogues.*?Gain 1 ideas?/g)?.length,
+    1,
+  );
 });
 
 test('Hammurabi discounts only his Fortress and offers Lawgiver alongside normal happiness costs', async () => {

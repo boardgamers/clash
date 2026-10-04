@@ -84,7 +84,7 @@ test('rosters, tactics and rolls combine across payment prompts without treating
   assert.equal(combat.defender.tactics, 'Encircled');
   assert.deepEqual(combat.attacker.modifiers, [
     'steel weapons added 1 combat value',
-    'Peltasts rolled a 6 and ignored a hit',
+    'Peltasts rolls a 6 and ignored a hit',
   ]);
   assert.equal(combat.attacker.value, 22);
   assert.equal(combat.result, 'Rome wins');
@@ -102,9 +102,9 @@ test('elephant blocks, leader rerolls and unknown loss text survive formatting',
     effect: '-1 hits, no combat value',
   });
   assert.deepEqual(combat.defender.dice?.[0], { value: 1, symbol: 'Leader', effect: 're-roll' });
-  assert.deepEqual(combat.defender.units?.[0].type, { Leader: 'Gaius Julius Caesar' });
+  assert.deepEqual(combat.defender.units?.[0].type, { Leader: 'Caesar' });
   assert.equal(combat.defender.hits, 0);
-  assert.ok(combat.outcomes.some((entry) => entry.notes.includes('Lost Gaius Julius Caesar at C1')));
+  assert.ok(combat.outcomes.some((entry) => entry.notes.includes('Lose Caesar at C1')));
 });
 
 test('each round and each separate battle retains its own casualties and result', () => {

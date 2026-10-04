@@ -1,3 +1,4 @@
+import { readableHistory } from './structured-log.ts';
 import { activeHistory } from './active-history.ts';
 import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Player, Resource } from './types.ts';
 import type { View } from './types.ts';
@@ -119,7 +120,7 @@ function confirmPayments(action: LoggedAction, payments: PaymentLog[], entries: 
   if (!deferred) return;
   const balances = new Map<number, Pile>();
   for (const item of action.items ?? []) {
-    if (item.Resources?.balance !== 'Loss') continue;
+    if (!item.Resources || !['Loss', 'Pay'].includes(item.Resources.balance)) continue;
     const balance = balances.get(item.player) ?? {};
     for (const [resource, amount] of Object.entries(item.Resources.resources))
       balance[resource as Resource] = (balance[resource as Resource] ?? 0) + amount;
@@ -234,8 +235,9 @@ function addClause(entry: JournalEntry, clause: string, payments: PaymentLog[]):
 
 export function journal(
   game: Game,
-  view?: Pick<View, 'eventCatalog' | 'pendingEvent' | 'players'>,
+  view?: Pick<View, 'eventCatalog' | 'pendingEvent' | 'players' | 'logOriginNames'>,
 ): JournalEntry[] {
+  game = readableHistory(game, view);
   const historicalCities = collectionCities(game);
   const eventNames = [
     ...new Set([
@@ -312,7 +314,11 @@ export function journal(
                 text: '',
                 tokens: [],
                 notes: [],
-                event: { outcomes: [], explanations: [], triggeredBy: entries.at(-1)?.player },
+                event: {
+                  outcomes: [],
+                  explanations: [],
+                  triggeredBy: action.player ?? entries.at(-1)?.player,
+                },
               });
               continue;
             }

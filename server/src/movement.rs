@@ -13,6 +13,7 @@ use crate::events::{EventOrigin, EventPlayer};
 use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
 use crate::game::{Game, GameContext, GameState};
+use crate::log::ActionLogEntry;
 use crate::move_routes::{MoveRoute, move_routes};
 use crate::movement::MovementAction::{Move, Stop};
 use crate::payment::PaymentOptions;
@@ -328,7 +329,7 @@ pub(crate) fn execute_movement_action(
     action: MovementAction,
     player_index: usize,
 ) -> Result<(), String> {
-    let player = EventPlayer::from_player(player_index, game, move_event_origin());
+    let player = EventPlayer::new(player_index, move_event_origin());
     match &action {
         Move(m) if m.city.is_some() => player.log(
             game,
@@ -337,11 +338,13 @@ pub(crate) fn execute_movement_action(
         Move(m) if m.units.is_empty() => {
             player.log(game, "Used a movement actions but moved no units");
         }
-        Move(m) => player.log(game, &move_action_log(game, player.get(game), m)),
+        Move(m) => {
+            player.add_log_entry(game, ActionLogEntry::move_units(player.get(game), m));
+        }
         Stop => player.log(game, "End the movement action"),
     }
 
-    let p = &EventPlayer::from_player(player_index, game, move_event_origin());
+    let p = &EventPlayer::new(player_index, move_event_origin());
     if let GameState::Playing = game.state {
         if game.actions_left == 0 && game.context != GameContext::Replay {
             return Err("No actions left".to_string());
@@ -383,10 +386,11 @@ fn has_any_moves_left(game: &mut Game) -> bool {
             return true;
         }
 
-        crate::content::civilizations::huns::has_city_moves_left(game, p) || p.units.iter().any(|unit| {
-            let result = possible_move_routes(p, game, &[unit.id], unit.position, None);
-            result.is_ok_and(|r| !r.is_empty()) || can_embark(game, p, unit)
-        })
+        crate::content::civilizations::huns::has_city_moves_left(game, p)
+            || p.units.iter().any(|unit| {
+                let result = possible_move_routes(p, game, &[unit.id], unit.position, None);
+                result.is_ok_and(|r| !r.is_empty()) || can_embark(game, p, unit)
+            })
     } else {
         false
     }
@@ -458,7 +462,7 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
         move_state.current_move = current_move;
     }
     if !starting_position.is_neighbor(m.destination) {
-        // roads move ends the current move
+        // roads move and navigation end the current move
         move_state.current_move = CurrentMove::None;
     }
 
@@ -837,42 +841,7 @@ fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
     false
 }
 
-pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> String {
-    let units_str = m
-        .units
-        .iter()
-        .map(|unit| player.get_unit(*unit).unit_type)
-        .collect::<Units>()
-        .to_string(Some(game));
-    let start = player.get_unit(m.units[0]).position;
-    let start_is_water = game.map.is_sea(start);
-    let dest = m.destination;
-    let t = game
-        .map
-        .get(dest)
-        .expect("the destination position should be on the map");
-    let (verb, suffix) = if start_is_water {
-        if t.is_unexplored() || t.is_water() {
-            ("sailed", "")
-        } else {
-            ("disembarked", "")
-        }
-    } else if m.embark_carrier_id.is_some() {
-        ("embarked", "")
-    } else if start.is_neighbor(dest) {
-        ("marched", "")
-    } else {
-        ("marched", " on roads")
-    };
-    let payment = &m.payment;
-    let cost = if payment.is_empty() {
-        String::new()
-    } else {
-        format!(" for {payment}")
-    };
-    format!("{verb} {units_str} from {start} to {dest}{suffix}{cost}",)
-}
-
-pub(crate) fn move_event_origin() -> EventOrigin {
+#[must_use]
+pub fn move_event_origin() -> EventOrigin {
     EventOrigin::Ability("Move".to_string())
 }

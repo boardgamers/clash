@@ -11,7 +11,10 @@ use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
-use crate::log::{ActionLogAge, ActionLogRound, ActionLogTurn, TurnType, add_log_action};
+use crate::log::{
+    ActionLogAge, ActionLogRound, SetupTurnType, TurnType, add_start_turn_action_if_needed,
+    add_turn_log,
+};
 use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
@@ -228,7 +231,19 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
     initialize_setup_log(&mut game);
     if game.civilization_draft.is_none() {
         execute_setup_round(setup.player_amount, &mut game, map_setup.as_ref());
+        if setup.options.civilization == CivSetupOption::Random {
+            game.next_age();
+        }
     } else {
+        // Draft choices precede the per-player setup grants, but undo locking
+        // still needs a turn to anchor its cursor before any choice is made.
+        add_turn_log(
+            &mut game,
+            TurnType::Setup(SetupTurnType {
+                player: starting_player,
+                civilization: None,
+            }),
+        );
         game.information_revealed();
     }
     game
@@ -236,23 +251,27 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
 
 fn initialize_setup_log(game: &mut Game) {
     let mut age = ActionLogAge::new(0);
-    let mut round = ActionLogRound::new(0);
-    let turn = ActionLogTurn::new(TurnType::Setup);
-    round.turns.push(turn);
-    age.rounds.push(round);
+    age.rounds.push(ActionLogRound::new(0));
     game.log.push(age);
-    add_log_action(game, Action::Setup);
 }
 
 fn execute_setup_round(player_amount: usize, game: &mut Game, map_setup: Option<&MapSetup>) {
+    let choose_civ = game.options.civilization == CivSetupOption::ChooseCivilization;
     for player_index in 0..player_amount {
-        let origin = setup_event_origin();
-        let player = &EventPlayer::from_player(player_index, game, origin.clone());
-        player.log(
+        add_turn_log(
             game,
-            &format!("Play as {}", player.get(game).civilization.name),
+            TurnType::Setup(SetupTurnType {
+                player: player_index,
+                civilization: if choose_civ {
+                    None
+                } else {
+                    Some(game.player(player_index).civilization.name.clone())
+                },
+            }),
         );
-
+        add_start_turn_action_if_needed(game, player_index);
+        let origin = setup_event_origin();
+        let player = &EventPlayer::new(player_index, origin.clone());
         player.gain_resources(game, ResourcePile::food(2));
         do_advance(game, Advance::Farming, player, false);
         do_advance(game, Advance::Mining, player, false);
@@ -268,7 +287,6 @@ fn execute_setup_round(player_amount: usize, game: &mut Game, map_setup: Option<
             gain_unit(game, player, position, UnitType::Settler);
         }
     }
-    game.next_age();
 }
 
 pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
@@ -285,7 +303,8 @@ pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
         .add_block_tiles(&h.position, &home, h.position.rotation);
 }
 
-fn setup_event_origin() -> EventOrigin {
+#[must_use]
+pub fn setup_event_origin() -> EventOrigin {
     EventOrigin::Ability("Setup".to_string())
 }
 
@@ -347,7 +366,7 @@ pub(crate) fn execute_choose_civ(
     player_index: usize,
     action: &Action,
 ) -> Result<(), String> {
-    let player = EventPlayer::from_player(player_index, game, setup_event_origin());
+    let player = EventPlayer::new(player_index, setup_event_origin());
     if let Action::ChooseCivilization(civ) = action {
         let civilization = game
             .cache
@@ -370,11 +389,8 @@ pub(crate) fn execute_choose_civ(
     game.increment_player_index();
     if game.players.iter().all(|p| !p.civilization.is_choose_civ()) {
         game.state = GameState::Playing;
+        game.next_age();
     }
-    player.log(
-        game,
-        &format!("Play as {}", game.player(player_index).civilization.name),
-    );
     Ok(())
 }
 
@@ -439,6 +455,7 @@ fn finish_civilization_draft(game: &mut Game) {
             .unwrap_or(0);
     }
     execute_setup_round(player_amount, game, map_setup.as_ref());
+    game.next_age();
     game.information_revealed();
 }
 

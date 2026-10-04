@@ -236,13 +236,15 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Loss",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Raze city"
@@ -261,9 +263,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Raze city: Lose city A1, Gain 1 gold"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

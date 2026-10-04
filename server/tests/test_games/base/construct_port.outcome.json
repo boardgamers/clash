@@ -220,11 +220,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Construct Building"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -238,7 +242,7 @@
                           "wood": 1,
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -251,15 +255,13 @@
                           "Building": "Port"
                         },
                         "balance": "Gain",
-                        "position": "A1"
+                        "position": "A1",
+                        "port_position": "A2"
                       },
                       "origin": {
                         "Ability": "Construct Building"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, Gain Port at A1 at the water tile A2"
                   ]
                 }
               ]

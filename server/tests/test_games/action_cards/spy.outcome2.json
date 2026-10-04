@@ -214,11 +214,15 @@
                       "ActionCard": 7
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "CivilCard": 7
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "CivilCard": 7
@@ -239,10 +243,6 @@
                         "Ability": "Action Card"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Spy: Pay 1 action, Pay 1 culture token",
-                    "Player1: Action Card: Play Spy/Heavy Resistance"
                   ]
                 },
                 {
@@ -255,6 +255,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -262,16 +263,21 @@
                         "resources": {
                           "culture_tokens": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
+                      "origin": {
+                        "CivilCard": 7
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Looked at the Wonder, Action, and Objective cards in the hand of Player2",
                       "origin": {
                         "CivilCard": 7
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Spy: Pay 1 culture token, Looked at the Wonder, Action, and Objective cards in the hand of Player2"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -286,6 +292,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 1,
@@ -320,12 +327,16 @@
                       "origin": {
                         "CivilCard": 7
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Decided to swap an action card with Player2",
+                      "origin": {
+                        "CivilCard": 7
+                      }
                     }
                   ],
-                  "log": [
-                    "Player2: Spy: Gain an action card from Player1",
-                    "Player1: Spy: Gain an action card from Player2, Decided to swap an action card with Player2"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

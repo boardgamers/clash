@@ -60,6 +60,10 @@ pub(crate) struct Assets {
     pub custom_actions: HashMap<CustomActionType, Texture2D>,
     pub civ: HashMap<String, CivAssets>,
     pub default_civ: CivAssets,
+
+    // Log
+    pub hex: Texture2D,
+    pub fast: Texture2D,
 }
 
 impl Assets {
@@ -116,6 +120,10 @@ impl Assets {
             export: load_png(include_bytes!("../assets/export-2-svgrepo-com.png")),
             play: load_png(include_bytes!("../assets/play-1003-svgrepo-com.png")),
             pause: load_png(include_bytes!("../assets/pause-1006-svgrepo-com.png")),
+
+            // Log
+            hex: load_png(include_bytes!("../assets/hex-svgrepo-com.png")),
+            fast: load_png(include_bytes!("../assets/lightning-svgrepo-com.png")),
         }
     }
 

@@ -203,11 +203,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Advance": "CivilLiberties"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Advance": "CivilLiberties"
@@ -225,9 +229,6 @@
                         "Ability": "Civil Liberties"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player1: Civil Liberties: Pay 1 action, Start action, Gain 3 mood tokens"
                   ]
                 }
               ]

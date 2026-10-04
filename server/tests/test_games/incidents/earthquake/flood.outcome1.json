@@ -5,6 +5,9 @@
       "event_type": {
         "Incident": {
           "incident_id": 33,
+          "cause": {
+            "Advance": "Storage"
+          },
           "active_player": 0
         }
       },
@@ -270,11 +273,15 @@
                       }
                     }
                   },
+                  "player": 0,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 0,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -286,7 +293,7 @@
                         "resources": {
                           "gold": 2
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -308,18 +315,22 @@
                       "player": 0,
                       "Advance": {
                         "advance": "Storage",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Heavy Flood",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     }
-                  ],
-                  "log": [
-                    "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
-                    "Player1: Storage: Gain 1 mood token",
-                    "A new game event has been triggered: Heavy Flood"
                   ]
                 },
                 {
@@ -330,6 +341,7 @@
                       ]
                     }
                   },
+                  "player": 0,
                   "items": [
                     {
                       "player": 0,
@@ -342,9 +354,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player1: Heavy Flood: City C2 became Neutral"
-                  ]
+                  "active_events": 1
                 }
               ]
             }

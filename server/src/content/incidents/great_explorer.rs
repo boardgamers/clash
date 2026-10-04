@@ -3,7 +3,7 @@ use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::city::{found_city, is_valid_city_terrain};
 use crate::content::advances::AdvanceGroup;
 use crate::content::incidents::great_persons::{
-    great_person_action_card, great_person_description,
+    GreatPersonType, great_person_card, tech_great_person_description,
 };
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::events::{EventOrigin, EventPlayer, check_event_origin};
@@ -18,14 +18,15 @@ use itertools::Itertools;
 
 pub(crate) fn great_explorer() -> ActionCard {
     let groups = vec![AdvanceGroup::Seafaring];
-    let mut builder = great_person_action_card(
+    let mut builder = great_person_card(
         18,
+        GreatPersonType::ActionCard,
         "Great Explorer",
         &format!(
             "{} Then, you may explore a region adjacent to a region \
             where you have a city. If you do, you may found a city in the explored region,\
             without using a Settler.",
-            great_person_description(&groups)
+            tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),
         groups,

@@ -305,11 +305,54 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Advance"
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "balance": "Pay"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Ideas limit reduced to 2",
+                      "origin": {
+                        "Advance": "Dogma"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "unlocks Provinces",
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Dogma",
+                        "incident_token": {
+                          "Take": 1
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -324,25 +367,9 @@
                         "balance": "Loss"
                       },
                       "origin": {
-                        "Ability": "Advance"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Advance": {
-                        "advance": "Dogma",
-                        "take_incident_token": true,
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Advance"
+                        "Ability": "Waste"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Advance: Pay 1 action, Pay 2 ideas, Unlock Provinces, Gain Dogma and take an event token (1 left)",
-                    "Player2: Dogma: Ideas limit reduced to 2",
-                    "Player2: Waste: Could not store 2 ideas"
                   ]
                 },
                 {
@@ -359,11 +386,15 @@
                       }
                     }
                   },
+                  "player": 1,
+                  "origin": {
+                    "Ability": "Construct Building"
+                  },
                   "items": [
                     {
                       "player": 1,
                       "Action": {
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -376,7 +407,7 @@
                           "wood": 1,
                           "ore": 1
                         },
-                        "balance": "Loss"
+                        "balance": "Pay"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -389,21 +420,25 @@
                     },
                     {
                       "player": 1,
+                      "Text": "Reduce the food cost to 0",
+                      "origin": {
+                        "Advance": "StateReligion"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Structure": {
                         "structure": {
                           "Building": "Temple"
                         },
                         "balance": "Gain",
-                        "position": "C1"
+                        "position": "C1",
+                        "port_position": null
                       },
                       "origin": {
                         "Ability": "Construct Building"
                       }
                     }
-                  ],
-                  "log": [
-                    "Player2: Construct Building: Pay 1 action, Pay 1 wood and 1 ore with State Religion, Gain Temple at C1",
-                    "Player2: State Religion: Reduce the food cost to 0"
                   ]
                 },
                 {
@@ -414,6 +449,7 @@
                       }
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
@@ -428,9 +464,7 @@
                       }
                     }
                   ],
-                  "log": [
-                    "Player2: Temple: Gain 1 culture token"
-                  ]
+                  "active_events": 1
                 },
                 {
                   "action": {
@@ -438,12 +472,15 @@
                       "SelectAdvance": "Fanaticism"
                     }
                   },
+                  "player": 1,
                   "items": [
                     {
                       "player": 1,
                       "Advance": {
                         "advance": "Fanaticism",
-                        "take_incident_token": true,
+                        "incident_token": {
+                          "Take": 0
+                        },
                         "balance": "Gain"
                       },
                       "origin": {
@@ -452,9 +489,16 @@
                     },
                     {
                       "player": 1,
+                      "Text": "triggers the event Anarchy",
+                      "origin": {
+                        "Advance": "Fanaticism"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Advance": {
                         "advance": "Dogma",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Loss"
                       },
                       "origin": {
@@ -465,19 +509,22 @@
                       "player": 1,
                       "Advance": {
                         "advance": "Fanaticism",
-                        "take_incident_token": false,
+                        "incident_token": "NoChange",
                         "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 44
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Lose 2 government advances due to Anarchy - adding 2 victory points",
+                      "origin": {
+                        "Incident": 44
+                      }
                     }
                   ],
-                  "log": [
-                    "Player2: Dogma: Gain Fanaticism and take an event token (triggering an incident)",
-                    "A new game event has been triggered: Anarchy",
-                    "Player2: Anarchy: Lose 2 government advances due to Anarchy - adding 2 victory points"
-                  ]
+                  "active_events": 1
                 }
               ]
             }
