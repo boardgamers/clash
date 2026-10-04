@@ -239,7 +239,9 @@ fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize
             position,
         } => {
             drawer.units(units, Some(balance));
-            drawer.at_location(*position);
+            if let Some(position) = position {
+                drawer.at_location(*position);
+            }
         }
         ActionLogEntry::Structure(s) => {
             drawer.structure(&s.structure, s.position, s.port_position, player);
