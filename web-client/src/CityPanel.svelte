@@ -287,7 +287,7 @@
             <p class="recruit-effect">{info.effect}</p>
             <div class="recruit-prices">
               <span class="recruit-current-cost"
-                >{usesDraft ? 'Draft · 1 infantry only' : 'For 1'}
+                >{usesDraft ? 'Draft · 1 infantry only' : 'Each'}
                 <ResourceAmount pile={item.payment} /></span
               >
               {#if differentCost}<span class="recruit-standard-cost"
