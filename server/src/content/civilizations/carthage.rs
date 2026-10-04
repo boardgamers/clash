@@ -337,14 +337,14 @@ fn dido() -> LeaderInfo {
         LeaderAbility::builder("Founder","A unit sharing Dido's space may found a city as a free action.")
             .add_custom_action(CustomActionType::Founder,|c|c.any_times().free_action().no_resources(),|b|b.add_units_request(|e|&mut e.custom_action,0,|game,p,_|Some(UnitsRequest::new(p.index,founder_settlers(game,p.get(game)),1..=1,"Founder · Choose the Settler")),|game,s,_|crate::city::execute_found_city_action(game,s.player_index,s.choice[0]).unwrap()),|game,p|!founder_settlers(game,p).is_empty())
             .add_custom_action(CustomActionType::HegemonyFounder,|c|c.any_times().free_action().no_resources(),|b|hegemony_action(b,true),|game,p|p.has_special_advance(SpecialAdvance::Hegemony)&&!founding_ships(game,p,true).is_empty()).build(),
-        LeaderAbility::builder("Sacrifice","When Dido's city is attacked, add +2 combat value. After surviving a round, you may discard Dido, replace her with Infantry, and force the attacker to retreat. No leader point is awarded.")
+        LeaderAbility::builder("Sacrifice","When Dido's city is attacked, add +2 combat value. After surviving a round, you may discard Dido, replace her with Infantry, and force the attacker to retreat. The attacker gains no victory points for Dido's sacrifice.")
             .add_combat_strength_listener(119,|game,c,s,r|{if !r.is_attacker()&&c.defender_city(game).is_some()&&c.has_leader(r,game){s.extra_combat_value+=2;s.roll_log.push("Sacrifice adds +2 combat value".into());}})
             .add_bool_request(|e|&mut e.combat_round_end,-50,|game,p,r|{
                 let c=&r.combat;(!c.role(p.index).is_attacker()&&c.defender_city(game).is_some()&&c.has_leader(c.role(p.index),game)&&r.final_result.is_none()&&c.retreat!=crate::combat::CombatRetreatState::EndAfterCurrentRound&&p.get(game).available_units().infantry>0).then(||"Sacrifice · Replace Dido with Infantry and force the attacker to retreat?".into())
             },|game,s,r|{if s.choice{
                 let p=s.player();let id=p.get(game).units.iter().find(|u|u.unit_type==UnitType::Leader(Leader::QueenDido)).unwrap().id;let pos=p.get(game).get_unit(id).position;
                 crate::unit::kill_units(game,&[id],p.index,None,&s.origin);gain_unit(game,&p,pos,UnitType::Infantry);
-                r.combat.retreat=crate::combat::CombatRetreatState::EndAfterCurrentRound;s.log(game,"Dido sacrificed herself; the attacker retreats and no leader point is awarded");
+                r.combat.retreat=crate::combat::CombatRetreatState::EndAfterCurrentRound;s.log(game,"Dido sacrificed herself; the attacker retreats and gains no victory points for her sacrifice");
             }}).build())
 }
 fn navigator_ships(p: &Player) -> Vec<u32> {

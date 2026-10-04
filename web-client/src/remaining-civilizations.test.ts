@@ -1259,7 +1259,7 @@ test('Storm Master restores a chosen non-leader unit lost to an event', async ()
   assert.match(JSON.stringify(after.log), /Storm Master restored/);
 });
 
-test('Dido may sacrifice herself after a surviving round to force retreat without a leader point', async () => {
+test('Dido may sacrifice herself after a surviving round to force retreat without awarding victory points', async () => {
   const g = await fixture('civilizations/china/fast_war', 'Rome');
   const defender = g.players[1];
   defender.civilization = 'Carthage';
@@ -1279,7 +1279,7 @@ test('Dido may sacrifice herself after a surviving round to force retreat withou
   assert.ok(after.players[1].units.every((u: any) => u.unit_type === 'Infantry'));
   assert.equal(after.players[1].units.length, 2);
   assert.ok(after.players[0].units.every((u: any) => u.position === 'E8'));
-  assert.match(JSON.stringify(after.log), /no leader point/);
+  assert.match(JSON.stringify(after.log), /gains no victory points for her sacrifice/);
 });
 test('Hannibal crosses a Mountain with Elephants and may leave it on the next Move action', async () => {
   const g = await fixture('civilizations/china/fast_war', 'Carthage', 'Hannibal');
