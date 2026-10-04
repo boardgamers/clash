@@ -16,6 +16,7 @@
     Link,
     Hammer,
     BookOpen,
+    ScrollText,
     Map,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
@@ -158,6 +159,9 @@
     ),
   );
   const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
+  const eventImminent = $derived(
+    !reference && (selected ? !!selected.triggersEvent : advances.some((a) => a.triggersEvent)),
+  );
   function matches(advance: PublicAdvance) {
     return `${advance.name} ${advance.description} ${researchPresentation(advance).summary}`
       .toLowerCase()
@@ -223,7 +227,7 @@
     if (e.key === 'Escape') close();
   }}
 >
-  <header class="research-header">
+  <header class="research-header" class:event-ready={eventImminent}>
     <div>
       <h2 id="research-title">
         {choice ? (choice.endOfAge ? 'Free advance' : choice.name) : 'Research'}
@@ -235,6 +239,13 @@
           ? choice.description
           : 'Each advance scores ½ point. Branches unlock from their first advance.'}
       </p>
+      {#if eventImminent}<p
+          class="research-event-notice"
+          id="research-event-notice"
+          title="This advance uses your last event marker. The event resolves after research bonuses and choices."
+        >
+          <ScrollText size={14} aria-hidden="true" />Next advance triggers an event
+        </p>{/if}
     </div>
     <!-- The dialog focuses its first control; avoid opening the mobile keyboard. -->
     <button class="icon-button" aria-label="Close research" onclick={close}><X size={21} /></button>
@@ -457,7 +468,8 @@
           {/if}
           <button
             class="primary"
-            title={unavailableReason(selected) || undefined}
+            title={unavailableReason(selected) || (eventImminent ? 'Research triggers an event' : undefined)}
+            aria-describedby={eventImminent ? 'research-event-notice' : undefined}
             disabled={!selectedAction || $session.pending}
             onclick={() => selectedAction && controller.submit(selectedAction)}
           >
@@ -467,11 +479,9 @@
                 ? 'Researched'
                 : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
             {#if !selected.owned}<span
-                >{#if borrowing}Until end of turn{:else if freeResearch}Free{:else if choice}Pay research cost
-                  next{:else}{#if selectedPayment}Pay <ResourceAmount
-                      pile={selectedPayment.payment}
-                      compact
-                    /> ·
+                >{#if eventImminent}<ScrollText size={13} aria-hidden="true" />{/if}{#if borrowing}Until end
+                  of turn{:else if freeResearch}Free{:else if choice}Pay research cost next{:else}{#if selectedPayment}Pay
+                    <ResourceAmount pile={selectedPayment.payment} compact /> ·
                   {/if}1 action{/if}</span
               >{/if}
           </button>

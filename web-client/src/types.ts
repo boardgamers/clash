@@ -77,6 +77,8 @@ export interface Game {
     unexplored_blocks?: { position: { top_tile: string; rotation: number } }[];
   };
   current_player_index: number;
+  starting_player_index?: number;
+  dropped_players?: number[];
   actions_left: number;
   age: number;
   round: number;
@@ -167,6 +169,7 @@ export interface PublicAdvance {
   borrowedSource?: string;
 }
 export interface AdvanceView extends PublicAdvance {
+  triggersEvent?: boolean;
   owned: boolean;
   reason: string | null;
   payment: Pile;
@@ -297,6 +300,7 @@ export interface View {
     }[];
   }[];
   wonderCards: WonderCard[];
+  wonderCatalog?: WonderCard[];
   explorationDecision?: {
     start: string;
     destination: string | null;
@@ -312,6 +316,7 @@ export interface View {
   canUndo: boolean;
   canRedo?: boolean;
   canEndTurn: boolean;
+  endTurnTradeWarning?: { waste: Pile; routes: number } | null;
 }
 export interface CollectionPreview {
   action: Move;

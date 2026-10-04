@@ -24,6 +24,30 @@ pub(crate) fn trade_route_reward(
     game: &Game,
     p: &EventPlayer,
 ) -> Option<(ResourceReward, Vec<TradeRoute>)> {
+    trade_route_reward_with_currency(game, p, p.get(game).can_use_advance(Advance::Currency))
+}
+
+// A borrowed Great Library effect expires at the end of this turn. Forecasts
+// share the real route and reward rules, but must not rely on borrowed advances.
+pub(crate) fn next_turn_trade_route_reward(
+    game: &Game,
+    p: &EventPlayer,
+) -> Option<(ResourceReward, Vec<TradeRoute>)> {
+    let permanent = |advance| {
+        p.get(game).has_advance(advance)
+            || crate::content::civilizations::egypt::grants_advance(p.get(game), advance)
+    };
+    if !permanent(Advance::TradeRoutes) {
+        return None;
+    }
+    trade_route_reward_with_currency(game, p, permanent(Advance::Currency))
+}
+
+fn trade_route_reward_with_currency(
+    game: &Game,
+    p: &EventPlayer,
+    currency: bool,
+) -> Option<(ResourceReward, Vec<TradeRoute>)> {
     let trade_routes = find_trade_routes(game, p.get(game), false);
     if trade_routes.is_empty() {
         return None;
@@ -31,7 +55,7 @@ pub(crate) fn trade_route_reward(
 
     let mut reward = p.reward_options().sum(
         trade_routes.len() as u8,
-        if p.get(game).can_use_advance(Advance::Currency) {
+        if currency {
             if p.get(game).has_special_advance(SpecialAdvance::Alphabet) {
                 &[ResourceType::Food, ResourceType::Gold]
             } else {
@@ -46,7 +70,7 @@ pub(crate) fn trade_route_reward(
             .reward_options()
             .sum(trade_routes.len() as u8, &[ResourceType::Food]);
         for resource in [ResourceType::MoodTokens, ResourceType::Gold] {
-            if resource != ResourceType::Gold || p.get(game).can_use_advance(Advance::Currency) {
+            if resource != ResourceType::Gold || currency {
                 reward
                     .payment_options
                     .conversions
@@ -103,7 +127,7 @@ pub(crate) fn trade_route_reward(
         reward = p
             .reward_options()
             .sum(trade_routes.len() as u8, &[ResourceType::Food]);
-        if p.get(game).can_use_advance(Advance::Currency) && human > 0 {
+        if currency && human > 0 {
             reward
                 .payment_options
                 .conversions

@@ -25,6 +25,7 @@ use serde_json::{Value, json};
 mod actions;
 mod decisions;
 mod journal;
+mod turn;
 mod waiting;
 pub use actions::recruit_preview;
 
@@ -95,6 +96,14 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         );
     let can_play = seat == Some(active) && playing;
     let event_catalog = journal::catalog(game);
+    // A reference catalog comes from rules, never the deck or anyone's hand.
+    let mut wonder_catalog = game.cache.get_wonders().iter().map(|info| json!({
+        "id":info.wonder,"name":info.name(),"description":info.description,
+        "cost":info.cost.default_payment(),"requiredAdvance":info.required_advance.name(game),
+        "requiredAdvanceOwned":false,"builtPoints":info.built_victory_points,
+        "ownedPoints":info.owned_victory_points
+    })).collect::<Vec<_>>();
+    wonder_catalog.sort_by_key(|w| w["name"].as_str().unwrap_or_default().to_string());
     // Built wonders are public, including for spectators. Read their effects from
     // the same definitions as the cards in hand, without exposing anyone's hand.
     let built_wonders = game
@@ -186,7 +195,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
+        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -263,6 +272,10 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     } else {
         None
     };
+    let research_uses_event_marker = advance_choice.is_none()
+        || game.current_event_handler().is_some_and(|handler| {
+            decisions::advance_uses_event_marker(game, handler)
+        });
     let mut advances = game.cache.get_advances().iter().map(|(advance, info)| {
         let cost = p.advance_cost(*advance, game, CostTrigger::NoModifiers).cost;
         let payment = cost.first_valid_payment(&p.resources);
@@ -305,6 +318,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                 json!({"amount":amount,"resources":resources})
             }).collect::<Vec<_>>();
         item.as_object_mut().unwrap().extend(json!({
+            "triggersEvent":action.is_some() && p.incident_tokens == 1 && research_uses_event_marker,
             "owned":owned,"reason":reason,"payment":if advance_choice.is_some_and(|(_, mode)| mode != "paid") {ResourcePile::empty()} else {payment.unwrap_or_else(|| cost.default_payment())},"action":action,
             "costAmount":cost_amount,"costResources":resources,
             "costGroups":cost_groups,
@@ -316,7 +330,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
     json!({"logOriginNames":log_origin_names,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
-        "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "builtWonders":built_wonders, "decision":decision,
+        "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "wonderCatalog":wonder_catalog, "builtWonders":built_wonders, "decision":decision,
         "civilizations":crate::game_setup::civilization_choices(game, seat).iter().map(|c|json!({"name":c.name,
             "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),
             "leaders":c.leaders.iter().map(|l|json!({"name":l.name,"abilities":l.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()})).collect::<Vec<_>>(),
@@ -328,6 +342,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "nomadCities":p.cities.iter().filter(|c|!crate::content::civilizations::huns::city_destinations(game,p,c.position,&[]).is_empty()).map(|c|c.position).collect::<Vec<_>>(),
         "movementLeft":if let GameState::Movement(m)=&game.state {m.movement_actions_left} else {3},
         "seaRoutes":sea_routes,
+        "endTurnTradeWarning":if can_play { turn::trade_warning(game, seat) } else { None },
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})

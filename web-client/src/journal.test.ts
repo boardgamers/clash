@@ -1,6 +1,23 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { journal, journalParts } from './model.ts';
+
+test('reference text can add icons to resource names without changing journal parsing', () => {
+  const text =
+    'Gold replaces wood or ideas. Spend mood tokens, 1 culture token, or 2 food. Golden ages are separate.';
+  const parts = journalParts(text, true);
+  assert.equal(parts.map((p) => p.text).join(''), text);
+  assert.deepEqual(
+    parts.filter((p) => p.resource).map((p) => p.resource),
+    ['gold', 'wood', 'ideas', 'mood_tokens', 'culture_tokens', 'food'],
+  );
+  assert.deepEqual(
+    journalParts(text)
+      .filter((p) => p.resource)
+      .map((p) => p.resource),
+    ['culture_tokens', 'food'],
+  );
+});
 import type { Game, LoggedAction } from './types.ts';
 
 test('map references preserve surrounding text and avoid matching names or resource amounts', () => {

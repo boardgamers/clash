@@ -33,6 +33,13 @@ pub(super) fn advance_mode(game: &Game, handler: &PersistentEventHandler) -> &'s
     }
 }
 
+// Card-granted advances leave the event counter alone, even when their research
+// costs resources (e.g. Synergies). The Library only borrows an effect. Regular
+// purchases, the status-phase advance, Dogma and leader research use a marker.
+pub(super) fn advance_uses_event_marker(game: &Game, handler: &PersistentEventHandler) -> bool {
+    !matches!(handler.origin, EventOrigin::CivilCard(_)) && advance_mode(game, handler) != "borrow"
+}
+
 pub(super) fn structure_name(s: &Structure) -> String {
     match s {
         Structure::CityCenter => "City center".into(),

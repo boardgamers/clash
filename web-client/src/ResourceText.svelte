@@ -5,6 +5,7 @@
   let {
     text,
     compactResources = false,
+    namedResources = false,
     positions,
     onCoordinate,
     onLocate,
@@ -15,6 +16,7 @@
   }: {
     text: string;
     compactResources?: boolean;
+    namedResources?: boolean;
     positions?: Set<string>;
     onCoordinate?: (position: string | null) => void;
     onLocate?: (position: string) => void;
@@ -24,7 +26,7 @@
     onObjective?: (reference: { name: string; player: number }) => void;
   } = $props();
   const parts = $derived(
-    journalParts(text).flatMap((part) => {
+    journalParts(text, namedResources).flatMap((part) => {
       if (part.resource || part.position) return [part];
       return namedTextParts(part.text, onObjective ? objectives : []).flatMap(({ text, reference }) =>
         reference

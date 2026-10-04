@@ -32,6 +32,18 @@
   color: var(--muted);
   margin-top: 5px;
 }
+.research-header .research-event-notice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+}
+.research-event-notice svg {
+  flex-shrink: 0;
+}
+.research-header.event-ready .event-markers {
+  color: var(--gold);
+}
 .research-header > .icon-button {
   margin-left: auto;
   order: 1;

@@ -72,6 +72,7 @@
   import ExplorationPanel from './ExplorationPanel.svelte';
   import ScoreDialog from './ScoreDialog.svelte';
   import WondersDialog from './WondersDialog.svelte';
+  import HowToPlay from './HowToPlay.svelte';
   import CardReveal from './CardReveal.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
   import ResourceAmount from './ResourceAmount.svelte';
@@ -98,6 +99,7 @@
   import { movementBonus } from './movement-bonus';
   import { lastOpponentTurn } from './playback';
   import { ageCount, ageLabel } from './game-length';
+  import { roundProgress, personalRoundLabel } from './round-progress';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   const lastTurn = $derived($session.game ? lastOpponentTurn($session.game, $session.seat) : null);
@@ -187,6 +189,18 @@
       .join(' · '),
   );
   let identity = $derived($session.view?.players.find((p) => p.index === $session.seat));
+  const playerTurns = $derived(
+    roundProgress(
+      $session.playback || $session.view?.civilizationDraft ? null : $session.game,
+      $session.view?.players ?? [],
+    ),
+  );
+  const roundHint = $derived(
+    personalRoundLabel(
+      $session.game?.round ?? 1,
+      playerTurns.find((p) => p.player.index === $session.seat)?.status,
+    ),
+  );
   const activePlayers = $derived(
     $session.game?.state === 'Finished' || $session.playback
       ? []
@@ -223,6 +237,10 @@
   let mapPositions = $derived(new Set($session.game?.map.tiles.map(([position]) => position) ?? []));
   let totalActions = $derived($session.game?.actions_left ?? 0);
   let readyToEnd = $derived(!!$session.view?.canEndTurn && totalActions === 0);
+  const tradeWarning = $derived($session.view?.endTurnTradeWarning);
+  $effect(() => {
+    if (!$session.view?.canEndTurn) confirmEnd = false;
+  });
   let researchAvailable = $derived($session.view?.advances.some((a) => !!a.action));
   let researchChoice = $derived(researchDecision($session.view));
   let mapDecision = $derived(mapDecisionOptions($session.view?.decision).length > 0);
@@ -603,7 +621,9 @@
             )} · {($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
               ? 'End of age'
               : `Round ${$session.playback?.frame?.round ?? $session.game?.round ?? 1}/3`}{/if}</span
-        ></button
+        >{#if roundHint}<span class="mobile-turn-status" title="Your turn in the current round"
+            >{roundHint}</span
+          >{/if}</button
       >
       <p class="game-credits">
         <span title="Game design: Christian Marcussen">Christian Marcussen</span>
@@ -630,15 +650,17 @@
           title={`Age ${age} of ${ageCount($session.game)}`}
         >
           {ageLabel(age)}
-          {#if age === ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
-            <small class="round-label"
-              >{($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
-                ? 'End of age'
-                : `Round ${$session.playback?.frame?.round ?? $session.game?.round ?? 1}/3`}</small
-            >
-          {/if}
         </span>
       {/each}
+      <small class="round-label"
+        >{($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
+          ? 'End of age'
+          : `Round ${$session.playback?.frame?.round ?? $session.game?.round ?? 1}/3`}{#if roundHint}<span
+            class="round-personal"
+          >
+            · {roundHint}</span
+          >{/if}</small
+      >
     </div>
     <nav class="header-actions">
       {#if $session.seat !== undefined}
@@ -698,8 +720,8 @@
     <section class="map-section" aria-label="The civilization map">
       <div class="map-world" bind:this={boardHost}></div>
       <div class="map-vignette"></div>
-      <div class="player-list" aria-label="Civilizations">
-        {#each $session.view?.players ?? [] as player}
+      <div class="player-list" aria-label="Civilizations in turn order">
+        {#each playerTurns as { player, order, status }}
           {@const turnLabel = activePlayers.includes(player.index)
             ? choosingPlayer
               ? 'Choosing'
@@ -707,12 +729,22 @@
                 ? 'Your turn'
                 : 'Current turn'
             : null}
+          {@const progressLabel =
+            status === 'done'
+              ? 'Turn complete'
+              : status === 'upcoming'
+                ? 'Turn ahead'
+                : status === 'current'
+                  ? 'Turn in progress'
+                  : status === 'left'
+                    ? 'Left game'
+                    : null}
           <button
             class="player-card"
             class:active={!!turnLabel}
             style={`--player:${playerColor(player.index, $session.colorBlind, $session.playerColors)}`}
             title={`Inspect ${player.civilization} (${player.index === $session.seat ? 'You' : player.name}): advances and victory points`}
-            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}.${turnLabel ? ` ${turnLabel}.` : ''} View resources, advances and scores`}
+            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}.${order ? ` Turn order ${order}.` : ''}${turnLabel ? ` ${turnLabel}.` : ''}${progressLabel ? ` ${progressLabel} this round.` : ''} View resources, advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -733,7 +765,12 @@
             <span class="player-emblem"
               >{#if $session.colorBlind}<span class="ownership-symbol" aria-hidden="true"
                   >{playerSymbol(player.index, $session.playerSymbols)}</span
-                >{:else}<CivilizationEmblem civilization={player.civilization} size={24} />{/if}</span
+                >{:else}<CivilizationEmblem
+                  civilization={player.civilization}
+                  size={24}
+                />{/if}{#if order}<span class="player-order" title={`Turn order: ${order}`} aria-hidden="true"
+                  >{order}</span
+                >{/if}</span
             ><span class="player-info"
               ><strong>{player.civilization}</strong><small
                 >{player.index === $session.seat
@@ -745,8 +782,17 @@
                     title={$session.playerBadges[player.index]!.label}
                   />{/if}</small
               ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span
-              >{#if turnLabel}<span class="player-turn"
-                  ><ArrowRight size={12} aria-hidden="true" />{turnLabel}</span
+              >{#if turnLabel || progressLabel}<span class="player-turn" class:round-inactive={!turnLabel}
+                  >{#if turnLabel || status === 'current'}<ArrowRight
+                      size={12}
+                      aria-hidden="true"
+                    />{:else if status === 'done'}<Check
+                      size={12}
+                      aria-hidden="true"
+                    />{:else if status === 'upcoming'}<Hourglass
+                      size={12}
+                      aria-hidden="true"
+                    />{/if}{turnLabel ?? progressLabel}</span
                 >{/if}{#if $session.strategyMap}{@const forces = militarySummary(
                   ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(
                     (p) => p.id === player.index,
@@ -996,7 +1042,7 @@
           onclick={() => {
             controller.closeActivity();
             controller.patch({ mode: 'overview', tilePanel: false });
-            if (totalActions) confirmEnd = !confirmEnd;
+            if (totalActions || tradeWarning) confirmEnd = !confirmEnd;
             else controller.submit({ Playing: 'EndTurn' });
           }}><Flag size={19} /><span>End turn</span></button
         >
@@ -1268,11 +1314,20 @@
           </div>
         {:else if confirmEnd}
           <h2>End turn?</h2>
-          <p>You have {totalActions} unused {totalActions === 1 ? 'action' : 'actions'}.</p>
+          {#if totalActions}<p>
+              You have {totalActions} unused {totalActions === 1 ? 'action' : 'actions'}.
+            </p>{/if}
+          {#if tradeWarning}
+            <div class="end-trade-warning" role="status">
+              <strong>Trade Routes next turn</strong>
+              <p><ResourceAmount pile={tradeWarning.waste} /> may be wasted at your current storage.</p>
+              <small>Based on current routes. Other players’ moves may change this.</small>
+            </div>
+          {/if}
           <div class="end-confirm">
             <button class="secondary" onclick={() => (confirmEnd = false)}>Keep playing</button><button
               class="primary"
-              disabled={$session.pending}
+              disabled={$session.pending || !$session.view?.canEndTurn}
               onclick={() => {
                 confirmEnd = false;
                 controller.submit({ Playing: 'EndTurn' });
@@ -1413,278 +1468,5 @@
       {/if}
     </dialog>
   {/if}
-  {#if $session.help}<dialog
-      class="field-guide"
-      use:showDialog
-      onclose={closeHelp}
-      onclick={(e) => {
-        if (e.target === e.currentTarget) closeHelp();
-      }}
-      onkeydown={(e) => {
-        if (e.key === 'Escape') closeHelp();
-      }}
-    >
-      <button class="close-guide icon-button" aria-label="Close field guide" onclick={closeHelp}
-        ><X size={20} /></button
-      >
-      <h2>How to play</h2>
-      <p class="guide-intro">Score the most points over {ageCount($session.game)} ages.</p>
-      {#if $session.game?.options?.variant === 'Builder'}
-        <p class="guide-intro">
-          <strong>Builder:</strong> You cannot attack another player's units or cities. Barbarians and pirates remain,
-          and Cultural Influence is allowed. Objectives requiring battles against other players are removed; their
-          cards keep any remaining objective.
-        </p>
-      {/if}
-      <div class="guide-grid">
-        <article>
-          <Trophy />
-          <h3>Victory and game end</h3>
-          <p>
-            The highest total victory score wins. Add points from city pieces, advances, completed objectives,
-            wonders, events and captured leaders.
-          </p>
-          <p>
-            The game ends after Age {ageLabel(ageCount($session.game))}’s objective checks. It also ends at an
-            earlier age’s objective checks if any player has no cities. Compare total scores in either case;
-            there is no fixed score target.
-          </p>
-          <p>
-            The final age ends before the free advance and card draws. Select a civilization’s score to see
-            its breakdown.
-          </p>
-        </article>
-        <article>
-          <Landmark />
-          <h3>Scoring</h3>
-          <p>
-            Each settlement and building you own scores 1 point; each advance scores ½ point. Completed
-            objectives score 2 points each. Wonders, events and captured leaders can add points.
-          </p>
-          <p>
-            Ties compare points from city pieces, advances, objectives, wonders, events and captured leaders,
-            in that order.
-          </p>
-        </article>
-        <article>
-          <Hourglass />
-          <h3>Turns and ages</h3>
-          <p>
-            Each age has three rounds. In each round, every player takes one turn with three actions. Between
-            ages, check objectives first, then gain a free advance and draw new cards.
-          </p>
-        </article>
-        <article>
-          <Wheat />
-          <h3>Collecting resources</h3>
-          <p>
-            Spend 1 action to activate one city and collect from its own tile or adjacent tiles, up to its
-            collection capacity. Each selected tile normally yields 1 resource: food from fertile land, wood
-            from forests, or ore from mountains. Advances can extend collection range and add resources.
-            Resources beyond your storage limit are lost.
-          </p>
-        </article>
-        <article>
-          <Smile />
-          <h3>City mood</h3>
-          <p>
-            Each city has its own mood. Base collection and recruitment capacity is size + 1 when Happy, size
-            when Neutral, and 1 when Angry. Collecting, recruiting and construction activate the city. Each
-            activation after the first in a turn lowers its mood by one step. An Angry city can be activated
-            once per turn while Angry and cannot construct buildings.
-          </p>
-        </article>
-        <article>
-          <Smile />
-          <h3>Happiness</h3>
-          <p>
-            <ResourceText
-              text="Spend 1 action to improve happiness in one or more cities. Each step from Angry to Neutral to Happy costs mood tokens equal to that city's size."
-            />
-          </p>
-        </article>
-        <article>
-          <GraduationCap />
-          <h3>Research</h3>
-          <p>
-            <ResourceText
-              text="Spend 1 action and 2 resources in any mix of food, ideas and gold to gain an advance. Some advances reduce this cost. Civilization advances unlock for free when their research requirements are met."
-            />
-          </p>
-        </article>
-        <article>
-          <Coins />
-          <h3>Gold</h3>
-          <p>
-            <ResourceText
-              text="Gold can replace food, wood, ore or ideas in a payment, one for one. Use it for research, construction and recruitment. A resource cost of 2 wood can be paid with 1 wood and 1 gold, or 2 gold."
-            />
-          </p>
-        </article>
-        <article>
-          <ScrollText />
-          <h3>Events</h3>
-          <p>
-            Gaining a standard advance uses one event marker. After using all three, resolve an event and
-            refill the markers. Unused markers carry over between turns. Events can grant rewards, cause
-            disasters or bring barbarians and pirates.
-          </p>
-        </article>
-        <article>
-          <Swords />
-          <h3>Barbarians</h3>
-          <p>Events can create a barbarian city with 1 infantry and add an extra unit to a barbarian city.</p>
-          <p>
-            A “Barbarians move” event moves nearby armies 1 land tile toward the triggering player’s cities.
-            Afterwards, barbarian cities within 2 land spaces of those cities gain 1 infantry, up to 4 units
-            per tile. If no army can move, the event tries to create a new city instead.
-          </p>
-          <p>Barbarians block collection on their tile. Some action cards also move and reinforce them.</p>
-        </article>
-        <article>
-          <Layers />
-          <h3>Action cards</h3>
-          <p>
-            Play a card's action effect when its conditions are met, or save it for its battle effect. Choose
-            one use, then discard the card.
-          </p>
-          <p>
-            With the Tactics advance, you may play one card for its battle effect at the start of each combat
-            round. The effect applies to that round and follows the conditions printed on the card.
-          </p>
-        </article>
-        <article>
-          <Target />
-          <h3>Objective cards</h3>
-          <p>
-            Each secret objective card offers two goals. You may claim either completed goal for 2 points,
-            then discard the card. Each goal specifies when it can be claimed: during play or at the end of an
-            age.
-          </p>
-        </article>
-        <article>
-          <Footprints />
-          <h3>Movement</h3>
-          <p>
-            Spend 1 action to move up to three groups. A group consists of units moving together from the same
-            tile; each unit may join one group per Move action. Land groups move to an adjacent tile, with
-            longer routes available through Roads and other abilities. Army movement requires Tactics.
-          </p>
-          <p>
-            Entering unexplored terrain reveals it. Entering Mountains or fighting a battle stops those units
-            from moving again that turn. After entering a Forest, units may move again but cannot attack for
-            the rest of the turn. Roads can bypass Forest and Mountain restrictions.
-          </p>
-        </article>
-        <article>
-          <Ship />
-          <h3>Ships and sea movement</h3>
-          <p>
-            <ResourceText
-              text="Recruit ships in a city with a Port for 2 wood each. Recruitment costs 1 action and activates the city. Ships start on the Port's sea tile."
-            />
-          </p>
-          <p>
-            A fleet can cross successive sea tiles as one movement group. Exploration or combat ends its
-            movement. Navigation allows travel around the map edge to the next sea or unexplored tile.
-          </p>
-          <p>
-            Attack pirates by moving ships into their sea tile, or by recruiting ships there from an adjacent
-            Port. Either starts a naval battle.
-          </p>
-        </article>
-        <article>
-          <Ship />
-          <h3>Transporting units</h3>
-          <p>
-            Each ship carries up to two land units. Embark by moving a land group onto your ship in an
-            adjacent sea tile. Disembark by moving passengers onto adjacent land, applying the usual terrain
-            and combat rules. Each counts as that land group's move.
-          </p>
-          <p>
-            Sailing carries passengers with the ship. Boarding and sailing can share one Move action; landing
-            those units requires a second Move action. Units already aboard can sail and land in one action.
-            The usual limit of three groups per Move action applies.
-          </p>
-        </article>
-        <article>
-          <Crown />
-          <h3>Leaders</h3>
-          <p>
-            <ResourceText
-              text="Recruit a leader for 1 mood token and 1 culture token. Recruitment costs 1 action and activates the city. Each civilization can have one leader in play."
-            />
-          </p>
-          <p>
-            Leaders have two unique abilities and count as army units. Tactics is required to move them, alone
-            or with other army units. Capturing an opponent's leader scores 2 points.
-          </p>
-        </article>
-        <article>
-          <Drama />
-          <h3>Cultural influence</h3>
-          <p>
-            Spend 1 action to target a city's building within range of one of your cities. Range equals your
-            city's size. Roll one die (results 1–6); a total of 5 or higher replaces a building with your
-            color. You score its point, while the city's owner continues to use it. You can also reclaim
-            buildings in your own cities.
-          </p>
-          <p>
-            Each culture token adds 1 range before the roll or +1 to the result afterwards. You may succeed
-            once per turn. Advances such as Arts can change the action cost.
-          </p>
-        </article>
-        <article>
-          <Swords />
-          <h3>Battles</h3>
-          <p>
-            Moving an army or fleet onto an enemy-occupied tile starts a battle as part of the Move action.
-            Settlers do not fight.
-          </p>
-          <p>
-            Each round, both sides roll one die per fighting unit and apply bonuses from units, leaders,
-            advances, fortresses and tactics cards. Every 5 combat value scores a hit, before hit
-            cancellations. Each hit removes one unit; players choose their own casualties and both sides
-            suffer their losses.
-          </p>
-          <p>
-            After a round, the attacker may retreat if allowed. Otherwise, fighting continues until a side is
-            defeated. Winning attackers occupy the tile.
-          </p>
-        </article>
-        <article>
-          <Flag />
-          <h3>Capturing cities</h3>
-          <p>
-            Army units capture a city by occupying it after defeating its defenders, or by entering an
-            undefended city. You control the city and can use its existing buildings.
-          </p>
-          <p>
-            Each settlement or building changed to your color scores 1 point for you instead of its previous
-            owner. Obelisks and buildings in a third player's color keep their color.
-          </p>
-          <p>
-            <ResourceText
-              text="Taking another player's city gives gold equal to its size: add 1 gold if it was Happy, or take only 1 gold if it was Angry."
-            />
-          </p>
-          <p>
-            The captured city becomes Angry, keeps its point value and counts toward your total number of
-            cities for growth. Improve its mood through Happiness to restore its capacity.
-          </p>
-          <p>
-            The previous owner places a settler from their supply in one of their remaining cities, if able.
-          </p>
-        </article>
-        <article>
-          <Hammer />
-          <h3>Growing cities</h3>
-          <p>
-            Each settlement starts at size 1. Buildings and wonders each add 1 to the city's size. After
-            construction, its size must be no greater than your total number of cities. Founding a new city
-            costs 1 action and replaces a settler on empty land with a settlement.
-          </p>
-        </article>
-      </div>
-    </dialog>{/if}
+  {#if $session.help}<HowToPlay game={$session.game} onClose={closeHelp} />{/if}
 </div>

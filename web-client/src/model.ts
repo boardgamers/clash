@@ -15,7 +15,7 @@ export function actionReason(reason: string | null | undefined): string {
   return reason;
 }
 type TextPart = { text: string; resource?: Resource; position?: string };
-export function journalParts(text: string): TextPart[] {
+export function journalParts(text: string, namedResources = false): TextPart[] {
   const names: Record<string, Resource> = {
     food: 'food',
     wood: 'wood',
@@ -32,14 +32,17 @@ export function journalParts(text: string): TextPart[] {
     'culture token': 'culture_tokens',
     'culture tokens': 'culture_tokens',
   };
-  const pattern =
-    /\b\d+(?:\.\d+)? (food|wood|ore|ideas?|gold|mood(?: tokens?)?|culture(?: tokens?)?|captives?)\b|\b([A-Z]\d+)\b/g;
+  const pattern = namedResources
+    ? /\b(?:\d+(?:\.\d+)? )?(food|wood|ore|ideas?|gold|mood tokens?|culture tokens?|captives?)\b|\b([A-Z]\d+)\b/gi
+    : /\b\d+(?:\.\d+)? (food|wood|ore|ideas?|gold|mood(?: tokens?)?|culture(?: tokens?)?|captives?)\b|\b([A-Z]\d+)\b/g;
   const parts: TextPart[] = [];
   let offset = 0;
   for (const match of text.matchAll(pattern)) {
     if (match.index > offset) parts.push({ text: text.slice(offset, match.index) });
     parts.push(
-      match[2] ? { text: match[0], position: match[2] } : { text: match[0], resource: names[match[1]] },
+      match[2]
+        ? { text: match[0], position: match[2] }
+        : { text: match[0], resource: names[match[1].toLowerCase()] },
     );
     offset = match.index + match[0].length;
   }
