@@ -1147,6 +1147,15 @@ export class Controller {
     this.chat.setOpen(false);
     this.patch({ activityOpen: false });
   }
+  researchReferenceView(player?: number): View | null {
+    if (!this.engine || !this.raw) return null;
+    // The browser only has the server-filtered state. Inspecting public research
+    // must not change the viewer's seat, decision, selection, or available filter.
+    const s = get(this.session);
+    return JSON.parse(
+      this.engine.webView(this.raw, player ?? s.seat ?? s.game?.current_player_index),
+    ) as View;
+  }
   notify(toast: string) {
     clearTimeout(this.timer);
     this.patch({ toast });

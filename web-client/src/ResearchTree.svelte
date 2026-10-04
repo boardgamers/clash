@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import {
     X,
     Search,
@@ -26,22 +26,52 @@
   import CivilizationAdvances from './CivilizationAdvances.svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import ResourceText from './ResourceText.svelte';
-  import { resourceNames, type Resource, type Pile, type AdvanceView, type PublicAdvance } from './types';
+  import {
+    resourceNames,
+    type Resource,
+    type Pile,
+    type AdvanceView,
+    type PublicAdvance,
+    type View,
+  } from './types';
+  import type { ResearchReference } from './research-links';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   import { researchDecision } from './decision-controls';
-  let { controller }: { controller: Controller } = $props();
+  let {
+    controller,
+    reference,
+    onDismiss,
+  }: {
+    controller: Controller;
+    reference?: { target: ResearchReference; view: View };
+    onDismiss?: () => void;
+  } = $props();
   const session = $derived(controller.session);
-  const choice = $derived(researchDecision($session.view) ? $session.view!.decision : null);
+  const view = $derived(reference?.view ?? $session.view);
+  const choice = $derived(!reference && researchDecision(view) ? view!.decision : null);
   const freeResearch = $derived(!!choice && choice.advanceMode === 'free');
   const borrowing = $derived(choice?.advanceMode === 'borrow');
   let query = $state('');
   let category = $state('All');
   let researchedOnly = $state(false);
-  const statusFilter = $derived(researchedOnly ? 'owned' : $session.availableOnly ? 'available' : 'all');
+  let inspectAvailableOnly = $state(false);
+  let inspectedAdvance = $state<string | null>(null);
+  let selectedCivilization = $state<string | null>(null);
+  const availableOnly = $derived(reference ? inspectAvailableOnly : $session.availableOnly);
+  const selectedId = $derived(reference ? inspectedAdvance : $session.selectedAdvance);
+  function selectAdvance(id: string | null) {
+    selectedCivilization = null;
+    if (reference) inspectedAdvance = id;
+    else controller.patch({ selectedAdvance: id });
+  }
+  const statusFilter = $derived(researchedOnly ? 'owned' : availableOnly ? 'available' : 'all');
   function setStatusFilter(value: string) {
     researchedOnly = value === 'owned';
-    if (!researchedOnly) controller.setAvailableOnly(value === 'available');
+    if (!researchedOnly) {
+      if (reference) inspectAvailableOnly = value === 'available';
+      else controller.setAvailableOnly(value === 'available');
+    }
   }
   let chosenPayment = $state<{ advance: string; payment: Pile } | null>(null);
   const samePayment = (a: Pile, b: Pile) =>
@@ -65,7 +95,7 @@
     culture_tokens: Drama,
     captives: Link,
   };
-  let advances = $derived([...($session.view?.advances ?? [])].sort((a, b) => a.order - b.order));
+  let advances = $derived([...(view?.advances ?? [])].sort((a, b) => a.order - b.order));
   const governmentGroups = ['Democracy', 'Autocracy', 'Theocracy'];
   const currentGovernment = $derived(
     advances.find((a) => a.owned && governmentGroups.includes(a.group))?.group,
@@ -84,9 +114,15 @@
       : actionReason(advance.reason);
   }
   const availableAdvances = $derived(
-    advances.filter((a) => (researchedOnly ? a.owned : !$session.availableOnly || !!a.action)),
+    advances.filter((a) => (researchedOnly ? a.owned : !availableOnly || !!a.action)),
   );
-  let player = $derived($session.view?.players.find((p) => p.index === $session.seat));
+  let player = $derived(
+    view?.players.find(
+      (p) =>
+        p.index ===
+        (reference ? (reference.target.player ?? $session.seat ?? view?.activePlayer) : $session.seat),
+    ),
+  );
   let civilizationAdvances = $derived(player?.civilizationAdvances ?? []);
   let visibleCivilizationAdvances = $derived(
     category === 'All' || category === 'Civilization'
@@ -94,7 +130,7 @@
           (a) =>
             (researchedOnly
               ? a.owned
-              : !$session.availableOnly ||
+              : !availableOnly ||
                 (!a.owned &&
                   a.prerequisites.some((p) => availableAdvances.some((advance) => advance.id === p.id)))) &&
             (matches(a) ||
@@ -104,7 +140,7 @@
       : [],
   );
   let groups = $derived([...new Set(advances.map((a) => a.group))]);
-  let selected = $derived(availableAdvances.find((a) => a.id === $session.selectedAdvance));
+  let selected = $derived(availableAdvances.find((a) => a.id === selectedId));
   let selectedPayment = $derived(
     selected?.payments.find((p) =>
       samePayment(
@@ -128,11 +164,12 @@
       .includes(query.trim().toLowerCase());
   }
   function close() {
-    if ($session.mode === 'research') controller.patch({ mode: 'overview', selectedAdvance: null });
+    if (reference) onDismiss?.();
+    else if ($session.mode === 'research') controller.patch({ mode: 'overview', selectedAdvance: null });
   }
   async function selectCategory(value: string) {
     category = value;
-    controller.patch({ selectedAdvance: null });
+    selectAdvance(null);
     await tick();
     document.querySelector('.research-tree')?.scrollTo({ top: 0, left: 0 });
   }
@@ -144,7 +181,8 @@
     setStatusFilter('all');
     query = '';
     if (category !== 'All') category = 'Civilization';
-    controller.patch({ selectedAdvance: null });
+    selectAdvance(null);
+    selectedCivilization = id;
     await tick();
     document.getElementById(`civilization-${id}`)?.scrollIntoView({
       block: 'nearest',
@@ -155,7 +193,7 @@
     if (researchedOnly || !advances.find((a) => a.id === id)?.action) setStatusFilter('all');
     query = '';
     if (category !== 'All') category = advances.find((a) => a.id === id)?.group ?? 'All';
-    controller.patch({ selectedAdvance: id });
+    selectAdvance(id);
     await tick();
     document.getElementById(`research-${id}`)?.scrollIntoView({
       block: 'nearest',
@@ -163,6 +201,14 @@
       behavior: $session.reducedMotion ? 'instant' : 'smooth',
     });
   }
+  $effect(() => {
+    const target = reference?.target;
+    if (target)
+      untrack(() => {
+        if (target.civilization) void showCivilizationAdvance(target.id);
+        else void showAdvance(target.id);
+      });
+  });
 </script>
 
 <dialog
@@ -181,9 +227,8 @@
     <div>
       <h2 id="research-title">
         {choice ? (choice.endOfAge ? 'Free advance' : choice.name) : 'Research'}
-        {#if $session.view?.players.find((p) => p.index === $session.seat)}<EventMarkers
-            remaining={$session.view.players.find((p) => p.index === $session.seat)!.eventTokens}
-          />{/if}
+        {#if reference && player}<span>· {player.civilization}</span>{/if}
+        {#if player}<EventMarkers remaining={player.eventTokens} />{/if}
       </h2>
       <p>
         {choice
@@ -201,7 +246,7 @@
       /></label
     >
   </header>
-  {#if !choice}<ContextualCards {controller} context="research" />{/if}
+  {#if !choice && !reference}<ContextualCards {controller} context="research" />{/if}
   <nav class="research-filters" aria-label="Research categories">
     <select
       class="research-status-filter"
@@ -230,6 +275,7 @@
         civilization={player.civilization}
         advances={visibleCivilizationAdvances}
         onPrerequisite={showAdvance}
+        selected={selectedCivilization}
       />
     {/if}
     {#each visibleGroups as group}{@const GroupIcon = groupIcons[group] ?? BookOpen}
@@ -272,7 +318,7 @@
               aria-label={`${advance.name}: ${presentation.summary}`}
               aria-pressed={selected?.id === advance.id}
               title={advance.description}
-              onclick={() => controller.patch({ selectedAdvance: advance.id })}
+              onclick={() => selectAdvance(advance.id)}
             >
               <span class="research-node-title"
                 ><span class="advance-pictogram"><Icon size={21} /></span><strong>{advance.name}</strong
@@ -365,7 +411,7 @@
     {#if !visibleGroups.length && !visibleCivilizationAdvances.length}<p class="research-empty">
         {researchedOnly
           ? 'No researched advances match these filters.'
-          : $session.availableOnly
+          : availableOnly
             ? 'No research available with these filters.'
             : query.trim()
               ? `No advances match “${query}”.`
@@ -379,7 +425,7 @@
     <section class="research-detail" aria-label="Research details">
       <div>
         <h3>
-          {selected.name}{#if selected.group === 'Seafaring'}<button
+          {selected.name}{#if selected.group === 'Seafaring' && !reference}<button
               class="icon-button sea-map-link"
               aria-label="Show sea routes on map"
               title="Show connected seas and Navigation shortcuts on the map"
@@ -392,50 +438,55 @@
             : selected.description}
         </p>
         {#if unavailableReason(selected) && !selected.owned}<small>{unavailableReason(selected)}</small>{/if}
-        {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
+        {#if $session.error && !reference}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
-      <div class="research-payment">
-        {#if !choice && !selected.owned && selected.payments.length > 1}
-          <PaymentPicker
-            options={selected.payments.map((option) => ({
-              payment: option.payment,
-              disabled: !option.action,
-            }))}
-            value={selectedPayment?.payment ?? selected.payment}
-            onChange={(payment) => {
-              chosenPayment = { advance: selected!.id, payment };
-            }}
-            pending={$session.pending}
-            label="Research payment"
-          />
-        {/if}
-        <button
-          class="primary"
-          title={unavailableReason(selected) || undefined}
-          disabled={!selectedAction || $session.pending}
-          onclick={() => selectedAction && controller.submit(selectedAction)}
-        >
-          {$session.pending
-            ? 'Confirming…'
-            : selected.owned
-              ? 'Researched'
-              : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
-          {#if !selected.owned}<span
-              >{#if borrowing}Until end of turn{:else if freeResearch}Free{:else if choice}Pay research cost
-                next{:else}{#if selectedPayment}Pay <ResourceAmount pile={selectedPayment.payment} compact /> ·
-                {/if}1 action{/if}</span
-            >{/if}
-        </button>
-      </div>
-      <button
-        class="icon-button"
-        aria-label="Close research details"
-        onclick={() => controller.patch({ selectedAdvance: null })}><X size={18} /></button
+      {#if !reference}<div class="research-payment">
+          {#if !choice && !selected.owned && selected.payments.length > 1}
+            <PaymentPicker
+              options={selected.payments.map((option) => ({
+                payment: option.payment,
+                disabled: !option.action,
+              }))}
+              value={selectedPayment?.payment ?? selected.payment}
+              onChange={(payment) => {
+                chosenPayment = { advance: selected!.id, payment };
+              }}
+              pending={$session.pending}
+              label="Research payment"
+            />
+          {/if}
+          <button
+            class="primary"
+            title={unavailableReason(selected) || undefined}
+            disabled={!selectedAction || $session.pending}
+            onclick={() => selectedAction && controller.submit(selectedAction)}
+          >
+            {$session.pending
+              ? 'Confirming…'
+              : selected.owned
+                ? 'Researched'
+                : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
+            {#if !selected.owned}<span
+                >{#if borrowing}Until end of turn{:else if freeResearch}Free{:else if choice}Pay research cost
+                  next{:else}{#if selectedPayment}Pay <ResourceAmount
+                      pile={selectedPayment.payment}
+                      compact
+                    /> ·
+                  {/if}1 action{/if}</span
+              >{/if}
+          </button>
+        </div>{/if}
+      <button class="icon-button" aria-label="Close research details" onclick={() => selectAdvance(null)}
+        ><X size={18} /></button
       >
     </section>
   {:else}<div class="research-legend">
       <span><Check size={14} /> Researched</span><span class="available-key">Available</span><span
         ><LockKeyhole size={13} /> Unavailable</span
-      ><span>Select an advance for its full rules and confirmation.</span>
+      ><span
+        >{reference
+          ? 'Select an advance for its full rules.'
+          : 'Select an advance for its full rules and confirmation.'}</span
+      >
     </div>{/if}
 </dialog>

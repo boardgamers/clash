@@ -89,7 +89,8 @@
   import { mobilePanels } from './mobile-panels';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
-  import type { Resource, JournalEntry } from './types';
+  import type { Resource, JournalEntry, View } from './types';
+  import { researchReferences, type ResearchReference } from './research-links';
   import { resources, resourceNames, playerColor, playerSymbol } from './types';
   import { journal, pileText } from './model';
   import { collectionYield, collectionBonusLabel } from './collection-yield';
@@ -105,6 +106,7 @@
   let fullscreenEnabled = $state(false);
   let fullscreen = $state(false);
   let confirmEnd = $state(false);
+  let researchReference = $state<{ target: ResearchReference; view: View } | null>(null);
   let seaTooltipDismissed = $state(false);
   let mapMinimized = $state(false);
   let mapModalMinimized = $state(false);
@@ -187,6 +189,13 @@
   let log = $derived(
     $session.game ? combatJournal(journal($session.game, $session.view ?? undefined)).reverse() : [],
   );
+  const researchCatalog = $derived(
+    $session.view && ($session.view.advances.length ? $session.view : controller.researchReferenceView()),
+  );
+  function showJournalResearch(target: ResearchReference) {
+    const view = controller.researchReferenceView(target.player);
+    if (view) researchReference = { target, view };
+  }
   const coordinateInteraction = {
     onCoordinate: (position: string | null) => world?.highlightCoordinate(position),
     onLocate: (position: string) => {
@@ -362,6 +371,7 @@
 
 {#snippet journalRow(entry: JournalEntry, outcome = false)}
   {@const EntryIcon = journalIcons[entry.kind]}
+  {@const research = researchReferences(researchCatalog, entry.player)}
   <article
     class:journal-event={!!entry.event}
     class:journal-outcome={outcome}
@@ -382,12 +392,18 @@
       {#if !outcome}<span class:journal-event-title={!!entry.event}
           >{#if !entry.event}<EntryIcon size={13} aria-hidden="true" />{/if}<ResourceText
             text={entry.title}
+            {research}
+            onResearch={showJournalResearch}
             positions={mapPositions}
             {...coordinateInteraction}
           /></span
         >{/if}
     </div>
-    {#if entry.combat}<CombatJournal combat={entry.combat} />
+    {#if entry.combat}<CombatJournal
+        combat={entry.combat}
+        {researchCatalog}
+        onResearch={showJournalResearch}
+      />
       {#each entry.combat.outcomes as effect}{@render journalRow(effect, true)}{/each}
     {/if}
     {#if entry.tokens.length}<div class="journal-deltas">
@@ -404,18 +420,36 @@
               aria-hidden="true"
             />
             <span class:sr-only={token.compact}
-              ><ResourceText text={token.label} positions={mapPositions} {...coordinateInteraction} /></span
+              ><ResourceText
+                text={token.label}
+                {research}
+                onResearch={showJournalResearch}
+                positions={mapPositions}
+                {...coordinateInteraction}
+              /></span
             >
           </span>
         {/each}
       </div>{/if}
     {#if entry.notes.length}<p class="journal-notes">
-        <ResourceText text={entry.notes.join(', ')} positions={mapPositions} {...coordinateInteraction} />
+        <ResourceText
+          text={entry.notes.join(', ')}
+          {research}
+          onResearch={showJournalResearch}
+          positions={mapPositions}
+          {...coordinateInteraction}
+        />
       </p>{/if}
     {#if entry.collection}
       {#each entry.collection.effects as effect}
         <div class="collection-included">
-          <span><GraduationCap size={13} aria-hidden="true" />{effect.source}</span>
+          <span
+            ><GraduationCap size={13} aria-hidden="true" /><ResourceText
+              text={effect.source}
+              {research}
+              onResearch={showJournalResearch}
+            /></span
+          >
           {#each effect.tokens as token}{@const Icon = journalTokenIcons[token.icon]}
             <span title={token.description} aria-label={token.description}
               >{token.value}<Icon size={13} aria-hidden="true" /></span
@@ -461,18 +495,38 @@
               aria-hidden="true"
             />{/if}
           <div>
-            {#if faction}<strong>{faction}</strong>{/if}<span>{explanation.text}</span>
+            {#if faction}<strong>{faction}</strong>{/if}<span
+              ><ResourceText
+                text={explanation.text}
+                research={researchReferences(researchCatalog, explanation.player)}
+                onResearch={showJournalResearch}
+              /></span
+            >
           </div>
         </div>
       {/each}
-      {#if entry.event.pending}<p class="event-pending"><Hourglass size={14} />{entry.event.pending}</p>{/if}
+      {#if entry.event.pending}<p class="event-pending">
+          <Hourglass size={14} /><ResourceText
+            text={entry.event.pending}
+            {research}
+            onResearch={showJournalResearch}
+          />
+        </p>{/if}
       {#if entry.event.info}
         <details class="event-rules">
           <summary aria-label={`${entry.title} rules`}
             ><BookOpen size={13} /> Rules <ChevronRight size={13} /></summary
           >
           {#each entry.event.info.rules as rule}
-            <p><ResourceText text={rule} positions={mapPositions} {...coordinateInteraction} /></p>
+            <p>
+              <ResourceText
+                text={rule}
+                {research}
+                onResearch={showJournalResearch}
+                positions={mapPositions}
+                {...coordinateInteraction}
+              />
+            </p>
           {/each}
           {#if entry.event.info.baseEffect && entry.event.info.protectionAdvance}
             <p>Protection does not prevent the base effect.</p>
@@ -517,7 +571,8 @@
         onclick={() => controller.commands.openBoardgame()}
         aria-label="About Clash of Cultures"
         ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
-          >{#if $session.game?.options?.variant === 'Builder'}Builder · {/if}{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {ageLabel(
+          >{#if $session.game?.options?.variant === 'Builder'}Builder ·
+          {/if}{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {ageLabel(
               $session.playback?.frame?.age ?? $session.game?.age ?? 1,
             )} · {($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
               ? 'End of age'
@@ -1260,7 +1315,12 @@
         <BattlePlayback {controller} />
       </div>{/if}
   </main>
-  {#if !$session.playback && $session.mode === 'research'}<ResearchTree {controller} />{/if}
+  {#if researchReference}<ResearchTree
+      {controller}
+      reference={researchReference}
+      onDismiss={() => (researchReference = null)}
+    />
+  {:else if !$session.playback && $session.mode === 'research'}<ResearchTree {controller} />{/if}
   {#if !$session.playback && $session.mode === 'city'}<CityPanel {controller} />{/if}
   {#if $session.scorePlayer !== null}<ScoreDialog {controller} />{/if}
   {#if $session.wondersOpen && $session.seat !== undefined}<WondersDialog {controller} />{/if}
@@ -1322,9 +1382,11 @@
       <h2>How to play</h2>
       <p class="guide-intro">Score the most points over {ageCount($session.game)} ages.</p>
       {#if $session.game?.options?.variant === 'Builder'}
-        <p class="guide-intro"><strong>Builder:</strong> You cannot attack another player's units or cities. Barbarians
-          and pirates remain, and Cultural Influence is allowed. Objectives requiring battles
-          against other players are removed; their cards keep any remaining objective.</p>
+        <p class="guide-intro">
+          <strong>Builder:</strong> You cannot attack another player's units or cities. Barbarians and pirates remain,
+          and Cultural Influence is allowed. Objectives requiring battles against other players are removed; their
+          cards keep any remaining objective.
+        </p>
       {/if}
       <div class="guide-grid">
         <article>
@@ -1335,8 +1397,9 @@
             wonders, events and captured leaders.
           </p>
           <p>
-            The game ends after Age {ageLabel(ageCount($session.game))}’s objective checks. It also ends at an earlier age’s objective checks
-            if any player has no cities. Compare total scores in either case; there is no fixed score target.
+            The game ends after Age {ageLabel(ageCount($session.game))}’s objective checks. It also ends at an
+            earlier age’s objective checks if any player has no cities. Compare total scores in either case;
+            there is no fixed score target.
           </p>
           <p>
             The final age ends before the free advance and card draws. Select a civilization’s score to see

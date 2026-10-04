@@ -3,7 +3,18 @@
   import type { CombatDie, CombatRound } from './combat-journal';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import UnitIcon from './UnitIcon.svelte';
-  let { combat }: { combat: CombatRound } = $props();
+  import ResourceText from './ResourceText.svelte';
+  import { researchReferences, type ResearchReference } from './research-links';
+  import type { View } from './types';
+  let {
+    combat,
+    researchCatalog,
+    onResearch,
+  }: {
+    combat: CombatRound;
+    researchCatalog?: View | null;
+    onResearch?: (reference: ResearchReference) => void;
+  } = $props();
   const sides = $derived([combat.attacker, combat.defender]);
   const dieLabel = (die: CombatDie) =>
     `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : (die.effect ?? 'No ability activated')}` : 'Face not recorded'}`;
@@ -65,7 +76,13 @@
     >
     {#if sides.some((s) => s.modifiers.length)}<tr
         ><th scope="row">Effects</th>{#each sides as side}<td>
-            {#each side.modifiers as modifier}<span class="combat-modifier">{modifier}</span>{:else}—{/each}
+            {#each side.modifiers as modifier}<span class="combat-modifier"
+                ><ResourceText
+                  text={modifier}
+                  research={researchReferences(researchCatalog ?? null, side.player)}
+                  {onResearch}
+                /></span
+              >{:else}—{/each}
           </td>{/each}</tr
       >{/if}
     <tr

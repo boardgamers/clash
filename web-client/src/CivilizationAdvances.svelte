@@ -8,10 +8,12 @@
     civilization,
     advances,
     onPrerequisite,
+    selected,
   }: {
     civilization: string;
     advances: CivilizationAdvance[];
     onPrerequisite?: (id: string) => void;
+    selected?: string | null;
   } = $props();
 </script>
 
@@ -26,7 +28,12 @@
   <div class="civilization-advance-grid">
     {#each advances as advance}
       {@const Icon = researchPresentation(advance).icon}
-      <article class="civilization-advance" class:owned={advance.owned} id={`civilization-${advance.id}`}>
+      <article
+        class="civilization-advance"
+        class:owned={advance.owned}
+        class:selected={advance.id === selected}
+        id={`civilization-${advance.id}`}
+      >
         <div class="civilization-advance-title">
           <span class="advance-pictogram"><Icon size={21} /></span>
           <strong>{advance.name}</strong>

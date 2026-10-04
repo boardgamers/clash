@@ -83,6 +83,26 @@ const fixture = (name: string) => {
   return JSON.stringify(game);
 };
 
+test('inspecting journal research keeps the current decision, selection, seat and preferences', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(0);
+    const raw = await engine.init(2, [], {}, 'journal-research-reference', {});
+    await c.load(engine.stripSecret(raw, 0));
+    c.patch({ mode: 'collect', activityOpen: true, selectedAdvance: 'Storage', availableOnly: true });
+    const before = app.session();
+    const view = c.researchReferenceView(1)!;
+    assert.equal(view.advances.length, 48);
+    assert.ok(view.advances.some((a) => a.id === 'PublicEducation'));
+    assert.equal(app.session(), before);
+    assert.deepEqual(app.sent, []);
+    assert.deepEqual(app.preferences, []);
+  } finally {
+    app.close();
+  }
+});
+
 test('Mass Production from Collect adds two tiles and keeps the chosen city, tiles and Free Economy', async () => {
   const app = paymentController(),
     c = app.controller;

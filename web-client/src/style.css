@@ -276,6 +276,59 @@ small {
   color: #94707b;
   background: #eee4e3;
 }
+/* More color inside the familiar resource silhouettes, without larger badges. */
+.resource-bar .resource-icon svg {
+  fill: currentColor;
+  fill-opacity: 0.4;
+}
+.dark .resource-bar .resource-icon {
+  background: color-mix(in srgb, currentColor 12%, var(--paper));
+}
+.resource-bar .resource-icon.food {
+  color: #a17b32;
+}
+.resource-bar .resource-icon.wood {
+  color: #4e7d55;
+}
+.resource-bar .resource-icon.ore {
+  color: #617e99;
+}
+.resource-bar .resource-icon.ideas {
+  color: #ae9145;
+}
+.resource-bar .resource-icon.gold {
+  color: #b78b2c;
+}
+.resource-bar .resource-icon.mood_tokens {
+  color: #b78242;
+}
+.resource-bar .resource-icon.culture_tokens {
+  color: #956d92;
+}
+.dark .resource-bar .resource-icon.food {
+  color: #d4b975;
+}
+.dark .resource-bar .resource-icon.wood {
+  color: #a5c995;
+}
+.dark .resource-bar .resource-icon.ore {
+  color: #abc4db;
+}
+.dark .resource-bar .resource-icon.ideas {
+  color: #d9c68a;
+}
+.dark .resource-bar .resource-icon.gold {
+  color: #e1ba65;
+}
+.dark .resource-bar .resource-icon.mood_tokens {
+  color: #dbb17c;
+}
+.dark .resource-bar .resource-icon.culture_tokens {
+  color: #c7a5ca;
+}
+.resource-bar .resource-icon.captives svg {
+  fill: none;
+}
 .resource strong {
   font-size: 18px;
   line-height: 1.1;
@@ -2821,6 +2874,35 @@ small {
 .coordinate-link:focus-visible {
   background: var(--paper2);
   border-bottom-style: solid;
+}
+.journal-research-link {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  vertical-align: baseline;
+}
+.journal-research-link:hover,
+.journal-research-link:focus-visible {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+}
+.journal-research-link:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+.civilization-advance.selected {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
 }
 .map-coordinate-reference {
   position: absolute;
