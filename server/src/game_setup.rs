@@ -32,6 +32,8 @@ pub struct CivilizationDraft {
     pub offers: Vec<Vec<String>>,
     pub choices: Vec<Option<String>>,
     pub ready: Vec<bool>,
+    #[serde(default)]
+    pub live_update: bool,
     random_map: bool,
 }
 
@@ -137,6 +139,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
                 .collect(),
             choices: vec![None; setup.player_amount],
             ready: vec![false; setup.player_amount],
+            live_update: false,
             random_map: setup.random_map,
         })
     } else {
@@ -416,12 +419,13 @@ pub(crate) fn execute_draft_choice(
     let Action::ChooseCivilization(civilization) = action else {
         return Err("Choose one of your three civilizations".into());
     };
-    if player >= draft.ready.len() || draft.ready[player] {
+    if player >= draft.ready.len() || game.dropped_players.contains(&player) {
         return Err("This player cannot choose a civilization now".into());
     }
     if !draft.offers[player].contains(civilization) {
         return Err("Choose one of your three civilizations".into());
     }
+    draft.live_update = draft.ready[player];
     draft.choices[player] = Some(civilization.clone());
     draft.ready[player] = true;
     finish_civilization_draft(game);
@@ -464,6 +468,7 @@ pub(crate) fn drop_draft_player(game: &mut Game, player: usize) {
     if player >= draft.ready.len() || game.dropped_players.contains(&player) {
         return;
     }
+    draft.live_update = false;
     if !draft.ready[player] {
         draft.choices[player] = draft.offers[player].first().cloned();
         draft.ready[player] = true;
@@ -486,7 +491,7 @@ pub(crate) fn civilization_choices(game: &Game, player: usize) -> Vec<&Civilizat
         .iter()
         .filter(|c| {
             if let Some(draft) = &game.civilization_draft {
-                !draft.ready[player] && draft.offers[player].contains(&c.name)
+                !game.dropped_players.contains(&player) && draft.offers[player].contains(&c.name)
             } else {
                 player == game.active_player() && c.can_choose() && c.is_used(game).is_none()
             }

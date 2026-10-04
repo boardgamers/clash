@@ -47,7 +47,7 @@ for (const count of [2, 3, 4])
         assert.equal(view(s, i).civilizationDraft.chosen, offers[i][1]);
         assert.equal(view(s, i).civilizationDraft.waiting, true);
         assert.equal(view(s, i).canUndo, false);
-        assert.deepEqual(view(s, i).civilizations, []);
+        assert.deepEqual(options(s, i), offers[i]);
         assert.deepEqual(options(s, 0), offers[0]);
         // A reload round-trip retains the deal and the lock without drawing again.
         s = engine.setPlayerMetaData(s, 0, { name: 'Reloaded player' });
@@ -99,7 +99,7 @@ test('private offers and locked choices never leak through player/spectator stat
   }
 });
 
-test('invalid, repeated and non-setup moves cannot bypass the private offer or locked choice', async () => {
+test('invalid and non-setup moves cannot bypass the private offer', async () => {
   let s = await start();
   const offered = options(s, 0)[0],
     foreign = options(s, 1)[0];
@@ -109,7 +109,21 @@ test('invalid, repeated and non-setup moves cannot bypass the private offer or l
   for (const action of ['Undo', 'Redo', { Playing: 'EndTurn' }])
     assert.throws(() => engine.tryMove(s, JSON.stringify(action), 0), /three civilizations/);
   s = choose(s, 0, offered);
-  assert.throws(() => choose(s, 0, offered), /cannot choose/);
+  const revised = options(s, 0)[1];
+  const payload = JSON.stringify({ ChooseCivilization: revised });
+  assert.equal(engine.canMoveOutOfTurn(s, payload, 0), true);
+  assert.equal(engine.canMoveOutOfTurn(s, payload, 1), false);
+  assert.equal(engine.canMoveOutOfTurn(s, JSON.stringify({ ChooseCivilization: foreign }), 0), false);
+  assert.equal(engine.canMoveOutOfTurn(s, JSON.stringify('Undo'), 0), false);
+  s = choose(s, 0, revised);
+  assert.equal(engine.isLiveUpdate(s), true);
+  assert.deepEqual(engine.currentPlayer(s), [1, 2, 3]);
+  assert.equal(view(s, 0).civilizationDraft.chosen, revised);
+  assert.equal(view(s, 1).civilizationDraft.chosen, null);
+  for (const seat of [1, 2, 3]) s = choose(s, seat, options(s, seat)[0]);
+  assert.equal(engine.isLiveUpdate(s), false);
+  assert.equal(engine.canMoveOutOfTurn(s, payload, 0), false);
+  assert.throws(() => choose(s, 0, revised));
 });
 
 test('submission order does not affect the map, decks, starting player or assignments', async () => {

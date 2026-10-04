@@ -289,7 +289,9 @@ pub(crate) fn execute_custom_phase_action(
         FoundCity(p) => on_found_city(game, player, p),
         Incident(i) => on_trigger_incident(game, i),
         StopBarbarianMovement(movable) => on_stop_barbarian_movement(game, movable),
-        ReinforceBarbarians(cities) => crate::barbarians::on_reinforce_barbarians(game, player, cities),
+        ReinforceBarbarians(cities) => {
+            crate::barbarians::on_reinforce_barbarians(game, player, cities)
+        }
         ActionCard(a) => on_play_action_card(game, player, a),
         DeclareActionCard(a) => crate::content::civilizations::japan::on_declare_card(game, a)?,
         WonderCard(w) => on_play_wonder_card(game, player, w),

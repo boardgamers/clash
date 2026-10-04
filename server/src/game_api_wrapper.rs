@@ -157,6 +157,32 @@ pub fn current_player(game: String) -> JsValue {
     }
 }
 
+#[wasm_bindgen(js_name = "canMoveOutOfTurn")]
+pub fn can_move_out_of_turn(data: String, move_data: JsValue, player: usize) -> bool {
+    let game = get_game(data);
+    let Some(draft) = &game.civilization_draft else {
+        return false;
+    };
+    if !draft.ready.get(player).copied().unwrap_or(false) || game.dropped_players.contains(&player)
+    {
+        return false;
+    }
+    let Some(raw) = move_data.as_string() else {
+        return false;
+    };
+    match serde_json::from_str::<crate::action::Action>(&raw) {
+        Ok(crate::action::Action::ChooseCivilization(name)) => draft.offers[player].contains(&name),
+        _ => false,
+    }
+}
+
+#[wasm_bindgen(js_name = "isLiveUpdate")]
+pub fn is_live_update(data: String) -> bool {
+    get_game(data)
+        .civilization_draft
+        .is_some_and(|draft| draft.live_update)
+}
+
 #[wasm_bindgen(js_name = "logLength")]
 pub fn log_length(game: String) -> JsValue {
     let game = get_game(game);

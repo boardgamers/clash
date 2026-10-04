@@ -1295,7 +1295,13 @@ export class Controller {
       s.pending ||
       s.playback ||
       s.seat === undefined ||
-      !(s.view?.activePlayers ?? [s.view?.activePlayer]).includes(s.seat)
+      (!(s.view?.activePlayers ?? [s.view?.activePlayer]).includes(s.seat) &&
+        !(
+          s.view?.civilizationDraft &&
+          typeof move === 'object' &&
+          'ChooseCivilization' in move &&
+          s.view.civilizations?.some((c) => c.name === move.ChooseCivilization)
+        ))
     )
       return;
     this.patch({ pending: true, error: '' });

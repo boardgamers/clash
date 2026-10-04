@@ -8,6 +8,7 @@
   const civilizations = $derived($session.view?.civilizations ?? []);
   const draft = $derived($session.view?.civilizationDraft);
   let selected = $state('');
+  let editing = $state(false);
   let tab = $state<'advances' | 'leaders'>('advances');
   const civilization = $derived(civilizations.find((c) => c.name === selected) ?? civilizations[0]);
   function show(node: HTMLDialogElement) {
@@ -40,7 +41,7 @@
       {/each}
     </div>
   {/if}
-  {#if draft?.waiting}
+  {#if draft?.waiting && !editing}
     <div class="draft-waiting" role="status">
       {#if draft.chosen}<CivilizationEmblem civilization={draft.chosen} size={40} />
         <h3>{draft.chosen} locked in</h3>{/if}
@@ -49,6 +50,15 @@
           ? 'Your choice is hidden. Waiting for the other players.'
           : 'Players are choosing privately.'}
       </p>
+      {#if draft.chosen && civilizations.length}
+        <button
+          disabled={$session.pending}
+          onclick={() => {
+            selected = draft.chosen!;
+            editing = true;
+          }}>Change choice</button
+        >
+      {/if}
     </div>
   {:else}
     <div class="faction-choices" role="group" aria-label="Available civilizations">
@@ -102,11 +112,15 @@
         {/if}
       </div>
       <footer>
+        {#if editing}<button onclick={() => (editing = false)}>Cancel</button>{/if}
         {#if draft}<small>Hidden until everyone is ready</small>{/if}
         <button
           class="primary"
           disabled={$session.pending}
-          onclick={() => controller.submit(civilization.action)}
+          onclick={() => {
+            controller.submit(civilization.action);
+            editing = false;
+          }}
           >{#if draft}<LockKeyhole size={15} />Lock in {civilization.name}{:else}Play as {civilization.name}<ArrowRight
               size={17}
             />{/if}</button
