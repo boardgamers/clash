@@ -14,6 +14,7 @@ import { recapStart, lastOpponentTurn, frameAt, frameEffects } from './playback'
 import { battleCues, battleCursor, BATTLE_DURATION, type BattleCue } from './battle-playback';
 import { contextualCards, type CardContext } from './contextual-cards';
 import { recruitDiscardSelection, requiredRecruitDiscards } from './recruit-discards';
+import { happinessTargets } from './happiness';
 import {
   researchDecision,
   mapDecisionOptions,
@@ -82,7 +83,17 @@ export class Controller {
   private cardContinuation:
     | (Pick<
         Session,
-        'mode' | 'city' | 'cityTab' | 'selection' | 'collectVariant' | 'ballcourts' | 'selectedAdvance'
+        | 'mode'
+        | 'city'
+        | 'cityTab'
+        | 'selection'
+        | 'collectVariant'
+        | 'ballcourts'
+        | 'selectedAdvance'
+        | 'happinessSteps'
+        | 'happinessVariant'
+        | 'happinessCity'
+        | 'happinessLawgiver'
       > & { id: number })
     | null = null;
   private raw = '';
@@ -286,6 +297,10 @@ export class Controller {
       attackPirates: false,
       recruitPreview: null,
       replacements: [],
+      happinessSteps: {},
+      happinessCity: null,
+      happinessVariant: 0,
+      happinessLawgiver: null,
       collectVariant: view.collectActions?.[0]?.value ?? 'Collect',
       destination: null,
       explorationRotation: view.explorationDecision?.choices[0]?.rotation ?? null,
@@ -654,6 +669,10 @@ export class Controller {
       attackPirates: false,
       recruitPreview: null,
       selectedSettler: null,
+      happinessSteps: {},
+      happinessCity: null,
+      happinessLawgiver: null,
+      happinessVariant: 0,
       selectedUnits: [],
       landingTargets: [],
       disembarkCarriers: undefined,
@@ -735,6 +754,10 @@ export class Controller {
       else this.selectCollectionTile(position);
       return;
     }
+    if (s.mode === 'happiness') {
+      this.toggleHappinessCity(position);
+      return;
+    }
     if (s.mode === 'settlers' && s.landingTargets?.includes(position)) {
       const ships = s.selectedUnits.filter((id) => s.view?.units?.find((u) => u.id === id)?.type === 'Ship');
       const landing = passengerLandings(s.view, ships, (ids) => this.movementDestinations(ids)).find(
@@ -751,12 +774,8 @@ export class Controller {
       this.chooseMoveDestination(position);
       return;
     }
-    if (
-      s.mode === 'settlers' &&
-      pick.kind !== 'unit' &&
-      s.view?.units?.some((u) => u.position === position)
-    ) {
-      this.focusUnitPosition(position);
+    if (s.mode === 'settlers' && s.view?.units?.some((u) => u.position === position)) {
+      this.focusUnitPosition(position, pick.kind === 'unit' ? pick.unit : undefined);
       return;
     }
     const units = s.view?.units?.filter((u) => u.position === position) ?? [];
@@ -773,7 +792,7 @@ export class Controller {
         s.mode === 'settlers' ||
         !!s.view?.stopMovement)
     ) {
-      this.openUnits([pickedUnit?.id ?? units.find((u) => u.carrier === null)?.id ?? units[0].id]);
+      this.openUnits(this.defaultMovementGroup(position, pickedUnit?.id));
       return;
     }
     if (city) this.selectCity(position);
@@ -816,12 +835,23 @@ export class Controller {
       return;
     this.patch({ decisionPosition: position, error: '' });
   }
-  focusUnitPosition(position: string) {
+  defaultMovementGroup(position: string, preferredUnit?: number) {
+    const units = get(this.session).view?.units?.filter((u) => u.position === position) ?? [];
+    const preferred = units.find((u) => u.id === preferredUnit);
+    const ships = units.filter((u) => u.type === 'Ship').map((u) => u.id);
+    const land = units.filter((u) => u.type !== 'Ship').map((u) => u.id);
+    // Ships carry their passengers automatically. Never put both in one move payload.
+    const ids = preferred ? (preferred.type === 'Ship' ? ships : land) : ships.length ? ships : land;
+    // Keep groups together when an escort or leader makes movement possible.
+    if (this.movementDestinations(ids).length) return ids;
+    const movable = ids.filter((id) => this.movementDestinations([id]).length);
+    return movable.length ? movable : ids;
+  }
+  focusUnitPosition(position: string, preferredUnit?: number) {
     const s = get(this.session);
-    if (s.pending || !s.view?.units?.some((u) => u.position === position)) return;
-    const current = s.unitPosition ?? s.view.units.find((u) => s.selectedUnits.includes(u.id))?.position;
+    if (s.pending || s.playback || !s.view?.units?.some((u) => u.position === position)) return;
     this.patch({ unitPosition: position, movingCity: null, disembarkCarriers: undefined });
-    if (current !== position) this.selectUnits([]);
+    this.selectUnits(this.defaultMovementGroup(position, preferredUnit));
   }
   chooseMoveDestination(position: string) {
     const s = get(this.session);
@@ -966,6 +996,10 @@ export class Controller {
     });
   }
   openCities(position?: string, cityTab: Session['cityTab'] = 'build') {
+    if (cityTab === 'happiness') {
+      this.beginHappiness(position);
+      return;
+    }
     this.closeActivity();
     this.patch({
       mode: 'city',
@@ -982,17 +1016,72 @@ export class Controller {
       error: '',
     });
   }
+  beginHappiness(position?: string) {
+    const s = get(this.session);
+    if (s.pending || s.playback || s.seat === undefined) return;
+    this.closeActivity();
+    this.patch({
+      mode: 'happiness',
+      cityTab: 'happiness',
+      tilePanel: false,
+      seaRoutes: false,
+      abilitiesOpen: false,
+      happinessSteps: {},
+      happinessCity: null,
+      happinessVariant: 0,
+      happinessLawgiver: null,
+      error: '',
+    });
+    if (position) this.toggleHappinessCity(position);
+  }
+  toggleHappinessCity(position: string) {
+    const s = get(this.session);
+    if (
+      s.pending ||
+      s.playback ||
+      s.mode !== 'happiness' ||
+      !s.view?.cities.some((city) => city.position === position && city.mood !== 'Happy')
+    )
+      return;
+    this.patch({ happinessCity: position, focus: position });
+    if (s.happinessSteps?.[position]) this.setHappinessCity(position, 0);
+    else {
+      const target = happinessTargets(s, (input) => this.query(input), position).find((t) => t.action);
+      if (target) this.setHappinessCity(position, target.steps, target.lawgiver);
+    }
+  }
+  setHappinessCity(position: string, steps: number, lawgiver = false) {
+    const s = get(this.session);
+    if (s.pending || s.playback || s.mode !== 'happiness') return;
+    if (
+      steps &&
+      !happinessTargets(s, (input) => this.query(input), position).some(
+        (t) => t.steps === steps && !!t.lawgiver === lawgiver && t.action,
+      )
+    )
+      return;
+    const selected = { ...s.happinessSteps };
+    if (steps) selected[position] = steps;
+    else delete selected[position];
+    this.patch({
+      happinessSteps: selected,
+      happinessCity: position,
+      happinessLawgiver:
+        steps && lawgiver ? position : s.happinessLawgiver === position ? null : s.happinessLawgiver,
+      error: '',
+    });
+  }
+  switchHappinessVariant(index: number) {
+    const s = get(this.session);
+    if (s.pending || s.playback || s.mode !== 'happiness' || !s.view?.happinessActions?.[index]) return;
+    this.patch({ happinessVariant: index, error: '' });
+  }
   openSettlers() {
     const s = get(this.session);
-    const atFocus = s.view?.units?.find((u) => u.position === s.focus && u.carrier === null);
+    const position =
+      s.view?.units?.find((u) => u.position === s.focus)?.position ?? s.view?.units?.[0]?.position;
     this.openUnits(
-      s.selectedUnits.length
-        ? s.selectedUnits
-        : atFocus
-          ? [atFocus.id]
-          : s.view?.units?.[0]
-            ? [s.view.units[0].id]
-            : [],
+      s.selectedUnits.length ? s.selectedUnits : position ? this.defaultMovementGroup(position) : [],
     );
   }
   query<T>(input: unknown): T {
@@ -1151,6 +1240,10 @@ export class Controller {
       collectVariant: s.collectVariant,
       ballcourts: s.ballcourts,
       selectedAdvance: s.selectedAdvance,
+      happinessSteps: { ...s.happinessSteps },
+      happinessVariant: s.happinessVariant,
+      happinessCity: s.happinessCity,
+      happinessLawgiver: s.happinessLawgiver,
     };
     this.submit(card.action, card.cost);
   }

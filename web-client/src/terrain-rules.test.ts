@@ -58,3 +58,35 @@ test('Hannibal and Terracing show their mountain exceptions before moving', () =
   assert.doesNotMatch(quote(maya, [5]).terrainNotes.join(' '), /must stop/);
   assert.match(quote(maya, [0, 5]).terrainNotes.join(' '), /Other units must stop/);
 });
+
+test('Great Gardens warning appears only when an opponent has built it', () => {
+  const g = fixture('Fertile');
+  g.players[0].units[0].movement_restrictions = ['Fertile'];
+  const notes = () =>
+    JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(g), 0), 0)).units.find((u: any) => u.id === 0)
+      .movementNotes;
+  assert.deepEqual(notes(), []);
+  g.players[1].cities[0].city_pieces = { wonders: ['GreatGardens'] };
+  assert.match(notes().join(' '), /Great Gardens/);
+  g.players[0].cities[0].city_pieces = { wonders: ['GreatGardens'] };
+  delete g.players[1].cities[0].city_pieces;
+  assert.deepEqual(notes(), [], 'own Great Gardens does not restrict attacks');
+});
+
+test('leaving mountains uses this group move but does not impose a turn-long stop', () => {
+  const g = fixture('Fertile');
+  g.map.tiles.find((t: any) => t[0] === 'C2')[1] = 'Mountain';
+  g.actions_left = 2;
+  const moved = engine.tryMove(JSON.stringify(g), JSON.stringify(quote(g).action), 0);
+  const view = JSON.parse(engine.webView(engine.stripSecret(moved, 0), 0));
+  const notes = view.units.find((u: any) => u.id === 0).movementNotes.join(' ');
+  assert.match(notes, /Already moved in this Move action/);
+  assert.doesNotMatch(notes, /Mountain|Great Gardens/);
+  const destinations = (raw: string) =>
+    JSON.parse(
+      engine.webQuery(engine.stripSecret(raw, 0), 0, JSON.stringify({ kind: 'movement', units: [0] })),
+    ).destinations;
+  assert.deepEqual(destinations(moved), []);
+  const nextAction = engine.tryMove(moved, JSON.stringify(view.stopMovement), 0);
+  assert(destinations(nextAction).length > 0, 'a new Move action can move the unit again');
+});

@@ -3,6 +3,7 @@ import { collectionYield, collectionBonusLabel, sameCollection } from './collect
 import type { MapPick } from './types';
 import * as THREE from 'three';
 import { activeCityAbility } from './abilities';
+import { happinessCities } from './happiness';
 import { ExplorationOverlay } from './exploration-overlay';
 import { explorationPreview } from './exploration-preview';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -848,6 +849,7 @@ export class World {
     const pieceDecision = mapChoices.some((o) => o.mapTarget);
     this.decisionPositions = decisionPositions;
     const ability = activeCityAbility(s);
+    const moodPositions = s.mode === 'happiness' ? happinessCities(s) : [];
     const combat = battle?.location ?? (playback ? (playback.frame?.combat ?? null) : activeCombat(s.game));
     const exploration = s.view?.explorationDecision;
     this.explorationPositions = exploration?.choices[0]?.tiles.map(([p]) => p) ?? explorationPreview(s);
@@ -862,34 +864,39 @@ export class World {
         ? [combat.attacker.position, combat.defender.position]
         : ability
           ? abilityPositions
-          : s.mode === 'collect'
-            ? [
-                ...new Set(
-                  [
-                    s.city!,
-                    ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ??
-                      []),
-                  ].filter(Boolean),
-                ),
-              ]
-            : s.mode === 'settlers'
+          : s.mode === 'happiness'
+            ? moodPositions
+            : s.mode === 'collect'
               ? [
-                  ...new Set([
-                    ...(s.unitPosition ? [s.unitPosition] : []),
-                    ...(s.view?.units?.filter((u) => s.selectedUnits.includes(u.id)).map((u) => u.position) ??
-                      []),
-                    ...s.moveDestinations.map((d) => d.position),
-                    ...this.explorationPositions,
-                    ...(s.landingTargets ?? []),
-                  ]),
+                  ...new Set(
+                    [
+                      s.city!,
+                      ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ??
+                        []),
+                    ].filter(Boolean),
+                  ),
                 ]
-              : s.tilePanel && s.focus
-                ? [s.focus]
-                : [];
+              : s.mode === 'settlers'
+                ? [
+                    ...new Set([
+                      ...(s.unitPosition ? [s.unitPosition] : []),
+                      ...(s.view?.units
+                        ?.filter((u) => s.selectedUnits.includes(u.id))
+                        .map((u) => u.position) ?? []),
+                      ...s.moveDestinations.map((d) => d.position),
+                      ...this.explorationPositions,
+                      ...(s.landingTargets ?? []),
+                    ]),
+                  ]
+                : s.tilePanel && s.focus
+                  ? [s.focus]
+                  : [];
     this.labelHost.classList.toggle('collecting', s.mode === 'collect');
+    this.labelHost.classList.toggle('choosing-happiness', s.mode === 'happiness');
     const decisionSelected = s.decisionSelection.flatMap((i) => mapChoices[i]?.position ?? []);
     const interacting =
       s.mode === 'collect' ||
+      s.mode === 'happiness' ||
       s.mode === 'settlers' ||
       s.tilePanel ||
       mapChoices.length > 0 ||
@@ -949,20 +956,22 @@ export class World {
       ? new Set()
       : s.view?.decision
         ? new Set(decisionPositions)
-        : s.mode === 'collect'
-          ? new Set([
-              ...(s.view?.cities.map((c) => c.position) ?? []),
-              ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? []),
-            ])
-          : s.mode === 'settlers'
+        : s.mode === 'happiness'
+          ? new Set(moodPositions)
+          : s.mode === 'collect'
             ? new Set([
-                ...(s.view?.units?.map((u) => u.position) ?? []),
-                ...s.moveDestinations.map((d) => d.position),
-                ...(s.landingTargets ?? []),
+                ...(s.view?.cities.map((c) => c.position) ?? []),
+                ...(s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? []),
               ])
-            : ability
-              ? new Set(abilityPositions)
-              : null;
+            : s.mode === 'settlers'
+              ? new Set([
+                  ...(s.view?.units?.map((u) => u.position) ?? []),
+                  ...s.moveDestinations.map((d) => d.position),
+                  ...(s.landingTargets ?? []),
+                ])
+              : ability
+                ? new Set(abilityPositions)
+                : null;
     const signature = JSON.stringify([
       mapTiles,
       s.game.players.map((p) => [p.cities, p.units]),
@@ -1456,30 +1465,34 @@ export class World {
           ? exploration.destination
             ? [exploration.destination]
             : []
-          : s.mode === 'settlers'
-            ? [s.unitPosition ?? settler?.position, s.moveTarget].filter((p): p is string => !!p)
-            : s.mode === 'collect'
-              ? s.selection.map((c) => c.position)
-              : s.tilePanel && focusedPosition
-                ? [focusedPosition]
-                : ability && s.abilityCity
-                  ? [s.abilityCity]
-                  : [];
+          : s.mode === 'happiness'
+            ? Object.keys(s.happinessSteps ?? {})
+            : s.mode === 'settlers'
+              ? [s.unitPosition ?? settler?.position, s.moveTarget].filter((p): p is string => !!p)
+              : s.mode === 'collect'
+                ? s.selection.map((c) => c.position)
+                : s.tilePanel && focusedPosition
+                  ? [focusedPosition]
+                  : ability && s.abilityCity
+                    ? [s.abilityCity]
+                    : [];
     const available = mapChoices.length
       ? decisionPositions
       : placement
         ? placement.tiles.map(([position]) => position)
-        : s.mode === 'settlers'
-          ? [
-              ...new Set([
-                ...(s.view?.units?.map((u) => u.position) ?? []),
-                ...s.moveDestinations.map((d) => d.position),
-                ...(s.landingTargets ?? []),
-              ]),
-            ]
-          : s.mode === 'collect'
-            ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
-            : abilityPositions;
+        : s.mode === 'happiness'
+          ? moodPositions
+          : s.mode === 'settlers'
+            ? [
+                ...new Set([
+                  ...(s.view?.units?.map((u) => u.position) ?? []),
+                  ...s.moveDestinations.map((d) => d.position),
+                  ...(s.landingTargets ?? []),
+                ]),
+              ]
+            : s.mode === 'collect'
+              ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
+              : abilityPositions;
     const selectionSig = JSON.stringify([selected, available]);
     if (selectionSig !== this.selectionSignature) {
       this.selectionSignature = selectionSig;
@@ -1583,17 +1596,25 @@ export class World {
     }
     const moveMarkers = mapChoices.length
       ? decisionPositions
-      : s.mode === 'settlers'
-        ? [
-            ...new Set([
-              ...(s.view?.units?.map((u) => u.position) ?? []),
-              ...(s.view?.nomadCities ?? []),
-              ...s.moveDestinations.map((d) => d.position),
-              ...(s.landingTargets ?? []),
-            ]),
-          ]
-        : abilityPositions;
-    const markerSignature = JSON.stringify([moveMarkers, mapChoices, s.view?.decision?.name, ability?.key]);
+      : s.mode === 'happiness'
+        ? moodPositions
+        : s.mode === 'settlers'
+          ? [
+              ...new Set([
+                ...(s.view?.units?.map((u) => u.position) ?? []),
+                ...(s.view?.nomadCities ?? []),
+                ...s.moveDestinations.map((d) => d.position),
+                ...(s.landingTargets ?? []),
+              ]),
+            ]
+          : abilityPositions;
+    const markerSignature = JSON.stringify([
+      moveMarkers,
+      mapChoices,
+      s.view?.decision?.name,
+      ability?.key,
+      s.mode,
+    ]);
     if (markerSignature !== this.moveMarkerSignature) {
       this.moveMarkerSignature = markerSignature;
       for (const label of this.labelPositions.filter((l) => l.kind === 'destination')) label.node.remove();
@@ -1605,7 +1626,8 @@ export class World {
         label.classList.toggle('decision-map-label', mapChoices.length > 0);
         label.textContent = '';
         const terrain = s.game.map.tiles.find(([p]) => p === position)?.[1];
-        const city = ability && s.view?.cities.find((city) => city.position === position);
+        const city =
+          (ability || s.mode === 'happiness') && s.view?.cities.find((city) => city.position === position);
         const description = city
           ? `${city.mood} city · Size ${city.size}`
           : terrain
@@ -1614,7 +1636,7 @@ export class World {
         label.dataset.description = description;
         label.setAttribute(
           'aria-label',
-          `${ability ? 'Choose city' : pieceDecision ? 'Choose units' : 'Choose hex'} · ${description}`,
+          `${s.mode === 'happiness' ? 'Select happiness city' : ability ? 'Choose city' : pieceDecision ? 'Choose units' : 'Choose hex'} · ${description}`,
         );
         label.onclick = () => {
           if (this.canPick(position)) this.pick(position);
@@ -1654,12 +1676,16 @@ export class World {
             ? pieceDecision
               ? label.position === (s.decisionPosition ?? decisionPositions[0])
               : decisionSelected.includes(label.position)
-            : ability
-              ? label.position === s.abilityCity
-              : label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
+            : s.mode === 'happiness'
+              ? !!s.happinessSteps?.[label.position]
+              : ability
+                ? label.position === s.abilityCity
+                : label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
         );
       if (label.kind === 'destination' && ability)
         label.node.setAttribute('aria-pressed', String(label.position === s.abilityCity));
+      if (label.kind === 'destination' && s.mode === 'happiness')
+        label.node.setAttribute('aria-pressed', String(!!s.happinessSteps?.[label.position]));
       if (label.kind === 'destination' && mapChoices.length) {
         label.node.setAttribute(
           'aria-pressed',

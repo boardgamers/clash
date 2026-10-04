@@ -143,8 +143,7 @@
       {#each movementNotes as note}<p><TriangleAlert size={14} />{note}</p>{/each}
     </div>{/if}
   {#if selectedUnits.some((u) => typeof u.type !== 'string')}
-    <details class="movement-leader-info">
-      <summary>Leader abilities</summary>
+    <div class="movement-leader-info">
       {#each $session.view?.players
         .find((p) => p.index === $session.seat)
         ?.leaders?.filter((l) => $session.selectedUnits.includes(l.unit)) ?? [] as leader}
@@ -156,7 +155,7 @@
           onUse={(action, payment) => controller.submit(action, payment)}
         />
       {/each}
-    </details>
+    </div>
   {/if}
   {#if $session.moveTarget && !destination && $session.moveDestinations.length}
     <div class="settler-destinations" role="group" aria-label="Choose how to move">

@@ -318,7 +318,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
         "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|{ let cost = a.cost(game,seat); json!({"value":a,"name":a.origin(p).name(game),"free":cost.free,"payment":cost.payment_options(p,a.origin(p)).default_payment()}) }).collect::<Vec<_>>()} else {vec![]},
         "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free,"surcharge":a.payment_options(game,seat).default})).collect::<Vec<_>>()} else {vec![]},
-        "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate,"movementNotes":movement_notes(p,u)})).collect::<Vec<_>>(),
+        "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate,"movementNotes":movement_notes(game,p,u)})).collect::<Vec<_>>(),
         "nomadCities":p.cities.iter().filter(|c|!crate::content::civilizations::huns::city_destinations(game,p,c.position,&[]).is_empty()).map(|c|c.position).collect::<Vec<_>>(),
         "movementLeft":if let GameState::Movement(m)=&game.state {m.movement_actions_left} else {3},
         "seaRoutes":sea_routes,
@@ -327,11 +327,21 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
 }
 
-fn movement_notes(player: &crate::player::Player, unit: &crate::unit::Unit) -> Vec<&'static str> {
+fn movement_notes(game: &Game, player: &crate::player::Player, unit: &crate::unit::Unit) -> Vec<&'static str> {
     use crate::movement::MovementRestriction;
     let mut notes = unit
         .movement_restrictions
         .iter()
+        .filter(|restriction| {
+            **restriction != MovementRestriction::Fertile
+                || game.players.iter().any(|opponent| {
+                    opponent.index != player.index
+                        && game.can_attack_player(player.index, opponent.index)
+                        && opponent.cities.iter().any(|city| {
+                            city.pieces.wonders.contains(&crate::wonder::Wonder::GreatGardens)
+                        })
+                })
+        })
         .map(|restriction| match restriction {
             MovementRestriction::Forest if player.can_use_advance(Advance::Roads) => {
                 "Forest · Attacking requires a Roads route this turn"
@@ -346,6 +356,15 @@ fn movement_notes(player: &crate::player::Player, unit: &crate::unit::Unit) -> V
             MovementRestriction::Fertile => "Cannot attack the Great Gardens this turn",
         })
         .collect::<Vec<_>>();
+    if let GameState::Movement(movement) = &game.state {
+        if player.index == game.current_player_index
+            && unit.is_land_based()
+            && movement.current_move.is_none()
+            && movement.moved_units.contains(&unit.id)
+        {
+            notes.push("Already moved in this Move action · Remaining group moves are for other units");
+        }
+    }
     notes.sort_unstable();
     notes.dedup();
     notes

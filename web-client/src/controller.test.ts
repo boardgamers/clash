@@ -8,6 +8,7 @@ import type { Controller as ControllerType } from './controller';
 import type { Session } from './types';
 import { contextualCards, activeCollectionCard } from './contextual-cards.ts';
 import { requiredRecruitDiscards } from './recruit-discards.ts';
+import { happinessPreview, happinessCities } from './happiness.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 // Bundle the actual controller so Node can run its browser TypeScript imports.
@@ -83,6 +84,149 @@ const fixture = (name: string) => {
       game.players.push({ ...npc, id: game.players.length });
   return JSON.stringify(game);
 };
+
+test('movement origins and next group select the whole compatible group without submitting', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const g = JSON.parse(fixture('movement/movement'));
+    g.players[0].advances.push('Tactics');
+    g.players[0].units.push({ id: 8, position: 'B2', unit_type: 'Settler' });
+    g.players[0].next_unit_id = 9;
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    c.patch({ focus: 'C2', selectedUnits: [] });
+    c.openSettlers();
+    assert.deepEqual(app.session().selectedUnits, [0, 1, 2, 3, 5, 6, 7]);
+    c.focusUnitPosition('B2');
+    assert.deepEqual(app.session().selectedUnits, [4, 8]);
+    c.selectUnits([4]);
+    assert.deepEqual(app.session().selectedUnits, [4], 'individual deselection still works');
+    c.selectTile('B2');
+    assert.deepEqual(app.session().selectedUnits, [4, 8], 'selecting the same origin reselects everyone');
+    c.selectUnits([]);
+    c.selectTile('C2', { kind: 'unit', player: 0, unit: 0 });
+    assert.deepEqual(app.session().selectedUnits, [0, 1, 2, 3, 5, 6, 7]);
+    c.patch({ pending: true });
+    c.focusUnitPosition('B2');
+    assert.equal(app.session().unitPosition, 'C2');
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('movement group defaults exclude blocked units and keep ship passengers aboard', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const g = JSON.parse(fixture('movement/movement'));
+    g.players[0].advances.push('Tactics');
+    g.state.Movement.moved_units = [0];
+    g.players[0].units.push(
+      { id: 8, position: 'C3', unit_type: 'Ship', carried_units: [{ id: 9, unit_type: 'Infantry' }] },
+      { id: 10, position: 'C3', unit_type: 'Ship' },
+    );
+    g.players[0].next_unit_id = 11;
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    c.openUnits([]);
+    c.focusUnitPosition('C2');
+    assert.deepEqual(app.session().selectedUnits, [1, 2, 3, 5, 6, 7]);
+    c.focusUnitPosition('C3');
+    assert.deepEqual(app.session().selectedUnits, [8, 10]);
+    assert(!app.session().selectedUnits.includes(9));
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('map happiness selects multiple cities, preserves them across variants, and confirms together', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const raw = fixture('advances/increase_happiness_voting');
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    c.openCities('C2', 'happiness');
+    assert.equal(app.session().mode, 'happiness');
+    assert.deepEqual(app.session().happinessSteps, { C2: 1 });
+    assert(!happinessCities(app.session()).includes('A1'), 'happy cities are not targets');
+    c.selectTile('A1');
+    c.selectTile('C1'); // Another player's city.
+    assert.deepEqual(app.session().happinessSteps, { C2: 1 });
+    c.selectTile('B3', { kind: 'unit', player: 0, unit: 3 });
+    c.setHappinessCity('C2', 2);
+    assert.deepEqual(app.session().happinessSteps, { C2: 2, B3: 1 });
+    const quote = () => happinessPreview(app.session(), (input) => c.query(input));
+    assert.deepEqual(quote().payment, { mood_tokens: 7 });
+    const voting = app.session().view!.happinessActions!.findIndex((v) => v.name === 'Voting');
+    assert(voting >= 0);
+    c.switchHappinessVariant(voting);
+    assert.deepEqual(app.session().happinessSteps, { C2: 2, B3: 1 });
+    assert.deepEqual(quote().payment, { mood_tokens: 8 });
+    c.selectTile('B3');
+    assert.deepEqual(app.session().happinessSteps, { C2: 2 });
+    c.selectTile('B3');
+    c.patch({ pending: true });
+    c.selectTile('C2');
+    assert.deepEqual(app.session().happinessSteps, { C2: 2, B3: 1 });
+    c.patch({ pending: false });
+    await c.load(engine.stripSecret(raw, 0));
+    assert.deepEqual(
+      app.session().happinessSteps,
+      { C2: 2, B3: 1 },
+      'duplicate snapshots preserve selections',
+    );
+    assert.equal(app.sent.length, 0, 'map choices do not submit actions');
+    c.submit(quote().action!);
+    const after = engine.tryMove(raw, app.sent[0], 0);
+    const game = JSON.parse(after);
+    assert.equal(game.players[0].cities.find((city: any) => city.position === 'C2').mood_state, 'Happy');
+    assert.equal(game.players[0].cities.find((city: any) => city.position === 'B3').mood_state, 'Neutral');
+    assert.equal(game.players[0].resources.mood_tokens, 1);
+    assert.equal(game.actions_left, JSON.parse(raw).actions_left, 'Voting remains a free action');
+    await c.load(engine.stripSecret(after, 0));
+    assert.deepEqual(app.session().happinessSteps, {});
+    assert.equal(app.session().mode, 'overview');
+  } finally {
+    app.close();
+  }
+});
+
+test('map happiness keeps Lawgiver distinct and blocks unaffordable selections', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/increase_happiness_voting'));
+    const p = game.players[0];
+    p.civilization = 'Babylonia';
+    p.units = [{ id: 1, position: 'C2', unit_type: { Leader: 'Hammurabi' } }];
+    p.resources = { mood_tokens: 1, culture_tokens: 1 };
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.beginHappiness();
+    c.selectTile('C2');
+    assert.deepEqual(app.session().happinessSteps, { C2: 2 });
+    assert.equal(app.session().happinessLawgiver, 'C2');
+    c.selectTile('B3');
+    assert.deepEqual(app.session().happinessSteps, { C2: 2, B3: 1 });
+    c.selectTile('B1');
+    assert.deepEqual(app.session().happinessSteps, { C2: 2, B3: 1 });
+    const quoted = happinessPreview(app.session(), (input) => c.query(input));
+    assert.deepEqual(quoted.payment, { culture_tokens: 1, mood_tokens: 1 });
+    assert(quoted.action);
+    c.selectTile('C2');
+    assert.equal(app.session().happinessLawgiver, null);
+    assert.deepEqual(app.session().happinessSteps, { B3: 1 });
+    c.setPlayer(1);
+    assert.deepEqual(app.session().happinessSteps, {});
+    assert.equal(app.sent.length, 0);
+  } finally {
+    app.close();
+  }
+});
 
 test('recruitment asks for only the missing pieces, clears stale discards and pays the full cost', async () => {
   const app = paymentController(),

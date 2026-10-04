@@ -23,7 +23,6 @@
   import PaymentPicker from './PaymentPicker.svelte';
   import ResourceText from './ResourceText.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
-  import HappinessPanel from './HappinessPanel.svelte';
   import CityFacts from './CityFacts.svelte';
   import UnitIcon from './UnitIcon.svelte';
   import AvailabilityFilter from './AvailabilityFilter.svelte';
@@ -186,7 +185,8 @@
     {#each [{ id: 'build', label: 'Buildings', icon: Hammer }, { id: 'recruit', label: 'Recruit', icon: Users }, { id: 'happiness', label: 'Happiness', icon: Smile }] as item}<button
         class:active={tab === item.id}
         onclick={() => {
-          controller.patch({ cityTab: item.id as typeof tab });
+          if (item.id === 'happiness') controller.beginHappiness();
+          else controller.patch({ cityTab: item.id as typeof tab });
           controller.patch({ error: '' });
         }}><item.icon size={17} />{item.label}</button
       >{/each}
@@ -363,8 +363,6 @@
           <button class="show-all-options" onclick={() => controller.setAvailableOnly(false)}>Show all</button
           >
         </p>{/if}
-    {:else}
-      <HappinessPanel {controller} />
     {/if}
   </div>
   {#if tab === 'build' && selected && !selected.owned}<footer class="city-confirm">

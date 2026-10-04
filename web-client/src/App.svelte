@@ -67,6 +67,7 @@
   import ResearchTree from './ResearchTree.svelte';
   import { researchDecision, mapDecisionOptions } from './decision-controls';
   import CityPanel from './CityPanel.svelte';
+  import HappinessPanel from './HappinessPanel.svelte';
   import SettlerPanel from './SettlerPanel.svelte';
   import ExplorationPanel from './ExplorationPanel.svelte';
   import ScoreDialog from './ScoreDialog.svelte';
@@ -186,6 +187,14 @@
       .join(' · '),
   );
   let identity = $derived($session.view?.players.find((p) => p.index === $session.seat));
+  const activePlayers = $derived(
+    $session.game?.state === 'Finished' || $session.playback
+      ? []
+      : ($session.view?.activePlayers ?? ($session.view ? [$session.view.activePlayer] : [])),
+  );
+  const choosingPlayer = $derived(
+    !!$session.view?.civilizationDraft || !!$session.game?.events?.length || ($session.game?.round ?? 0) > 3,
+  );
   let log = $derived(
     $session.game ? combatJournal(journal($session.game, $session.view ?? undefined)).reverse() : [],
   );
@@ -549,6 +558,7 @@
   class:colorblind={$session.colorBlind}
   class:spectating={$session.seat === undefined}
   class:board-interacting={$session.mode === 'collect' ||
+    $session.mode === 'happiness' ||
     $session.mode === 'settlers' ||
     $session.tilePanel ||
     !!activeCityAbility($session) ||
@@ -673,12 +683,20 @@
       <div class="map-world" bind:this={boardHost}></div>
       <div class="map-vignette"></div>
       <div class="player-list" aria-label="Civilizations">
-        {#each $session.view?.players ?? [] as player}<button
+        {#each $session.view?.players ?? [] as player}
+          {@const turnLabel = activePlayers.includes(player.index)
+            ? choosingPlayer
+              ? 'Choosing'
+              : player.index === $session.seat
+                ? 'Your turn'
+                : 'Current turn'
+            : null}
+          <button
             class="player-card"
-            class:active={player.index === $session.view?.activePlayer}
+            class:active={!!turnLabel}
             style={`--player:${playerColor(player.index, $session.colorBlind, $session.playerColors)}`}
             title={`Inspect ${player.civilization} (${player.index === $session.seat ? 'You' : player.name}): advances and victory points`}
-            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}. View resources, advances and scores`}
+            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}.${turnLabel ? ` ${turnLabel}.` : ''} View resources, advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -711,7 +729,9 @@
                     title={$session.playerBadges[player.index]!.label}
                   />{/if}</small
               ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span
-              >{#if $session.strategyMap}{@const forces = militarySummary(
+              >{#if turnLabel}<span class="player-turn"
+                  ><ArrowRight size={12} aria-hidden="true" />{turnLabel}</span
+                >{/if}{#if $session.strategyMap}{@const forces = militarySummary(
                   ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(
                     (p) => p.id === player.index,
                   ) ?? { id: player.index, civilization: player.civilization },
@@ -721,9 +741,7 @@
                   title="Army includes leaders and embarked troops; settlers are separate"
                   ><Swords size={13} />{forces.army}<Ship size={13} />{forces.ships}</span
                 >{/if}</span
-            ><span class="player-score">{player.score}<Trophy size={10} /></span
-            >{#if player.index === $session.view?.activePlayer}<span class="active-dot" title="Current player"
-              ></span>{/if}
+            ><span class="player-score">{player.score}<Trophy size={10} /></span>
           </button>{/each}
       </div>
       {#if !$session.game}<div class="map-loading">
@@ -890,7 +908,7 @@
             />{/if}</button
         >
         <button
-          class:active={$session.mode === 'city'}
+          class:active={$session.mode === 'city' || $session.mode === 'happiness'}
           class:inspect-only={!cityActionsAvailable}
           aria-label="Manage cities"
           title={cityActionsAvailable
@@ -1243,6 +1261,10 @@
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </section>
     {/if}
+    {#if $session.mode === 'happiness' && !$session.view?.explorationDecision && !$session.view?.decision && !choiceDecision && !objectiveDecision}<HappinessPanel
+        {controller}
+        onHighlight={(position) => world?.highlightCoordinate(position)}
+      />{/if}
     {#if $session.mode === 'settlers' && !$session.view?.explorationDecision && !$session.view?.decision && !choiceDecision && !objectiveDecision}<SettlerPanel
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}

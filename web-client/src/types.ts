@@ -463,6 +463,10 @@ export interface Session {
   decisionPosition?: string | null;
   replacements: number[];
   collectVariant: Move;
+  happinessSteps?: Record<string, number>;
+  happinessVariant?: number;
+  happinessLawgiver?: string | null;
+  happinessCity?: string | null;
   tilePanel: boolean;
   cityTab: 'build' | 'recruit' | 'happiness';
   collectionTile: string | null;
@@ -483,7 +487,7 @@ export interface Session {
   seat?: number;
   city: string | null;
   focus: string | null;
-  mode: 'overview' | 'collect' | 'research' | 'city' | 'settlers';
+  mode: 'overview' | 'collect' | 'research' | 'city' | 'settlers' | 'happiness';
   selectedSettler: number | null;
   destination: string | null;
   explorationRotation: number | null;

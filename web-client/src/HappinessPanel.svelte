@@ -1,178 +1,143 @@
 <script lang="ts">
-  import { Smile, Meh, Frown, Landmark, ArrowRight, Check, Zap } from 'lucide-svelte';
+  import { onDestroy } from 'svelte';
+  import { Smile, Meh, ArrowRight, Check, Zap, X } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import type { HappinessPreview } from './types';
+  import { happinessPreview, happinessTargets } from './happiness';
   import ResourceAmount from './ResourceAmount.svelte';
-  let { controller }: { controller: Controller } = $props();
+  import CityFacts from './CityFacts.svelte';
+  import ContextualCards from './ContextualCards.svelte';
+  let {
+    controller,
+    onHighlight,
+  }: { controller: Controller; onHighlight: (position: string | null) => void } = $props();
   const session = $derived(controller.session);
-  let steps = $state<Record<string, number>>({});
-  let variant = $state(0);
-  let lawgiverCity = $state<string | null>(null);
+  onDestroy(() => onHighlight(null));
+  const steps = $derived($session.happinessSteps ?? {});
   const choices = $derived($session.view?.happinessActions ?? []);
+  const variant = $derived(choices[$session.happinessVariant ?? 0]);
   const cities = $derived($session.view?.cities ?? []);
-  const singleCity = $derived(cities.length === 1);
-  const selected = $derived(Object.entries(steps).filter(([, n]) => n > 0));
-  const surcharge = $derived(choices[variant]?.surcharge ?? {});
-  const offers = $derived(
-    cities.map((city) => ({
-      city,
-      targets: ($session.view?.cityActions.find((c) => c.position === city.position)?.happiness ?? []).map(
-        (target) => {
-          if (!choices[variant]) return { ...target, action: null };
-          try {
-            const result = controller.query<HappinessPreview>({
-              kind: 'happiness',
-              cities: [
-                ...selected.filter(([position]) => position !== city.position),
-                [city.position, target.steps],
-              ],
-              variant: choices[variant].value,
-              lawgiver:
-                target.lawgiver ||
-                (lawgiverCity !== city.position && selected.some(([pos]) => pos === lawgiverCity)),
-            });
-            return {
-              ...target,
-              action: result.action,
-              reason: result.reason,
-              payment: singleCity ? result.payment : target.payment,
-            };
-          } catch (error) {
-            return { ...target, action: null, reason: String(error) };
-          }
-        },
-      ),
-    })),
+  const selected = $derived(cities.filter((city) => steps[city.position] > 0));
+  const focused = $derived(cities.find((city) => city.position === $session.happinessCity));
+  const targets = $derived(
+    focused ? happinessTargets($session, (input) => controller.query(input), focused.position) : [],
   );
-  const preview = $derived.by(() => {
-    if (!selected.length || !choices[variant]) return { action: null, payment: null, reason: null };
-    try {
-      return controller.query<HappinessPreview>({
-        kind: 'happiness',
-        cities: selected,
-        variant: choices[variant].value,
-        lawgiver: selected.some(([pos]) => pos === lawgiverCity),
-      });
-    } catch (error) {
-      return { action: null, payment: null, reason: String(error) };
-    }
-  });
+  const preview = $derived(happinessPreview($session, (input) => controller.query(input)));
+  const cityName = (position: string) =>
+    cities.find((c) => c.position === position)?.capital
+      ? 'Capital'
+      : `City ${cities.findIndex((c) => c.position === position) + 1}`;
+  const targetMood = (position: string) =>
+    cities.find((c) => c.position === position)?.mood === 'Angry' && steps[position] === 1
+      ? 'Neutral'
+      : 'Happy';
 </script>
 
-<div class="happiness-selection">
-  {#if choices.length > 1}<div class="variant-picker">
+<section class="action-panel floating-panel selection-tray happiness-panel" aria-label="Increase happiness">
+  <header class="movement-heading">
+    <h2><Smile size={18} />Happiness</h2>
+    <div class="happiness-budget" title="Mood tokens available">
+      <ResourceAmount
+        pile={{
+          mood_tokens:
+            $session.game?.players.find((p) => p.id === $session.seat)?.resources?.mood_tokens ?? 0,
+        }}
+        showZero
+      />
+    </div>
+    <button
+      class="icon-button close-movement"
+      aria-label="Close happiness controls"
+      onclick={() => controller.patch({ mode: 'overview', error: '' })}><X size={18} /></button
+    >
+  </header>
+  <ContextualCards {controller} context="happiness" />
+  {#if choices.length > 1}<div class="variant-picker" aria-label="Happiness action">
       {#each choices as choice, i}<button
-          class:selected={variant === i}
-          aria-pressed={variant === i}
-          onclick={() => {
-            variant = i;
-          }}
-          >{choice.name}<span
+          class:selected={($session.happinessVariant ?? 0) === i}
+          aria-pressed={($session.happinessVariant ?? 0) === i}
+          disabled={$session.pending}
+          onclick={() => controller.switchHappinessVariant(i)}
+        >
+          {choice.name}<span
             class="happiness-action-cost"
             aria-label={choice.free ? 'Free action' : 'Costs 1 action'}
             ><Zap size={12} />{choice.free ? 0 : 1}</span
-          ></button
-        >{/each}
-    </div>{/if}
-  {#if !singleCity && Object.values(surcharge).some(Boolean)}
-    <div class="happiness-surcharge" title="Added once to the total for all selected cities">
-      <span>{choices[variant].name}</span><span>+ <ResourceAmount pile={surcharge} /></span><small
-        >once per action</small
-      >
-    </div>
-  {/if}
-  <div class="happiness-city-list">
-    {#each offers as { city, targets }}
-      {@const CurrentMood = city.mood === 'Happy' ? Smile : city.mood === 'Angry' ? Frown : Meh}
-      <div class="mood-city-row" class:multiple-targets={targets.length > 1}>
-        <div class="mood-city-name">
-          <strong>{city.position}</strong><span title={`Size ${city.size}`} aria-label={`Size ${city.size}`}
-            ><Landmark size={13} />{city.size}</span
           >
-        </div>
-        <span
-          class="mood-current city-mood"
-          data-mood={city.mood.toLowerCase()}
-          title={`Currently ${city.mood.toLowerCase()}`}
-          aria-label={`Currently ${city.mood.toLowerCase()}`}><CurrentMood size={21} /></span
+        </button>{/each}
+    </div>{/if}
+  <p class="movement-hint">Select cities on the map. Tap again to remove.</p>
+  {#if selected.length}<div class="happiness-selected" aria-label="Selected cities">
+      {#each selected as city}<button
+          class:active={focused?.position === city.position}
+          aria-label={`Adjust happiness at ${city.position}`}
+          title={`Adjust ${cityName(city.position)}`}
+          onmouseenter={() => onHighlight(city.position)}
+          onmouseleave={() => onHighlight(null)}
+          onfocus={() => onHighlight(city.position)}
+          onblur={() => onHighlight(null)}
+          onclick={() => controller.patch({ happinessCity: city.position, focus: city.position })}
         >
-        {#if targets.length}<ArrowRight size={15} class="mood-change-arrow" />{/if}
-        <div class="mood-targets" role="group" aria-label={`Happiness at ${city.position}`}>
-          {#each targets as target}{@const isSelected =
-              steps[city.position] === target.steps &&
-              !!target.lawgiver === (lawgiverCity === city.position)}{@const Icon =
-              target.mood === 'Happy' ? Smile : Meh}
-            <button
-              class:selected={isSelected}
-              class:primary={singleCity && !!target.action}
-              aria-label={`${singleCity ? 'Make' : 'Set'} ${city.position} ${target.mood.toLowerCase()}${target.lawgiver ? ' with Lawgiver' : ''}`}
-              aria-pressed={singleCity ? undefined : isSelected}
-              title={!singleCity && isSelected
-                ? 'Remove this city from the selection'
-                : (target.reason ??
-                  (target.lawgiver
-                    ? 'Lawgiver: make Hammurabi’s city happy for 1 culture token'
-                    : singleCity
-                      ? 'Improve this city'
-                      : 'Cost to improve this city'))}
-              disabled={(!target.action && (singleCity || !isSelected)) || $session.pending}
-              onclick={() => {
-                if (singleCity && target.action) controller.submit(target.action);
-                else {
-                  if (lawgiverCity === city.position) lawgiverCity = null;
-                  if (!isSelected && target.lawgiver) lawgiverCity = city.position;
-                  steps = {
-                    ...steps,
-                    [city.position]: isSelected ? 0 : target.steps,
-                  };
-                }
-              }}
-            >
-              <span class="mood-target-label"
-                ><span class="city-mood" data-mood={target.mood.toLowerCase()}><Icon size={18} /></span
-                >{target.lawgiver ? 'Lawgiver' : target.mood}</span
-              >
-              <span class="mood-target-cost"
-                ><ResourceAmount
-                  pile={Object.values(target.payment).some(Boolean) ? target.payment : { mood_tokens: 0 }}
-                  showZero={!Object.values(target.payment).some(Boolean)}
-                />
-                {#if singleCity}{#if choices[variant]?.free}<span aria-label="Free action" title="Free action"
-                      ><Zap size={13} />0</span
-                    >{:else}<span aria-label="Costs 1 action"><Zap size={13} />1</span>{/if}{/if}
-              </span>
-              {#if !singleCity}<span class="mood-selection-mark" aria-hidden="true"
-                  >{#if isSelected}<Check size={12} />{/if}</span
-                >{/if}
-            </button>
-          {:else}<span class="mood-already-happy">Happy<Check size={14} /></span>{/each}
-        </div>
-      </div>
-    {/each}
-  </div>
-  {#if !singleCity}
-    {#if preview.reason}<p class="inline-error">{preview.reason}</p>{/if}
-    <footer class="happiness-footer">
-      <button
-        class="primary wide happiness-confirm"
-        disabled={!preview.action || $session.pending}
-        onclick={() => preview.action && controller.submit(preview.action)}
+          {cityName(city.position)}<CityFacts size={city.size} mood={targetMood(city.position)} />
+        </button>{/each}
+    </div>{/if}
+  {#if focused}
+    <div class="happiness-target-row">
+      <span class="happiness-city-name"
+        >{cityName(focused.position)}<CityFacts size={focused.size} mood={focused.mood} /><ArrowRight
+          size={14}
+        /></span
       >
-        <span
-          >{selected.length
-            ? `Improve ${selected.length} ${selected.length === 1 ? 'city' : 'cities'}`
-            : 'Select cities to improve'}</span
-        >
-        <span class="happiness-total" title="Total cost for all selected cities">
-          {#if preview.payment}<span class="happiness-payment"
-              >Total <ResourceAmount pile={preview.payment} /></span
-            >{/if}
-          {#if choices[variant]?.free}<span aria-label="Free action" title="Free action"
-              ><Zap size={13} />0</span
-            >{:else}<span class="settler-action-cost" aria-label="Costs 1 action"><Zap size={14} />1</span
-            >{/if}
-        </span>
-      </button>
-    </footer>
+      <div class="happiness-targets" role="group" aria-label={`Happiness at ${focused.position}`}>
+        {#each targets as target}{@const isSelected =
+            steps[focused.position] === target.steps &&
+            !!target.lawgiver === ($session.happinessLawgiver === focused.position)}{@const Icon =
+            target.mood === 'Happy' ? Smile : Meh}
+          <button
+            class:selected={isSelected}
+            aria-pressed={isSelected}
+            disabled={!target.action || $session.pending}
+            title={target.reason ??
+              (target.lawgiver
+                ? 'Lawgiver: make Hammurabi’s city happy for 1 culture token'
+                : `Set ${cityName(focused.position)} ${target.mood.toLowerCase()}`)}
+            onclick={() => controller.setHappinessCity(focused.position, target.steps, target.lawgiver)}
+          >
+            <span class="city-mood" data-mood={target.mood.toLowerCase()}><Icon size={18} /></span
+            >{target.lawgiver ? 'Lawgiver' : target.mood}
+          </button>
+        {/each}
+        {#if steps[focused.position]}<button
+            class="icon-button"
+            aria-label={`Remove ${cityName(focused.position)} from happiness selection`}
+            title="Remove city"
+            disabled={$session.pending}
+            onclick={() => controller.setHappinessCity(focused.position, 0)}><X size={15} /></button
+          >{/if}
+      </div>
+    </div>
+    {#if !steps[focused.position] && !targets.some((target) => target.action)}<p class="inline-error">
+        {targets[0]?.reason ?? 'This city cannot be improved now.'}
+      </p>{/if}
   {/if}
-</div>
+  {#if !cities.some((city) => city.mood !== 'Happy')}<p class="movement-hint">
+      All your cities are already happy.
+    </p>{/if}
+  {#if preview.reason}<p class="inline-error">{preview.reason}</p>{/if}
+  <footer class="happiness-map-footer">
+    <span class="happiness-total" aria-label="Total happiness cost">
+      {#if selected.length}<ResourceAmount pile={preview.payment} />{/if}
+      <span title={variant?.free ? 'Free action' : 'Costs 1 action'}
+        ><Zap size={13} />{variant?.free ? 0 : 1}</span
+      >
+    </span>
+    <button
+      class="primary"
+      disabled={!preview.action || $session.pending}
+      onclick={() => preview.action && controller.submit(preview.action)}
+    >
+      {selected.length
+        ? `Improve ${selected.length} ${selected.length === 1 ? 'city' : 'cities'}`
+        : 'Improve cities'}<Check size={15} />
+    </button>
+  </footer>
+</section>
