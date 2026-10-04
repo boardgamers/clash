@@ -4,6 +4,7 @@
   import { namedTextParts, researchTextParts, type ResearchReference } from './research-links';
   let {
     text,
+    compactResources = false,
     positions,
     onCoordinate,
     onLocate,
@@ -13,6 +14,7 @@
     onObjective,
   }: {
     text: string;
+    compactResources?: boolean;
     positions?: Set<string>;
     onCoordinate?: (position: string | null) => void;
     onLocate?: (position: string) => void;
@@ -59,8 +61,12 @@
       class="journal-research-link"
       title={`View ${part.research.name}`}
       onclick={() => onResearch?.(part.research!)}>{part.text}</button
-    >{:else if part.resource}{@const Icon = icons[part.resource]}<span class="inline-resource"
-      ><Icon size={14} aria-hidden="true" />{part.text}</span
+    >{:else if part.resource}{@const Icon = icons[part.resource]}<span
+      class="inline-resource"
+      role={compactResources ? 'img' : undefined}
+      aria-label={compactResources ? part.text : undefined}
+      title={compactResources ? part.text : undefined}
+      ><Icon size={14} aria-hidden="true" />{compactResources ? part.text.split(' ')[0] : part.text}</span
     >{:else if part.position && positions?.has(part.position) && onCoordinate}<button
       class="coordinate-link"
       title={`Highlight ${part.position} · Click to center on the map`}

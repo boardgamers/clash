@@ -372,13 +372,6 @@
                       "origin": {
                         "Ability": "Move"
                       }
-                    },
-                    {
-                      "player": 1,
-                      "Text": "Teleported ship from C4 to D4",
-                      "origin": {
-                        "Ability": "Move"
-                      }
                     }
                   ]
                 }

@@ -311,3 +311,13 @@ test('shared happiness fees and substituted custom-action payments use actual re
   );
   assert.equal(entries.flatMap((e) => e.tokens).filter((t) => t.icon === 'happy').length, 2);
 });
+
+test('compact replay resource names retain typed icons for ideas, tokens and captives', () => {
+  const text = 'gained 1 idea, 2 ideas, 1 mood, 2 culture, 1 captive, 3 captives';
+  const parts = journalParts(text);
+  assert.equal(parts.map((p) => p.text).join(''), text);
+  assert.deepEqual(
+    parts.filter((p) => p.resource).map((p) => p.resource),
+    ['ideas', 'ideas', 'mood_tokens', 'culture_tokens', 'captives', 'captives'],
+  );
+});

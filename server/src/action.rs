@@ -251,6 +251,7 @@ pub(crate) fn execute_custom_phase_action(
         ExploreResolution(r) => {
             ask_explore_resolution(game, player, r);
         }
+        ShipExploreDestination(s) => crate::explore::ask_ship_explore_destination(game, player, s),
         InfluenceCultureBoost(r) => {
             on_cultural_influence(game, player, r);
         }

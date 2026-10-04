@@ -1,8 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::Advance;
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
-    EventResponse, PersistentEventRequest, PersistentEventType,
+    EventResponse, PersistentEventRequest, PersistentEventType, PositionRequest,
 };
 use crate::events::EventPlayer;
 use crate::game::Game;
@@ -19,6 +18,36 @@ pub struct ExploreResolutionState {
     pub start: Position,
     pub destination: Option<Position>,
     pub ship_can_teleport: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct ShipExploreDestination {
+    pub units: Vec<u32>,
+    pub destinations: Vec<Position>,
+}
+
+pub(crate) fn ask_ship_explore_destination(
+    game: &mut Game,
+    player: usize,
+    state: ShipExploreDestination,
+) {
+    let _ = game.trigger_persistent_event(
+        &[player],
+        |e| &mut e.ship_explore_destination,
+        state,
+        PersistentEventType::ShipExploreDestination,
+    );
+}
+
+pub(crate) fn ship_explore_destination() -> Ability {
+    Ability::builder("Finish ship exploration", "Choose where the fleet finishes its exploration move.")
+        .add_position_request(
+            |e| &mut e.ship_explore_destination, 0,
+            |_, _, state| Some(PositionRequest::new(state.destinations.clone(), 1..=1,
+                "Choose a highlighted sea space in the revealed region. This completes the same group move.")),
+            |game, selected, state| move_units(game, selected.player_index, &state.units, selected.choice[0], None),
+        )
+        .build()
 }
 
 pub(crate) fn move_to_unexplored_tile(
@@ -160,23 +189,33 @@ fn move_to_explored_tile(
     player: &EventPlayer,
     units: &[u32],
     destination: Position,
-    ship_can_teleport: bool,
+    _ship_can_teleport: bool,
 ) {
-    if is_any_ship(game, player.index, units) && game.map.is_land(destination) {
+    if is_any_ship(game, player.index, units) {
         let p = player.get(game);
-        let used_navigation = p.can_use_advance(Advance::Navigation)
-            && !p.get_unit(units[0]).position.is_neighbor(destination);
-
-        if ship_can_teleport || used_navigation {
-            for (p, t) in block.block.tiles(&block.position, rotation) {
-                if t.is_water() {
-                    player.log(game, &format!("Teleported ship from {destination} to {p}"));
-                    move_units(game, player.index, units, p, None);
-                    return;
-                }
-            }
+        let start = p.get_unit(units[0]).position;
+        let routes = crate::move_routes::sea_routes(p, units, game, start);
+        let destinations: Vec<Position> = block
+            .block
+            .tiles(&block.position, rotation)
+            .into_iter()
+            .filter(|(pos, terrain)| {
+                terrain.is_water() && routes.iter().any(|r| r.destination == *pos)
+            })
+            .map(|(pos, _)| pos)
+            .collect();
+        if destinations.is_empty() {
+            player.log(game, "Ship can't move to the explored tile");
+        } else {
+            ask_ship_explore_destination(
+                game,
+                player.index,
+                ShipExploreDestination {
+                    units: units.to_vec(),
+                    destinations,
+                },
+            );
         }
-        player.log(game, "Ship can't move to the explored tile");
         return;
     }
     move_units(game, player.index, units, destination, None);

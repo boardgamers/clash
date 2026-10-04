@@ -12,7 +12,7 @@ use crate::cultural_influence::{
     InfluenceCultureAttemptInfo, InfluenceCultureBoostInfo, InfluenceCultureOutcome,
 };
 use crate::events::{Event, EventOrigin, EventPlayer};
-use crate::explore::ExploreResolutionState;
+use crate::explore::{ExploreResolutionState, ShipExploreDestination};
 use crate::game::Game;
 use crate::incident::PassedIncident;
 use crate::map::Terrain;
@@ -108,6 +108,7 @@ pub(crate) struct PersistentEvents {
     pub found_city: PersistentEvent<Position>,
     pub influence_culture_boost: PersistentEvent<InfluenceCultureBoostInfo>,
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
+    pub ship_explore_destination: PersistentEvent<ShipExploreDestination>,
     pub pay_action: PersistentEvent<ActionPayment>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
     pub declare_action_card:
@@ -149,6 +150,7 @@ impl PersistentEvents {
             found_city: Event::new("found_city"),
             influence_culture_boost: Event::new("influence_culture"),
             explore_resolution: Event::new("explore_resolution"),
+            ship_explore_destination: Event::new("ship_explore_destination"),
             pay_action: Event::new("pay_action"),
             play_action_card: Event::new("play_action_card"),
             declare_action_card: Event::new("declare_action_card"),

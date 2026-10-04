@@ -194,7 +194,7 @@ test('recap details name construction and collected amounts without exposing coo
     ],
   } as Game;
   const after = { ...before, cursor: 1, actor: 1, title: 'Build' };
-  assert.equal(frameDetails(before, after, game).caption, 'Greece · built Academy');
+  assert.equal(frameDetails(before, after, game).caption, 'Greece · built Academy · gained 2 food, 1 wood');
   assert.equal(
     frameDetails(before, { ...after, title: 'Collect' }, game).caption,
     'Greece · collected 2 food, 1 wood',

@@ -22,7 +22,7 @@ use crate::content::incidents::trojan::{
 use crate::content::wonders::use_great_mausoleum;
 use crate::cultural_influence::use_cultural_influence;
 use crate::events::EventOrigin;
-use crate::explore::explore_resolution;
+use crate::explore::{explore_resolution, ship_explore_destination};
 use crate::game::Game;
 use crate::objective_card::select_objectives;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
@@ -94,6 +94,7 @@ pub fn get_all_uncached() -> Vec<Ability> {
         pay_for_action(),
         use_cultural_influence(),
         explore_resolution(),
+        ship_explore_destination(),
         draw_wonder_card_handler(),
         build_wonder_handler(),
         choose_carried_units_to_remove(),

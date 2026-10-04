@@ -2,6 +2,7 @@
   import { Play, Pause, ChevronLeft, ChevronRight, History, RotateCcw, X } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { frameDetails } from './playback';
+  import ResourceText from './ResourceText.svelte';
   import BattlePlayback from './BattlePlayback.svelte';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
@@ -36,7 +37,12 @@
               : `Action ${playback.index - playback.start} of ${playback.end - playback.start}`}</span
           >{/if}
       </strong>
-      <small>{atStart && recap ? 'Use Next to step through, or Play to watch.' : details.caption}</small>
+      <small
+        >{#if atStart && recap}Use Next to step through, or Play to watch.{:else}<ResourceText
+            text={details.caption}
+            compactResources
+          />{/if}</small
+      >
     </div>
     {#if playback.end > playback.start}<div class="playback-transport">
         <button aria-label="Previous action" disabled={atStart} onclick={() => controller.stepPlayback(-1)}

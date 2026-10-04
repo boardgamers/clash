@@ -24,6 +24,11 @@ pub(super) fn describe(game: &Game) -> Option<Value> {
             {
                 "Choose a Barbarian reinforcement"
             }
+            (Request::SelectPositions(_), EventOrigin::Ability(name))
+                if name == "Finish ship exploration" =>
+            {
+                "Choose where the exploring fleet finishes"
+            }
             (Request::SelectPositions(_), EventOrigin::Advance(Advance::Fanaticism)) => {
                 "Place an infantry"
             }

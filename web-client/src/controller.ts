@@ -11,6 +11,7 @@ import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
 import { recapStart, lastOpponentTurn, frameAt, frameEffects } from './playback';
+import { groupPlaybackFrames } from './replay-actions';
 import { battleCues, battleCursor, BATTLE_DURATION, type BattleCue } from './battle-playback';
 import { contextualCards, type CardContext } from './contextual-cards';
 import { recruitDiscardSelection, requiredRecruitDiscards } from './recruit-discards';
@@ -217,6 +218,7 @@ export class Controller {
     // It is not an acknowledgement of a pending move and must preserve local selections.
     if (raw === this.raw && old.view) return;
     const game = JSON.parse(raw) as Game;
+    if (game.board_history) game.board_history = { ...game.board_history, frames: groupPlaybackFrames(game) };
     const changed = raw !== this.raw;
     this.raw = raw;
     this.moveCache.clear();

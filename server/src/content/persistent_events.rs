@@ -12,7 +12,7 @@ pub use crate::content::civilizations::aztecs::Captive;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::cultural_influence::InfluenceCultureBoostInfo;
 use crate::events::EventOrigin;
-use crate::explore::ExploreResolutionState;
+use crate::explore::{ExploreResolutionState, ShipExploreDestination};
 use crate::game::Game;
 use crate::log::ActionLogItem;
 use crate::map::Rotation;
@@ -105,6 +105,7 @@ impl PersistentEventPlayer {
 pub enum PersistentEventType {
     Collect(CollectInfo),
     ExploreResolution(ExploreResolutionState),
+    ShipExploreDestination(ShipExploreDestination),
     InfluenceCultureBoost(InfluenceCultureBoostInfo),
     UnitsKilled(KilledUnits),
     CombatStart(Combat),

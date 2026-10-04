@@ -27,6 +27,9 @@ import StrategyMapTile from './StrategyMapTile.svelte';
 import { CivilizationFlags } from './civilization-flags';
 import { TileTooltip } from './tile-hover';
 import { strategyHome, strategyFrame } from './strategy-camera';
+import { ResourceOverlay } from './resource-overlay';
+import { frameResources } from './resource-playback';
+import { publicActions } from './replay-actions';
 
 const terrainColor: Record<string, string> = {
   Forest: '#54755a',
@@ -37,6 +40,10 @@ const terrainColor: Record<string, string> = {
   Unexplored: '#526f77',
 };
 export class World {
+  private resourceOverlay: ResourceOverlay;
+  private resourceCursor = -1;
+  private resourceHistory = '';
+  private resourcePlayback = false;
   private explorationOverlay = new ExplorationOverlay();
   private explorationLabel: HTMLDivElement;
   private explorationPositions: string[] = [];
@@ -184,6 +191,7 @@ export class World {
     this.labelHost = document.createElement('div');
     this.labelHost.className = 'world-labels';
     host.append(this.labelHost);
+    this.resourceOverlay = new ResourceOverlay(host);
     this.tileTooltip = new TileTooltip(host);
     this.renderer.domElement.setAttribute('aria-describedby', this.tileTooltip.node.id);
     this.scene.add(this.explorationOverlay.group);
@@ -472,6 +480,7 @@ export class World {
       this.renderer.render(this.scene, this.camera);
       const w = this.host.clientWidth,
         h = this.host.clientHeight;
+      this.resourceOverlay.project(this.camera, w, h);
       for (const label of this.labelPositions) {
         const v = label.at.clone().project(this.camera);
         let x = ((v.x + 1) * w) / 2 + (label.offsetX ?? 0);
@@ -794,10 +803,44 @@ export class World {
       this.strategyHome = home;
     }
     const playback = s.playback;
+    const history = s.game.board_history;
+    const resourceFrame = playback?.frame ?? history?.frames.at(-1);
+    const historyId = history?.id ?? '';
+    if (!resourceFrame) {
+      this.resourceOverlay.clear();
+      this.resourceCursor = publicActions(s.game).length;
+      this.resourceHistory = '';
+      this.resourcePlayback = false;
+    }
+    if (
+      resourceFrame &&
+      (resourceFrame.cursor !== this.resourceCursor ||
+        !!playback !== this.resourcePlayback ||
+        historyId !== this.resourceHistory)
+    ) {
+      const sameHistory =
+        historyId === this.resourceHistory ||
+        (!this.resourceHistory && history?.frames[0]?.cursor === this.resourceCursor);
+      const from = playback ? history?.frames[playback.index - 1]?.cursor : this.resourceCursor;
+      const show = playback
+        ? playback.index > playback.start
+        : sameHistory &&
+          !this.resourcePlayback &&
+          this.resourceCursor >= 0 &&
+          resourceFrame.cursor > this.resourceCursor;
+      this.resourceOverlay.show(
+        show && from !== undefined ? frameResources(s.game, from, resourceFrame).markers : [],
+        s,
+        !s.reducedMotion && sameHistory && resourceFrame.cursor > this.resourceCursor,
+      );
+      this.resourceCursor = resourceFrame.cursor;
+      this.resourceHistory = historyId;
+      this.resourcePlayback = !!playback;
+    }
     const battle = s.battles?.[0];
     const replayPositions =
       playback && playback.index > playback.start
-        ? frameDetails(s.game.board_history?.frames[playback.index - 1], playback.frame).positions
+        ? frameDetails(s.game.board_history?.frames[playback.index - 1], playback.frame, s.game).positions
         : [];
     const cursor = playback
       ? `replay:${playback.frame?.cursor}`
@@ -1725,6 +1768,7 @@ export class World {
   }
   destroy() {
     this.settleMotion?.();
+    this.resourceOverlay.dispose();
     this.disposed = true;
     this.tileTooltip.destroy();
     this.clearCollectionBadges();

@@ -1,5 +1,41 @@
 {
   "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "ShipExploreDestination": {
+          "units": [
+            1
+          ],
+          "destinations": [
+            "B5",
+            "C5"
+          ]
+        }
+      },
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectPositions": {
+            "choices": [
+              "B5",
+              "C5"
+            ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
+            "description": "Choose a highlighted sea space in the revealed region. This completes the same group move."
+          }
+        },
+        "origin": {
+          "Ability": "Finish ship exploration"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "id": 0,
@@ -69,7 +105,7 @@
       ],
       "units": [
         {
-          "position": "C5",
+          "position": "D5",
           "unit_type": "Ship",
           "id": 1
         }

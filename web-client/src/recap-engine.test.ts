@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
+import { groupPlaybackFrames } from './replay-actions.ts';
 import { passengerLandings } from './map-actions.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const fixture = (name: string) =>
@@ -190,4 +191,75 @@ test('Cartography counts a Navigation exploration before its new sea area is rev
   const next = JSON.parse(engine.tryMove(raw, JSON.stringify(d.action), 1));
   assert.equal(next.players[1].resources.ideas, 1);
   assert.equal(next.players[1].resources.culture_tokens, 1);
+});
+
+test('ship exploration offers both revealed seas as the same move, with cargo, reload, undo and redo', () => {
+  for (const remaining of [1, 2]) {
+    const g = JSON.parse(fixture('movement/ship_explore'));
+    g.state.Movement.movement_actions_left = remaining;
+    g.players[1].advances = [...new Set([...g.players[1].advances, 'Cartography'])];
+    g.players[1].resources = {};
+    g.players[1].units[0].carried_units = [{ id: 9, unit_type: 'Infantry' }];
+    let raw = engine.tryMove(
+      JSON.stringify(g),
+      JSON.stringify({ Movement: { Move: { units: [1], destination: 'C5', payment: {} } } }),
+      1,
+    );
+    const pending = JSON.parse(raw);
+    const decision = view(raw, 1).decision;
+    assert.deepEqual(decision.options.map((o: any) => o.position).sort(), ['B5', 'C5']);
+    assert.match(decision.description, /same group move/);
+    assert.equal(pending.players[1].units[0].position, 'D5');
+    assert.equal(pending.players[1].resources.ideas, 1);
+    assert.equal(engine.canLaunchAnalysisMode(raw), true);
+    const before = { state: pending.state, actions: pending.actions_left };
+    for (const position of ['B5', 'C5']) {
+      const resolved = engine.tryMove(
+        JSON.stringify(pending),
+        JSON.stringify({ Response: { SelectPositions: [position] } }),
+        1,
+      );
+      const after = JSON.parse(resolved);
+      assert.equal(after.players[1].units[0].position, position);
+      const grouped = groupPlaybackFrames(JSON.parse(engine.stripSecret(resolved, 0)));
+      assert.equal(grouped.length, 2, 'exploration and ship landing are a single replay action');
+      assert.equal(grouped[1].title, 'Explore');
+      assert.deepEqual(after.players[1].units[0].carried_units, [{ unit_type: 'Infantry', id: 9 }]);
+      assert.equal(after.players[1].resources.ideas, 1, 'Cartography is awarded only once');
+      assert.deepEqual({ state: after.state, actions: after.actions_left }, before);
+      assert.ok(!view(resolved, 1).decision);
+      const undone = engine.tryMove(resolved, '"Undo"', 1);
+      assert.deepEqual(view(undone, 1).decision.options, decision.options);
+      const redone = engine.tryMove(undone, '"Redo"', 1);
+      assert.equal(JSON.parse(redone).players[1].units[0].position, position);
+    }
+    assert.throws(() => engine.tryMove(raw, JSON.stringify({ Response: { SelectPositions: ['D5'] } }), 1));
+    assert.throws(() => engine.tryMove(raw, JSON.stringify({ Response: { SelectPositions: ['B5'] } }), 0));
+  }
+});
+
+test('choosing region orientation can open a ship destination choice and resume it once', () => {
+  const g = JSON.parse(fixture('movement/ship_explore'));
+  g.state.Movement.moved_units = [1];
+  const block = g.map.unexplored_blocks.find((b: any) => b.position.top_tile === 'B4');
+  g.events = [
+    {
+      event_type: {
+        ExploreResolution: { block, units: [1], start: 'D5', destination: 'C5', ship_can_teleport: true },
+      },
+      player: 1,
+      last_priority_used: 0,
+      handler: { priority: 0, request: 'ExploreResolution', origin: { Ability: 'Explore Resolution' } },
+    },
+  ];
+  const raw = engine.tryMove(JSON.stringify(g), JSON.stringify({ Response: { ExploreResolution: 3 } }), 1);
+  assert.deepEqual(
+    view(raw, 1)
+      .decision.options.map((o: any) => o.position)
+      .sort(),
+    ['B5', 'C5'],
+  );
+  const resolved = engine.tryMove(raw, JSON.stringify({ Response: { SelectPositions: ['B5'] } }), 1);
+  assert.equal(JSON.parse(resolved).players[1].units[0].position, 'B5');
+  assert.ok(!view(resolved, 1).decision);
 });

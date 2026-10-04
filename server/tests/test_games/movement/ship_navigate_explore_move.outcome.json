@@ -345,13 +345,6 @@
                       "origin": {
                         "Ability": "Move"
                       }
-                    },
-                    {
-                      "player": 1,
-                      "Text": "Teleported ship from F2 to G3",
-                      "origin": {
-                        "Ability": "Move"
-                      }
                     }
                   ]
                 }

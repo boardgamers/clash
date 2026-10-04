@@ -20,14 +20,20 @@ export function journalParts(text: string): TextPart[] {
     food: 'food',
     wood: 'wood',
     ore: 'ore',
+    idea: 'ideas',
     ideas: 'ideas',
     gold: 'gold',
+    mood: 'mood_tokens',
     'mood token': 'mood_tokens',
     'mood tokens': 'mood_tokens',
+    culture: 'culture_tokens',
+    captive: 'captives',
+    captives: 'captives',
     'culture token': 'culture_tokens',
     'culture tokens': 'culture_tokens',
   };
-  const pattern = /\b\d+(?:\.\d+)? (food|wood|ore|ideas|gold|mood tokens?|culture tokens?)\b|\b([A-Z]\d+)\b/g;
+  const pattern =
+    /\b\d+(?:\.\d+)? (food|wood|ore|ideas?|gold|mood(?: tokens?)?|culture(?: tokens?)?|captives?)\b|\b([A-Z]\d+)\b/g;
   const parts: TextPart[] = [];
   let offset = 0;
   for (const match of text.matchAll(pattern)) {

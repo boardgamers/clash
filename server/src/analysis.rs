@@ -42,6 +42,7 @@ fn public_continuation(event: &crate::content::persistent_events::PersistentEven
         | E::ShipConstructionConversion(_)
         | E::StopBarbarianMovement(_)
         | E::ReinforceBarbarians(_)
+        | E::ShipExploreDestination(_)
         | E::UnitsKilled(_)
         | E::InfluenceCultureBoost(_)
         | E::StatusPhase(_) => true,

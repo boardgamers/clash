@@ -166,10 +166,23 @@ fn test_ship_disembark_capture_empty_city() {
 fn test_ship_explore() {
     JSON.test(
         "ship_explore",
-        vec![TestAction::not_undoable(
-            1,
-            move_action(vec![1], Position::from_offset("C5")),
-        )],
+        vec![
+            TestAction::not_undoable(1, move_action(vec![1], Position::from_offset("C5"))),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B5",
+                )])),
+            )
+            .skip_json()
+            .with_post_assert(|game| {
+                assert_eq!(
+                    game.player(1).get_unit(1).position,
+                    Position::from_offset("B5")
+                );
+                assert!(game.current_event_handler().is_none());
+            }),
+        ],
     );
 }
 

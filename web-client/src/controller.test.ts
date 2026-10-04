@@ -9,6 +9,8 @@ import type { Session } from './types';
 import { contextualCards, activeCollectionCard } from './contextual-cards.ts';
 import { requiredRecruitDiscards } from './recruit-discards.ts';
 import { happinessPreview, happinessCities } from './happiness.ts';
+import { frameDetails } from './playback.ts';
+import { frameResources } from './resource-playback.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 // Bundle the actual controller so Node can run its browser TypeScript imports.
@@ -1209,6 +1211,40 @@ test('the first battle recorded in an older game animates live and stores only p
     assert.deepEqual(JSON.parse(engine.stripSecret(raw, 1)).board_history.frames.at(-1).combat, combat);
     await c.load(engine.stripSecret(raw, 0));
     assert.equal(app.session().battles!.length, 1, 'refresh must not enqueue the battle twice');
+  } finally {
+    app.close();
+  }
+});
+
+test('real Taxes commands load as one replay action with public resources and per-city markers', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/taxes'));
+    game.players[0].resources = { mood_tokens: 3 };
+    let raw = JSON.stringify(game);
+    for (const action of [
+      { Playing: { Custom: { action: 'Taxes' } } },
+      { Response: { Payment: [{ mood_tokens: 1 }] } },
+      { Response: { ResourceReward: { food: 1, wood: 1, ore: 1, gold: 1 } } },
+    ])
+      raw = engine.tryMove(raw, JSON.stringify(action), 0);
+    assert.equal(JSON.parse(raw).board_history.frames.length, 4);
+    c.setPlayer(1);
+    await c.load(engine.stripSecret(raw, 1));
+    const visible = app.session().game!,
+      frames = visible.board_history!.frames;
+    assert.equal(frames.length, 2);
+    assert.match(
+      frameDetails(frames[0], frames[1], visible).caption,
+      /Taxes · gained 1 food, 1 wood, 1 ore, 1 gold/,
+    );
+    assert.equal(frameResources(visible, frames[0].cursor, frames[1]).markers.length, 4);
+    c.startPlayback();
+    c.stepPlayback(1);
+    assert.equal(app.session().playback!.index, 1);
+    assert.equal(app.session().playback!.end, 1);
+    assert.deepEqual(app.sent, []);
   } finally {
     app.close();
   }

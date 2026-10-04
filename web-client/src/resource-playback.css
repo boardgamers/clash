@@ -1,0 +1,104 @@
+.resource-gain-badge {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: max-content;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--gain-player) 60%, var(--line));
+  border-radius: 9px;
+  background: var(--paper);
+  box-shadow: 0 3px 12px #0003;
+  transform: translate(-50%, -100%) translateY(-24px);
+}
+.resource-gain-badge .gain {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.resource-gain-badge .gain svg {
+  fill: currentColor;
+  fill-opacity: 0.3;
+}
+.resource-gain-badge .food {
+  color: #987023;
+}
+.resource-gain-badge .wood {
+  color: #43734d;
+}
+.resource-gain-badge .ore {
+  color: #527392;
+}
+.resource-gain-badge .ideas {
+  color: #947b26;
+}
+.resource-gain-badge .gold {
+  color: #a87b19;
+}
+.resource-gain-badge .mood_tokens {
+  color: #a67732;
+}
+.resource-gain-badge .culture_tokens {
+  color: #92658c;
+}
+.dark .resource-gain-badge .food {
+  color: #e0c27a;
+}
+.dark .resource-gain-badge .wood {
+  color: #aad09b;
+}
+.dark .resource-gain-badge .ore {
+  color: #afcce6;
+}
+.dark .resource-gain-badge .ideas {
+  color: #ead895;
+}
+.dark .resource-gain-badge .gold {
+  color: #ecc563;
+}
+.dark .resource-gain-badge .mood_tokens {
+  color: #e4bb84;
+}
+.dark .resource-gain-badge .culture_tokens {
+  color: #d2b1d6;
+}
+.resource-gain-badge.rise {
+  animation: resource-rise 2000ms ease-out both;
+}
+.resource-gain-badge.rise.transient {
+  animation-name: resource-rise-away;
+}
+@keyframes resource-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -100%) translateY(4px) scale(0.88);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -100%) translateY(-24px);
+  }
+}
+@keyframes resource-rise-away {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -100%) translateY(4px) scale(0.88);
+  }
+  18%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -100%) translateY(-36px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resource-gain-badge.rise {
+    animation: none;
+  }
+}

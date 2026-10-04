@@ -40,6 +40,7 @@ export interface PublicEffect {
   kind: 'action' | 'objective' | 'wonder' | 'completed';
   label: string;
   key?: string;
+  cursor?: number;
 }
 export interface BoardFrame {
   combat?: import('./active-combat').ActiveCombat;

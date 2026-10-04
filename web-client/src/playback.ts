@@ -1,5 +1,5 @@
-import type { BoardFrame, Game, Pile, View } from './types.ts';
-import { resourceNames } from './types.ts';
+import type { BoardFrame, Game, View } from './types.ts';
+import { frameResources, describeResources } from './resource-playback.ts';
 import { activeHistory } from './active-history.ts';
 import { officialWonderText, wonderName } from './wonder-names.ts';
 
@@ -81,7 +81,9 @@ export function frameDetails(
     for (const [position, terrain] of frame.tiles)
       if (JSON.stringify(tiles.get(position)) !== JSON.stringify(terrain)) positions.add(position);
   }
-  let description = frame.title;
+  let description = ['Explore Resolution', 'Finish ship exploration'].includes(frame.title)
+    ? 'Explore'
+    : frame.title;
   if (before && frame.title === 'Recruit') {
     const counts = new Map<string, number>();
     for (const [id, unit] of newUnits) {
@@ -164,18 +166,16 @@ export function frameDetails(
         });
         if (built.length) details.push('built ' + [...new Set(built)].join(', '));
       }
-      if (frame.title === 'Collect') {
-        const pile: Pile = {};
-        for (const item of own)
-          if (item.Resources?.balance === 'Gain') {
-            for (const [resource, value] of Object.entries(item.Resources.resources))
-              pile[resource as keyof Pile] = (pile[resource as keyof Pile] ?? 0) + value;
-          }
-        const resources = Object.entries(pile)
-          .filter(([, value]) => value > 0)
-          .map(([resource, value]) => `${value} ${resourceNames[resource as keyof Pile].toLowerCase()}`);
-        if (resources.length) details.push('collected ' + resources.join(', '));
-      }
+    }
+    const resources = frameResources(game, before.cursor, frame);
+    for (const marker of resources.markers) positions.add(marker.position);
+    for (const gain of resources.gains) {
+      const player = frame.players.find((p) => p.id === gain.player)?.civilization;
+      const gained = describeResources(gain.pile),
+        waste = describeResources(gain.waste);
+      const prefix = gain.player === frame.actor ? '' : `${player ?? 'Player'}: `;
+      if (gained) details.push(`${prefix}${frame.title === 'Collect' ? 'collected' : 'gained'} ${gained}`);
+      if (waste) details.push(`${prefix}${waste} not stored`);
     }
     if (details.length)
       description = ['Research', 'Build', 'Build wonder', 'Collect'].includes(frame.title)
@@ -191,10 +191,12 @@ export function frameEffects(game: Game, after: number) {
   return (game.board_history?.frames ?? [])
     .filter((f) => f.cursor > after)
     .flatMap((f) =>
-      (f.effects ?? []).map((effect, i) => ({
-        ...effect,
-        key: `${game.board_history!.id}:${f.cursor}:${i}`,
-      })),
+      (f.effects ?? [])
+        .filter((effect) => (effect.cursor ?? f.cursor) > after)
+        .map((effect, i) => ({
+          ...effect,
+          key: effect.key ?? `${game.board_history!.id}:${f.cursor}:${i}`,
+        })),
     );
 }
 
