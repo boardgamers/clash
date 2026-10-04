@@ -32,17 +32,26 @@ export function researchTextParts(
   text: string,
   references: ResearchReference[],
 ): { text: string; research?: ResearchReference }[] {
+  return namedTextParts(text, references).map(({ text, reference }) =>
+    reference ? { text, research: reference } : { text },
+  );
+}
+
+export function namedTextParts<T extends { name: string }>(
+  text: string,
+  references: T[],
+): { text: string; reference?: T }[] {
   if (!references.length) return [{ text }];
   const names = new Map(references.map((reference) => [reference.name.toLowerCase(), reference]));
   const alternatives = [...names.keys()]
     .sort((a, b) => b.length - a.length)
     .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'));
   const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])(?:${alternatives.join('|')})(?![\\p{L}\\p{N}_])`, 'giu');
-  const parts: { text: string; research?: ResearchReference }[] = [];
+  const parts: { text: string; reference?: T }[] = [];
   let offset = 0;
   for (const match of text.matchAll(pattern)) {
     if (match.index > offset) parts.push({ text: text.slice(offset, match.index) });
-    parts.push({ text: match[0], research: names.get(match[0].toLowerCase().replace(/\s+/g, ' ')) });
+    parts.push({ text: match[0], reference: names.get(match[0].toLowerCase().replace(/\s+/g, ' ')) });
     offset = match.index + match[0].length;
   }
   if (offset < text.length) parts.push({ text: text.slice(offset) });

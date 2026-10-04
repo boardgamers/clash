@@ -117,6 +117,10 @@ export class Controller {
   patch(patch: Partial<Session>) {
     this.session.update((s) => {
       const next = { ...s, ...patch };
+      if ('scorePlayer' in patch && patch.scorePlayer !== s.scorePlayer) {
+        next.scoreTab = patch.scoreTab ?? 'score';
+        next.scoreObjective = patch.scoreObjective ?? null;
+      }
       if (!next.abilitiesOpen || next.mode !== 'overview') {
         next.abilityChoice = null;
         next.abilityCity = null;
@@ -265,6 +269,13 @@ export class Controller {
     const city = view.cities.some((c) => c.position === old.city)
       ? old.city
       : (view.cities[0]?.position ?? null);
+    const movementEnded = !!old.view?.stopMovement && !view.stopMovement;
+    const turnChanged =
+      !!old.game &&
+      (old.game.current_player_index !== game.current_player_index ||
+        old.game.round !== game.round ||
+        old.game.age !== game.age);
+    const resetMovement = movementEnded || turnChanged || (!view.canPlay && !view.stopMovement);
     const ability = groupAbilities(view.specialActions).find((group) => group.key === old.abilityChoice);
     clearTimeout(this.refreshTimer);
     this.patch({
@@ -281,6 +292,8 @@ export class Controller {
       collectionTile: null,
       disembarkCarriers: undefined,
       landingTargets: [],
+      unitPosition: resetMovement ? null : old.unitPosition,
+      movingCity: resetMovement ? null : old.movingCity,
       seaRouteStart: game.map.tiles.some(([p, t]) => p === old.seaRouteStart && t === 'Water')
         ? old.seaRouteStart
         : null,
@@ -315,6 +328,9 @@ export class Controller {
         : view.stopMovement
           ? 'settlers'
           : old.pending ||
+              movementEnded ||
+              turnChanged ||
+              (old.mode === 'settlers' && resetMovement) ||
               view.decision ||
               view.objectiveDecision ||
               view.choiceDecision ||
@@ -373,7 +389,9 @@ export class Controller {
     this.selectUnits(
       recruitedMover
         ? [recruitedMover.id]
-        : old.selectedUnits.filter((id) => view.units?.some((u) => u.id === id)),
+        : resetMovement
+          ? []
+          : old.selectedUnits.filter((id) => view.units?.some((u) => u.id === id)),
     );
     if (view.stopMovement && !get(this.session).moveDestinations.length) {
       const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);

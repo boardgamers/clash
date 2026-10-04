@@ -25,6 +25,7 @@ use serde_json::{Value, json};
 mod actions;
 mod decisions;
 mod journal;
+mod waiting;
 pub use actions::recruit_preview;
 
 pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
@@ -62,6 +63,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let seat = seat.filter(|i| *i < game.players.len() && game.player(*i).is_human());
     let active = game.active_player();
     let active_players = game.active_players();
+    let waiting_for = waiting::describe(game);
     let civilization_draft = game.civilization_draft.as_ref().map(|draft| {
         json!({
             "ready": draft.ready,
@@ -166,6 +168,10 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                 "prerequisites":required.iter().map(|a|json!({"id":a,"name":a.name(game)})).collect::<Vec<_>>()})
         }).collect::<Vec<_>>(),
         "scoreParts": victory_points_parts(p, game).map(|(name, points)| json!({"name": name, "points": points})),
+        "completedObjectives": p.completed_objectives.iter().map(|completed| {
+            let objective = game.cache.get_objective(&completed.name);
+            json!({"name":completed.name,"description":objective.description,"points":OBJECTIVE_VICTORY_POINTS})
+        }).collect::<Vec<_>>(),
         "leaders": p.units.iter().filter_map(|u| {
             if let crate::unit::UnitType::Leader(leader) = u.unit_type {
                 let info = game.cache.get_leader(&leader);
@@ -180,7 +186,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
+        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -309,7 +315,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         item
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
-    json!({"logOriginNames":log_origin_names,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
+    json!({"logOriginNames":log_origin_names,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "builtWonders":built_wonders, "decision":decision,
         "civilizations":crate::game_setup::civilization_choices(game, seat).iter().map(|c|json!({"name":c.name,
             "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Link } from 'lucide-svelte';
   import { journalParts } from './model';
-  import { researchTextParts, type ResearchReference } from './research-links';
+  import { namedTextParts, researchTextParts, type ResearchReference } from './research-links';
   let {
     text,
     positions,
@@ -9,6 +9,8 @@
     onLocate,
     research = [],
     onResearch,
+    objectives = [],
+    onObjective,
   }: {
     text: string;
     positions?: Set<string>;
@@ -16,11 +18,26 @@
     onLocate?: (position: string) => void;
     research?: ResearchReference[];
     onResearch?: (reference: ResearchReference) => void;
+    objectives?: { name: string; player: number }[];
+    onObjective?: (reference: { name: string; player: number }) => void;
   } = $props();
   const parts = $derived(
-    journalParts(text).flatMap((part) =>
-      part.resource || part.position || !onResearch ? [part] : researchTextParts(part.text, research),
-    ) as { text: string; resource?: keyof typeof icons; position?: string; research?: ResearchReference }[],
+    journalParts(text).flatMap((part) => {
+      if (part.resource || part.position) return [part];
+      return namedTextParts(part.text, onObjective ? objectives : []).flatMap(({ text, reference }) =>
+        reference
+          ? [{ text, objective: reference }]
+          : onResearch
+            ? researchTextParts(text, research)
+            : [{ text }],
+      );
+    }) as {
+      text: string;
+      resource?: keyof typeof icons;
+      position?: string;
+      research?: ResearchReference;
+      objective?: { name: string; player: number };
+    }[],
   );
   const icons = {
     food: Wheat,
@@ -34,7 +51,11 @@
   };
 </script>
 
-{#each parts as part}{#if part.research}<button
+{#each parts as part}{#if part.objective}<button
+      class="journal-research-link"
+      title={`View completed objective ${part.objective.name}`}
+      onclick={() => onObjective?.(part.objective!)}>{part.text}</button
+    >{:else if part.research}<button
       class="journal-research-link"
       title={`View ${part.research.name}`}
       onclick={() => onResearch?.(part.research!)}>{part.text}</button

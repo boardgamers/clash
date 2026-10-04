@@ -22,6 +22,7 @@
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import { civilizationAccent } from './civilization-theme';
   import { researchPresentation } from './research';
+  import { tick } from 'svelte';
   import type { Controller } from './controller';
   let { controller, onLocate }: { controller: Controller; onLocate: (position: string) => void } = $props();
   const session = $derived(controller.session);
@@ -37,7 +38,22 @@
         .map((key) => [key, publicPlayer?.resources?.[key as keyof Pile] ?? 0]),
     ) as Pile,
   );
-  let tab = $state<'score' | 'advances' | 'cities' | 'leaders'>('score');
+  const tab = $derived($session.scoreTab ?? 'score');
+  const setTab = (scoreTab: NonNullable<typeof $session.scoreTab>) =>
+    controller.patch({ scoreTab, scoreObjective: null });
+  let objectiveList = $state<HTMLDivElement>();
+  $effect(() => {
+    const target = $session.scoreObjective;
+    if (tab === 'objectives' && target) {
+      void tick().then(() => {
+        const card = [...(objectiveList?.querySelectorAll<HTMLElement>('[data-objective]') ?? [])].find(
+          (node) => node.dataset.objective === target,
+        );
+        card?.scrollIntoView({ block: 'nearest' });
+        card?.focus({ preventScroll: true });
+      });
+    }
+  });
   let advances = $derived(
     [...(player?.advances ?? [])].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
   );
@@ -92,28 +108,35 @@
       <ResourceAmount pile={resources} showZero />
     </div>
     <nav class="civilization-tabs" aria-label="Civilization details">
-      <button class:active={tab === 'score'} aria-pressed={tab === 'score'} onclick={() => (tab = 'score')}
+      <button class:active={tab === 'score'} aria-pressed={tab === 'score'} onclick={() => setTab('score')}
         ><Trophy size={16} /> Score</button
       >
       <button
         class:active={tab === 'advances'}
         aria-pressed={tab === 'advances'}
-        onclick={() => (tab = 'advances')}
+        onclick={() => setTab('advances')}
         ><GraduationCap size={16} /> Advances <span>{advances.length}</span></button
       >
       <button
         class:active={tab === 'cities'}
         aria-pressed={tab === 'cities'}
-        onclick={() => (tab = 'cities')}
+        onclick={() => setTab('cities')}
       >
         <Landmark size={16} /> Cities <span>{player.cities.length}</span>
       </button>
       <button
         class:active={tab === 'leaders'}
         aria-pressed={tab === 'leaders'}
-        onclick={() => (tab = 'leaders')}
+        onclick={() => setTab('leaders')}
       >
         <Crown size={16} /> Leaders <span>{player.civilizationLeaders?.length ?? 0}</span>
+      </button>
+      <button
+        class:active={tab === 'objectives'}
+        aria-pressed={tab === 'objectives'}
+        onclick={() => setTab('objectives')}
+      >
+        <Target size={16} /> Objectives <span>{player.completedObjectives?.length ?? 0}</span>
       </button>
     </nav>
     {#if tab === 'score'}
@@ -127,12 +150,43 @@
           <div class="score-row" class:zero={part.points === 0}>
             <Icon size={19} />
             <div>
-              <strong>{part.name}</strong>
+              {#if part.name === 'Advances' || part.name === 'Objectives' || part.name === 'City pieces'}
+                <button
+                  class="score-category-link"
+                  onclick={() =>
+                    setTab(
+                      part.name === 'Advances'
+                        ? 'advances'
+                        : part.name === 'Objectives'
+                          ? 'objectives'
+                          : 'cities',
+                    )}
+                >
+                  <strong>{part.name}</strong>
+                </button>
+              {:else}<strong>{part.name}</strong>{/if}
               <p>{category?.description}</p>
             </div>
             <b>{part.points}</b>
           </div>
         {/each}
+      </div>
+    {:else if tab === 'objectives'}
+      <div class="public-objectives" bind:this={objectiveList}>
+        {#each player.completedObjectives ?? [] as objective, index (`${objective.name}-${index}`)}
+          <section
+            data-objective={objective.name}
+            tabindex="-1"
+            class:highlighted={$session.scoreObjective === objective.name}
+            aria-label={objective.name}
+          >
+            <header>
+              <Target size={19} /><strong>{objective.name}</strong><span>{objective.points} VP</span>
+            </header>
+            <p><ResourceText text={objective.description} /></p>
+            <small>Completed</small>
+          </section>
+        {:else}<p class="muted">No completed objectives yet.</p>{/each}
       </div>
     {:else if tab === 'cities'}
       <div class="public-cities">

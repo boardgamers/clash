@@ -195,6 +195,11 @@
   const choosingPlayer = $derived(
     !!$session.view?.civilizationDraft || !!$session.game?.events?.length || ($session.game?.round ?? 0) > 3,
   );
+  const waiting = $derived(
+    !$session.playback && $session.view?.waitingFor?.player !== $session.seat
+      ? $session.view?.waitingFor
+      : null,
+  );
   let log = $derived(
     $session.game ? combatJournal(journal($session.game, $session.view ?? undefined)).reverse() : [],
   );
@@ -204,6 +209,9 @@
   function showJournalResearch(target: ResearchReference) {
     const view = controller.researchReferenceView(target.player);
     if (view) researchReference = { target, view };
+  }
+  function showJournalObjective(target: { name: string; player: number }) {
+    controller.patch({ scorePlayer: target.player, scoreTab: 'objectives', scoreObjective: target.name });
   }
   const coordinateInteraction = {
     onCoordinate: (position: string | null) => world?.highlightCoordinate(position),
@@ -238,29 +246,31 @@
   let choiceDecision = $derived($session.view?.choiceDecision);
   let activeMovementBonus = $derived(movementBonus($session.game));
   let actionTitle = $derived(
-    $session.seat === undefined
-      ? 'Spectating'
-      : $session.game?.state === 'Finished'
-        ? 'Game over'
-        : $session.view?.decision
-          ? $session.view.decision.endOfAge
-            ? 'End of age'
-            : $session.view.decision.name
-          : $session.view?.explorationDecision
-            ? 'Place explored terrain'
-            : choiceDecision
-              ? 'Choose a bonus'
-              : objectiveDecision
-                ? 'Objective available'
-                : $session.view?.stopMovement
-                  ? activeMovementBonus
-                    ? `${activeMovementBonus.source} moves`
-                    : 'Moving units'
-                  : readyToEnd
-                    ? 'Ready to end turn'
-                    : $session.view?.canPlay
-                      ? 'Your turn'
-                      : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
+    waiting
+      ? `Waiting for ${$session.view?.players.find((p) => p.index === waiting.player)?.civilization ?? 'another player'}`
+      : $session.seat === undefined
+        ? 'Spectating'
+        : $session.game?.state === 'Finished'
+          ? 'Game over'
+          : $session.view?.decision
+            ? $session.view.decision.endOfAge
+              ? 'End of age'
+              : $session.view.decision.name
+            : $session.view?.explorationDecision
+              ? 'Place explored terrain'
+              : choiceDecision
+                ? 'Choose a bonus'
+                : objectiveDecision
+                  ? 'Objective available'
+                  : $session.view?.stopMovement
+                    ? activeMovementBonus
+                      ? `${activeMovementBonus.source} moves`
+                      : 'Moving units'
+                    : readyToEnd
+                      ? 'Ready to end turn'
+                      : $session.view?.canPlay
+                        ? 'Your turn'
+                        : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
     fullscreenEnabled = document.fullscreenEnabled;
@@ -381,6 +391,10 @@
 {#snippet journalRow(entry: JournalEntry, outcome = false)}
   {@const EntryIcon = journalIcons[entry.kind]}
   {@const research = researchReferences(researchCatalog, entry.player)}
+  {@const objectives =
+    $session.view?.players
+      .find((p) => p.index === entry.player)
+      ?.completedObjectives?.map((o) => ({ name: o.name, player: entry.player! })) ?? []}
   <article
     class:journal-event={!!entry.event}
     class:journal-outcome={outcome}
@@ -443,6 +457,8 @@
     {#if entry.notes.length}<p class="journal-notes">
         <ResourceText
           text={entry.notes.join(', ')}
+          {objectives}
+          onObjective={showJournalObjective}
           {research}
           onResearch={showJournalResearch}
           positions={mapPositions}
@@ -868,9 +884,15 @@
       </div>
     </section>
     <div class="board-toolbar" class:has-redo={$session.view?.canRedo} aria-label="Game controls">
-      <div class="turn-banner">
-        <span class="turn-light"></span><strong>{actionTitle}</strong
-        >{#if !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.playback?.frame?.round ?? $session.game?.round ?? 1) <= 3}<span
+      <div class="turn-banner" class:waiting={!!waiting} role="status" aria-live="polite">
+        {#if waiting}<Hourglass size={15} aria-hidden="true" />{:else}<span class="turn-light"></span>{/if}
+        <div class="turn-copy">
+          <strong>{actionTitle}</strong>
+          {#if waiting}<span class="waiting-action"
+              >{waiting.action}{waiting.source ? ` · ${waiting.source}` : ''}</span
+            >{/if}
+        </div>
+        {#if !waiting && !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.playback?.frame?.round ?? $session.game?.round ?? 1) <= 3}<span
             class="action-markers"
             role="img"
             aria-label={`${totalActions} ${totalActions === 1 ? 'action' : 'actions'} remaining`}

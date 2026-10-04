@@ -186,6 +186,7 @@ export interface CivilizationAdvance extends PublicAdvance {
   prerequisites: { id: string; name: string }[];
 }
 export interface PlayerView {
+  completedObjectives?: { name: string; description: string; points: number }[];
   civilizationLeaders?: {
     id: string;
     name: string;
@@ -234,6 +235,7 @@ export interface WonderCard {
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
 export interface View {
+  waitingFor?: { player: number; action: string; source: string | null } | null;
   logOriginNames?: Record<string, string>;
   activePlayers?: number[];
   civilizationDraft?: { ready: boolean[]; chosen: string | null; waiting: boolean } | null;
@@ -509,6 +511,8 @@ export interface Session {
   objectivesOpen: boolean;
   wondersOpen: boolean;
   scorePlayer: number | null;
+  scoreTab?: 'score' | 'advances' | 'cities' | 'leaders' | 'objectives';
+  scoreObjective?: string | null;
   cardDraws: CardDraw[];
   dark: boolean;
   unread: number;

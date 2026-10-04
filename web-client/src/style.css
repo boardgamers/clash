@@ -2430,6 +2430,9 @@ small {
   font-size: 36px;
   margin-bottom: 8px;
 }
+.score-dialog {
+  max-width: 660px;
+}
 .wonders-dialog .guide-intro,
 .hand-note,
 .feature-note,
@@ -5730,4 +5733,72 @@ small {
 }
 .world-labels.choosing-happiness .unit-map-label {
   display: none !important;
+}
+
+.board-toolbar .turn-banner.waiting {
+  height: auto;
+  min-height: 35px;
+  padding: 9px 13px;
+  align-items: flex-start;
+}
+.turn-copy {
+  min-width: 0;
+}
+.turn-copy strong {
+  display: block;
+}
+.board-toolbar .turn-banner.waiting strong {
+  white-space: normal;
+}
+.turn-banner.waiting > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--muted);
+}
+.waiting-action {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.score-category-link {
+  padding: 0;
+  text-align: left;
+}
+.score-category-link:hover,
+.score-category-link:focus-visible {
+  color: var(--gold);
+}
+.public-objectives {
+  display: grid;
+  gap: 12px;
+}
+.public-objectives > section {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper2);
+}
+.public-objectives > section.highlighted {
+  border-color: var(--gold);
+}
+.public-objectives header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.public-objectives header strong {
+  flex: 1;
+}
+.public-objectives header span {
+  white-space: nowrap;
+}
+.public-objectives p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+.public-objectives small {
+  color: var(--muted);
 }

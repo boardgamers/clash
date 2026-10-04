@@ -85,6 +85,63 @@ const fixture = (name: string) => {
   return JSON.stringify(game);
 };
 
+test('finishing movement from another snapshot clears its controls before selecting a city', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('movement/movement'));
+    game.players[0].civilization = 'Maya';
+    game.players[0].advances.push('Tactics');
+    game.players[0].units = [{ id: 9, position: 'C2', unit_type: { Leader: 'Pakal' } }];
+    game.players[0].recruited_leaders = ['Pakal'];
+    game.players[0].cities.find((city: any) => city.position === 'C2').activations = 0;
+    game.actions_left = 2;
+    let raw = JSON.stringify(game);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    c.openUnits([9]);
+    assert.equal(app.session().mode, 'settlers');
+    assert.equal(app.session().unitPosition, 'C2');
+    // No local pending flag: the move can finish in another tab or after reconnecting.
+    raw = engine.tryMove(raw, JSON.stringify({ Movement: 'Stop' }), 0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().mode, 'overview');
+    assert.equal(app.session().unitPosition, null);
+    assert.deepEqual(app.session().selectedUnits, []);
+    assert.deepEqual(app.session().moveDestinations, []);
+    c.selectTile('C2', { kind: 'city', player: 0 });
+    assert.equal(app.session().mode, 'overview');
+    assert.equal(app.session().tilePanel, true);
+    assert.equal(app.session().city, 'C2');
+    c.openCities('C2', 'build');
+    assert.equal(app.session().mode, 'city');
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('a new turn clears a previously opened movement panel', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('movement/movement'));
+    game.state = 'Playing';
+    game.players[0].advances.push('Tactics');
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.openUnits([0]);
+    game.round += 1;
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    assert.equal(app.session().mode, 'overview');
+    assert.deepEqual(app.session().selectedUnits, []);
+    c.selectTile('C2');
+    assert.equal(app.session().tilePanel, true);
+  } finally {
+    app.close();
+  }
+});
+
 test('movement origins and next group select the whole compatible group without submitting', async () => {
   const app = paymentController(),
     c = app.controller;
