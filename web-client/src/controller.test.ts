@@ -469,7 +469,9 @@ test('a rejected contextual card leaves the collection draft intact', async () =
     c.setPlayer(0);
     await c.load(engine.stripSecret(JSON.stringify(game), 0));
     c.beginCollect();
-    c.toggleChoice(app.session().view!.cities[0].choices[0]);
+    c.toggleChoice(
+      app.session().view!.cities.find((city) => city.position === app.session().city)!.choices[0],
+    );
     const selection = structuredClone(app.session().selection);
     app.reject();
     c.playContextualCard(19, 'collect');
@@ -639,7 +641,9 @@ test('Free Economy pays the displayed fee once, with no second click or duplicat
     const fee = app.session().view!.collectActions!.find((a) => a.name === 'Free Economy')!;
     c.beginCollect();
     c.patch({ collectVariant: fee.value });
-    c.toggleChoice(app.session().view!.cities[0].choices[0]);
+    c.toggleChoice(
+      app.session().view!.cities.find((city) => city.position === app.session().city)!.choices[0],
+    );
     assert.ok(app.session().preview);
     const before = JSON.parse(state);
     c.collect();
@@ -836,7 +840,9 @@ test('changing collection action keeps selected tiles and requotes the submitted
     c.setPlayer(0);
     await c.load(engine.stripSecret(fixture('advances/collect_free_economy'), 0));
     c.beginCollect();
-    c.toggleChoice(app.session().view!.cities[0].choices[0]);
+    c.toggleChoice(
+      app.session().view!.cities.find((city) => city.position === app.session().city)!.choices[0],
+    );
     const selected = structuredClone(app.session().selection);
     const normal = app.session().collectVariant;
     const free = app.session().view!.collectActions!.find((a) => a.name === 'Free Economy')!;
@@ -1401,4 +1407,63 @@ test('engine resolves consecutive offline raze choices and records responses tha
   }
   for (const key of ['age', 'round', 'state', 'events', 'current_player_index', 'actions_left'])
     assert.deepEqual(JSON.parse(manual)[key], JSON.parse(after)[key], key);
+});
+
+test('toolbar city actions choose a fresh suitable city, while explicit map/city choices stay selected', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/collect_free_economy'));
+    const p = game.players[0];
+    p.advances = [
+      'Farming',
+      'Mining',
+      'Storage',
+      'Writing',
+      'PublicEducation',
+      'Bartering',
+      'Myths',
+      'Tactics',
+    ];
+    p.resources = { food: 7, wood: 7, ore: 7, ideas: 7, gold: 7, mood_tokens: 7, culture_tokens: 7 };
+    p.units = [];
+    p.cities = [
+      { position: 'A1', mood_state: 'Happy', city_pieces: { market: 0 } },
+      { position: 'C2', mood_state: 'Happy', city_pieces: { academy: 0 } },
+      {
+        position: 'F2',
+        mood_state: 'Happy',
+        activations: 1,
+        city_pieces: { temple: 0, market: 0, fortress: 0 },
+      },
+      { position: 'F5', mood_state: 'Angry', activations: 1, angry_activation: true },
+    ];
+    game.map.tiles = [];
+    for (const col of 'ABCDEFG')
+      for (let row = 1; row <= 6; row++) game.map.tiles.push([`${col}${row}`, 'Fertile']);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.selectCity('F5');
+    c.beginCollect();
+    assert.equal(
+      app.session().city,
+      'C2',
+      'unactivated Academy beats the equal-size city and used larger city',
+    );
+    assert.equal(app.session().focus, 'C2');
+    assert.deepEqual(app.session().selection, [], 'do not preselect or spend resources');
+    c.beginCollect('A1');
+    assert.equal(app.session().city, 'A1', 'explicit city wins');
+    c.selectCity('F2');
+    c.openCities();
+    assert.ok(['A1', 'C2'].includes(app.session().city!), 'building defaults to a usable unactivated city');
+    c.openCities('F2', 'recruit');
+    assert.equal(app.session().city, 'F2');
+    c.openCities(undefined, 'recruit');
+    assert.ok(['A1', 'C2'].includes(app.session().city!));
+    assert.equal(app.session().focus, app.session().city);
+    assert.deepEqual(app.sent, [], 'defaults never submit a move');
+  } finally {
+    app.close();
+  }
 });

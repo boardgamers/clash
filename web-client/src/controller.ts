@@ -1,3 +1,4 @@
+import { defaultCity, type CollectionPotential } from './default-city';
 import { get, writable } from 'svelte/store';
 import { ChatController } from '@boardgamers/protocol/chat';
 import type { ViewerCommands } from '@boardgamers/protocol/viewer';
@@ -995,8 +996,18 @@ export class Controller {
     this.patch({ seaRouteStart: water[next] });
   }
   beginCollect(position?: string) {
-    if (get(this.session).pending) return;
-    if (position) this.selectCity(position);
+    const s = get(this.session);
+    if (s.pending) return;
+    const variant = s.view?.collectActions?.[0]?.value ?? 'Collect';
+    const city =
+      position ??
+      defaultCity(
+        s.view,
+        'collect',
+        s.city,
+        s.view?.canPlay ? this.query<CollectionPotential[]>({ kind: 'collectionPotential', variant }) : [],
+      );
+    if (city) this.selectCity(city);
     this.closeActivity();
     this.patch({
       mode: 'collect',
@@ -1007,7 +1018,7 @@ export class Controller {
       preview: null,
       error: '',
       selectedAdvance: null,
-      collectVariant: get(this.session).view?.collectActions?.[0]?.value ?? 'Collect',
+      collectVariant: variant,
       ballcourts: false,
       draftCard: false,
       attackPirates: false,
@@ -1062,13 +1073,16 @@ export class Controller {
       this.beginHappiness(position);
       return;
     }
+    const s = get(this.session);
+    const city = position ?? defaultCity(s.view, cityTab, s.city);
     this.closeActivity();
     this.patch({
       mode: 'city',
       cityTab,
       tilePanel: false,
       abilitiesOpen: false,
-      city: position ?? get(this.session).city,
+      city,
+      focus: city ?? s.focus,
       recruits: {},
       ballcourts: false,
       draftCard: false,

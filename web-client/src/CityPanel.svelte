@@ -186,7 +186,7 @@
         class:active={tab === item.id}
         onclick={() => {
           if (item.id === 'happiness') controller.beginHappiness();
-          else controller.patch({ cityTab: item.id as typeof tab });
+          else controller.openCities(undefined, item.id as typeof tab);
           controller.patch({ error: '' });
         }}><item.icon size={17} />{item.label}</button
       >{/each}

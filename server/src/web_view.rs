@@ -23,6 +23,7 @@ use crate::victory_points::victory_points_parts;
 use crate::wonder::Wonder;
 use serde_json::{Value, json};
 mod actions;
+mod collection_potential;
 mod decisions;
 mod journal;
 mod turn;
@@ -48,6 +49,11 @@ pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
         ),
         Some("recruit") => actions::recruit_extended(game, seat, &input),
         Some("happiness") => actions::happiness_preview(game, seat, &input),
+        Some("collectionPotential") => Ok(collection_potential::potentials(
+            game,
+            seat,
+            &serde_json::from_value(input["variant"].clone()).map_err(|e| e.to_string())?,
+        )),
         Some("collect") => collect_variant_preview(
             game,
             seat,

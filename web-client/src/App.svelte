@@ -247,6 +247,7 @@
   $effect(() => {
     if (!$session.view?.canEndTurn) confirmEnd = false;
   });
+  let collectAvailable = $derived($session.view?.cities.some((c) => !c.reason && c.choices.length > 0));
   let researchAvailable = $derived($session.view?.advances.some((a) => !!a.action));
   let researchChoice = $derived(researchDecision($session.view));
   let mapDecision = $derived(mapDecisionOptions($session.view?.decision).length > 0);
@@ -948,9 +949,11 @@
       <nav class="board-actions" aria-label="Actions">
         <button
           class:active={$session.mode === 'collect'}
-          title={city?.reason ?? 'Collect resources · 1 action'}
+          title={collectAvailable
+            ? 'Collect resources · 1 action'
+            : (city?.reason ?? 'No city can collect resources')}
           aria-label="Collect resources"
-          disabled={!$session.view?.canPlay || !city || !!city.reason || $session.pending}
+          disabled={!$session.view?.canPlay || !collectAvailable || $session.pending}
           onclick={() => {
             confirmEnd = false;
             controller.beginCollect();
