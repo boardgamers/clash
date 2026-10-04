@@ -27,6 +27,7 @@
   import CityFacts from './CityFacts.svelte';
   import UnitIcon from './UnitIcon.svelte';
   import AvailabilityFilter from './AvailabilityFilter.svelte';
+  import { requiredRecruitDiscards, recruitLeaderToDiscard } from './recruit-discards';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   let tab = $derived($session.cityTab);
@@ -54,7 +55,7 @@
       (u) =>
         !$session.availableOnly ||
         ($session.recruits[unitInfo[u.type].key] ?? 0) > 0 ||
-        (!u.reason && u.available > 0),
+        (!u.reason && (u.limit ?? u.available) > 0),
     ),
   );
   const visibleLeaders = $derived(
@@ -86,6 +87,13 @@
   );
   const capacity = $derived((city?.capacity ?? 0) + Number(!!$session.ballcourts && !!city?.ballcourts));
   const occupiedCapacity = $derived(count + Number(!!$session.draftCard));
+  const discards = $derived(requiredRecruitDiscards($session.view, $session.city, $session.recruits));
+  const discardedLeader = $derived(recruitLeaderToDiscard($session.view, $session.recruits));
+  const discardedLeaderName = $derived(
+    $session.view?.players
+      .find((p) => p.index === $session.seat)
+      ?.leaders?.find((l) => l.unit === discardedLeader?.id)?.name ?? 'Your current leader',
+  );
   function abilityIcon(text: string) {
     if (/battle|combat|captur|attack/i.test(text)) return Swords;
     if (/advance/i.test(text)) return GraduationCap;
@@ -104,6 +112,29 @@
     return { destroy: () => node.close() };
   }
 </script>
+
+{#snippet discardPicker(group: ReturnType<typeof requiredRecruitDiscards>[number])}
+  {@const selectedCount = group.units.filter((u) => $session.replacements.includes(u.id)).length}
+  <section class="recruit-discards" aria-label={`Discard ${group.type} for recruitment`}>
+    <h3>Supply limit · Discard {group.count}<span>{selectedCount} / {group.count}</span></h3>
+    <p class="recruit-discard-note">
+      Choose units to remove from the board when you confirm recruitment. You still pay the normal recruitment
+      cost.
+    </p>
+    <div class="unit-picker">
+      {#each group.units as unit}<button
+          class:selected={$session.replacements.includes(unit.id)}
+          aria-pressed={$session.replacements.includes(unit.id)}
+          aria-label={`Discard ${group.type} at ${unit.position}`}
+          title={`Discard ${group.type} at ${unit.position}`}
+          disabled={$session.pending ||
+            (!$session.replacements.includes(unit.id) && selectedCount >= group.count)}
+          onclick={() => controller.toggleRecruitDiscard(unit.id)}
+          ><UnitIcon type={unit.type} />{group.type}</button
+        >{/each}
+    </div>
+  </section>
+{/snippet}
 
 <dialog
   class="city-dialog"
@@ -234,6 +265,7 @@
           {@const differentCost = !sameRecruitPayment(standard, item.payment)}
           {@const usesDraft = item.costOptions?.includes('Draft') && (item.payment.mood_tokens ?? 0) > 0}
           {@const costOptions = recruitCostOptions(item.costOptions, item.payment, standard)}
+          {@const discard = discards.find((group) => group.type === item.type)}
           <article class="recruit-row" class:selected={amount > 0} aria-label={item.type}>
             <div class="recruit-unit-title"><info.icon size={20} /><strong>{item.type}</strong></div>
             <div class="quantity">
@@ -273,10 +305,15 @@
             <small class="recruit-availability"
               >{cityReason(item.reason) || `${item.available} in supply`}</small
             >
+            {#if discard}{@render discardPicker(discard)}{/if}
           </article>{/each}
       </div>
       {#if visibleLeaders.length}<section class="leader-recruit" aria-label="Leaders">
           <h3><Crown size={16} />Leaders</h3>
+          {#if discardedLeader}<p class="recruit-discard-note" role="status">
+              Recruiting {options?.leaders?.find((l) => l.id === $session.recruits.leader)?.name} permanently removes
+              {discardedLeaderName} from the board. That leader cannot be recruited again.
+            </p>{/if}
           <div class="leader-grid">
             {#each visibleLeaders as leader}
               <article class="leader-card" class:selected={$session.recruits.leader === leader.id}>
@@ -326,27 +363,6 @@
           <button class="show-all-options" onclick={() => controller.setAvailableOnly(false)}>Show all</button
           >
         </p>{/if}
-      {#if $session.view?.units?.length}<details class="replacement-recruit">
-          <summary>Replace units on the map</summary>
-          <div class="unit-picker">
-            {#each $session.view.units as unit}<button
-                class:selected={$session.replacements.includes(unit.id)}
-                aria-pressed={$session.replacements.includes(unit.id)}
-                title={`Replace ${typeof unit.type === 'string' ? unit.type : unit.type.Leader} at ${unit.position}`}
-                onclick={() => {
-                  controller.patch({
-                    replacements: $session.replacements.includes(unit.id)
-                      ? $session.replacements.filter((id) => id !== unit.id)
-                      : [...$session.replacements, unit.id],
-                  });
-                  controller.setRecruits($session.recruits);
-                }}
-                ><UnitIcon type={unit.type} />{typeof unit.type === 'string'
-                  ? unit.type
-                  : unit.type.Leader}</button
-              >{/each}
-          </div>
-        </details>{/if}
     {:else}
       <HappinessPanel {controller} />
     {/if}

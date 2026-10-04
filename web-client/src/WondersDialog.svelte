@@ -29,14 +29,16 @@
     {$session.view?.wonderCards.length === 1 ? 'card' : 'cards'}
   </p>
   {#each $session.view?.wonderCards ?? [] as card (card.id)}
-    <WonderCard {card} />
-    <button
-      class="primary wide"
-      disabled={!card.action || $session.pending}
-      title={card.reason ?? 'Choose a city and pay to construct this wonder'}
-      onclick={() => card.action && controller.submit(card.action)}
-      ><Hammer size={16} />Construct {card.name}</button
-    >
+    <div class="wonder-hand-entry">
+      <WonderCard {card} />
+      <button
+        class="primary wide"
+        disabled={!card.action || $session.pending}
+        title={card.reason ?? 'Choose a city and pay to construct this wonder'}
+        onclick={() => card.action && controller.submit(card.action)}
+        ><Hammer size={16} />Construct {card.name}</button
+      >
+    </div>
   {:else}
     <div class="hand-empty">
       <Landmark size={32} />

@@ -7,6 +7,7 @@ import { build } from 'esbuild';
 import type { Controller as ControllerType } from './controller';
 import type { Session } from './types';
 import { contextualCards, activeCollectionCard } from './contextual-cards.ts';
+import { requiredRecruitDiscards } from './recruit-discards.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 // Bundle the actual controller so Node can run its browser TypeScript imports.
@@ -82,6 +83,103 @@ const fixture = (name: string) => {
       game.players.push({ ...npc, id: game.players.length });
   return JSON.stringify(game);
 };
+
+test('recruitment asks for only the missing pieces, clears stale discards and pays the full cost', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(await engine.init(2, [], {}, 'recruit-discards', {}));
+    const seat = game.current_player_index,
+      p = game.players[seat],
+      city = p.cities[0].position;
+    const initialView = JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(game), seat), seat));
+    const limit = initialView.cityActions[0].recruits.find(
+      (r: { type: string }) => r.type === 'Settler',
+    ).limit;
+    p.resources = { food: 7, ore: 7, mood_tokens: 7, culture_tokens: 7 };
+    p.units = Array.from({ length: limit - 1 }, (_, id) => ({ id, position: city, unit_type: 'Settler' }));
+    p.units.push({ id: 50, position: city, unit_type: 'Infantry' });
+    p.next_unit_id = 51;
+    const raw = JSON.stringify(game);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    c.openCities(city, 'recruit');
+    c.setRecruits({ settlers: 1 });
+    assert.deepEqual(requiredRecruitDiscards(app.session().view, city, app.session().recruits), []);
+    assert.ok(app.session().recruitPreview);
+    c.setRecruits({ settlers: 2 });
+    const groups = requiredRecruitDiscards(app.session().view, city, app.session().recruits);
+    assert.deepEqual(
+      groups.map((g) => [g.type, g.count]),
+      [['Settler', 1]],
+    );
+    assert.ok(groups[0].units.every((u) => u.type === 'Settler'));
+    assert.equal(app.session().recruitPreview, null);
+    assert.equal(app.session().error, '', 'the inline choice replaces an Invalid replacement error');
+    c.toggleRecruitDiscard(50);
+    assert.deepEqual(app.session().replacements, [], 'unrelated types cannot be discarded');
+    c.toggleRecruitDiscard(0);
+    assert.ok(app.session().recruitPreview);
+    c.toggleRecruitDiscard(1);
+    assert.deepEqual(app.session().replacements, [0], 'cannot discard more than necessary');
+    c.setRecruits({ settlers: 1 });
+    assert.deepEqual(app.session().replacements, []);
+    assert.ok(app.session().recruitPreview);
+    c.setRecruits({ settlers: 2 });
+    assert.equal(app.session().recruitPreview, null);
+    c.toggleRecruitDiscard(1);
+    c.setRecruits({});
+    assert.deepEqual(app.session().replacements, []);
+    c.setRecruits({ settlers: 2 });
+    c.toggleRecruitDiscard(0);
+    assert.deepEqual(app.sent, [], 'selecting a discard does not submit recruitment');
+    c.submit(app.session().recruitPreview!.action);
+    const after = JSON.parse(engine.tryMove(raw, app.sent[0], seat));
+    assert.equal(after.players[seat].resources.food, 3, 'both new settlers cost food');
+    assert.equal(
+      after.players[seat].units.filter((u: { unit_type: string }) => u.unit_type === 'Settler').length,
+      limit,
+    );
+    assert.ok(!after.players[seat].units.some((u: { id: number }) => u.id === 0));
+  } finally {
+    app.close();
+  }
+});
+
+test('selecting a new leader accounts for the current one without asking for unrelated discards', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    let raw = await engine.init(2, [], {}, 'recruit-leader-discard', {});
+    const game = JSON.parse(raw),
+      seat = game.current_player_index,
+      p = game.players[seat],
+      city = p.cities[0].position;
+    p.resources = { food: 7, ore: 7, mood_tokens: 7, culture_tokens: 7 };
+    raw = JSON.stringify(game);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    c.openCities(city, 'recruit');
+    const first = app.session().view!.cityActions[0].leaders![0].id;
+    c.setRecruits({ leader: first });
+    assert.deepEqual(app.session().replacements, []);
+    raw = engine.tryMove(raw, JSON.stringify(app.session().recruitPreview!.action), seat);
+    await c.load(engine.stripSecret(raw, seat));
+    c.openCities(city, 'recruit');
+    const existing = app.session().view!.units!.find((u) => typeof u.type === 'object')!;
+    const next = app.session().view!.cityActions[0].leaders![0].id;
+    c.setRecruits({ leader: next });
+    assert.deepEqual(app.session().replacements, [existing.id]);
+    assert.ok(app.session().recruitPreview);
+    assert.deepEqual(requiredRecruitDiscards(app.session().view, city, app.session().recruits), []);
+    assert.deepEqual(app.sent, []);
+    c.setRecruits({ infantry: 1 });
+    assert.deepEqual(app.session().replacements, []);
+    assert.ok(app.session().recruitPreview);
+  } finally {
+    app.close();
+  }
+});
 
 test('inspecting journal research keeps the current decision, selection, seat and preferences', async () => {
   const app = paymentController(),

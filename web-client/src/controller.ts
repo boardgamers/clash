@@ -13,6 +13,7 @@ import { activeCityAbility, groupAbilities } from './abilities';
 import { recapStart, lastOpponentTurn, frameAt, frameEffects } from './playback';
 import { battleCues, battleCursor, BATTLE_DURATION, type BattleCue } from './battle-playback';
 import { contextualCards, type CardContext } from './contextual-cards';
+import { recruitDiscardSelection, requiredRecruitDiscards } from './recruit-discards';
 import {
   researchDecision,
   mapDecisionOptions,
@@ -1040,8 +1041,15 @@ export class Controller {
   setRecruits(recruits: RecruitSelection, payment?: Pile) {
     const s = get(this.session);
     if (s.pending || s.seat === undefined || !s.city || !this.engine) return;
-    this.patch({ recruits, recruitPreview: null, error: '' });
+    const replacements = recruitDiscardSelection(s.view, s.city, recruits, s.replacements);
+    this.patch({ recruits, replacements, recruitPreview: null, error: '' });
     if (!Object.values(recruits).some(Boolean) && !s.draftCard) return;
+    if (
+      requiredRecruitDiscards(s.view, s.city, recruits).some(
+        (group) => group.units.filter((u) => replacements.includes(u.id)).length < group.count,
+      )
+    )
+      return;
     try {
       this.patch({
         recruitPreview: this.query({
@@ -1051,13 +1059,27 @@ export class Controller {
           draftCard: !!s.draftCard,
           city: s.city,
           units: recruits,
-          replaced: s.replacements,
+          replaced: replacements,
           ballcourts: !!s.ballcourts,
         }),
       });
     } catch (error) {
       this.patch({ error: String(error) });
     }
+  }
+  toggleRecruitDiscard(id: number) {
+    const s = get(this.session);
+    if (s.pending || s.playback) return;
+    const group = requiredRecruitDiscards(s.view, s.city, s.recruits).find((g) =>
+      g.units.some((u) => u.id === id),
+    );
+    if (!group) return;
+    const selected = s.replacements.includes(id);
+    if (!selected && group.units.filter((u) => s.replacements.includes(u.id)).length >= group.count) return;
+    this.patch({
+      replacements: selected ? s.replacements.filter((unit) => unit !== id) : [...s.replacements, id],
+    });
+    this.setRecruits(s.recruits);
   }
   toggleChoice(choice: Choice) {
     const s = get(this.session);

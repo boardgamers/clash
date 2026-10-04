@@ -70,7 +70,7 @@ export function recruitCostOptions(sources: string[] = [], payment: Pile, standa
 export function cityReason(reason: string | null, size = 1) {
   if (reason === 'Need more cities') return `Requires ${size + 1} cities to build here.`;
   if (reason === 'Invalid replacement')
-    return 'Choose matching units on the map to replace pieces missing from your supply.';
+    return 'Choose units to discard from the board to free up pieces for these recruits.';
   if (reason === 'Too many units') return 'The selection exceeds this city’s recruitment capacity.';
   return actionReason(reason).replace('Mising building:', 'Requires a');
 }
