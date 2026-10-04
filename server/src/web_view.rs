@@ -173,6 +173,10 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                     "abilities":info.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()}))
             } else { None }
         }).collect::<Vec<_>>(),
+        "civilizationLeaders": p.civilization.leaders.iter().map(|info| json!({
+            "id":info.leader,"name":info.name,"recruited":p.recruited_leaders.contains(&info.leader),
+            "abilities":info.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()
+        })).collect::<Vec<_>>(),
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {

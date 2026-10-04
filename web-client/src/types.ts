@@ -186,6 +186,12 @@ export interface CivilizationAdvance extends PublicAdvance {
   prerequisites: { id: string; name: string }[];
 }
 export interface PlayerView {
+  civilizationLeaders?: {
+    id: string;
+    name: string;
+    recruited: boolean;
+    abilities: { name: string; description: string }[];
+  }[];
   leaders?: {
     id: string;
     unit: number;

@@ -10,7 +10,7 @@
     pending = false,
     onUse,
   }: {
-    leader: NonNullable<PlayerView['leaders']>[number];
+    leader: Pick<NonNullable<PlayerView['leaders']>[number], 'name' | 'abilities'> & { position?: string };
     civilization?: string;
     compact?: boolean;
     actions?: NonNullable<View['specialActions']>;

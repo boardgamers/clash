@@ -113,7 +113,7 @@
         aria-pressed={tab === 'leaders'}
         onclick={() => (tab = 'leaders')}
       >
-        <Crown size={16} /> Leaders <span>{player.leaders?.length ?? 0}</span>
+        <Crown size={16} /> Leaders <span>{player.civilizationLeaders?.length ?? 0}</span>
       </button>
     </nav>
     {#if tab === 'score'}
@@ -161,23 +161,25 @@
       </div>
     {:else if tab === 'leaders'}
       <div class="public-leaders">
-        {#each player.leaders ?? [] as leader (leader.id)}
-          <section aria-label={leader.name}>
-            <div class="public-leader-status">
-              <span>In play</span>
-              <button
-                class="secondary"
-                disabled={$session.pending}
-                aria-label={`Show ${leader.name} on the map`}
-                onclick={() => {
-                  close();
-                  onLocate(leader.position);
-                }}><MapPin size={15} />Show on map</button
-              >
-            </div>
+        {#each player.civilizationLeaders ?? [] as leader (leader.id)}
+          {@const active = player?.leaders?.find((l) => l.id === leader.id)}
+          <section aria-label={leader.name} class:in-play={!!active}>
+            {#if active || leader.recruited}<div class="public-leader-status">
+                <span>{active ? 'In play' : 'Previously recruited'}</span>
+                {#if active}<button
+                    class="secondary"
+                    disabled={$session.pending}
+                    aria-label={`Show ${leader.name} on the map`}
+                    onclick={() => {
+                      const position = active.position;
+                      close();
+                      onLocate(position);
+                    }}><MapPin size={15} />Show on map</button
+                  >{/if}
+              </div>{/if}
             <LeaderDetails {leader} />
           </section>
-        {:else}<p class="muted">No leader in play.</p>{/each}
+        {:else}<p class="muted">No leaders for this civilization.</p>{/each}
       </div>
     {:else}
       {#if player.civilizationAdvances.length}<CivilizationAdvances

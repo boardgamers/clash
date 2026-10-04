@@ -3426,7 +3426,24 @@ small {
 }
 .public-leaders {
   display: grid;
-  gap: 16px;
+  gap: 12px;
+}
+.public-leaders > section {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.public-leaders > section.in-play {
+  border-color: var(--civilization-accent);
+  background: color-mix(in srgb, var(--civilization-accent) 8%, var(--paper));
+}
+.public-leaders .tile-leader {
+  border-top: 0;
+  padding: 0;
+}
+.public-leaders .in-play .public-leader-status > span {
+  color: var(--ink);
+  font-weight: 600;
 }
 .public-leader-status {
   display: flex;
