@@ -49,6 +49,7 @@ pub enum PlayingActionType {
     InfluenceCultureAttempt,
     ActionCard(u8),
     WonderCard(Wonder),
+    #[serde(alias = "Custom")]
     Special(SpecialAction),
     EndTurn,
 }

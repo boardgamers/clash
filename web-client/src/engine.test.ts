@@ -12,6 +12,25 @@ async function initial() {
   return engine.init(2, [], { civilization: 'Random' }, 'clash-preview-20260927', {});
 }
 
+test('published WASM opens a frozen 0.4.16 save and preserves its journal for all viewers', () => {
+  const raw = readFileSync(
+    new URL('../../server/tests/fixtures/legacy_0_4_16/setup.json', import.meta.url),
+    'utf8',
+  );
+  const original = JSON.parse(raw);
+  assert.equal(engine.currentPlayer(raw), original.current_player_index);
+  const oldJournal = original.log[0].rounds[0].turns[0].actions[0].log;
+  for (const seat of [undefined, 0, 1]) {
+    const visible = engine.stripSecret(raw, seat);
+    const game = JSON.parse(visible);
+    assert.deepEqual(game.log[0].rounds[0].turns[0].actions[0].log, oldJournal);
+    assert.ok(engine.logLength(raw) > 0);
+    const view: View = JSON.parse(engine.webView(visible, seat));
+    assert.ok(view);
+    assert.deepEqual(game.players.map((p: any) => p.cities), original.players.map((p: any) => p.cities));
+  }
+});
+
 test('sea route guide follows Navigation perimeter rules and stops at unexplored terrain without revealing it', () => {
   const raw = readFileSync(
     new URL('../../server/tests/test_games/movement/ship_navigation_unit_test.json', import.meta.url),

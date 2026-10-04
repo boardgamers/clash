@@ -255,6 +255,7 @@ impl IncidentPlayerInfo {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
     pub incident_id: u8,
+    #[serde(default = "legacy_incident_cause")]
     pub cause: EventOrigin,
     pub active_player: usize,
     #[serde(default)]
@@ -278,6 +279,11 @@ pub struct IncidentInfo {
 
     #[serde(flatten)]
     pub player: IncidentPlayerInfo,
+}
+
+fn legacy_incident_cause() -> EventOrigin {
+    // Older saves do not record which advance or effect triggered the event.
+    EventOrigin::Ability("Game event".to_string())
 }
 
 impl IncidentInfo {

@@ -39,6 +39,7 @@ pub enum Action {
     Response(EventResponse),
     Undo,
     Redo,
+    #[serde(alias = "Setup")]
     StartTurn, // created for trade routes and status phase
     ChooseCivilization(String),
 }

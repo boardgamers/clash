@@ -65,12 +65,57 @@ pub enum TurnType {
     StatusPhase(StatusPhaseStateType),
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Clone, PartialEq)]
 pub struct ActionLogTurn {
     pub turn_type: TurnType,
-    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub actions: Vec<ActionLogAction>,
+}
+
+impl<'de> Deserialize<'de> for ActionLogTurn {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct SavedTurn {
+            turn_type: serde_json::Value,
+            #[serde(default)]
+            actions: Vec<serde_json::Value>,
+        }
+        let saved = SavedTurn::deserialize(deserializer)?;
+        let turn_type = match saved.turn_type.as_str() {
+            Some("Setup") => TurnType::Setup(SetupTurnType {
+                player: 0,
+                civilization: None,
+            }),
+            Some("StatusPhase") => TurnType::StatusPhase(StatusPhaseStateType::CompleteObjectives),
+            _ => serde_json::from_value(saved.turn_type).map_err(serde::de::Error::custom)?,
+        };
+        let turn_player = match &turn_type {
+            TurnType::Player(p) => Some(*p),
+            _ => None,
+        };
+        let actions = saved
+            .actions
+            .into_iter()
+            .map(|mut value| {
+                if value.get("player").is_none() {
+                    let actor = value["items"]
+                        .as_array()
+                        .and_then(|items| items.first())
+                        .and_then(|item| item["player"].as_u64())
+                        .map(|p| p as usize);
+                    let player = if value["action"].get("Response").is_some() {
+                        actor.or(turn_player)
+                    } else {
+                        turn_player.or(actor)
+                    }
+                    .unwrap_or(0);
+                    value["player"] = player.into();
+                }
+                serde_json::from_value(value).map_err(serde::de::Error::custom)
+            })
+            .collect::<Result<_, D::Error>>()?;
+        Ok(Self { turn_type, actions })
+    }
 }
 
 impl ActionLogTurn {
@@ -109,6 +154,9 @@ pub struct ActionLogAction {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub items: Vec<ActionLogItem>,
+    // Saves before the structured-log refactor keep their public journal prose.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub log: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "usize::is_zero")]
     pub active_events: usize,
@@ -129,14 +177,16 @@ impl ActionLogAction {
             undo: Vec::new(),
             combat_stats: None,
             items: Vec::new(),
+            log: Vec::new(),
             active_events,
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug, Default)]
 pub enum ActionLogIncidentToken {
     Take(u8),
+    #[default]
     NoChange,
 }
 
@@ -186,6 +236,7 @@ pub struct ActionLogEntryCombatRoll {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ActionLogEntryAdvance {
     pub advance: Advance,
+    #[serde(default)]
     pub incident_token: ActionLogIncidentToken,
     balance: ActionLogBalance,
 }
@@ -207,7 +258,8 @@ pub enum ActionLogEntry {
     Units {
         units: Units,
         balance: ActionLogBalance,
-        position: Position,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        position: Option<Position>,
     },
     Structure(ActionLogEntryStructure),
     HandCard {
@@ -256,7 +308,7 @@ impl ActionLogEntry {
         Self::Units {
             units,
             balance,
-            position,
+            position: Some(position),
         }
     }
 

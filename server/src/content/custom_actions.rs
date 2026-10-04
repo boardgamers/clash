@@ -153,10 +153,32 @@ pub enum SpecialActionExecution {
     Action(CustomActionActionExecution),
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
+#[derive(Serialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum SpecialAction {
     Modifier(PlayingActionModifier),
     Custom(CustomActionType),
+}
+
+impl<'de> Deserialize<'de> for SpecialAction {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        enum Current {
+            Modifier(PlayingActionModifier),
+            Custom(CustomActionType),
+        }
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum Saved {
+            Current(Current),
+            // Older saves used one flat enum for both kinds of special action.
+            Modifier(PlayingActionModifier),
+            Custom(CustomActionType),
+        }
+        Ok(match Saved::deserialize(deserializer)? {
+            Saved::Current(Current::Modifier(m)) | Saved::Modifier(m) => Self::Modifier(m),
+            Saved::Current(Current::Custom(c)) | Saved::Custom(c) => Self::Custom(c),
+        })
+    }
 }
 
 impl SpecialAction {
