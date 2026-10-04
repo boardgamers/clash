@@ -16,7 +16,7 @@
     {#if city}<p>
         <Users size={16} /><span
           >After a “Barbarians move” event, cities within 2 land spaces of the triggering player’s cities gain
-          1 infantry, up to 4 units.</span
+          1 unit, up to 4 units. Choose Infantry, or Cavalry/Elephant if an Infantry is already there.</span
         >
       </p>{/if}
     <p>

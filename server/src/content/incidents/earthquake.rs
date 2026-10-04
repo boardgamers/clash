@@ -32,7 +32,7 @@ fn volcano() -> Incident {
             Select one of your cities. \
             Kill all units in the city. \
             Remove all structures (center, buildings, wonders) from the game permanently. \
-            Wonder effects are lost (exception: Pyramids). \
+            Wonder effects are lost (exception: Great Pyramid). \
             The city center and buildings are worth 2 points each (according to the last owner), \
             wonders as usual.",
         IncidentBaseEffect::None,
@@ -83,7 +83,7 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
         "If you have at least 3 cities: \
                       Select 1-3 structures (center, buildings, wonders) in your cities \
                       and remove them from the game permanently. \
-                      Wonder effects are lost (exception: Pyramids). \
+                      Wonder effects are lost (exception: Great Pyramid). \
                       The mood of all affected cities is reduced. \
                       The city center and buildings are worth 2 points each \
                       (according to the last owner), wonders as usual.",

@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
-use crate::barbarians::barbarians_bonus;
+use crate::barbarians::{barbarians_bonus, reinforce_barbarians};
 use crate::city_pieces::Building;
 use crate::combat_listeners::{choose_fighter_casualties, offer_retreat, place_settler};
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
@@ -108,6 +108,7 @@ pub fn get_all_uncached() -> Vec<Ability> {
         offer_retreat(),
         // incident related
         barbarians_bonus(),
+        reinforce_barbarians(),
         pirates_bonus(),
         pirates_round_bonus(),
         pestilence_permanent_effect(),

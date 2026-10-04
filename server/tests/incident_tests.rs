@@ -88,10 +88,17 @@ fn test_pirates_spawn() {
 fn test_barbarians_attack() {
     JSON.test(
         "barbarians_attack",
-        vec![TestAction::not_undoable(
-            0,
-            Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
-        )],
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
+            )
+            .skip_json(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectUnitType(UnitType::Infantry)),
+            ),
+        ],
     );
 }
 

@@ -9,6 +9,10 @@ use crate::player::Player;
 use crate::unit::{Unit, UnitType};
 use itertools::Itertools;
 
+#[cfg(test)]
+#[path = "bold_tests.rs"]
+mod bold_tests;
+
 // English card face: https://boardgamegeek.com/image/6509349/bigleaguecreative
 pub(crate) fn conqueror() -> Objective {
     let name = "Conqueror";
@@ -187,7 +191,7 @@ pub(crate) fn bold() -> Objective {
             let fewer_fighters =
                 s.player(player).fighters(b).amount() < o.fighters(b).amount();
             let fewer_warfare = warfare_advances(game.player(player), game) < warfare_advances(game.player(o.player), game);
-            if (fewer_fighters && s.is_winner(player)) || fewer_warfare {
+            if s.is_winner(player) && (fewer_fighters || fewer_warfare) {
                 objective_is_ready(game.player_mut(player), name);
             }
         },

@@ -1,4 +1,5 @@
 import type { Game, LoggedAction, Pile, View } from './types.ts';
+import { officialWonderText } from './wonder-names.ts';
 
 type Units = Record<string, number | string>;
 type Item = NonNullable<LoggedAction['items']>[number];
@@ -198,7 +199,10 @@ export function readableHistory(game: Game, context?: Context): Game {
             turn.turn_type && typeof turn.turn_type === 'object' && 'Setup' in turn.turn_type
               ? 'Setup'
               : turn.turn_type,
-          actions: turn.actions?.map((action) => ({ ...action, log: lines(game, action, context) })),
+          actions: turn.actions?.map((action) => ({
+            ...action,
+            log: lines(game, action, context).map(officialWonderText),
+          })),
         })),
       })),
     })),

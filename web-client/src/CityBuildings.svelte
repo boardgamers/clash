@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Landmark, Trophy, X } from 'lucide-svelte';
   import { wonderIcons } from './wonder-icons';
+  import { wonderName } from './wonder-names';
   import { buildingInfo } from './city';
   import ResourceText from './ResourceText.svelte';
   import type { City, Player, View } from './types';
@@ -68,7 +69,7 @@
     {@const Icon = wonderIcons[id] ?? Landmark}
     <li>
       <button class:expanded={expanded === id} aria-expanded={expanded === id} onclick={() => toggle(id)}
-        ><Icon size={16} /><span>{card?.name ?? id.replace(/([a-z])([A-Z])/g, '$1 $2')}</span></button
+        ><Icon size={16} /><span>{card?.name ?? wonderName(id)}</span></button
       >
     </li>
   {/each}

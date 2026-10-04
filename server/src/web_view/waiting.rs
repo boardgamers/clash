@@ -19,6 +19,11 @@ pub(super) fn describe(game: &Game) -> Option<Value> {
             matches!(event.event_type, PersistentEventType::SelectObjectives(_))
         });
         let action = match (&handler.request, &handler.origin) {
+            (Request::SelectUnitType(_), EventOrigin::Ability(name))
+                if name == "Barbarian reinforcements" =>
+            {
+                "Choose a Barbarian reinforcement"
+            }
             (Request::SelectPositions(_), EventOrigin::Advance(Advance::Fanaticism)) => {
                 "Place an infantry"
             }

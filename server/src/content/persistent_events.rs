@@ -120,6 +120,7 @@ pub enum PersistentEventType {
     FoundCity(Position),
     Incident(IncidentInfo),
     StopBarbarianMovement(Vec<Position>),
+    ReinforceBarbarians(Vec<Position>),
     ActionCard(ActionCardInfo),
     DeclareActionCard(crate::content::civilizations::japan::CardAnnouncement),
     WonderCard(WonderCardInfo),

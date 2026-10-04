@@ -46,20 +46,21 @@ test('spawn explanations distinguish the new city army from its extra reinforcem
   assert.match(gains[1].notes[0], /Extra reinforcement.*Barbarians spawn/);
 });
 
-test('post-battle reinforcement is explained without calling the captured city a new spawn', () => {
-  const entries = journal(fixture('barbarians_attack.outcome'));
-  const combat = entries.filter((entry) => entry.title === 'Combat');
-  assert.ok(
-    combat.some((entry) => entry.tokens.some((token) => token.icon === 'city' && token.tone === 'gain')),
-  );
-  assert.ok(
-    combat.every((entry) => entry.notes.every((note) => !/New barbarian city|Reinforced after/.test(note))),
-  );
-  const gain = entries
-    .flatMap((entry) => entry.event?.outcomes ?? [])
-    .find((entry) => entry.civilization === 'Barbarians')!;
-  assert.match(gain.notes[0], /Reinforced after barbarian movement/);
-});
+for (const name of ['barbarians_attack.outcome', 'barbarians_attack.outcome1'])
+  test(`post-battle reinforcement is explained without calling the captured city a new spawn (${name})`, () => {
+    const entries = journal(fixture(name));
+    const combat = entries.filter((entry) => entry.title === 'Combat');
+    assert.ok(
+      combat.some((entry) => entry.tokens.some((token) => token.icon === 'city' && token.tone === 'gain')),
+    );
+    assert.ok(
+      combat.every((entry) => entry.notes.every((note) => !/New barbarian city|Reinforced after/.test(note))),
+    );
+    const gain = entries
+      .flatMap((entry) => entry.event?.outcomes ?? [])
+      .find((entry) => entry.civilization === 'Barbarians')!;
+    assert.match(gain.notes[0], /Reinforced after barbarian movement/);
+  });
 
 test('a movement fallback creates a city without claiming post-movement reinforcement', () => {
   const game = history([

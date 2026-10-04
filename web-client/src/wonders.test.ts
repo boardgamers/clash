@@ -1,7 +1,27 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { officialWonderText, wonderName } from './wonder-names.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
+
+test('official wonder names preserve saved IDs and appear in private and public views', async () => {
+  const names = {
+    Colosseum: 'Great Arena',
+    Pyramids: 'Great Pyramid',
+    GreatGardens: 'Great Gardens',
+    GreatLibrary: 'Great Library',
+    GreatLighthouse: 'Great Lighthouse',
+    GreatMausoleum: 'Great Mausoleum',
+    GreatStatue: 'Great Statue',
+    GreatWall: 'Great Wall',
+  };
+  const game = JSON.parse(await engine.init(2, [], {}, 'wonder-names', {}));
+  game.players[0].wonder_cards = Object.keys(names);
+  const view = JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(game), 0), 0));
+  assert.deepEqual(Object.fromEntries(view.wonderCards.map((w: any) => [w.id, w.name])), names);
+  for (const [id, name] of Object.entries(names)) assert.equal(wonderName(id), name);
+  assert.equal(officialWonderText('Colosseum: built Pyramids'), 'Great Arena: built Great Pyramid');
+});
 
 test('built wonder effects are public for both players and spectators; private cards stay private', async () => {
   const game = JSON.parse(await engine.init(2, [], {}, 'public-wonders', {}));

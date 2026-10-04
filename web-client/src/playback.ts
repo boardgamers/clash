@@ -1,6 +1,7 @@
 import type { BoardFrame, Game, Pile, View } from './types.ts';
 import { resourceNames } from './types.ts';
 import { activeHistory } from './active-history.ts';
+import { officialWonderText, wonderName } from './wonder-names.ts';
 
 export function recapStart(game: Game, seat: number | undefined, seen = 0): number | null {
   const frames = game.board_history?.frames ?? [];
@@ -134,7 +135,7 @@ export function frameDetails(
       }
     }
     const details: string[] = [];
-    const readable = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2');
+    const readable = wonderName;
     for (const player of frame.players) {
       const own = items.filter((item) => item.player === player.id);
       const gained = [
@@ -181,7 +182,10 @@ export function frameDetails(
         ? details.join(' · ')
         : [description, ...details].join(' · ');
   }
-  return { caption: actor ? `${actor} · ${description}` : description, positions: [...positions] };
+  return {
+    caption: officialWonderText(actor ? `${actor} · ${description}` : description),
+    positions: [...positions],
+  };
 }
 export function frameEffects(game: Game, after: number) {
   return (game.board_history?.frames ?? [])

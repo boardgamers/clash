@@ -15,7 +15,7 @@
       "handler": {
         "priority": 0,
         "request": {
-          "BoolRequest": "Do you want to draw the public wonder card Pyramids?"
+          "BoolRequest": "Do you want to draw the public wonder card Great Pyramid?"
         },
         "origin": {
           "Ability": "Draw Wonder Card"
@@ -349,7 +349,7 @@
                     },
                     {
                       "player": 0,
-                      "Text": "Pyramids is now available to be taken by anyone",
+                      "Text": "Great Pyramid is now available to be taken by anyone",
                       "origin": {
                         "Incident": 40
                       }

@@ -1,11 +1,12 @@
 import { activeHistory } from './active-history.ts';
+import { wonderName } from './wonder-names.ts';
 import { explainBarbarianGains } from './barbarian-journal.ts';
 import type { EventInfo, Game, JournalEntry, LoggedAction, View } from './types.ts';
 
 type Facts = { units: number; cities: number; advances: Set<string>; borrowed?: string };
 type RecordAtAction = { action: LoggedAction; facts: Map<number, Facts>; actor?: number };
 const actionId = (entry: JournalEntry) => entry.id.split('-').slice(0, 4).join('-');
-const displayName = (name: string) => name.replace(/([a-z])([A-Z])/g, '$1 $2');
+const displayName = wonderName;
 
 function publicHistory(game: Game): Map<string, RecordAtAction> {
   const facts = new Map(
@@ -123,6 +124,7 @@ export function explainEvents(
     const outcomes = resolution.filter(
       (next) =>
         next.title.split(' · ')[0] === entry.title ||
+        next.title === 'Barbarian reinforcements' ||
         (info?.baseEffect === 'Gold deposits.' && next.title === 'Gold deposits'),
     );
     entry.event.outcomes = outcomes;

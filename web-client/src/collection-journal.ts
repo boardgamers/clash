@@ -1,4 +1,5 @@
 import { activeHistory } from './active-history.ts';
+import { wonderName } from './wonder-names.ts';
 import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Resource } from './types.ts';
 
 type CityFacts = NonNullable<JournalEntry['collection']>['city'];
@@ -26,10 +27,7 @@ export function collectionCities(game: Game): Map<string, CityFacts> {
             result.set(`${a}-${r}-${t}-${c}`, {
               size: 1 + city.structures.size,
               mood: city.mood,
-              structures: [
-                'Settlement',
-                ...[...city.structures].map((s) => s.split(':')[1].replace(/([a-z])([A-Z])/g, '$1 $2')),
-              ],
+              structures: ['Settlement', ...[...city.structures].map((s) => wonderName(s.split(':')[1]))],
             });
           for (const item of action.items ?? []) {
             const structure = item.Structure;

@@ -21,6 +21,10 @@ use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
+#[path = "barbarians_tests.rs"]
+mod tests;
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct BarbariansMoveRequest {
     pub from: Position,
@@ -354,20 +358,64 @@ fn execute_barbarian_move(
 
 fn reinforce_after_move(game: &mut Game, player: &EventPlayer) {
     let p = game.player(player.index);
-    let barbarian = &get_barbarians_event_player(game, &player.origin);
-    let available = p.available_units().get(&UnitType::Infantry) as usize;
-
+    let barbarian = get_barbarians_player(game).index;
     let cities: Vec<Position> = p
         .cities
         .iter()
-        .flat_map(|c| cities_in_land_range(game, |p| p.index == barbarian.index, c.position, 2))
+        .flat_map(|c| cities_in_land_range(game, |p| p.index == barbarian, c.position, 2))
         .unique()
-        .filter(|&p| get_barbarians_player(game).get_units(p).len() < STACK_LIMIT)
-        .take(available)
+        .filter(|&pos| !get_barbarian_reinforcement_choices(game, pos).is_empty())
         .collect();
-    for pos in cities {
-        gain_unit(game, barbarian, pos, UnitType::Infantry);
+    on_reinforce_barbarians(game, player.index, cities);
+}
+
+pub(crate) fn on_reinforce_barbarians(game: &mut Game, player: usize, mut cities: Vec<Position>) {
+    // Each city is removed after placement. Persist the remainder while a player
+    // chooses, and recheck the shared Barbarian supply before the next placement.
+    while !cities.is_empty() {
+        let Some(remaining) = game.trigger_persistent_event(
+            &[player],
+            |events| &mut events.reinforce_barbarians,
+            cities,
+            PersistentEventType::ReinforceBarbarians,
+        ) else {
+            return;
+        };
+        cities = remaining;
     }
+}
+
+pub(crate) fn reinforce_barbarians() -> Ability {
+    Ability::builder("Barbarian reinforcements", "Reinforce each nearby Barbarian city once.")
+        .add_position_request(
+            |events| &mut events.reinforce_barbarians,
+            1,
+            |game, _, cities| {
+                cities.retain(|pos| !get_barbarian_reinforcement_choices(game, *pos).is_empty());
+                Some(PositionRequest::new(cities.clone(), 1..=1, "Choose a Barbarian city to reinforce"))
+            },
+            |_, selection, cities| {
+                let index = cities.iter().position(|pos| *pos == selection.choice[0]).expect("eligible city");
+                cities.swap(0, index);
+            },
+        )
+        .add_unit_type_request(
+            |events| &mut events.reinforce_barbarians,
+            0,
+            |game, _, cities| {
+                let city = *cities.first()?;
+                Some(UnitTypeRequest::new(
+                    get_barbarian_reinforcement_choices(game, city),
+                    get_barbarians_player(game).index,
+                    &format!("Reinforce {city}: choose Infantry, Cavalry or Elephant. Cavalry and Elephants require an Infantry already in the city."),
+                ))
+            },
+            |game, selection, cities| {
+                let city = cities.remove(0);
+                gain_unit(game, &get_barbarians_event_player(game, &selection.origin), city, selection.choice);
+            },
+        )
+        .build()
 }
 
 pub(crate) fn get_movable_units(
@@ -497,15 +545,17 @@ pub(crate) fn possible_barbarians_spawns(game: &Game, player: &Player) -> Vec<Po
 
 pub(crate) fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
     let barbarian = get_barbarians_player(game);
-    let avail = barbarian.available_units();
-    if !barbarian_fighters().iter().any(|u| avail.has_unit(u)) {
-        return vec![];
-    }
     cities_that_can_add_units(barbarian)
+        .into_iter()
+        .filter(|pos| !get_barbarian_reinforcement_choices(game, *pos).is_empty())
+        .collect()
 }
 
 pub(crate) fn get_barbarian_reinforcement_choices(game: &Game, pos: Position) -> Vec<UnitType> {
     let barbarian = get_barbarians_player(game);
+    if barbarian.get_units(pos).len() >= STACK_LIMIT {
+        return vec![];
+    }
 
     let possible = if barbarian.get_units(pos).iter().any(|u| u.is_infantry()) {
         barbarian_fighters()

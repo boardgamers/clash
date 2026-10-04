@@ -24,7 +24,11 @@ export function explainBarbarianGains(event: JournalEntry, game: Game): void {
         : 'New barbarian city · starts with 1 infantry.';
       if (!moving && units.reduce((n, token) => n + Number(token.value), 0) > 1)
         reason += ' The spawn effect also adds an extra unit to a barbarian city.';
-    } else if (moving && !fallback && units.every((token) => /^infantry at /.test(token.label))) {
+    } else if (
+      moving &&
+      !fallback &&
+      units.every((token) => /^(infantry|cavalry|elephant) at /.test(token.label))
+    ) {
       reason = `Reinforced after barbarian movement · within 2 land spaces of ${triggering ? triggering + '’s' : 'the triggering player’s'} cities.`;
     } else if (!moving) {
       reason = 'Extra reinforcement from this event’s “Barbarians spawn” effect.';

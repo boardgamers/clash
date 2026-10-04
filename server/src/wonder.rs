@@ -60,8 +60,8 @@ impl Wonder {
 impl Display for Wonder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Wonder::Colosseum => write!(f, "Colosseum"),
-            Wonder::Pyramids => write!(f, "Pyramids"),
+            Wonder::Colosseum => write!(f, "Great Arena"),
+            Wonder::Pyramids => write!(f, "Great Pyramid"),
             Wonder::GreatGardens => write!(f, "Great Gardens"),
             Wonder::GreatLibrary => write!(f, "Great Library"),
             Wonder::GreatLighthouse => write!(f, "Great Lighthouse"),
