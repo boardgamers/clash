@@ -28,7 +28,7 @@
     {
       icon: Hourglass,
       title: 'Turns and ages',
-      text: 'Each age has three rounds. Every player takes one turn per round, with three actions. Player cards show turn order and completed turns. Between ages, check objectives, gain a free advance, and draw new cards; you can also change government.',
+      text: 'Each age has three rounds. Every player takes one turn per round, with three actions. Player cards show turn order and who is acting. Between ages, check objectives, gain a free advance, and draw new cards; you can also change government.',
     },
     {
       icon: Trophy,

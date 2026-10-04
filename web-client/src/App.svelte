@@ -730,21 +730,13 @@
                 : 'Current turn'
             : null}
           {@const progressLabel =
-            status === 'done'
-              ? 'Turn complete'
-              : status === 'upcoming'
-                ? 'Turn ahead'
-                : status === 'current'
-                  ? 'Turn in progress'
-                  : status === 'left'
-                    ? 'Left game'
-                    : null}
+            status === 'current' ? 'Turn in progress' : status === 'left' ? 'Left game' : null}
           <button
             class="player-card"
             class:active={!!turnLabel}
             style={`--player:${playerColor(player.index, $session.colorBlind, $session.playerColors)}`}
             title={`Inspect ${player.civilization} (${player.index === $session.seat ? 'You' : player.name}): advances and victory points`}
-            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}.${order ? ` Turn order ${order}.` : ''}${turnLabel ? ` ${turnLabel}.` : ''}${progressLabel ? ` ${progressLabel} this round.` : ''} View resources, advances and scores`}
+            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}.${order ? ` Turn order ${order}.` : ''}${turnLabel ? ` ${turnLabel}.` : ''}${progressLabel ? ` ${progressLabel}.` : ''} View resources, advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -784,12 +776,6 @@
               ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span
               >{#if turnLabel || progressLabel}<span class="player-turn" class:round-inactive={!turnLabel}
                   >{#if turnLabel || status === 'current'}<ArrowRight
-                      size={12}
-                      aria-hidden="true"
-                    />{:else if status === 'done'}<Check
-                      size={12}
-                      aria-hidden="true"
-                    />{:else if status === 'upcoming'}<Hourglass
                       size={12}
                       aria-hidden="true"
                     />{/if}{turnLabel ?? progressLabel}</span

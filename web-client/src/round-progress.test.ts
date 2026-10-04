@@ -43,8 +43,8 @@ test('the next round and a new starting player reset round progress', () => {
     ),
     ['current', 'upcoming', 'upcoming', 'upcoming'],
   );
-  assert.equal(personalRoundLabel(1, 'upcoming'), 'Turn ahead');
-  assert.equal(personalRoundLabel(2, 'done'), 'Turn complete');
+  assert.equal(personalRoundLabel(1, 'upcoming'), null);
+  assert.equal(personalRoundLabel(2, 'done'), null);
   assert.ok(roundProgress(game({ round: 4 }), players).every((p) => p.status === 'done'));
   assert.equal(personalRoundLabel(4, 'done'), null);
 });

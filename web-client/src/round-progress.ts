@@ -40,12 +40,10 @@ export function roundProgress(game: Game | null, players: PlayerView[]): PlayerT
 }
 
 export function personalRoundLabel(round: number, status?: RoundStatus): string | null {
-  if (round > 3 || !status || status === 'left') return null;
-  if (round === 3)
-    return status === 'done'
-      ? 'Final turn complete'
-      : status === 'current'
-        ? 'Your final turn'
-        : 'Final turn ahead';
-  return status === 'done' ? 'Turn complete' : status === 'current' ? 'Your turn' : 'Turn ahead';
+  if (round !== 3 || !status || status === 'left') return null;
+  return status === 'done'
+    ? 'Final turn complete'
+    : status === 'current'
+      ? 'Your final turn'
+      : 'Final turn ahead';
 }
