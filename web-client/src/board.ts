@@ -22,6 +22,7 @@ import { PieceModels, type BuildingKind } from './piece-models';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
 import { CombatOverlay } from './combat-overlay';
+import { PlacementAnimation } from './placement-animation';
 import { activeCombat } from './active-combat';
 import { Swords } from 'lucide-svelte';
 import { mount, unmount } from 'svelte';
@@ -71,23 +72,28 @@ export class World {
   private seaRouteStart: string | null = null;
   private tiles = new Map<string, THREE.Mesh>();
   private pieces: THREE.Group[] = [];
+  private buildings = new Map<string, THREE.Group>();
+  private placement = new PlacementAnimation();
   private motionFrame = 0;
   private settleMotion: (() => void) | null = null;
   private lastBoardCursor = '';
+  private lastBoardFrame = -1;
+  private lastBoardHistory = '';
   private wasPlayback = false;
   private pieceKey(piece: THREE.Group) {
     const d = piece.userData;
     return `${d.kind}:${d.player}:${d.unit ?? d.cityPosition ?? d.position}:${d.building ?? ''}`;
   }
-  private animatePieces(previous: Map<string, THREE.Vector3>) {
+  private animatePieces(previous: Map<string, THREE.Vector3>, appearing: Set<THREE.Group>) {
     const moves = this.pieces
+      .filter((piece) => !appearing.has(piece))
       .map((piece) => ({
         piece,
         from: previous.get(this.pieceKey(piece)),
         to: piece.position.clone(),
         scale: piece.scale.clone(),
       }))
-      .filter((m) => !m.from || m.from.distanceTo(m.to) > 0.02);
+      .filter((m) => m.from && m.from.distanceTo(m.to) > 0.02);
     if (!moves.length) return;
     const start = performance.now();
     this.settleMotion = () => {
@@ -104,7 +110,6 @@ export class World {
         eased = t * t * (3 - 2 * t);
       for (const m of moves) {
         if (m.from) m.piece.position.lerpVectors(m.from, m.to, eased);
-        else m.piece.scale.copy(m.scale).multiplyScalar(0.1 + 0.9 * eased);
       }
       this.invalidate();
       if (t < 1) this.motionFrame = requestAnimationFrame(tick);
@@ -233,7 +238,7 @@ export class World {
       glint.position.set(x, -0.535, z);
       this.scene.add(glint);
     }
-    this.scene.add(this.board, this.rings);
+    this.scene.add(this.board, this.rings, this.placement.group);
     const hoverMaterial = new THREE.MeshBasicMaterial({
       color: '#fff3c9',
       transparent: true,
@@ -769,6 +774,7 @@ export class World {
   }
   private clearBoard() {
     this.settleMotion?.();
+    this.placement.stop();
     this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
@@ -792,6 +798,7 @@ export class World {
     this.board.clear();
     this.tiles.clear();
     this.pieces = [];
+    this.buildings.clear();
     this.labelHost.replaceChildren();
     this.labelPositions = [];
     this.moveMarkerSignature = '';
@@ -857,8 +864,19 @@ export class World {
       !!this.lastBoardCursor &&
       cursor !== this.lastBoardCursor &&
       (playback ? playback.animate : !this.wasPlayback);
-    if (!animate && (s.reducedMotion || !!playback !== this.wasPlayback)) this.settleMotion?.();
+    const boardFrame = playback?.frame?.cursor ?? history?.frames.at(-1)?.cursor ?? s.game.log_index;
+    const placeForward =
+      animate &&
+      boardFrame > this.lastBoardFrame &&
+      historyId === this.lastBoardHistory &&
+      !!playback === this.wasPlayback;
+    if (!animate && (s.reducedMotion || !!playback !== this.wasPlayback)) {
+      this.settleMotion?.();
+      this.placement.stop();
+    }
     this.lastBoardCursor = cursor;
+    this.lastBoardFrame = boardFrame;
+    this.lastBoardHistory = historyId;
     this.wasPlayback = !!playback;
     if (playback) {
       const frame = playback.frame;
@@ -1035,7 +1053,14 @@ export class World {
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
       this.settleMotion?.();
+      this.placement.stop();
       const previous = new Map(this.pieces.map((p) => [this.pieceKey(p), p.position.clone()]));
+      const previousBuildings = new Set(this.buildings.keys());
+      const previousCities = new Set(
+        this.pieces
+          .filter((p) => p.userData.kind === 'city' && !p.userData.building)
+          .map((p) => p.userData.position as string),
+      );
       const hadTiles = this.tiles.size > 0;
       this.clearBoard();
       const models = new PieceModels(
@@ -1225,6 +1250,7 @@ export class World {
               annex.scale.setScalar(additions.length < 3 ? 0.62 : 0.55);
               annex.position.set(ax, 0, az);
               cityModel.add(annex);
+              this.buildings.set(`${city.position}:building:${name}`, annex);
               ordinary.push(annex);
             }
             if (wonders.length) {
@@ -1251,6 +1277,7 @@ export class World {
                 );
                 landmark.userData.wonder = name;
                 cityModel.add(landmark);
+                this.buildings.set(`${city.position}:wonder:${name}`, landmark);
               });
               for (const marker of ownershipPieces) marker.position.x += 0.28;
             }
@@ -1280,6 +1307,7 @@ export class World {
               };
               this.board.add(dock);
               this.pieces.push(dock);
+              this.buildings.set(`${city.position}:building:port`, dock);
             }
             this.board.add(cityModel);
             cityModel.updateWorldMatrix(true, true);
@@ -1496,7 +1524,28 @@ export class World {
           });
         }
       }
-      if (animate) this.animatePieces(previous);
+      const constructing = placeForward
+        ? [...this.buildings]
+            .filter(([key]) => !previousBuildings.has(key) && previousCities.has(key.split(':')[0]))
+            .map(([, model]) => model)
+        : [];
+      const appearing = placeForward
+        ? [
+            ...constructing.map((model) => ({ model, kind: 'building' as const })),
+            ...this.pieces
+              .filter((piece) =>
+                piece.userData.kind === 'unit'
+                  ? !previous.has(this.pieceKey(piece))
+                  : !piece.userData.building && !previousCities.has(piece.userData.position),
+              )
+              .map((model) => ({
+                model,
+                kind: model.userData.kind === 'unit' ? ('unit' as const) : ('building' as const),
+              })),
+          ]
+        : [];
+      if (animate) this.animatePieces(previous, new Set(appearing.map(({ model }) => model)));
+      this.placement.play(appearing, () => this.invalidate());
       // Frame a newly created map, including when the last opponent finishes choosing.
       if (!hadTiles && this.tiles.size > 0) this.reset();
     }
@@ -1819,6 +1868,7 @@ export class World {
   }
   destroy() {
     this.settleMotion?.();
+    this.placement.stop();
     this.resourceOverlay.dispose();
     this.disposed = true;
     this.tileTooltip.destroy();

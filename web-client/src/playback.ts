@@ -6,6 +6,11 @@ import { officialWonderText, wonderName } from './wonder-names.ts';
 export function recapStart(game: Game, seat: number | undefined, seen = 0): number | null {
   const frames = game.board_history?.frames ?? [];
   if (seat === undefined || frames.length < 2 || seen >= frames.at(-1)!.cursor) return null;
+  const responses = latestTurnResponses(frames, seat);
+  if (responses && !frames.slice(responses.end + 1).some((f) => f.actor === seat)) {
+    const start = frameAt(frames, Math.max(seen, frames[responses.start].cursor));
+    return start < responses.end ? start : null;
+  }
   const lastTurn = lastIndex(frames, (f) => f.actor === seat && f.ended_turn);
   if (lastTurn < 0 || frames.slice(lastTurn + 1).some((f) => f.actor === seat)) return null;
   const start = lastIndex(frames, (f) => f.cursor <= Math.max(seen, frames[lastTurn].cursor));
@@ -22,6 +27,8 @@ export function frameAt(frames: BoardFrame[], cursor: number): number {
 export function sinceLastTurn(game: Game, seat: number | undefined) {
   const frames = game.board_history?.frames ?? [];
   if (seat === undefined) return null;
+  const responses = latestTurnResponses(frames, seat);
+  if (responses) return responses;
   let end = frames.length - 1;
   while (end > 0) {
     const boundary = lastIndex(frames.slice(0, end), (f) => f.ended_turn);
@@ -36,6 +43,21 @@ export function sinceLastTurn(game: Game, seat: number | undefined) {
     end = boundary;
   }
   return null;
+}
+
+/** Other players can act during your turn, for example after you capture a city. */
+function latestTurnResponses(frames: BoardFrame[], seat: number) {
+  const end = frames.length - 1;
+  if (end < 1) return null;
+  const boundary = lastIndex(frames.slice(0, end), (f) => f.ended_turn);
+  const owner = frames[end].ended_turn
+    ? frames[end].actor
+    : frames.slice(boundary + 1).find((f) => f.actor !== null)?.actor;
+  if (owner !== seat) return null;
+  const response = lastIndex(frames, (f) => f.actor !== null && f.actor !== seat);
+  if (response <= boundary) return null;
+  const start = lastIndex(frames.slice(0, response), (f) => f.actor === seat);
+  return start > boundary ? { start, end: response } : null;
 }
 
 /** Describe public board changes and the journal entries belonging to each frame. */

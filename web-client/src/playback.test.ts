@@ -112,6 +112,65 @@ test('since last turn spans four players and an age transition without resetting
   });
 });
 
+test('responses after your attack replay from your last choice, not the defender’s earlier turn', () => {
+  // Orderly-dungeon: Maya captures D6, chooses Stelas, then Carthage places
+  // Fanaticism infantry and a settler in D7 during Maya's turn.
+  const frames = [
+    { cursor: 175, actor: 0, ended_turn: true },
+    { cursor: 178, actor: 1, title: 'Taxes' },
+    { cursor: 179, actor: 1, title: 'Build' },
+    { cursor: 181, actor: 1, ended_turn: true },
+    { cursor: 182, actor: 0, title: 'Collect' },
+    { cursor: 187, actor: 0, title: 'Move' },
+    { cursor: 188, actor: 0, title: 'Stelas' },
+    { cursor: 189, actor: 1, title: 'Fanaticism' },
+    { cursor: 190, actor: 1, title: 'Place Settler' },
+  ].map((f) => ({
+    players: [],
+    tiles: [],
+    age: 4,
+    round: 3,
+    title: '',
+    ended_turn: false,
+    ...f,
+  })) as BoardFrame[];
+  const game = { board_history: { id: 'attack-responses', frames } } as Game;
+  assert.deepEqual(sinceLastTurn(game, 0), { start: 6, end: 8 });
+  assert.equal(recapStart(game, 0), 6, 'returning to your turn catches up on the responses');
+  assert.equal(recapStart(game, 0, 189), 7, 'already seen infantry placement stays out');
+  assert.equal(recapStart(game, 0, 190), null);
+  assert.deepEqual(sinceLastTurn(game, 1), { start: 3, end: 8 }, 'defender still sees the whole attack turn');
+  const continued = {
+    ...game,
+    board_history: { ...game.board_history!, frames: [...frames, { cursor: 191, actor: 0 } as BoardFrame] },
+  };
+  assert.deepEqual(sinceLastTurn(continued, 0), { start: 6, end: 8 });
+  assert.equal(recapStart(continued, 0), null, 'do not interrupt after the attacker has resumed');
+  continued.board_history.frames.push({ cursor: 192, actor: 1 } as BoardFrame);
+  assert.deepEqual(sinceLastTurn(continued, 0), { start: 9, end: 10 }, 'later responses use the new handoff');
+  continued.board_history.frames.push(
+    { cursor: 193, actor: 0, ended_turn: true } as BoardFrame,
+    { cursor: 194, actor: 1 } as BoardFrame,
+  );
+  assert.deepEqual(
+    sinceLastTurn(continued, 0),
+    { start: 11, end: 12 },
+    'next ordinary turn uses the usual boundary',
+  );
+});
+
+test('responses during the first turn need no earlier completed turn', () => {
+  const frames = [
+    { cursor: 0, actor: null },
+    { cursor: 1, actor: 0, title: 'Move' },
+    { cursor: 2, actor: 1, title: 'Place Settler' },
+  ] as BoardFrame[];
+  const game = { board_history: { id: 'first-attack', frames } } as Game;
+  assert.deepEqual(sinceLastTurn(game, 0), { start: 1, end: 2 });
+  assert.equal(recapStart(game, 0), 1);
+  assert.equal(sinceLastTurn(game, undefined), null);
+});
+
 test('recap captions and highlights describe public recruitment and movement without coordinates in text', () => {
   const before = {
     cursor: 1,
