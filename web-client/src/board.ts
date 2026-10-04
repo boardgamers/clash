@@ -1,5 +1,12 @@
 import CollectionMapBadge from './CollectionMapBadge.svelte';
-import { collectionYield, collectionBonusLabel, sameCollection } from './collection-yield';
+import {
+  collectionYield,
+  collectionBonusLabel,
+  collectionBonusIndicators,
+  collectionTriggerLabel,
+  collectionStorageWaste,
+  sameCollection,
+} from './collection-yield';
 import type { MapPick } from './types';
 import * as THREE from 'three';
 import { activeCityAbility } from './abilities';
@@ -1575,9 +1582,17 @@ export class World {
         }
       }
     }
-    const collectionChoices =
-      s.mode === 'collect' ? (s.view?.cities.find((c) => c.position === s.city)?.choices ?? []) : [];
-    const collectionSignature = JSON.stringify([collectionChoices, s.selection]);
+    const collectionCity =
+      s.mode === 'collect' ? s.view?.cities.find((c) => c.position === s.city) : undefined;
+    const collectionChoices = collectionCity?.choices ?? [];
+    const collector = s.game?.players.find((p) => p.id === s.seat);
+    const collectionSignature = JSON.stringify([
+      collectionCity,
+      s.selection,
+      s.ballcourts,
+      collector?.resources,
+      collector?.resource_limit,
+    ]);
     if (collectionSignature !== this.collectionSignature) {
       const positions = new Set(collectionChoices.map((c) => c.position));
       for (const [position, badge] of this.collectionBadges) {
@@ -1597,6 +1612,24 @@ export class World {
         );
         const displayed = selectedChoices.length ? selectedChoices : choices;
         const piles = displayed.map((c) => collectionYield(c, s.selection));
+        const triggered = displayed.map((c) =>
+          collectionBonusIndicators(
+            c,
+            s.selection,
+            collectionCity!,
+            Number(!!s.ballcourts && !!collectionCity?.ballcourts),
+          ),
+        );
+        const waste = displayed.map((c) =>
+          collectionStorageWaste(
+            c,
+            s.selection,
+            collectionCity!,
+            collector?.resources,
+            collector?.resource_limit,
+            Number(!!s.ballcourts && !!collectionCity?.ballcourts),
+          ),
+        );
         const previous = this.collectionBadges.get(position);
         const label = previous?.node ?? document.createElement('button');
         if (previous) void unmount(previous.component);
@@ -1622,16 +1655,34 @@ export class World {
               .join(' + '),
           )
           .join(' or ');
-        const bonuses = [...new Set(choices.map(collectionBonusLabel).filter(Boolean))].join(', ');
-        label.title = `${position}: ${amounts}${bonuses ? ` · ${bonuses}` : ''}`;
+        const bonuses = [
+          ...new Set(
+            [...choices.map(collectionBonusLabel), ...triggered.flat().map(collectionTriggerLabel)].filter(
+              Boolean,
+            ),
+          ),
+        ].join(', ');
+        const lost = waste
+          .filter((pile) => Object.values(pile).some(Boolean))
+          .map((pile) =>
+            Object.entries(pile)
+              .map(([r, n]) => `${n} ${r}`)
+              .join(' + '),
+          )
+          .join(' or ');
+        label.title = `${position}: ${amounts}${bonuses ? ` · ${bonuses}` : ''}${lost ? ` · ${lost} will be lost to the storage limit` : ''}`;
         label.setAttribute('aria-label', `Collect at ${label.title}`);
         label.setAttribute('aria-pressed', String(selectedChoices.length > 0));
         label.classList.toggle('selected', selectedChoices.length > 0);
+        label.classList.toggle(
+          'storage-overflow',
+          waste.some((pile) => Object.values(pile).some(Boolean)),
+        );
         this.collectionBadges.set(position, {
           node: label,
           component: mount(CollectionMapBadge, {
             target: label,
-            props: { piles, selected: selectedChoices.length > 0 },
+            props: { piles, selected: selectedChoices.length > 0, bonuses: triggered, waste },
           }),
         });
       }

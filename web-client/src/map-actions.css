@@ -385,6 +385,65 @@
   padding: 0 3px;
   font-size: 10px;
 }
+.collection-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+.collection-waste {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  color: var(--warning, #b57820);
+}
+.collect-map-label.selected .collection-waste {
+  color: #684500;
+}
+.collect-map-label.storage-overflow,
+.collection-tile-options button.storage-overflow,
+.collection-choices button.storage-overflow {
+  background-image: linear-gradient(#cb8a2529, #cb8a2529);
+  border-color: #b57820;
+}
+.collection-choices button.storage-overflow.selected {
+  background-image: linear-gradient(#cb8a2529, #cb8a2529);
+  border-color: #b57820;
+}
+.dark .collection-tile-options button.storage-overflow,
+.dark .collection-choices button.storage-overflow {
+  background-image: linear-gradient(#efb65424, #efb65424);
+  border-color: #c49a57;
+}
+.dark .collection-choices button.storage-overflow.selected {
+  background-image: linear-gradient(#efb65424, #efb65424);
+  border-color: #c49a57;
+}
+.dark .collection-waste {
+  color: #e1b565;
+}
+.dark .collect-map-label.selected .collection-waste {
+  color: #684500;
+}
+.collection-summary .collection-storage-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-left: 2px solid currentColor;
+  background: #b5782012;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.collection-storage-warning > svg {
+  flex-shrink: 0;
+}
+.collection-storage-warning .resource-amount {
+  display: inline-flex;
+  vertical-align: middle;
+}
 .collection-choices .collection-bonus {
   max-width: 215px;
   line-height: 1.4;
@@ -732,6 +791,7 @@
 }
 .board-collection .collection-summary > small,
 .board-collection .collection-summary > .collection-included,
+.board-collection .collection-summary > .collection-storage-warning,
 .board-collection .activation-inline {
   flex-basis: 100%;
 }

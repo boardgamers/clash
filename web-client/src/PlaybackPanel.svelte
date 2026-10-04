@@ -26,11 +26,7 @@
     {#if $session.battles?.length}<BattlePlayback {controller} />{/if}
     <div class="playback-description" aria-live="polite">
       <strong
-        ><History size={16} />{playback.range === 'catch-up'
-          ? 'Since your last turn'
-          : playback.range === 'last-turn'
-            ? 'Last turn'
-            : 'Replay'}
+        ><History size={16} />{playback.range === 'all' ? 'Replay' : 'Since your last turn'}
         {#if playback.end > playback.start}<span class="playback-progress"
             >{atStart
               ? 'Start'
@@ -55,7 +51,7 @@
           onclick={() => controller.stepPlayback(1)}>Next<ChevronRight size={16} /></button
         >
         {#if atEnd}
-          <button aria-label="Replay this turn" onclick={() => controller.restartPlayback()}
+          <button aria-label="Replay these actions" onclick={() => controller.restartPlayback()}
             ><RotateCcw size={16} />Replay</button
           >
         {:else}

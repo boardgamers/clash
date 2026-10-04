@@ -139,7 +139,13 @@ export interface Choice {
 export interface Selection extends Choice {
   times: number;
 }
+export interface CollectionBonus {
+  source: string;
+  minimum: Pile;
+  pile: Pile;
+}
 export interface CityView {
+  collectionBonuses?: CollectionBonus[];
   ballcourts?: boolean;
   draftCard?: boolean;
   attackPirates?: boolean;

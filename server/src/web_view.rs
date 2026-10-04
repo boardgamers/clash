@@ -256,6 +256,9 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         choices.sort_by_key(Value::to_string);
         let reason = if !can_play { Some("Wait for your turn".to_string()) } else if !city.can_activate() { Some("This city has already been activated while angry".to_string()) } else { collect_reason.clone() };
         json!({"position":city.position,"capital":city.position == crate::map::capital_city_position(game,p),"size":city.size(),"capacity":info.max_selection,"maxPerTile":info.max_per_tile,"maxRange2":info.max_range2_tiles,"mood":city.mood_state,"activations":city.activations,"reason":reason,"choices":choices,
+            "collectionBonuses":if crate::content::civilizations::japan::pottery_available(game,p) {
+                vec![json!({"source":"Pottery","minimum":ResourcePile::food(crate::content::civilizations::japan::POTTERY_FOOD),"pile":ResourcePile::culture_tokens(1)})]
+            } else {vec![]},
             "ballcourts":crate::content::civilizations::maya::ballcourts_available(p,city.position),
             "piratePort":crate::content::civilizations::carthage::pirate_port(game,p,city.position),
             "shogunateDraft":p.has_special_advance(crate::special_advance::SpecialAdvance::Shogunate)&&p.can_use_advance(Advance::Draft)&&!p.event_info.contains_key("Shogunate Draft"),
@@ -273,9 +276,9 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         None
     };
     let research_uses_event_marker = advance_choice.is_none()
-        || game.current_event_handler().is_some_and(|handler| {
-            decisions::advance_uses_event_marker(game, handler)
-        });
+        || game
+            .current_event_handler()
+            .is_some_and(|handler| decisions::advance_uses_event_marker(game, handler));
     let mut advances = game.cache.get_advances().iter().map(|(advance, info)| {
         let cost = p.advance_cost(*advance, game, CostTrigger::NoModifiers).cost;
         let payment = cost.first_valid_payment(&p.resources);
@@ -348,7 +351,11 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
 }
 
-fn movement_notes(game: &Game, player: &crate::player::Player, unit: &crate::unit::Unit) -> Vec<&'static str> {
+fn movement_notes(
+    game: &Game,
+    player: &crate::player::Player,
+    unit: &crate::unit::Unit,
+) -> Vec<&'static str> {
     use crate::movement::MovementRestriction;
     let mut notes = unit
         .movement_restrictions
@@ -359,7 +366,9 @@ fn movement_notes(game: &Game, player: &crate::player::Player, unit: &crate::uni
                     opponent.index != player.index
                         && game.can_attack_player(player.index, opponent.index)
                         && opponent.cities.iter().any(|city| {
-                            city.pieces.wonders.contains(&crate::wonder::Wonder::GreatGardens)
+                            city.pieces
+                                .wonders
+                                .contains(&crate::wonder::Wonder::GreatGardens)
                         })
                 })
         })
@@ -377,13 +386,18 @@ fn movement_notes(game: &Game, player: &crate::player::Player, unit: &crate::uni
             MovementRestriction::Fertile => "Cannot attack the Great Gardens this turn",
         })
         .collect::<Vec<_>>();
+    if unit.is_army_unit() && !player.can_use_advance(Advance::Tactics) {
+        notes.push("Requires Tactics to move");
+    }
     if let GameState::Movement(movement) = &game.state {
         if player.index == game.current_player_index
             && unit.is_land_based()
             && movement.current_move.is_none()
             && movement.moved_units.contains(&unit.id)
         {
-            notes.push("Already moved in this Move action · Remaining group moves are for other units");
+            notes.push(
+                "Already moved in this Move action · Remaining group moves are for other units",
+            );
         }
     }
     notes.sort_unstable();
@@ -587,13 +601,18 @@ fn collect_variant_preview(
     {
         return Err("Not enough mood for this action and Ballcourts".into());
     }
-    let effects = collection
+    let mut effects = collection
         .info
         .log
         .iter()
         .map(|(origin, description)| json!({"source":origin.name(game),"description":description}))
         .collect::<Vec<_>>();
-    let total = collection.total;
+    let mut total = collection.total;
+    let pottery = crate::content::civilizations::japan::pottery_bonus(game, p, total.food);
+    if !pottery.is_empty() {
+        effects.push(json!({"source":"Pottery","description":format!("Gain {pottery}")}));
+        total += pottery;
+    }
     let mut after = p.resources.clone() + total.clone();
     let waste = after.apply_resource_limit(&p.resource_limit);
     let mut collect = Collect::new(city, selections, kind);

@@ -1,7 +1,13 @@
 <script lang="ts">
   import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Link, Check } from 'lucide-svelte';
-  import type { Pile, Resource } from './types';
-  let { piles, selected }: { piles: Pile[]; selected: boolean } = $props();
+  import type { CollectionBonus as Bonus, Pile, Resource } from './types';
+  import CollectionIndicators from './CollectionIndicators.svelte';
+  let {
+    piles,
+    selected,
+    bonuses = [],
+    waste = [],
+  }: { piles: Pile[]; selected: boolean; bonuses?: Bonus[][]; waste?: Pile[] } = $props();
   const icons = {
     food: Wheat,
     wood: Trees,
@@ -21,5 +27,6 @@
     {#each Array.from({ length: Math.min(amount!, 3) }) as _}<Icon size={15} aria-hidden="true" />{/each}
     {#if amount! > 3}<b>{amount}</b>{/if}
   {/each}
+  <CollectionIndicators bonuses={bonuses[index] ?? []} waste={waste[index]} />
 {/each}
 {#if selected}<Check size={14} class="collection-check" aria-hidden="true" />{/if}

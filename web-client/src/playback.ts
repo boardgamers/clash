@@ -18,8 +18,8 @@ export function frameAt(frames: BoardFrame[], cursor: number): number {
   );
 }
 
-/** Include the position before the latest opponent turn so its first move can animate. */
-export function lastOpponentTurn(game: Game, seat: number | undefined) {
+/** Replay all intervening turns, including the position before their first action. */
+export function sinceLastTurn(game: Game, seat: number | undefined) {
   const frames = game.board_history?.frames ?? [];
   if (seat === undefined) return null;
   let end = frames.length - 1;
@@ -29,7 +29,10 @@ export function lastOpponentTurn(game: Game, seat: number | undefined) {
       ? frames[end].actor
       : frames.slice(boundary + 1, end + 1).find((f) => f.actor !== null)?.actor;
     const start = Math.max(0, boundary);
-    if (owner != null && owner !== seat && start < end) return { start, end };
+    if (owner != null && owner !== seat && start < end) {
+      const ownEnd = lastIndex(frames.slice(0, end), (f) => f.actor === seat && f.ended_turn);
+      return { start: Math.max(0, ownEnd), end };
+    }
     end = boundary;
   }
   return null;

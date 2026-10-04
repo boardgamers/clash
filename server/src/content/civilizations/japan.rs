@@ -1,7 +1,7 @@
 // Monumental Edition components: https://boardgamegeek.com/image/9490524
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::pay_action;
-use crate::advance::{Advance, gain_advance_without_payment};
+use crate::advance::{Advance, gain_advance_without_payment, is_special_advance_active};
 use crate::card::{HandCard, HandCardLocation};
 use crate::city_pieces::{BUILDINGS, Building};
 use crate::civilization::Civilization;
@@ -47,6 +47,22 @@ impl CardAnnouncement {
 }
 pub(crate) fn shogunate_available(p: &Player) -> bool {
     p.has_special_advance(SpecialAdvance::Shogunate) && !p.event_info.contains_key("Shogunate card")
+}
+pub(crate) const POTTERY_FOOD: u8 = 3;
+
+pub(crate) fn pottery_available(game: &Game, p: &Player) -> bool {
+    p.has_special_advance(SpecialAdvance::Pottery)
+        && is_special_advance_active(SpecialAdvance::Pottery, p.advances, game)
+        && !p.event_info.contains_key("Pottery")
+}
+
+// Shared by the actual reward and the read-only collection preview.
+pub(crate) fn pottery_bonus(game: &Game, p: &Player, food: u8) -> ResourcePile {
+    if food >= POTTERY_FOOD && pottery_available(game, p) {
+        ResourcePile::culture_tokens(1)
+    } else {
+        ResourcePile::empty()
+    }
 }
 pub(crate) fn on_declare_card(game: &mut Game, a: CardAnnouncement) -> Result<(), String> {
     let players = game.human_players_sorted(a.player);
@@ -111,8 +127,9 @@ pub(crate) fn japan() -> Civilization {
     Civilization::new("Japan",vec![
         SpecialAdvanceInfo::builder(SpecialAdvance::Pottery,SpecialAdvanceRequirement::Advance(Advance::Storage),"Pottery","Once per turn, gain 1 culture token when you collect at least 3 food.")
             .add_simple_persistent_event_listener(|e|&mut e.collect,15,|game,p,c|{
-                if c.total.food>=3&&!p.get(game).event_info.contains_key("Pottery") {
-                    p.get_mut(game).event_info.insert("Pottery".into(),"used".into());p.gain_resources(game,ResourcePile::culture_tokens(1));
+                let bonus = pottery_bonus(game, p.get(game), c.total.food);
+                if !bonus.is_empty() {
+                    p.get_mut(game).event_info.insert("Pottery".into(),"used".into());p.gain_resources(game,bonus);
                 }
             }).build(),
         SpecialAdvanceInfo::builder(SpecialAdvance::Horsemanship,SpecialAdvanceRequirement::Advance(Advance::Husbandry),"Horsemanship","You may recruit Cavalry in your cities with a Fortress without a Market. In round 1 when defending a Fortress, one of your Cavalry dice-symbol abilities adds +3 combat value instead of +2.").build(),

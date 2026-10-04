@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { recapStart, lastOpponentTurn, frameAt, frameEffects, frameDetails } from './playback.ts';
+import { recapStart, sinceLastTurn, frameAt, frameEffects, frameDetails } from './playback.ts';
 import type { BoardFrame, Game, LoggedAction } from './types.ts';
 const frames = [
   { cursor: 10, actor: 0, ended_turn: true },
@@ -33,9 +33,9 @@ test('replay cursors clamp to the recorded range; effects identify card types on
   assert.deepEqual(frameEffects(game, 13), []);
 });
 
-test('last turn selects the latest opponent turn, even after returning or starting your own turn', () => {
-  assert.deepEqual(lastOpponentTurn(game, 0), { start: 0, end: 3 });
-  assert.equal(lastOpponentTurn(game, undefined), null);
+test('since last turn includes all intervening players, even after starting your own turn', () => {
+  assert.deepEqual(sinceLastTurn(game, 0), { start: 0, end: 3 });
+  assert.equal(sinceLastTurn(game, undefined), null);
   const later = {
     ...game,
     board_history: {
@@ -47,10 +47,10 @@ test('last turn selects the latest opponent turn, even after returning or starti
       ] as BoardFrame[],
     },
   };
-  assert.deepEqual(lastOpponentTurn(later, 0), { start: 0, end: 3 });
-  assert.deepEqual(lastOpponentTurn(later, 1), { start: 3, end: 5 });
+  assert.deepEqual(sinceLastTurn(later, 0), { start: 0, end: 3 });
+  assert.deepEqual(sinceLastTurn(later, 1), { start: 3, end: 5 });
   assert.deepEqual(
-    lastOpponentTurn(
+    sinceLastTurn(
       {
         ...game,
         board_history: {
@@ -60,18 +60,56 @@ test('last turn selects the latest opponent turn, even after returning or starti
       },
       0,
     ),
-    { start: 3, end: 5 },
+    { start: 0, end: 5 },
     'responses do not split an opponent turn',
   );
   assert.deepEqual(
-    lastOpponentTurn({ ...game, board_history: { id: 'key', frames: frames.slice(1) } }, 0),
+    sinceLastTurn({ ...game, board_history: { id: 'key', frames: frames.slice(1) } }, 0),
     { start: 0, end: 2 },
     'bounded history uses its earliest available position',
   );
-  assert.equal(
-    lastOpponentTurn({ ...game, board_history: { id: 'key', frames: frames.slice(0, 1) } }, 0),
-    null,
-  );
+  assert.equal(sinceLastTurn({ ...game, board_history: { id: 'key', frames: frames.slice(0, 1) } }, 0), null);
+});
+
+test('player 2 round 3 replay includes player 3 round 2 and player 1 round 3', () => {
+  const turns = [
+    { cursor: 20, actor: 1, ended_turn: true, round: 2 },
+    { cursor: 21, actor: 2, round: 2 },
+    { cursor: 22, actor: 1, round: 2 }, // Response during player 3's turn.
+    { cursor: 23, actor: 2, ended_turn: true, round: 3 },
+    { cursor: 24, actor: 0, round: 3 },
+    { cursor: 25, actor: 0, ended_turn: true, round: 3 },
+    { cursor: 26, actor: 1, round: 3 }, // Current own turn stays out of the replay.
+  ] as BoardFrame[];
+  const game = { board_history: { id: 'three-players', frames: turns } } as Game;
+  assert.deepEqual(sinceLastTurn(game, 1), { start: 0, end: 5 });
+  const inProgress = { ...game, board_history: { id: 'three-players', frames: turns.slice(0, 5) } };
+  assert.deepEqual(sinceLastTurn(inProgress, 1), { start: 0, end: 4 });
+  const earlier = [
+    { cursor: 18, actor: 2, ended_turn: true, round: 2 },
+    { cursor: 19, actor: 1, round: 2 },
+    ...turns,
+  ] as BoardFrame[];
+  assert.deepEqual(sinceLastTurn({ ...game, board_history: { id: 'three-players', frames: earlier } }, 1), {
+    start: 2,
+    end: 7,
+  });
+});
+
+test('since last turn spans four players and an age transition without resetting at the round', () => {
+  const frames = [
+    { cursor: 1, actor: 2, ended_turn: true, age: 1, round: 3 },
+    { cursor: 2, actor: 3, ended_turn: true, age: 1, round: 3 },
+    { cursor: 3, actor: null, age: 1, round: 0 },
+    { cursor: 4, actor: 2, age: 1, round: 0 },
+    { cursor: 5, actor: 0, age: 2, round: 1 },
+    { cursor: 6, actor: 0, ended_turn: true, age: 2, round: 1 },
+    { cursor: 7, actor: 1, ended_turn: true, age: 2, round: 1 },
+  ] as BoardFrame[];
+  assert.deepEqual(sinceLastTurn({ board_history: { id: 'four-players', frames } } as Game, 2), {
+    start: 0,
+    end: 6,
+  });
 });
 
 test('recap captions and highlights describe public recruitment and movement without coordinates in text', () => {

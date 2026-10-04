@@ -10,7 +10,7 @@ import { CardDrawTracker } from './card-draws';
 import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
-import { recapStart, lastOpponentTurn, frameAt, frameEffects } from './playback';
+import { recapStart, sinceLastTurn, frameAt, frameEffects } from './playback';
 import { groupPlaybackFrames } from './replay-actions';
 import { battleCues, battleCursor, BATTLE_DURATION, type BattleCue } from './battle-playback';
 import { contextualCards, type CardContext } from './contextual-cards';
@@ -487,7 +487,7 @@ export class Controller {
   replayLastTurn() {
     const s = get(this.session);
     if (!s.game || s.pending) return;
-    const turn = lastOpponentTurn(s.game, s.seat);
+    const turn = sinceLastTurn(s.game, s.seat);
     if (turn) this.startPlayback(false, turn.start, turn.end, 'last-turn');
   }
   startPlayback(

@@ -95,14 +95,20 @@
   import { researchReferences, type ResearchReference } from './research-links';
   import { resources, resourceNames, playerColor, playerSymbol } from './types';
   import { journal, pileText } from './model';
-  import { collectionYield, collectionBonusLabel } from './collection-yield';
+  import {
+    collectionYield,
+    collectionBonusLabel,
+    collectionBonusIndicators,
+    collectionStorageWaste,
+  } from './collection-yield';
+  import CollectionIndicators from './CollectionIndicators.svelte';
   import { movementBonus } from './movement-bonus';
-  import { lastOpponentTurn } from './playback';
+  import { sinceLastTurn } from './playback';
   import { ageCount, ageLabel } from './game-length';
   import { roundProgress, personalRoundLabel } from './round-progress';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
-  const lastTurn = $derived($session.game ? lastOpponentTurn($session.game, $session.seat) : null);
+  const lastTurn = $derived($session.game ? sinceLastTurn($session.game, $session.seat) : null);
   let boardHost: HTMLDivElement;
   let world: World;
   let boardError = $state('');
@@ -1038,10 +1044,10 @@
     <nav class="table-tools" aria-label="Table controls">
       {#if lastTurn && !$session.analysis}<button
           class="last-turn-button"
-          title="Step through the opponent’s last turn"
-          aria-label="Replay last turn"
+          title="Replay all actions since your last turn"
+          aria-label="Replay since your last turn"
           disabled={$session.pending}
-          onclick={() => controller.replayLastTurn()}><History size={19} /><span>Last turn</span></button
+          onclick={() => controller.replayLastTurn()}><History size={19} /><span>Since my turn</span></button
         >{/if}
       <button
         class:active={$session.activityOpen && $session.tab === 'journal'}
@@ -1207,12 +1213,30 @@
               aria-label={`Resource at ${$session.collectionTile}`}
             >
               <strong>{$session.collectionTile}</strong>
-              {#each city?.choices.filter((c) => c.position === $session.collectionTile) ?? [] as choice}<button
+              {#each city?.choices.filter((c) => c.position === $session.collectionTile) ?? [] as choice}{@const waste =
+                  collectionStorageWaste(
+                    choice,
+                    $session.selection,
+                    city!,
+                    current?.resources,
+                    current?.resource_limit,
+                    Number(!!$session.ballcourts && !!city?.ballcourts),
+                  )}<button
+                  class:storage-overflow={Object.values(waste).some(Boolean)}
                   class="secondary"
                   onclick={() => {
                     controller.toggleChoice(choice);
                     controller.patch({ collectionTile: null });
-                  }}><ResourceAmount pile={choice.pile} /></button
+                  }}
+                  ><ResourceAmount pile={choice.pile} /><CollectionIndicators
+                    {waste}
+                    bonuses={collectionBonusIndicators(
+                      choice,
+                      $session.selection,
+                      city!,
+                      Number(!!$session.ballcourts && !!city?.ballcourts),
+                    )}
+                  /></button
                 >{/each}
             </div>{/if}
           <details class="collection-tile-list" open={!!boardError}>
@@ -1236,9 +1260,17 @@
                     (c) =>
                       c.position === choice.position &&
                       JSON.stringify(c.pile) === JSON.stringify(choice.pile),
-                  )}<button
+                  )}{@const waste = collectionStorageWaste(
+                  choice,
+                  $session.selection,
+                  city!,
+                  current?.resources,
+                  current?.resource_limit,
+                  Number(!!$session.ballcourts && !!city?.ballcourts),
+                )}<button
                   class:selected
-                  aria-label={`${choice.position}: ${pileText(collectionYield(choice, $session.selection))}${choice.bonuses?.length ? ` · ${collectionBonusLabel(choice)}` : ''}`}
+                  class:storage-overflow={Object.values(waste).some(Boolean)}
+                  aria-label={`${choice.position}: ${pileText(collectionYield(choice, $session.selection))}${choice.bonuses?.length ? ` · ${collectionBonusLabel(choice)}` : ''}${Object.values(waste).some(Boolean) ? ` · ${pileText(waste)} will be lost to the storage limit` : ''}`}
                   onmouseenter={() => world?.highlightCoordinate(choice.position)}
                   onmouseleave={() => world?.highlightCoordinate(null)}
                   onfocus={() => world?.highlightCoordinate(choice.position)}
@@ -1247,9 +1279,17 @@
                   disabled={$session.pending}
                   aria-pressed={selected}
                   ><span class="choice-icon {resource}"><Icon size={21} /></span><span
-                    ><strong>{pileText(collectionYield(choice, $session.selection))}</strong><small
-                      >Tile {choice.position}</small
-                    >{#if choice.bonuses?.length}<small
+                    ><strong
+                      >{pileText(collectionYield(choice, $session.selection))}<CollectionIndicators
+                        {waste}
+                        bonuses={collectionBonusIndicators(
+                          choice,
+                          $session.selection,
+                          city!,
+                          Number(!!$session.ballcourts && !!city?.ballcourts),
+                        )}
+                      /></strong
+                    ><small>Tile {choice.position}</small>{#if choice.bonuses?.length}<small
                         class="collection-bonus"
                         title={collectionBonusLabel(choice)}>{collectionBonusLabel(choice)}</small
                       >{/if}</span
@@ -1265,9 +1305,15 @@
           </details>
           <div class="collection-confirm">
             {#if $session.preview}<div class="collection-summary">
-                {#if Object.values($session.preview.waste).some((n) => n)}<small class="warning"
-                    >Storage is full: {pileText($session.preview.waste)} will be lost.</small
-                  >{/if}
+                {#if Object.values($session.preview.waste).some((n) => n)}<div
+                    class="collection-storage-warning warning"
+                    id="collection-storage-warning"
+                    role="status"
+                  >
+                    <TriangleAlert size={16} aria-hidden="true" /><span
+                      >Storage limit: <ResourceAmount pile={$session.preview.waste} compact={false} /> will be lost.</span
+                    >
+                  </div>{/if}
                 {#each $session.preview.effects ?? [] as effect}
                   {#if /^(Added|Gain|Convert) \d/.test(effect.description)}
                     <div class="collection-included">
@@ -1286,6 +1332,9 @@
               disabled={!$session.preview || $session.pending}
               title={`${collectionCostLabel} · Activates this city`}
               aria-label={`Collect resources${$session.preview ? `: ${pileText($session.preview.total)}` : ''} · ${collectionCostLabel}`}
+              aria-describedby={Object.values($session.preview?.waste ?? {}).some(Boolean)
+                ? 'collection-storage-warning'
+                : undefined}
               onclick={() => controller.collect()}
             >
               <span>{$session.pending ? 'Confirming…' : 'Collect'}</span>

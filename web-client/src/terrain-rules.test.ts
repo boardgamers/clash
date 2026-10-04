@@ -90,3 +90,49 @@ test('leaving mountains uses this group move but does not impose a turn-long sto
   const nextAction = engine.tryMove(moved, JSON.stringify(view.stopMovement), 0);
   assert(destinations(nextAction).length > 0, 'a new Move action can move the unit again');
 });
+
+test('a newly recruited leader needs Tactics to move, and the unit explains why', async () => {
+  let state = await engine.init(2, [], {}, 'leader-needs-tactics', {});
+  const g = JSON.parse(state);
+  const seat = engine.currentPlayer(state);
+  const p = g.players[seat];
+  p.civilization = 'Japan';
+  p.available_leaders = ['GoToba', 'Jimmu', 'Suiko'];
+  p.resources = { mood_tokens: 1, culture_tokens: 1 };
+  state = engine.tryMove(
+    JSON.stringify(g),
+    JSON.stringify({
+      Playing: {
+        Recruit: {
+          city_position: p.cities[0].position,
+          units: { leader: 'GoToba' },
+          payment: p.resources,
+        },
+      },
+    }),
+    seat,
+  );
+  const after = JSON.parse(state);
+  const leader = after.players[seat].units.find((u: any) => typeof u.unit_type === 'object');
+  const info = (raw: string) => JSON.parse(engine.webView(engine.stripSecret(raw, seat), seat)).units;
+  const routes = (raw: string) =>
+    JSON.parse(
+      engine.webQuery(
+        engine.stripSecret(raw, seat),
+        seat,
+        JSON.stringify({ kind: 'movement', units: [leader.id] }),
+      ),
+    ).destinations;
+  assert(
+    info(state)
+      .find((u: any) => u.id === leader.id)
+      .movementNotes.includes('Requires Tactics to move'),
+  );
+  assert.deepEqual(info(state).find((u: any) => u.type === 'Settler').movementNotes, []);
+  assert.deepEqual(routes(state), []);
+  after.players[seat].advances.push('Tactics');
+  state = JSON.stringify(after);
+  assert.deepEqual(info(state).find((u: any) => u.id === leader.id).movementNotes, []);
+  assert(routes(state).length > 0, 'Recruitment does not prevent movement');
+  assert.doesNotThrow(() => engine.tryMove(state, JSON.stringify(routes(state)[0].action), seat));
+});
