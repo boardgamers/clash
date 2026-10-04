@@ -3,7 +3,8 @@
   import { untrack } from 'svelte';
   import { Check, Sparkles, Layers, BookOpen, ChevronRight, Zap } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import type { Decision, Move, Pile } from './types';
+  import type { Decision, Move, Pile, UnitKind } from './types';
+  import { unitInfo } from './city';
   import { resourceNames } from './types';
   import ResourceAmount from './ResourceAmount.svelte';
   import PaymentPicker from './PaymentPicker.svelte';
@@ -115,18 +116,29 @@
 {#snippet options()}
   <div class="decision-options">
     {#each decision.options as option, i}
+      {@const unit =
+        typeof option.value === 'string' && Object.hasOwn(unitInfo, option.value)
+          ? unitInfo[option.value as UnitKind]
+          : null}
+      {@const presented = unit
+        ? {
+            ...option,
+            name: option.value as string,
+            description: option.description || unit.choiceEffect || unit.effect,
+          }
+        : option}
       {@const advance =
         typeof option.value === 'string'
           ? $session.view?.advances.find((a) => a.id === option.value)
           : undefined}
-      {@const Icon = advance ? researchPresentation(advance).icon : null}
+      {@const Icon = unit?.icon ?? (advance ? researchPresentation(advance).icon : null)}
       <button
         class="decision-option"
-        class:has-description={!!option.description}
+        class:has-description={!!presented.description}
         class:card-option={!!option.card}
         class:selected={selected.includes(i)}
-        aria-label={option.name}
-        aria-describedby={option.description ? `${panelId}-option-${i}` : undefined}
+        aria-label={presented.name}
+        aria-describedby={presented.description ? `${panelId}-option-${i}` : undefined}
         aria-pressed={selected.includes(i)}
         disabled={$session.pending ||
           (!selected.includes(i) && decision.max > 1 && selected.length >= decision.max)}
@@ -137,7 +149,7 @@
         onclick={() => toggle(i)}
       >
         {#if option.terrain}<TerrainIcon terrain={option.terrain} />{:else if Icon}<Icon size={19} />{/if}
-        <DecisionOptionContent {option} id={`${panelId}-option-${i}`} />
+        <DecisionOptionContent option={presented} id={`${panelId}-option-${i}`} />
         <span class="decision-selection" aria-hidden="true"
           >{#if selected.includes(i)}<Check size={13} />{/if}</span
         >

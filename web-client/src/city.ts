@@ -29,11 +29,17 @@ export const unitInfo: Record<
     icon: typeof Footprints;
     key: Exclude<keyof RecruitSelection, 'leader'>;
     effect: string;
+    choiceEffect?: string;
     requirement?: { building: string; advance: string };
   }
 > = {
   Settler: { icon: Footprints, key: 'settlers', effect: 'Exploration · Found cities' },
-  Infantry: { icon: Swords, key: 'infantry', effect: '+1 combat value on infantry face · Tactics to move' },
+  Infantry: {
+    icon: Swords,
+    key: 'infantry',
+    effect: '+1 combat value on infantry face · Tactics to move',
+    choiceEffect: '+1 combat value on infantry face',
+  },
   Cavalry: {
     icon: Flag,
     key: 'cavalry',
