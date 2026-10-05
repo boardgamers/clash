@@ -3,7 +3,7 @@ use crate::action::gain_action;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::{Advance, init_great_library};
 use crate::card::{HandCard, HandCardLocation, all_objective_hand_cards, log_card_transfer};
-use crate::city::{City, MoodState, activate_city};
+use crate::city::MoodState;
 use crate::combat_listeners::CombatRoundEnd;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::CustomActionType;
@@ -16,7 +16,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::PaymentConversion;
-use crate::player::{Player, gain_unit};
+use crate::player::gain_unit;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::tactics_card::CombatRole;
@@ -215,7 +215,7 @@ fn great_lighthouse() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatLighthouse,
         "Requires a port to build: \
-        Activate the city: Place a ship on any sea space without enemy ships. \
+        Whenever this city is activated, you may place a free ship on any sea space without enemy ships. \
         Decide the starting player of the next turn.",
         ResourcePile::new(3, 5, 4, 0, 0, 0, 5),
         Advance::Cartography,
@@ -223,24 +223,24 @@ fn great_lighthouse() -> WonderInfo {
     .placement_requirement(Arc::new(|pos, game| {
         game.get_any_city(pos).pieces.port.is_some()
     }))
-    .add_custom_action(
-        CustomActionType::GreatLighthouse,
-        |c| c.any_times().free_action().no_resources(),
-        use_great_lighthouse,
-        |game, p| {
-            great_lighthouse_city(p).can_activate()
-                && p.available_units().ships > 0
-                && !great_lighthouse_spawns(game, p.index).is_empty()
+    .add_position_request(
+        |event| &mut event.city_activated,
+        0,
+        |game, p, position| {
+            let player = p.get(game);
+            if !player.try_get_city(*position).is_some_and(|city| city.pieces.wonders.contains(&Wonder::GreatLighthouse))
+                || player.available_units().ships == 0 { return None; }
+            let choices = great_lighthouse_spawns(game, p.index);
+            if choices.is_empty() { return None; }
+            Some(PositionRequest::new(choices, 0..=1, "Great Lighthouse: place a free ship, or skip"))
+        },
+        |game, s, _| {
+            if let Some(&position) = s.choice.first() {
+                gain_unit(game, &s.player(), position, UnitType::Ship);
+            }
         },
     )
     .build()
-}
-
-pub(crate) fn great_lighthouse_city(p: &Player) -> &City {
-    p.cities
-        .iter()
-        .find(|c| c.pieces.wonders.contains(&Wonder::GreatLighthouse))
-        .expect("city not found")
 }
 
 pub(crate) fn great_lighthouse_spawns(game: &Game, player: usize) -> Vec<Position> {
@@ -251,28 +251,6 @@ pub(crate) fn great_lighthouse_spawns(game: &Game, player: usize) -> Vec<Positio
             (*t == Terrain::Water && game.enemy_player(player, pos).is_none()).then_some(pos)
         })
         .collect_vec()
-}
-
-fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
-    b.add_position_request(
-        |event| &mut event.custom_action,
-        0,
-        |game, p, _| {
-            Some(PositionRequest::new(
-                great_lighthouse_spawns(game, p.index),
-                1..=1,
-                "Select a sea space to place a ship",
-            ))
-        },
-        |game, s, _| {
-            activate_city(
-                great_lighthouse_city(game.player(s.player_index)).position,
-                game,
-                &s.origin,
-            );
-            gain_unit(game, &s.player(), s.choice[0], UnitType::Ship);
-        },
-    )
 }
 
 fn library() -> WonderInfo {

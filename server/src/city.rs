@@ -31,6 +31,7 @@ pub struct City {
     pub mood_state: MoodState,
     pub activations: u32,
     pub activation_mood_decreased: bool, // transient
+    pub activated: bool,                 // transient
     pub angry_activation: bool,
     pub player_index: usize,
     pub position: Position,
@@ -49,6 +50,7 @@ impl City {
             activations: data.activations,
             angry_activation: data.angry_activation,
             activation_mood_decreased: false, // transient, not in data
+            activated: false,
             player_index,
             position: data.position,
             port_position: data.port_position,
@@ -98,6 +100,7 @@ impl City {
             activations: 0,
             angry_activation: false,
             activation_mood_decreased: false, // transient, not in data
+            activated: false,
             player_index,
             position,
             port_position: None,
@@ -344,6 +347,7 @@ pub(crate) fn activate_city_for_collection(
     }
     let was_activated = city.is_activated();
     city.activations += 1;
+    city.activated = true;
     if was_activated {
         city.activation_mood_decreased = true;
         decrease_city_mood(game, position, origin);

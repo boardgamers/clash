@@ -38,6 +38,7 @@ fn public_continuation(event: &crate::content::persistent_events::PersistentEven
         | E::Recruit(_)
         | E::FoundCity(_)
         | E::Collect(_)
+        | E::CityActivated(_)
         | E::CityActivationMoodDecreased(_)
         | E::ShipConstructionConversion(_)
         | E::StopBarbarianMovement(_)

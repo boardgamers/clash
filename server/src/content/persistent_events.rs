@@ -130,6 +130,7 @@ pub enum PersistentEventType {
     CustomAction(CustomActionActivation),
     ChooseActionCard,
     ChooseIncident(IncidentInfo),
+    CityActivated(Position),
     CityActivationMoodDecreased(Position),
     ShipConstructionConversion(Vec<u32>),
 }

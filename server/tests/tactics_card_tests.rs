@@ -127,10 +127,7 @@ fn heavy_resistance_can_resolve_a_battle_at_a_wonder_city() {
         assert!(game.player(0).wonders_owned.contains(*wonder));
         assert!(!game.player(1).wonders_owned.contains(*wonder));
     }
-    for ability in [
-        CustomActionType::GreatLibrary,
-        CustomActionType::GreatLighthouse,
-    ] {
+    for ability in [CustomActionType::GreatLibrary] {
         assert!(game.player(0).special_actions.contains_key(
             &server::content::custom_actions::SpecialAction::Custom(ability)
         ));

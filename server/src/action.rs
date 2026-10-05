@@ -193,14 +193,23 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
         on_action_end(game, player_index);
     }
     let mut city: Option<Position> = None;
+    let mut activated = Vec::new();
     for c in &mut game.player_mut(player_index).cities {
         if c.activation_mood_decreased {
             city = Some(c.position);
         }
         c.activation_mood_decreased = false;
+        if c.activated {
+            activated.push(c.position);
+        }
+        c.activated = false;
     }
     if let Some(pos) = city {
         on_city_activation_mood_decreased(game, player_index, pos);
+    }
+
+    for pos in activated {
+        on_city_activated(game, player_index, pos);
     }
 
     game.trigger_transient_event_with_game_value(
@@ -213,6 +222,15 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
         crate::content::civilizations::carthage::sync_pirates(game, p);
         add_dynamic_victory_points(game, p);
     }
+}
+
+pub(crate) fn on_city_activated(game: &mut Game, player_index: usize, pos: Position) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.city_activated,
+        pos,
+        PersistentEventType::CityActivated,
+    );
 }
 
 pub(crate) fn on_city_activation_mood_decreased(
@@ -301,6 +319,7 @@ pub(crate) fn execute_custom_phase_action(
         CustomAction(a) => on_custom_action(game, player, a),
         ChooseActionCard => on_action_end(game, player),
         ChooseIncident(i) => on_choose_incident(game, player, i),
+        CityActivated(p) => on_city_activated(game, player, p),
         CityActivationMoodDecreased(p) => {
             on_city_activation_mood_decreased(game, player, p);
         }

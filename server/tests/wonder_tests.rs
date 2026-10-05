@@ -86,22 +86,52 @@ fn test_library() {
 
 #[test]
 fn test_lighthouse() {
-    JSON.test(
-        "lighthouse",
-        vec![
-            TestAction::undoable(0, Action::Playing(WonderCard(Wonder::GreatLighthouse)))
-                .skip_json(),
-            TestAction::undoable(0, payment_response(ResourcePile::new(3, 5, 4, 0, 0, 0, 5)))
-                .skip_json(),
-            TestAction::undoable(0, custom_action(CustomActionType::GreatLighthouse)).skip_json(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
-                    "C3",
-                )])),
-            ),
-        ],
+    let game = JSON.load_game("lighthouse");
+    let game = server::game_api::execute(
+        game,
+        Action::Playing(WonderCard(Wonder::GreatLighthouse)),
+        0,
     );
+    let game = server::game_api::execute(
+        game,
+        payment_response(ResourcePile::new(3, 5, 4, 0, 0, 0, 5)),
+        0,
+    );
+    let city = game
+        .player(0)
+        .cities
+        .iter()
+        .find(|c| c.pieces.wonders.contains(&Wonder::GreatLighthouse))
+        .unwrap();
+    let activations = city.activations;
+    let position = city.position;
+    let actions = game.actions_left;
+    let ships = game
+        .player(0)
+        .units
+        .iter()
+        .filter(|u| u.unit_type.is_ship())
+        .count();
+    let game = server::game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+            "C3",
+        )])),
+        0,
+    );
+    assert_eq!(game.player(0).get_city(position).activations, activations);
+    assert_eq!(game.actions_left, actions);
+    assert_eq!(
+        game.player(0)
+            .units
+            .iter()
+            .filter(|u| u.unit_type.is_ship())
+            .count(),
+        ships + 1
+    );
+    assert!(!game.player(0).special_actions.contains_key(
+        &server::content::custom_actions::SpecialAction::Custom(CustomActionType::GreatLighthouse)
+    ));
 }
 
 #[test]
