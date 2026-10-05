@@ -204,15 +204,19 @@ struct ReplayOptions {
 }
 
 #[wasm_bindgen(js_name = "replay")]
-pub fn replay(game: String, options: JsValue) -> String {
+pub fn replay(game: String, options: JsValue) -> Result<String, JsValue> {
     console_error_panic_hook::set_once();
 
-    let r: ReplayGameData = serde_json::from_str(&game).expect("Could not deserialize game data");
+    let r: ReplayGameData = serde_json::from_str(&game).map_err(|e| {
+        JsValue::from_str(&format!(
+            "Cannot replay this save: supported action_log history is required ({e})"
+        ))
+    })?;
     let to = serde_wasm_bindgen::from_value::<ReplayOptions>(options)
-        .ok()
-        .and_then(|o| o.to);
-    let game = replay::replay(r, to);
-    from_game(game)
+        .map_err(|e| JsValue::from_str(&format!("Invalid replay options: {e}")))?
+        .to;
+    let game = replay::replay(r, to).map_err(|e| JsValue::from_str(&e))?;
+    Ok(from_game(game))
 }
 
 #[wasm_bindgen(js_name = "setPlayerMetaData")]

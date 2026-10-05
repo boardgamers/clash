@@ -32,7 +32,8 @@ fn replay(to: Option<&String>) {
     let game = replay::replay(
         data,
         to.map(|s| s.parse::<usize>().expect("Failed to parse replay index")),
-    );
+    )
+    .expect("Could not replay game");
     export(game)
 }
 

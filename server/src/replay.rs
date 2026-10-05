@@ -16,7 +16,6 @@ pub struct ReplayGameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "String::is_empty")]
     seed: String,
-    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     action_log: Vec<ReplayActionLogAge>,
     players: Vec<ReplayPlayerData>,
@@ -59,13 +58,20 @@ pub struct ReplayPlayerData {
 
 /// replay is used to store the game data for replay
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if the game data cannot be replayed
+/// Returns an error if the history is empty, the target is outside the history,
+/// or a recorded action cannot be executed.
 #[must_use]
-pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
+pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
     let log = linear_action_log(mem::take(&mut data.action_log));
+    if log.is_empty() {
+        return Err("Cannot replay an empty action history".to_string());
+    }
     let to = to.unwrap_or(log.len() - 1);
+    if to >= log.len() {
+        return Err(format!("Replay target {to} is outside the action history"));
+    }
     let random = data.options.civilization == CivSetupOption::Random;
     let mut builder = GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
         .seed(data.seed)
@@ -98,14 +104,10 @@ pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
         println!("Executing action {i} {id}: {a:?}");
 
         let player_index = game.active_player();
-        match try_execute_action(game, a.clone(), player_index) {
-            Ok(g) => game = g,
-            Err(e) => {
-                panic!("Failed to execute action {id}, {a:?}: {e}");
-            }
-        }
+        game = try_execute_action(game, a.clone(), player_index)
+            .map_err(|e| format!("Failed to execute action {id}, {a:?}: {e}"))?;
     }
-    game
+    Ok(game)
 }
 
 pub(crate) fn linear_action_log(log: Vec<ReplayActionLogAge>) -> Vec<(String, Action)> {

@@ -11,3 +11,5 @@ Engine 0.4.27 adds per-player `skipRazeCity` settings and automatic end-of-age r
 Engine 0.4.28 allows revising a private civilization draft choice while other players are still choosing. Publish the matching viewer and engine together; the engine exports `canMoveOutOfTurn` and `isLiveUpdate` so replacements do not grant another time increment.
 
 Engine 0.4.29 fixes Star Catalogues offering Great Mausoleum's event discard choice to players who do not own that wonder. Star Catalogues still grants its reward before drawing an event, and Mausoleum owners retain their discard choice.
+
+Engine 0.4.30 makes admin replay throw for saves without supported `action_log` history, empty histories, invalid targets, and illegal recorded moves. Current `log` saves cannot be replayed yet; rejecting them prevents a fresh setup state from overwriting the game. Successful legacy replay remains supported.
