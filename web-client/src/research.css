@@ -304,7 +304,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 5px 9px;
-  padding: 0 12px 12px;
+  margin-top: -5px;
   font-size: 10px;
   color: var(--muted);
 }
@@ -312,6 +312,9 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 2px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
 }
 .research-legend {
   display: flex;

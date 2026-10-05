@@ -1197,22 +1197,6 @@
   flex-basis: 100%;
 }
 
-.research-other-owners {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 6px 0;
-  font-size: 11px;
-  color: var(--muted);
-}
-.research-other-owners span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 5px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-}
 .decision-card-preview {
   background: var(--paper2);
   padding: 12px;

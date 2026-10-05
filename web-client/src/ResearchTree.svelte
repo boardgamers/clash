@@ -349,6 +349,15 @@
                   />{/if}</span
               >
               <span class="research-summary"><ResourceText text={presentation.summary} /></span>
+            {#if researchOwners(view, advance.id, player?.index).length}
+              <span class="research-other-owners" aria-label="Other civilizations with this advance">
+                {#each researchOwners(view, advance.id, player?.index) as owner}
+                  <span title={`Researched by ${owner.civilization} (${owner.name})`}>
+                    <CivilizationEmblem civilization={owner.civilization} size={14} />{owner.civilization}
+                  </span>
+                {/each}
+              </span>
+            {/if}
             </button>
             <div class="research-effects">
               {#if advance.unlocks}<span
@@ -417,15 +426,6 @@
                 {/each}
               {/if}
             </div>{/if}
-            {#if researchOwners(view, advance.id, player?.index).length}
-              <div class="research-other-owners" aria-label="Other civilizations with this advance">
-                {#each researchOwners(view, advance.id, player?.index) as owner}
-                  <span title={`Researched by ${owner.civilization} (${owner.name})`}>
-                    <CivilizationEmblem civilization={owner.civilization} size={14} />{owner.civilization}
-                  </span>
-                {/each}
-              </div>
-            {/if}
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
               {@const UnlockIcon = researchPresentation(unlocked).icon}
               <button
