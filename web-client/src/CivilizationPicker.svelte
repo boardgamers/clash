@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowRight, Crown, GraduationCap, Check, LockKeyhole } from 'lucide-svelte';
+  import { ArrowRight, Crown, GraduationCap, Check, Pencil, X } from 'lucide-svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import ResourceText from './ResourceText.svelte';
   import type { Controller } from './controller';
@@ -35,7 +35,7 @@
               aria-hidden="true"
             ></span>{/if}
           {player.index === $session.seat ? 'You' : player.name} · {draft.ready[player.index]
-            ? 'Locked in'
+            ? 'Submitted'
             : 'Choosing'}
         </span>
       {/each}
@@ -44,7 +44,7 @@
   {#if draft?.waiting && !editing}
     <div class="draft-waiting" role="status">
       {#if draft.chosen}<CivilizationEmblem civilization={draft.chosen} size={40} />
-        <h3>{draft.chosen} locked in</h3>{/if}
+        <h3>{draft.chosen} submitted</h3>{/if}
       <p>
         {draft.chosen
           ? 'Your choice is hidden. Waiting for the other players.'
@@ -52,11 +52,13 @@
       </p>
       {#if draft.chosen && civilizations.length}
         <button
+          aria-label="Change choice"
+          title="Change choice"
           disabled={$session.pending}
           onclick={() => {
             selected = draft.chosen!;
             editing = true;
-          }}>Change choice</button
+          }}><Pencil size={18} aria-hidden="true" /></button
         >
       {/if}
     </div>
@@ -112,16 +114,20 @@
         {/if}
       </div>
       <footer>
-        {#if editing}<button onclick={() => (editing = false)}>Cancel</button>{/if}
+        {#if editing}<button aria-label="Cancel" title="Cancel" onclick={() => (editing = false)}
+            ><X size={18} aria-hidden="true" /></button
+          >{/if}
         {#if draft}<small>Hidden until everyone is ready</small>{/if}
         <button
           class="primary"
+          aria-label={draft ? `Submit ${civilization.name}` : `Play as ${civilization.name}`}
+          title={draft ? `Submit ${civilization.name}` : `Play as ${civilization.name}`}
           disabled={$session.pending}
           onclick={() => {
             controller.submit(civilization.action);
             editing = false;
           }}
-          >{#if draft}<LockKeyhole size={15} />Lock in {civilization.name}{:else}Play as {civilization.name}<ArrowRight
+          >{#if draft}<Check size={18} aria-hidden="true" />{:else}Play as {civilization.name}<ArrowRight
               size={17}
             />{/if}</button
         >
