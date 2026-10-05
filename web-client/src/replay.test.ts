@@ -3,59 +3,76 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
+const move = (game: string, action: unknown, player = engine.currentPlayer(game)) =>
+  engine.tryMove(game, JSON.stringify(action), player);
+const storage = { Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } } };
+const compareState = (actual: string, expected: string) => {
+  const a = JSON.parse(actual),
+    b = JSON.parse(expected);
+  for (const key of [
+    'state',
+    'players',
+    'map',
+    'age',
+    'round',
+    'current_player_index',
+    'starting_player_index',
+    'actions_left',
+    'rng',
+    'action_cards_left',
+    'objective_cards_left',
+    'wonders_left',
+    'incidents_left',
+    'events',
+  ])
+    assert.deepEqual(a[key], b[key], key);
+  assert.equal(engine.logLength(actual), engine.logLength(expected));
+};
 
-const legacyHistory = (game: any) => ({
-  ...game,
-  action_log: game.log.map((age: any) => ({
-    rounds: age.rounds.map((round: any) => ({
-      players: round.turns.map((turn: any) => ({
-        index: turn.actions?.[0]?.player ?? 0,
-        actions: (turn.actions ?? []).map((item: any) => ({ action: item.action })),
-      })),
-    })),
-  })),
+for (const civilization of ['Random', 'ChooseCivilization', 'DraftThree']) {
+  test(`current ${civilization} history reconstructs setup and exact move-count targets`, async () => {
+    let game = await engine.init(3, [], { civilization }, 'current-replay', {});
+    if (civilization === 'ChooseCivilization') {
+      for (const name of ['Babylonia', 'Rome', 'Phoenicia']) game = move(game, { ChooseCivilization: name });
+    } else if (civilization === 'DraftThree') {
+      const offers = JSON.parse(game).civilization_draft.offers;
+      for (const i of [2, 0, 1]) game = move(game, { ChooseCivilization: offers[i][1] }, i);
+    }
+    const setup = game;
+    game = move(game, storage);
+    const advanced = game;
+    game = move(game, { Playing: 'EndTurn' });
+    compareState(engine.replay(game, { to: engine.logLength(setup) }), setup);
+    compareState(engine.replay(game, { to: engine.logLength(advanced) }), advanced);
+    compareState(engine.replay(game, { to: engine.logLength(game) }), game);
+    compareState(engine.replay(game, {}), game);
+  });
+}
+
+test('current replay follows the active undo cursor instead of replaying undone moves', async () => {
+  const setup = await engine.init(2, [], {}, 'undo-replay', {});
+  const advanced = move(setup, storage);
+  const undone = move(advanced, 'Undo');
+  compareState(engine.replay(undone, {}), setup);
 });
 
-test('replay rejects current saves instead of silently replacing them with setup', async () => {
-  const game = await engine.init(3, [], { civilization: 'DraftThree' }, 'replay-safety', {});
-  for (const to of [60, 62]) {
-    assert.throws(
-      () => engine.replay(game, { to }),
-      /Cannot replay this save: supported action_log history is required/,
-    );
-  }
-});
-
-test('replay rejects empty legacy histories and targets beyond their end', async () => {
-  const game = JSON.parse(await engine.init(2, [], {}, 'legacy-replay', {}));
+test('replay rejects absent or empty current history and invalid targets and cursors', async () => {
+  const game = JSON.parse(await engine.init(2, [], {}, 'invalid-replay', {}));
+  const { log, ...withoutHistory } = game;
+  assert.throws(() => engine.replay(JSON.stringify(withoutHistory), {}), /current log history is required/);
+  assert.throws(() => engine.replay(JSON.stringify({ ...game, log: [] }), {}), /empty action history/);
+  assert.throws(() => engine.replay(JSON.stringify(game), { to: 60 }), /outside the action history/);
+  assert.throws(() => engine.replay(JSON.stringify(game), { to: 'invalid' }), /Invalid replay options/);
+  assert.throws(() => engine.replay(JSON.stringify(game), { to: 0 }), /complete action boundary/);
   assert.throws(
-    () => engine.replay(JSON.stringify({ ...game, action_log: [] }), {}),
-    /Cannot replay an empty action history/,
+    () => engine.replay(JSON.stringify({ ...game, log_index: 100 }), {}),
+    /Invalid replay history cursor/,
   );
-  const legacy = JSON.stringify(legacyHistory(game));
-  assert.throws(() => engine.replay(legacy, { to: 60 }), /outside the action history/);
-  assert.throws(() => engine.replay(legacy, { to: 'invalid' }), /Invalid replay options/);
 });
 
-test('supported legacy replay still reconstructs recorded moves and rejects illegal ones', async () => {
-  let game = await engine.init(2, [], {}, 'legacy-replay', {});
-  const player = engine.currentPlayer(game);
-  game = engine.tryMove(
-    game,
-    JSON.stringify({ Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } } }),
-    player,
-  );
-  const saved = JSON.parse(game);
-  const legacy = legacyHistory(saved);
-  const replayed = engine.replay(JSON.stringify(legacy), {});
-  assert.equal(engine.logLength(replayed), engine.logLength(game));
-  assert.deepEqual(JSON.parse(replayed).players, saved.players);
-  legacy.action_log
-    .at(-1)
-    .rounds.at(-1)
-    .players.at(-1)
-    .actions.push({
-      action: { Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } } },
-    });
-  assert.throws(() => engine.replay(JSON.stringify(legacy), {}), /Failed to execute action/);
+test('illegal recorded actions throw instead of returning a partial replay', async () => {
+  const setup = await engine.init(2, [], {}, 'illegal-replay', {});
+  const saved = JSON.parse(move(setup, storage));
+  saved.log.at(-1).rounds.at(-1).turns.at(-1).actions.at(-1).action = { Response: { Bool: true } };
+  assert.throws(() => engine.replay(JSON.stringify(saved), {}), /Failed to replay move/);
 });

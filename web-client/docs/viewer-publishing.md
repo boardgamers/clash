@@ -13,3 +13,5 @@ Engine 0.4.28 allows revising a private civilization draft choice while other pl
 Engine 0.4.29 fixes Star Catalogues offering Great Mausoleum's event discard choice to players who do not own that wonder. Star Catalogues still grants its reward before drawing an event, and Mausoleum owners retain their discard choice.
 
 Engine 0.4.30 makes admin replay throw for saves without supported `action_log` history, empty histories, invalid targets, and illegal recorded moves. Current `log` saves cannot be replayed yet; rejecting them prevents a fresh setup state from overwriting the game. Successful legacy replay remains supported.
+
+Engine 0.4.31 replaces the legacy replay reader with current `log` history. Targets use the history length shown by BGS, the active undo cursor excludes undone moves, and draft civilization choices are reconstructed from setup turns. Recorded actions use normal rule validation; an invalid action or incomplete target throws without returning a partial game. Old `action_log` saves are unsupported.

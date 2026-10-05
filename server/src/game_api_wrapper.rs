@@ -209,7 +209,7 @@ pub fn replay(game: String, options: JsValue) -> Result<String, JsValue> {
 
     let r: ReplayGameData = serde_json::from_str(&game).map_err(|e| {
         JsValue::from_str(&format!(
-            "Cannot replay this save: supported action_log history is required ({e})"
+            "Cannot replay this save: current log history is required ({e})"
         ))
     })?;
     let to = serde_wasm_bindgen::from_value::<ReplayOptions>(options)
