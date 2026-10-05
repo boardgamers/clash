@@ -833,6 +833,56 @@ test('unit decisions open a hex without picking a casualty and lock while a move
   }
 });
 
+test('Ballcourts preserves collection choices and invalidates an oversized draft when disabled', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/collect_free_economy'));
+    const p = game.players[0];
+    p.civilization = 'Maya';
+    p.advances = [...new Set([...p.advances, 'Arts', 'Sports'])];
+    p.resources.mood_tokens = 8;
+    p.cities[0].mood_state = 'Neutral';
+    p.cities[0].activations = 0;
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.beginCollect(p.cities[0].position);
+    const city = app.session().view!.cities.find((a) => a.position === app.session().city)!;
+    assert.ok(city.ballcourts);
+    c.toggleChoice(city.choices[0]);
+    const selected = structuredClone(app.session().selection);
+    const ordinary = app.session().preview!.action;
+    c.setBallcourts(true);
+    assert.deepEqual(app.session().selection, selected);
+    assert.notDeepEqual(app.session().preview!.action, ordinary);
+    c.setBallcourts(false);
+    assert.deepEqual(app.session().selection, selected);
+    assert.deepEqual(app.session().preview!.action, ordinary);
+    c.setBallcourts(true);
+    c.toggleChoice(city.choices.find((a) => a.position !== selected[0].position)!);
+    const extra = structuredClone(app.session().selection);
+    assert.equal(
+      extra.reduce((n, a) => n + a.times, 0),
+      city.capacity + 1,
+    );
+    const boosted = app.session().preview!.action;
+    c.setBallcourts(false);
+    assert.deepEqual(app.session().selection, extra);
+    assert.equal(app.session().preview, null);
+    assert.ok(app.session().error);
+    c.collect();
+    assert.deepEqual(app.sent, []);
+    c.setBallcourts(true);
+    assert.deepEqual(app.session().selection, extra);
+    assert.deepEqual(app.session().preview!.action, boosted);
+    assert.equal(app.session().error, '');
+    c.collect();
+    assert.deepEqual(JSON.parse(app.sent[0]), boosted);
+  } finally {
+    app.close();
+  }
+});
+
 test('changing collection action keeps selected tiles and requotes the submitted action', async () => {
   const app = paymentController(),
     c = app.controller;

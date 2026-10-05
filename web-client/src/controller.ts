@@ -1205,7 +1205,9 @@ export class Controller {
   }
   setBallcourts(enabled: boolean) {
     const s = get(this.session);
-    this.patch({ ballcourts: enabled, selection: [], preview: null, error: '' });
+    if (s.pending || s.playback) return;
+    this.patch({ ballcourts: enabled, preview: null, error: '' });
+    if (s.mode === 'collect') this.switchCollectVariant(s.collectVariant);
     if (s.mode === 'city') this.setRecruits(s.recruits);
   }
   setDraftCard(enabled: boolean) {
