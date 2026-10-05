@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "6.2.4",
-    "@types/node": "24.19.0",
+    "@types/node": "24.19.1",
     "@types/three": "0.180.0",
     "esbuild": "0.28.2",
     "playwright": "1.62.1",
