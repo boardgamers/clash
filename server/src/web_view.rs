@@ -102,6 +102,13 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         );
     let can_play = seat == Some(active) && playing;
     let event_catalog = journal::catalog(game);
+    // Static rules reference: includes no hand identities or deck order.
+    let card_catalog = game.cache.get_action_cards().iter()
+        .chain(game.cache.get_incidents().iter().filter_map(|i| i.action_card.as_ref()))
+        .map(|c| json!({"id":c.id,"name":c.civil_card.name,"description":c.civil_card.description,
+            "free":c.civil_card.action_type.free,
+            "tactics":c.tactics_card.as_ref().map(|t|json!({"name":t.name,"description":t.description}))}))
+        .collect::<Vec<_>>();
     // A reference catalog comes from rules, never the deck or anyone's hand.
     let mut wonder_catalog = game.cache.get_wonders().iter().map(|info| json!({
         "id":info.wonder,"name":info.name(),"description":info.description,
@@ -201,7 +208,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
+        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -267,6 +274,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             } else {vec![]},
             "ballcourts":crate::content::civilizations::maya::ballcourts_available(p,city.position),
             "piratePort":crate::content::civilizations::carthage::pirate_port(game,p,city.position),
+            "shogunateDraftCost":crate::content::advances::warfare::draft_cost(p),
             "shogunateDraft":p.has_special_advance(crate::special_advance::SpecialAdvance::Shogunate)&&p.can_use_advance(Advance::Draft)&&!p.event_info.contains_key("Shogunate Draft"),
             "canActivate":city.can_activate(), "activationMood":after_activation.mood_state,"activationCapacity":after_activation.mood_modified_size(p)})
     }).collect::<Vec<_>>();
@@ -338,7 +346,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         item
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
-    json!({"logOriginNames":log_origin_names,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
+    json!({"logOriginNames":log_origin_names,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "influenceContext":decisions::influence_context(game, seat), "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "wonderCatalog":wonder_catalog, "builtWonders":built_wonders, "decision":decision,
         "civilizations":crate::game_setup::civilization_choices(game, seat).iter().map(|c|json!({"name":c.name,
             "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),
@@ -511,9 +519,29 @@ fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
                 .map(|pile|json!({"name":pile.to_string(),"pile":pile,"action":Action::Response(EventResponse::ResourceReward(pile.clone()))})).collect::<Vec<_>>();
             Some(json!({"name":request.name,"choices":choices}))
         }
-        PersistentEventRequest::BoolRequest(name) => Some(json!({"name":name,"choices":[
-            {"name":"Yes","action":Action::Response(EventResponse::Bool(true))},
-            {"name":"No","action":Action::Response(EventResponse::Bool(false))}]})),
+        PersistentEventRequest::BoolRequest(name) => {
+            let preview = if handler.origin.name(game) == "Great Mausoleum" {
+                match &event.event_type {
+                    PersistentEventType::ChooseIncident(_) => game.incidents_discarded.last().map(|id| {
+                        let card = game.cache.get_incident(*id);
+                        json!({"name":card.name,"rules":card.description(game),
+                            "affected":card.targets.iter().map(|t|match t {
+                                crate::player_events::IncidentTarget::AllPlayers => "All players",
+                                crate::player_events::IncidentTarget::ActivePlayer => "Active player",
+                                crate::player_events::IncidentTarget::SelectedPlayer => "Selected player",
+                            }).collect::<Vec<_>>().join(" · ")})
+                    }),
+                    PersistentEventType::ChooseActionCard => game.action_cards_discarded.last().map(|id| {
+                        let card = game.cache.get_action_card(*id);
+                        json!({"name":card.civil_card.name,"rules":[card.civil_card.description]})
+                    }),
+                    _ => None,
+                }
+            } else { None };
+            Some(json!({"name":name,"preview":preview,"choices":[
+                {"name":"Yes","action":Action::Response(EventResponse::Bool(true))},
+                {"name":"No","action":Action::Response(EventResponse::Bool(false))}]}))
+        },
         _ => None,
     }
 }

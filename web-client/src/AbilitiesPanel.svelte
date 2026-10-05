@@ -12,6 +12,7 @@
     onHighlight,
   }: { controller: Controller; onHighlight: (position: string | null) => void } = $props();
   const session = $derived(controller.session);
+  const drafts = $derived($session.view && controller.shogunateDraftOffers());
   const groups = $derived(groupAbilities($session.view?.specialActions));
   const active = $derived(activeCityAbility($session));
   const selected = $derived(active?.offers.find((offer) => offer.position === $session.abilityCity));
@@ -73,7 +74,7 @@
       aria-label="Close abilities"
       onclick={() => controller.patch({ abilitiesOpen: false })}><X size={18} /></button
     >
-    {#if groups.length}<h2><Sparkles size={21} />Abilities</h2>{/if}
+    {#if groups.length || drafts?.length}<h2><Sparkles size={21} />Abilities</h2>{/if}
     {#each groups as group}
       {@const action = group.offer}
       {@const city = $session.view?.cities.find((c) => c.position === action.activatesCity)}
@@ -99,6 +100,20 @@
           </span></button
         >
       </article>{/each}
+    {#if drafts?.length}
+      <article class="ability-card">
+        <h3>Shogunate · Draft an action card</h3>
+        <p>
+          Once per turn, use Draft to recruit an action card. Spends 1 action and activates the city. Separate
+          from Shogunate's free card-play allowance.
+        </p>
+        <div class="decision-options">
+          {#each drafts as offer}<button onclick={() => controller.beginShogunateDraft(offer.position)}>
+              Draft in {offer.position}<ResourceAmount pile={offer.payment} compact />
+            </button>{/each}
+        </div>
+      </article>
+    {/if}
     <InfluencePicker {controller} {onHighlight} />
   {/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}

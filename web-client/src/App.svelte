@@ -1,5 +1,7 @@
 <script lang="ts">
   import PlaybackPanel from './PlaybackPanel.svelte';
+  import CardReferenceDialog from './CardReferenceDialog.svelte';
+  import { cardReferences, type CardReference, type CardRule } from './card-reference';
   import InfluenceFlow from './InfluenceFlow.svelte';
   import BattlePlayback from './BattlePlayback.svelte';
   import PublicEffects from './PublicEffects.svelte';
@@ -116,6 +118,11 @@
   let fullscreenEnabled = $state(false);
   let fullscreen = $state(false);
   let confirmEnd = $state(false);
+  let cardReference = $state<CardRule | null>(null);
+  const journalCards = $derived(cardReferences($session.view));
+  function showJournalCard(reference: CardReference) {
+    cardReference = reference.card;
+  }
   let researchReference = $state<{ target: ResearchReference; view: View } | null>(null);
   let seaTooltipDismissed = $state(false);
   let mapMinimized = $state(false);
@@ -268,7 +275,9 @@
         (!!$session.view?.units?.length || !!$session.view?.nomadCities?.length)),
   );
   let abilitiesAvailable = $derived(
-    !!$session.view?.specialActions?.length || !!$session.view?.influence?.length,
+    !!$session.view?.specialActions?.length ||
+      !!$session.view?.influence?.length ||
+      !!($session.view && controller.shogunateDraftOffers().length),
   );
   let objectiveDecision = $derived($session.view?.objectiveDecision);
   let choiceDecision = $derived($session.view?.choiceDecision);
@@ -445,6 +454,8 @@
             text={entry.title}
             {research}
             onResearch={showJournalResearch}
+            cards={journalCards}
+            onCard={showJournalCard}
             positions={mapPositions}
             {...coordinateInteraction}
           /></span
@@ -475,6 +486,8 @@
                 text={token.label}
                 {research}
                 onResearch={showJournalResearch}
+                cards={journalCards}
+                onCard={showJournalCard}
                 positions={mapPositions}
                 {...coordinateInteraction}
               /></span
@@ -489,6 +502,8 @@
           onObjective={showJournalObjective}
           {research}
           onResearch={showJournalResearch}
+          cards={journalCards}
+          onCard={showJournalCard}
           positions={mapPositions}
           {...coordinateInteraction}
         />
@@ -501,6 +516,8 @@
               text={effect.source}
               {research}
               onResearch={showJournalResearch}
+              cards={journalCards}
+              onCard={showJournalCard}
             /></span
           >
           {#each effect.tokens as token}{@const Icon = journalTokenIcons[token.icon]}
@@ -553,6 +570,8 @@
                 text={explanation.text}
                 research={researchReferences(researchCatalog, explanation.player)}
                 onResearch={showJournalResearch}
+                cards={journalCards}
+                onCard={showJournalCard}
               /></span
             >
           </div>
@@ -563,6 +582,8 @@
             text={entry.event.pending}
             {research}
             onResearch={showJournalResearch}
+            cards={journalCards}
+            onCard={showJournalCard}
           />
         </p>{/if}
       {#if entry.event.info}
@@ -576,6 +597,8 @@
                 text={rule}
                 {research}
                 onResearch={showJournalResearch}
+                cards={journalCards}
+                onCard={showJournalCard}
                 positions={mapPositions}
                 {...coordinateInteraction}
               />
@@ -1129,6 +1152,14 @@
           {#if $session.view?.influenceContext}<InfluenceFlow
               context={$session.view.influenceContext}
             />{:else}<h2>{choiceDecision.name}</h2>{/if}
+          {#if choiceDecision.preview}
+            <section class="decision-card-preview" aria-label="Discarded card rules">
+              <h3>{choiceDecision.preview.name}</h3>
+              {#if choiceDecision.preview.affected}<small>Affects: {choiceDecision.preview.affected}</small
+                >{/if}
+              {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
+            </section>
+          {/if}
           <div class="collection-choices">
             {#each choiceDecision.choices as choice}<button
                 class="secondary wide"
@@ -1490,6 +1521,10 @@
         <BattlePlayback {controller} />
       </div>{/if}
   </main>
+  {#if cardReference}<CardReferenceDialog
+      card={cardReference}
+      onDismiss={() => (cardReference = null)}
+    />{/if}
   {#if researchReference}<ResearchTree
       {controller}
       reference={researchReference}

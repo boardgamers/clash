@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { frameResources, describeResources } from './resource-playback.ts';
 import { groupPlaybackFrames } from './replay-actions.ts';
-import { frameDetails, frameEffects } from './playback.ts';
+import { frameDetails, frameEffects, sinceLastTurn, recapStart } from './playback.ts';
 import type { Game, LoggedAction } from './types.ts';
 const gain = (pile: Record<string, number>, origin = 'Taxes', player = 1) => ({
   player,
@@ -215,4 +215,32 @@ test('exploration orientation and ship landing are one move; unrelated movement 
   assert.equal(grouped[1].title, 'Explore');
   assert.equal(grouped[2].title, 'Place Settler');
   assert.equal(frameDetails(frames[1], frames[2], game).caption, 'Carthage · Explore');
+});
+
+test('declining to raze creates no playback step or replay button, while razing stays visible', () => {
+  const game = fixture([
+    {
+      player: 1,
+      action: { Response: { SelectPositions: [] } },
+      items: [{ player: 1, Text: 'Did not raze a city' }],
+    },
+  ]);
+  game.board_history!.frames[1].title = 'Raze city';
+  const grouped = groupPlaybackFrames(game);
+  assert.equal(grouped.length, 1);
+  const clean = { ...game, board_history: { ...game.board_history!, frames: grouped } };
+  assert.equal(sinceLastTurn(clean, 0), null);
+  assert.equal(recapStart(clean, 0), null);
+  game.board_history!.frames[1].effects = [{ player: 1, kind: 'action', label: 'Gain 1 gold' }];
+  assert.equal(groupPlaybackFrames(game).length, 2, 'do not hide rewards or other consequences');
+  game.board_history!.frames[1].effects = [];
+  (game.log![0].rounds[0].turns[0].actions![0].action as any).Response.SelectPositions = ['B1'];
+  assert.equal(groupPlaybackFrames(game).length, 2);
+});
+test('ending an otherwise empty opponent turn does not offer replay', () => {
+  const game = fixture([{ player: 1, action: { Playing: 'EndTurn' } }]);
+  game.board_history!.frames[1].title = 'End turn';
+  game.board_history!.frames[1].ended_turn = true;
+  assert.equal(sinceLastTurn(game, 0), null);
+  assert.equal(recapStart(game, 0), null);
 });

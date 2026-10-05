@@ -72,3 +72,10 @@ export function researchFreeHints(advance: AdvanceView, advances: AdvanceView[])
       : [];
   });
 }
+
+export function researchOwners(view: View | null | undefined, id: string, viewer?: number) {
+  return (
+    view?.players.filter((p) => p.index !== viewer && p.advances.some((a) => a.id === id && !a.borrowed)) ??
+    []
+  );
+}

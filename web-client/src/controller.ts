@@ -1243,6 +1243,31 @@ export class Controller {
     if (s.mode === 'collect') this.switchCollectVariant(s.collectVariant);
     if (s.mode === 'city') this.setRecruits(s.recruits);
   }
+  shogunateDraftOffers() {
+    const s = get(this.session);
+    if (!s.view?.canPlay || s.pending || s.playback) return [];
+    return s.view.cities
+      .filter((c) => c.shogunateDraft)
+      .flatMap((c) => {
+        try {
+          const preview = this.query<NonNullable<Session['recruitPreview']>>({
+            kind: 'recruit',
+            city: c.position,
+            units: {},
+            replaced: [],
+            draftCard: true,
+          });
+          return [{ position: c.position, payment: preview.payment }];
+        } catch {
+          return [];
+        }
+      });
+  }
+  beginShogunateDraft(position: string) {
+    if (!this.shogunateDraftOffers().some((c) => c.position === position)) return;
+    this.openCities(position, 'recruit');
+    this.setDraftCard(true);
+  }
   setDraftCard(enabled: boolean) {
     this.patch({ draftCard: enabled });
     this.setRecruits(get(this.session).recruits);

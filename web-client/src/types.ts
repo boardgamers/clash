@@ -152,6 +152,7 @@ export interface CityView {
   draftCard?: boolean;
   attackPirates?: boolean;
   shogunateDraft?: boolean;
+  shogunateDraftCost?: number;
   piratePort?: boolean;
   capital?: boolean;
   position: string;
@@ -256,6 +257,7 @@ export interface InfluenceContext {
   threshold: number;
 }
 export interface View {
+  cardCatalog?: Pick<ActionCard, 'id' | 'name' | 'description' | 'free' | 'tactics'>[];
   influenceContext?: InfluenceContext | null;
   waitingFor?: { player: number; action: string; source: string | null } | null;
   logOriginNames?: Record<string, string>;
@@ -318,7 +320,11 @@ export interface View {
   cityActions: CityActions[];
   settlers: SettlerView[];
   stopMovement: Move | null;
-  choiceDecision?: { name: string; choices: { name: string; pile?: Pile; action: Move }[] } | null;
+  choiceDecision?: {
+    name: string;
+    preview?: { name: string; rules: string[]; affected?: string } | null;
+    choices: { name: string; pile?: Pile; action: Move }[];
+  } | null;
   advances: AdvanceView[];
   objectiveCards: {
     id: number;

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Link } from 'lucide-svelte';
+  import type { CardReference } from './card-reference';
   import { journalParts } from './model';
   import { namedTextParts, researchTextParts, type ResearchReference } from './research-links';
   let {
@@ -11,6 +12,8 @@
     onLocate,
     research = [],
     onResearch,
+    cards = [],
+    onCard,
     objectives = [],
     onObjective,
   }: {
@@ -22,6 +25,8 @@
     onLocate?: (position: string) => void;
     research?: ResearchReference[];
     onResearch?: (reference: ResearchReference) => void;
+    cards?: CardReference[];
+    onCard?: (reference: CardReference) => void;
     objectives?: { name: string; player: number }[];
     onObjective?: (reference: { name: string; player: number }) => void;
   } = $props();
@@ -31,15 +36,20 @@
       return namedTextParts(part.text, onObjective ? objectives : []).flatMap(({ text, reference }) =>
         reference
           ? [{ text, objective: reference }]
-          : onResearch
-            ? researchTextParts(text, research)
-            : [{ text }],
+          : namedTextParts(text, onCard ? cards : []).flatMap(({ text, reference }) =>
+              reference
+                ? [{ text, card: reference }]
+                : onResearch
+                  ? researchTextParts(text, research)
+                  : [{ text }],
+            ),
       );
     }) as {
       text: string;
       resource?: keyof typeof icons;
       position?: string;
       research?: ResearchReference;
+      card?: CardReference;
       objective?: { name: string; player: number };
     }[],
   );
@@ -55,7 +65,12 @@
   };
 </script>
 
-{#each parts as part}{#if part.objective}<button
+{#each parts as part}{#if part.card}<button
+      class="journal-research-link"
+      title={`View ${part.card.name} rules`}
+      onclick={() => onCard?.(part.card!)}>{part.text}</button
+    >
+  {:else if part.objective}<button
       class="journal-research-link"
       title={`View completed objective ${part.objective.name}`}
       onclick={() => onObjective?.(part.objective!)}>{part.text}</button

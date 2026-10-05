@@ -246,7 +246,9 @@
             disabled={!$session.draftCard && occupiedCapacity >= capacity}
             onchange={(e) => controller.setDraftCard(e.currentTarget.checked)}
           />
-          Shogunate · Draft an action card <ResourceAmount pile={{ mood_tokens: 1 }} /></label
+          Shogunate · Draft an action card <ResourceAmount
+            pile={{ mood_tokens: city.shogunateDraftCost ?? 1 }}
+          /></label
         >{/if}
       {#if city?.piratePort}<label class="ballcourts-toggle"
           ><input
@@ -396,7 +398,7 @@
       <div class="recruit-total">
         <strong>{occupiedCapacity} / {capacity} selected</strong>{#if $session.recruitPreview}<span
             class="recruit-pay-total">You pay <ResourceAmount pile={$session.recruitPreview.payment} /></span
-          >{#if $session.recruitPreview.basePayment && !sameRecruitPayment($session.recruitPreview.basePayment, $session.recruitPreview.payment)}<span
+          >{#if count && $session.recruitPreview.basePayment && !sameRecruitPayment($session.recruitPreview.basePayment, $session.recruitPreview.payment)}<span
               class="recruit-standard-cost"
               >Units normally <ResourceAmount pile={$session.recruitPreview.basePayment} /></span
             >{/if}{#if $session.recruitPreview.moodWillDecrease && city && city.activationMood !== city.mood}<span
@@ -417,7 +419,9 @@
         onclick={() => $session.recruitPreview && controller.submit($session.recruitPreview.action)}
         >{$session.pending
           ? 'Confirming…'
-          : `Recruit ${count || ''} ${count === 1 ? 'unit' : 'units'}`}</button
+          : $session.draftCard && !count
+            ? 'Draft action card'
+            : `Recruit ${count || ''} ${count === 1 ? 'unit' : 'units'}${$session.draftCard ? ' & action card' : ''}`}</button
       >
     </footer>{/if}
   {#if $session.error}<p class="city-error" role="alert">{cityReason($session.error, city?.size)}</p>{/if}

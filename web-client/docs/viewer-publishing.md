@@ -21,3 +21,5 @@ Engine 0.4.32 allows Great Explorer to grant a free Seafaring advance when no ad
 Engine 0.4.33 replaces Great Lighthouse's standalone free activation with an optional ship reward after its city activates. Placing the ship costs no additional action or resources and does not activate the city again.
 
 Engine 0.4.34 supplies cultural influence context and upfront costs throughout the attempt. Publish the matching viewer: target and source selection show the full cost, one confirmation carries through the accepted action fee and range payment, and optional rerolls and culture boosts remain explicit choices with the target and roll visible.
+
+Engine 0.4.35 adds public action/event card rules for journal references, discarded card previews including affected players, and Draft's actual Shogunate cost. The matching viewer shows building effects and other civilizations' research, offers Shogunate drafting in Abilities, removes empty raze replay steps, and grounds terrain decorations on their tiles. Great Prophet's Temple cost and Shogunate's independent allowances are explicit in the rules text.

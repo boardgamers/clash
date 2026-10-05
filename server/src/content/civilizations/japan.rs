@@ -140,7 +140,7 @@ pub(crate) fn japan() -> Civilization {
             },|game,s,a|{if let Some(HandCard::ActionCard(id))=s.choice.first(){
                 crate::action_card::discard_action_card(game,s.player_index,*id,&s.origin,HandCardLocation::DiscardPile);a.cancelled=true;s.log(game,"Cancelled the action card. Its action and resource costs are not paid.");
             }}).build(),
-        SpecialAdvanceInfo::builder(SpecialAdvance::Shogunate,SpecialAdvanceRequirement::AnyGovernment,"Shogunate","Once per turn, play an action-cost Action or Event card as a free action. Once per turn, Draft may buy an action card instead of an Infantry.")
+        SpecialAdvanceInfo::builder(SpecialAdvance::Shogunate,SpecialAdvanceRequirement::AnyGovernment,"Shogunate","Once per turn, play an action-cost Action or Event card as a free action. Separately, once per turn, use Draft during a Recruit action to buy an action card instead of an Infantry, paying 1 mood token (2 with Civil Liberties). This still spends an action and activates the recruiting city.")
             .add_bool_request(|e|&mut e.declare_action_card,20,|game,p,a|{
                 if a.player==p.index&&shogunate_available(p.get(game))&&!game.cache.get_civil_card(a.card).action_type.free&&game.actions_left==0 { a.shogunate=true; return None; }
                 (a.player==p.index&&shogunate_available(p.get(game))&&!game.cache.get_civil_card(a.card).action_type.free).then(||"Shogunate · Play this card without spending an action?".into())

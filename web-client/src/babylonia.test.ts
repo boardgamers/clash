@@ -187,6 +187,11 @@ test('Star Catalogues offers discarded events only to Great Mausoleum owners', a
     if (ownsMausoleum) {
       assert.deepEqual(after.incidents_left, [39, 51]);
       assert.match(JSON.stringify(after.events), /Great Mausoleum/);
+      const preview = view(after).choiceDecision?.preview;
+      assert.equal(preview?.name, 'Heavy Flood');
+      assert.equal(preview?.affected, 'All players');
+      assert.deepEqual(preview?.rules, view(after).eventCatalog?.find((e) => e.id === 33)?.rules);
+      assert.ok(preview?.rules.length);
       after = move(after, { Response: { Bool: true } });
       assert.deepEqual(after.incidents_left, [39, 51]);
       assert.match(JSON.stringify(after.log), /Drew Heavy Flood from the discard pile/);

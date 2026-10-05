@@ -1560,3 +1560,48 @@ test('influence confirmation carries through only the accepted upfront payments 
     }
   }
 });
+
+test('Shogunate has a visible card-only draft path independent of its free card-play allowance', async () => {
+  let raw = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'shogunate-feedback', {});
+  raw = engine.tryMove(raw, JSON.stringify({ ChooseCivilization: 'Japan' }), engine.currentPlayer(raw));
+  raw = engine.tryMove(raw, JSON.stringify({ ChooseCivilization: 'Rome' }), engine.currentPlayer(raw));
+  const game = JSON.parse(raw),
+    index = engine.currentPlayer(raw),
+    p = game.players[index];
+  p.advances = [...new Set([...p.advances, 'Tactics', 'Draft', 'Nationalism'])];
+  p.resources.mood_tokens = 7;
+  p.event_info = { ...p.event_info, 'Shogunate card': 'used' };
+  p.cities[0].mood_state = 'Neutral';
+  raw = JSON.stringify(game);
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(index);
+    await c.load(engine.stripSecret(raw, index));
+    const offer = c.shogunateDraftOffers()[0];
+    assert.equal(offer.position, p.cities[0].position);
+    assert.deepEqual(offer.payment, { mood_tokens: 1 });
+    c.beginShogunateDraft(offer.position);
+    assert.equal(app.sent.length, 0, 'entry point prepares the confirmation');
+    assert.equal(app.session().mode, 'city');
+    assert.equal(app.session().cityTab, 'recruit');
+    assert.equal(app.session().draftCard, true);
+    assert.deepEqual(app.session().recruits, {});
+    const quote = app.session().recruitPreview!;
+    assert.ok(quote.action);
+    const after = JSON.parse(engine.tryMove(raw, JSON.stringify(quote.action), index));
+    assert.equal(after.players[index].event_info['Shogunate Draft'], 'used');
+    assert.equal(after.players[index].event_info['Shogunate card'], 'used');
+    assert.equal(after.actions_left, game.actions_left - 1);
+    await c.load(engine.stripSecret(JSON.stringify(after), index));
+    assert.deepEqual(c.shogunateDraftOffers(), []);
+    p.advances = p.advances.filter((a: string) => a !== 'Nationalism');
+    p.advances.push('Philosophy', 'Voting', 'CivilLiberties');
+    await c.load(engine.stripSecret(JSON.stringify(game), index));
+    const expensive = c.shogunateDraftOffers()[0];
+    assert.deepEqual(expensive.payment, { mood_tokens: 2 });
+    assert.equal(app.session().view?.cities[0].shogunateDraftCost, 2);
+  } finally {
+    app.close();
+  }
+});

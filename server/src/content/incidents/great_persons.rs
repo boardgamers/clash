@@ -233,7 +233,7 @@ fn great_prophet() -> ActionCard {
         GreatPersonType::ActionCard,
         "Great Prophet",
         &format!(
-            "{} Then, you build a Temple without activating the city.",
+            "{} Then, you may build a Temple, paying its normal resource cost, without spending another action or activating the city.",
             tech_great_person_description(&groups)
         ),
         |c| c.action().no_resources(),

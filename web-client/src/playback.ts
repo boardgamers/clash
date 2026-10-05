@@ -14,7 +14,9 @@ export function recapStart(game: Game, seat: number | undefined, seen = 0): numb
   const lastTurn = lastIndex(frames, (f) => f.actor === seat && f.ended_turn);
   if (lastTurn < 0 || frames.slice(lastTurn + 1).some((f) => f.actor === seat)) return null;
   const start = lastIndex(frames, (f) => f.cursor <= Math.max(seen, frames[lastTurn].cursor));
-  return start >= 0 && start < frames.length - 1 ? start : null;
+  return start >= 0 && start < frames.length - 1 && hasReplayContent(frames, start, frames.length - 1)
+    ? start
+    : null;
 }
 export function frameAt(frames: BoardFrame[], cursor: number): number {
   return Math.max(
@@ -38,7 +40,8 @@ export function sinceLastTurn(game: Game, seat: number | undefined) {
     const start = Math.max(0, boundary);
     if (owner != null && owner !== seat && start < end) {
       const ownEnd = lastIndex(frames.slice(0, end), (f) => f.actor === seat && f.ended_turn);
-      return { start: Math.max(0, ownEnd), end };
+      const first = Math.max(0, ownEnd);
+      return hasReplayContent(frames, first, end) ? { start: first, end } : null;
     }
     end = boundary;
   }
@@ -228,4 +231,12 @@ export function frameEffects(game: Game, after: number) {
 function lastIndex<T>(items: T[], match: (item: T) => boolean) {
   for (let i = items.length - 1; i >= 0; i--) if (match(items[i])) return i;
   return -1;
+}
+
+function hasReplayContent(frames: BoardFrame[], start: number, end: number) {
+  return frames
+    .slice(start + 1, end + 1)
+    .some(
+      (f) => f.actor != null && (!['End turn', 'Earlier position'].includes(f.title) || !!f.effects?.length),
+    );
 }

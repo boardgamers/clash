@@ -36,6 +36,23 @@ export function groupPlaybackFrames(game: Game): BoardFrame[] {
   for (const [index, frame] of frames.entries()) {
     const interval = actions.slice(frames[index - 1]?.cursor ?? frame.cursor, frame.cursor);
     const action = interval.length === 1 ? interval[0] : undefined;
+    const responseMove = action?.action && typeof action.action === 'object' ? action.action.Response : null;
+    const previousFrame = frames[index - 1];
+    if (
+      frame.title === 'Raze city' &&
+      responseMove &&
+      typeof responseMove === 'object' &&
+      'SelectPositions' in responseMove &&
+      Array.isArray(responseMove.SelectPositions) &&
+      !responseMove.SelectPositions.length &&
+      !frame.effects?.length &&
+      previousFrame &&
+      JSON.stringify([frame.tiles, frame.players, frame.combat]) ===
+        JSON.stringify([previousFrame.tiles, previousFrame.players, previousFrame.combat])
+    ) {
+      group = null;
+      continue;
+    }
     const separate = !action || boundary(action, frame) || frame.ended_turn;
     const response = action?.action && typeof action.action === 'object' && 'Response' in action.action;
     const explorationResponse =

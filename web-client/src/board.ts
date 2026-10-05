@@ -664,7 +664,7 @@ export class World {
       cone.position.y = 0.39 + k * 0.18;
       group.add(cone);
     }
-    group.position.set(x, 0.12, z);
+    group.position.set(x, 0, z);
     group.scale.setScalar(scale);
     return group;
   }
@@ -685,12 +685,12 @@ export class World {
           new THREE.ConeGeometry(0.45, height, 5),
           this.material(['#82867a', '#999c8c', '#767d77'][i]),
         );
-        rock.position.set((i - 1) * 0.32, height / 2 + 0.08, (i % 2) * 0.24 - 0.1);
+        rock.position.set((i - 1) * 0.32, height / 2, (i % 2) * 0.24 - 0.1);
         rock.rotation.y = i;
         group.add(rock);
         const cap = this.mesh(new THREE.ConeGeometry(0.14, height * 0.28, 5), this.material('#eee9d7'));
         cap.position.copy(rock.position);
-        cap.position.y = height * 0.87 + 0.08;
+        cap.position.y = height * 0.87;
         cap.rotation.y = i;
         group.add(cap);
       }
@@ -699,7 +699,7 @@ export class World {
       const fieldMat = this.material('#c6b968');
       for (let i = 0; i < 5; i++) {
         const furrow = this.mesh(new THREE.BoxGeometry(0.06, 0.035, 0.7), fieldMat);
-        furrow.position.set(-0.35 + i * 0.14, 0.12, 0.03);
+        furrow.position.set(-0.35 + i * 0.14, 0.0175, 0.03);
         furrow.rotation.y = 0.25;
         group.add(furrow);
       }
@@ -713,6 +713,8 @@ export class World {
         );
         rock.position.set(Math.sin(i * 8) * 0.65, 0.13, Math.cos(i * 5) * 0.6);
         rock.scale.y = 0.5;
+        rock.geometry.computeBoundingBox();
+        rock.position.y = -rock.geometry.boundingBox!.min.y * rock.scale.y;
         group.add(rock);
       }
     }

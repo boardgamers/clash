@@ -35,7 +35,8 @@
     type PublicAdvance,
     type View,
   } from './types';
-  import { researchFreeHints, type ResearchReference } from './research-links';
+  import { buildingInfo } from './city';
+  import { researchOwners, researchFreeHints, type ResearchReference } from './research-links';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   import { researchDecision } from './decision-controls';
@@ -350,7 +351,8 @@
               <span class="research-summary"><ResourceText text={presentation.summary} /></span>
             </button>
             <div class="research-effects">
-              {#if advance.unlocks}<span title={`Unlocks ${advance.unlocks}`}
+              {#if advance.unlocks}<span
+                  title={`${advance.unlocks}: ${buildingInfo[advance.unlocks]?.effect ?? 'Unlocked building'}`}
                   ><Hammer size={12} />{advance.unlocks}</span
                 >{/if}{#each Object.entries(advance.bonus ?? {}) as [resource, amount]}{@const BonusIcon =
                   resourceIcons[resource as Resource]}<span
@@ -415,6 +417,15 @@
                 {/each}
               {/if}
             </div>
+            {#if researchOwners(view, advance.id, player?.index).length}
+              <div class="research-other-owners" aria-label="Other civilizations with this advance">
+                {#each researchOwners(view, advance.id, player?.index) as owner}
+                  <span title={`Researched by ${owner.civilization} (${owner.name})`}>
+                    <CivilizationEmblem civilization={owner.civilization} size={14} />{owner.civilization}
+                  </span>
+                {/each}
+              </div>
+            {/if}
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
               {@const UnlockIcon = researchPresentation(unlocked).icon}
               <button
@@ -469,6 +480,10 @@
             ? 'Ships sail through connected sea tiles. Navigation adds a clockwise or counterclockwise shortcut around the edge to the next sea area. Unexplored regions must be explored before sailing farther.'
             : selected.description}
         </p>
+        {#if selected.unlocks && buildingInfo[selected.unlocks]}<p>
+            <strong>{selected.unlocks}:</strong>
+            {buildingInfo[selected.unlocks].effect}
+          </p>{/if}
         {#if unavailableReason(selected) && !selected.owned}<small>{unavailableReason(selected)}</small>{/if}
         {#if $session.error && !reference}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
