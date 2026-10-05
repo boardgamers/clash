@@ -176,6 +176,9 @@ pub(crate) fn use_great_mausoleum() -> Ability {
             |event| &mut event.choose_incident,
             0,
             |game, p, i| {
+                if !p.get(game).wonders_owned.contains(Wonder::GreatMausoleum) {
+                    return None;
+                }
                 if let Some(card) = game.incidents_discarded.last() {
                     Some(format!(
                         "Do you want to draw {} from the discard pile?",

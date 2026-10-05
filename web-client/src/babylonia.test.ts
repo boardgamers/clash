@@ -165,6 +165,41 @@ test('Star Catalogues asks for its reward before revealing or removing an event 
   );
 });
 
+test('Star Catalogues offers discarded events only to Great Mausoleum owners', async () => {
+  for (const ownsMausoleum of [false, true]) {
+    const game = await babylonia();
+    const index = seat(game);
+    const p = game.players[index];
+    p.advances.push('Math');
+    p.incident_tokens = 1;
+    p.resources.ideas = 0;
+    game.incidents_left = [39, 51];
+    game.incidents_discarded = [33];
+    if (ownsMausoleum) {
+      p.cities[0].city_pieces = { wonders: ['GreatMausoleum'] };
+      game.wonders_left = game.wonders_left.filter((w: string) => w !== 'GreatMausoleum');
+    }
+    const pending = move(game, view(game).advances.find((a) => a.id === 'Astronomy')!.action);
+    assert.deepEqual(pending.incidents_left, [39, 51]);
+    assert.deepEqual(pending.incidents_discarded, [33]);
+    assert.match(JSON.stringify(pending.events), /StarCatalogues/);
+    let after = move(pending, { Response: { ResourceReward: { ideas: 1 } } });
+    if (ownsMausoleum) {
+      assert.deepEqual(after.incidents_left, [39, 51]);
+      assert.match(JSON.stringify(after.events), /Great Mausoleum/);
+      after = move(after, { Response: { Bool: true } });
+      assert.deepEqual(after.incidents_left, [39, 51]);
+      assert.match(JSON.stringify(after.log), /Drew Heavy Flood from the discard pile/);
+    } else {
+      assert.deepEqual(after.incidents_left, [51]);
+      assert.deepEqual(after.incidents_discarded, [33, 39]);
+      assert.match(JSON.stringify(after.log), /triggers the event Uprising/);
+      assert.doesNotMatch(JSON.stringify(after.events), /Great Mausoleum/);
+      assert.doesNotMatch(JSON.stringify(after.log), /Great Mausoleum/);
+    }
+  }
+});
+
 test('Hammurabi discounts only his Fortress and offers Lawgiver alongside normal happiness costs', async () => {
   const game = await babylonia('Hammurabi');
   const index = seat(game),
