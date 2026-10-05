@@ -30,11 +30,7 @@ pub(crate) fn great_explorer() -> ActionCard {
         ),
         |c| c.action().no_resources(),
         groups,
-        |game, player| {
-            !action_explore_request(game, player.index)
-                .choices
-                .is_empty()
-        },
+        |_game, _player| true,
     );
     builder = explore_adjacent_block(builder);
     builder

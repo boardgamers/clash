@@ -67,6 +67,30 @@ function exactChoices(v: View) {
   );
 }
 
+test('Great Explorer grants a free Seafaring advance even when the entire map is explored', () => {
+  const initial = fixture('advances/writing');
+  const p = initial.players[0];
+  p.action_cards = [118];
+  p.advances = ['Farming', 'Mining', 'Fishing', 'Navigation'];
+  initial.map.tiles = initial.map.tiles.map(([position, terrain]: string[]) => [
+    position,
+    terrain === 'Unexplored' ? 'Fertile' : terrain,
+  ]);
+  const offer = view(initial, 0).actionCards!.find((a) => a.id === 118)!;
+  assert.ok(offer.action);
+  let g = move(initial, offer.action);
+  const decision = view(g, 0);
+  exactChoices(decision);
+  assert.deepEqual(decision.decision!.options.map((o) => o.value).sort(), ['Cartography', 'WarShips']);
+  g = move(g, { Response: { SelectAdvance: 'WarShips' } });
+  assert.ok(g.players[0].advances.includes('WarShips'));
+  assert.equal(g.actions_left, initial.actions_left - 1);
+  assert.deepEqual(g.players[0].resources, p.resources);
+  assert.equal(g.players[0].event_tokens, p.event_tokens);
+  assert.ok(!(g.players[0].action_cards ?? []).includes(118));
+  assert.equal(view(g, 0).decision, null);
+});
+
 test('Synergies uses the research tree for both paid choices, with the second restricted to its category', () => {
   const initial = fixture('action_cards/synergies');
   let g = move(initial, { Playing: { ActionCard: 34 } });
