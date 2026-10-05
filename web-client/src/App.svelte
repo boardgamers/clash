@@ -1160,7 +1160,11 @@
               {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
             </section>
           {/if}
-          <div class="collection-choices">
+          <div
+            class="collection-choices"
+            class:binary-choices={choiceDecision.choices.length === 2 &&
+              choiceDecision.choices.every((choice) => choice.name === 'Yes' || choice.name === 'No')}
+          >
             {#each choiceDecision.choices as choice}<button
                 class="secondary wide"
                 aria-label={$session.view?.influenceContext?.stage === 'reroll'
