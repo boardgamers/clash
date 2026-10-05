@@ -364,8 +364,8 @@
                   +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
                 </span>{/each}
             </div>
-            <div class="research-node-cost">
-              {#if advance.owned}<span class="researched-label">Researched</span>{:else}<span
+            {#if !advance.owned}<div class="research-node-cost">
+              <span
                   class="research-flexible-cost"
                   title={borrowing
                     ? 'Borrow until end of turn'
@@ -403,7 +403,7 @@
                       onclick={() => showAdvance(parent.id)}>Needs {parent.name}</button
                     >
                   {:else if !lockedGovernment}{actionReason(advance.reason)}{/if}</span
-                >{/if}
+                >
               {#if !borrowing && !freeResearch}
                 {#each researchFreeHints(advance, advances) as source}
                   <span class="research-free-hint">
@@ -416,7 +416,7 @@
                   </span>
                 {/each}
               {/if}
-            </div>
+            </div>{/if}
             {#if researchOwners(view, advance.id, player?.index).length}
               <div class="research-other-owners" aria-label="Other civilizations with this advance">
                 {#each researchOwners(view, advance.id, player?.index) as owner}
