@@ -1,4 +1,4 @@
-import type { View } from './types.ts';
+import type { AdvanceView, View } from './types.ts';
 
 export interface ResearchReference {
   id: string;
@@ -56,4 +56,19 @@ export function namedTextParts<T extends { name: string }>(
   }
   if (offset < text.length) parts.push({ text: text.slice(offset) });
   return parts;
+}
+
+export function researchFreeHints(advance: AdvanceView, advances: AdvanceView[]) {
+  if (advance.owned || advance.borrowed || advance.costAmount === 0) return [];
+  const sources = [
+    ...(['Engineering', 'Roads'].includes(advance.id) ? ['Math'] : []),
+    ...(['Navigation', 'Cartography'].includes(advance.id) ? ['Astronomy'] : []),
+    ...(advance.group === 'Science' ? ['Priesthood'] : []),
+  ];
+  return sources.flatMap((id) => {
+    const source = advances.find((a) => a.id === id);
+    return source && !source.owned && !source.borrowed
+      ? [{ id, name: source.name, oncePerTurn: id === 'Priesthood' }]
+      : [];
+  });
 }

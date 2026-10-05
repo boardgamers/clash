@@ -35,7 +35,7 @@
     type PublicAdvance,
     type View,
   } from './types';
-  import type { ResearchReference } from './research-links';
+  import { researchFreeHints, type ResearchReference } from './research-links';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   import { researchDecision } from './decision-controls';
@@ -402,6 +402,18 @@
                     >
                   {:else if !lockedGovernment}{actionReason(advance.reason)}{/if}</span
                 >{/if}
+              {#if !borrowing && !freeResearch}
+                {#each researchFreeHints(advance, advances) as source}
+                  <span class="research-free-hint">
+                    <button
+                      class="research-advance-link"
+                      title="No resource cost; the research action and prerequisites still apply."
+                      onclick={() => showAdvance(source.id)}
+                      >Free with {source.name}{source.oncePerTurn ? ' · once per turn' : ''}</button
+                    >
+                  </span>
+                {/each}
+              {/if}
             </div>
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
               {@const UnlockIcon = researchPresentation(unlocked).icon}

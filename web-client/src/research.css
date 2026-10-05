@@ -285,6 +285,9 @@
   color: var(--muted);
   text-align: right;
 }
+.research-node-cost .research-free-hint {
+  flex-basis: 100%;
+}
 .research-event-warning {
   display: inline-flex;
   align-items: center;

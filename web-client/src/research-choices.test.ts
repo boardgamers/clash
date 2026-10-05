@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { researchDecision } from './decision-controls.ts';
+import { researchFreeHints } from './research-links.ts';
 import type { View } from './types.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const npcs = JSON.parse(await engine.init(2, [], {}, 'research-npcs', {})).players.slice(2);
@@ -20,6 +21,37 @@ const view = (g: any, seat = engine.currentPlayer(serialize(g))): View =>
   JSON.parse(engine.webView(engine.stripSecret(serialize(g), seat), seat));
 const move = (g: any, action: unknown) =>
   JSON.parse(engine.tryMove(serialize(g), JSON.stringify(action), engine.currentPlayer(serialize(g))));
+
+test('research hints identify future resource-free unlocks and disappear once their sources are owned', () => {
+  const game = fixture('advances/writing');
+  const p = game.players[0];
+  p.advances = ['Farming', 'Mining', 'Fishing'];
+  const before = view(game).advances;
+  const hint = (id: string) =>
+    researchFreeHints(
+      before.find((a) => a.id === id)!,
+      before,
+    );
+  for (const id of ['Engineering', 'Roads']) assert.equal(hint(id)[0].name, 'Math');
+  for (const id of ['Navigation', 'Cartography']) assert.equal(hint(id)[0].name, 'Astronomy');
+  for (const a of before.filter((a) => a.group === 'Science')) {
+    assert.deepEqual(researchFreeHints(a, before), [
+      { id: 'Priesthood', name: 'Priesthood', oncePerTurn: true },
+    ]);
+  }
+  assert.deepEqual(hint('Storage'), []);
+  p.advances.push('Math', 'Astronomy', 'Myths', 'Priesthood');
+  const after = view(game).advances;
+  for (const id of ['Engineering', 'Roads', 'Navigation', 'Cartography', 'Medicine', 'Metallurgy']) {
+    assert.deepEqual(
+      researchFreeHints(
+        after.find((a) => a.id === id)!,
+        after,
+      ),
+      [],
+    );
+  }
+});
 function exactChoices(v: View) {
   assert.ok(researchDecision(v));
   assert.deepEqual(
