@@ -285,31 +285,31 @@ small {
 /* More color inside the familiar resource silhouettes, without larger badges. */
 .resource-bar .resource-icon svg {
   fill: currentColor;
-  fill-opacity: 0.4;
+  fill-opacity: 0.55;
 }
 .dark .resource-bar .resource-icon {
   background: color-mix(in srgb, currentColor 12%, var(--paper));
 }
 .resource-bar .resource-icon.food {
-  color: #a17b32;
+  color: #b58024;
 }
 .resource-bar .resource-icon.wood {
-  color: #4e7d55;
+  color: #33844d;
 }
 .resource-bar .resource-icon.ore {
-  color: #617e99;
+  color: #527eac;
 }
 .resource-bar .resource-icon.ideas {
-  color: #ae9145;
+  color: #cd9c20;
 }
 .resource-bar .resource-icon.gold {
-  color: #b78b2c;
+  color: #c48b18;
 }
 .resource-bar .resource-icon.mood_tokens {
-  color: #b78242;
+  color: #cf862e;
 }
 .resource-bar .resource-icon.culture_tokens {
-  color: #956d92;
+  color: #a75f96;
 }
 .dark .resource-bar .resource-icon.food {
   color: #d4b975;
@@ -640,6 +640,17 @@ small {
 }
 :is(.city-map-label, .city-mood):is([data-mood='happy'], [data-mood='angry']) svg > :is(path, line) {
   stroke: #fff8e9;
+}
+/* Yellow happy faces avoid relying on red/green separation in color-blind mode. */
+.colorblind :is(.city-map-label, .city-mood)[data-mood='happy'] {
+  color: #e7b83d;
+}
+.colorblind .city-map-label[data-mood='happy'] {
+  background: #fff2bc;
+  border-color: #a3781c;
+}
+.colorblind :is(.city-map-label, .city-mood)[data-mood='happy'] svg > :is(path, line) {
+  stroke: #493817;
 }
 .city-map-name {
   display: none;
@@ -5860,4 +5871,32 @@ small {
 }
 .public-objectives small {
   color: var(--muted);
+}
+
+/* Keep the map guide visible while its toggle is on. */
+.map-control-help .pirate-spawn-key {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+.pirate-spawn-key i {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 3px solid;
+  border-radius: 3px;
+}
+.pirate-spawn-key .pirate-first { border-color: #e96a55; }
+.pirate-spawn-key .pirate-second { border-color: #f7c65b; }
+
+.pirate-spawn-key label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.pirate-spawn-key select {
+  max-width: 150px;
+  padding: 4px 6px;
 }

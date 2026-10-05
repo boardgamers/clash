@@ -169,32 +169,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         IncidentTarget::ActivePlayer,
         priority,
         move |game, p, _i| {
-            let pirates = get_pirates_player(game).index;
-            let player = p.get(game);
-            let mut sea_spaces = game
-                .map
-                .tiles
-                .keys()
-                .filter(|&pos| {
-                    game.map.is_sea(*pos)
-                        && game.players.iter().all(|p| {
-                            p.index == pirates || p.units.iter().all(|u| u.position != *pos)
-                        })
-                })
-                .copied()
-                .collect_vec();
-
-            if blockade {
-                let adjacent = adjacent_sea(player);
-                let blocking = sea_spaces
-                    .iter()
-                    .copied()
-                    .filter(|&pos| adjacent.contains(&pos))
-                    .collect_vec();
-                if !blocking.is_empty() {
-                    sea_spaces = blocking;
-                }
-            }
+            let sea_spaces = pirate_spawn_positions(game, p.index, blockade);
 
             if sea_spaces.is_empty() && blockade {
                 // don't log this twice (blockade is only for first call)
@@ -217,6 +192,42 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
             );
         },
     )
+}
+
+/// Shared by incident placement and the public map guide. Existing pirates do not block placement.
+pub(crate) fn pirate_spawn_positions(
+    game: &Game,
+    player_index: usize,
+    blockade: bool,
+) -> Vec<Position> {
+    let player = game.player(player_index);
+    let mut sea_spaces = game
+        .map
+        .tiles
+        .keys()
+        .filter(|&pos| {
+            game.map.is_sea(*pos)
+                && game
+                    .players
+                    .iter()
+                    .all(|p| p.civilization.is_pirates() || p.units.iter().all(|u| u.position != *pos))
+        })
+        .copied()
+        .collect_vec();
+
+    if blockade {
+        let adjacent = adjacent_sea(player);
+        let blocking = sea_spaces
+            .iter()
+            .copied()
+            .filter(|&pos| adjacent.contains(&pos))
+            .collect_vec();
+        if !blocking.is_empty() {
+            sea_spaces = blocking;
+        }
+    }
+
+    sea_spaces
 }
 
 fn adjacent_sea(player: &Player) -> Vec<Position> {

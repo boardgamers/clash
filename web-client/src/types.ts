@@ -312,6 +312,7 @@ export interface View {
   movementLeft?: number;
   nomadCities?: string[];
   seaRoutes?: string[][];
+  pirateSpawns?: { player: number; first: string[]; second: string[] }[];
   activePlayer: number;
   canPlay: boolean;
   supportedPhase: boolean;
@@ -527,6 +528,8 @@ export interface Session {
   abilityChoice?: string | null;
   abilityCity?: string | null;
   seaRoutes: boolean;
+  pirateSpawns: boolean;
+  pirateSpawnPlayer?: number | null;
   seaRouteStart: string | null;
   game: Game | null;
   view: View | null;

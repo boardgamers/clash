@@ -39,6 +39,7 @@ export class Controller {
     cardsOpen: false,
     abilitiesOpen: false,
     seaRoutes: false,
+    pirateSpawns: false,
     seaRouteStart: null,
     game: null,
     view: null,
@@ -586,6 +587,7 @@ export class Controller {
       help: false,
       scorePlayer: null,
       seaRoutes: false,
+      pirateSpawns: false,
       cardDraws: [],
     });
     this.reportPlayback();
@@ -907,6 +909,7 @@ export class Controller {
       mode: 'overview',
       tilePanel: false,
       seaRoutes: false,
+      pirateSpawns: false,
       error: '',
     });
   }
@@ -987,6 +990,7 @@ export class Controller {
       mode: 'settlers',
       tilePanel: false,
       seaRoutes: false,
+      pirateSpawns: false,
       abilitiesOpen: false,
       error: '',
     });
@@ -1008,6 +1012,7 @@ export class Controller {
     this.closeActivity();
     this.patch({
       seaRoutes: show,
+      pirateSpawns: false,
       tilePanel: false,
       seaRouteStart: null,
       mode: 'overview',
@@ -1015,6 +1020,31 @@ export class Controller {
       selection: [],
       preview: null,
     });
+  }
+  showPirateSpawns(show = true) {
+    this.closeActivity();
+    const s = get(this.session);
+    this.patch({
+      pirateSpawns: show,
+      pirateSpawnPlayer: s.seat ?? s.view?.activePlayer,
+      seaRoutes: false,
+      seaRouteStart: null,
+      tilePanel: false,
+      mode: 'overview',
+      focus: null,
+      city: null,
+      abilitiesOpen: false,
+      abilityChoice: null,
+      abilityCity: null,
+      cardsOpen: false,
+      error: '',
+      selection: [],
+      preview: null,
+    });
+  }
+  setPirateSpawnPlayer(player: number) {
+    if (get(this.session).view?.pirateSpawns?.some((p) => p.player === player))
+      this.patch({ pirateSpawnPlayer: player });
   }
   nextSeaRoute(direction: number) {
     const s = get(this.session);
@@ -1047,6 +1077,7 @@ export class Controller {
       tilePanel: false,
       collectionTile: null,
       seaRoutes: false,
+      pirateSpawns: false,
       selection: [],
       preview: null,
       error: '',
@@ -1134,6 +1165,7 @@ export class Controller {
       cityTab: 'happiness',
       tilePanel: false,
       seaRoutes: false,
+      pirateSpawns: false,
       abilitiesOpen: false,
       happinessSteps: {},
       happinessCity: null,

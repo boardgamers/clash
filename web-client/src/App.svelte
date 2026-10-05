@@ -10,6 +10,7 @@
   import TilePanel from './TilePanel.svelte';
   import { onMount } from 'svelte';
   import {
+    Skull,
     Landmark,
     Compass,
     Wheat,
@@ -737,7 +738,7 @@
             aria-label={`${resourceNames[resource]}: ${current.resources?.[resource] ?? 0}${current.resource_limit?.[resource] !== undefined ? `, storage limit ${current.resource_limit[resource]}` : ''}`}
             title={`${resourceNames[resource]}${current?.resource_limit?.[resource] !== undefined ? ` · Storage limit ${current.resource_limit[resource]}` : ''}`}
           >
-            <span class="resource-icon {resource}"><Icon size={18} strokeWidth={1.65} /></span><span
+            <span class="resource-icon {resource}"><Icon size={20} strokeWidth={1.8} /></span><span
               ><strong
                 >{current.resources?.[resource] ?? 0}{#if current.resource_limit?.[resource] !== undefined}<em
                   >
@@ -868,6 +869,49 @@
             <div><i class="route-line dashed" aria-hidden="true"></i>Shortcut requiring Navigation</div>
             <p>Hover a sea tile to preview. Click here to show all routes.</p>
           </div>
+        </div>
+        <div class="map-control-help">
+          <button
+            aria-label="Show pirate spawn positions"
+            title="Pirate spawn positions"
+            disabled={!!$session.playback ||
+              !!$session.view?.decision ||
+              !!$session.view?.choiceDecision ||
+              !!$session.view?.objectiveDecision ||
+              !!$session.view?.explorationDecision ||
+              !$session.view?.pirateSpawns}
+            class:active={$session.pirateSpawns && $session.mode === 'overview'}
+            aria-pressed={$session.pirateSpawns && $session.mode === 'overview'}
+            onclick={() => controller.showPirateSpawns(!$session.pirateSpawns)}><Skull size={18} /></button
+          >
+          {#if $session.pirateSpawns && $session.mode === 'overview' && !$session.view?.decision && !$session.view?.choiceDecision && !$session.view?.objectiveDecision && !$session.view?.explorationDecision && !$session.abilitiesOpen && !$session.playback}
+            <div class="map-tooltip pirate-spawn-key" role="status">
+              <strong>Pirate spawn positions</strong>
+              <label
+                >Incident player
+                <select
+                  aria-label="Pirate guide incident player"
+                  value={$session.pirateSpawnPlayer ?? $session.seat ?? $session.view?.activePlayer}
+                  onchange={(event) => controller.setPirateSpawnPlayer(Number(event.currentTarget.value))}
+                >
+                  {#each $session.view?.players ?? [] as player}<option value={player.index}
+                      >{player.civilization}</option
+                    >{/each}
+                </select>
+              </label>
+              <div><i class="pirate-first" aria-hidden="true"></i>First ship</div>
+              <div><i class="pirate-second" aria-hidden="true"></i>Second ship can also use these tiles</div>
+              <p>
+                The first ship must be adjacent to this civilization’s city if possible. Otherwise, any
+                eligible sea tile. Player units block placement; existing pirates do not.
+              </p>
+              {#if !$session.view?.pirateSpawns?.find((p) => p.player === ($session.pirateSpawnPlayer ?? $session.seat ?? $session.view?.activePlayer))?.second.length}<p
+                >
+                  No eligible sea tiles right now.
+                </p>{/if}
+              <small>Shows current positions. They may change before the event.</small>
+            </div>
+          {/if}
         </div>
         <span></span>
         <button

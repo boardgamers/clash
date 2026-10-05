@@ -903,6 +903,7 @@ export class World {
         city: null,
         tilePanel: false,
         seaRoutes: false,
+        pirateSpawns: false,
         seaRouteStart: null,
         selectedUnits: [],
         moveDestinations: [],
@@ -1595,7 +1596,23 @@ export class World {
             : s.mode === 'collect'
               ? (s.view?.cities.find((c) => c.position === s.city)?.choices.map((c) => c.position) ?? [])
               : abilityPositions;
-    const selectionSig = JSON.stringify([selected, available]);
+    const pirateGuide =
+      s.pirateSpawns &&
+      s.mode === 'overview' &&
+      !playback &&
+      !s.view?.decision &&
+      !s.view?.choiceDecision &&
+      !s.view?.objectiveDecision &&
+      !exploration &&
+      !ability;
+    const pirateSpawns = pirateGuide
+      ? s.view?.pirateSpawns?.find(
+          (p) => p.player === (s.pirateSpawnPlayer ?? s.seat ?? s.view?.activePlayer),
+        )
+      : undefined;
+    const pirateFirst = pirateSpawns?.first ?? [];
+    const pirateSecond = pirateSpawns?.second ?? [];
+    const selectionSig = JSON.stringify([selected, available, pirateFirst, pirateSecond]);
     if (selectionSig !== this.selectionSignature) {
       this.selectionSignature = selectionSig;
       this.rings.traverse((o) => {
@@ -1607,11 +1624,24 @@ export class World {
         }
       });
       this.rings.clear();
-      for (const pos of new Set([...selected, ...available])) {
+      for (const pos of new Set([...selected, ...available, ...pirateSecond])) {
         const [x, z] = positionXY(pos);
         const ring = this.mesh(
-          new THREE.TorusGeometry(0.99, selected.includes(pos) ? 0.05 : 0.025, 6, 6),
-          new THREE.MeshBasicMaterial({ color: selected.includes(pos) ? '#ffd16b' : '#ebdab3' }),
+          new THREE.TorusGeometry(
+            0.99,
+            selected.includes(pos) || pirateSecond.includes(pos) ? 0.05 : 0.025,
+            6,
+            6,
+          ),
+          new THREE.MeshBasicMaterial({
+            color: pirateFirst.includes(pos)
+              ? '#e96a55'
+              : pirateSecond.includes(pos)
+                ? '#f7c65b'
+                : selected.includes(pos)
+                  ? '#ffd16b'
+                  : '#ebdab3',
+          }),
         );
         ring.rotation.x = -Math.PI / 2;
         ring.position.set(x, selected.includes(pos) ? 0.48 : 0.35, z);

@@ -1605,3 +1605,27 @@ test('Shogunate has a visible card-only draft path independent of its free card-
     app.close();
   }
 });
+
+test('pirate map guide switches incident players without moves and clears when collecting', async () => {
+  const app = paymentController();
+  const c = app.controller;
+  try {
+    const game = JSON.parse(fixture('incidents/pirates_spawn.outcome1'));
+    game.events = [];
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.showSeaRoutes();
+    c.showPirateSpawns();
+    assert.equal(app.session().seaRoutes, false);
+    assert.equal(app.session().pirateSpawns, true);
+    c.setPirateSpawnPlayer(1);
+    assert.equal(app.session().pirateSpawnPlayer, 1);
+    c.setPirateSpawnPlayer(999);
+    assert.equal(app.session().pirateSpawnPlayer, 1);
+    assert.deepEqual(app.sent, []);
+    c.beginCollect('A1');
+    assert.equal(app.session().pirateSpawns, false);
+  } finally {
+    app.close();
+  }
+});

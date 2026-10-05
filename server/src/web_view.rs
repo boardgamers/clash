@@ -161,6 +161,19 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         .flat_map(|(position, _)| crate::move_routes::navigation_paths(&game.map, *position))
         .collect::<Vec<_>>();
     sea_routes.sort_by_key(|path| format!("{path:?}"));
+    let pirate_spawns = game
+        .players
+        .iter()
+        .filter(|p| p.is_human())
+        .map(|p| {
+            let sorted = |blockade| {
+                let mut positions = crate::pirates::pirate_spawn_positions(game, p.index, blockade);
+                positions.sort_by_key(std::string::ToString::to_string);
+                positions
+            };
+            json!({"player":p.index,"first":sorted(true),"second":sorted(false)})
+        })
+        .collect::<Vec<_>>();
     let players = game.players.iter().filter(|p| p.is_human()).map(|p| json!({
         "index": p.index, "name": game.player_name(p.index), "civilization": p.civilization.name, "capital":crate::map::capital_city_position(game,p),
         "score": p.victory_points(game),
@@ -208,7 +221,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "seaRoutes":sea_routes});
+        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -358,7 +371,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate,"movementNotes":movement_notes(game,p,u)})).collect::<Vec<_>>(),
         "nomadCities":p.cities.iter().filter(|c|!crate::content::civilizations::huns::city_destinations(game,p,c.position,&[]).is_empty()).map(|c|c.position).collect::<Vec<_>>(),
         "movementLeft":if let GameState::Movement(m)=&game.state {m.movement_actions_left} else {3},
-        "seaRoutes":sea_routes,
+        "pirateSpawns":pirate_spawns,"seaRoutes":sea_routes,
         "endTurnTradeWarning":if can_play { turn::trade_warning(game, seat) } else { None },
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
