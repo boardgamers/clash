@@ -1,3 +1,4 @@
+import { influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
 import { get, writable } from 'svelte/store';
 import { ChatController } from '@boardgamers/protocol/chat';
@@ -82,6 +83,8 @@ export class Controller {
   private cardDraws = new CardDrawTracker();
   private submittedMove: Move | null = null;
   private quotedActionPayment: Pile | null = null;
+  private quotedInfluenceRangePayment: Pile | null = null;
+  private influenceAttemptPending = false;
   private cardContinuation:
     | (Pick<
         Session,
@@ -235,6 +238,8 @@ export class Controller {
     this.cardContinuation = null;
     this.submittedMove = null;
     this.quotedActionPayment = null;
+    this.quotedInfluenceRangePayment = null;
+    this.influenceAttemptPending = false;
     this.audio.play('error');
     this.patch({ error: String(error), pending: false, automaticPayment: false });
   }
@@ -254,6 +259,7 @@ export class Controller {
     this.raw = raw;
     this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
+    if (view.influenceContext) this.influenceAttemptPending = true;
     const quotedPayment = this.quotedActionPayment;
     this.quotedActionPayment = null;
     let automaticPayment: Move | null = null;
@@ -288,6 +294,25 @@ export class Controller {
           /* Keep the payment controls if the engine rejects the continuation. */
         }
       }
+    }
+    if (
+      old.pending &&
+      changed &&
+      old.seat === view.activePlayer &&
+      influencePaymentMatches(view, this.quotedInfluenceRangePayment)
+    ) {
+      try {
+        automaticPayment = this.query<{ action: Move }>({
+          kind: 'decision',
+          values: [],
+          payments: [this.quotedInfluenceRangePayment],
+        }).action;
+      } catch {
+        /* Keep the range controls when a quote is rejected. */
+      }
+      this.quotedInfluenceRangePayment = null;
+    } else if (!view.influenceContext || !['payment', 'range'].includes(view.influenceContext.stage)) {
+      this.quotedInfluenceRangePayment = null;
     }
     const researchChoice = researchDecision(view);
     const newDecision = changed || JSON.stringify(view.decision) !== JSON.stringify(old.view?.decision);
@@ -437,7 +462,13 @@ export class Controller {
       this.audio.play('draw');
     } else if (old.pending && changed && !automaticPayment) {
       this.audio.play(moveSound(this.submittedMove));
-      this.notify('Game updated.');
+      if (!this.influenceAttemptPending) this.notify('Game updated.');
+    }
+    if (this.influenceAttemptPending && changed && !automaticPayment && !game.events?.length) {
+      this.notify(
+        game.successful_cultural_influence ? 'Cultural influence succeeded' : 'Cultural influence failed',
+      );
+      this.influenceAttemptPending = false;
     }
     this.submittedMove = null;
     if (automaticPayment) this.submit(automaticPayment);
@@ -698,6 +729,8 @@ export class Controller {
     this.endPlayback();
     this.dismissEffects(true);
     this.quotedActionPayment = null;
+    this.quotedInfluenceRangePayment = null;
+    this.influenceAttemptPending = false;
     this.moveCache.clear();
     this.cardDraws.reset();
     this.patch({
@@ -1290,6 +1323,13 @@ export class Controller {
     } catch (error) {
       this.patch({ error: String(error) });
     }
+  }
+  startInfluence(move: Move, actionPayment: Pile, rangePayment: Pile) {
+    const s = get(this.session);
+    if (s.pending || s.playback || !s.view?.canPlay) return;
+    this.influenceAttemptPending = true;
+    this.quotedInfluenceRangePayment = { ...rangePayment };
+    this.submit(move, actionPayment);
   }
   submit(move: Move, quotedPayment?: Pile) {
     const s = get(this.session);

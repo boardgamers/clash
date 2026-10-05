@@ -1,5 +1,6 @@
 <script lang="ts">
   import PlaybackPanel from './PlaybackPanel.svelte';
+  import InfluenceFlow from './InfluenceFlow.svelte';
   import BattlePlayback from './BattlePlayback.svelte';
   import PublicEffects from './PublicEffects.svelte';
   import EventMarkers from './EventMarkers.svelte';
@@ -1125,16 +1126,26 @@
             onclick={closeAction}><X size={18} /></button
           >{/if}
         {#if choiceDecision}
-          <h2>{choiceDecision.name}</h2>
+          {#if $session.view?.influenceContext}<InfluenceFlow
+              context={$session.view.influenceContext}
+            />{:else}<h2>{choiceDecision.name}</h2>{/if}
           <div class="collection-choices">
             {#each choiceDecision.choices as choice}<button
                 class="secondary wide"
-                aria-label={choice.pile ? pileText(choice.pile) : choice.name}
+                aria-label={$session.view?.influenceContext?.stage === 'reroll'
+                  ? choice.name === 'Yes'
+                    ? 'Reroll with Buddhism'
+                    : 'Keep this roll'
+                  : choice.pile
+                    ? pileText(choice.pile)
+                    : choice.name}
                 disabled={$session.pending}
                 onclick={() => controller.submit(choice.action)}
-                >{#if choice.pile}<ResourceAmount pile={choice.pile} />{:else}{choice.name}{/if}<ArrowRight
-                  size={17}
-                /></button
+                >{#if choice.pile}<ResourceAmount
+                    pile={choice.pile}
+                  />{:else if $session.view?.influenceContext?.stage === 'reroll'}{choice.name === 'Yes'
+                    ? 'Reroll with Buddhism'
+                    : 'Keep this roll'}{:else}{choice.name}{/if}<ArrowRight size={17} /></button
               >{/each}
           </div>
         {:else if objectiveDecision}

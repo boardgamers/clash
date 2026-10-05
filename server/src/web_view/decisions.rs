@@ -644,3 +644,31 @@ pub(super) fn preview(game: &Game, seat: usize, input: &Value) -> Result<Value, 
     };
     Ok(json!({"action":Action::Response(response)}))
 }
+
+// Keep one attempt's context visible through action fees, range payment and rerolls.
+pub(super) fn influence_context(game: &Game, seat: usize) -> Option<Value> {
+    let event = game.events.last()?;
+    if event.player.index != seat { return None; }
+    let handler = game.current_event_handler()?;
+    match &event.event_type {
+        PersistentEventType::InfluenceCultureBoost(info) => {
+            let stage = match &handler.request {
+                PersistentEventRequest::BoolRequest(_) => "reroll",
+                PersistentEventRequest::Payment(requests) if requests.iter().any(|r| r.optional) => "boost",
+                PersistentEventRequest::Payment(_) => "range",
+                _ => return None,
+            };
+            let a = &info.attempt;
+            Some(json!({"stage":stage,"source":a.starting_city_position,"target":a.position,
+                "name":if a.target_unit.is_some() { "Army unit".to_string() } else { structure_name(&a.structure) },
+                "roll":(stage != "range").then_some(info.roll),"rollBonus":a.roll_boost,"threshold":crate::consts::INFLUENCE_MIN_ROLL}))
+        }
+        PersistentEventType::PayAction(payment) => {
+            let crate::playing_actions::PlayingAction::InfluenceCultureAttempt(a) = &payment.action else {return None;};
+            Some(json!({"stage":"payment","source":a.starting_position,"target":a.selected_structure.position,
+                "name":if a.target_unit.is_some() {"Army unit".to_string()} else {structure_name(&a.selected_structure.structure)},
+                "roll":null,"rollBonus":0,"threshold":crate::consts::INFLUENCE_MIN_ROLL}))
+        }
+        _ => None,
+    }
+}

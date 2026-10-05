@@ -1517,3 +1517,46 @@ test('toolbar city actions choose a fresh suitable city, while explicit map/city
     app.close();
   }
 });
+
+test('influence confirmation carries through only the accepted upfront payments and stops for optional boosts', async () => {
+  for (const drama of [false, true]) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('base/cultural_influence_instant'));
+      g.dice_roll_outcomes = [0];
+      g.current_player_index = 0;
+      g.players[1].cities[0].city_pieces = { temple: 1 };
+      g.players[0].cities = [{ position: 'A1', mood_state: 'Happy' }];
+      g.players[0].civilization = 'Rome';
+      g.players[0].resources.culture_tokens = 7;
+      if (drama) g.players[0].advances = [...new Set([...g.players[0].advances, 'Arts', 'Theaters'])];
+      c.setPlayer(0);
+      let raw = JSON.stringify(g);
+      await c.load(engine.stripSecret(raw, 0));
+      const target = app
+        .session()
+        .view!.influence!.find((t) => t.position === 'C1' && t.name === 'Temple' && !!t.free === drama)!;
+      const origin = target.origins!.find((o) => o.position === target.origin)!;
+      c.startInfluence(origin.action, origin.actionPayment!, origin.payment);
+      for (let i = 0; i < app.sent.length; i++) {
+        assert.ok(i < 3, 'no optional purchases can follow the upfront quote');
+        raw = engine.tryMove(raw, app.sent[i], 0);
+        await c.load(engine.stripSecret(raw, 0));
+      }
+      assert.equal(app.sent.length, drama ? 3 : 2);
+      assert.equal(app.session().view!.influenceContext!.stage, 'boost');
+      assert.equal(app.session().pending, false);
+      const count = app.sent.length;
+      const payment = app
+        .session()
+        .view!.decision!.fields[0].choices!.find((p) => Object.values(p).some(Boolean))!;
+      c.submit(c.query<{ action: any }>({ kind: 'decision', values: [], payments: [payment] }).action);
+      raw = engine.tryMove(raw, app.sent[count], 0);
+      await c.load(engine.stripSecret(raw, 0));
+      assert.equal(app.session().toast, 'Cultural influence succeeded');
+    } finally {
+      app.close();
+    }
+  }
+});

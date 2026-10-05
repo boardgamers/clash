@@ -7,6 +7,7 @@
   import { unitInfo } from './city';
   import { resourceNames } from './types';
   import ResourceAmount from './ResourceAmount.svelte';
+  import InfluenceFlow from './InfluenceFlow.svelte';
   import PaymentPicker from './PaymentPicker.svelte';
   import { samePayment } from './payment-options';
   import ResourceText from './ResourceText.svelte';
@@ -169,7 +170,9 @@
 >
   {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
   <header class="decision-heading">
-    <h2><Sparkles size={21} />{decision.name}</h2>
+    {#if $session.view?.influenceContext}
+      <InfluenceFlow context={$session.view.influenceContext} />
+    {:else}<h2><Sparkles size={21} />{decision.name}</h2>{/if}
     {#if decision.eventContext}
       {@const context = decision.eventContext}
       <div class="decision-event-context" class:full-context={!!context.card}>
@@ -218,7 +221,7 @@
       </div>
     {/if}
   </header>
-  {#if description}<p class="decision-description">
+  {#if description && !$session.view?.influenceContext}<p class="decision-description">
       <ResourceText
         text={description.replaceAll('Status Phase', 'End of age').replaceAll('status phase', 'end of age')}
       />
@@ -258,22 +261,50 @@
   {/if}
   {#if directPayments}
     {@const field = decision.fields[0]}
-    {#if field.name !== decision.name && !combatBenefit}<p class="decision-description">
+    {#if field.name !== decision.name && !combatBenefit && !$session.view?.influenceContext}<p
+        class="decision-description"
+      >
         <ResourceText text={field.name} />
       </p>{/if}
-    <PaymentPicker
-      options={directPayments.map((choice) => ({ payment: choice.payment, disabled: !choice.action }))}
-      value={payments[0]}
-      onChange={(payment) => choosePayment(0, payment)}
-      onPay={(payment) => {
-        const action = directPayments.find((choice) => samePayment(choice.payment, payment))?.action;
-        if (action) controller.submit(action);
-      }}
-      pending={$session.pending}
-      optional={field.optional}
-      reward={decision.reward}
-      label={field.name}
-    />
+    {#if $session.view?.influenceContext}
+      {@const context = $session.view.influenceContext}
+      <div class="influence-decisions">
+        {#each directPayments as choice}
+          {@const paid = Object.values(choice.payment).some(Boolean)}
+          <button
+            class:primary={paid}
+            class:secondary={!paid}
+            disabled={!choice.action || $session.pending}
+            onclick={() => choice.action && controller.submit(choice.action)}
+          >
+            <span
+              >{context.stage === 'boost'
+                ? paid
+                  ? 'Spend culture & succeed'
+                  : 'Accept failure'
+                : context.stage === 'range'
+                  ? 'Extend range & roll'
+                  : 'Pay & continue'}</span
+            >
+            {#if paid}<ResourceAmount pile={choice.payment} compact />{/if}
+          </button>
+        {/each}
+      </div>
+    {:else}
+      <PaymentPicker
+        options={directPayments.map((choice) => ({ payment: choice.payment, disabled: !choice.action }))}
+        value={payments[0]}
+        onChange={(payment) => choosePayment(0, payment)}
+        onPay={(payment) => {
+          const action = directPayments.find((choice) => samePayment(choice.payment, payment))?.action;
+          if (action) controller.submit(action);
+        }}
+        pending={$session.pending}
+        optional={field.optional}
+        reward={decision.reward}
+        label={field.name}
+      />
+    {/if}
   {:else}
     {#each decision.fields as field, i}
       <div class="decision-payment">

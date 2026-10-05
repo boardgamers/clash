@@ -339,7 +339,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
     json!({"logOriginNames":log_origin_names,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
-        "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "wonderCatalog":wonder_catalog, "builtWonders":built_wonders, "decision":decision,
+        "influenceContext":decisions::influence_context(game, seat), "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "wonderCatalog":wonder_catalog, "builtWonders":built_wonders, "decision":decision,
         "civilizations":crate::game_setup::civilization_choices(game, seat).iter().map(|c|json!({"name":c.name,
             "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),
             "leaders":c.leaders.iter().map(|l|json!({"name":l.name,"abilities":l.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()})).collect::<Vec<_>>(),

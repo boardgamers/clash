@@ -67,6 +67,7 @@ export interface Playback {
   animate: boolean;
 }
 export interface Game {
+  successful_cultural_influence?: boolean;
   options?: { length?: 'Standard' | 'Epic'; variant?: 'Standard' | 'Builder' };
   permanent_effects?: unknown[];
   board_history?: { id: string; frames: BoardFrame[] };
@@ -245,7 +246,17 @@ export interface WonderCard {
 }
 export type CardDraw =
   { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
+export interface InfluenceContext {
+  stage: 'payment' | 'range' | 'reroll' | 'boost';
+  source: string | null;
+  target: string;
+  name: string;
+  roll: number | null;
+  rollBonus: number;
+  threshold: number;
+}
 export interface View {
+  influenceContext?: InfluenceContext | null;
   waitingFor?: { player: number; action: string; source: string | null } | null;
   logOriginNames?: Record<string, string>;
   activePlayers?: number[];
@@ -276,7 +287,21 @@ export interface View {
     name: string;
     position: string;
     origin: string;
-    origins?: { position: string; settlers: boolean; reroll: boolean; payment: Pile; action: Move }[];
+    origins?: {
+      position: string;
+      settlers: boolean;
+      reroll: boolean;
+      payment: Pile;
+      action: Move;
+      free?: boolean;
+      actionPayment?: Pile;
+      rollBonus?: number;
+      preventBoost?: boolean;
+    }[];
+    free?: boolean;
+    actionPayment?: Pile;
+    rollBonus?: number;
+    preventBoost?: boolean;
     variant: string;
     payment: Pile;
     action: Move;

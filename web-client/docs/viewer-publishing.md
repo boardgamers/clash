@@ -19,3 +19,5 @@ Engine 0.4.31 replaces the legacy replay reader with current `log` history. Targ
 Engine 0.4.32 allows Great Explorer to grant a free Seafaring advance when no adjacent unexplored region remains. Its optional exploration step no longer prevents playing the card.
 
 Engine 0.4.33 replaces Great Lighthouse's standalone free activation with an optional ship reward after its city activates. Placing the ship costs no additional action or resources and does not activate the city again.
+
+Engine 0.4.34 supplies cultural influence context and upfront costs throughout the attempt. Publish the matching viewer: target and source selection show the full cost, one confirmation carries through the accepted action fee and range payment, and optional rerolls and culture boosts remain explicit choices with the target and roll visible.
