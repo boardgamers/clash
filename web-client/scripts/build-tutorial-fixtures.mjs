@@ -131,6 +131,10 @@ for (const id of [
       ),
     );
   }
+  // Older test fixtures serialize token fields, but only goods have storage limits.
+  for (const player of g.players) {
+    for (const token of ['mood_tokens', 'culture_tokens', 'captives']) delete player.resource_limit?.[token];
+  }
   // Validate the fixture against the production engine before saving it.
   engine.webView(engine.stripSecret(JSON.stringify(g), 0), 0);
   await fs.writeFile(new URL(`${id}.json`, directory), JSON.stringify(g, null, 2) + '\n');

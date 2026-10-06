@@ -12,6 +12,10 @@ for (const chapter of chapters) {
       engine,
       readFileSync(new URL(`./tutorial/positions/${chapter.id}.json`, import.meta.url), 'utf8'),
     );
+    for (const player of JSON.parse(lesson.initialState().game).players) {
+      for (const token of ['mood_tokens', 'culture_tokens', 'captives'])
+        assert.equal(player.resource_limit?.[token], undefined, `${chapter.id}: ${token} has no storage cap`);
+    }
     const saved = new Map<string, string>();
     const storage = {
       getItem: (key: string) => saved.get(key) ?? null,

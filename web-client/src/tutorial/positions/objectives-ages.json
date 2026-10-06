@@ -17,9 +17,7 @@
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "gold": 7
       },
       "cities": [
         {
@@ -111,9 +109,7 @@
         "wood": 7,
         "ore": 7,
         "ideas": 7,
-        "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "gold": 7
       },
       "cities": [
         {

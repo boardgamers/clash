@@ -736,19 +736,24 @@
         aria-label="Your resources"
         style={`--resource-count:${visibleResources.length}`}
       >
-        {#each visibleResources as resource}{@const Icon = icons[resource]}
+        {#each visibleResources as resource}{@const Icon = icons[resource]}{@const limit = [
+            'food',
+            'wood',
+            'ore',
+            'ideas',
+            'gold',
+          ].includes(resource)
+            ? current.resource_limit?.[resource]
+            : undefined}
           <div
             class="resource"
             role="img"
-            aria-label={`${translate(resourceNames[resource])}: ${current.resources?.[resource] ?? 0}${current.resource_limit?.[resource] !== undefined ? translate(`, storage limit ${current.resource_limit[resource]}`) : ''}`}
-            title={`${translate(resourceNames[resource])}${current?.resource_limit?.[resource] !== undefined ? translate(` · Storage limit ${current.resource_limit[resource]}`) : ''}`}
+            aria-label={`${translate(resourceNames[resource])}: ${current.resources?.[resource] ?? 0}${limit !== undefined ? translate(`, storage limit ${limit}`) : ''}`}
+            title={`${translate(resourceNames[resource])}${limit !== undefined ? translate(` · Storage limit ${limit}`) : ''}`}
           >
             <span class="resource-icon {resource}"><Icon size={20} strokeWidth={1.8} /></span><span
               ><strong
-                >{current.resources?.[resource] ?? 0}{#if current.resource_limit?.[resource] !== undefined}<em
-                  >
-                    / {current.resource_limit[resource]}</em
-                  >{/if}</strong
+                >{current.resources?.[resource] ?? 0}{#if limit !== undefined}<em> / {limit}</em>{/if}</strong
               ></span
             >
           </div>{/each}
