@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatPoints } from './score';
   import CollectionBonusHints from './CollectionBonusHints.svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
   import PlaybackPanel from './PlaybackPanel.svelte';
@@ -772,7 +773,7 @@
             class:active={!!turnLabel}
             style={`--player:${playerColor(player.index, $session.colorBlind, $session.playerColors)}`}
             title={`Inspect ${player.civilization} (${player.index === $session.seat ? 'You' : player.name}): advances and victory points`}
-            aria-label={`${player.civilization}: ${player.score} victory points. ${player.index === $session.seat ? 'You' : player.name}.${order ? ` Turn order ${order}.` : ''}${turnLabel ? ` ${turnLabel}.` : ''}${progressLabel ? ` ${progressLabel}.` : ''} View resources, advances and scores`}
+            aria-label={`${player.civilization}: ${formatPoints(player.score)} victory points. ${player.index === $session.seat ? 'You' : player.name}.${order ? ` Turn order ${order}.` : ''}${turnLabel ? ` ${turnLabel}.` : ''}${progressLabel ? ` ${progressLabel}.` : ''} View resources, advances and scores`}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -825,7 +826,7 @@
                   title="Army includes leaders and embarked troops; settlers are separate"
                   ><Swords size={13} />{forces.army}<Ship size={13} />{forces.ships}</span
                 >{/if}</span
-            ><span class="player-score">{player.score}<Trophy size={10} /></span>
+            ><span class="player-score">{formatPoints(player.score)}<Trophy size={10} /></span>
           </button>{/each}
       </div>
       {#if !$session.game}<div class="map-loading">
@@ -1284,7 +1285,7 @@
                 disabled={$session.pending}
                 onclick={() => controller.submit(card.action)}
               >
-                Claim {objectiveDecision.points} points <Check size={17} />
+                Claim {formatPoints(objectiveDecision.points)} points <Check size={17} />
               </button>
             </div>
           {/each}

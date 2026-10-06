@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatPoints } from './score';
   import { Landmark, GraduationCap, Check, Trophy } from 'lucide-svelte';
   import { wonderIcons } from './wonder-icons';
   import ResourceAmount from './ResourceAmount.svelte';
@@ -23,8 +24,8 @@
   <div class="wonder-cost"><span>Base construction cost</span><ResourceAmount pile={card.cost} /></div>
   <div class="wonder-points">
     <Trophy size={16} /><span
-      ><strong>{Math.round(card.builtPoints * 10) / 10}</strong> VP for building ·
-      <strong>{card.ownedPoints}</strong> VP for owning</span
+      ><strong>{formatPoints(card.builtPoints)}</strong> VP for building ·
+      <strong>{formatPoints(card.ownedPoints)}</strong> VP for owning</span
     >
   </div>
 </article>

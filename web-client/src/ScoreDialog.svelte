@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatPoints } from './score';
   import {
     Landmark,
     GraduationCap,
@@ -141,7 +142,7 @@
     </nav>
     {#if tab === 'score'}
       <div class="score-summary">
-        <span><Trophy size={22} /> Total</span><strong>{player.score}<small> VP</small></strong>
+        <span><Trophy size={22} /> Total</span><strong>{formatPoints(player.score)}<small> VP</small></strong>
       </div>
       <div class="score-breakdown">
         {#each player.scoreParts as part}
@@ -167,7 +168,7 @@
               {:else}<strong>{part.name}</strong>{/if}
               <p>{category?.description}</p>
             </div>
-            <b>{part.points}</b>
+            <b>{formatPoints(part.points)}</b>
           </div>
         {/each}
       </div>
@@ -181,7 +182,7 @@
             aria-label={objective.name}
           >
             <header>
-              <Target size={19} /><strong>{objective.name}</strong><span>{objective.points} VP</span>
+              <Target size={19} /><strong>{objective.name}</strong><span>{formatPoints(objective.points)} VP</span>
             </header>
             <p><ResourceText text={objective.description} /></p>
             <small>Completed</small>

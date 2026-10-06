@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatPoints } from './score';
   import { Landmark, Trophy, X } from 'lucide-svelte';
   import { wonderIcons } from './wonder-icons';
   import { wonderName } from './wonder-names';
@@ -85,7 +86,7 @@
     </header>
     <p><ResourceText text={effect} /></p>
     {#if wonder}<small class="built-wonder-points"
-        ><Trophy size={14} />{Math.round(wonder.builtPoints * 10) / 10} VP for building · {wonder.ownedPoints} VP
+        ><Trophy size={14} />{formatPoints(wonder.builtPoints)} VP for building · {formatPoints(wonder.ownedPoints)} VP
         for owning</small
       >{/if}
   </section>{/if}
