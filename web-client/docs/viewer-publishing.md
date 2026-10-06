@@ -27,3 +27,5 @@ Engine 0.4.35 adds public action/event card rules for journal references, discar
 Engine 0.4.36 exposes public pirate spawn positions using the same rules as incident placement. The matching viewer adds an incident-player map guide for first and second ships, and strengthens resource icon colors while preserving the existing city mood styling in normal mode. Color-blind mode uses yellow happy faces to distinguish them from red angry faces.
 
 Engine 0.4.37 exposes public barbarian spawn, reinforcement and movement guides and a validated Free Education research quote. The matching viewer adds horned helmet symbols for barbarians in color-blind mode, an upfront Free Education choice, early Pottery bonus hints, and an initial map orientation with the player’s home at the bottom. Myths protection wording states the number of affected cities. Pirates keep their existing flag.
+
+Engine 0.4.38 clarifies single-city Myths protection as “your affected city”, including already pending payments. The matching viewer gives barbarian infantry and mounted riders curved ivory horns on their helmets, preserving the existing city flag and color-blind symbols.

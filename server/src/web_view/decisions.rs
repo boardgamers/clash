@@ -266,12 +266,12 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                 let legacy_myths_label = r.cost.default.amount() == 1
                     && r.name.starts_with("You may pay 1 mood token for each city");
                 let name = if legacy_myths_label {
-                    "Pay 1 mood token to protect the one affected city, or pay nothing"
+                    "Pay 1 mood token to protect your affected city, or pay nothing".to_string()
                 } else {
-                    &r.name
+                    r.name.replace("the one affected city", "your affected city")
                 };
                 let field =
-                    resource_field(&r.cost, name, r.optional, &available, false, &p.resources);
+                    resource_field(&r.cost, &name, r.optional, &available, false, &p.resources);
                 let initial: ResourcePile =
                     serde_json::from_value(field["initial"].clone()).unwrap();
                 available -= initial;

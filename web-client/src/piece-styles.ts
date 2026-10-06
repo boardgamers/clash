@@ -1,7 +1,17 @@
 export interface PieceStyle {
   roof: 'gable' | 'roman' | 'swept' | 'pagoda' | 'flat' | 'stepped' | 'dome' | 'timber' | 'thatch' | 'tent';
   helmet:
-    'crest' | 'legion' | 'lamellar' | 'kabuto' | 'cloth' | 'tiara' | 'turban' | 'nasal' | 'cap' | 'feather';
+    | 'crest'
+    | 'legion'
+    | 'lamellar'
+    | 'kabuto'
+    | 'cloth'
+    | 'tiara'
+    | 'turban'
+    | 'nasal'
+    | 'cap'
+    | 'feather'
+    | 'horned';
   shield: 'round' | 'rectangular' | 'oval' | 'wicker';
   ship: 'galley' | 'junk' | 'longship' | 'reed' | 'dhow' | 'merchant' | 'canoe';
   wall: string;
@@ -15,6 +25,18 @@ export interface PieceStyle {
 // Stylized visual vocabulary, independent of player colors and game rules.
 // Each faction changes geometry as well as materials; type silhouettes remain shared.
 export const civilizationPieceStyles: Record<string, PieceStyle> = {
+  Barbarians: {
+    roof: 'thatch',
+    helmet: 'horned',
+    shield: 'round',
+    ship: 'merchant',
+    wall: '#b7a17a',
+    roofColor: '#947750',
+    trim: '#887454',
+    wood: '#6f523b',
+    metal: '#84908c',
+    cloth: '#bd9b76',
+  },
   Greece: {
     roof: 'gable',
     helmet: 'crest',

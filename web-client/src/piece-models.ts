@@ -517,6 +517,32 @@ export class PieceModels {
     );
     helmet.scale.y = style.helmet === 'cap' ? 1.4 : 1;
     switch (style.helmet) {
+      case 'horned':
+        this.box(g, style.metal, 0.027, 0.14, 0.027, 0, y + 0.01, z + 0.09);
+        for (const side of [-1, 1]) {
+          const curve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(side * 0.085, y + 0.035, z),
+            new THREE.Vector3(side * 0.17, y + 0.045, z),
+            new THREE.Vector3(side * 0.23, y + 0.11, z),
+            new THREE.Vector3(side * 0.245, y + 0.225, z),
+          ]);
+          const horn = new THREE.TubeGeometry(curve, 8, 0.04, 6, false);
+          const vertices = horn.getAttribute('position');
+          for (let i = 0; i < vertices.count; i++) {
+            const progress = Math.floor(i / 7) / 8;
+            const center = curve.getPointAt(progress);
+            const taper = 1 - progress * 0.97;
+            vertices.setXYZ(
+              i,
+              center.x + (vertices.getX(i) - center.x) * taper,
+              center.y + (vertices.getY(i) - center.y) * taper,
+              center.z + (vertices.getZ(i) - center.z) * taper,
+            );
+          }
+          horn.computeVertexNormals();
+          this.add(g, horn, '#f4e4bf');
+        }
+        break;
       case 'crest':
       case 'legion':
         this.box(

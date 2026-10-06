@@ -564,7 +564,7 @@ impl IncidentBuilder {
                     Some(vec![PaymentRequest::mandatory(
                         options,
                         &if needed == 1 {
-                            format!("Pay 1 mood token to protect the one affected city from {action}, or pay nothing")
+                            format!("Pay 1 mood token to protect your affected city from {action}, or pay nothing")
                         } else {
                             format!("Pay up to {needed} mood tokens: 1 per city you protect from {action}, or pay nothing")
                         },

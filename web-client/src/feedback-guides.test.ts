@@ -56,10 +56,16 @@ test('saved single-city Myths payments describe one city and still offer zero or
     ),
   );
   const request = after.events.at(-1).handler.request.Payment[0];
-  request.name = 'You may pay 1 mood token for each city to avoid reducing the mood';
-  const field = view(after, 0).decision.fields[0];
-  assert.match(field.name, /one affected city/);
-  assert.deepEqual(field.choices, [{}, { mood_tokens: 1 }]);
+  for (const name of [
+    request.name,
+    'You may pay 1 mood token for each city to avoid reducing the mood',
+    'Pay 1 mood token to protect the one affected city from mood loss, or pay nothing',
+  ]) {
+    request.name = name;
+    const field = view(after, 0).decision.fields[0];
+    assert.match(field.name, /your affected city/);
+    assert.deepEqual(field.choices, [{}, { mood_tokens: 1 }]);
+  }
 });
 
 test('Free Education quote requires a remaining idea and accounts for Philosophy reward', () => {
