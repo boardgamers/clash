@@ -1686,21 +1686,18 @@ test('failed research confirmation cannot carry a Free Education payment into an
   }
 });
 
-test('home-at-bottom is a saved account preference and never submits a game move', () => {
+test('home-at-bottom changes from platform preferences never submit moves or write preferences back', () => {
   const app = paymentController(),
     c = app.controller;
   try {
     assert.equal(app.session().homeAtBottom, false);
-    c.setGlobalPreference('homeAtBottom', true);
-    assert.equal(app.session().homeAtBottom, true);
-    assert.deepEqual(app.preferences.at(-1), { name: 'homeAtBottom', value: true });
     c.setPreferences({ homeAtBottom: true });
     assert.equal(app.session().homeAtBottom, true);
-    c.setGlobalPreference('homeAtBottom', false);
+    c.setPreferences({ homeAtBottom: false });
     assert.equal(app.session().homeAtBottom, false);
-    assert.deepEqual(app.preferences.at(-1), { name: 'homeAtBottom', value: false });
     c.setPreferences({});
     assert.equal(app.session().homeAtBottom, false);
+    assert.deepEqual(app.preferences, []);
     assert.deepEqual(app.sent, []);
   } finally {
     app.close();

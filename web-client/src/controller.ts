@@ -231,7 +231,7 @@ export class Controller {
     this.patch({ topDown: strategyMap, strategyMap });
     this.commands.updatePreference('mapView', strategyMap ? 'strategy' : '3d');
   }
-  setGlobalPreference(name: 'sound' | 'colorBlind' | 'homeAtBottom', enabled: boolean) {
+  setGlobalPreference(name: 'sound' | 'colorBlind', enabled: boolean) {
     if (!this.commands.updatePreference(name, enabled)) return;
     if (name === 'sound') this.audio.setEnabled(enabled);
     this.patch({ [name]: enabled });
