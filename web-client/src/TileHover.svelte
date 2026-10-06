@@ -14,7 +14,9 @@
   {#if $data.city}
     <strong class="tile-hover-city"
       ><Landmark size={15} />{#if $data.colorBlind}{playerSymbol($data.city.owner, $data.playerSymbols)}
-      {/if}{$data.city.civilization} city<small>{$data.city.mood}</small></strong
+      {/if}{$data.city.civilization} city<small class="tile-coordinate">{$data.position}</small><small
+        >{$data.city.mood}</small
+      ></strong
     >
   {:else}<strong class="tile-hover-terrain"
       ><TerrainIcon terrain={$data.terrain} size={15} />{terrainInfo($data.terrain).label}</strong

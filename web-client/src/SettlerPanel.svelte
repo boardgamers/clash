@@ -191,6 +191,11 @@
             : 'No moves available.'}
     </p>
   {/if}
+  {#if $session.moveTarget}<p class="movement-route">
+      <span class="tile-coordinate">{origin}</span><ArrowRight size={12} aria-hidden="true" /><span
+        class="tile-coordinate">{$session.moveTarget}</span
+      >
+    </p>{/if}
   {#if destination && !$session.movingCity}<TerrainRules
       terrain={destination.terrain}
       notes={destination.terrainNotes}

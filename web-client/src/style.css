@@ -5982,3 +5982,18 @@ small {
 .research-extra-payment {
   margin-bottom: 8px;
 }
+
+.tile-coordinate {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.movement-route {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  color: var(--muted);
+}

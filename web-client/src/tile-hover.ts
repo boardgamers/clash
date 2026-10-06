@@ -5,6 +5,7 @@ import { tileUnitStacks } from './tile-units';
 import TileHover from './TileHover.svelte';
 
 export interface TileHoverData {
+  position: string;
   terrain: Terrain;
   city?: { owner: number; civilization: string; mood: string };
   stacks: ReturnType<typeof tileUnitStacks>;
@@ -75,6 +76,7 @@ export class TileTooltip {
       return false;
     }
     this.data.set({
+      position: this.position,
       terrain,
       city:
         terrain === 'Unexplored'

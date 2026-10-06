@@ -58,6 +58,7 @@
           ? `${(owner ?? publicOwner)!.civilization} city`
           : terrainInfo(terrain).label}</strong
       >
+      <small class="tile-coordinate">{position}</small>
       {#if city}<CityFacts size={city.size} mood={city.mood} />{/if}
       <button class="icon-button" aria-label="Close tile actions" onclick={close}><X size={18} /></button>
     </header>
