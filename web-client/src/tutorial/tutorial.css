@@ -110,10 +110,15 @@
   padding: 3px 9px;
   font-size: 12px;
 }
-.bgs-tutorial-transport {
+.bgs-tutorial-transport,
+.bgs-tutorial-next-chapter:not([hidden]) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
+}
+.bgs-tutorial-next-chapter svg {
+  flex: none;
 }
 .bgs-tutorial-highlight {
   outline: 3px solid #b58a45;
