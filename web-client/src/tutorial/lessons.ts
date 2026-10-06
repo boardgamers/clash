@@ -247,7 +247,7 @@ export const chapters: {
     title: 'Ships and passengers',
     section: 'expansion',
     description: 'Board, sail and land with the right movement timing.',
-    version: 4,
+    version: 5,
     steps: [
       {
         id: 'embark',
@@ -258,7 +258,7 @@ export const chapters: {
       {
         id: 'sail',
         title: 'Sail with the passenger',
-        text: 'Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.',
+        text: 'Sail to B3 at the end of the sea route. The passenger travels with the ship in the same Move action.',
         kind: 'sail',
       },
       {

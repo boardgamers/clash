@@ -2606,7 +2606,7 @@
   "move should be of type action": "move should be of type action",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.",
   "Move the settler": "Move the settler",
-  "Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.": "Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.",
+  "Sail to B3 at the end of the sea route. The passenger travels with the ship in the same Move action.": "Sail to B3 at the end of the sea route. The passenger travels with the ship in the same Move action.",
   "Move to {p0}": "Move to {p0}",
   "Move to an empty land tile to found a city": "Move to an empty land tile to found a city",
   "move units": "move units",

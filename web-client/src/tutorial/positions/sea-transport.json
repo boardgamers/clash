@@ -120,8 +120,20 @@
   "map": {
     "tiles": [
       [
+        "A3",
+        "Barren"
+      ],
+      [
         "A5",
         "Unexplored"
+      ],
+      [
+        "A7",
+        "Unexplored"
+      ],
+      [
+        "B2",
+        "Fertile"
       ],
       [
         "B3",
@@ -136,6 +148,14 @@
         "Unexplored"
       ],
       [
+        "B6",
+        "Unexplored"
+      ],
+      [
+        "B7",
+        "Unexplored"
+      ],
+      [
         "C2",
         "Water"
       ],
@@ -144,7 +164,19 @@
         "Water"
       ],
       [
+        "C4",
+        "Unexplored"
+      ],
+      [
         "C5",
+        "Unexplored"
+      ],
+      [
+        "C6",
+        "Unexplored"
+      ],
+      [
+        "C7",
         "Unexplored"
       ],
       [
@@ -160,6 +192,22 @@
         "Fertile"
       ],
       [
+        "D3",
+        "Unexplored"
+      ],
+      [
+        "D4",
+        "Unexplored"
+      ],
+      [
+        "D5",
+        "Unexplored"
+      ],
+      [
+        "D6",
+        "Unexplored"
+      ],
+      [
         "D7",
         "Fertile"
       ],
@@ -172,8 +220,64 @@
         "Mountain"
       ],
       [
+        "E3",
+        "Unexplored"
+      ],
+      [
+        "E4",
+        "Unexplored"
+      ],
+      [
+        "E5",
+        "Unexplored"
+      ],
+      [
+        "E6",
+        "Unexplored"
+      ],
+      [
+        "E7",
+        "Unexplored"
+      ],
+      [
         "E8",
         "Forest"
+      ],
+      [
+        "F2",
+        "Unexplored"
+      ],
+      [
+        "F3",
+        "Unexplored"
+      ],
+      [
+        "F4",
+        "Unexplored"
+      ],
+      [
+        "F5",
+        "Unexplored"
+      ],
+      [
+        "F6",
+        "Unexplored"
+      ],
+      [
+        "F7",
+        "Unexplored"
+      ],
+      [
+        "G3",
+        "Unexplored"
+      ],
+      [
+        "G5",
+        "Unexplored"
+      ],
+      [
+        "G7",
+        "Unexplored"
       ]
     ],
     "unexplored_blocks": [
@@ -186,6 +290,90 @@
           "terrain": [
             "Forest",
             "Mountain",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Water",
+            "Barren",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D3",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Mountain",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D5",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Mountain",
+            "Forest",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Water",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Mountain",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Mountain",
+            "Water",
             "Fertile",
             "Mountain"
           ]

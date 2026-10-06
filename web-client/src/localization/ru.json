@@ -1898,7 +1898,7 @@
   "Move sea units": "Переместить морские юниты",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Переместите второго поселенца на неисследованную сушу. Исследование открывает регион из четырёх клеток, а не одну отдельную клетку.",
   "Move the settler": "Переместить поселенца",
-  "Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.": "Плывите до B3 в конце морского пути. До острова нельзя добраться пешком. Пассажир плывёт с кораблём в рамках того же действия перемещения.",
+  "Sail to B3 at the end of the sea route. The passenger travels with the ship in the same Move action.": "Плывите до B3 в конце морского пути. Пассажир плывёт с кораблём в рамках того же действия перемещения.",
   "Move to an empty land tile to found a city": "Переместитесь на пустую клетку суши для основания города",
   "Move to {p0}": "Переместиться в {p0}",
   "Move units": "Переместить юниты",
