@@ -3632,7 +3632,7 @@ small {
   gap: 3px;
 }
 
-.world-labels.hide-unit-badges .unit-map-label:not(.barbarian-symbol) {
+.world-labels.hide-unit-badges .unit-map-label {
   display: none;
 }
 

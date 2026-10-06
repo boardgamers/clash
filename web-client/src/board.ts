@@ -1496,7 +1496,6 @@ export class World {
             const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
             const label = document.createElement('button');
             label.className = 'unit-map-label';
-            label.classList.toggle('barbarian-symbol', s.colorBlind && player.civilization === 'Barbarians');
             label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
             label.setAttribute('aria-label', `Inspect ${description}`);
             this.unitBadges.push(

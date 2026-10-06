@@ -31,3 +31,5 @@ Engine 0.4.37 exposes public barbarian spawn, reinforcement and movement guides 
 Engine 0.4.38 clarifies single-city Myths protection as “your affected city”, including already pending payments. The matching viewer gives barbarian infantry and mounted riders curved ivory horns on their helmets, preserving the existing city flag and color-blind symbols.
 
 The viewer update following 0.4.38 makes home-at-bottom rotation an account preference, disabled by default in both 3D and Strategy views. Publish the updated preference declarations with the viewer. Change this preference in the BGS platform settings; the viewer immediately resets the orientation when it changes. Manual camera rotation remains available. The engine is unchanged.
+
+The next viewer update makes barbarian unit badges follow the unit-badge preference in color-blind mode. Horned helmets on the models and barbarian city flags remain visible when badges are disabled. The engine is unchanged.
