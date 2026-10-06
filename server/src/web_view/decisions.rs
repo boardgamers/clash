@@ -419,6 +419,17 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                 great_seer_choice_description(game, h).unwrap_or_else(|| r.description.clone());
             r.choices
                 .iter()
+                .filter(|card| {
+                    if tactics_selection
+                        && let PersistentEventType::CombatRoundStart(round) = &game.current_event().event_type
+                        && let HandCard::ActionCard(id) = card
+                    {
+                        return crate::tactics_card::can_play_tactics_card(
+                            game, p.index, game.cache.get_action_card(*id), &round.combat,
+                        );
+                    }
+                    true
+                })
                 .map(|card| {
                     let text = match card {
                         HandCard::ActionCard(id) => {

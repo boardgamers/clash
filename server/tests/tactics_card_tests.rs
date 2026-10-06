@@ -298,3 +298,41 @@ fn test_flanking() {
         ],
     );
 }
+
+#[test]
+fn fortress_without_army_cannot_use_tactical_retreat_even_from_a_saved_prompt() {
+    use server::content::persistent_events::PersistentEventRequest;
+    use server::game_api;
+    let city = Position::from_offset("C1");
+    let mut setup = JSON.load_game("heavy_resistance");
+    setup.players[0].action_cards.clear();
+    setup.players[1].action_cards = vec![19, 25];
+    setup.players[1].units.clear();
+    setup.players[1].get_city_mut(city).pieces.fortress = Some(1);
+    let mut game = game_api::execute(setup, move_action(vec![0], city), 0);
+    let view = server::web_view::view(&game, Some(1));
+    let options = view["decision"]["options"].as_array().unwrap();
+    assert_eq!(options.len(), 1);
+    assert_eq!(options[0]["value"]["ActionCard"], 25);
+
+    // An already pending request may still contain choices saved by the old engine.
+    let handler = game.events.last_mut().unwrap().player.handler.as_mut().unwrap();
+    let PersistentEventRequest::SelectHandCards(request) = &mut handler.request else {
+        panic!("Expected tactics choice");
+    };
+    request.choices.push(HandCard::ActionCard(19));
+    let view = server::web_view::view(&game, Some(1));
+    assert_eq!(view["decision"]["options"].as_array().unwrap().len(), 1);
+    assert!(
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            game_api::execute(
+                game,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                    19,
+                )])),
+                1,
+            )
+        }))
+        .is_err()
+    );
+}

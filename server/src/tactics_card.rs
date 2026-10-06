@@ -348,6 +348,15 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                 let HandCard::ActionCard(card) = s.choice[0] else {
                     panic!("Expected ActionCard, got {:?}", s.choice[0]);
                 };
+                assert!(
+                    can_play_tactics_card(
+                        game,
+                        player,
+                        game.cache.get_action_card(card),
+                        &r.combat
+                    ),
+                    "Tactics card requirements are not met"
+                );
                 update_combat_strength(game, player, r, move |_game, _c, s, _role| {
                     s.tactics_card = Some(card);
                 });
@@ -388,11 +397,17 @@ pub(crate) fn can_play_tactics_card(
 
             let fighter_met = card.fighter_requirement.is_empty()
                 || card.fighter_requirement.iter().any(|r| match r {
-                    FighterRequirement::Army => combat.is_land_battle(game),
+                    FighterRequirement::Army => combat
+                        .fighting_units(game, player)
+                        .iter()
+                        .any(|&id| game.player(player).get_unit(id).unit_type.is_army_unit()),
                     FighterRequirement::Fortress => {
                         combat.defender_fortress(game) && combat.defender() == player
                     }
-                    FighterRequirement::Ship => combat.is_sea_battle(game),
+                    FighterRequirement::Ship => combat
+                        .fighting_units(game, player)
+                        .iter()
+                        .any(|&id| game.player(player).get_unit(id).unit_type.is_ship()),
                 });
 
             let location_met = card.location_requirement.as_ref().is_none_or(|l| match l {
