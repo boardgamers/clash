@@ -121,7 +121,7 @@
     "tiles": [
       [
         "A3",
-        "Unexplored"
+        "Barren"
       ],
       [
         "A5",
@@ -133,11 +133,11 @@
       ],
       [
         "B2",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "B3",
-        "Unexplored"
+        "Water"
       ],
       [
         "B4",
@@ -193,7 +193,7 @@
       ],
       [
         "D3",
-        "Water"
+        "Unexplored"
       ],
       [
         "D4",
@@ -221,7 +221,7 @@
       ],
       [
         "E3",
-        "Fertile"
+        "Unexplored"
       ],
       [
         "E4",
@@ -281,20 +281,6 @@
       ]
     ],
     "unexplored_blocks": [
-      {
-        "position": {
-          "top_tile": "B2",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Water",
-            "Fertile",
-            "Fertile",
-            "Barren"
-          ]
-        }
-      },
       {
         "position": {
           "top_tile": "B4",

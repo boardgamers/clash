@@ -65,13 +65,28 @@ for (const chapter of chapters) {
     if (chapter.id === 'sea-transport') {
       const view = JSON.parse(engine.webView(engine.stripSecret(controller.snapshot.state.game, 0), 0));
       const settler = view.units.find((unit: any) => unit.type === 'Settler');
-      assert.equal(settler.position, 'D4');
+      assert.equal(settler.position, 'C4');
       assert.notEqual(
-        final.map.tiles.find(([position]: [string, string]) => position === 'D4')[1],
+        final.map.tiles.find(([position]: [string, string]) => position === 'C4')[1],
         'Unexplored',
       );
       assert.equal(final.actions_left, initial.actions_left - 2);
       assert.equal(settler.carrier, null);
+      const ship = view.units.find((unit: any) => unit.type === 'Ship');
+      assert.equal(ship.position, 'C3');
+      assert.equal(
+        final.map.tiles.find(([position]: [string, string]) => position === ship.position)[1],
+        'Water',
+        'Exploration must preserve water beneath the ship',
+      );
+      for (const [position, terrain] of initial.map.tiles) {
+        if (terrain !== 'Unexplored')
+          assert.equal(
+            final.map.tiles.find(([p]: [string, string]) => p === position)[1],
+            terrain,
+            `Exploration preserves known terrain at ${position}`,
+          );
+      }
     }
     if (chapter.id === 'cultural-influence') {
       assert.equal(final.successful_cultural_influence, true);

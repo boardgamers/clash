@@ -75,14 +75,21 @@ for (const id of [
     p.next_unit_id = 2;
   }
   if (id === 'sea-transport') {
-    g.map.tiles.find((t) => t[0] === 'C3')[1] = 'Water';
+    // Reveal the entire sea-route block. Partly revealed blocks would overwrite
+    // occupied water when an adjacent tile is explored later.
+    g.map.unexplored_blocks = g.map.unexplored_blocks.filter((block) => block.position.top_tile !== 'B2');
+    for (const [position, terrain] of Object.entries({
+      B2: 'Fertile',
+      A3: 'Barren',
+      C3: 'Water',
+      B3: 'Water',
+    }))
+      g.map.tiles.find((tile) => tile[0] === position)[1] = terrain;
     g.map.tiles.find((t) => t[0] === 'C2')[1] = 'Water';
     g.map.tiles.find((t) => t[0] === 'D1')[1] = 'Water';
     p.advances.push('Fishing', 'Tactics');
     p.units.push({ id: 1, position: 'D1', unit_type: 'Ship' });
     p.next_unit_id = 2;
-    g.map.tiles.find((t) => t[0] === 'D3')[1] = 'Water';
-    g.map.tiles.find((t) => t[0] === 'E3')[1] = 'Fertile';
   }
   if (id === 'cultural-influence') {
     g = await fixture('base/cultural_influence_instant');

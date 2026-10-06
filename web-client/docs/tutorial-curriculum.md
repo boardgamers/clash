@@ -64,9 +64,9 @@ Metadata remains in English for translation through BGS admin. Tutorial prose be
 
 **Position:** One ship beside a settler, a connected sea route and an unexplored region beyond the starting city.
 
-**Steps:** Board and sail in one Move action; check why a newly boarded passenger needs another Move action to land; disembark into unexplored D4 and choose the region’s orientation.
+**Steps:** Board and sail in one Move action; check why a newly boarded passenger needs another Move action to land; disembark into unexplored C4 and choose the region’s orientation.
 
-**Check:** Boarding and sailing spend one action; landing and exploring spend another. The settler ends at D4 without a carrier, and the region is revealed. Rejected moves remain atomic.
+**Check:** Boarding and sailing spend one action; landing and exploring spend another. The settler ends at C4 without a carrier, and the region is revealed. Rejected moves remain atomic.
 
 ### 7. Cultural influence, one decision at a time (`cultural-influence`, interaction, 8 minutes)
 

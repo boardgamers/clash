@@ -247,7 +247,7 @@ export const chapters: {
     title: 'Ships and passengers',
     section: 'expansion',
     description: 'Board, sail and land with the right movement timing.',
-    version: 2,
+    version: 3,
     steps: [
       {
         id: 'embark',
@@ -602,8 +602,8 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
           kind === 'embark'
             ? d.position === 'D1'
             : kind === 'sail'
-              ? d.position === 'D3'
-              : d.position === 'D4',
+              ? d.position === 'C3'
+              : d.position === 'C4',
         )
         .map((d: any) => ({ label: `Move to ${d.position}`, move: d.action }));
     }
