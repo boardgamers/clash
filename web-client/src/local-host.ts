@@ -12,7 +12,7 @@ let journal: string[] = [];
 const send = (event: string, payload?: unknown) =>
   frame.contentWindow?.postMessage({ source: 'clash-host', event, payload }, location.origin);
 const preferences: Record<string, unknown> = {
-  locale: 'en',
+  locale: new URLSearchParams(location.search).get('locale') ?? 'en',
   sound: true,
   colorBlind: false,
   mapView: '3d',

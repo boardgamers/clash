@@ -1,7 +1,9 @@
 <script lang="ts">
   import { ScrollText } from 'lucide-svelte';
   let { remaining }: { remaining: number } = $props();
-  let label = $derived(`${remaining} event marker${remaining === 1 ? '' : 's'} left`);
+  let label = $derived(
+    remaining === 1 ? `${remaining} event marker left` : `${remaining} event markers left`,
+  );
 </script>
 
 <span

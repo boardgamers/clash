@@ -22,6 +22,13 @@ async function api(url, options = {}) {
   return res.json();
 }
 const previous = await api(endpoint);
+const declaredTutorial = JSON.parse(await fs.readFile(path.join(root, 'bgs-tutorial.json'), 'utf8'));
+// Preserve admin edits when the same chapter versions are already registered.
+const tutorialSignature = (value) => JSON.stringify(value?.chapters?.map(({ id, version }) => [id, version]));
+const tutorial =
+  tutorialSignature(previous.tutorial) === tutorialSignature(declaredTutorial)
+    ? previous.tutorial
+    : declaredTutorial;
 const enginePath = process.argv.find((arg) => arg.startsWith('--engine='))?.slice('--engine='.length);
 const engineBytes = enginePath ? await fs.readFile(path.resolve(enginePath)) : null;
 let expectedEngine = previous.engine;
@@ -70,6 +77,7 @@ console.log(
       preferences,
       settings,
       options,
+      tutorial,
       enginePackage: enginePath ?? null,
       dryRun: process.argv.includes('--dry-run'),
     },
@@ -107,6 +115,7 @@ if (!process.argv.includes('--dry-run')) {
     JSON.stringify(current.preferences) !== JSON.stringify(previous.preferences) ||
     JSON.stringify(current.settings) !== JSON.stringify(previous.settings) ||
     JSON.stringify(current.options) !== JSON.stringify(previous.options) ||
+    JSON.stringify(current.tutorial) !== JSON.stringify(previous.tutorial) ||
     JSON.stringify(current.engine) !== JSON.stringify(previous.engine)
   )
     throw new Error('The viewer or preferences changed during upload; version metadata was not changed');
@@ -124,7 +133,7 @@ if (!process.argv.includes('--dry-run')) {
   await api(endpoint, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ viewer, preferences, settings, options }),
+    body: JSON.stringify({ viewer, preferences, settings, options, tutorial }),
   });
   const saved = await api(endpoint);
   if (
@@ -133,6 +142,7 @@ if (!process.argv.includes('--dry-run')) {
     JSON.stringify(saved.preferences) !== JSON.stringify(preferences) ||
     JSON.stringify(saved.settings) !== JSON.stringify(settings) ||
     JSON.stringify(saved.options) !== JSON.stringify(options) ||
+    JSON.stringify(saved.tutorial) !== JSON.stringify(tutorial) ||
     JSON.stringify(saved.engine) !== JSON.stringify(expectedEngine)
   )
     throw new Error('Published version verification failed; inspect the saved backup');

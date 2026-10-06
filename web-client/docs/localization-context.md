@@ -1,0 +1,20 @@
+# CoC localization context
+
+This is the current Svelte/3D viewer for Clash of Cultures: Monumental Edition. The implementation in `server/src` and presentation in `web-client/src` are authoritative for what each UI string means. `client/js/src/localization` contains older translations to reuse, rather than translate the same rule again.
+
+Translate public interface and rules text yourself with context; do not use BGS's translation endpoint or another translation service. Preserve `{p0}`, `{p1}`, etc., numbers, numeric ranges, rules conditions, and action/resource distinctions. Keep internal command IDs, CSS, URLs and developer identifiers unchanged. Preserve player-entered names, messages and saved state; only presentation changes. Proper historical leader names may use conventional spellings. Prefer existing game terminology in each locale, correcting misleading terms where necessary.
+
+- Advance: a researched technology; “advance” is not moving a unit forward. Research normally spends food; particular abilities allow other payments. Civilization advances are that civilization's special advances. Government advances and prerequisites are separate from research groups.
+- Mood tokens and culture tokens are tokens, distinct from ordinary resources (food, wood, ore, ideas, gold). “Resources” in a rule may exclude tokens. Gold substitution must not imply that it can replace mood/culture indiscriminately.
+- City size counts its city center and buildings. Collection capacity depends on size and mood. A happy city collects one extra; angry cities have restrictions. A city activation is a game mechanic, distinct from selecting a city in the interface. Increasing happiness is an action that can affect several cities and does not activate them. Razing is destroying an eligible city at the end of an age; skipping raze is not abandoning a turn.
+- Draft is military conscription, not choosing cards at setup. Civilization draft is choosing a civilization; action-card drafting is its own ability. Shogunate's card drafting and card-play allowances are separate.
+- Cultural influence changes a building's ownership, not the city's owner. Keep the initial fee, range-extension payment, success-roll shortfall, optional culture boost, reroll and failed attempt distinct. Building color identifies its owner.
+- Movement groups: a movement action can move up to three groups; terrain and Tactics impose limits. Founding a city needs a separate action and an eligible settler, and does not become free merely because a movement group is selected. Embarked units travel with their ship and do not spend an independent group to follow it.
+- Exploration reveals one region, comprising four hexes. Region is a map object, distinct from one tile. Barren and exhausted are different terrain states.
+- Pirates are naval enemies with flags; barbarians use horned helmets. Spawn, reinforcement and movement have separate eligibility rules. Guides preview legal spaces; they are not actions that create pieces.
+- Objectives are scoring goals on objective cards, including battle conditions. Wonders have separate points/effects for building versus owning. Great Pyramid gives its builder 5.1 points and its owner 0. A free action can still require resources; a free advance may still require the action and prerequisites. Great Lighthouse rewards activating its city with an optional ship; it does not grant another city activation.
+- Replay/“Since your last turn” is a visual recap. Undo is constrained by information reveals. Replay does not mutate the live game. Analysis is an independent sandbox.
+
+English source keys include templates for dynamic quantities and historical source extraction. Many technical literals were already present in the older source catalogue; do not translate identifiers as if they were prose. Look up ambiguous short labels at their call sites before deciding.
+
+BGS locales: en, de, fr, pl, ro, el, hi, ru, da, pt-BR, ko, zh-TW, vi, it, nl, fa. Tutorial chapter metadata on BGS will be translated separately by the user; in-game tutorial prose is part of the viewer catalogue.

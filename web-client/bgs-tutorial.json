@@ -1,0 +1,115 @@
+{
+  "sections": [
+    {
+      "id": "basics",
+      "title": "The basics",
+      "description": "Take your first turn, improve your cities and plan research."
+    },
+    {
+      "id": "expansion",
+      "title": "Expansion",
+      "description": "Move groups, explore regions and transport units by sea."
+    },
+    {
+      "id": "interaction",
+      "title": "Interaction",
+      "description": "Resolve cultural influence and incidents one decision at a time."
+    },
+    {
+      "id": "mastery",
+      "title": "Mastery",
+      "description": "Understand leaders, wonders and objective timing."
+    },
+    {
+      "id": "platform",
+      "title": "Platform tools",
+      "description": "Read the journal, review actions and understand undo."
+    }
+  ],
+  "chapters": [
+    {
+      "id": "first-turn",
+      "title": "Your first turn",
+      "description": "Learn the three-action turn through collection and research.",
+      "section": "basics",
+      "version": 1
+    },
+    {
+      "id": "city-economy",
+      "title": "A productive city",
+      "description": "Understand happy-city capacity, terrain and storage.",
+      "section": "basics",
+      "version": 1
+    },
+    {
+      "id": "activation-happiness",
+      "title": "Activation and happiness",
+      "description": "Improve multiple cities in one action without activating them.",
+      "section": "basics",
+      "version": 1
+    },
+    {
+      "id": "research-paths",
+      "title": "Research with a plan",
+      "description": "Follow prerequisites and discover advances that become free.",
+      "section": "basics",
+      "version": 1
+    },
+    {
+      "id": "movement-founding",
+      "title": "Move, explore, found",
+      "description": "Separate movement groups from actions and founding.",
+      "section": "expansion",
+      "version": 1
+    },
+    {
+      "id": "sea-transport",
+      "title": "Ships and passengers",
+      "description": "Board, sail and land with the right movement timing.",
+      "section": "expansion",
+      "version": 1
+    },
+    {
+      "id": "cultural-influence",
+      "title": "Cultural influence",
+      "description": "Pay for range, roll, then decide whether to boost the result.",
+      "section": "interaction",
+      "version": 1
+    },
+    {
+      "id": "incidents-hostiles",
+      "title": "Incidents and hostile units",
+      "description": "Read affected cities and resolve protection choices.",
+      "section": "interaction",
+      "version": 1
+    },
+    {
+      "id": "cards-leaders",
+      "title": "Cards, leaders and free actions",
+      "description": "Recruit a leader and distinguish payments from action costs.",
+      "section": "mastery",
+      "version": 1
+    },
+    {
+      "id": "wonders-ownership",
+      "title": "Wonders and ownership",
+      "description": "Use Great Lighthouse and inspect builder versus owner points.",
+      "section": "mastery",
+      "version": 1
+    },
+    {
+      "id": "objectives-ages",
+      "title": "Objectives and the end of an age",
+      "description": "Meet the exact objective condition and distinguish claim timing.",
+      "section": "mastery",
+      "version": 1
+    },
+    {
+      "id": "platform-tools",
+      "title": "Read, review and recover",
+      "description": "Use rule references and understand the boundary of undo.",
+      "section": "platform",
+      "version": 1
+    }
+  ]
+}

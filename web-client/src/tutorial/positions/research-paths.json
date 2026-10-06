@@ -1,0 +1,810 @@
+{
+  "version": 2,
+  "seed": "clash-tutorial-v1",
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 3,
+        "ore": 3,
+        "ideas": 3,
+        "gold": 3,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "position": "D2",
+          "mood_state": "Happy"
+        }
+      ],
+      "units": [
+        {
+          "position": "D2",
+          "unit_type": "Settler",
+          "id": 0
+        }
+      ],
+      "civilization": "Rome",
+      "available_leaders": [
+        "Caesar",
+        "Augustus",
+        "Sulla"
+      ],
+      "advances": [
+        "Farming",
+        "Mining",
+        "Writing"
+      ],
+      "incident_tokens": 3,
+      "action_cards": [
+        18
+      ],
+      "objective_cards": [
+        4
+      ],
+      "next_unit_id": 1,
+      "name": "You"
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "position": "D7",
+          "mood_state": "Happy"
+        }
+      ],
+      "units": [
+        {
+          "position": "D7",
+          "unit_type": "Settler",
+          "id": 0
+        }
+      ],
+      "civilization": "Persia",
+      "available_leaders": [
+        "Cyrus",
+        "Darius",
+        "Xerxes"
+      ],
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "action_cards": [
+        24
+      ],
+      "objective_cards": [
+        7
+      ],
+      "next_unit_id": 1,
+      "name": "Opponent"
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Unexplored"
+      ],
+      [
+        "A5",
+        "Unexplored"
+      ],
+      [
+        "A7",
+        "Unexplored"
+      ],
+      [
+        "B2",
+        "Unexplored"
+      ],
+      [
+        "B3",
+        "Unexplored"
+      ],
+      [
+        "B4",
+        "Unexplored"
+      ],
+      [
+        "B5",
+        "Unexplored"
+      ],
+      [
+        "B6",
+        "Unexplored"
+      ],
+      [
+        "B7",
+        "Unexplored"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Unexplored"
+      ],
+      [
+        "C4",
+        "Unexplored"
+      ],
+      [
+        "C5",
+        "Unexplored"
+      ],
+      [
+        "C6",
+        "Unexplored"
+      ],
+      [
+        "C7",
+        "Unexplored"
+      ],
+      [
+        "C8",
+        "Mountain"
+      ],
+      [
+        "D1",
+        "Water"
+      ],
+      [
+        "D2",
+        "Fertile"
+      ],
+      [
+        "D3",
+        "Unexplored"
+      ],
+      [
+        "D4",
+        "Unexplored"
+      ],
+      [
+        "D5",
+        "Unexplored"
+      ],
+      [
+        "D6",
+        "Unexplored"
+      ],
+      [
+        "D7",
+        "Fertile"
+      ],
+      [
+        "D8",
+        "Barren"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Unexplored"
+      ],
+      [
+        "E4",
+        "Unexplored"
+      ],
+      [
+        "E5",
+        "Unexplored"
+      ],
+      [
+        "E6",
+        "Unexplored"
+      ],
+      [
+        "E7",
+        "Unexplored"
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        "Unexplored"
+      ],
+      [
+        "F3",
+        "Unexplored"
+      ],
+      [
+        "F4",
+        "Unexplored"
+      ],
+      [
+        "F5",
+        "Unexplored"
+      ],
+      [
+        "F6",
+        "Unexplored"
+      ],
+      [
+        "F7",
+        "Unexplored"
+      ],
+      [
+        "G3",
+        "Unexplored"
+      ],
+      [
+        "G5",
+        "Unexplored"
+      ],
+      [
+        "G7",
+        "Unexplored"
+      ]
+    ],
+    "unexplored_blocks": [
+      {
+        "position": {
+          "top_tile": "B2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Fertile",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Forest",
+            "Water",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Water",
+            "Barren",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D3",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Mountain",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D5",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Mountain",
+            "Forest",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Water",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Mountain",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Mountain",
+            "Water",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      }
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "log": [
+    {
+      "age": 0,
+      "rounds": [
+        {
+          "round": 0,
+          "turns": [
+            {
+              "turn_type": {
+                "Setup": {
+                  "player": 0,
+                  "civilization": "Japan"
+                }
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Farming",
+                        "incident_token": "NoChange",
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Mining",
+                        "incident_token": "NoChange",
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 18
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 4
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "D2",
+                        "port_position": null
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "D2",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain",
+                        "position": "D2"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "turn_type": {
+                "Setup": {
+                  "player": 1,
+                  "civilization": "Persia"
+                }
+              },
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1,
+                  "items": [
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Farming",
+                        "incident_token": "NoChange",
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Mining",
+                        "incident_token": "NoChange",
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 24
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 7
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "D7",
+                        "port_position": null
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "MoodChange": {
+                        "city": "D7",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain",
+                        "position": "D7"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "log_index": 0,
+  "undo_limit": 0,
+  "actions_left": 3,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "Age 1 has started"
+  ],
+  "rng": "296445263143693867296281034113932097109",
+  "wonders_left": [
+    "Pyramids",
+    "GreatMausoleum",
+    "GreatLibrary",
+    "GreatStatue",
+    "GreatGardens",
+    "GreatLighthouse",
+    "Colosseum",
+    "GreatWall"
+  ],
+  "action_cards_left": [
+    14,
+    10,
+    11,
+    3,
+    2,
+    37,
+    5,
+    20,
+    34,
+    4,
+    25,
+    21,
+    39,
+    22,
+    32,
+    8,
+    1,
+    26,
+    16,
+    23,
+    42,
+    6,
+    12,
+    33,
+    13,
+    36,
+    31,
+    15,
+    17,
+    9,
+    7,
+    30,
+    41,
+    28,
+    29,
+    38,
+    19,
+    27,
+    40,
+    35
+  ],
+  "objective_cards_left": [
+    2,
+    9,
+    31,
+    19,
+    15,
+    27,
+    11,
+    29,
+    28,
+    18,
+    38,
+    13,
+    20,
+    10,
+    16,
+    1,
+    12,
+    21,
+    6,
+    36,
+    3,
+    33,
+    35,
+    30,
+    14,
+    37,
+    8,
+    22,
+    25,
+    32,
+    17,
+    23,
+    5,
+    26,
+    24,
+    34
+  ],
+  "incidents_left": [
+    24,
+    48,
+    33,
+    1,
+    16,
+    15,
+    14,
+    58,
+    12,
+    2,
+    11,
+    13,
+    19,
+    25,
+    7,
+    55,
+    20,
+    45,
+    10,
+    8,
+    52,
+    42,
+    51,
+    40,
+    37,
+    35,
+    32,
+    47,
+    43,
+    46,
+    41,
+    36,
+    57,
+    49,
+    26,
+    17,
+    6,
+    18,
+    28,
+    4,
+    38,
+    44,
+    53,
+    5,
+    34,
+    21,
+    3,
+    50,
+    30,
+    9,
+    23,
+    56,
+    29,
+    39,
+    31,
+    27,
+    22,
+    54
+  ]
+}

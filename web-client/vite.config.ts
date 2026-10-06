@@ -1,10 +1,27 @@
 import { defineConfig } from 'vite';
+import { readFileSync } from 'node:fs';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { previewApi } from './scripts/preview-api';
 export default defineConfig({
   base: './',
   publicDir: false,
   plugins: [
+    {
+      name: 'localization-font-licenses',
+      generateBundle() {
+        const licenses = Object.fromEntries(
+          ['LICENSE-Noto.txt', 'LICENSE-Noto-Arabic.txt'].map((name) => [
+            name,
+            readFileSync(new URL(`./src/localization/fonts/${name}`, import.meta.url), 'utf8'),
+          ]),
+        );
+        this.emitFile({
+          type: 'asset',
+          fileName: 'font-licenses.json',
+          source: JSON.stringify(licenses, null, 2),
+        });
+      },
+    },
     {
       name: 'external-wasm-fallback',
       enforce: 'pre',

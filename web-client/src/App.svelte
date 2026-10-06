@@ -1,5 +1,7 @@
 <script lang="ts">
   import { formatPoints } from './score';
+  import { currentLocale, translateText } from './localization';
+  const translate = $derived((value: string) => translateText(value, $currentLocale));
   import CollectionBonusHints from './CollectionBonusHints.svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
   import PlaybackPanel from './PlaybackPanel.svelte';
@@ -651,7 +653,7 @@
         class="brand"
         onclick={() => controller.commands.openBoardgame()}
         aria-label="About Clash of Cultures"
-        ><span class="brand-name">Clash <i>of</i> Cultures</span><span class="mobile-era"
+        ><span class="brand-name" translate="no">Clash <i>of</i> Cultures</span><span class="mobile-era"
           >{#if $session.game?.options?.variant === 'Builder'}Builder ·
           {/if}{#if $session.view?.civilizationDraft}Civilization draft{:else}Age {ageLabel(
               $session.playback?.frame?.age ?? $session.game?.age ?? 1,
@@ -738,8 +740,8 @@
           <div
             class="resource"
             role="img"
-            aria-label={`${resourceNames[resource]}: ${current.resources?.[resource] ?? 0}${current.resource_limit?.[resource] !== undefined ? `, storage limit ${current.resource_limit[resource]}` : ''}`}
-            title={`${resourceNames[resource]}${current?.resource_limit?.[resource] !== undefined ? ` · Storage limit ${current.resource_limit[resource]}` : ''}`}
+            aria-label={`${translate(resourceNames[resource])}: ${current.resources?.[resource] ?? 0}${current.resource_limit?.[resource] !== undefined ? translate(`, storage limit ${current.resource_limit[resource]}`) : ''}`}
+            title={`${translate(resourceNames[resource])}${current?.resource_limit?.[resource] !== undefined ? translate(` · Storage limit ${current.resource_limit[resource]}`) : ''}`}
           >
             <span class="resource-icon {resource}"><Icon size={20} strokeWidth={1.8} /></span><span
               ><strong
@@ -773,7 +775,15 @@
             class:active={!!turnLabel}
             style={`--player:${playerColor(player.index, $session.colorBlind, $session.playerColors)}`}
             title={`Inspect ${player.civilization} (${player.index === $session.seat ? 'You' : player.name}): advances and victory points`}
-            aria-label={`${player.civilization}: ${formatPoints(player.score)} victory points. ${player.index === $session.seat ? 'You' : player.name}.${order ? ` Turn order ${order}.` : ''}${turnLabel ? ` ${turnLabel}.` : ''}${progressLabel ? ` ${progressLabel}.` : ''} View resources, advances and scores`}
+            aria-label={[
+              `${translate(player.civilization)}: ${formatPoints(player.score)} ${translate('victory points')}`,
+              player.index === $session.seat ? translate('You') : player.name,
+              order ? translate(`Turn order ${order}.`).replace(/\.$/u, '') : '',
+              turnLabel ? translate(turnLabel) : '',
+              progressLabel ? translate(progressLabel) : '',
+            ]
+              .filter(Boolean)
+              .join('. ')}
             onclick={() => controller.patch({ scorePlayer: player.index })}
             onmouseenter={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
@@ -1022,8 +1032,8 @@
             onclick={() => controller.openCities(c.position)}
             ><span class="city-thumb"><Landmark size={25} /></span><span
               ><strong
-                >{identity?.civilization}
-                {c.capital ? 'Capital' : 'City'}{#if c.capital}<Crown
+                >{translate(identity?.civilization ?? '')}
+                {translate(c.capital ? 'Capital' : 'City')}{#if c.capital}<Crown
                     size={11}
                     aria-label="Original capital"
                   />{/if}</strong
@@ -1039,7 +1049,12 @@
           >{/each}
       </div>
     </section>
-    <div class="board-toolbar" class:has-redo={$session.view?.canRedo} aria-label="Game controls">
+    <div
+      class="board-toolbar"
+      data-tutorial="actions"
+      class:has-redo={$session.view?.canRedo}
+      aria-label="Game controls"
+    >
       <div class="turn-banner" class:waiting={!!waiting} role="status" aria-live="polite">
         {#if waiting}<Hourglass size={15} aria-hidden="true" />{:else}<span class="turn-light"></span>{/if}
         <div class="turn-copy">

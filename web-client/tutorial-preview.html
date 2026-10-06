@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Clash of Cultures tutorials</title>
+  </head>
+  <body style="margin: 0">
+    <div id="app"></div>
+    <script type="module">
+      import { chapters } from '/src/tutorial/lessons.ts';
+      const params = new URLSearchParams(location.search);
+      let viewer;
+      if (params.has('built')) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = '/bundle/viewer.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.append(script);
+        });
+        viewer = window.clash3d;
+      } else {
+        viewer = (await import('/src/viewer.ts')).viewer;
+      }
+      const chapter = params.get('chapter') ?? chapters[0].id;
+      const index = chapters.findIndex((c) => c.id === chapter);
+      await viewer.launchTutorial('#app', {
+        chapter,
+        locale: params.get('locale') ?? 'en',
+        nextChapter:
+          index < chapters.length - 1
+            ? {
+                title: chapters[index + 1].title,
+                open: () => {
+                  params.set('chapter', chapters[index + 1].id);
+                  location.search = params.toString();
+                },
+              }
+            : undefined,
+      });
+    </script>
+  </body>
+</html>
