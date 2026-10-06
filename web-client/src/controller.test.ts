@@ -1314,6 +1314,144 @@ test('Redo restores an undone collection, remains private to the active seat, an
   }
 });
 
+async function undoPreviewFixture() {
+  const app = paymentController();
+  const game = JSON.parse(fixture('advances/collect_free_economy'));
+  game.board_history = { id: 'undo-preview-test', frames: [] };
+  const action = {
+    Playing: {
+      Collect: {
+        city_position: 'C2',
+        collections: [{ position: 'B1', pile: { ore: 1 }, times: 1 }],
+        action_type: 'Collect',
+      },
+    },
+  };
+  // Seed the fixture's public board history, as a live game already has.
+  const before = engine.tryMove(
+    engine.tryMove(JSON.stringify(game), JSON.stringify(action), 0),
+    JSON.stringify('Undo'),
+    0,
+  );
+  app.controller.setPlayer(0);
+  await app.controller.load(engine.stripSecret(before, 0));
+  app.controller.submit(action);
+  const after = engine.tryMove(before, JSON.stringify(action), 0);
+  await app.controller.load(engine.stripSecret(after, 0));
+  return { ...app, before, after };
+}
+
+test('Undo immediately previews a confirmed earlier state, ignores stale snapshots, then reconciles', async () => {
+  const app = await undoPreviewFixture();
+  const c = app.controller;
+  try {
+    const before = JSON.parse(app.before),
+      after = JSON.parse(app.after);
+    assert.notDeepEqual(before.players[0].resources, after.players[0].resources);
+    c.submit('Undo');
+    assert.deepEqual(app.session().game!.players[0].resources, before.players[0].resources);
+    assert.equal(app.session().game!.actions_left, before.actions_left);
+    assert.equal(app.session().pending, true, 'server confirmation still gates further moves');
+    c.submit('Undo');
+    assert.equal(app.sent.length, 2, 'one collection and one undo, without duplicate submissions');
+    await c.load(engine.stripSecret(app.after, 0));
+    assert.deepEqual(app.session().game!.players[0].resources, before.players[0].resources);
+    assert.equal(app.session().pending, true, 'the old snapshot does not acknowledge Undo');
+    const undone = engine.tryMove(app.after, JSON.stringify('Undo'), 0);
+    await c.load(engine.stripSecret(undone, 0));
+    assert.equal(app.session().pending, false);
+    assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(undone).players[0].resources);
+    assert.equal(app.session().view!.canRedo, true);
+  } finally {
+    app.close();
+  }
+});
+
+test('a rejected optimistic Undo restores the confirmed game without reverting preferences', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const app = await undoPreviewFixture();
+  try {
+    app.controller.submit('Undo');
+    app.controller.patch({ dark: true });
+    app.controller.handleError('Undo rejected');
+    assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(app.after).players[0].resources);
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().dark, true);
+    t.mock.timers.tick(8000);
+    assert.equal(app.session().error, 'Undo rejected', 'the retry timer is cancelled on failure');
+  } finally {
+    app.close();
+  }
+});
+
+test('an Undo timeout restores the confirmed state and a late confirmation still applies', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const app = await undoPreviewFixture();
+  try {
+    app.controller.submit('Undo');
+    t.mock.timers.tick(8000);
+    assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(app.after).players[0].resources);
+    assert.equal(app.session().pending, true);
+    const undone = engine.tryMove(app.after, JSON.stringify('Undo'), 0);
+    await app.controller.load(engine.stripSecret(undone, 0));
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().error, '');
+    assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(app.before).players[0].resources);
+  } finally {
+    app.close();
+  }
+});
+
+test('Undo waits for the server after a seat change or when its target snapshot was never received', async () => {
+  const app = await undoPreviewFixture();
+  const fresh = paymentController();
+  try {
+    app.controller.setPlayer(1);
+    app.controller.setPlayer(0);
+    fresh.controller.setPlayer(0);
+    await fresh.controller.load(engine.stripSecret(app.after, 0));
+    for (const current of [app, fresh]) {
+      current.controller.submit('Undo');
+      assert.equal(current.session().pending, true);
+      assert.deepEqual(
+        current.session().game!.players[0].resources,
+        JSON.parse(app.after).players[0].resources,
+      );
+      current.controller.handleError('Undo rejected');
+    }
+  } finally {
+    app.close();
+    fresh.close();
+  }
+});
+
+test('Undo uses the new branch after undoing and choosing a different collection', async () => {
+  const app = await undoPreviewFixture();
+  try {
+    app.controller.submit('Undo');
+    let raw = engine.tryMove(app.after, JSON.stringify('Undo'), 0);
+    await app.controller.load(engine.stripSecret(raw, 0));
+    const wood = {
+      Playing: {
+        Collect: {
+          city_position: 'C2',
+          collections: [{ position: 'C2', pile: { wood: 1 }, times: 1 }],
+          action_type: 'Collect',
+        },
+      },
+    };
+    app.controller.submit(wood);
+    raw = engine.tryMove(raw, JSON.stringify(wood), 0);
+    await app.controller.load(engine.stripSecret(raw, 0));
+    app.controller.submit('Undo');
+    assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(app.before).players[0].resources);
+    await app.controller.load(engine.stripSecret(engine.tryMove(raw, JSON.stringify('Undo'), 0), 0));
+    assert.equal(app.session().pending, false);
+  } finally {
+    app.close();
+  }
+});
+
 test('battle playback queues rounds, slows autoplay, keeps manual results and cancels on seek or skip', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const app = paymentController(),

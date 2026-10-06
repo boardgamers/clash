@@ -18,6 +18,7 @@ import { battleCues, battleCursor, BATTLE_DURATION, type BattleCue } from './bat
 import { contextualCards, type CardContext } from './contextual-cards';
 import { recruitDiscardSelection, requiredRecruitDiscards } from './recruit-discards';
 import { happinessTargets } from './happiness';
+import { UndoPreview } from './undo-preview';
 import {
   researchDecision,
   mapDecisionOptions,
@@ -105,6 +106,8 @@ export class Controller {
       > & { id: number })
     | null = null;
   private raw = '';
+  private undoPreview = new UndoPreview();
+  private undoRestore: Partial<Session> | null = null;
   private playerSettings: Record<string, unknown> | null = null;
   private legacySkipRaze = false;
   private migratedSkipRaze = false;
@@ -237,6 +240,8 @@ export class Controller {
     this.patch({ [name]: enabled });
   }
   handleError(error: unknown) {
+    clearTimeout(this.refreshTimer);
+    this.restoreUndoPreview();
     this.keepCitiesRequest = null;
     this.cardContinuation = null;
     this.submittedMove = null;
@@ -263,6 +268,8 @@ export class Controller {
     this.raw = raw;
     this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
+    this.undoRestore = null;
+    this.undoPreview.remember(game, view, old.seat, raw.length * 2);
     if (view.influenceContext) this.influenceAttemptPending = true;
     const quotedPayment = this.quotedActionPayment;
     this.quotedActionPayment = null;
@@ -766,6 +773,8 @@ export class Controller {
   }
   setPlayer(index?: number) {
     if (get(this.session).seat === index) return;
+    this.restoreUndoPreview();
+    this.undoPreview.clear();
     if (get(this.session).seat !== undefined) this.playerSettings = null;
     this.migratedSkipRaze = false;
     this.keepCitiesRequest = null;
@@ -1461,10 +1470,42 @@ export class Controller {
       this.handleError('The action could not be sent. Please try again.');
       return;
     }
+    if (move === 'Undo') this.showUndoPreview();
     this.refreshTimer = setTimeout(() => {
+      this.restoreUndoPreview();
       this.commands.fetchState();
       this.patch({ error: 'Waiting for the game to confirm your action…' });
     }, 8000);
+  }
+  private showUndoPreview() {
+    const s = get(this.session);
+    if (!s.pending || !s.game || !s.view || s.analysis) return;
+    const snapshot = this.undoPreview.previous(s.game, s.view);
+    if (!snapshot) return;
+    const patch: Partial<Session> = {
+      game: snapshot.game,
+      view: snapshot.view,
+      mode: 'overview',
+      tilePanel: false,
+      cardsOpen: false,
+      wondersOpen: false,
+      objectivesOpen: false,
+      abilitiesOpen: false,
+      abilityChoice: null,
+      abilityCity: null,
+      publicEffects: [],
+      battles: [],
+    };
+    this.undoRestore = Object.fromEntries(Object.keys(patch).map((key) => [key, s[key as keyof Session]]));
+    // Keep the authoritative raw state and pending lock until the host confirms.
+    // No queries, automatic payments or other game moves use this preview.
+    this.patch(patch);
+  }
+  private restoreUndoPreview() {
+    if (!this.undoRestore) return;
+    const restore = this.undoRestore;
+    this.undoRestore = null;
+    this.patch(restore);
   }
   playContextualCard(id: number, context: CardContext) {
     const s = get(this.session);
@@ -1517,6 +1558,8 @@ export class Controller {
     this.timer = setTimeout(() => this.patch({ toast: '' }), 4000);
   }
   destroy() {
+    this.undoPreview.clear();
+    this.undoRestore = null;
     clearTimeout(this.battleTimer);
     this.destroyed = true;
     clearTimeout(this.playbackTimer);

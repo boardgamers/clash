@@ -290,31 +290,33 @@
   let choiceDecision = $derived($session.view?.choiceDecision);
   let activeMovementBonus = $derived(movementBonus($session.game));
   let actionTitle = $derived(
-    waiting
-      ? `Waiting for ${$session.view?.players.find((p) => p.index === waiting.player)?.civilization ?? 'another player'}`
-      : $session.seat === undefined
-        ? 'Spectating'
-        : $session.game?.state === 'Finished'
-          ? 'Game over'
-          : $session.view?.decision
-            ? $session.view.decision.endOfAge
-              ? 'End of age'
-              : $session.view.decision.name
-            : $session.view?.explorationDecision
-              ? 'Place explored terrain'
-              : choiceDecision
-                ? 'Choose a bonus'
-                : objectiveDecision
-                  ? 'Objective available'
-                  : $session.view?.stopMovement
-                    ? activeMovementBonus
-                      ? `${activeMovementBonus.source} moves`
-                      : 'Moving units'
-                    : readyToEnd
-                      ? 'Ready to end turn'
-                      : $session.view?.canPlay
-                        ? 'Your turn'
-                        : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
+    $session.pending
+      ? 'Confirming…'
+      : waiting
+        ? `Waiting for ${$session.view?.players.find((p) => p.index === waiting.player)?.civilization ?? 'another player'}`
+        : $session.seat === undefined
+          ? 'Spectating'
+          : $session.game?.state === 'Finished'
+            ? 'Game over'
+            : $session.view?.decision
+              ? $session.view.decision.endOfAge
+                ? 'End of age'
+                : $session.view.decision.name
+              : $session.view?.explorationDecision
+                ? 'Place explored terrain'
+                : choiceDecision
+                  ? 'Choose a bonus'
+                  : objectiveDecision
+                    ? 'Objective available'
+                    : $session.view?.stopMovement
+                      ? activeMovementBonus
+                        ? `${activeMovementBonus.source} moves`
+                        : 'Moving units'
+                      : readyToEnd
+                        ? 'Ready to end turn'
+                        : $session.view?.canPlay
+                          ? 'Your turn'
+                          : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
     fullscreenEnabled = document.fullscreenEnabled;

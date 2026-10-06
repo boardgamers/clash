@@ -43,3 +43,5 @@ Viewer 0.1.21 fixes Teach Us event warnings in the bundled rules bridge, highlig
 Viewer 0.1.22 makes possible new barbarian city sites visible without relying on color: thick light/dark hex outlines, a translucent fill, and a city-plus marker with a checkmark for the selected site. The same markers appear in the map guide and incident placement prompts, in both 3D and Strategy view. Engine 0.4.39 is unchanged.
 
 Viewer 0.1.23 keeps Move city visible but disabled for Hunnic cities stopped by entering mountains this turn, with an explanation in the city details. The message follows the saved restriction and disappears when it clears. Engine 0.4.39 is unchanged.
+
+Viewer 0.1.24 previews Undo immediately when the exact preceding state was already received for the current player and turn. The server still confirms every Undo; controls remain locked with a Confirming label, failures restore the last confirmed state, and unavailable snapshots use the normal server path. The bounded in-memory cache is cleared on seat/turn changes and pruned on history branches. Engine 0.4.39 is unchanged.
