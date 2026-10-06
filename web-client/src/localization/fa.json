@@ -1898,7 +1898,7 @@
   "Move sea units": "حرکت واحدهای دریایی",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "مهاجر دوم را به زمین اکتشاف‌نشده ببرید. اکتشاف منطقه‌ای چهارخانه‌ای را آشکار می‌کند، نه یک شش‌ضلعی جدا.",
   "Move the settler": "حرکت مهاجر",
-  "Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.": "کشتی را به خانه دریایی بعد ببرید. سرنشین در همان اقدام حرکت همراه آن می‌رود.",
+  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "کشتی را دو خانهٔ دریایی تا C3 حرکت بده. مسافر در همان اقدام حرکت همراه آن جابه‌جا می‌شود.",
   "Move to an empty land tile to found a city": "برای بناکردن شهر به خانهٔ زمینی خالی حرکت کنید",
   "Move to {p0}": "حرکت به {p0}",
   "Move units": "حرکت واحدها",

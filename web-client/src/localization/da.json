@@ -1886,7 +1886,7 @@
   "Move sea units": "Flyt søenheder",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Flyt den anden nybygger til uudforsket land. Udforskning afslører en region med fire felter, ikke ét isoleret felt.",
   "Move the settler": "Flyt nybyggeren",
-  "Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.": "Flyt skibet til næste havfelt. Passageren rejser med i samme flyttehandling.",
+  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "Sejl skibet to havfelter til C3. Passageren følger med inden for samme flyttehandling.",
   "Move to an empty land tile to found a city": "Flyt til tomt landfelt for at grundlægge en by",
   "Move to {p0}": "Flyt til {p0}",
   "Move units": "Flyt enheder",

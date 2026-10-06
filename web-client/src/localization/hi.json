@@ -1768,7 +1768,7 @@
   "Move sea units": "समुद्री इकाइयाँ चलाएँ",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "दूसरे बसने वाले को अज्ञात भूमि में चलाएँ। खोज एक अलग षट्कोण के बजाय चार-षट्कोण वाला क्षेत्र प्रकट करती है।",
   "Move the settler": "बसने वाला चलाएँ",
-  "Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.": "जहाज़ को अगली समुद्री टाइल पर चलाएँ। उसका यात्री उसी संचलन कार्रवाई में साथ जाता है।",
+  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "जहाज़ को दो समुद्री खानों की दूरी पर C3 तक ले जाएँ। यात्री उसी चाल कार्रवाई में उसके साथ जाता है।",
   "Move to {p0}": "{p0} चलें",
   "Move units": "इकाइयाँ चलाएँ",
   "Move units and found cities": "इकाइयाँ चलाएँ और नगर बसाएँ",

@@ -1898,7 +1898,7 @@
   "Move sea units": "Μετακίνηση θαλάσσιων μονάδων",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Μετακίνησε τον δεύτερο άποικο σε ανεξερεύνητο έδαφος. Η εξερεύνηση αποκαλύπτει περιοχή τεσσάρων εξαγώνων, όχι ένα μεμονωμένο εξάγωνο.",
   "Move the settler": "Μετακίνησε τον άποικο",
-  "Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.": "Μετακίνησε το πλοίο στο επόμενο θαλάσσιο εξάγωνο. Ο επιβάτης ταξιδεύει μαζί του στην ίδια ενέργεια μετακίνησης.",
+  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "Πλεύσε με το πλοίο δύο θαλάσσια εξάγωνα έως το C3. Ο επιβάτης ταξιδεύει μαζί του, στην ίδια ενέργεια μετακίνησης.",
   "Move to an empty land tile to found a city": "Μετακίνηση σε κενό χερσαίο εξάγωνο για ίδρυση πόλης",
   "Move to {p0}": "Μετακίνηση προς {p0}",
   "Move units": "Μετακίνηση μονάδων",

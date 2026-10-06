@@ -1768,7 +1768,7 @@
   "Move sea units": "移動海上單位",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "將第二個移民移至未探索陸地。探索會揭露由四個六角格組成的區域，而非單獨一格。",
   "Move the settler": "移動移民",
-  "Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.": "將船移至下一個海洋地塊。乘員在同一次移動行動中隨船移動。",
+  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "讓船航行兩個海洋格，到達 C3。乘客會在同一次移動行動中隨船移動。",
   "Move to {p0}": "移至 {p0}",
   "Move units": "移動單位",
   "Move units and found cities": "移動單位與建立城市",

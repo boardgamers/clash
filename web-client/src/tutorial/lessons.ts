@@ -258,7 +258,7 @@ export const chapters: {
       {
         id: 'sail',
         title: 'Sail with the passenger',
-        text: 'Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.',
+        text: 'Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.',
         kind: 'sail',
       },
       {

@@ -1768,7 +1768,7 @@
   "Move sea units": "해상 유닛 이동",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "두 번째 개척자를 미탐험 육지로 이동하세요. 탐험은 개별 육각 칸 하나가 아닌 네 칸의 지역을 공개합니다.",
   "Move the settler": "개척자 이동",
-  "Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.": "배를 다음 바다 타일로 이동하세요. 승객은 같은 이동 행동에서 배와 함께 갑니다.",
+  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "배를 바다 칸 두 개만큼 이동하여 C3으로 보내세요. 승객은 같은 이동 행동으로 배와 함께 이동합니다.",
   "Move to {p0}": "{p0}(으)로 이동",
   "Move units": "유닛 이동",
   "Move units and found cities": "유닛 이동과 도시 설립",

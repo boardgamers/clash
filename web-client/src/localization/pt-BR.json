@@ -1898,7 +1898,7 @@
   "Move sea units": "Mover unidades marítimas",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Mova o segundo colono para terra inexplorada. A exploração revela uma região de quatro hexágonos, em vez de um hexágono isolado.",
   "Move the settler": "Mover o colono",
-  "Move the ship to the next sea tile. Its passenger travels with it, within the same Move action.": "Mova o navio para o próximo hexágono marítimo. Seu passageiro vai junto, na mesma ação de movimento.",
+  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "Navegue com o navio por dois hexágonos de mar até C3. O passageiro viaja com ele na mesma ação de movimento.",
   "Move to an empty land tile to found a city": "Mova para um hexágono terrestre vazio para fundar uma cidade",
   "Move to {p0}": "Mover para {p0}",
   "Move units": "Mover unidades",
