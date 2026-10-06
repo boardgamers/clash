@@ -29,6 +29,7 @@ export const viewer = registerViewer<string, string>(
       localization.setNames(session.view?.players.map((player) => player.name) ?? []);
     });
     const app = mount(App, { target, props: { controller } });
+    let thumbnail: HTMLCanvasElement | null = null;
     const unlockAudio = (event: Event) => {
       if (event.isTrusted) controller.audio.unlock();
     };
@@ -61,6 +62,16 @@ export const viewer = registerViewer<string, string>(
         await controller.load(state);
         await tick();
       },
+      async onThumbnail({ width, height }) {
+        await tick();
+        thumbnail?.remove();
+        thumbnail = app.renderThumbnail(width, height);
+        if (!thumbnail) return null;
+        thumbnail.style.cssText = `position:fixed;left:0;top:0;width:${width}px;height:${height}px;z-index:2147483647;pointer-events:none`;
+        thumbnail.setAttribute('aria-hidden', 'true');
+        target.ownerDocument.body.append(thumbnail);
+        return thumbnail;
+      },
       onReplayStart() {
         controller.startPlayback();
       },
@@ -90,6 +101,7 @@ export const viewer = registerViewer<string, string>(
         controller.handleError(error);
       },
       destroy() {
+        thumbnail?.remove();
         target.removeEventListener('pointerdown', unlockAudio, true);
         target.removeEventListener('keydown', unlockAudio, true);
         target.removeEventListener('click', clickAudio, true);

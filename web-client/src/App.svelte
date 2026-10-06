@@ -362,6 +362,9 @@
       world?.destroy();
     };
   });
+  export function renderThumbnail(width: number, height: number) {
+    return world?.thumbnail(width, height) ?? null;
+  }
   async function toggleFullscreen() {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();

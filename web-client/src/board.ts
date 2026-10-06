@@ -1,3 +1,4 @@
+import { thumbnailCamera } from './thumbnail-camera';
 import CollectionMapBadge from './CollectionMapBadge.svelte';
 import {
   collectionYield,
@@ -436,12 +437,12 @@ export class World {
       : this.replaying
         ? 'grab'
         : this.pending
-        ? 'wait'
-        : position
-          ? this.canPick(position)
-            ? 'pointer'
-            : 'not-allowed'
-          : 'grab';
+          ? 'wait'
+          : position
+            ? this.canPick(position)
+              ? 'pointer'
+              : 'not-allowed'
+            : 'grab';
     this.hoverRing.visible = !!position && this.canPick(position) && !this.gesture.dragging;
     if (position) {
       const [x, z] = positionXY(position);
@@ -576,6 +577,52 @@ export class World {
   clearCoordinate() {
     this.pinnedReference = null;
     this.highlightCoordinate(null);
+  }
+  /** Capture only rendered terrain and pieces; no DOM panels or player information. */
+  thumbnail(width: number, height: number): HTMLCanvasElement | null {
+    if (!this.tiles.size || this.disposed) return null;
+    this.settleMotion?.();
+    const bounds = new THREE.Box3().setFromObject(this.board);
+    if (bounds.isEmpty()) return null;
+    const parts = this.board.children
+      .filter((child) => child.visible)
+      .map((child) => new THREE.Box3().setFromObject(child))
+      .filter((box) => !box.isEmpty());
+    const camera = thumbnailCamera(bounds, width, height, parts);
+    const size = this.renderer.getSize(new THREE.Vector2());
+    const ratio = this.renderer.getPixelRatio();
+    const overlays = [
+      this.rings,
+      this.hoverRing,
+      this.referenceRing,
+      this.seaOverlay.group,
+      this.combatOverlay.group,
+      this.explorationOverlay.group,
+      this.placement.group,
+    ];
+    const visibility = overlays.map((object) => object.visible);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    try {
+      overlays.forEach((object) => {
+        object.visible = false;
+      });
+      this.renderer.setPixelRatio(1);
+      this.renderer.setSize(width, height, false);
+      this.renderer.render(this.scene, camera);
+      context.drawImage(this.renderer.domElement, 0, 0);
+    } finally {
+      overlays.forEach((object, index) => {
+        object.visible = visibility[index];
+      });
+      this.renderer.setPixelRatio(ratio);
+      this.renderer.setSize(size.x, size.y, false);
+      this.invalidate();
+    }
+    return canvas;
   }
   zoom(factor: number) {
     const direction = this.camera.position.clone().sub(this.controls.target);

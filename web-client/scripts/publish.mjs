@@ -108,6 +108,7 @@ if (!process.argv.includes('--dry-run')) {
     fullScreen: true,
     fullScreenMobile: true,
     replayable: true,
+    thumbnail: true,
     chat: true,
   };
   const current = await api(endpoint);
