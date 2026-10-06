@@ -88,15 +88,15 @@ Metadata remains in English for translation through BGS admin. Tutorial prose be
 
 **Check:** Use the actual incident's target list; do not imply all incidents select one city. Protection must use the real Myths rules and payment. Empty incident phases should not appear as substantive replay actions.
 
-### 9. Cards, leaders and free actions (`cards-leaders`, mastery, 7 minutes)
+### 9. Civilization advances and leaders (`cards-leaders`, mastery, 7 minutes)
 
-**Problem:** “Free action” is read as “free payment”; draft, recruit and card play are conflated.
+**Problem:** Players miss civilization advances unlocked by normal research and the distinction between recruiting a leader and activating an ability.
 
-**Position:** Great Prophet available with a legal Temple construction, one recruitable leader and a Shogunate example in a separate checkpoint.
+**Position:** Rome knows Tactics, Writing and Math, and can research Engineering and recruit Caesar.
 
-**Steps:** Read Great Prophet's conditions and payment; build without spending a normal action, while paying the listed cost; inspect leader recruitment and movement requirements; distinguish Shogunate card drafting from playing a card and its separate allowance. Show Draft as military conscription of one unit, not civilization selection.
+**Steps:** Research Engineering; inspect the automatically unlocked Aqueduct; recruit Caesar through the normal Recruit controls; inspect the civilization overview for leader abilities.
 
-**Check:** Free actions still pay their specified resource costs. Ability counters reset at the correct turn boundary. Do not use a formerly broken interaction as a tutorial rule.
+**Check:** Research and recruitment each spend one action. Aqueduct is owned after Engineering and Caesar is present after recruitment. Action-card play has its own interactive chapter below.
 
 ### 10. Wonders and ownership (`wonders-ownership`, mastery, 7 minutes)
 
@@ -118,27 +118,17 @@ Metadata remains in English for translation through BGS admin. Tutorial prose be
 
 **Check:** Match objective IDs and triggers, not translated name text. A battle example must satisfy every printed condition. Show completion progress rather than treating any victory as sufficient.
 
-### 12. Read, review and recover (`platform-tools`, reference, 5 minutes)
-
-**Problem:** Undo, visual replay and analysis are confused; useful rules links and preferences are hidden.
-
-**Position:** A short existing example history with one information reveal and two harmless actions, loaded as an isolated tutorial fixture.
-
-**Steps:** Click an advance or card in the journal; locate a coordinate on the map; step through the last turn's actions; observe that empty phase changes are skipped; inspect the undo boundary at an information reveal; enter analysis and return to the live position. Visit available-actions filtering, colorblind display and map-orientation preferences in platform settings.
-
-**Check:** Tutorial analysis never writes to a live game. The replay example uses the current action log format. A failed replay must leave the original position intact. Explain that “available actions only” filters choices; it does not execute or skip decisions.
-
 ## Delivery and acceptance
 
-Implement chapters in this order: 1–5 and 7 first, then 6 and 8–12. These address the most frequent onboarding questions without requiring every optional rule on day one. Keep each chapter around five to eight minutes and offer a skip-to-reference route for experienced players.
+The implemented chapters below supersede the original ordering above. These address the most frequent onboarding questions without requiring every optional rule on day one. Keep each chapter around five to eight minutes and offer a skip-to-reference route for experienced players.
 
 Each chapter needs a current engine-generated fixture, deterministic scripted opponent responses, constrained real actions, one failure-path test, a complete successful walkthrough, a restart/restore test and screenshots in English plus at least one non-Latin locale. Save action history rather than trusting serialized tutorial progress. Keep stable chapter IDs, and increment the chapter version when an engine/rule change invalidates stored history.
 
-One feedback item remains open: selecting a hex sometimes opens movement and sometimes city details. That is a UI consistency problem. Resolve it in the viewer; a tutorial should explain a consistent interaction, not teach players to anticipate a surprising one.
+Hex clicks now inspect the tile; unit clicks open movement. Tutorials use those consistent controls.
 
 ## Implemented release scope
 
-The release registers all 12 independent chapters in five sections: basics, expansion, interaction, mastery and platform tools. Each chapter has a small production-engine position, constrained legal moves, explanations and/or checks, plus validated save, restart and failure behavior. The longer scenarios above remain curriculum ideas; they do not all occur in the initial chapters.
+The release registers 14 independent chapters in four sections: basics, expansion, interaction and mastery. Each chapter has a small production-engine position, constrained legal moves, explanations and/or checks, plus validated save, restart and failure behavior. The longer scenarios above remain curriculum ideas; they do not all occur in the initial chapters.
 
 | Chapter                        | Interactive exercise in this release                                                                              |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
@@ -146,13 +136,17 @@ The release registers all 12 independent chapters in five sections: basics, expa
 | A productive city              | Collect from a happy size-2 city; check capacity and overflow.                                                    |
 | Activation and happiness       | Improve two cities together, then collect and compare activation counts.                                          |
 | Research with a plan           | Research Math and claim Engineering without a resource payment.                                                   |
-| Move, explore, found           | Move a settler, finish movement, found a city, then explore and orient a region.                                  |
+| Move, explore, found           | Move both settlers in one Move action, explore and orient a region, then found the city.                                  |
 | Ships and passengers           | Board, sail, then disembark to explore a new region in the next action.                                                                        |
 | Cultural influence             | Select a Temple, pay extra range, see the roll, pay the boost, and compare building and city ownership.           |
 | Incidents and hostile factions | Trigger Heavy Flood, protect with Myths, and resolve the scripted opponent's city choice; inspect hostile guides. |
-| Cards and leaders              | Recruit Caesar and distinguish a free action from a free payment through a check.                                 |
+| Civilization advances and leaders | Research Engineering to unlock Rome’s Aqueduct, recruit Caesar, and inspect civilization and leader abilities.                                 |
 | Wonders and ownership          | Activate a Lighthouse city and accept its optional ship; check Pyramid builder scoring.                           |
 | Objectives and ages            | Recruit twice and claim Draft; check when final-age rewards stop.                                                 |
-| Platform tools                 | Undo a harmless research action; distinguish analysis and explain the platform preferences.                       |
+| Combat and barbarians | Attack with three infantry, play Peltasts, read the roll, capture the city and improve its mood. Fortress-only defense is explained using official rulebook page 23. |
+| Pirates and sea control | Attack pirates with ships, choose the token reward, then collect from the freed sea tile. |
+| Play an action card | Play Production Focus and click the same forest three times to collect three wood. |
 
-Tutorial game steps use the normal board controls. The sidebar provides a control path and highlights the relevant controls; only quiz answers have sidebar buttons. Legal collection choices, research payments and city selection order are accepted and validated by the engine. Unrelated actions are rejected without changing the position. The 12 walkthrough tests also restore saved history and restart, and semantic assertions verify the key rules effects.
+Tutorial game steps use the normal board controls. The sidebar provides a control path and highlights the relevant controls; only quiz answers have sidebar buttons. Legal collection choices, research payments and city selection order are accepted and validated by the engine. Unrelated actions are rejected without changing the position. The 14 walkthrough tests also restore saved history and restart, and semantic assertions verify the key rules effects.
+
+The final Platform tools section has been removed. The tutorial now has four sections and fourteen chapters. The new lessons use production engine fixtures with fixed combat rolls; rewards, casualties, action counts and city ownership are checked by walkthrough tests. Lesson text is translated contextually into all sixteen supported locales.

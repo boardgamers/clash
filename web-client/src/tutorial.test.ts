@@ -114,6 +114,31 @@ for (const chapter of chapters) {
         ),
       );
     }
+    if (chapter.id === 'cards-leaders') {
+      assert.ok(final.players[0].advances.includes('Engineering'));
+      assert.ok(JSON.parse(engine.webView(controller.snapshot.state.game, 0)).players[0].civilizationAdvances.some((a: any) => a.id === 'Aqueduct' && a.owned));
+      assert.ok(final.players[0].units.some((u: any) => u.unit_type?.Leader === 'Caesar'));
+      assert.equal(final.actions_left, initial.actions_left - 2);
+    }
+    if (chapter.id === 'action-cards') {
+      assert.equal(final.players[0].resources.wood, initial.players[0].resources.wood + 3);
+      assert.ok(!final.players[0].action_cards?.includes(20));
+      assert.equal(final.actions_left, initial.actions_left - 1);
+    }
+    if (chapter.id === 'combat-barbarians') {
+      assert.equal(final.players[0].cities.find((c: any) => c.position === 'C2').mood_state, 'Neutral');
+      assert.equal(final.players[0].units.length, 3, 'Peltasts protects the army from the barbarian hit');
+      assert.equal(final.players[0].resources.gold, initial.players[0].resources.gold + 2);
+      assert.equal(final.actions_left, initial.actions_left - 2);
+    }
+    if (chapter.id === 'pirates') {
+      assert.equal(final.players.find((p: any) => p.civilization === 'Pirates').units?.length ?? 0, 0);
+      assert.equal(final.players[0].resources.gold, initial.players[0].resources.gold + 1);
+      assert.equal(final.players[0].resources.food, initial.players[0].resources.food + 1);
+      assert.equal(final.actions_left, initial.actions_left - 2);
+      const start = JSON.parse(engine.webView(engine.stripSecret(lesson.initialState().game, 0), 0));
+      assert.ok(!start.cities[0].choices.some((c: any) => c.position === 'D1'), 'Pirate initially blocks the sea collection');
+    }
     if (chapter.id === 'objectives-ages') assert.equal(final.players[0].completed_objectives.length, 1);
     const restored = await createTutorial({ ...lesson, storage });
     assert.ok(restored.snapshot.completed, 'Validated saved history restores completion');

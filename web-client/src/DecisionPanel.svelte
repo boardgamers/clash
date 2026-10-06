@@ -161,6 +161,7 @@
 
 <section
   class="action-panel floating-panel decision-panel"
+  data-tutorial="decision"
   class:board-decision={mapChoice}
   class:selection-tray={mapChoice}
   class:unit-decision={unitChoice}

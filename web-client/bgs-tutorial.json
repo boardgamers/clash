@@ -13,102 +13,111 @@
     {
       "id": "interaction",
       "title": "Interaction",
-      "description": "Resolve cultural influence and incidents one decision at a time."
+      "description": "Resolve cultural influence, incidents and battles on land and at sea."
     },
     {
       "id": "mastery",
       "title": "Mastery",
       "description": "Understand leaders, wonders and objective timing."
-    },
-    {
-      "id": "platform",
-      "title": "Platform tools",
-      "description": "Read the journal, review actions and understand undo."
     }
   ],
   "chapters": [
     {
       "id": "first-turn",
       "title": "Your first turn",
-      "description": "Learn the three-action turn through collection and research.",
       "section": "basics",
+      "description": "Learn the three-action turn through collection and research.",
       "version": 1
     },
     {
       "id": "city-economy",
       "title": "A productive city",
-      "description": "Understand happy-city capacity, terrain and storage.",
       "section": "basics",
+      "description": "Understand happy-city capacity, terrain and storage.",
       "version": 1
     },
     {
       "id": "activation-happiness",
       "title": "Activation and happiness",
-      "description": "Improve multiple cities in one action without activating them.",
       "section": "basics",
+      "description": "Improve multiple cities in one action without activating them.",
       "version": 1
     },
     {
       "id": "research-paths",
       "title": "Research with a plan",
-      "description": "Follow prerequisites and discover advances that become free.",
       "section": "basics",
+      "description": "Follow prerequisites and discover advances that become free.",
       "version": 1
     },
     {
       "id": "movement-founding",
       "title": "Move, explore, found",
-      "description": "Separate movement groups from actions and founding.",
       "section": "expansion",
+      "description": "Separate movement groups from actions and founding.",
       "version": 2
     },
     {
       "id": "sea-transport",
       "title": "Ships and passengers",
-      "description": "Board, sail and land with the right movement timing.",
       "section": "expansion",
+      "description": "Board, sail and land with the right movement timing.",
       "version": 5
     },
     {
       "id": "cultural-influence",
       "title": "Cultural influence",
-      "description": "Pay for range, roll, then decide whether to boost the result.",
       "section": "interaction",
+      "description": "Pay for range, roll, then decide whether to boost the result.",
       "version": 1
     },
     {
       "id": "incidents-hostiles",
       "title": "Incidents and hostile units",
-      "description": "Read affected cities and resolve protection choices.",
       "section": "interaction",
+      "description": "Read affected cities and resolve protection choices.",
+      "version": 1
+    },
+    {
+      "id": "combat-barbarians",
+      "title": "Combat and barbarians",
+      "section": "interaction",
+      "description": "Attack a barbarian city, play a tactic and recover the captured city.",
+      "version": 1
+    },
+    {
+      "id": "pirates",
+      "title": "Pirates and sea control",
+      "section": "interaction",
+      "description": "Clear a pirate ship, choose your reward and collect from the freed sea.",
       "version": 1
     },
     {
       "id": "cards-leaders",
-      "title": "Cards, leaders and free actions",
-      "description": "Recruit a leader and distinguish payments from action costs.",
+      "title": "Civilization advances and leaders",
       "section": "mastery",
-      "version": 1
+      "description": "Unlock a Roman advance and recruit one of Rome’s leaders.",
+      "version": 2
     },
     {
       "id": "wonders-ownership",
       "title": "Wonders and ownership",
-      "description": "Use Great Lighthouse and inspect builder versus owner points.",
       "section": "mastery",
+      "description": "Use Great Lighthouse and inspect builder versus owner points.",
       "version": 1
     },
     {
       "id": "objectives-ages",
       "title": "Objectives and the end of an age",
-      "description": "Meet the exact objective condition and distinguish claim timing.",
       "section": "mastery",
+      "description": "Meet the exact objective condition and distinguish claim timing.",
       "version": 1
     },
     {
-      "id": "platform-tools",
-      "title": "Read, review and recover",
-      "description": "Use rule references and understand the boundary of undo.",
-      "section": "platform",
+      "id": "action-cards",
+      "title": "Play an action card",
+      "section": "mastery",
+      "description": "Use a civil effect, then carry out the action it modifies.",
       "version": 1
     }
   ]

@@ -6,7 +6,7 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
+        "food": 0,
         "wood": 3,
         "ore": 3,
         "ideas": 3,
@@ -29,9 +29,14 @@
       ],
       "units": [
         {
-          "position": "D2",
-          "unit_type": "Settler",
-          "id": 0
+          "id": 0,
+          "position": "D1",
+          "unit_type": "Ship"
+        },
+        {
+          "id": 1,
+          "position": "D1",
+          "unit_type": "Ship"
         }
       ],
       "civilization": "Rome",
@@ -43,18 +48,15 @@
       "advances": [
         "Farming",
         "Mining",
-        "Tactics",
-        "Writing",
-        "Math"
+        "Fishing",
+        "Tactics"
       ],
       "incident_tokens": 3,
-      "action_cards": [
-        18
-      ],
+      "action_cards": [],
       "objective_cards": [
         4
       ],
-      "next_unit_id": 1,
+      "next_unit_id": 2,
       "name": "You"
     },
     {
@@ -110,7 +112,14 @@
     {
       "id": 3,
       "civilization": "Pirates",
-      "next_unit_id": 0
+      "next_unit_id": 1,
+      "units": [
+        {
+          "id": 0,
+          "position": "C2",
+          "unit_type": "Ship"
+        }
+      ]
     }
   ],
   "map": {
@@ -153,7 +162,7 @@
       ],
       [
         "C2",
-        "Forest"
+        "Water"
       ],
       [
         "C3",
@@ -808,5 +817,10 @@
     27,
     22,
     54
+  ],
+  "dice_roll_outcomes": [
+    0,
+    11,
+    11
   ]
 }

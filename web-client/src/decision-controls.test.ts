@@ -365,3 +365,18 @@ test('Taxes can be cancelled before choosing its reward, but not after completio
   assert.equal(JSON.parse(restored).actions_left, JSON.parse(initial).actions_left);
   assert.equal(canCancelAbility(JSON.parse(restored), view(restored, 0)), false);
 });
+
+test('cancelling a government choice refunds its payment and retains the current government', async () => {
+  const setup = JSON.parse(fixture('status_phase/change_government'));
+  const base = JSON.parse(await engine.init(2, [], {}, 'government-cancel', {}));
+  setup.players.push(...base.players.slice(2));
+  let raw = engine.tryMove(JSON.stringify(setup), JSON.stringify({Response: {SelectPositions: []}}), 1);
+  const before = JSON.parse(raw);
+  raw = engine.tryMove(raw, JSON.stringify({Response: {Payment: [{culture_tokens: 1, mood_tokens: 1}]}}), 0);
+  assert.equal(canCancelAbility(JSON.parse(raw), view(raw, 0)), true);
+  raw = engine.tryMove(raw, JSON.stringify('Undo'), 0);
+  const after = JSON.parse(raw);
+  assert.deepEqual(after.players[0].resources, before.players[0].resources);
+  assert.deepEqual(after.players[0].advances, before.players[0].advances);
+  assert.ok(!canCancelAbility(after, view(raw, 0)), 'Returned to the optional payment, not an unrelated undo');
+});

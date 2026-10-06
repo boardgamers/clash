@@ -42,7 +42,14 @@ type Kind =
   | 'lighthouse'
   | 'draft'
   | 'objective'
-  | 'undo';
+  | 'undo'
+  | 'attack'
+  | 'tactics'
+  | 'pirate_reward'
+  | 'calm_city'
+  | 'production_focus'
+  | 'focus_collect'
+  | 'sea_collect';
 interface LessonStep {
   id: string;
   title: string;
@@ -66,14 +73,10 @@ export const sections = [
   {
     id: 'interaction',
     title: 'Interaction',
-    description: 'Resolve cultural influence and incidents one decision at a time.',
+    description: 'Resolve cultural influence, incidents and battles on land and at sea.',
   },
   { id: 'mastery', title: 'Mastery', description: 'Understand leaders, wonders and objective timing.' },
-  {
-    id: 'platform',
-    title: 'Platform tools',
-    description: 'Read the journal, review actions and understand undo.',
-  },
+
 ];
 export const chapters: {
   id: string;
@@ -356,31 +359,65 @@ export const chapters: {
     ],
   },
   {
-    id: 'cards-leaders',
-    title: 'Cards, leaders and free actions',
-    section: 'mastery',
-    description: 'Recruit a leader and distinguish payments from action costs.',
+    id: 'combat-barbarians',
+    title: 'Combat and barbarians',
+    section: 'interaction',
+    description: 'Attack a barbarian city, play a tactic and recover the captured city.',
     version: 1,
     steps: [
+      { id: 'attack', title: 'Attack the barbarian city',
+        text: 'The horned helmets at C2 mark barbarians. Use Move, select all three infantry at D2, and attack C2. Entering an enemy army’s space starts combat. Units that fight cannot move again this turn.',
+        kind: 'attack' },
+      { id: 'tactics', title: 'Play Peltasts before the roll',
+        text: 'Select Peltasts and confirm. Tactics lets you play the battle half of an action card. Peltasts requires your army in the battle and can cancel one incoming hit. Barbarians cannot play cards or retreat.',
+        kind: 'tactics' },
+      { id: 'rolls', title: 'Read the combat result',
+        text: 'Each army unit rolls one die. Add the values and applicable Clash bonuses, then divide by five and round down for hits. In this lesson, Peltasts cancels the barbarian hit. You win, capture C2 and gain two gold: one for defeating barbarians and one for their city.' },
+      { id: 'recover', title: 'Recover the captured city',
+        text: 'Captured barbarian cities become Angry. Open Happiness, select C2 and increase its mood once to Neutral. This costs one mood token and one action; it does not activate the city.',
+        kind: 'calm_city' },
+      { id: 'fortress', title: 'An empty city can still defend',
+        text: 'A Fortress can defend without an army for one combat round: it adds a die and cancels one hit. If attackers survive that round, they capture the city. A Fortress is not an army and does not satisfy an Army requirement on a tactics card.' },
+    ],
+  },
+  {
+    id: 'pirates',
+    title: 'Pirates and sea control',
+    section: 'interaction',
+    description: 'Clear a pirate ship, choose your reward and collect from the freed sea.',
+    version: 1,
+    steps: [
+      { id: 'attack', title: 'Clear the pirate ship',
+        text: 'The pirate at C2 blocks collection there and in adjacent sea spaces. Use Move, select both ships at D1, and attack C2. Ships fight at sea; they have no Clash ability. Pirates cannot play cards or retreat.',
+        kind: 'attack' },
+      { id: 'reward', title: 'Choose a reward',
+        text: 'You destroyed the pirate ship and gained one gold. Choose the mood token or culture token offered for fighting pirates.',
+        kind: 'pirate_reward' },
+      { id: 'collect', title: 'Use the cleared sea',
+        text: 'With the pirate gone, Fishing lets D2 collect food from D1 again. Open Collect, select D2, choose one food from D1, and confirm.',
+        kind: 'sea_collect' },
+      { id: 'events', title: 'Watch for new pirates',
+        text: 'Pirates return through incident effects. Their spawn guide shows eligible sea spaces; it does not place ships. Keep ships near important sea collection and Trade Routes to protect them.' },
+    ],
+  },
+  {
+    id: 'cards-leaders',
+    title: 'Civilization advances and leaders',
+    section: 'mastery',
+    description: 'Unlock a Roman advance and recruit one of Rome’s leaders.',
+    version: 2,
+    steps: [
+      { id: 'advance', title: 'Unlock Rome’s Aqueduct',
+        text: 'Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Research and research Engineering; Aqueduct unlocks automatically, without a separate purchase.',
+        kind: 'engineering' },
       {
         id: 'leader',
         title: 'Recruit a leader',
         text: 'Recruit Caesar in your city. This costs one mood token, one culture token and one action, and activates the city. A leader is an army unit and needs Tactics to move.',
         kind: 'leader',
       },
-      {
-        id: 'free',
-        title: 'A free action can still cost resources',
-        text: 'Does “free action” always mean there is no resource payment?',
-        answers: ['No, pay any listed resource cost', 'Yes, every payment is waived'],
-        correct: 'No, pay any listed resource cost',
-        hint: 'Great Prophet grants a free construction action but still requires the Temple payment. Read each effect’s exact wording.',
-      },
-      {
-        id: 'draft',
-        title: 'Different kinds of draft',
-        text: 'Draft recruits one unit by military conscription. Shogunate card drafting and card play have separate allowances. Neither is the civilization-selection draft.',
-      },
+      { id: 'abilities', title: 'Read your leader’s abilities',
+        text: 'Open your civilization overview to read Caesar’s abilities. Each civilization has three different leaders; only one may be in play at a time. Their abilities differ from the civilization advances you keep throughout the game.' },
     ],
   },
   {
@@ -452,46 +489,36 @@ export const chapters: {
     ],
   },
   {
-    id: 'platform-tools',
-    title: 'Read, review and recover',
-    section: 'platform',
-    description: 'Use rule references and understand the boundary of undo.',
+    id: 'action-cards',
+    title: 'Play an action card',
+    section: 'mastery',
+    description: 'Use a civil effect, then carry out the action it modifies.',
     version: 1,
     steps: [
-      {
-        id: 'journal',
-        title: 'Follow a journal reference',
-        text: 'Open the journal and select Storage to inspect its rules. Coordinates can locate places on the map. Last turn reviews actual actions and skips empty phase changes.',
-      },
-      {
-        id: 'undo',
-        title: 'Undo the harmless research',
-        text: 'Undo the research in this isolated example. Undo cannot cross an information reveal. Visual replay and analysis are separate tools.',
-        kind: 'undo',
-      },
-      {
-        id: 'analysis',
-        title: 'Analysis is an independent branch',
-        text: 'Does trying an action in analysis change the live game?',
-        answers: ['No, analysis is independent', 'Yes, analysis submits live moves'],
-        correct: 'No, analysis is independent',
-      },
-      {
-        id: 'settings',
-        title: 'Platform preferences',
-        text: 'Available actions only filters the choices shown; it does not make decisions for you. Colorblind display and map orientation are available in platform settings.',
-      },
+      { id: 'card', title: 'Use Production Focus',
+        text: 'Open Cards and play Production Focus. This civil effect is a free action: it lets your next Collect take resources repeatedly from the same tile. Playing it discards the whole card, including its Peltasts battle effect.',
+        kind: 'production_focus' },
+      { id: 'collect', title: 'Collect repeatedly from one tile',
+        text: 'Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.',
+        kind: 'focus_collect' },
+      { id: 'result', title: 'One card, one use',
+        text: 'You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.' },
     ],
   },
+
 ];
 
 export function controlForKind(kind?: Kind): string | undefined {
   if (!kind) return undefined;
   if (['storage', 'math', 'engineering', 'incident'].includes(kind)) return 'research';
-  if (['walk', 'stop', 'found', 'explore', 'embark', 'sail', 'land'].includes(kind)) return 'movement';
+  if (['walk', 'stop', 'found', 'explore', 'embark', 'sail', 'land', 'attack'].includes(kind)) return 'movement';
   if (['leader', 'draft'].includes(kind)) return 'recruit';
   if (['range', 'boost', 'protect', 'lighthouse', 'objective', 'orientation'].includes(kind))
     return 'decision';
+  if (['tactics', 'pirate_reward'].includes(kind)) return 'decision';
+  if (kind === 'calm_city') return 'happiness';
+  if (['focus_collect', 'sea_collect'].includes(kind)) return 'collect';
+  if (kind === 'production_focus') return 'cards';
   if (kind === 'influence') return 'influence';
   return kind;
 }
@@ -552,6 +579,19 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
       const advance = kind === 'math' ? 'Math' : kind === 'engineering' ? 'Engineering' : 'Storage';
       return one(`Research ${advance}`, v.advances.find((a: any) => a.id === advance)?.action);
     }
+    if (kind === 'production_focus') return one('Play Production Focus', v.actionCards.find((c: any) => c.id === 20)?.action);
+    if (kind === 'focus_collect' || kind === 'sea_collect') {
+      const c = v.cities.find((c: any) => c.position === 'D2');
+      const choice = c.choices.find((c: any) => c.position === (kind === 'focus_collect' ? 'C2' : 'D1') && (kind === 'focus_collect' ? c.pile?.wood : c.pile?.food));
+      return choice ? one('Collect resources', query(state, {kind: 'collect', city: 'D2', selections: [{...choice, times: kind === 'focus_collect' ? 3 : 1}], variant: 'Collect'}).action) : [];
+    }
+    if (kind === 'attack') {
+      const units = id === 'pirates' ? [0, 1] : [0, 1, 2];
+      return one('Attack C2', query(state, {kind: 'movement', units, city: null}).destinations.find((d: any) => d.position === 'C2')?.action);
+    }
+    if (kind === 'tactics') return one('Play Peltasts', {Response: {SelectHandCards: [{ActionCard: 20}]}});
+    if (kind === 'pirate_reward') return (v.choiceDecision?.choices ?? []).map((c: any) => ({label: c.name, move: c.action}));
+    if (kind === 'calm_city') return one('Improve C2', query(state, {kind: 'happiness', cities: [['C2', 1]], variant: v.happinessActions[0].value, lawgiver: false}).action);
     if (kind === 'collect') {
       const c = v.cities.find((c: any) => c.position === city);
       const selections = c.choices
@@ -658,6 +698,13 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
   function controlPath(step: LessonStep, state: State): string[] {
     const offer = step.kind ? (moves(state, step.kind)[0]?.move as any) : undefined;
     const city = view(state).cities?.[0]?.position ?? '';
+    if (step.kind === 'production_focus') return ['Cards', 'Production Focus', 'Play card'];
+    if (step.kind === 'focus_collect') return ['Collect', 'D2', 'C2', 'Wood', 'Collect'];
+    if (step.kind === 'sea_collect') return ['Collect', 'D2', 'D1', 'Food', 'Collect'];
+    if (step.kind === 'attack') return ['Move', id === 'pirates' ? 'D1' : 'D2', 'C2', 'Attack'];
+    if (step.kind === 'tactics') return ['Peltasts', 'Play tactics'];
+    if (step.kind === 'pirate_reward') return ['Select a reward for fighting the Pirates'];
+    if (step.kind === 'calm_city') return ['Happiness', 'C2', 'Confirm'];
     if (step.kind === 'collect') return ['Collect', city, 'Choose resources', 'Collect'];
     if (step.kind === 'happiness')
       return [

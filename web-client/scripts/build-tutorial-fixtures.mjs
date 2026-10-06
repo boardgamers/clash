@@ -53,7 +53,9 @@ for (const id of [
   'cards-leaders',
   'wonders-ownership',
   'objectives-ages',
-  'platform-tools',
+  'combat-barbarians',
+  'pirates',
+  'action-cards',
 ]) {
   let g = structuredClone(base),
     p = g.players[0];
@@ -110,7 +112,7 @@ for (const id of [
     g.players[0].advances.push('Myths');
   }
   if (id === 'cards-leaders') {
-    p.advances.push('Tactics');
+    p.advances.push('Tactics', 'Writing', 'Math');
     p.available_leaders = ['Caesar', 'Augustus', 'Sulla'];
   }
   if (id === 'wonders-ownership') {
@@ -122,14 +124,34 @@ for (const id of [
   if (id === 'objectives-ages') {
     g = await fixture('objective_cards/instant/draft');
   }
-  if (id === 'platform-tools') {
-    g = JSON.parse(
-      engine.tryMove(
-        JSON.stringify(g),
-        JSON.stringify({ Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } } }),
-        0,
-      ),
-    );
+  if (id === 'combat-barbarians') {
+    p.advances.push('Tactics');
+    p.action_cards = [20];
+    p.units = [0, 1, 2].map((id) => ({id, position: 'D2', unit_type: 'Infantry'}));
+    p.next_unit_id = 3;
+    const barbarians = g.players.find((p) => p.civilization === 'Barbarians');
+    barbarians.cities = [{position: 'C2', mood_state: 'Neutral'}];
+    barbarians.units = [{id: 0, position: 'C2', unit_type: 'Infantry'}];
+    barbarians.next_unit_id = 1;
+    // A fixed teaching roll: Peltasts succeeds, the army wins without casualties.
+    g.dice_roll_outcomes = [11, 9, 0, 0, 11];
+  }
+  if (id === 'pirates') {
+    p.advances.push('Fishing', 'Tactics');
+    p.action_cards = [];
+    p.resources.food = 0;
+    p.units = [0, 1].map((id) => ({id, position: 'D1', unit_type: 'Ship'}));
+    p.next_unit_id = 2;
+    g.map.tiles.find(([position]) => position === 'C2')[1] = 'Water';
+    const pirates = g.players.find((p) => p.civilization === 'Pirates');
+    pirates.units = [{id: 0, position: 'C2', unit_type: 'Ship'}];
+    pirates.next_unit_id = 1;
+    g.dice_roll_outcomes = [0, 11, 11];
+  }
+  if (id === 'action-cards') {
+    p.action_cards = [20];
+    p.cities[0].city_pieces = {academy: 0};
+    p.resources.wood = 0;
   }
   // Older test fixtures serialize token fields, but only goods have storage limits.
   for (const player of g.players) {
@@ -139,4 +161,4 @@ for (const id of [
   engine.webView(engine.stripSecret(JSON.stringify(g), 0), 0);
   await fs.writeFile(new URL(`${id}.json`, directory), JSON.stringify(g, null, 2) + '\n');
 }
-console.log('Wrote 12 validated tutorial positions');
+console.log('Wrote validated tutorial positions');

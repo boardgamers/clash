@@ -705,6 +705,7 @@
       {#if $session.seat !== undefined}
         <button
           class="text-button cards-button"
+          data-tutorial="cards"
           aria-label={`Action cards: ${$session.view?.actionCards?.length ?? 0}`}
           onclick={() => controller.patch({ cardsOpen: true })}
           ><Layers size={17} /><span>Cards</span><span class="card-count"
@@ -1026,7 +1027,7 @@
               >{(city?.capacity ?? 0) + Number(!!$session.ballcourts && !!city?.ballcourts)}</strong
             > highlighted tiles</span
           ><span class="instruction-count"
-            >{$session.selection.length} / {(city?.capacity ?? 0) +
+            >{$session.selection.reduce((sum, choice) => sum + choice.times, 0)} / {(city?.capacity ?? 0) +
               Number(!!$session.ballcourts && !!city?.ballcourts)}</span
           >
         </div>{/if}

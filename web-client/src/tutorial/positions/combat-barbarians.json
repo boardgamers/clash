@@ -4,18 +4,18 @@
   "state": "Playing",
   "players": [
     {
-      "name": "You",
       "id": 0,
       "resources": {
+        "food": 2,
         "wood": 3,
         "ore": 3,
         "ideas": 3,
         "gold": 3,
-        "mood_tokens": 8,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -23,15 +23,25 @@
       },
       "cities": [
         {
-          "mood_state": "Happy",
-          "position": "D2"
+          "position": "D2",
+          "mood_state": "Happy"
         }
       ],
       "units": [
         {
+          "id": 0,
           "position": "D2",
-          "unit_type": "Settler",
-          "id": 0
+          "unit_type": "Infantry"
+        },
+        {
+          "id": 1,
+          "position": "D2",
+          "unit_type": "Infantry"
+        },
+        {
+          "id": 2,
+          "position": "D2",
+          "unit_type": "Infantry"
         }
       ],
       "civilization": "Rome",
@@ -43,19 +53,19 @@
       "advances": [
         "Farming",
         "Mining",
-        "Storage"
+        "Tactics"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "action_cards": [
-        18
+        20
       ],
       "objective_cards": [
         4
       ],
-      "next_unit_id": 1
+      "next_unit_id": 3,
+      "name": "You"
     },
     {
-      "name": "Opponent",
       "id": 1,
       "resources": {
         "food": 2
@@ -69,8 +79,8 @@
       },
       "cities": [
         {
-          "mood_state": "Happy",
-          "position": "D7"
+          "position": "D7",
+          "mood_state": "Happy"
         }
       ],
       "units": [
@@ -97,12 +107,26 @@
       "objective_cards": [
         7
       ],
-      "next_unit_id": 1
+      "next_unit_id": 1,
+      "name": "Opponent"
     },
     {
       "id": 2,
       "civilization": "Barbarians",
-      "next_unit_id": 0
+      "next_unit_id": 1,
+      "cities": [
+        {
+          "position": "C2",
+          "mood_state": "Neutral"
+        }
+      ],
+      "units": [
+        {
+          "id": 0,
+          "position": "C2",
+          "unit_type": "Infantry"
+        }
+      ]
     },
     {
       "id": 3,
@@ -640,554 +664,16 @@
             {
               "turn_type": {
                 "Player": 0
-              },
-              "actions": [
-                {
-                  "action": {
-                    "Playing": {
-                      "Advance": {
-                        "advance": "Storage",
-                        "payment": {
-                          "food": 2
-                        }
-                      }
-                    }
-                  },
-                  "player": 0,
-                  "origin": {
-                    "Ability": "Advance"
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/incident_tokens",
-                      "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resource_limit/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    }
-                  ],
-                  "items": [
-                    {
-                      "player": 0,
-                      "Action": {
-                        "balance": "Pay"
-                      },
-                      "origin": {
-                        "Ability": "Advance"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "food": 2
-                        },
-                        "balance": "Pay"
-                      },
-                      "origin": {
-                        "Ability": "Advance"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "mood_tokens": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Advance": "Storage"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Advance": {
-                        "advance": "Storage",
-                        "incident_token": {
-                          "Take": 2
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Advance"
-                      }
-                    }
-                  ]
-                }
-              ]
+              }
             }
           ]
         }
       ]
     }
   ],
-  "board_history": {
-    "id": "c1d75c00a1b4f5355fca8c1a58e18c0d0a14d0e68e9cf97238c83d4d769e0cf5",
-    "frames": [
-      {
-        "cursor": 2,
-        "actor": null,
-        "ended_turn": false,
-        "title": "Earlier position",
-        "age": 1,
-        "round": 1,
-        "tiles": [
-          [
-            "A3",
-            "Unexplored"
-          ],
-          [
-            "A5",
-            "Unexplored"
-          ],
-          [
-            "A7",
-            "Unexplored"
-          ],
-          [
-            "B2",
-            "Unexplored"
-          ],
-          [
-            "B3",
-            "Unexplored"
-          ],
-          [
-            "B4",
-            "Unexplored"
-          ],
-          [
-            "B5",
-            "Unexplored"
-          ],
-          [
-            "B6",
-            "Unexplored"
-          ],
-          [
-            "B7",
-            "Unexplored"
-          ],
-          [
-            "C2",
-            "Forest"
-          ],
-          [
-            "C3",
-            "Unexplored"
-          ],
-          [
-            "C4",
-            "Unexplored"
-          ],
-          [
-            "C5",
-            "Unexplored"
-          ],
-          [
-            "C6",
-            "Unexplored"
-          ],
-          [
-            "C7",
-            "Unexplored"
-          ],
-          [
-            "C8",
-            "Mountain"
-          ],
-          [
-            "D1",
-            "Water"
-          ],
-          [
-            "D2",
-            "Fertile"
-          ],
-          [
-            "D3",
-            "Unexplored"
-          ],
-          [
-            "D4",
-            "Unexplored"
-          ],
-          [
-            "D5",
-            "Unexplored"
-          ],
-          [
-            "D6",
-            "Unexplored"
-          ],
-          [
-            "D7",
-            "Fertile"
-          ],
-          [
-            "D8",
-            "Barren"
-          ],
-          [
-            "E2",
-            "Mountain"
-          ],
-          [
-            "E3",
-            "Unexplored"
-          ],
-          [
-            "E4",
-            "Unexplored"
-          ],
-          [
-            "E5",
-            "Unexplored"
-          ],
-          [
-            "E6",
-            "Unexplored"
-          ],
-          [
-            "E7",
-            "Unexplored"
-          ],
-          [
-            "E8",
-            "Forest"
-          ],
-          [
-            "F2",
-            "Unexplored"
-          ],
-          [
-            "F3",
-            "Unexplored"
-          ],
-          [
-            "F4",
-            "Unexplored"
-          ],
-          [
-            "F5",
-            "Unexplored"
-          ],
-          [
-            "F6",
-            "Unexplored"
-          ],
-          [
-            "F7",
-            "Unexplored"
-          ],
-          [
-            "G3",
-            "Unexplored"
-          ],
-          [
-            "G5",
-            "Unexplored"
-          ],
-          [
-            "G7",
-            "Unexplored"
-          ]
-        ],
-        "players": [
-          {
-            "id": 0,
-            "civilization": "Rome",
-            "cities": [
-              {
-                "mood_state": "Happy",
-                "position": "D2"
-              }
-            ],
-            "units": [
-              {
-                "position": "D2",
-                "unit_type": "Settler",
-                "id": 0
-              }
-            ]
-          },
-          {
-            "id": 1,
-            "civilization": "Persia",
-            "cities": [
-              {
-                "mood_state": "Happy",
-                "position": "D7"
-              }
-            ],
-            "units": [
-              {
-                "position": "D7",
-                "unit_type": "Settler",
-                "id": 0
-              }
-            ]
-          },
-          {
-            "id": 2,
-            "civilization": "Barbarians",
-            "cities": [],
-            "units": []
-          },
-          {
-            "id": 3,
-            "civilization": "Pirates",
-            "cities": [],
-            "units": []
-          }
-        ]
-      },
-      {
-        "cursor": 3,
-        "actor": 0,
-        "ended_turn": false,
-        "title": "Research",
-        "age": 1,
-        "round": 1,
-        "tiles": [
-          [
-            "A3",
-            "Unexplored"
-          ],
-          [
-            "A5",
-            "Unexplored"
-          ],
-          [
-            "A7",
-            "Unexplored"
-          ],
-          [
-            "B2",
-            "Unexplored"
-          ],
-          [
-            "B3",
-            "Unexplored"
-          ],
-          [
-            "B4",
-            "Unexplored"
-          ],
-          [
-            "B5",
-            "Unexplored"
-          ],
-          [
-            "B6",
-            "Unexplored"
-          ],
-          [
-            "B7",
-            "Unexplored"
-          ],
-          [
-            "C2",
-            "Forest"
-          ],
-          [
-            "C3",
-            "Unexplored"
-          ],
-          [
-            "C4",
-            "Unexplored"
-          ],
-          [
-            "C5",
-            "Unexplored"
-          ],
-          [
-            "C6",
-            "Unexplored"
-          ],
-          [
-            "C7",
-            "Unexplored"
-          ],
-          [
-            "C8",
-            "Mountain"
-          ],
-          [
-            "D1",
-            "Water"
-          ],
-          [
-            "D2",
-            "Fertile"
-          ],
-          [
-            "D3",
-            "Unexplored"
-          ],
-          [
-            "D4",
-            "Unexplored"
-          ],
-          [
-            "D5",
-            "Unexplored"
-          ],
-          [
-            "D6",
-            "Unexplored"
-          ],
-          [
-            "D7",
-            "Fertile"
-          ],
-          [
-            "D8",
-            "Barren"
-          ],
-          [
-            "E2",
-            "Mountain"
-          ],
-          [
-            "E3",
-            "Unexplored"
-          ],
-          [
-            "E4",
-            "Unexplored"
-          ],
-          [
-            "E5",
-            "Unexplored"
-          ],
-          [
-            "E6",
-            "Unexplored"
-          ],
-          [
-            "E7",
-            "Unexplored"
-          ],
-          [
-            "E8",
-            "Forest"
-          ],
-          [
-            "F2",
-            "Unexplored"
-          ],
-          [
-            "F3",
-            "Unexplored"
-          ],
-          [
-            "F4",
-            "Unexplored"
-          ],
-          [
-            "F5",
-            "Unexplored"
-          ],
-          [
-            "F6",
-            "Unexplored"
-          ],
-          [
-            "F7",
-            "Unexplored"
-          ],
-          [
-            "G3",
-            "Unexplored"
-          ],
-          [
-            "G5",
-            "Unexplored"
-          ],
-          [
-            "G7",
-            "Unexplored"
-          ]
-        ],
-        "players": [
-          {
-            "id": 0,
-            "civilization": "Rome",
-            "cities": [
-              {
-                "mood_state": "Happy",
-                "position": "D2"
-              }
-            ],
-            "units": [
-              {
-                "position": "D2",
-                "unit_type": "Settler",
-                "id": 0
-              }
-            ]
-          },
-          {
-            "id": 1,
-            "civilization": "Persia",
-            "cities": [
-              {
-                "mood_state": "Happy",
-                "position": "D7"
-              }
-            ],
-            "units": [
-              {
-                "position": "D7",
-                "unit_type": "Settler",
-                "id": 0
-              }
-            ]
-          },
-          {
-            "id": 2,
-            "civilization": "Barbarians",
-            "cities": [],
-            "units": []
-          },
-          {
-            "id": 3,
-            "civilization": "Pirates",
-            "cities": [],
-            "units": []
-          }
-        ]
-      }
-    ]
-  },
-  "log_index": 1,
+  "log_index": 0,
   "undo_limit": 0,
-  "actions_left": 2,
+  "actions_left": 3,
   "round": 1,
   "age": 1,
   "messages": [
@@ -1343,5 +829,12 @@
     27,
     22,
     54
+  ],
+  "dice_roll_outcomes": [
+    11,
+    9,
+    0,
+    0,
+    11
   ]
 }

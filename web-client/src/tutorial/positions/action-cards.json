@@ -7,7 +7,7 @@
       "id": 0,
       "resources": {
         "food": 2,
-        "wood": 3,
+        "wood": 0,
         "ore": 3,
         "ideas": 3,
         "gold": 3,
@@ -24,7 +24,10 @@
       "cities": [
         {
           "position": "D2",
-          "mood_state": "Happy"
+          "mood_state": "Happy",
+          "city_pieces": {
+            "academy": 0
+          }
         }
       ],
       "units": [
@@ -42,14 +45,11 @@
       ],
       "advances": [
         "Farming",
-        "Mining",
-        "Tactics",
-        "Writing",
-        "Math"
+        "Mining"
       ],
       "incident_tokens": 3,
       "action_cards": [
-        18
+        20
       ],
       "objective_cards": [
         4

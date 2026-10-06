@@ -43,9 +43,12 @@ export function toggleDecisionSelection(decision: Decision, selected: number[], 
   return selected.length < decision.max ? [...selected, index] : selected;
 }
 
-/** Only the initial, undoable ability prompt can be cancelled in one step. */
+/** Cancel an initial ability prompt or refund a pending government-change payment. */
 export function canCancelAbility(game: Game | null, view: View | null): boolean {
   if (!game || !view?.decision || !view.canUndo) return false;
+  const governmentChoice = view.decision.options.some((option) =>
+    option.value && typeof option.value === 'object' && 'new_government' in option.value);
+  if (governmentChoice) return true; // Undo refunds the optional government-change payment.
   const actions = game.log?.at(-1)?.rounds.at(-1)?.turns.at(-1)?.actions;
   const action = actions?.[game.log_index - 1]?.action;
   return !!(action && typeof action === 'object' && 'Playing' in action &&
