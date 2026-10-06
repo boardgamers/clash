@@ -214,25 +214,13 @@ export const chapters: {
     title: 'Move, explore, found',
     section: 'expansion',
     description: 'Separate movement groups from actions and founding.',
-    version: 1,
+    version: 2,
     steps: [
       {
         id: 'walk',
         title: 'Move the settler',
-        text: 'A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.',
+        text: 'A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.',
         kind: 'walk',
-      },
-      {
-        id: 'stop',
-        title: 'Finish the Move action',
-        text: 'The Move action remains open for other groups. Finish movement before founding. A single unit cannot join two groups in the same Move action.',
-        kind: 'stop',
-      },
-      {
-        id: 'found',
-        title: 'Found a separate city',
-        text: 'Found a city on the settler’s empty land tile. Founding spends a separate action and replaces the settler with a settlement.',
-        kind: 'found',
       },
       {
         id: 'explore',
@@ -245,6 +233,12 @@ export const chapters: {
         title: 'Choose the revealed region',
         text: 'Choose the orientation offered by the engine. The revealed terrain must allow the exploring unit to enter.',
         kind: 'orientation',
+      },
+      {
+        id: 'found',
+        title: 'Found a separate city',
+        text: 'Found a city on the settler’s empty land tile. Founding spends a separate action and replaces the settler with a settlement.',
+        kind: 'found',
       },
     ],
   },
@@ -579,7 +573,7 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
     if (kind === 'undo') return one('Undo the last action', v.canUndo ? 'Undo' : null);
     if (kind === 'found')
       return v.settlers
-        .filter((s: any) => s.foundAction)
+        .filter((s: any) => s.foundAction && (id !== 'movement-founding' || s.position === 'C2'))
         .map((s: any) => ({ label: `Found city at ${s.position}`, move: s.foundAction }));
     if (['walk', 'explore'].includes(kind))
       return v.settlers
@@ -672,9 +666,16 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
         'Move',
         'Select units, then a highlighted hex.',
         offer?.Movement?.Move?.destination ?? '',
-        'Move here',
+        step.kind === 'explore'
+          ? 'Explore'
+          : step.kind === 'embark'
+            ? 'Board ship'
+            : step.kind === 'land'
+              ? 'Disembark'
+              : 'Move here',
       ];
-    if (step.kind === 'found') return ['Move', 'Found city here'];
+    if (step.kind === 'found')
+      return ['Move', ...(id === 'movement-founding' ? ['C2'] : []), 'Found city here'];
     if (step.kind === 'stop') return ['Finish moving'];
     if (step.kind === 'influence') return ['Abilities', 'Temple', 'A1', 'C1', 'Confirm'];
     if (step.kind === 'leader') return ['Recruit', city, 'Caesar', 'Recruit'];

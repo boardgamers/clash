@@ -113,7 +113,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "Πόλη βαρβάρων που καταλαμβάνει ο Ρουγίλα γίνεται ευτυχισμένη μετά την επίλυση κατάληψης.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "Μία ενέργεια μετακίνησης μετακινεί έως τρεις ομάδες. Μετακίνησε τον πρώτο άποικο στο κοντινό δάσος. Ο στρατός απαιτεί Τακτική· οι άποικοι όχι.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "Μία ενέργεια μετακίνησης μετακινεί έως τρεις ομάδες. Μετακίνησε τον πρώτο άποικο στο κοντινό δάσος. Ο στρατός απαιτεί Τακτική· οι άποικοι όχι. Και οι δύο άποικοι είναι επιλεγμένοι από προεπιλογή. Αποεπίλεξε τον έναν πριν επιλέξεις το δάσος.",
   "A Roads route can bypass terrain movement restrictions.": "Διαδρομή Δρόμων παρακάμπτει περιορισμούς εδάφους.",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "Ένα `Result` που περιέχει ένα διάνυσμα με όλους τους πιθανούς συνδυασμούς `k` αριθμών από το `0...n-1`,",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "Η κάρτα στο χέρι δεν δίνει πόντους. Κατασκεύασε το θαύμα σε ευτυχισμένη πόλη με Μηχανική και την απαιτούμενη πρόοδο για τις επιδράσεις και τους πόντους του.",

@@ -113,7 +113,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "Uma cidade bárbara capturada por Rugila fica feliz após resolver a captura.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "Uma ação de movimento pode mover até três grupos. Mova o primeiro colono para a floresta próxima. Exércitos precisam de Táticas para mover; colonos não.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "Uma ação de movimento pode mover até três grupos. Mova o primeiro colono para a floresta próxima. Exércitos precisam de Táticas para mover; colonos não. Os dois colonos estão selecionados por padrão. Desmarque um deles antes de escolher a floresta.",
   "A Roads route can bypass terrain movement restrictions.": "Uma rota de Estradas pode ignorar restrições de movimento do terreno.",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "Um `Result` contendo um vetor com todas as combinações possíveis de `k` números de `0...n-1`,",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "Uma carta na mão não dá pontos. Construa a maravilha numa cidade feliz, com Engenharia e o avanço exigido, para obter seus efeitos e pontos.",

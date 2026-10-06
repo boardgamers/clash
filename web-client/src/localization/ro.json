@@ -113,7 +113,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "Orașul barbar cucerit de Rugila devine fericit după rezolvarea cuceririi.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "O acțiune de deplasare poate muta până la trei grupuri. Mută primul colonist în pădurea apropiată. Armatele necesită Tactică pentru deplasare; coloniștii nu.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "O acțiune de deplasare poate muta până la trei grupuri. Mută primul colonist în pădurea apropiată. Armatele necesită Tactică pentru deplasare; coloniștii nu. Ambii coloniști sunt selectați implicit. Deselectează unul înainte de a alege pădurea.",
   "A Roads route can bypass terrain movement restrictions.": "Un traseu de Drumuri poate evita restricțiile de teren.",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "Un `Result` care conține un vector cu toate combinațiile posibile de `k` numere din `0...n-1`,",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "O carte în mână nu valorează puncte. Construiește minunea într-un oraș fericit, cu Inginerie și progresul necesar, pentru a primi efectele și punctele sale.",

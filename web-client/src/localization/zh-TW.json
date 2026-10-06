@@ -106,7 +106,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "魯吉拉佔領的蠻族城市在結算佔領後變為快樂。",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "一次移動行動最多可移動三個群組。將第一個移民移至附近森林。軍隊移動需要戰術；移民則不需要。",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "一次移動行動最多可移動三個群組。將第一個移民移至附近森林。軍隊移動需要戰術；移民則不需要。 預設已選取兩名移民。選擇森林前，先取消選取其中一名。",
   "A Roads route can bypass terrain movement restrictions.": "道路路線可忽略地形移動限制。",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "一個 `Result`，包含一個向量，內含從 `0...n-1` 中取出 `k` 個數字的所有可能組合，",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "手中的卡牌不計分。須擁有工程學及所需科技，在快樂城市建造奇觀，才能取得其效果與分數。",

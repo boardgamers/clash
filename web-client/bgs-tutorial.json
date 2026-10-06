@@ -60,7 +60,7 @@
       "title": "Move, explore, found",
       "description": "Separate movement groups from actions and founding.",
       "section": "expansion",
-      "version": 1
+      "version": 2
     },
     {
       "id": "sea-transport",

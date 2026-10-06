@@ -113,7 +113,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "Город варваров, захваченный Ругилой, становится счастливым после разрешения захвата.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "Действие движения перемещает до трёх групп. Переместите первого поселенца в ближний лес. Для движения армии нужна Тактика; для поселенцев — нет.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "Действие движения перемещает до трёх групп. Переместите первого поселенца в ближний лес. Для движения армии нужна Тактика; для поселенцев — нет. По умолчанию выбраны оба поселенца. Снимите выделение с одного из них, прежде чем выбрать лес.",
   "A Roads route can bypass terrain movement restrictions.": "Маршрут Дорог обходит ограничения движения местности.",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "`Result`, содержащий вектор со всеми возможными комбинациями из `k` чисел из `0...n-1`,",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "Карта на руке не даёт очков. Постройте чудо в счастливом городе с Инженерией и требуемым достижением, чтобы получить его эффекты и очки.",

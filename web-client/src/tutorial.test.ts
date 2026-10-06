@@ -54,6 +54,14 @@ for (const chapter of chapters) {
       assert.equal(final.players[0].cities[1].mood_state, 'Neutral');
       assert.equal(final.players[0].cities[1].activations ?? 0, 0);
     }
+    if (chapter.id === 'movement-founding') {
+      assert.equal(
+        final.actions_left,
+        initial.actions_left - 2,
+        'Both settlers share one Move action; founding spends one more action',
+      );
+      assert.ok(final.players[0].cities.some((city: any) => city.position === 'C2'));
+    }
     if (chapter.id === 'sea-transport') {
       const view = JSON.parse(engine.webView(engine.stripSecret(controller.snapshot.state.game, 0), 0));
       const settler = view.units.find((unit: any) => unit.type === 'Settler');

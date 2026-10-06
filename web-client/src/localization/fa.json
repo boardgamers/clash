@@ -113,7 +113,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "شهر بربر تصرف‌شده توسط روگیلا پس از حل تصرف شاد می‌شود.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "یک اقدام حرکت می‌تواند حداکثر سه گروه را حرکت دهد. مهاجر اول را به جنگل نزدیک ببرید. حرکت ارتش به تاکتیک نیاز دارد؛ مهاجران ندارند.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "یک اقدام حرکت می‌تواند حداکثر سه گروه را حرکت دهد. مهاجر اول را به جنگل نزدیک ببرید. حرکت ارتش به تاکتیک نیاز دارد؛ مهاجران ندارند. هر دو مهاجر به‌طور پیش‌فرض انتخاب شده‌اند. پیش از انتخاب جنگل، یکی را از حالت انتخاب خارج کن.",
   "A Roads route can bypass terrain movement restrictions.": "مسیر جاده می‌تواند محدودیت حرکت زمین را رد کند.",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "کارت در دست امتیاز ندارد. برای اثر و امتیاز، با مهندسی و پیشرفت لازم، عجایب را در شهری شاد بسازید.",

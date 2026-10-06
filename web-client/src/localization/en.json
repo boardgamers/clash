@@ -330,7 +330,7 @@
   "A game event will be triggered": "A game event will be triggered",
   "A good year": "A good year",
   "A leader ability took a wonder card away from you. You can draw a replacement wonder card.": "A leader ability took a wonder card away from you. You can draw a replacement wonder card.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.",
   "A moving group containing Hannibal and Elephants ignores Mountain movement restrictions.": "A moving group containing Hannibal and Elephants ignores Mountain movement restrictions.",
   "A new game event has been triggered:": "A new game event has been triggered:",
   "A new game event has been triggered: {p0}": "A new game event has been triggered: {p0}",

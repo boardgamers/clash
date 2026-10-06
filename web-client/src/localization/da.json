@@ -110,7 +110,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "En barbarby erobret af Rugila bliver glad, når erobringen er afviklet.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "En flyttehandling kan flytte op til tre grupper. Flyt den første nybygger til den nærliggende skov. Hærbevægelse kræver Taktik; nybyggere gør ikke.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "En flyttehandling kan flytte op til tre grupper. Flyt den første nybygger til den nærliggende skov. Hærbevægelse kræver Taktik; nybyggere gør ikke. Begge nybyggere er valgt som standard. Fravælg den ene, før du vælger skoven.",
   "A Roads route can bypass terrain movement restrictions.": "En rute med Veje kan omgå terrænets bevægelsesbegrænsninger.",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "En `Result`, der indeholder en vektor med alle mulige kombinationer af `k` tal ud af `0...n-1`,",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "Et kort på hånden giver ingen point. Opfør vidunderet i en glad by med Ingeniørkunst og det krævede fremskridt for at få dets effekter og point.",

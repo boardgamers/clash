@@ -54,7 +54,7 @@ Metadata remains in English for translation through BGS admin. Tutorial prose be
 
 **Position:** Two settler groups, safe adjacent land and an unexplored region; army units are visible but Tactics is absent.
 
-**Steps:** Start Move; move the first group; move a second group within the same action; finish movement explicitly; found a city using a separate action; explore a region and choose its orientation; inspect all four revealed hexes. Compare forest and mountain movement restrictions.
+**Steps:** Start Move; move the first settler to the forest; explore with the second settler within the same Move action and choose the revealed region’s orientation; after movement finishes, found a city with the first settler using a separate action. The whole sequence spends two actions, leaving one action available.
 
 **Check:** Movement spends one action for up to three groups. A unit cannot join two groups within that action. Tactics restrictions and founding legality use the real engine. Failed destinations do not change the state.
 

@@ -106,7 +106,7 @@
   "@boardgamers/protocol/tutorial/dom": "@boardgamers/protocol/tutorial/dom",
   "@boardgamers/protocol/viewer": "@boardgamers/protocol/viewer",
   "A Barbarian city captured by Rugila becomes Happy after resolving the capture.": "루길라가 점령한 야만족 도시는 점령 처리 후 행복해집니다.",
-  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not.": "이동 행동으로 최대 세 그룹을 움직일 수 있습니다. 첫 개척자를 가까운 숲으로 이동하세요. 군대 이동에는 전술이 필요하지만 개척자는 필요하지 않습니다.",
+  "A Move action can move up to three groups. Move the first settler to the nearby forest. Army movement requires Tactics; settlers do not. Both settlers are selected by default. Deselect one before choosing the forest.": "이동 행동으로 최대 세 그룹을 움직일 수 있습니다. 첫 개척자를 가까운 숲으로 이동하세요. 군대 이동에는 전술이 필요하지만 개척자는 필요하지 않습니다. 기본적으로 두 개척자가 모두 선택되어 있습니다. 숲을 선택하기 전에 한 개척자의 선택을 해제하세요.",
   "A Roads route can bypass terrain movement restrictions.": "도로 경로는 지형 이동 제한을 무시할 수 있습니다.",
   "A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,": "`0...n-1` 중 `k`개 숫자의 모든 가능한 조합을 담은 벡터를 포함하는 `Result`",
   "A card in hand scores no points. Construct the wonder in a happy city with Engineering and its required advance to gain its effects and points.": "손에 든 카드는 점수를 주지 않습니다. 공학과 필요한 발전을 갖추고 행복한 도시에 불가사의를 건설해야 효과와 점수를 얻습니다.",
