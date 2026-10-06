@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { frameResources, describeResources } from './resource-playback.ts';
-import { groupPlaybackFrames } from './replay-actions.ts';
+import { groupPlaybackFrames, playbackSteps } from './replay-actions.ts';
 import { frameDetails, frameEffects, sinceLastTurn, recapStart } from './playback.ts';
 import type { Game, LoggedAction } from './types.ts';
 const gain = (pile: Record<string, number>, origin = 'Taxes', player = 1) => ({
@@ -145,7 +145,7 @@ test('recruiting, construction, research, happiness and card follow-ups group wi
 });
 test('battles, incident triggers, opponent reactions and objective claims keep separate replay steps', () => {
   const boundaries: LoggedAction[] = [
-    { player: 0, action: { Response: { Bool: true } } },
+    { player: 0, action: { Response: { Bool: true } }, items: [gain({ food: 1 }, 'Medicine', 0)] },
     {
       player: 1,
       action: { Response: { Bool: true } },
@@ -241,6 +241,63 @@ test('ending an otherwise empty opponent turn does not offer replay', () => {
   const game = fixture([{ player: 1, action: { Playing: 'EndTurn' } }]);
   game.board_history!.frames[1].title = 'End turn';
   game.board_history!.frames[1].ended_turn = true;
+  assert.equal(sinceLastTurn(game, 0), null);
+  assert.equal(recapStart(game, 0), null);
+});
+
+test('empty phase decisions and movement stops are skipped without losing turn boundaries', () => {
+  const game = fixture([
+    { player: 1, action: { Playing: { Custom: { action: 'Taxes' } } }, items: [gain({ food: 1 })] },
+    { player: 1, action: { Response: { SelectPositions: [] } } },
+    { player: 1, action: { Response: { Bool: false } } },
+    { player: 1, action: { Movement: 'Stop' } },
+    { player: 1, action: { Playing: 'EndTurn' } },
+  ]);
+  const frames = game.board_history!.frames;
+  frames[2].title = 'Raze city';
+  frames[3].title = 'Resolve choice';
+  frames[4].title = 'Stop movement';
+  frames[5].title = 'End turn';
+  frames[5].ended_turn = true;
+  frames[5].players = structuredClone(frames[5].players);
+  frames[5].players[0].cities![0].activations = 0;
+  const grouped = groupPlaybackFrames(game);
+  assert.deepEqual(
+    grouped.map((frame) => frame.cursor),
+    [0, 1, 5],
+  );
+  const clean = { ...game, board_history: { ...game.board_history!, frames: grouped } };
+  assert.deepEqual(sinceLastTurn(clean, 0), { start: 0, end: 2 });
+  assert.deepEqual(playbackSteps(clean, 0, 2), [0, 1]);
+  assert.equal(grouped[2].ended_turn, true);
+});
+
+test('phase transitions retain actual public rewards, card draws and city changes', () => {
+  const game = fixture([
+    { player: 1, action: { Playing: 'EndTurn' }, items: [gain({ food: 1 }, 'TradeRoutes')] },
+    { player: 1, action: { Response: { SelectPositions: [] } } },
+    { player: 1, action: { Response: { Bool: false } } },
+  ]);
+  const frames = game.board_history!.frames;
+  frames[1].title = 'End turn';
+  frames[1].ended_turn = true;
+  frames[2].title = 'Raze city';
+  frames[2].effects = [{ player: 1, kind: 'objective', label: 'Drew an objective' }];
+  frames[3].title = 'Resolve choice';
+  frames[3].players = structuredClone(frames[3].players);
+  frames[3].players[0].cities!.pop();
+  assert.deepEqual(playbackSteps(game, 0, 3), [0, 1, 2, 3]);
+});
+
+test('phase confirmation and age bookkeeping without consequences do not offer replay', () => {
+  const game = fixture([{ player: 1, action: { Response: { Bool: true } }, items: [gain({ food: 0 })] }]);
+  const frames = game.board_history!.frames;
+  frames[1].title = 'Resolve choice';
+  frames[1].age = 2;
+  frames[1].round = 1;
+  frames[1].players = structuredClone(frames[1].players);
+  frames[1].players[0].cities![0].activations = 0;
+  assert.deepEqual(playbackSteps(game, 0, 1), [0]);
   assert.equal(sinceLastTurn(game, 0), null);
   assert.equal(recapStart(game, 0), null);
 });

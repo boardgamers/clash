@@ -56,6 +56,7 @@ export interface BoardFrame {
   effects?: PublicEffect[];
 }
 export interface Playback {
+  steps?: number[];
   frame: BoardFrame | null;
   index: number;
   total: number;

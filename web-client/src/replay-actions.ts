@@ -27,6 +27,63 @@ function boundary(action: LoggedAction, frame: BoardFrame): boolean {
   );
 }
 
+export function frameHasContent(game: Game, before: BoardFrame | undefined, frame: BoardFrame): boolean {
+  if (frame.effects?.length) return true;
+  const actions = publicActions(game).slice(before?.cursor ?? frame.cursor, frame.cursor);
+  if (
+    actions.some((action) =>
+      action.items?.some(
+        (item) =>
+          Object.keys(item).some(
+            (key) =>
+              !['player', 'origin', 'Text'].includes(key) &&
+              (key !== 'Resources' || Object.values(item.Resources?.resources ?? {}).some(Boolean)),
+          ) || item.Text?.startsWith('triggers the event '),
+      ),
+    )
+  )
+    return true;
+  if (actions.some((action) => action.combat_stats)) return true;
+  if (frame.ended_turn || frame.title === 'End turn') return false;
+  if (
+    before &&
+    JSON.stringify([frame.tiles, frame.players], (key, value) =>
+      ['activations', 'angry_activation', 'movement_restrictions'].includes(key) ? undefined : value,
+    ) !==
+      JSON.stringify([before.tiles, before.players], (key, value) =>
+        ['activations', 'angry_activation', 'movement_restrictions'].includes(key) ? undefined : value,
+      )
+  )
+    return true;
+  if (actions.length)
+    return actions.some((action) => {
+      const move = action.action;
+      if (!move || typeof move !== 'object') return false;
+      if (move.Playing && move.Playing !== 'EndTurn') return true;
+      if (move.Movement && move.Movement !== 'Stop') return true;
+      if ('ChooseCivilization' in move) return true;
+      const response = move.Response;
+      return (
+        !!response &&
+        typeof response === 'object' &&
+        'SelectPositions' in response &&
+        Array.isArray(response.SelectPositions) &&
+        response.SelectPositions.length > 0
+      );
+    });
+  return !['End turn', 'Earlier position', 'Raze city', 'Resolve choice'].includes(frame.title);
+}
+
+export function playbackSteps(game: Game, start: number, end: number): number[] {
+  const frames = game.board_history?.frames ?? [];
+  return [
+    start,
+    ...frames.flatMap((frame, index) =>
+      index > start && index <= end && frameHasContent(game, frames[index - 1], frame) ? [index] : [],
+    ),
+  ];
+}
+
 /** Payment and same-player decisions resolve their initiating action, not extra turns. */
 export function groupPlaybackFrames(game: Game): BoardFrame[] {
   const frames = game.board_history?.frames ?? [];
@@ -36,21 +93,8 @@ export function groupPlaybackFrames(game: Game): BoardFrame[] {
   for (const [index, frame] of frames.entries()) {
     const interval = actions.slice(frames[index - 1]?.cursor ?? frame.cursor, frame.cursor);
     const action = interval.length === 1 ? interval[0] : undefined;
-    const responseMove = action?.action && typeof action.action === 'object' ? action.action.Response : null;
     const previousFrame = frames[index - 1];
-    if (
-      frame.title === 'Raze city' &&
-      responseMove &&
-      typeof responseMove === 'object' &&
-      'SelectPositions' in responseMove &&
-      Array.isArray(responseMove.SelectPositions) &&
-      !responseMove.SelectPositions.length &&
-      !frame.effects?.length &&
-      previousFrame &&
-      JSON.stringify([frame.tiles, frame.players, frame.combat]) ===
-        JSON.stringify([previousFrame.tiles, previousFrame.players, previousFrame.combat])
-    ) {
-      group = null;
+    if (action && previousFrame && !frame.ended_turn && !frameHasContent(game, previousFrame, frame)) {
       continue;
     }
     const separate = !action || boundary(action, frame) || frame.ended_turn;

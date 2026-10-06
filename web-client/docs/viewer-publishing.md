@@ -33,3 +33,5 @@ Engine 0.4.38 clarifies single-city Myths protection as “your affected city”
 The viewer update following 0.4.38 makes home-at-bottom rotation an account preference, disabled by default in both 3D and Strategy views. Publish the updated preference declarations with the viewer. Change this preference in the BGS platform settings; the viewer immediately resets the orientation when it changes. Manual camera rotation remains available. The engine is unchanged.
 
 The next viewer update makes barbarian unit badges follow the unit-badge preference in color-blind mode. Horned helmets on the models and barbarian city flags remain visible when badges are disabled. The engine is unchanged.
+
+The following viewer update skips empty end-turn, raze-city and other phase transitions in visual replay and “Since your last turn”. Turn boundaries remain available to select the recap range; actual rewards, card draws, combat and board changes remain replay steps. City dock tiles use less padding and smaller decorative icons. The engine is unchanged.

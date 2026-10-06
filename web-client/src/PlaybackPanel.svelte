@@ -10,11 +10,23 @@
   const frame = $derived(playback?.frame);
   const details = $derived(
     frameDetails(
-      $session.game?.board_history?.frames[(playback?.index ?? 0) - 1],
+      $session.game?.board_history?.frames[
+        playback?.steps
+          ? playback.steps[playback.steps.indexOf(playback.index) - 1]
+          : (playback?.index ?? 0) - 1
+      ],
       frame ?? null,
       $session.game,
       $session.view?.advances,
     ),
+  );
+  const progress = $derived(
+    playback?.steps
+      ? playback.steps.indexOf(playback.index)
+      : (playback?.index ?? 0) - (playback?.start ?? 0),
+  );
+  const count = $derived(
+    playback?.steps ? playback.steps.length - 1 : (playback?.end ?? 0) - (playback?.start ?? 0),
   );
   const atStart = $derived(!!playback && playback.index === playback.start);
   const atEnd = $derived(!!playback && playback.index >= playback.end);
@@ -28,9 +40,7 @@
       <strong
         ><History size={16} />{playback.range === 'all' ? 'Replay' : 'Since your last turn'}
         {#if playback.end > playback.start}<span class="playback-progress"
-            >{atStart
-              ? 'Start'
-              : `Action ${playback.index - playback.start} of ${playback.end - playback.start}`}</span
+            >{atStart ? 'Start' : `Action ${progress} of ${count}`}</span
           >{/if}
       </strong>
       <small

@@ -1019,7 +1019,7 @@ test('opponent recap steps animate and pause, replay stays within its turn, and 
     });
     c.replayLastTurn();
     assert.equal(app.session().playback!.index, 1);
-    assert.equal(app.session().playback!.end, 3);
+    assert.equal(app.session().playback!.end, 2);
     assert.equal(app.session().playback!.playing, false);
     c.stepPlayback(1);
     assert.equal(app.session().playback!.index, 2);
@@ -1038,10 +1038,10 @@ test('opponent recap steps animate and pause, replay stays within its turn, and 
     t.mock.timers.tick(1);
     assert.equal(app.session().playback!.index, 2);
     t.mock.timers.tick(2500);
-    assert.equal(app.session().playback!.index, 3);
+    assert.equal(app.session().playback!.index, 2);
     assert.equal(app.session().playback!.playing, false, 'stays open at completion');
     t.mock.timers.tick(10000);
-    assert.equal(app.session().playback!.index, 3);
+    assert.equal(app.session().playback!.index, 2);
     c.restartPlayback();
     assert.equal(app.session().playback!.index, 1, 'Replay does not restart the whole game');
     c.endPlayback();
@@ -1698,6 +1698,53 @@ test('home-at-bottom changes from platform preferences never submit moves or wri
     c.setPreferences({});
     assert.equal(app.session().homeAtBottom, false);
     assert.deepEqual(app.preferences, []);
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('recap navigation skips empty phases across multiple opponents while keeping real actions', () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const frames = [
+      { cursor: 0, actor: 0, title: 'End turn', ended_turn: true },
+      { cursor: 1, actor: 1, title: 'Move' },
+      { cursor: 2, actor: 1, title: 'End turn', ended_turn: true },
+      { cursor: 3, actor: 2, title: 'Raze city' },
+      { cursor: 4, actor: 2, title: 'Research' },
+      { cursor: 5, actor: 2, title: 'End turn', ended_turn: true },
+    ].map((frame) => ({ players: [], tiles: [], age: 1, round: 1, ended_turn: false, ...frame }));
+    c.patch({
+      game: {
+        state: 'Playing',
+        players: [],
+        map: { tiles: [] },
+        current_player_index: 0,
+        actions_left: 3,
+        age: 1,
+        round: 1,
+        log_index: 0,
+        board_history: { id: 'empty-phase-recap', frames },
+      },
+      seat: 0,
+    });
+    c.replayLastTurn();
+    assert.deepEqual(app.session().playback!.steps, [0, 1, 4]);
+    assert.equal(app.session().playback!.end, 4);
+    c.stepPlayback(1);
+    assert.equal(app.session().playback!.frame!.title, 'Move');
+    c.stepPlayback(1);
+    assert.equal(app.session().playback!.frame!.title, 'Research');
+    c.stepPlayback(-1);
+    assert.equal(app.session().playback!.frame!.title, 'Move');
+    c.seekPlayback(3);
+    assert.equal(
+      app.session().playback!.frame!.cursor,
+      1,
+      'seeking an empty phase shows the preceding action',
+    );
     assert.deepEqual(app.sent, []);
   } finally {
     app.close();

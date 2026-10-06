@@ -2124,7 +2124,7 @@ small {
   min-height: 0;
   padding: 0;
   border: 0;
-  gap: 8px;
+  gap: 6px;
   background: transparent;
   backdrop-filter: none;
 }
@@ -2132,8 +2132,28 @@ small {
   display: none;
 }
 .city-dock button {
-  min-width: 190px;
+  min-width: 0;
+  min-height: 44px;
+  flex-shrink: 0;
+  gap: 6px;
+  padding: 5px 7px;
+  white-space: nowrap;
   box-shadow: 0 3px 18px #28483d20;
+}
+.city-dock .city-thumb {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.city-dock .city-thumb svg {
+  width: 19px;
+  height: 19px;
+}
+.city-dock button small {
+  margin-top: 2px;
+}
+.city-dock .city-activation-badge {
+  padding: 2px 3px;
 }
 .map-controls {
   right: 20px;

@@ -13,7 +13,7 @@ import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
 import { recapStart, sinceLastTurn, frameAt, frameEffects } from './playback';
-import { groupPlaybackFrames } from './replay-actions';
+import { groupPlaybackFrames, playbackSteps } from './replay-actions';
 import { battleCues, battleCursor, BATTLE_DURATION, type BattleCue } from './battle-playback';
 import { contextualCards, type CardContext } from './contextual-cards';
 import { recruitDiscardSelection, requiredRecruitDiscards } from './recruit-discards';
@@ -538,8 +538,18 @@ export class Controller {
           s.playback.range === 'all'
             ? frames.length - 1
             : frameAt(frames, previous[s.playback.end]?.cursor ?? frames.at(-1)!.cursor);
+        const steps = playbackSteps(game, start, end);
+        const visibleIndex = steps.filter((step) => step <= index).at(-1) ?? start;
         this.patch({
-          playback: { ...s.playback, index, start, end, frame: frames[index], total: frames.length },
+          playback: {
+            ...s.playback,
+            steps,
+            index: visibleIndex,
+            start,
+            end: steps.at(-1)!,
+            frame: frames[visibleIndex],
+            total: frames.length,
+          },
         });
       }
       return;
@@ -588,15 +598,17 @@ export class Controller {
     if (s.analysis || !s.game) return;
     clearTimeout(this.playbackTimer);
     const frames = s.game.board_history?.frames ?? [];
+    const steps = playbackSteps(s.game, index, end ?? Math.max(0, frames.length - 1));
     this.dismissEffects(true);
     this.showBattles([]);
     this.patch({
       playback: {
+        steps,
         frame: frames[index] ?? null,
         index,
         total: frames.length,
         start: index,
-        end: end ?? Math.max(0, frames.length - 1),
+        end: steps.at(-1) ?? index,
         range,
         automatic,
         playing: automatic && s.replayAutoplay,
@@ -626,7 +638,7 @@ export class Controller {
       this.commands.setReplayInfo({
         start: frames[0].cursor,
         current: p.frame?.cursor ?? frames[0].cursor,
-        end: frames.at(-1)!.cursor,
+        end: frames[p.end].cursor,
       });
   }
   seekPlayback(cursor: number) {
@@ -638,7 +650,11 @@ export class Controller {
     const p = get(this.session).playback;
     if (p) {
       if (p.range !== 'all') this.setReplayAutoplay(false);
-      this.showPlaybackFrame(p.index + direction, false);
+      const steps = p.steps ?? Array.from({ length: p.end - p.start + 1 }, (_, i) => p.start + i);
+      this.showPlaybackFrame(
+        steps[Math.max(0, Math.min(steps.length - 1, steps.indexOf(p.index) + direction))],
+        false,
+      );
     }
   }
   restartPlayback() {
@@ -652,10 +668,12 @@ export class Controller {
       p = s.playback;
     if (!p || !frames.length) return;
     index = Math.max(p.start, Math.min(index, p.end));
+    index = p.steps?.filter((step) => step <= index).at(-1) ?? index;
+    const previous = p.steps?.[Math.max(0, p.steps.indexOf(index) - 1)] ?? index - 1;
     this.dismissEffects(true);
     const battles =
-      index > p.start ? battleCues(s.game!, frames[index - 1].cursor, frames[index].cursor, s.view) : [];
-    this.showBattles(battles, index === p.index + 1);
+      index > p.start ? battleCues(s.game!, frames[previous].cursor, frames[index].cursor, s.view) : [];
+    this.showBattles(battles, previous === p.index);
     this.patch({
       playback: {
         ...p,
@@ -701,7 +719,7 @@ export class Controller {
     );
     this.playbackTimer = setTimeout(() => {
       const p = get(this.session).playback;
-      if (p?.playing) this.showPlaybackFrame(p.index + 1, true);
+      if (p?.playing) this.showPlaybackFrame(p.steps?.[p.steps.indexOf(p.index) + 1] ?? p.index + 1, true);
     }, duration);
   }
   endPlayback() {

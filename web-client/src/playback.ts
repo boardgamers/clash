@@ -1,12 +1,13 @@
 import type { BoardFrame, Game, View } from './types.ts';
 import { frameResources, describeResources } from './resource-playback.ts';
+import { frameHasContent } from './replay-actions.ts';
 import { activeHistory } from './active-history.ts';
 import { officialWonderText, wonderName } from './wonder-names.ts';
 
 export function recapStart(game: Game, seat: number | undefined, seen = 0): number | null {
   const frames = game.board_history?.frames ?? [];
   if (seat === undefined || frames.length < 2 || seen >= frames.at(-1)!.cursor) return null;
-  const responses = latestTurnResponses(frames, seat);
+  const responses = latestTurnResponses(game, frames, seat);
   if (responses && !frames.slice(responses.end + 1).some((f) => f.actor === seat)) {
     const start = frameAt(frames, Math.max(seen, frames[responses.start].cursor));
     return start < responses.end ? start : null;
@@ -14,7 +15,7 @@ export function recapStart(game: Game, seat: number | undefined, seen = 0): numb
   const lastTurn = lastIndex(frames, (f) => f.actor === seat && f.ended_turn);
   if (lastTurn < 0 || frames.slice(lastTurn + 1).some((f) => f.actor === seat)) return null;
   const start = lastIndex(frames, (f) => f.cursor <= Math.max(seen, frames[lastTurn].cursor));
-  return start >= 0 && start < frames.length - 1 && hasReplayContent(frames, start, frames.length - 1)
+  return start >= 0 && start < frames.length - 1 && hasReplayContent(game, frames, start, frames.length - 1)
     ? start
     : null;
 }
@@ -29,7 +30,7 @@ export function frameAt(frames: BoardFrame[], cursor: number): number {
 export function sinceLastTurn(game: Game, seat: number | undefined) {
   const frames = game.board_history?.frames ?? [];
   if (seat === undefined) return null;
-  const responses = latestTurnResponses(frames, seat);
+  const responses = latestTurnResponses(game, frames, seat);
   if (responses) return responses;
   let end = frames.length - 1;
   while (end > 0) {
@@ -41,7 +42,7 @@ export function sinceLastTurn(game: Game, seat: number | undefined) {
     if (owner != null && owner !== seat && start < end) {
       const ownEnd = lastIndex(frames.slice(0, end), (f) => f.actor === seat && f.ended_turn);
       const first = Math.max(0, ownEnd);
-      return hasReplayContent(frames, first, end) ? { start: first, end } : null;
+      return hasReplayContent(game, frames, first, end) ? { start: first, end } : null;
     }
     end = boundary;
   }
@@ -49,7 +50,7 @@ export function sinceLastTurn(game: Game, seat: number | undefined) {
 }
 
 /** Other players can act during your turn, for example after you capture a city. */
-function latestTurnResponses(frames: BoardFrame[], seat: number) {
+function latestTurnResponses(game: Game, frames: BoardFrame[], seat: number) {
   const end = frames.length - 1;
   if (end < 1) return null;
   const boundary = lastIndex(frames.slice(0, end), (f) => f.ended_turn);
@@ -57,7 +58,10 @@ function latestTurnResponses(frames: BoardFrame[], seat: number) {
     ? frames[end].actor
     : frames.slice(boundary + 1).find((f) => f.actor !== null)?.actor;
   if (owner !== seat) return null;
-  const response = lastIndex(frames, (f) => f.actor !== null && f.actor !== seat);
+  const response = lastIndex(
+    frames,
+    (f) => f.actor !== null && f.actor !== seat && frameHasContent(game, frames[frames.indexOf(f) - 1], f),
+  );
   if (response <= boundary) return null;
   const start = lastIndex(frames.slice(0, response), (f) => f.actor === seat);
   return start > boundary ? { start, end: response } : null;
@@ -233,10 +237,8 @@ function lastIndex<T>(items: T[], match: (item: T) => boolean) {
   return -1;
 }
 
-function hasReplayContent(frames: BoardFrame[], start: number, end: number) {
-  return frames
-    .slice(start + 1, end + 1)
-    .some(
-      (f) => f.actor != null && (!['End turn', 'Earlier position'].includes(f.title) || !!f.effects?.length),
-    );
+function hasReplayContent(game: Game, frames: BoardFrame[], start: number, end: number) {
+  return frames.some(
+    (frame, index) => index > start && index <= end && frameHasContent(game, frames[index - 1], frame),
+  );
 }
