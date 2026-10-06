@@ -247,7 +247,7 @@ export const chapters: {
     title: 'Ships and passengers',
     section: 'expansion',
     description: 'Board, sail and land with the right movement timing.',
-    version: 3,
+    version: 4,
     steps: [
       {
         id: 'embark',
@@ -258,7 +258,7 @@ export const chapters: {
       {
         id: 'sail',
         title: 'Sail with the passenger',
-        text: 'Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.',
+        text: 'Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.',
         kind: 'sail',
       },
       {
@@ -602,8 +602,8 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
           kind === 'embark'
             ? d.position === 'D1'
             : kind === 'sail'
-              ? d.position === 'C3'
-              : d.position === 'C4',
+              ? d.position === 'B3'
+              : d.position === 'B4',
         )
         .map((d: any) => ({ label: `Move to ${d.position}`, move: d.action }));
     }

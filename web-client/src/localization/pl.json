@@ -1898,7 +1898,7 @@
   "Move sea units": "Przesuń jednostki morskie",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Przesuń drugiego osadnika na nieodkryty ląd. Eksploracja odkrywa region złożony z czterech pól, a nie pojedyncze pole.",
   "Move the settler": "Rusz osadnikiem",
-  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "Przepłyń statkiem dwa pola morskie do C3. Pasażer przemieszcza się wraz z nim w ramach tej samej akcji ruchu.",
+  "Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.": "Popłyń do B3 na końcu szlaku morskiego. Na wyspę nie można dotrzeć pieszo. Pasażer podróżuje ze statkiem w ramach tej samej akcji ruchu.",
   "Move to an empty land tile to found a city": "Rusz na puste pole lądowe, aby założyć miasto",
   "Move to {p0}": "Rusz do {p0}",
   "Move units": "Przesuń jednostki",

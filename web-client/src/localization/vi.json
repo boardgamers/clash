@@ -1768,7 +1768,7 @@
   "Move sea units": "Di chuyển đơn vị trên biển",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Đưa người định cư thứ hai vào đất chưa khám phá. Khám phá lật vùng bốn ô lục giác thay vì một ô riêng.",
   "Move the settler": "Di chuyển người định cư",
-  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "Cho tàu đi hai ô biển đến C3. Hành khách đi cùng tàu trong cùng hành động di chuyển.",
+  "Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.": "Đi tàu đến B3 ở cuối tuyến đường biển. Không thể đi bộ đến đảo. Hành khách đi cùng tàu trong cùng hành động di chuyển.",
   "Move to {p0}": "Di chuyển đến {p0}",
   "Move units": "Di chuyển đơn vị",
   "Move units and found cities": "Di chuyển đơn vị và lập thành phố",

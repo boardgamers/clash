@@ -75,18 +75,27 @@ for (const id of [
     p.next_unit_id = 2;
   }
   if (id === 'sea-transport') {
-    // Reveal the entire sea-route block. Partly revealed blocks would overwrite
-    // occupied water when an adjacent tile is explored later.
-    g.map.unexplored_blocks = g.map.unexplored_blocks.filter((block) => block.position.top_tile !== 'B2');
-    for (const [position, terrain] of Object.entries({
-      B2: 'Fertile',
-      A3: 'Barren',
-      C3: 'Water',
-      B3: 'Water',
-    }))
+    // A sea corridor leads to a separate unexplored island. Reveal/remove whole
+    // blocks together so exploration never replaces occupied sea tiles.
+    const sea = { D1: 'Water', C2: 'Water', C3: 'Water', B3: 'Water' };
+    const retained = new Set([
+      'D2',
+      'E2',
+      'D7',
+      'C8',
+      'D8',
+      'E8',
+      'B4',
+      'A5',
+      'C5',
+      'B5',
+      ...Object.keys(sea),
+    ]);
+    g.map.tiles = g.map.tiles.filter(([position]) => retained.has(position));
+    g.map.unexplored_blocks = g.map.unexplored_blocks.filter((block) => block.position.top_tile === 'B4');
+    g.map.unexplored_blocks[0].block.terrain = ['Forest', 'Mountain', 'Fertile', 'Mountain'];
+    for (const [position, terrain] of Object.entries(sea))
       g.map.tiles.find((tile) => tile[0] === position)[1] = terrain;
-    g.map.tiles.find((t) => t[0] === 'C2')[1] = 'Water';
-    g.map.tiles.find((t) => t[0] === 'D1')[1] = 'Water';
     p.advances.push('Fishing', 'Tactics');
     p.units.push({ id: 1, position: 'D1', unit_type: 'Ship' });
     p.next_unit_id = 2;

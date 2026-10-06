@@ -1886,7 +1886,7 @@
   "Move sea units": "Seeeinheiten bewegen",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Bewege den zweiten Siedler auf unerforschtes Land. Erkundung deckt eine Region aus vier Feldern auf, nicht nur ein einzelnes Feld.",
   "Move the settler": "Den Siedler bewegen",
-  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "Segle mit dem Schiff zwei Seefelder weit nach C3. Der Passagier fährt innerhalb derselben Bewegungsaktion mit.",
+  "Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.": "Segle bis B3 am Ende der Seeroute. Die Insel ist zu Fuß nicht erreichbar. Der Passagier fährt in derselben Bewegungsaktion mit dem Schiff mit.",
   "Move to an empty land tile to found a city": "Auf freies Landfeld bewegen, um eine Stadt zu gründen",
   "Move to {p0}": "Nach {p0} bewegen",
   "Move units": "Einheiten bewegen",

@@ -1886,7 +1886,7 @@
   "Move sea units": "Déplacer les unités maritimes",
   "Move the second settler into unexplored land. Exploration reveals a four-hex region, rather than one isolated hex.": "Déplacez le second colon sur une terre inexplorée. L'exploration révèle une région de quatre cases, pas une case isolée.",
   "Move the settler": "Déplacer le colon",
-  "Sail the ship two sea tiles to C3. Its passenger travels with it, within the same Move action.": "Naviguez de deux cases de mer jusqu’à C3. Le passager accompagne le navire dans la même action de déplacement.",
+  "Sail to B3 at the end of the sea route. The island cannot be reached on foot. The passenger travels with the ship in the same Move action.": "Naviguez jusqu’à B3, au bout de la route maritime. L’île est inaccessible à pied. Le passager accompagne le navire dans la même action de déplacement.",
   "Move to an empty land tile to found a city": "Aller sur une terre vide pour fonder une ville",
   "Move to {p0}": "Déplacer vers {p0}",
   "Move units": "Déplacer les unités",
