@@ -1,12 +1,19 @@
 // Keep the legend inside the board and clear of the Journal/Chat toolbar.
 export function positionStrategyKey(node: HTMLDetailsElement) {
-  const content = node.querySelector<HTMLElement>('.strategy-key-content')!;
+  return positionMapPanel(node, node.querySelector<HTMLElement>('.strategy-key-content')!, () => node.open);
+}
+
+export function positionMapGuide(node: HTMLElement) {
+  return positionMapPanel(node, node, () => true);
+}
+
+function positionMapPanel(node: HTMLElement, content: HTMLElement, isOpen: () => boolean) {
   const controls = node.closest<HTMLElement>('.map-controls')!;
   const board = node.closest<HTMLElement>('.map-section')!;
   const tableTools = node.closest('.play-layout')!.querySelector<HTMLElement>('.table-tools')!;
   const gap = 8;
   const position = () => {
-    if (!node.open) return;
+    if (!isOpen()) return;
     const bounds = board.getBoundingClientRect();
     const anchor = controls.getBoundingClientRect();
     const toolbar = tableTools.getBoundingClientRect();
@@ -34,11 +41,13 @@ export function positionStrategyKey(node: HTMLDetailsElement) {
     content.style.top = `${(space.above ? space.bottom - Math.min(height, available) : space.top) - anchor.top - controls.clientTop}px`;
   };
   const observer = new ResizeObserver(position);
+  const frame = requestAnimationFrame(position);
   for (const element of [board, controls, tableTools, content]) observer.observe(element);
   node.addEventListener('toggle', position);
   window.addEventListener('resize', position);
   return {
     destroy() {
+      cancelAnimationFrame(frame);
       observer.disconnect();
       node.removeEventListener('toggle', position);
       window.removeEventListener('resize', position);

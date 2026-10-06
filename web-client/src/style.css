@@ -6005,3 +6005,15 @@ small {
   .game-shell[data-panels-minimized] :is(.action-panel.floating-panel, .board-context, .activity.floating-panel, dialog, .card-reveal, .toast) { display: none !important; }
   .game-shell .restore-mobile-panel:not([hidden]) { display: flex; position: absolute; right: 16px; bottom: 72px; z-index: 45; padding: 8px 14px; background: var(--paper); border: 1px solid var(--gold); border-radius: 7px; color: var(--ink); }
 }
+
+/* Persistent hostile-faction guides must clear the Journal/Chat toolbar on touch screens. */
+.map-controls:has(.pirate-spawn-key) {
+  z-index: 26;
+}
+.map-control-help .pirate-spawn-key {
+  bottom: auto;
+  right: auto;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

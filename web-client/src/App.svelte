@@ -72,7 +72,7 @@
   import { mountChat } from '@boardgamers/protocol/chat/dom';
   import { World } from './board';
   import { militarySummary } from './strategy';
-  import { positionStrategyKey } from './strategy-key';
+  import { positionStrategyKey, positionMapGuide } from './strategy-key';
   import ResearchTree from './ResearchTree.svelte';
   import { researchDecision, mapDecisionOptions } from './decision-controls';
   import CityPanel from './CityPanel.svelte';
@@ -932,7 +932,7 @@
               )}><BarbarianIcon /></button
           >
           {#if $session.pirateSpawns && $session.mode === 'overview' && !$session.view?.decision && !$session.view?.choiceDecision && !$session.view?.objectiveDecision && !$session.view?.explorationDecision && !$session.abilitiesOpen && !$session.playback}
-            <div class="map-tooltip pirate-spawn-key" role="status">
+            <div class="map-tooltip pirate-spawn-key" role="status" use:positionMapGuide>
               <strong
                 >{$session.threatGuide === 'barbarians'
                   ? 'Barbarian spawn and movement'

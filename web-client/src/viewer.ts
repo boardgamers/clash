@@ -59,7 +59,8 @@ export const viewer = registerViewer<string, string>(
       chat: controller.chat,
       async onState(state) {
         await localization.ready;
-        await controller.load(state);
+        // Public thumbnail hosts decode the snapshot JSON; regular game hosts send the serialized string.
+        await controller.load(typeof state === 'string' ? state : JSON.stringify(state));
         await tick();
       },
       async onThumbnail({ width, height }) {
