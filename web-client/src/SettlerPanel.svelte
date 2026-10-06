@@ -75,6 +75,11 @@
 >
   <header class="movement-heading">
     <h2><Footprints size={18} />{disembarking ? 'Disembark' : 'Move'}</h2>
+    {#if $session.moveTarget}<span class="movement-route">
+        <span class="tile-coordinate">{origin}</span><ArrowRight size={12} aria-hidden="true" /><span
+          class="tile-coordinate">{$session.moveTarget}</span
+        >
+      </span>{/if}
     {#if $session.view?.stopMovement}<span class="movement-remaining" title={bonus?.label}
         >{movesLeft} {bonus ? 'bonus' : 'group'} {movesLeft === 1 ? 'move' : 'moves'} left</span
       >{/if}
@@ -191,11 +196,6 @@
             : 'No moves available.'}
     </p>
   {/if}
-  {#if $session.moveTarget}<p class="movement-route">
-      <span class="tile-coordinate">{origin}</span><ArrowRight size={12} aria-hidden="true" /><span
-        class="tile-coordinate">{$session.moveTarget}</span
-      >
-    </p>{/if}
   {#if destination && !$session.movingCity}<TerrainRules
       terrain={destination.terrain}
       notes={destination.terrainNotes}
