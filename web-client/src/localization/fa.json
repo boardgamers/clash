@@ -4579,5 +4579,6 @@
   "Finish Move": "پایان حرکت",
   "Choose a highlighted advance.": "یک پیشرفت برجسته‌شده را انتخاب کنید.",
   "Separate roll: no 5 or 6. No hit cancelled.": "پرتاب جداگانه: نه ۵ و نه ۶. هیچ ضربه‌ای خنثی نشد.",
-  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "بربرها فقط به‌سوی شهرهای بازیکنی حرکت می‌کنند که رویداد را فعال کرده است. اگر هیچ ارتشی نتواند حرکت کند، رویداد حرکت به‌جای آن تلاش می‌کند یک شهر ایجاد کند."
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "بربرها فقط به‌سوی شهرهای بازیکنی حرکت می‌کنند که رویداد را فعال کرده است. اگر هیچ ارتشی نتواند حرکت کند، رویداد حرکت به‌جای آن تلاش می‌کند یک شهر ایجاد کند.",
+  "New barbarian city · {p0}": "شهر بربر جدید · {p0}"
 }

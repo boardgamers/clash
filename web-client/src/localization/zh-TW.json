@@ -4579,5 +4579,6 @@
   "Finish Move": "結束移動",
   "Choose a highlighted advance.": "選擇一項醒目標示的進步。",
   "Separate roll: no 5 or 6. No hit cancelled.": "獨立擲骰：沒有擲出 5 或 6，未取消任何命中。",
-  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "蠻族只會朝觸發事件的玩家的城市移動。若沒有軍隊可以移動，移動事件會改為嘗試生成一座城市。"
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "蠻族只會朝觸發事件的玩家的城市移動。若沒有軍隊可以移動，移動事件會改為嘗試生成一座城市。",
+  "New barbarian city · {p0}": "新蠻族城市 · {p0}"
 }

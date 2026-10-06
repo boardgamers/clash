@@ -5925,8 +5925,48 @@ small {
   padding: 4px 6px;
 }
 
-.pirate-spawn-key .barbarian-spawn {
-  border-color: #edaa4d;
+.barbarian-city-site,
+.barbarian-site-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff7d9;
+  color: #242630;
+  border: 2px solid #242630;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px #fff7d9;
+}
+.barbarian-city-site {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 7;
+  width: 32px;
+  height: 30px;
+  padding: 0;
+  pointer-events: auto;
+}
+.barbarian-city-site.selected {
+  outline: 3px solid #242630;
+  outline-offset: 3px;
+}
+.barbarian-city-site.selected::after {
+  content: '✓';
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  background: #242630;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font: bold 12px/14px sans-serif;
+}
+.barbarian-site-key {
+  width: 28px;
+  height: 27px;
+  margin: 3px 0;
 }
 .pirate-spawn-key .barbarian-move {
   border-color: #242630;
@@ -6069,4 +6109,23 @@ small {
   border-radius: 6px;
   font-size: 11px;
   white-space: nowrap;
+}
+
+.city-site-icon {
+  display: inline-flex;
+  position: relative;
+  padding: 3px;
+}
+.city-site-icon b {
+  position: absolute;
+  right: -2px;
+  top: -3px;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #242630;
+  color: #fff;
+  font: bold 12px/1 sans-serif;
 }

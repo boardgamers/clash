@@ -4579,5 +4579,6 @@
   "Finish Move": "이동 마치기",
   "Choose a highlighted advance.": "강조 표시된 발전을 선택하세요.",
   "Separate roll: no 5 or 6. No hit cancelled.": "별도 굴림: 5나 6이 나오지 않았습니다. 명중을 취소하지 못했습니다.",
-  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "야만인은 사건을 발생시킨 플레이어의 도시를 향해서만 이동합니다. 이동할 수 있는 군대가 없으면 이동 사건은 대신 도시 생성을 시도합니다."
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "야만인은 사건을 발생시킨 플레이어의 도시를 향해서만 이동합니다. 이동할 수 있는 군대가 없으면 이동 사건은 대신 도시 생성을 시도합니다.",
+  "New barbarian city · {p0}": "새 야만족 도시 · {p0}"
 }

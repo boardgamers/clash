@@ -4579,5 +4579,6 @@
   "Finish Move": "Beweging beëindigen",
   "Choose a highlighted advance.": "Kies een gemarkeerde vooruitgang.",
   "Separate roll: no 5 or 6. No hit cancelled.": "Aparte worp: geen 5 of 6. Geen treffer geannuleerd.",
-  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbaren bewegen alleen naar de steden van de speler die de gebeurtenis heeft geactiveerd. Als geen leger kan bewegen, probeert een bewegingsgebeurtenis in plaats daarvan een stad te plaatsen."
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbaren bewegen alleen naar de steden van de speler die de gebeurtenis heeft geactiveerd. Als geen leger kan bewegen, probeert een bewegingsgebeurtenis in plaats daarvan een stad te plaatsen.",
+  "New barbarian city · {p0}": "Nieuwe barbarenstad · {p0}"
 }

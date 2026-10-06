@@ -4,6 +4,7 @@
   const translate = $derived((value: string) => translateText(value, $currentLocale));
   import CollectionBonusHints from './CollectionBonusHints.svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
+  import CitySiteIcon from './CitySiteIcon.svelte';
   import PlaybackPanel from './PlaybackPanel.svelte';
   import CardReferenceDialog from './CardReferenceDialog.svelte';
   import { cardReferences, type CardReference, type CardRule } from './card-reference';
@@ -953,7 +954,7 @@
                 </select>
               </label>
               {#if $session.threatGuide === 'barbarians'}
-                <div><i class="barbarian-spawn" aria-hidden="true"></i>New barbarian city</div>
+                <div><span class="barbarian-site-key"><CitySiteIcon /></span>New barbarian city</div>
                 <div><i class="barbarian-move" aria-hidden="true"></i>Army movement →</div>
                 <div><i class="barbarian-reinforce" aria-hidden="true"></i>Reinforcement city</div>
                 <p>

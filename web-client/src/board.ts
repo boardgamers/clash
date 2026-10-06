@@ -1,5 +1,6 @@
 import { thumbnailCamera } from './thumbnail-camera';
 import CollectionMapBadge from './CollectionMapBadge.svelte';
+import CitySiteIcon from './CitySiteIcon.svelte';
 import {
   collectionYield,
   collectionBonusLabel,
@@ -144,6 +145,7 @@ export class World {
     string,
     { node: HTMLButtonElement; component: ReturnType<typeof mount> }
   >();
+  private barbarianCityBadges = new Map<string, ReturnType<typeof mount>>();
   private disposed = false;
   private topDown = false;
   private strategyMap = false;
@@ -161,7 +163,7 @@ export class World {
     position: string;
     at: THREE.Vector3;
     node: HTMLButtonElement;
-    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy';
+    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy' | 'barbarian-city';
     offsetX?: number;
     offsetY?: number;
     ownershipBounds?: THREE.Vector3[];
@@ -849,10 +851,17 @@ export class World {
     this.collectionSignature = '';
     this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'collection');
   }
+  private clearBarbarianCityBadges() {
+    for (const component of this.barbarianCityBadges.values()) void unmount(component);
+    this.barbarianCityBadges.clear();
+    for (const label of this.labelPositions.filter((l) => l.kind === 'barbarian-city')) label.node.remove();
+    this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'barbarian-city');
+  }
   private clearBoard() {
     this.settleMotion?.();
     this.placement.stop();
     this.clearCollectionBadges();
+    this.clearBarbarianCityBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
     this.board.traverse((o) => {
@@ -1700,7 +1709,12 @@ export class World {
             (p) => p.player === (s.pirateSpawnPlayer ?? s.seat ?? s.view?.activePlayer),
           )
         : undefined;
-    const barbarianSpawn = barb?.spawn ?? [];
+    const barbarianCityChoice =
+      !!mapChoices.length &&
+      /^Barbarians (spawn|move): Select a position for the new city and infantry unit$/.test(
+        s.view?.decision?.description ?? '',
+      );
+    const barbarianSpawn = barbarianCityChoice ? decisionPositions : (barb?.spawn ?? []);
     const barbarianReinforce = barb?.reinforce ?? [];
     const barbarianMoves = barb?.moves ?? [];
     const pirateFirst = s.threatGuide !== 'barbarians' ? (pirateSpawns?.first ?? []) : [];
@@ -1733,6 +1747,38 @@ export class World {
         ...barbarianReinforce,
       ])) {
         const [x, z] = positionXY(pos);
+        if (barbarianSpawn.includes(pos)) {
+          // Draw over terrain decorations; a dark outer edge stays visible without colour cues.
+          for (const [radius, thickness, color, order] of [
+            [0.94, 0.105, '#242630', 3],
+            [0.94, 0.055, '#fff1b8', 4],
+          ] as const) {
+            const material = new THREE.MeshBasicMaterial({ color, depthTest: false, depthWrite: false });
+            this.materials.add(material);
+            const outline = this.mesh(new THREE.TorusGeometry(radius, thickness, 6, 6), material);
+            outline.rotation.x = -Math.PI / 2;
+            outline.position.set(x, 0.5, z);
+            outline.renderOrder = order;
+            outline.castShadow = false;
+            this.rings.add(outline);
+          }
+          const material = new THREE.MeshBasicMaterial({
+            color: '#fff1b8',
+            transparent: true,
+            opacity: 0.24,
+            depthTest: false,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          });
+          this.materials.add(material);
+          const fill = this.mesh(new THREE.CircleGeometry(0.9, 6), material);
+          fill.rotation.x = -Math.PI / 2;
+          fill.position.set(x, 0.49, z);
+          fill.renderOrder = 2;
+          fill.castShadow = false;
+          this.rings.add(fill);
+          continue;
+        }
         const ring = this.mesh(
           new THREE.TorusGeometry(
             0.99,
@@ -1741,17 +1787,15 @@ export class World {
             6,
           ),
           new THREE.MeshBasicMaterial({
-            color: barbarianSpawn.includes(pos)
-              ? '#edaa4d'
-              : barbarianReinforce.includes(pos)
-                ? '#b789d8'
-                : pirateFirst.includes(pos)
-                  ? '#e96a55'
-                  : pirateSecond.includes(pos)
-                    ? '#f7c65b'
-                    : selected.includes(pos)
-                      ? '#ffd16b'
-                      : '#ebdab3',
+            color: barbarianReinforce.includes(pos)
+              ? '#b789d8'
+              : pirateFirst.includes(pos)
+                ? '#e96a55'
+                : pirateSecond.includes(pos)
+                  ? '#f7c65b'
+                  : selected.includes(pos)
+                    ? '#ffd16b'
+                    : '#ebdab3',
           }),
         );
         ring.rotation.x = -Math.PI / 2;
@@ -1825,6 +1869,31 @@ export class World {
           this.rings.add(arrow);
         }
       }
+    }
+    for (const [position, component] of this.barbarianCityBadges) {
+      if (barbarianSpawn.includes(position)) continue;
+      void unmount(component);
+      this.barbarianCityBadges.delete(position);
+      this.labelPositions.find((l) => l.kind === 'barbarian-city' && l.position === position)?.node.remove();
+    }
+    this.labelPositions = this.labelPositions.filter(
+      (l) => l.kind !== 'barbarian-city' || barbarianSpawn.includes(l.position),
+    );
+    for (const position of barbarianSpawn) {
+      if (this.barbarianCityBadges.has(position)) continue;
+      const node = document.createElement('button');
+      node.className = 'barbarian-city-site';
+      node.dataset.position = position;
+      node.setAttribute('aria-label', `New barbarian city · ${position}`);
+      node.title = `New barbarian city · ${position}`;
+      node.onclick = () => {
+        if (this.canPick(position)) this.pick(position);
+      };
+      this.bindTileHover(node, position);
+      this.barbarianCityBadges.set(position, mount(CitySiteIcon, { target: node }));
+      this.labelHost.append(node);
+      const [x, z] = positionXY(position);
+      this.labelPositions.push({ position, at: new THREE.Vector3(x, 0.65, z), node, kind: 'barbarian-city' });
     }
     const collectionCity =
       s.mode === 'collect' ? s.view?.cities.find((c) => c.position === s.city) : undefined;
@@ -1949,6 +2018,7 @@ export class World {
     const markerSignature = JSON.stringify([
       moveMarkers,
       mapChoices,
+      barbarianCityChoice,
       s.view?.decision?.name,
       ability?.key,
       s.mode,
@@ -1958,6 +2028,7 @@ export class World {
       for (const label of this.labelPositions.filter((l) => l.kind === 'destination')) label.node.remove();
       this.labelPositions = this.labelPositions.filter((l) => l.kind !== 'destination');
       for (const position of moveMarkers) {
+        if (barbarianCityChoice && barbarianSpawn.includes(position)) continue;
         const label = document.createElement('button');
         label.className = 'map-hit-target';
         label.dataset.position = position;
@@ -2024,7 +2095,7 @@ export class World {
         label.node.setAttribute('aria-pressed', String(label.position === s.abilityCity));
       if (label.kind === 'destination' && s.mode === 'happiness')
         label.node.setAttribute('aria-pressed', String(!!s.happinessSteps?.[label.position]));
-      if (label.kind === 'destination' && mapChoices.length) {
+      if ((label.kind === 'destination' || label.kind === 'barbarian-city') && mapChoices.length) {
         label.node.setAttribute(
           'aria-pressed',
           String(
@@ -2063,6 +2134,7 @@ export class World {
     this.invalidate();
   }
   destroy() {
+    this.clearBarbarianCityBadges();
     this.settleMotion?.();
     this.placement.stop();
     this.resourceOverlay.dispose();

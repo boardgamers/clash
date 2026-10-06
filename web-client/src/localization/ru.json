@@ -4579,5 +4579,6 @@
   "Finish Move": "Завершить движение",
   "Choose a highlighted advance.": "Выберите выделенное достижение.",
   "Separate roll: no 5 or 6. No hit cancelled.": "Отдельный бросок: ни 5, ни 6. Ни одно попадание не отменено.",
-  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Варвары движутся только к городам игрока, вызвавшего событие. Если ни одна армия не может двигаться, событие движения вместо этого пытается создать город."
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Варвары движутся только к городам игрока, вызвавшего событие. Если ни одна армия не может двигаться, событие движения вместо этого пытается создать город.",
+  "New barbarian city · {p0}": "Новый город варваров · {p0}"
 }

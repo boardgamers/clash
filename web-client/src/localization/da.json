@@ -4579,5 +4579,6 @@
   "Finish Move": "Afslut bevægelse",
   "Choose a highlighted advance.": "Vælg et fremhævet fremskridt.",
   "Separate roll: no 5 or 6. No hit cancelled.": "Separat kast: ingen 5 eller 6. Ingen træffer annulleret.",
-  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbarer bevæger sig kun mod byerne tilhørende den spiller, der udløste hændelsen. Hvis ingen hær kan bevæge sig, forsøger en bevægelseshændelse i stedet at oprette en by."
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbarer bevæger sig kun mod byerne tilhørende den spiller, der udløste hændelsen. Hvis ingen hær kan bevæge sig, forsøger en bevægelseshændelse i stedet at oprette en by.",
+  "New barbarian city · {p0}": "Ny barbarby · {p0}"
 }

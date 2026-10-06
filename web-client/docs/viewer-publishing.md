@@ -39,3 +39,5 @@ The following viewer update skips empty end-turn, raze-city and other phase tran
 The next viewer update formats victory points consistently to one decimal at most, preserving Great Pyramid’s extra 0.1 without floating-point tails in player cards, score breakdowns or wonder details. The engine is unchanged.
 
 Viewer 0.1.21 fixes Teach Us event warnings in the bundled rules bridge, highlights eligible research choices, and places the Peltasts result beside the tactics card in combat journals. Map pieces open inspection until Move is selected; city dock buttons open the same city details as the map. Ongoing movement stays highlighted with a persistent Finish Move control, and barbarian movement arrows have a contrasting outline. This viewer remains compatible with engine 0.4.39; no engine upload is required.
+
+Viewer 0.1.22 makes possible new barbarian city sites visible without relying on color: thick light/dark hex outlines, a translucent fill, and a city-plus marker with a checkmark for the selected site. The same markers appear in the map guide and incident placement prompts, in both 3D and Strategy view. Engine 0.4.39 is unchanged.

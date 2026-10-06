@@ -4579,5 +4579,6 @@
   "Finish Move": "Încheie deplasarea",
   "Choose a highlighted advance.": "Alege un progres evidențiat.",
   "Separate roll: no 5 or 6. No hit cancelled.": "Aruncare separată: niciun 5 sau 6. Nicio lovitură anulată.",
-  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbarii se deplasează doar spre orașele jucătorului care a declanșat evenimentul. Dacă nicio armată nu se poate deplasa, un eveniment de deplasare încearcă să creeze un oraș în schimb."
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbarii se deplasează doar spre orașele jucătorului care a declanșat evenimentul. Dacă nicio armată nu se poate deplasa, un eveniment de deplasare încearcă să creeze un oraș în schimb.",
+  "New barbarian city · {p0}": "Oraș barbar nou · {p0}"
 }
