@@ -427,13 +427,13 @@ export const chapters: {
       {
         id: 'draft1',
         title: 'Meet the first condition',
-        text: 'Your Draft objective requires recruiting with Draft twice this turn. Recruit one infantry using Draft in the legal city.',
+        text: 'Your Draft objective requires recruiting with Draft twice this turn. In A1, select one infantry, then select one mood token in Payment before recruiting. Paying with a mood token uses Draft.',
         kind: 'draft',
       },
       {
         id: 'draft2',
         title: 'Meet the complete condition',
-        text: 'Use Draft a second time. One qualifying recruitment alone was not enough for this objective.',
+        text: 'Recruit another infantry in A1, again selecting one mood token in Payment to use Draft. One qualifying recruitment alone was not enough for this objective.',
         kind: 'draft',
       },
       {
