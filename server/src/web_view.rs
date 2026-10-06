@@ -36,6 +36,7 @@ pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
     }
     match input["kind"].as_str() {
         Some("decision") => decisions::preview(game, seat, &input),
+        Some("researchPlan") => research_plan(game, seat, &input),
         Some("movement") if input["city"].is_string() => actions::nomad_movement(
             game,
             seat,
@@ -161,6 +162,12 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         .flat_map(|(position, _)| crate::move_routes::navigation_paths(&game.map, *position))
         .collect::<Vec<_>>();
     sea_routes.sort_by_key(|path| format!("{path:?}"));
+    let barbarian_guide = game
+        .players
+        .iter()
+        .filter(|p| p.is_human())
+        .map(|p| crate::barbarians::map_guide(game, p.index))
+        .collect::<Vec<_>>();
     let pirate_spawns = game
         .players
         .iter()
@@ -221,7 +228,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
+        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -371,7 +378,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate,"movementNotes":movement_notes(game,p,u)})).collect::<Vec<_>>(),
         "nomadCities":p.cities.iter().filter(|c|!crate::content::civilizations::huns::city_destinations(game,p,c.position,&[]).is_empty()).map(|c|c.position).collect::<Vec<_>>(),
         "movementLeft":if let GameState::Movement(m)=&game.state {m.movement_actions_left} else {3},
-        "pirateSpawns":pirate_spawns,"seaRoutes":sea_routes,
+        "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes,
         "endTurnTradeWarning":if can_play { turn::trade_warning(game, seat) } else { None },
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
@@ -550,11 +557,13 @@ fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
                     }),
                     _ => None,
                 }
-            } else { None };
+            } else {
+                None
+            };
             Some(json!({"name":name,"preview":preview,"choices":[
                 {"name":"Yes","action":Action::Response(EventResponse::Bool(true))},
                 {"name":"No","action":Action::Response(EventResponse::Bool(false))}]}))
-        },
+        }
         _ => None,
     }
 }
@@ -719,4 +728,42 @@ mod tests {
             .is_err()
         );
     }
+}
+
+fn research_plan(game: &Game, seat: usize, input: &Value) -> Result<Value, String> {
+    let action: Action =
+        serde_json::from_value(input["action"].clone()).map_err(|e| e.to_string())?;
+    let Action::Playing(PlayingAction::Advance(a)) = &action else {
+        return Err("Choose a research action".into());
+    };
+    let p = game.player(seat);
+    let eligible = p.can_use_advance(Advance::FreeEducation)
+        && a.advance != Advance::FreeEducation
+        && (a.payment.ideas > 0 || a.payment.gold > 0);
+    if !eligible {
+        return Ok(json!({"eligible":false,"affordable":false}));
+    }
+    let extra_idea = a.advance == Advance::Philosophy
+        || (p.can_use_advance(Advance::Philosophy)
+            && matches!(
+                a.advance,
+                Advance::Math | Advance::Astronomy | Advance::Medicine | Advance::Metallurgy
+            ));
+    if p.resources.ideas.saturating_sub(a.payment.ideas) + u8::from(extra_idea) == 0 {
+        return Ok(json!({"eligible":true,"affordable":false}));
+    }
+    let preview = crate::action::try_execute_action(game.clone(), action, seat)?;
+    let matches = preview
+        .current_event_handler()
+        .is_some_and(|h| h.origin == crate::events::EventOrigin::Advance(Advance::FreeEducation));
+    if !matches {
+        return Ok(json!({"eligible":true,"affordable":false}));
+    }
+    let available = decisions::preview(
+        &preview,
+        seat,
+        &json!({"values":[],"payments":[ResourcePile::ideas(1)]}),
+    )
+    .is_ok();
+    Ok(json!({"eligible":true,"affordable":available,"combined":true}))
 }

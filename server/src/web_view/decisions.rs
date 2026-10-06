@@ -263,14 +263,15 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             }
             let mut available = p.resources.clone();
             for r in requests {
-                let field = resource_field(
-                    &r.cost,
-                    &r.name,
-                    r.optional,
-                    &available,
-                    false,
-                    &p.resources,
-                );
+                let legacy_myths_label = r.cost.default.amount() == 1
+                    && r.name.starts_with("You may pay 1 mood token for each city");
+                let name = if legacy_myths_label {
+                    "Pay 1 mood token to protect the one affected city, or pay nothing"
+                } else {
+                    &r.name
+                };
+                let field =
+                    resource_field(&r.cost, name, r.optional, &available, false, &p.resources);
                 let initial: ResourcePile =
                     serde_json::from_value(field["initial"].clone()).unwrap();
                 available -= initial;
@@ -508,7 +509,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
         }
     }
     Some(
-        json!({"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
+        json!({"origin":h.origin,"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
         "eventContext":event_context,
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
         "tacticsSelection":tactics_selection,

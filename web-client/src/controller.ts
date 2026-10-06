@@ -83,6 +83,7 @@ export class Controller {
   readonly audio = new GameAudio();
   private cardDraws = new CardDrawTracker();
   private submittedMove: Move | null = null;
+  private quotedFreeEducation: Pile | null = null;
   private quotedActionPayment: Pile | null = null;
   private quotedInfluenceRangePayment: Pile | null = null;
   private influenceAttemptPending = false;
@@ -240,6 +241,7 @@ export class Controller {
     this.submittedMove = null;
     this.quotedActionPayment = null;
     this.quotedInfluenceRangePayment = null;
+    this.quotedFreeEducation = null;
     this.influenceAttemptPending = false;
     this.audio.play('error');
     this.patch({ error: String(error), pending: false, automaticPayment: false });
@@ -315,6 +317,28 @@ export class Controller {
     } else if (!view.influenceContext || !['payment', 'range'].includes(view.influenceContext.stage)) {
       this.quotedInfluenceRangePayment = null;
     }
+    if (
+      old.pending &&
+      changed &&
+      this.quotedFreeEducation &&
+      old.seat === view.activePlayer &&
+      decision?.origin?.Advance === 'FreeEducation' &&
+      !decision.reward &&
+      !decision.options.length &&
+      decision.fields.length === 1 &&
+      decision.fields[0].optional
+    ) {
+      try {
+        automaticPayment = this.query<{ action: Move }>({
+          kind: 'decision',
+          values: [],
+          payments: [this.quotedFreeEducation],
+        }).action;
+      } catch {
+        /* Show the regular dialog if the agreed purchase is no longer legal. */
+      }
+      this.quotedFreeEducation = null;
+    } else if (old.pending && changed && !automaticPayment) this.quotedFreeEducation = null;
     const researchChoice = researchDecision(view);
     const newDecision = changed || JSON.stringify(view.decision) !== JSON.stringify(old.view?.decision);
     const drawn = this.cardDraws.update(old.seat, game, view);
@@ -732,6 +756,7 @@ export class Controller {
     this.dismissEffects(true);
     this.quotedActionPayment = null;
     this.quotedInfluenceRangePayment = null;
+    this.quotedFreeEducation = null;
     this.influenceAttemptPending = false;
     this.moveCache.clear();
     this.cardDraws.reset();
@@ -1021,11 +1046,12 @@ export class Controller {
       preview: null,
     });
   }
-  showPirateSpawns(show = true) {
+  showPirateSpawns(show = true, guide: 'pirates' | 'barbarians' = 'pirates') {
     this.closeActivity();
     const s = get(this.session);
     this.patch({
       pirateSpawns: show,
+      threatGuide: guide,
       pirateSpawnPlayer: s.seat ?? s.view?.activePlayer,
       seaRoutes: false,
       seaRouteStart: null,
@@ -1387,6 +1413,23 @@ export class Controller {
     this.influenceAttemptPending = true;
     this.quotedInfluenceRangePayment = { ...rangePayment };
     this.submit(move, actionPayment);
+  }
+  researchPlan(action: Move | null): { eligible: boolean; affordable: boolean; combined?: boolean } {
+    if (!action) return { eligible: false, affordable: false };
+    try {
+      return this.query({ kind: 'researchPlan', action });
+    } catch {
+      return { eligible: false, affordable: false };
+    }
+  }
+  submitResearch(action: Move, buyFreeEducation: boolean) {
+    const plan = this.researchPlan(action);
+    this.quotedFreeEducation = plan.combined
+      ? buyFreeEducation && plan.affordable
+        ? { ideas: 1 }
+        : {}
+      : null;
+    this.submit(action);
   }
   submit(move: Move, quotedPayment?: Pile) {
     const s = get(this.session);

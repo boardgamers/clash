@@ -312,6 +312,12 @@ export interface View {
   movementLeft?: number;
   nomadCities?: string[];
   seaRoutes?: string[][];
+  barbarianGuide?: {
+    player: number;
+    spawn: string[];
+    reinforce: string[];
+    moves: { from: string; to: string }[];
+  }[];
   pirateSpawns?: { player: number; first: string[]; second: string[] }[];
   activePlayer: number;
   canPlay: boolean;
@@ -530,6 +536,7 @@ export interface Session {
   seaRoutes: boolean;
   pirateSpawns: boolean;
   pirateSpawnPlayer?: number | null;
+  threatGuide?: 'pirates' | 'barbarians';
   seaRouteStart: string | null;
   game: Game | null;
   view: View | null;
@@ -628,6 +635,7 @@ export interface ActionCard {
   action: Move | null;
 }
 export interface Decision {
+  origin?: Record<string, unknown>;
   eventContext?: {
     name: string;
     rules: string[];

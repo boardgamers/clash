@@ -599,13 +599,25 @@ export class World {
       this.scene.fog.far = 105;
     }
     this.controls.target.copy(this.center);
+    const homeAngle =
+      this.strategyHome && this.tiles.size
+        ? strategyFrame([...this.tiles.keys()], this.strategyHome, this.camera.aspect).angle
+        : undefined;
     this.camera.position
       .copy(this.center)
       .add(
         new THREE.Vector3(
-          this.topDown ? 0 : 12.5,
+          homeAngle === undefined
+            ? this.topDown
+              ? 0
+              : 12.5
+            : Math.sin(homeAngle) * (this.topDown ? 0.01 : Math.hypot(12.5, 17)),
           this.topDown ? 27 : 22,
-          this.topDown ? 0.01 : 17,
+          homeAngle === undefined
+            ? this.topDown
+              ? 0.01
+              : 17
+            : Math.cos(homeAngle) * (this.topDown ? 0.01 : Math.hypot(12.5, 17)),
         ).multiplyScalar(
           Math.max(1, 0.92 / this.camera.aspect) *
             (this.camera.aspect > 1.4 ? 0.85 : 1) *
@@ -739,7 +751,7 @@ export class World {
       }
     }
   }
-  private ownershipBadge(index: number, symbols?: string[]) {
+  private ownershipBadge(index: number, symbols?: string[], barbarian = false) {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 64;
     const context = canvas.getContext('2d')!;
@@ -754,7 +766,19 @@ export class World {
     context.font = 'bold 42px system-ui';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillText(playerSymbol(index, symbols), 32, 33);
+    if (barbarian) {
+      context.save();
+      context.scale(64 / 24, 64 / 24);
+      context.lineWidth = 1.8;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      context.stroke(
+        new Path2D(
+          'M6 11C3 10 2 7 3 3l4 4M18 11c3-1 4-4 3-8l-4 4M6 18v-6a6 6 0 0 1 12 0v6M5 18h14M12 7v11M8 18v3m8-3v3',
+        ),
+      );
+      context.restore();
+    } else context.fillText(playerSymbol(index, symbols), 32, 33);
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     this.textures.add(texture);
@@ -782,7 +806,7 @@ export class World {
     this.unitBadges = [];
     this.board.traverse((o) => {
       if (o instanceof THREE.Mesh || o instanceof THREE.Sprite) {
-        if (o instanceof THREE.Mesh) {
+        if (o instanceof THREE.Mesh || o instanceof THREE.Line) {
           o.geometry.dispose();
           this.geometries.delete(o.geometry);
         }
@@ -1207,7 +1231,11 @@ export class World {
             this.pieces.push(cityModel);
             let ownershipBadge: THREE.Sprite | undefined;
             if (s.colorBlind) {
-              const badge = this.ownershipBadge(player.id, s.playerSymbols);
+              const badge = this.ownershipBadge(
+                player.id,
+                s.playerSymbols,
+                player.civilization === 'Barbarians',
+              );
               badge.position.set(0.27, 1.27, -0.12);
               cityModel.add(badge);
               ownershipBadge = badge;
@@ -1464,6 +1492,7 @@ export class World {
             const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
             const label = document.createElement('button');
             label.className = 'unit-map-label';
+            label.classList.toggle('barbarian-symbol', s.colorBlind && player.civilization === 'Barbarians');
             label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
             label.setAttribute('aria-label', `Inspect ${description}`);
             this.unitBadges.push(
@@ -1472,9 +1501,10 @@ export class World {
                 props: {
                   groups: [...counts.values()],
                   symbol:
-                    s.colorBlind && player.civilization !== 'Pirates'
+                    s.colorBlind && !['Pirates', 'Barbarians'].includes(player.civilization)
                       ? playerSymbol(player.id, s.playerSymbols)
                       : '',
+                  barbarian: s.colorBlind && player.civilization === 'Barbarians',
                   pirate: player.civilization === 'Pirates' || surfaceUnits.some((unit) => unit.pirate),
                 },
               }),
@@ -1610,13 +1640,30 @@ export class World {
           (p) => p.player === (s.pirateSpawnPlayer ?? s.seat ?? s.view?.activePlayer),
         )
       : undefined;
-    const pirateFirst = pirateSpawns?.first ?? [];
-    const pirateSecond = pirateSpawns?.second ?? [];
-    const selectionSig = JSON.stringify([selected, available, pirateFirst, pirateSecond]);
+    const barb =
+      pirateGuide && s.threatGuide === 'barbarians'
+        ? s.view?.barbarianGuide?.find(
+            (p) => p.player === (s.pirateSpawnPlayer ?? s.seat ?? s.view?.activePlayer),
+          )
+        : undefined;
+    const barbarianSpawn = barb?.spawn ?? [];
+    const barbarianReinforce = barb?.reinforce ?? [];
+    const barbarianMoves = barb?.moves ?? [];
+    const pirateFirst = s.threatGuide !== 'barbarians' ? (pirateSpawns?.first ?? []) : [];
+    const pirateSecond = s.threatGuide !== 'barbarians' ? (pirateSpawns?.second ?? []) : [];
+    const selectionSig = JSON.stringify([
+      selected,
+      available,
+      pirateFirst,
+      pirateSecond,
+      barbarianSpawn,
+      barbarianReinforce,
+      barbarianMoves,
+    ]);
     if (selectionSig !== this.selectionSignature) {
       this.selectionSignature = selectionSig;
       this.rings.traverse((o) => {
-        if (o instanceof THREE.Mesh) {
+        if (o instanceof THREE.Mesh || o instanceof THREE.Line) {
           o.geometry.dispose();
           this.geometries.delete(o.geometry);
           (o.material as THREE.Material).dispose();
@@ -1624,7 +1671,13 @@ export class World {
         }
       });
       this.rings.clear();
-      for (const pos of new Set([...selected, ...available, ...pirateSecond])) {
+      for (const pos of new Set([
+        ...selected,
+        ...available,
+        ...pirateSecond,
+        ...barbarianSpawn,
+        ...barbarianReinforce,
+      ])) {
         const [x, z] = positionXY(pos);
         const ring = this.mesh(
           new THREE.TorusGeometry(
@@ -1634,13 +1687,17 @@ export class World {
             6,
           ),
           new THREE.MeshBasicMaterial({
-            color: pirateFirst.includes(pos)
-              ? '#e96a55'
-              : pirateSecond.includes(pos)
-                ? '#f7c65b'
-                : selected.includes(pos)
-                  ? '#ffd16b'
-                  : '#ebdab3',
+            color: barbarianSpawn.includes(pos)
+              ? '#edaa4d'
+              : barbarianReinforce.includes(pos)
+                ? '#b789d8'
+                : pirateFirst.includes(pos)
+                  ? '#e96a55'
+                  : pirateSecond.includes(pos)
+                    ? '#f7c65b'
+                    : selected.includes(pos)
+                      ? '#ffd16b'
+                      : '#ebdab3',
           }),
         );
         ring.rotation.x = -Math.PI / 2;
@@ -1662,6 +1719,58 @@ export class World {
           fill.castShadow = false;
           this.rings.add(fill);
         }
+      }
+
+      for (const { from, to } of barbarianMoves) {
+        const [x, z] = positionXY(from),
+          [tx, tz] = positionXY(to);
+        const material = new THREE.LineDashedMaterial({
+          color: '#e96a55',
+          dashSize: 0.14,
+          gapSize: 0.08,
+          depthTest: false,
+        });
+        const geometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(x, 0.5, z),
+          new THREE.Vector3(tx, 0.5, tz),
+        ]);
+        this.geometries.add(geometry);
+        this.materials.add(material);
+        const line = new THREE.Line(geometry, material);
+        line.computeLineDistances();
+        line.renderOrder = 3;
+        this.rings.add(line);
+        const dx = tx - x,
+          dz = tz - z,
+          length = Math.hypot(dx, dz),
+          ux = dx / length,
+          uz = dz / length;
+        const ax = x + dx * 0.68,
+          az = z + dz * 0.68;
+        const arrowGeo = new THREE.BufferGeometry().setAttribute(
+          'position',
+          new THREE.Float32BufferAttribute(
+            [
+              ax + ux * 0.18,
+              0.51,
+              az + uz * 0.18,
+              ax - ux * 0.1 - uz * 0.12,
+              0.51,
+              az - uz * 0.1 + ux * 0.12,
+              ax - ux * 0.1 + uz * 0.12,
+              0.51,
+              az - uz * 0.1 - ux * 0.12,
+            ],
+            3,
+          ),
+        );
+        const arrowMat = new THREE.MeshBasicMaterial({
+          color: '#e96a55',
+          side: THREE.DoubleSide,
+          depthTest: false,
+        });
+        this.materials.add(arrowMat);
+        this.rings.add(this.mesh(arrowGeo, arrowMat));
       }
     }
     const collectionCity =
@@ -1878,7 +1987,7 @@ export class World {
       s.topDown !== this.topDown ||
       s.strategyMap !== this.strategyMap ||
       guideChanged ||
-      (s.strategyMap && orientationChanged)
+      (orientationChanged && !s.playback)
     ) {
       this.topDown = s.topDown;
       this.strategyMap = s.strategyMap;

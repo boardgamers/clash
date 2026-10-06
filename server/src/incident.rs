@@ -556,14 +556,18 @@ impl IncidentBuilder {
                         ));
 
                     let action = match mood_modifier {
-                        MoodModifier::Decrease => "reducing the mood",
-                        MoodModifier::MakeAngry => "making it Angry",
+                        MoodModifier::Decrease => "mood loss",
+                        MoodModifier::MakeAngry => "becoming Angry",
                     };
 
                     // mandatory - but may be 0
                     Some(vec![PaymentRequest::mandatory(
                         options,
-                        &format!("You may pay 1 mood token for each city to avoid {action}"),
+                        &if needed == 1 {
+                            format!("Pay 1 mood token to protect the one affected city from {action}, or pay nothing")
+                        } else {
+                            format!("Pay up to {needed} mood tokens: 1 per city you protect from {action}, or pay nothing")
+                        },
                     )])
                 } else {
                     None

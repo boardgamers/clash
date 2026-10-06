@@ -39,7 +39,7 @@
                   "Advance": "Myths"
                 }
               },
-              "name": "You may pay 1 mood token for each city to avoid reducing the mood",
+              "name": "Pay up to 2 mood tokens: 1 per city you protect from mood loss, or pay nothing",
               "optional": false
             }
           ]

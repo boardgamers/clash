@@ -17,7 +17,7 @@ import rome from '../../client/assets/colosseum-rome-svgrepo-com.png';
 import greece from '../../client/assets/temple-building-with-columns-svgrepo-com.png';
 import china from '../../client/assets/great-wall-of-china-chinese-svgrepo-com.png';
 import pirates from '../../client/assets/pirate-symbol-mark-svgrepo-com.png';
-import barbarians from '../../client/assets/warrior-svgrepo-com.png';
+import barbarians from './assets/barbarian-helmet.svg';
 
 const icons: Record<string, typeof Landmark> = {
   India: Flower2,

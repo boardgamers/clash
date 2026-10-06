@@ -280,24 +280,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 |game, p, i| {
                     let state = i.barbarians.as_mut().expect("barbarians should exist");
                     if let Some(army) = state.selected_position {
-                        let choices = if state.hunnic_tribes {
-                            let barb = get_barbarians_player(game);
-                            let size = barb.get_units(army).len();
-                            army.neighbors()
-                                .into_iter()
-                                .filter(|to| {
-                                    game.map.is_land(*to)
-                                        && barb.get_units(*to).len() + size <= STACK_LIMIT
-                                })
-                                .collect()
-                        } else {
-                            barbarian_march_steps(
-                                game,
-                                game.player(p.index),
-                                army,
-                                0, // stack size was already checked in last step
-                            )
-                        };
+                        let choices = barbarian_move_destinations(game, p.index, state, army);
 
                         let needed = 1..=1;
                         Some(PositionRequest::new(
@@ -325,6 +308,56 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
             }
         },
     )
+}
+
+pub(crate) fn barbarian_move_destinations(
+    game: &Game,
+    player: usize,
+    state: &BarbariansEventState,
+    army: Position,
+) -> Vec<Position> {
+    if state.hunnic_tribes {
+        let barb = get_barbarians_player(game);
+        let size = barb.get_units(army).len();
+        army.neighbors()
+            .into_iter()
+            .filter(|to| game.map.is_land(*to) && barb.get_units(*to).len() + size <= STACK_LIMIT)
+            .collect()
+    } else {
+        barbarian_march_steps(game, game.player(player), army, 0)
+    }
+}
+
+pub(crate) fn map_guide(game: &Game, player: usize) -> serde_json::Value {
+    let mut spawn = possible_barbarians_spawns(game, game.player(player));
+    spawn.sort();
+    if !game.players.iter().any(|p| p.civilization.is_barbarian()) {
+        return serde_json::json!({"player":player,"spawn":spawn,"moves":[],"reinforce":[]});
+    }
+    let state = game
+        .events
+        .iter()
+        .rev()
+        .find_map(|e| {
+            if let PersistentEventType::Incident(i) = &e.event_type {
+                i.barbarians.as_ref()
+            } else {
+                None
+            }
+        })
+        .cloned()
+        .unwrap_or_default();
+    let moves = get_movable_units(game, player, &state)
+        .into_iter()
+        .flat_map(|from| {
+            let mut destinations = barbarian_move_destinations(game, player, &state, from);
+            destinations.sort();
+            destinations
+                .into_iter()
+                .map(move |to| serde_json::json!({"from":from,"to":to}))
+        })
+        .collect::<Vec<_>>();
+    serde_json::json!({"player":player,"spawn":spawn,"moves":moves,"reinforce":possible_barbarians_reinforcements(game)})
 }
 
 fn execute_barbarian_move(

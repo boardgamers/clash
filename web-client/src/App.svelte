@@ -1,4 +1,6 @@
 <script lang="ts">
+  import CollectionBonusHints from './CollectionBonusHints.svelte';
+  import BarbarianIcon from './BarbarianIcon.svelte';
   import PlaybackPanel from './PlaybackPanel.svelte';
   import CardReferenceDialog from './CardReferenceDialog.svelte';
   import { cardReferences, type CardReference, type CardRule } from './card-reference';
@@ -880,17 +882,48 @@
               !!$session.view?.objectiveDecision ||
               !!$session.view?.explorationDecision ||
               !$session.view?.pirateSpawns}
-            class:active={$session.pirateSpawns && $session.mode === 'overview'}
-            aria-pressed={$session.pirateSpawns && $session.mode === 'overview'}
-            onclick={() => controller.showPirateSpawns(!$session.pirateSpawns)}><Skull size={18} /></button
+            class:active={$session.pirateSpawns &&
+              $session.threatGuide !== 'barbarians' &&
+              $session.mode === 'overview'}
+            aria-pressed={$session.pirateSpawns &&
+              $session.threatGuide !== 'barbarians' &&
+              $session.mode === 'overview'}
+            onclick={() =>
+              controller.showPirateSpawns(!($session.pirateSpawns && $session.threatGuide !== 'barbarians'))}
+            ><Skull size={18} /></button
+          >
+          <button
+            title="Barbarian spawn and movement guide"
+            aria-label="Show barbarian spawn and movement"
+            class:active={$session.pirateSpawns &&
+              $session.threatGuide === 'barbarians' &&
+              $session.mode === 'overview'}
+            aria-pressed={$session.pirateSpawns &&
+              $session.threatGuide === 'barbarians' &&
+              $session.mode === 'overview'}
+            disabled={!!$session.playback ||
+              !!$session.view?.decision ||
+              !!$session.view?.choiceDecision ||
+              !!$session.view?.explorationDecision}
+            onclick={() =>
+              controller.showPirateSpawns(
+                !($session.pirateSpawns && $session.threatGuide === 'barbarians'),
+                'barbarians',
+              )}><BarbarianIcon /></button
           >
           {#if $session.pirateSpawns && $session.mode === 'overview' && !$session.view?.decision && !$session.view?.choiceDecision && !$session.view?.objectiveDecision && !$session.view?.explorationDecision && !$session.abilitiesOpen && !$session.playback}
             <div class="map-tooltip pirate-spawn-key" role="status">
-              <strong>Pirate spawn positions</strong>
+              <strong
+                >{$session.threatGuide === 'barbarians'
+                  ? 'Barbarian spawn and movement'
+                  : 'Pirate spawn positions'}</strong
+              >
               <label
                 >Incident player
                 <select
-                  aria-label="Pirate guide incident player"
+                  aria-label={$session.threatGuide === 'barbarians'
+                    ? 'Barbarian guide incident player'
+                    : 'Pirate guide incident player'}
                   value={$session.pirateSpawnPlayer ?? $session.seat ?? $session.view?.activePlayer}
                   onchange={(event) => controller.setPirateSpawnPlayer(Number(event.currentTarget.value))}
                 >
@@ -899,16 +932,29 @@
                     >{/each}
                 </select>
               </label>
-              <div><i class="pirate-first" aria-hidden="true"></i>First ship</div>
-              <div><i class="pirate-second" aria-hidden="true"></i>Second ship can also use these tiles</div>
-              <p>
-                The first ship must be adjacent to this civilization’s city if possible. Otherwise, any
-                eligible sea tile. Player units block placement; existing pirates do not.
-              </p>
-              {#if !$session.view?.pirateSpawns?.find((p) => p.player === ($session.pirateSpawnPlayer ?? $session.seat ?? $session.view?.activePlayer))?.second.length}<p
-                >
-                  No eligible sea tiles right now.
-                </p>{/if}
+              {#if $session.threatGuide === 'barbarians'}
+                <div><i class="barbarian-spawn" aria-hidden="true"></i>New barbarian city</div>
+                <div><i class="barbarian-move" aria-hidden="true"></i>Army movement →</div>
+                <div><i class="barbarian-reinforce" aria-hidden="true"></i>Reinforcement city</div>
+                <p>
+                  Movement follows these arrows toward the incident player’s cities. If no army can move, a
+                  movement event tries to spawn a city instead.
+                </p>
+                <small>Current legal choices; earlier moves can change later ones.</small>
+              {:else}
+                <div><i class="pirate-first" aria-hidden="true"></i>First ship</div>
+                <div>
+                  <i class="pirate-second" aria-hidden="true"></i>Second ship can also use these tiles
+                </div>
+                <p>
+                  The first ship must be adjacent to this civilization’s city if possible. Otherwise, any
+                  eligible sea tile. Player units block placement; existing pirates do not.
+                </p>
+                {#if !$session.view?.pirateSpawns?.find((p) => p.player === ($session.pirateSpawnPlayer ?? $session.seat ?? $session.view?.activePlayer))?.second.length}<p
+                  >
+                    No eligible sea tiles right now.
+                  </p>{/if}
+              {/if}
               <small>Shows current positions. They may change before the event.</small>
             </div>
           {/if}
@@ -1295,6 +1341,7 @@
                 >{/each}
             </div>{/if}
           <ContextualCards {controller} context="collect" />
+          {#if city && !city.reason}<CollectionBonusHints {city} selection={$session.selection} />{/if}
           {#if city?.ballcourts}<label class="ballcourts-toggle"
               ><input
                 type="checkbox"

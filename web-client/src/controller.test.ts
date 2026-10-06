@@ -1629,3 +1629,59 @@ test('pirate map guide switches incident players without moves and clears when c
     app.close();
   }
 });
+
+test('research confirmation pays Free Education once, or skips it, using the quoted choice', async () => {
+  for (const buy of [true, false]) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('advances/free_education'));
+      g.players[0].resources.ideas = 6;
+      let raw = JSON.stringify(g);
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(raw, 0));
+      const advance = app.session().view!.advances.find((a) => a.id === 'Irrigation')!;
+      assert.ok(advance.action);
+      const before = raw;
+      assert.deepEqual(c.researchPlan(advance.action!), { eligible: true, affordable: true, combined: true });
+      assert.equal(raw, before, 'quoting never changes the save');
+      c.submitResearch(advance.action!, buy);
+      for (let i = 0; i < app.sent.length; i++) {
+        assert.ok(i < 2, 'only the research and its Free Education choice are submitted');
+        raw = engine.tryMove(raw, app.sent[i], 0);
+        await c.load(engine.stripSecret(raw, 0));
+      }
+      assert.equal(app.sent.length, 2);
+      const p = JSON.parse(raw).players[0];
+      assert.equal(
+        p.resources.ideas,
+        6 - (advance.action as any).Playing.Advance.payment.ideas - Number(buy),
+      );
+      assert.equal(p.resources.mood_tokens, 12 + Number(buy));
+      assert.equal(app.session().view!.decision, null);
+    } finally {
+      app.close();
+    }
+  }
+});
+
+test('failed research confirmation cannot carry a Free Education payment into another move', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const g = JSON.parse(fixture('advances/free_education'));
+    g.players[0].resources.ideas = 6;
+    const raw = JSON.stringify(g);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    const action = app.session().view!.advances.find((a) => a.id === 'Irrigation')!.action!;
+    c.submitResearch(action, true);
+    c.handleError('Research rejected');
+    const after = engine.tryMove(raw, JSON.stringify(action), 0);
+    await c.load(engine.stripSecret(after, 0));
+    assert.equal(app.sent.length, 1);
+    assert.equal(app.session().view!.decision!.origin!.Advance, 'FreeEducation');
+  } finally {
+    app.close();
+  }
+});

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Swords, Ship, Footprints, Landmark, Shield, Skull } from 'lucide-svelte';
+  import BarbarianIcon from './BarbarianIcon.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import { playerColor, playerSymbol } from './types';
   import type { StrategyTile } from './strategy';
@@ -19,16 +20,21 @@
 >
 {#each tile.occupants as occupant}
   <span class="strategy-owner" style={`--owner:${playerColor(occupant.player.id, colorBlind, playerColors)}`}>
-    {#if colorBlind}<span class="strategy-symbol">{playerSymbol(occupant.player.id, playerSymbols)}</span
+    {#if colorBlind && !['Barbarians', 'Pirates'].includes(occupant.player.civilization)}<span
+        class="strategy-symbol">{playerSymbol(occupant.player.id, playerSymbols)}</span
       >{/if}
     {#if occupant.city}<span class="strategy-city"
-        ><Landmark size={17} />{occupant.size}{#if occupant.city.city_pieces?.fortress != null}<Shield
+        >{#if occupant.player.civilization === 'Barbarians'}<BarbarianIcon size={17} />{:else}<Landmark
+            size={17}
+          />{/if}{occupant.size}{#if occupant.city.city_pieces?.fortress != null}<Shield
             size={16}
           />{/if}</span
       >{/if}
     {#if occupant.army || occupant.ships || occupant.settlers}<span class="strategy-forces">
         {#if occupant.army - occupant.aboard > 0}<span
-            ><Swords size={18} /><b>{occupant.army - occupant.aboard}</b></span
+            >{#if occupant.player.civilization === 'Barbarians'}<BarbarianIcon size={18} />{:else}<Swords
+                size={18}
+              />{/if}<b>{occupant.army - occupant.aboard}</b></span
           >{/if}
         {#if occupant.ships}<span
             >{#if occupant.player.civilization === 'Pirates'}<Skull size={18} />{:else}<Ship

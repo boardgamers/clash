@@ -63,6 +63,7 @@
   const availableOnly = $derived(reference ? inspectAvailableOnly : $session.availableOnly);
   const selectedId = $derived(reference ? inspectedAdvance : $session.selectedAdvance);
   function selectAdvance(id: string | null) {
+    buyFreeEducation = false;
     selectedCivilization = null;
     if (reference) inspectedAdvance = id;
     else controller.patch({ selectedAdvance: id });
@@ -159,7 +160,13 @@
           (category === group && governmentLocked(group) && !researchedOnly)),
     ),
   );
+  let buyFreeEducation = $state(false);
   const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
+  const researchPlan = $derived(
+    !choice && !reference
+      ? controller.researchPlan(selectedAction ?? null)
+      : { eligible: false, affordable: false },
+  );
   const eventImminent = $derived(
     !reference && (selected ? !!selected.triggersEvent : advances.some((a) => a.triggersEvent)),
   );
@@ -349,15 +356,15 @@
                   />{/if}</span
               >
               <span class="research-summary"><ResourceText text={presentation.summary} /></span>
-            {#if researchOwners(view, advance.id, player?.index).length}
-              <span class="research-other-owners" aria-label="Other civilizations with this advance">
-                {#each researchOwners(view, advance.id, player?.index) as owner}
-                  <span title={`Researched by ${owner.civilization} (${owner.name})`}>
-                    <CivilizationEmblem civilization={owner.civilization} size={14} />{owner.civilization}
-                  </span>
-                {/each}
-              </span>
-            {/if}
+              {#if researchOwners(view, advance.id, player?.index).length}
+                <span class="research-other-owners" aria-label="Other civilizations with this advance">
+                  {#each researchOwners(view, advance.id, player?.index) as owner}
+                    <span title={`Researched by ${owner.civilization} (${owner.name})`}>
+                      <CivilizationEmblem civilization={owner.civilization} size={14} />{owner.civilization}
+                    </span>
+                  {/each}
+                </span>
+              {/if}
             </button>
             <div class="research-effects">
               {#if advance.unlocks}<span
@@ -374,7 +381,7 @@
                 </span>{/each}
             </div>
             {#if !advance.owned}<div class="research-node-cost">
-              <span
+                <span
                   class="research-flexible-cost"
                   title={borrowing
                     ? 'Borrow until end of turn'
@@ -413,19 +420,19 @@
                     >
                   {:else if !lockedGovernment}{actionReason(advance.reason)}{/if}</span
                 >
-              {#if !borrowing && !freeResearch}
-                {#each researchFreeHints(advance, advances) as source}
-                  <span class="research-free-hint">
-                    <button
-                      class="research-advance-link"
-                      title="No resource cost; the research action and prerequisites still apply."
-                      onclick={() => showAdvance(source.id)}
-                      >Free with {source.name}{source.oncePerTurn ? ' · once per turn' : ''}</button
-                    >
-                  </span>
-                {/each}
-              {/if}
-            </div>{/if}
+                {#if !borrowing && !freeResearch}
+                  {#each researchFreeHints(advance, advances) as source}
+                    <span class="research-free-hint">
+                      <button
+                        class="research-advance-link"
+                        title="No resource cost; the research action and prerequisites still apply."
+                        onclick={() => showAdvance(source.id)}
+                        >Free with {source.name}{source.oncePerTurn ? ' · once per turn' : ''}</button
+                      >
+                    </span>
+                  {/each}
+                {/if}
+              </div>{/if}
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
               {@const UnlockIcon = researchPresentation(unlocked).icon}
               <button
@@ -502,12 +509,31 @@
               label="Research payment"
             />
           {/if}
+          {#if researchPlan.eligible}
+            {#if researchPlan.combined}
+              <label class="research-extra-payment"
+                ><input
+                  type="checkbox"
+                  checked={buyFreeEducation && researchPlan.affordable}
+                  disabled={!researchPlan.affordable || $session.pending}
+                  onchange={(e) => (buyFreeEducation = e.currentTarget.checked)}
+                />
+                <span><strong>Free Education</strong><span>Pay 1 extra idea → gain 1 mood token</span></span>
+              </label>
+            {:else}<small class="research-payment-hint"
+                >Free Education: keep 1 idea after research to gain 1 mood token.</small
+              >{/if}
+          {/if}
           <button
             class="primary"
             title={unavailableReason(selected) || (eventImminent ? 'Research triggers an event' : undefined)}
             aria-describedby={eventImminent ? 'research-event-notice' : undefined}
             disabled={!selectedAction || $session.pending}
-            onclick={() => selectedAction && controller.submit(selectedAction)}
+            onclick={() =>
+              selectedAction &&
+              (!choice
+                ? controller.submitResearch(selectedAction, buyFreeEducation)
+                : controller.submit(selectedAction))}
           >
             {$session.pending
               ? 'Confirming…'
@@ -517,7 +543,12 @@
             {#if !selected.owned}<span
                 >{#if eventImminent}<ScrollText size={13} aria-hidden="true" />{/if}{#if borrowing}Until end
                   of turn{:else if freeResearch}Free{:else if choice}Pay research cost next{:else}{#if selectedPayment}Pay
-                    <ResourceAmount pile={selectedPayment.payment} compact /> ·
+                    <ResourceAmount
+                      pile={buyFreeEducation && researchPlan.affordable
+                        ? { ...selectedPayment.payment, ideas: (selectedPayment.payment.ideas ?? 0) + 1 }
+                        : selectedPayment.payment}
+                      compact
+                    /> ·
                   {/if}1 action{/if}</span
               >{/if}
           </button>
