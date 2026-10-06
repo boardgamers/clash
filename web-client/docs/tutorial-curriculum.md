@@ -62,11 +62,11 @@ Metadata remains in English for translation through BGS admin. Tutorial prose be
 
 **Problem:** Boarding, sailing and landing allowances are difficult to infer from the UI.
 
-**Position:** Port, one ship and two land units on adjacent land; a second ship begins with passengers aboard.
+**Position:** One ship beside a settler, a connected sea route and an unexplored region beyond the starting city.
 
-**Steps:** Inspect two-passenger capacity; board and sail in one Move action; attempt landing and explain why it requires another action for those newly boarded units; then compare a ship whose units were aboard before the action, which can sail and land in one action. Show the sea destination choice after exploration.
+**Steps:** Board and sail in one Move action; check why a newly boarded passenger needs another Move action to land; disembark into unexplored D4 and choose the region’s orientation.
 
-**Check:** Demonstrate both timing cases with actual legal moves. Passenger identity remains attached to the carrier, and rejected landings are atomic.
+**Check:** Boarding and sailing spend one action; landing and exploring spend another. The settler ends at D4 without a carrier, and the region is revealed. Rejected moves remain atomic.
 
 ### 7. Cultural influence, one decision at a time (`cultural-influence`, interaction, 8 minutes)
 
@@ -147,7 +147,7 @@ The release registers all 12 independent chapters in five sections: basics, expa
 | Activation and happiness       | Improve two cities together, then collect and compare activation counts.                                          |
 | Research with a plan           | Research Math and claim Engineering without a resource payment.                                                   |
 | Move, explore, found           | Move a settler, finish movement, found a city, then explore and orient a region.                                  |
-| Ships and passengers           | Board, sail, then land in the next action.                                                                        |
+| Ships and passengers           | Board, sail, then disembark to explore a new region in the next action.                                                                        |
 | Cultural influence             | Select a Temple, pay extra range, see the roll, pay the boost, and compare building and city ownership.           |
 | Incidents and hostile factions | Trigger Heavy Flood, protect with Myths, and resolve the scripted opponent's city choice; inspect hostile guides. |
 | Cards and leaders              | Recruit Caesar and distinguish a free action from a free payment through a check.                                 |

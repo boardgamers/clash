@@ -3113,7 +3113,7 @@
   "Use Great Lighthouse and inspect builder versus owner points.": "Brug det Store Fyrtårn og sammenlign bygger- og ejerpoint.",
   "Use Next to step through, or Play to watch.": "Brug Næste til at gå trinvis frem, eller Afspil til at se forløbet.",
   "Use a card’s action effect on your turn when its conditions are met, or its battle effect with Tactics. Choose one use, then discard it. In battle, you may play one card at the start of each combat round; its effect lasts that round.": "Brug et korts handlingseffekt på din tur, når betingelserne er opfyldt, eller dets kampeffekt med Taktik. Vælg én brug, og kassér det. I kamp må du spille ét kort ved starten af hver kamprunde; effekten varer den runde.",
-  "Use another Move action to land the passenger on adjacent empty land.": "Brug en ny flyttehandling til at lade passageren gå i land på tilstødende tomt land.",
+  "Use another Move action to disembark into the unexplored region. Choose its orientation to reveal new land.": "Brug en ny flyttehandling til at gå i land i det uudforskede område. Vælg dets orientering for at afsløre nyt land.",
   "Use city": "Brug by",
   "Use city {p0}": "Brug by {p0}",
   "Use gold in place of mood tokens for Draft. A city with a Port may Draft a Ship instead of an Infantry.": "Brug guld i stedet for humørpoletter til Værnepligt. En by med Havn må indkalde et skib i stedet for infanteri.",

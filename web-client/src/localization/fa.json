@@ -3133,7 +3133,7 @@
   "Use Great Lighthouse and inspect builder versus owner points.": "فانوس بزرگ را استفاده کنید و امتیاز سازنده و مالک را بررسی کنید.",
   "Use Next to step through, or Play to watch.": "برای مشاهده گام‌به‌گام «بعدی» یا برای تماشا «پخش» را بزنید.",
   "Use a card’s action effect on your turn when its conditions are met, or its battle effect with Tactics. Choose one use, then discard it. In battle, you may play one card at the start of each combat round; its effect lasts that round.": "اثر اقدام کارت را در نوبت خود با فراهم‌بودن شرایطش، یا اثر نبرد آن را با تاکتیک به‌کار برید. یک کاربرد را انتخاب و سپس کارت را دور بیندازید. در نبرد، می‌توانید در آغاز هر دور یک کارت بازی کنید؛ اثر آن تا پایان همان دور است.",
-  "Use another Move action to land the passenger on adjacent empty land.": "برای پیاده کردن سرنشین در زمین خالی مجاور، اقدام حرکت دیگری استفاده کنید.",
+  "Use another Move action to disembark into the unexplored region. Choose its orientation to reveal new land.": "با یک اقدام حرکت دیگر در منطقهٔ کشف‌نشده پیاده شو. جهت آن را انتخاب کن تا سرزمین جدید آشکار شود.",
   "Use city": "استفاده از شهر",
   "Use city {p0}": "استفاده از شهر {p0}",
   "Use gold in place of mood tokens for Draft. A city with a Port may Draft a Ship instead of an Infantry.": "برای سربازگیری به‌جای نشان روحیه از طلا استفاده کنید. شهری با بندر می‌تواند به‌جای پیاده‌نظام، کشتی سربازگیری کند.",

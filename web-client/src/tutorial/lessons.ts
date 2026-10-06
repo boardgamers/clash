@@ -247,7 +247,7 @@ export const chapters: {
     title: 'Ships and passengers',
     section: 'expansion',
     description: 'Board, sail and land with the right movement timing.',
-    version: 1,
+    version: 2,
     steps: [
       {
         id: 'embark',
@@ -275,9 +275,15 @@ export const chapters: {
       },
       {
         id: 'land',
-        title: 'Land on empty land',
-        text: 'Use another Move action to land the passenger on adjacent empty land.',
+        title: 'Explore a region',
+        text: 'Use another Move action to disembark into the unexplored region. Choose its orientation to reveal new land.',
         kind: 'land',
+      },
+      {
+        id: 'orientation',
+        title: 'Choose the revealed region',
+        text: 'Choose the orientation offered by the engine. The revealed terrain must allow the exploring unit to enter.',
+        kind: 'orientation',
       },
     ],
   },
@@ -597,7 +603,7 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
             ? d.position === 'D1'
             : kind === 'sail'
               ? d.position === 'D3'
-              : d.position === 'E3',
+              : d.position === 'D4',
         )
         .map((d: any) => ({ label: `Move to ${d.position}`, move: d.action }));
     }
@@ -666,7 +672,7 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
         'Move',
         'Select units, then a highlighted hex.',
         offer?.Movement?.Move?.destination ?? '',
-        step.kind === 'explore'
+        step.kind === 'explore' || (step.kind === 'land' && id === 'sea-transport')
           ? 'Explore'
           : step.kind === 'embark'
             ? 'Board ship'

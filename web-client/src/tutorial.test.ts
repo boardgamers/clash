@@ -65,7 +65,12 @@ for (const chapter of chapters) {
     if (chapter.id === 'sea-transport') {
       const view = JSON.parse(engine.webView(engine.stripSecret(controller.snapshot.state.game, 0), 0));
       const settler = view.units.find((unit: any) => unit.type === 'Settler');
-      assert.equal(settler.position, 'E3');
+      assert.equal(settler.position, 'D4');
+      assert.notEqual(
+        final.map.tiles.find(([position]: [string, string]) => position === 'D4')[1],
+        'Unexplored',
+      );
+      assert.equal(final.actions_left, initial.actions_left - 2);
       assert.equal(settler.carrier, null);
     }
     if (chapter.id === 'cultural-influence') {
