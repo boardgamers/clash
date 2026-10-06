@@ -69,6 +69,7 @@
 </script>
 
 <section
+  data-tutorial="movement"
   class="action-panel floating-panel settler-panel board-movement selection-tray"
   aria-label="Unit movement"
 >

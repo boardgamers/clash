@@ -119,3 +119,43 @@
   outline: 3px solid #b58a45;
   outline-offset: 3px;
 }
+
+.tutorial-control-path {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #315d63;
+}
+.tutorial-control-path span {
+  font-weight: 600;
+}
+.tutorial-choices:empty {
+  display: none;
+}
+.clash-tutorial[data-lesson-control='collect'] [data-tutorial='collect'] {
+  outline: 3px solid #b58a45;
+  outline-offset: 3px;
+}
+.clash-tutorial[data-lesson-control='research'] [data-tutorial='research'] {
+  outline: 3px solid #b58a45;
+  outline-offset: 3px;
+}
+.clash-tutorial[data-lesson-control='happiness'] [data-tutorial='happiness'] {
+  outline: 3px solid #b58a45;
+  outline-offset: 3px;
+}
+.clash-tutorial[data-lesson-control='movement'] [data-tutorial='movement'] {
+  outline: 3px solid #b58a45;
+  outline-offset: 3px;
+}
+.clash-tutorial[data-lesson-control='recruit'] [data-tutorial='recruit'] {
+  outline: 3px solid #b58a45;
+  outline-offset: 3px;
+}
+.clash-tutorial[data-lesson-control='decision'] [data-tutorial='decision'] {
+  outline: 3px solid #b58a45;
+  outline-offset: 3px;
+}
+.clash-tutorial[data-lesson-control='influence'] [data-tutorial='influence'] {
+  outline: 3px solid #b58a45;
+  outline-offset: 3px;
+}

@@ -32,7 +32,11 @@
       : 'Happy';
 </script>
 
-<section class="action-panel floating-panel selection-tray happiness-panel" aria-label="Increase happiness">
+<section
+  data-tutorial="happiness"
+  class="action-panel floating-panel selection-tray happiness-panel"
+  aria-label="Increase happiness"
+>
   <header class="movement-heading">
     <h2><Smile size={18} />Happiness</h2>
     <div class="happiness-budget" title="Mood tokens available">

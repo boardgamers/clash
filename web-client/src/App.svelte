@@ -1049,12 +1049,7 @@
           >{/each}
       </div>
     </section>
-    <div
-      class="board-toolbar"
-      data-tutorial="actions"
-      class:has-redo={$session.view?.canRedo}
-      aria-label="Game controls"
-    >
+    <div class="board-toolbar" class:has-redo={$session.view?.canRedo} aria-label="Game controls">
       <div class="turn-banner" class:waiting={!!waiting} role="status" aria-live="polite">
         {#if waiting}<Hourglass size={15} aria-hidden="true" />{:else}<span class="turn-light"></span>{/if}
         <div class="turn-copy">
@@ -1082,6 +1077,7 @@
           title={collectAvailable
             ? 'Collect resources · 1 action'
             : (city?.reason ?? 'No city can collect resources')}
+          data-tutorial="collect"
           aria-label="Collect resources"
           disabled={!$session.view?.canPlay || !collectAvailable || $session.pending}
           onclick={() => {
@@ -1093,6 +1089,7 @@
           class:active={$session.mode === 'research'}
           class:inspect-only={!researchAvailable}
           title={researchAvailable ? 'Research tree' : 'View research · Browse advances and costs'}
+          data-tutorial="research"
           aria-label="Research tree"
           disabled={$session.seat === undefined}
           onclick={openResearch}
@@ -1123,6 +1120,7 @@
         <button
           class="desktop-action"
           class:active={$session.mode === 'city' && $session.cityTab === 'recruit'}
+          data-tutorial="recruit"
           aria-label="Recruit units"
           title="Recruit units · 1 action"
           disabled={!$session.view?.canPlay || !city || $session.pending}
@@ -1134,6 +1132,7 @@
         <button
           class="desktop-action"
           class:active={$session.mode === 'happiness'}
+          data-tutorial="happiness"
           aria-label="Increase happiness"
           title="Increase happiness · Select cities on the map"
           disabled={!$session.view?.canPlay || !city || $session.pending}
@@ -1145,6 +1144,7 @@
         <button
           class:active={$session.mode === 'settlers'}
           class:inspect-only={!settlersAvailable}
+          data-tutorial="movement"
           aria-label="Move units and found cities"
           title={$session.view?.nomadCities?.length
             ? 'Move units or Nomad cities · Found cities'
@@ -1164,6 +1164,7 @@
           title={abilitiesAvailable
             ? 'Abilities and cultural influence'
             : 'No abilities or influence targets available'}
+          data-tutorial="influence"
           aria-label="Abilities and cultural influence"
           class:active={$session.abilitiesOpen}
           disabled={!abilitiesAvailable || $session.pending}
@@ -1174,6 +1175,7 @@
         >
         <button
           title="Undo last action"
+          data-tutorial="undo"
           aria-label="Undo last action"
           disabled={!$session.view?.canUndo || $session.pending}
           onclick={() => controller.submit('Undo')}><Undo2 size={19} /><span>Undo</span></button
@@ -1188,6 +1190,7 @@
           class:active={confirmEnd}
           class:end-turn-ready={readyToEnd}
           title="End turn"
+          data-tutorial="end"
           aria-label="End turn"
           disabled={!$session.view?.canEndTurn || $session.pending}
           onclick={() => {
@@ -1248,6 +1251,11 @@
         class="action-panel floating-panel"
         class:board-collection={$session.mode === 'collect'}
         aria-label="Current action"
+        data-tutorial={choiceDecision || objectiveDecision
+          ? 'decision'
+          : $session.mode === 'collect'
+            ? 'collect'
+            : undefined}
       >
         {#if !choiceDecision && !objectiveDecision && $session.view?.supportedPhase}<button
             class="icon-button close-action"
@@ -1569,6 +1577,7 @@
       />{/if}
     {#if researchChoice && $session.mode !== 'research'}<section
         class="action-panel floating-panel decision-panel"
+        data-tutorial="decision"
         aria-label="Choose an advance"
       >
         <h2><GraduationCap size={21} />{$session.view?.decision?.name ?? 'Choose an advance'}</h2>

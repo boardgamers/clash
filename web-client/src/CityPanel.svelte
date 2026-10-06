@@ -136,6 +136,7 @@
 {/snippet}
 
 <dialog
+  data-tutorial="recruit"
   class="city-dialog"
   class:recruit-dialog={tab === 'recruit'}
   class:happiness-dialog={tab === 'happiness'}

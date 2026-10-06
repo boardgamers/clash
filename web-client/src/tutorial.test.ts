@@ -114,3 +114,52 @@ test('engine failure leaves tutorial game, completion and history unchanged', as
   assert.match(controller.snapshot.error, /Rejected by engine/);
   controller.destroy();
 });
+
+for (const id of ['first-turn', 'activation-happiness']) {
+  test(`tutorial ${id}: accepts real-control choices and rejects invalid payments atomically`, async () => {
+    const lesson = createLesson(
+      id,
+      engine,
+      readFileSync(new URL(`./tutorial/positions/${id}.json`, import.meta.url), 'utf8'),
+    );
+    const controller = await createTutorial(lesson);
+    while (controller.snapshot.canContinue) await controller.continue();
+    const first = lesson.steps[controller.snapshot.step].offers(controller.snapshot.state)[0].action;
+    assert.equal(first.kind, 'move');
+    const action = structuredClone(first) as any;
+    if (id === 'activation-happiness') {
+      action.move.Playing.IncreaseHappiness.happiness_increases.reverse();
+      action.move.Playing.IncreaseHappiness.payment = { mood_tokens: 0 };
+      const before = controller.snapshot.state;
+      assert.equal(await controller.play(action), false);
+      assert.equal(controller.snapshot.state, before);
+      action.move.Playing.IncreaseHappiness.payment = { mood_tokens: 2 };
+    } else {
+      const game = engine.stripSecret(controller.snapshot.state.game, 0);
+      const view = JSON.parse(engine.webView(game, 0));
+      const city = view.cities[0];
+      action.move = JSON.parse(
+        engine.webQuery(
+          game,
+          0,
+          JSON.stringify({
+            kind: 'collect',
+            city: city.position,
+            selections: [{ ...city.choices.find((choice: any) => choice.pile?.wood), times: 1 }],
+            variant: 'Collect',
+          }),
+        ),
+      ).action;
+      assert.ok(action.move, 'Alternative collection is legal');
+    }
+    assert.equal(await controller.play(action), true, controller.snapshot.error);
+    if (id === 'first-turn') {
+      const research = structuredClone(
+        lesson.steps[controller.snapshot.step].offers(controller.snapshot.state)[0].action,
+      ) as any;
+      research.move.Playing.Advance.payment = { gold: 2, ideas: 0 };
+      assert.equal(await controller.play(research), true, controller.snapshot.error);
+    }
+    controller.destroy();
+  });
+}

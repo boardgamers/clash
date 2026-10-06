@@ -37,7 +37,9 @@ export const mountTutorial: TutorialMount = async (target, options) => {
   choices.setAttribute('aria-label', 'Lesson actions');
   const board = document.createElement('div');
   board.className = 'tutorial-board';
-  sidebar.append(guide, choices);
+  const controlPath = document.createElement('p');
+  controlPath.className = 'tutorial-control-path';
+  sidebar.append(guide, controlPath, choices);
   layout.append(sidebar, board);
   target.append(layout);
   let storage: Storage | undefined;
@@ -97,8 +99,22 @@ export const mountTutorial: TutorialMount = async (target, options) => {
   const remove = tutorial.subscribe((snapshot) => {
     latest = snapshot;
     choices.replaceChildren();
+    controlPath.replaceChildren();
+    layout.dataset.lessonControl = snapshot.target ?? '';
+    if (!snapshot.completed) {
+      const labels = lesson.steps[snapshot.step].controls(snapshot.state);
+      labels.forEach((label, index) => {
+        if (index) controlPath.append(document.createTextNode(' → '));
+        const part = document.createElement('span');
+        part.textContent = label;
+        controlPath.append(part);
+      });
+    }
+    controlPath.hidden = !controlPath.childNodes.length;
     if (!snapshot.completed)
-      for (const offer of lesson.steps[snapshot.step].offers(snapshot.state)) {
+      for (const offer of lesson.steps[snapshot.step]
+        .offers(snapshot.state)
+        .filter((offer) => offer.action.kind === 'answer')) {
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = offer.label;

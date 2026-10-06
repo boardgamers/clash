@@ -155,4 +155,4 @@ The release registers all 12 independent chapters in five sections: basics, expa
 | Objectives and ages            | Recruit twice and claim Draft; check when final-age rewards stop.                                                 |
 | Platform tools                 | Undo a harmless research action; distinguish analysis and explain the platform preferences.                       |
 
-Tutorial shortcuts issue the same validated engine moves as the board controls. Unrelated actions are rejected without changing the position. The 12 walkthrough tests also restore saved history and restart, and semantic assertions verify the key rules effects.
+Tutorial game steps use the normal board controls. The sidebar provides a control path and highlights the relevant controls; only quiz answers have sidebar buttons. Legal collection choices, research payments and city selection order are accepted and validated by the engine. Unrelated actions are rejected without changing the position. The 12 walkthrough tests also restore saved history and restart, and semantic assertions verify the key rules effects.

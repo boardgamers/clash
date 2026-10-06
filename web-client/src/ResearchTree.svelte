@@ -224,6 +224,7 @@
 </script>
 
 <dialog
+  data-tutorial="research"
   class="research-dialog"
   aria-labelledby="research-title"
   use:open

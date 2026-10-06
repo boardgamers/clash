@@ -485,12 +485,57 @@ export const chapters: {
   },
 ];
 
+export function controlForKind(kind?: Kind): string | undefined {
+  if (!kind) return undefined;
+  if (['storage', 'math', 'engineering', 'incident'].includes(kind)) return 'research';
+  if (['walk', 'stop', 'found', 'explore', 'embark', 'sail', 'land'].includes(kind)) return 'movement';
+  if (['leader', 'draft'].includes(kind)) return 'recruit';
+  if (['range', 'boost', 'protect', 'lighthouse', 'objective', 'orientation'].includes(kind))
+    return 'decision';
+  if (kind === 'influence') return 'influence';
+  return kind;
+}
+
 const canonical = (value: unknown): string =>
   JSON.stringify(value, (_key, item) =>
     item && typeof item === 'object' && !Array.isArray(item)
       ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
       : item,
   );
+// Real controls may choose another legal payment, tile allocation or city order.
+function matchesLessonMove(actual: Move, expected: Move): boolean {
+  const normalize = (move: Move) => {
+    const value = structuredClone(move) as any;
+    const playing = value?.Playing;
+    if (playing?.Collect) {
+      if (!playing.Collect.collections?.length) return null;
+      delete playing.Collect.collections;
+    }
+    if (playing?.Advance) delete playing.Advance.payment;
+    if (playing?.IncreaseHappiness) {
+      delete playing.IncreaseHappiness.payment;
+      playing.IncreaseHappiness.happiness_increases.sort(([a]: [string, number], [b]: [string, number]) =>
+        a.localeCompare(b),
+      );
+    }
+    return JSON.stringify(value, (key, item) => {
+      if (['ballcourts', 'attack_pirates', 'draft_card', 'lawgiver'].includes(key) && item === false)
+        return undefined;
+      if (key === 'replaced_units' && Array.isArray(item) && !item.length) return undefined;
+      if (item === null) return undefined;
+      if (key === 'payment' || key === 'Payment') {
+        const clean = (pile: any) =>
+          Object.fromEntries(Object.entries(pile).filter(([, amount]) => amount !== 0));
+        return Array.isArray(item) ? item.map(clean) : clean(item);
+      }
+      return item;
+    });
+  };
+  const a = normalize(actual),
+    b = normalize(expected);
+  return a !== null && b !== null && canonical(JSON.parse(a)) === canonical(JSON.parse(b));
+}
+
 export function createLesson(id: string, engine: TutorialEngine, initialGame: string) {
   const chapter = chapters.find((chapter) => chapter.id === id);
   if (!chapter) throw new Error(`Unknown Clash of Cultures chapter: ${id}`);
@@ -610,20 +655,54 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
         }))
       : [];
   }
-  const steps: (TutorialStep<State, Action> & { offers: (state: State) => Offer[] })[] = chapter.steps.map(
-    (step) => ({
-      ...step,
-      target: step.kind ? 'actions' : undefined,
-      offers: (state) => offers(step, state),
-      complete: step.kind || step.answers ? (state) => state.done.includes(step.id) : undefined,
-      validateMove: (_state, action) =>
-        action.step !== step.id
-          ? 'Follow the current lesson step.'
-          : action.kind === 'answer' && action.answer !== step.correct
-            ? (step.hint ?? 'Read the explanation and try again.')
-            : undefined,
-    }),
-  );
+  function controlPath(step: LessonStep, state: State): string[] {
+    const offer = step.kind ? (moves(state, step.kind)[0]?.move as any) : undefined;
+    const city = view(state).cities?.[0]?.position ?? '';
+    if (step.kind === 'collect') return ['Collect', city, 'Choose resources', 'Collect'];
+    if (step.kind === 'happiness')
+      return [
+        'Happiness',
+        ...JSON.parse(state.game).players[0].cities.map((c: any) => c.position),
+        'Confirm',
+      ];
+    if (['storage', 'math', 'engineering', 'incident'].includes(step.kind ?? ''))
+      return ['Research', offer?.Playing?.Advance?.advance ?? '', 'Research'];
+    if (['walk', 'explore', 'embark', 'sail', 'land'].includes(step.kind ?? ''))
+      return [
+        'Move',
+        'Select units, then a highlighted hex.',
+        offer?.Movement?.Move?.destination ?? '',
+        'Move here',
+      ];
+    if (step.kind === 'found') return ['Move', 'Found city here'];
+    if (step.kind === 'stop') return ['Finish moving'];
+    if (step.kind === 'influence') return ['Abilities', 'Temple', 'A1', 'C1', 'Confirm'];
+    if (step.kind === 'leader') return ['Recruit', city, 'Caesar', 'Recruit'];
+    if (step.kind === 'draft') return ['Recruit', 'A1', 'Infantry', 'Payment', 'Mood', 'Recruit'];
+    if (['range', 'boost', 'protect'].includes(step.kind ?? '')) return ['Payment', 'Pay'];
+    if (step.kind === 'lighthouse') return ['D1', 'Confirm'];
+    if (step.kind === 'objective') return ['Objectives', 'Draft', 'Claim'];
+    if (step.kind === 'orientation') return ['Select', 'Confirm'];
+    if (step.kind === 'end') return ['End turn', 'Confirm'];
+    if (step.kind === 'undo') return ['Undo'];
+    return [];
+  }
+  const steps: (TutorialStep<State, Action> & {
+    controls: (state: State) => string[];
+    offers: (state: State) => Offer[];
+  })[] = chapter.steps.map((step) => ({
+    ...step,
+    target: controlForKind(step.kind),
+    controls: (state: State) => controlPath(step, state),
+    offers: (state) => offers(step, state),
+    complete: step.kind || step.answers ? (state) => state.done.includes(step.id) : undefined,
+    validateMove: (_state, action) =>
+      action.step !== step.id
+        ? 'Follow the current lesson step.'
+        : action.kind === 'answer' && action.answer !== step.correct
+          ? (step.hint ?? 'Read the explanation and try again.')
+          : undefined,
+  }));
   function resolveIncidentOpponents(game: string): string {
     for (let guard = 0; guard < 20; guard++) {
       const player = engine.currentPlayer(game);
@@ -653,8 +732,15 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
     initialState: () => ({ game: initialGame, done: [] }),
     move: (state, action) => {
       const step = chapter.steps.find((step) => step.id === action.step);
-      if (!step || !offers(step, state).some((offer) => canonical(offer.action) === canonical(action)))
-        throw new Error('Use one of the actions offered for this lesson step.');
+      if (
+        !step ||
+        !offers(step, state).some((offer) =>
+          action.kind === 'move' && offer.action.kind === 'move'
+            ? matchesLessonMove(action.move, offer.action.move)
+            : canonical(offer.action) === canonical(action),
+        )
+      )
+        throw new Error('Follow the current lesson step.');
       return {
         game:
           action.kind === 'move'
