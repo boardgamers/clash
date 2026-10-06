@@ -143,7 +143,7 @@ test('map view, orientation and unit badges round-trip through BGS preferences a
     strategyMap: true,
     unitBadges: true,
     replayAutoplay: true,
-    availableOnly: true,
+    availableOnly: false,
   });
   assert.equal(writes, 1);
   viewer.updatePreference('unitBadges', false);
@@ -172,7 +172,8 @@ test('opponent recap defaults to autoplay and restores the player’s manual pre
 });
 
 test('availability filtering defaults on and restores the player’s show-all preference', () => {
-  assert.equal(readPreferences({}).availableOnly, true);
+  assert.equal(readPreferences({}).availableOnly, false);
+  assert.equal(readPreferences({ availableOnly: true }).availableOnly, true);
   assert.equal(readPreferences({ availableOnly: false }).availableOnly, false);
 });
 

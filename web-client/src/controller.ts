@@ -77,7 +77,7 @@ export class Controller {
     strategyMap: false,
     unitBadges: false,
     replayAutoplay: true,
-    availableOnly: true,
+    availableOnly: false,
     skipRazeCity: false,
   });
   readonly chat = new ChatController();

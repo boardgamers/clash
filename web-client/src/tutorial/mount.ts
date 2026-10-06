@@ -63,6 +63,7 @@ export const mountTutorial: TutorialMount = async (target, options) => {
     locale: options.locale,
     sound: false,
     replayAutoplay: false,
+    availableOnly: false,
   };
   const noop = () => false;
   const controller = new Controller(

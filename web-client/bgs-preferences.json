@@ -7,7 +7,7 @@
     "default": false
   },
   { "name": "unitBadges", "label": "Unit badges", "type": "checkbox", "default": false },
-  { "name": "availableOnly", "label": "Show available actions only", "type": "checkbox", "default": true },
+  { "name": "availableOnly", "label": "Show available actions only", "type": "checkbox", "default": false },
   { "name": "replayAutoplay", "label": "Autoplay opponent recap", "type": "checkbox", "default": true },
   { "name": "colorBlind", "label": "Color-blind mode", "type": "checkbox", "default": false },
   {

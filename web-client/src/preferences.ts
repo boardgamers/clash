@@ -26,6 +26,6 @@ export function readPreferences(preferences: Record<string, unknown>) {
     strategyMap: preferences.mapView === '2d' || preferences.mapView === 'strategy',
     unitBadges: preferences.unitBadges === true,
     replayAutoplay: preferences.replayAutoplay !== false,
-    availableOnly: preferences.availableOnly !== false,
+    availableOnly: preferences.availableOnly === true,
   };
 }

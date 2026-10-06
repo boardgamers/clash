@@ -18,7 +18,7 @@ const preferences: Record<string, unknown> = {
   mapView: '3d',
   homeAtBottom: false,
   unitBadges: false,
-  availableOnly: true,
+  availableOnly: false,
   replayAutoplay: true,
 };
 try {
