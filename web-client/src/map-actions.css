@@ -141,6 +141,9 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
 }
+.tile-city-actions:has(> button:nth-child(5)) {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
 .tile-city-actions > button {
   display: flex;
   flex-direction: column;
@@ -152,6 +155,21 @@
 }
 .tile-city-actions > button:hover:not(:disabled) {
   background: var(--paper2);
+}
+.city-movement-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.city-movement-note > svg {
+  flex-shrink: 0;
 }
 .tile-unit-actions,
 .tile-arrivals {

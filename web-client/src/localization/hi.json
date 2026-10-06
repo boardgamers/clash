@@ -4580,5 +4580,6 @@
   "Choose a highlighted advance.": "हाइलाइट की गई उन्नति चुनें।",
   "Separate roll: no 5 or 6. No hit cancelled.": "अलग पासा फेंका: कोई 5 या 6 नहीं। कोई प्रहार रद्द नहीं हुआ।",
   "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "बर्बर केवल उस खिलाड़ी के शहरों की ओर बढ़ते हैं जिसने घटना शुरू की थी। यदि कोई सेना नहीं चल सकती, तो गति की घटना इसके बजाय एक शहर बनाने का प्रयास करती है।",
-  "New barbarian city · {p0}": "नया बर्बर नगर · {p0}"
+  "New barbarian city · {p0}": "नया बर्बर नगर · {p0}",
+  "This city entered mountains this turn and cannot move again until next turn.": "यह नगर इस बारी में पहाड़ों पर आया है और अगली बारी तक फिर से नहीं चल सकता।"
 }

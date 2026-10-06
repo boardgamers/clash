@@ -1,5 +1,16 @@
 <script lang="ts">
-  import { X, Wheat, Hammer, Users, Smile, Footprints, ArrowRight, Shield, LogOut } from 'lucide-svelte';
+  import {
+    X,
+    Wheat,
+    Hammer,
+    Users,
+    Smile,
+    Footprints,
+    ArrowRight,
+    Shield,
+    LogOut,
+    Mountain,
+  } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { canMoveOnMap } from './map-actions';
   import { terrainInfo } from './terrain';
@@ -28,6 +39,7 @@
   );
   const publicCity = $derived(publicOwner?.cities?.find((c) => c.position === position));
   const ownCity = $derived($session.view?.cities.find((c) => c.position === position));
+  const cityMountainStop = $derived(ownCity?.size === 1 && !!publicCity?.nomad_mountain);
   const ownUnits = $derived($session.view?.units?.filter((u) => u.position === position) ?? []);
   const settler = $derived($session.view?.settlers.find((u) => u.position === position));
   const canMove = $derived(canMoveOnMap($session.view, $session.game));
@@ -90,7 +102,9 @@
           title={ownCity.reason ?? 'Collect resources · 1 action'}
           onclick={() => controller.beginCollect(position)}><Wheat size={19} />Collect</button
         >
-        {#if $session.view?.nomadCities?.includes(position)}<button
+        {#if $session.view?.nomadCities?.includes(position) || cityMountainStop}<button
+            disabled={cityMountainStop || $session.pending}
+            aria-describedby={cityMountainStop ? 'city-mountain-stop' : undefined}
             onclick={() => controller.openNomadCity(position)}><Footprints size={19} />Move city</button
           >{/if}
         <button onclick={() => controller.openCities(position, 'build')}><Hammer size={19} />Build</button>
@@ -99,6 +113,10 @@
           ><Smile size={19} />Happiness</button
         >
       </div>
+      {#if cityMountainStop}<p id="city-mountain-stop" class="city-movement-note" role="note">
+          <Mountain size={18} aria-hidden="true" />
+          <span>This city entered mountains this turn and cannot move again until next turn.</span>
+        </p>{/if}
       {#if ownCity.activations > 0}<ActivationStatus city={ownCity} warning />{/if}
     {/if}
     {#if ownUnits.length && canMove}

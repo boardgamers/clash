@@ -4580,5 +4580,6 @@
   "Choose a highlighted advance.": "Wähle einen hervorgehobenen Fortschritt.",
   "Separate roll: no 5 or 6. No hit cancelled.": "Separater Wurf: keine 5 oder 6. Kein Treffer verhindert.",
   "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbaren bewegen sich nur auf die Städte des Spielers zu, der das Ereignis ausgelöst hat. Kann sich keine Armee bewegen, versucht ein Bewegungsereignis stattdessen, eine Stadt zu gründen.",
-  "New barbarian city · {p0}": "Neue Barbarenstadt · {p0}"
+  "New barbarian city · {p0}": "Neue Barbarenstadt · {p0}",
+  "This city entered mountains this turn and cannot move again until next turn.": "Diese Stadt hat in diesem Zug ein Gebirge betreten und kann sich erst im nächsten Zug wieder bewegen."
 }

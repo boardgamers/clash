@@ -14,6 +14,7 @@ export interface City {
     Record<'academy' | 'market' | 'obelisk' | 'observatory' | 'fortress' | 'port' | 'temple', number>
   > & { wonders?: string[] };
   activations?: number;
+  nomad_mountain?: boolean;
 }
 export interface Player {
   id: number;
