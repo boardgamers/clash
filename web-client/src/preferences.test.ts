@@ -110,8 +110,8 @@ test('unavailable audio does not interrupt the viewer', () => {
   });
 });
 
-test('map view and unit badges round-trip through BGS preferences and incoming preferences never write back', () => {
-  let saved = { sound: false, colorBlind: true, mapView: '3d', unitBadges: true };
+test('map view, orientation and unit badges round-trip through BGS preferences and incoming preferences never write back', () => {
+  let saved = { sound: false, colorBlind: true, mapView: '3d', unitBadges: true, homeAtBottom: false };
   let current = readPreferences({});
   assert.equal(current.unitBadges, false);
   let writes = 0;
@@ -138,6 +138,7 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
     playerBadges: [],
     sound: false,
     colorBlind: true,
+    homeAtBottom: false,
     topDown: true,
     strategyMap: true,
     unitBadges: true,
@@ -148,9 +149,13 @@ test('map view and unit badges round-trip through BGS preferences and incoming p
   viewer.updatePreference('unitBadges', false);
   assert.equal(current.unitBadges, false);
   assert.equal(writes, 2);
+  viewer.updatePreference('homeAtBottom', true);
+  assert.equal(current.homeAtBottom, true);
+  assert.equal(writes, 3);
   viewer.destroy();
   const reopened = createViewer(options);
   reopened.emitter.receive('preferences', saved);
+  assert.equal(current.homeAtBottom, true);
   assert.equal(current.topDown, true);
   assert.equal(current.unitBadges, false);
   reopened.emitter.receive('preferences', { ...saved, sound: true, colorBlind: false });
@@ -233,4 +238,11 @@ test('legacy 2D preferences open Strategy while 3D remains the default', () => {
 
 test('account preferences cannot overwrite the engine-managed razing setting', () => {
   assert.equal('skipRazeCity' in readPreferences({ skipRazeCity: true }), false);
+});
+
+test('home-at-bottom rotation is opt-in and only accepts an enabled boolean preference', () => {
+  for (const homeAtBottom of [undefined, false, null, 'true', 1])
+    assert.equal(readPreferences({ homeAtBottom }).homeAtBottom, false);
+  assert.equal(readPreferences({}).homeAtBottom, false);
+  assert.equal(readPreferences({ homeAtBottom: true }).homeAtBottom, true);
 });

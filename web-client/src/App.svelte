@@ -970,6 +970,13 @@
           title="Zoom out"
           aria-label="Zoom out"
           onclick={() => world?.zoom(1.18)}><Minus size={18} /></button
+        ><button
+          title="Start with my civilization at the bottom · Saved preference"
+          aria-label="Start with my civilization at the bottom"
+          aria-pressed={$session.homeAtBottom}
+          class:active={$session.homeAtBottom}
+          onclick={() => controller.setGlobalPreference('homeAtBottom', !$session.homeAtBottom)}
+          ><Compass size={18} /></button
         ><span></span><button
           class="map-view-toggle"
           title={$session.strategyMap ? 'Show 3D map' : 'Show Strategy map'}

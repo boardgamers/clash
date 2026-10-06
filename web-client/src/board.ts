@@ -145,6 +145,7 @@ export class World {
   private disposed = false;
   private topDown = false;
   private strategyMap = false;
+  private homeAtBottom = false;
   private strategySeat?: number;
   private strategyHome?: string;
   private strategyGame?: string;
@@ -832,12 +833,15 @@ export class World {
   update(s: Session) {
     if (!s.game) return;
     // Keep the viewer's home orientation when replay temporarily clears the interactive seat.
-    const home = strategyHome(s.game, s.seat);
+    const home = s.homeAtBottom ? strategyHome(s.game, s.seat) : undefined;
+    const homePreferenceChanged = this.homeAtBottom !== s.homeAtBottom;
     const orientationChanged =
+      homePreferenceChanged ||
       this.strategySeat !== s.seat ||
       this.strategyGame !== s.game.board_history?.id ||
       (!this.strategyHome && !!home);
     if (orientationChanged) {
+      this.homeAtBottom = s.homeAtBottom;
       this.strategySeat = s.seat;
       this.strategyGame = s.game.board_history?.id;
       this.strategyHome = home;
@@ -1987,7 +1991,8 @@ export class World {
       s.topDown !== this.topDown ||
       s.strategyMap !== this.strategyMap ||
       guideChanged ||
-      (orientationChanged && !s.playback)
+      homePreferenceChanged ||
+      (s.homeAtBottom && orientationChanged && !s.playback)
     ) {
       this.topDown = s.topDown;
       this.strategyMap = s.strategyMap;

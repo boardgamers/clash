@@ -16,19 +16,30 @@ const preferences: Record<string, unknown> = {
   sound: true,
   colorBlind: false,
   mapView: '3d',
+  homeAtBottom: false,
   unitBadges: false,
   availableOnly: true,
   replayAutoplay: true,
 };
 try {
   const saved = JSON.parse(localStorage.getItem('clash-preview-preferences') ?? '{}');
-  for (const key of ['sound', 'colorBlind', 'unitBadges', 'availableOnly', 'replayAutoplay', 'skipRazeCity'])
+  for (const key of [
+    'sound',
+    'colorBlind',
+    'homeAtBottom',
+    'unitBadges',
+    'availableOnly',
+    'replayAutoplay',
+    'skipRazeCity',
+  ])
     if (typeof saved[key] === 'boolean') preferences[key] = saved[key];
   if (['2d', 'strategy'].includes(saved.mapView)) preferences.mapView = 'strategy';
 } catch {}
 function savePreference(name: string, value: unknown) {
   if (!(
-    (['sound', 'colorBlind', 'unitBadges', 'availableOnly', 'replayAutoplay'].includes(name) &&
+    (['sound', 'colorBlind', 'homeAtBottom', 'unitBadges', 'availableOnly', 'replayAutoplay'].includes(
+      name,
+    ) &&
       typeof value === 'boolean') ||
     (name === 'mapView' && (value === '3d' || value === 'strategy'))
   ))

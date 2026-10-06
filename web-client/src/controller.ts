@@ -72,6 +72,7 @@ export class Controller {
     locale: 'en',
     selectedAdvance: null,
     toast: '',
+    homeAtBottom: false,
     topDown: false,
     strategyMap: false,
     unitBadges: false,
@@ -230,7 +231,7 @@ export class Controller {
     this.patch({ topDown: strategyMap, strategyMap });
     this.commands.updatePreference('mapView', strategyMap ? 'strategy' : '3d');
   }
-  setGlobalPreference(name: 'sound' | 'colorBlind', enabled: boolean) {
+  setGlobalPreference(name: 'sound' | 'colorBlind' | 'homeAtBottom', enabled: boolean) {
     if (!this.commands.updatePreference(name, enabled)) return;
     if (name === 'sound') this.audio.setEnabled(enabled);
     this.patch({ [name]: enabled });

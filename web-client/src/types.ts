@@ -580,6 +580,7 @@ export interface Session {
   locale: string;
   selectedAdvance: string | null;
   toast: string;
+  homeAtBottom: boolean;
   topDown: boolean;
   strategyMap: boolean;
   unitBadges: boolean;

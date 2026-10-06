@@ -29,3 +29,5 @@ Engine 0.4.36 exposes public pirate spawn positions using the same rules as inci
 Engine 0.4.37 exposes public barbarian spawn, reinforcement and movement guides and a validated Free Education research quote. The matching viewer adds horned helmet symbols for barbarians in color-blind mode, an upfront Free Education choice, early Pottery bonus hints, and an initial map orientation with the player’s home at the bottom. Myths protection wording states the number of affected cities. Pirates keep their existing flag.
 
 Engine 0.4.38 clarifies single-city Myths protection as “your affected city”, including already pending payments. The matching viewer gives barbarian infantry and mounted riders curved ivory horns on their helmets, preserving the existing city flag and color-blind symbols.
+
+The viewer update following 0.4.38 makes home-at-bottom rotation an account preference, disabled by default in both 3D and Strategy views. Publish the updated preference declarations with the viewer. The compass control changes this preference and immediately resets the orientation; manual camera rotation remains available. The engine is unchanged.

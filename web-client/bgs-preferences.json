@@ -1,5 +1,11 @@
 [
   { "name": "sound", "label": "Sound", "type": "checkbox", "default": true },
+  {
+    "name": "homeAtBottom",
+    "label": "Start with my civilization at the bottom",
+    "type": "checkbox",
+    "default": false
+  },
   { "name": "unitBadges", "label": "Unit badges", "type": "checkbox", "default": false },
   { "name": "availableOnly", "label": "Show available actions only", "type": "checkbox", "default": true },
   { "name": "replayAutoplay", "label": "Autoplay opponent recap", "type": "checkbox", "default": true },
