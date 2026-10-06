@@ -125,6 +125,7 @@ export class World {
   private pinnedReference: string | null = null;
   private selectable: Set<string> | null = null;
   private pending = false;
+  private replaying = false;
   private gesture = new MapGesture();
   private raycaster = new THREE.Raycaster();
   private resize: ResizeObserver;
@@ -432,7 +433,9 @@ export class World {
     );
     this.renderer.domElement.style.cursor = this.gesture.dragging
       ? 'grabbing'
-      : this.pending
+      : this.replaying
+        ? 'grab'
+        : this.pending
         ? 'wait'
         : position
           ? this.canPick(position)
@@ -1042,6 +1045,7 @@ export class World {
       );
     }
     this.pending = s.pending;
+    this.replaying = !!s.playback;
     const placement =
       exploration?.choices.find(
         (choice) => choice.rotation === (s.explorationPreview ?? s.explorationRotation),

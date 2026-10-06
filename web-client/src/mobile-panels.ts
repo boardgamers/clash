@@ -52,7 +52,7 @@ export function mobilePanels(
     previous = null;
   }
   function minimize(panel: HTMLElement) {
-    if (!media.matches || minimized) return;
+    if ((!media.matches && !panel.matches('.decision-panel')) || minimized) return;
     previous = panel;
     dialogs = [...root.querySelectorAll<HTMLDialogElement>('dialog[open]')];
     scroll = [
@@ -128,7 +128,7 @@ export function mobilePanels(
   const observer = new MutationObserver(scan);
   observer.observe(root, { childList: true, subtree: true });
   const resize = () => {
-    if (!media.matches) resume();
+    if (!media.matches && !previous?.matches('.decision-panel')) resume();
   };
   const escape = (event: KeyboardEvent) => {
     if (minimized && event.key === 'Escape') {

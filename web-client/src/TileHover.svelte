@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { buildingInfo } from './city';
   import type { Readable } from 'svelte/store';
-  import { Skull, Landmark } from 'lucide-svelte';
+  import { Skull, Landmark, Star } from 'lucide-svelte';
   import type { TileHoverData } from './tile-hover';
   import { playerColor, playerSymbol } from './types';
   import { terrainInfo } from './terrain';
@@ -21,6 +22,15 @@
   {:else}<strong class="tile-hover-terrain"
       ><TerrainIcon terrain={$data.terrain} size={15} />{terrainInfo($data.terrain).label}</strong
     >{/if}
+  {#if $data.city}
+    <div class="tile-hover-buildings">
+      {#each $data.city.buildings as name}
+        {@const Icon = buildingInfo[name]?.icon ?? Landmark}
+        <span><Icon size={14} />{name}</span>
+      {/each}
+      {#each $data.city.wonders as name}<span><Star size={14} />{name}</span>{/each}
+    </div>
+  {/if}
   {#each $data.stacks as { player, groups }}
     <div
       class="tile-hover-owner"

@@ -930,9 +930,7 @@ export class Controller {
       units.length &&
       (pickedUnit ||
         (pick.kind === 'units' && pick.player === s.seat && !inspectLeader) ||
-        (!city && pick.kind === 'tile' && !inspectLeader) ||
-        s.mode === 'settlers' ||
-        !!s.view?.stopMovement)
+        s.mode === 'settlers')
     ) {
       this.openUnits(this.defaultMovementGroup(position, pickedUnit?.id));
       return;

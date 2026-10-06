@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import {
+  canCancelAbility,
   researchDecision,
   mapDecisionOptions,
   mapDecisionIndex,
@@ -343,4 +344,24 @@ test('Earthquake offers separate building choices at the same city and respects 
   let selected: number[] = [];
   for (let i = 0; i < options.length; i++) selected = toggleDecisionSelection(d, selected, i);
   assert.equal(selected.length, d.max);
+});
+
+
+test('Taxes can be cancelled before choosing its reward, but not after completion or an information reveal', async () => {
+  const setup = JSON.parse(await engine.init(2, [], {}, 'taxes-cancel', {}));
+  setup.current_player_index = 0;
+  setup.players[0].advances.push('Taxes');
+  setup.players[0].resources.mood_tokens = 3;
+  const initial = JSON.stringify(setup);
+  const raw = engine.tryMove(initial, JSON.stringify({Playing: {Custom: {action: 'Taxes'}}}), 0);
+  const visible = engine.stripSecret(raw, 0);
+  const game = JSON.parse(visible);
+  const prompt = view(raw, 0);
+  assert.equal(canCancelAbility(game, prompt), true);
+  assert.equal(canCancelAbility(game, {...prompt, canUndo: false}), false);
+  const restored = engine.tryMove(raw, JSON.stringify('Undo'), 0);
+  assert.equal(view(restored, 0).decision, null);
+  assert.deepEqual(JSON.parse(restored).players[0].resources, JSON.parse(initial).players[0].resources);
+  assert.equal(JSON.parse(restored).actions_left, JSON.parse(initial).actions_left);
+  assert.equal(canCancelAbility(JSON.parse(restored), view(restored, 0)), false);
 });

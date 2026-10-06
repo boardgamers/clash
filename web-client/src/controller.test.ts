@@ -786,9 +786,12 @@ test('Expansion keeps its new settler and destination selected across repeated p
     assert.deepEqual(session!.selectedUnits, [newSettler.id]);
     assert.equal(session!.moveTarget, target);
     assert.equal(session!.moveDestination, selection);
-    // The city itself also resumes movement after intentionally closing the controls.
+    // City clicks inspect consistently; selecting a unit resumes movement.
     controller.patch({ mode: 'overview', tilePanel: false });
     controller.selectTile(city, { kind: 'city', player: seat });
+    assert.equal(session!.mode, 'overview');
+    assert.equal(session!.tilePanel, true);
+    controller.selectTile(city, { kind: 'unit', player: seat, unit: newSettler.id });
     assert.equal(session!.mode, 'settlers');
     assert.ok(session!.moveDestinations.length);
     // Duplicate snapshots must not acknowledge an action the server has not applied.

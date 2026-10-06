@@ -16,7 +16,7 @@
   import TacticsOption from './TacticsOption.svelte';
   import UnitPicker, { type UnitChoice } from './UnitPicker.svelte';
   import { researchPresentation } from './research';
-  import { mapDecisionOptions } from './decision-controls';
+  import { canCancelAbility, mapDecisionOptions } from './decision-controls';
   import { steelWeaponsBenefit } from './active-combat';
   let {
     controller,
@@ -170,6 +170,11 @@
 >
   {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
   <header class="decision-heading">
+    {#if canCancelAbility($session.game, $session.view)}
+      <button disabled={$session.pending} onclick={() => controller.submit('Undo')}>Cancel</button>
+    {:else if $session.view?.canUndo && $session.game?.events?.some((event) => typeof event.event_type === 'object' && event.event_type !== null && 'CustomAction' in event.event_type)}
+      <button disabled={$session.pending} onclick={() => controller.submit('Undo')}>Back</button>
+    {/if}
     {#if $session.view?.influenceContext}
       <InfluenceFlow context={$session.view.influenceContext} />
     {:else}<h2><Sparkles size={21} />{decision.name}</h2>{/if}

@@ -1,4 +1,4 @@
-import type { Decision, MapPick, View } from './types.ts';
+import type { Decision, Game, MapPick, View } from './types.ts';
 
 export const researchDecision = (view: View | null | undefined) => !!view?.decision?.advanceSelection;
 
@@ -41,4 +41,13 @@ export function toggleDecisionSelection(decision: Decision, selected: number[], 
   if (selected.includes(index)) return selected.filter((i) => i !== index);
   if (decision.max === 1) return [index];
   return selected.length < decision.max ? [...selected, index] : selected;
+}
+
+/** Only the initial, undoable ability prompt can be cancelled in one step. */
+export function canCancelAbility(game: Game | null, view: View | null): boolean {
+  if (!game || !view?.decision || !view.canUndo) return false;
+  const actions = game.log?.at(-1)?.rounds.at(-1)?.turns.at(-1)?.actions;
+  const action = actions?.[game.log_index - 1]?.action;
+  return !!(action && typeof action === 'object' && 'Playing' in action &&
+    typeof action.Playing === 'object' && action.Playing !== null && 'Custom' in action.Playing);
 }

@@ -7,7 +7,7 @@ import TileHover from './TileHover.svelte';
 export interface TileHoverData {
   position: string;
   terrain: Terrain;
-  city?: { owner: number; civilization: string; mood: string };
+  city?: { owner: number; civilization: string; mood: string; buildings: string[]; wonders: string[] };
   stacks: ReturnType<typeof tileUnitStacks>;
   colorBlind: boolean;
   playerColors?: string[];
@@ -84,7 +84,10 @@ export class TileTooltip {
           : session.game.players.flatMap((player) => {
               const city = player.cities?.find((city) => city.position === this.position);
               return city
-                ? [{ owner: player.id, civilization: player.civilization, mood: city.mood_state }]
+                ? [{ owner: player.id, civilization: player.civilization, mood: city.mood_state,
+                    buildings: Object.entries(city.city_pieces ?? {}).filter(([key, owner]) => key !== 'wonders' && typeof owner === 'number').map(([key]) => key[0].toUpperCase() + key.slice(1)),
+                    wonders: (city.city_pieces?.wonders ?? []).map((id) => session.view?.wonderCatalog?.find((w) => w.id === id)?.name ?? id),
+                  }]
                 : [];
             })[0],
       stacks: terrain === 'Unexplored' ? [] : tileUnitStacks(session.game.players, this.position),
