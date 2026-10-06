@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "چند بار از یک خانه جمع‌آوری کنید",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "از D2 جمع‌آوری کنید. سه بار روی جنگل C2 کلیک کنید تا سه چوب انتخاب شود، سپس تأیید کنید. تمرکز تولید این جمع‌آوری تکراری را مجاز می‌کند؛ مقدار جمع‌آوری شهر را افزایش نمی‌دهد.",
   "One card, one use": "یک کارت، یک بار استفاده",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "سه چوب گرفتید و یک اقدام برای جمع‌آوری مصرف کردید. خود کارت هیچ اقدامی هزینه نداشت. کارت‌های دیگر ممکن است اقدام یا منابع هزینه داشته باشند؛ پیش از بازی کردن، هزینه و زمان استفاده‌شان را بررسی کنید."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "سه چوب گرفتید و یک اقدام برای جمع‌آوری مصرف کردید. خود کارت هیچ اقدامی هزینه نداشت. کارت‌های دیگر ممکن است اقدام یا منابع هزینه داشته باشند؛ پیش از بازی کردن، هزینه و زمان استفاده‌شان را بررسی کنید.",
+  "Finish Move": "پایان حرکت",
+  "Choose a highlighted advance.": "یک پیشرفت برجسته‌شده را انتخاب کنید.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "پرتاب جداگانه: نه ۵ و نه ۶. هیچ ضربه‌ای خنثی نشد.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "بربرها فقط به‌سوی شهرهای بازیکنی حرکت می‌کنند که رویداد را فعال کرده است. اگر هیچ ارتشی نتواند حرکت کند، رویداد حرکت به‌جای آن تلاش می‌کند یک شهر ایجاد کند."
 }

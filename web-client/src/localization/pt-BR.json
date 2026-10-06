@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "Colete repetidamente de um hexágono",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "Colete de D2. Clique três vezes na floresta em C2 para selecionar três madeiras e confirme. Foco de Produção permite esta coleta repetida; não aumenta a quantidade que a cidade coleta.",
   "One card, one use": "Uma carta, um uso",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Você ganhou três madeiras e gastou uma ação em Coletar. A carta em si não custou ação. Outras cartas podem custar uma ação ou recursos; confira seu custo e o momento de uso antes de jogá-las."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Você ganhou três madeiras e gastou uma ação em Coletar. A carta em si não custou ação. Outras cartas podem custar uma ação ou recursos; confira seu custo e o momento de uso antes de jogá-las.",
+  "Finish Move": "Encerrar movimento",
+  "Choose a highlighted advance.": "Escolha um avanço destacado.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "Rolagem separada: nenhum 5 ou 6. Nenhum acerto cancelado.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Os bárbaros só se movem em direção às cidades do jogador que desencadeou o evento. Se nenhum exército puder se mover, um evento de movimento tenta criar uma cidade em vez disso."
 }

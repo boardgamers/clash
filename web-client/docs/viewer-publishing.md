@@ -37,3 +37,5 @@ The next viewer update makes barbarian unit badges follow the unit-badge prefere
 The following viewer update skips empty end-turn, raze-city and other phase transitions in visual replay and “Since your last turn”. Turn boundaries remain available to select the recap range; actual rewards, card draws, combat and board changes remain replay steps. City dock tiles use less padding and smaller decorative icons. The engine is unchanged.
 
 The next viewer update formats victory points consistently to one decimal at most, preserving Great Pyramid’s extra 0.1 without floating-point tails in player cards, score breakdowns or wonder details. The engine is unchanged.
+
+Viewer 0.1.21 fixes Teach Us event warnings in the bundled rules bridge, highlights eligible research choices, and places the Peltasts result beside the tactics card in combat journals. Map pieces open inspection until Move is selected; city dock buttons open the same city details as the map. Ongoing movement stays highlighted with a persistent Finish Move control, and barbarian movement arrows have a contrasting outline. This viewer remains compatible with engine 0.4.39; no engine upload is required.

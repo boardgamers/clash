@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "從同一格重複收集",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "從D2收集。點擊C2的森林3次以選取3木材，然後確認。生產專注允許重複收集，但不增加城市的收集量。",
   "One card, one use": "一張牌，一次用途",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "你獲得3木材，收集花費1行動。卡牌本身不花行動。其他卡牌可能花費行動或資源；使用前請確認費用與時機。"
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "你獲得3木材，收集花費1行動。卡牌本身不花行動。其他卡牌可能花費行動或資源；使用前請確認費用與時機。",
+  "Finish Move": "結束移動",
+  "Choose a highlighted advance.": "選擇一項醒目標示的進步。",
+  "Separate roll: no 5 or 6. No hit cancelled.": "獨立擲骰：沒有擲出 5 或 6，未取消任何命中。",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "蠻族只會朝觸發事件的玩家的城市移動。若沒有軍隊可以移動，移動事件會改為嘗試生成一座城市。"
 }

@@ -46,7 +46,12 @@
         >{/each}</tr
     >
     {#if sides.some((s) => s.tactics)}<tr
-        ><th scope="row">Tactics</th>{#each sides as side}<td>{side.tactics ?? '—'}</td>{/each}</tr
+        ><th scope="row">Tactics</th>{#each sides as side}<td
+            >{side.tactics ?? '—'}
+            {#if side.tacticsEffect}<span class="combat-tactics-effect"
+                ><ResourceText text={side.tacticsEffect} /></span
+              >{/if}
+          </td>{/each}</tr
       >{/if}
     <tr
       ><th scope="row">Dice</th>{#each sides as side}<td

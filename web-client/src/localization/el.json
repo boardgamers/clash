@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "Σύλλεξε επανειλημμένα από ένα εξάγωνο",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "Σύλλεξε από το D2. Πάτησε το δάσος στο C2 τρεις φορές για να επιλέξεις τρεις μονάδες ξύλου και μετά επιβεβαίωσε. Η Εστίαση Παραγωγής επιτρέπει αυτή την επαναλαμβανόμενη συλλογή· δεν αυξάνει την ποσότητα που συλλέγει η πόλη.",
   "One card, one use": "Μία κάρτα, μία χρήση",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Πήρες τρεις μονάδες ξύλου και ξόδεψες μία ενέργεια για Συλλογή. Η ίδια η κάρτα δεν κόστισε ενέργεια. Άλλες κάρτες μπορεί να κοστίζουν ενέργεια ή πόρους· έλεγξε το κόστος και τον χρόνο χρήσης τους πριν τις παίξεις."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Πήρες τρεις μονάδες ξύλου και ξόδεψες μία ενέργεια για Συλλογή. Η ίδια η κάρτα δεν κόστισε ενέργεια. Άλλες κάρτες μπορεί να κοστίζουν ενέργεια ή πόρους· έλεγξε το κόστος και τον χρόνο χρήσης τους πριν τις παίξεις.",
+  "Finish Move": "Ολοκλήρωση κίνησης",
+  "Choose a highlighted advance.": "Επίλεξε μια επισημασμένη πρόοδο.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "Ξεχωριστή ζαριά: κανένα 5 ή 6. Δεν ακυρώθηκε κανένα χτύπημα.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Οι βάρβαροι κινούνται μόνο προς τις πόλεις του παίκτη που προκάλεσε το γεγονός. Αν κανένας στρατός δεν μπορεί να κινηθεί, ένα γεγονός κίνησης επιχειρεί να δημιουργήσει μια πόλη αντ’ αυτού."
 }

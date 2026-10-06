@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "Colectează în mod repetat dintr-un hexagon",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "Colectează din D2. Apasă de trei ori pe pădurea de la C2 pentru a selecta trei unități de lemn, apoi confirmă. Focalizare pe producție permite această colectare repetată; nu mărește cantitatea pe care o colectează orașul.",
   "One card, one use": "O carte, o utilizare",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Ai primit trei unități de lemn și ai cheltuit o acțiune pentru Colectează. Cartea în sine nu a costat nicio acțiune. Alte cărți pot costa o acțiune sau resurse; verifică-le costul și momentul folosirii înainte să le joci."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Ai primit trei unități de lemn și ai cheltuit o acțiune pentru Colectează. Cartea în sine nu a costat nicio acțiune. Alte cărți pot costa o acțiune sau resurse; verifică-le costul și momentul folosirii înainte să le joci.",
+  "Finish Move": "Încheie deplasarea",
+  "Choose a highlighted advance.": "Alege un progres evidențiat.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "Aruncare separată: niciun 5 sau 6. Nicio lovitură anulată.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbarii se deplasează doar spre orașele jucătorului care a declanșat evenimentul. Dacă nicio armată nu se poate deplasa, un eveniment de deplasare încearcă să creeze un oraș în schimb."
 }

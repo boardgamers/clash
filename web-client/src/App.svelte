@@ -957,8 +957,8 @@
                 <div><i class="barbarian-move" aria-hidden="true"></i>Army movement →</div>
                 <div><i class="barbarian-reinforce" aria-hidden="true"></i>Reinforcement city</div>
                 <p>
-                  Movement follows these arrows toward the incident player’s cities. If no army can move, a
-                  movement event tries to spawn a city instead.
+                  Barbarians only move toward the cities of the player who triggered the event. If no army can
+                  move, a movement event tries to spawn a city instead.
                 </p>
                 <small>Current legal choices; earlier moves can change later ones.</small>
               {:else}
@@ -1038,7 +1038,7 @@
         <div class="dock-intro"><Landmark size={19} /><span class="tiny-label">YOUR CITIES</span></div>
         {#each $session.view?.cities ?? [] as c}<button
             class:selected={c.position === $session.city}
-            onclick={() => controller.openCities(c.position)}
+            onclick={() => controller.inspectTile(c.position)}
             ><span class="city-thumb"><Landmark size={25} /></span><span
               ><strong
                 >{translate(identity?.civilization ?? '')}
@@ -1079,6 +1079,18 @@
                 aria-hidden="true"
               ></span>{/each}
           </span>{/if}
+        {#if $session.view?.stopMovement && !$session.playback}
+          <button
+            class="finish-movement"
+            disabled={$session.pending ||
+              !!$session.view?.decision ||
+              !!$session.view?.choiceDecision ||
+              !!$session.view?.explorationDecision ||
+              !!$session.view?.objectiveDecision}
+            onclick={() => controller.submit($session.view!.stopMovement!)}
+            ><Check size={20} /><span>Finish Move</span></button
+          >
+        {/if}
       </div>
       <nav class="board-actions" aria-label="Actions">
         <button
@@ -1151,7 +1163,8 @@
           }}><Smile size={21} /><span>Happiness</span></button
         >
         <button
-          class:active={$session.mode === 'settlers'}
+          class:active={$session.mode === 'settlers' || !!$session.view?.stopMovement}
+          class:movement-in-progress={!!$session.view?.stopMovement}
           class:inspect-only={!settlersAvailable}
           data-tutorial="movement"
           aria-label="Move units and found cities"
@@ -1169,6 +1182,7 @@
               aria-hidden="true"
             />{/if}</button
         >
+
         <button
           title={abilitiesAvailable
             ? 'Abilities and cultural influence'

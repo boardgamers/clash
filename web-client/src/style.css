@@ -5929,8 +5929,8 @@ small {
   border-color: #edaa4d;
 }
 .pirate-spawn-key .barbarian-move {
-  border-color: #e96a55;
-  border-style: dashed;
+  border-color: #242630;
+  background: #ffb568;
 }
 .pirate-spawn-key .barbarian-reinforce {
   border-color: #b789d8;
@@ -5998,12 +5998,46 @@ small {
   color: var(--muted);
 }
 
-.tile-hover-buildings { display: flex; flex-wrap: wrap; gap: 5px 10px; margin-top: 5px; }
-.tile-hover-buildings span { display: inline-flex; align-items: center; gap: 4px; }
+.tile-hover-buildings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  margin-top: 5px;
+}
+.tile-hover-buildings span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 @media (min-width: 761px) {
-  .decision-panel .mobile-panel-minimize { display: inline-flex; margin-left: auto; padding: 6px; }
-  .game-shell[data-panels-minimized] :is(.action-panel.floating-panel, .board-context, .activity.floating-panel, dialog, .card-reveal, .toast) { display: none !important; }
-  .game-shell .restore-mobile-panel:not([hidden]) { display: flex; position: absolute; right: 16px; bottom: 72px; z-index: 45; padding: 8px 14px; background: var(--paper); border: 1px solid var(--gold); border-radius: 7px; color: var(--ink); }
+  .decision-panel .mobile-panel-minimize {
+    display: inline-flex;
+    margin-left: auto;
+    padding: 6px;
+  }
+  .game-shell[data-panels-minimized]
+    :is(
+      .action-panel.floating-panel,
+      .board-context,
+      .activity.floating-panel,
+      dialog,
+      .card-reveal,
+      .toast
+    ) {
+    display: none !important;
+  }
+  .game-shell .restore-mobile-panel:not([hidden]) {
+    display: flex;
+    position: absolute;
+    right: 16px;
+    bottom: 72px;
+    z-index: 45;
+    padding: 8px 14px;
+    background: var(--paper);
+    border: 1px solid var(--gold);
+    border-radius: 7px;
+    color: var(--ink);
+  }
 }
 
 /* Persistent hostile-faction guides must clear the Journal/Chat toolbar on touch screens. */
@@ -6016,4 +6050,23 @@ small {
   box-sizing: border-box;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.board-toolbar .board-actions button.movement-in-progress,
+.board-toolbar button.finish-movement {
+  box-shadow: inset 0 0 0 2px var(--gold);
+  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
+}
+.board-toolbar button.finish-movement > span {
+  display: inline;
+}
+
+.board-toolbar button.finish-movement {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
 }

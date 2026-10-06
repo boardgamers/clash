@@ -248,6 +248,7 @@
           ? choice.description
           : 'Each advance scores ½ point. Branches unlock from their first advance.'}
       </p>
+      {#if choice}<p class="research-choice-hint">Choose a highlighted advance.</p>{/if}
       {#if eventImminent}<p
           class="research-event-notice"
           id="research-event-notice"
@@ -331,6 +332,8 @@
             class:child={statusFilter === 'all' && index > 0}
             class:owned={advance.owned}
             class:available={!!advance.action}
+            class:choice-available={!!choice && !!advance.action}
+            class:choice-unavailable={!!choice && !advance.action && !advance.owned}
             class:selected={selected?.id === advance.id}
             class:search-muted={!!query.trim() && !matches(advance)}
           >
@@ -347,7 +350,7 @@
                 >{#if advance.owned}<Check
                     size={16}
                     aria-label="Researched"
-                  />{:else if !advance.action && (lockedGovernment || actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
+                  />{:else if !choice && !advance.action && (lockedGovernment || actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
                     size={13}
                     aria-label={lockedGovernment
                       ? 'Switch government at end of age'
@@ -381,7 +384,7 @@
                   +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
                 </span>{/each}
             </div>
-            {#if !advance.owned}<div class="research-node-cost">
+            {#if !advance.owned && (!choice || advance.action)}<div class="research-node-cost">
                 <span
                   class="research-flexible-cost"
                   title={borrowing
@@ -419,7 +422,7 @@
                       title={`View ${parent.name}`}
                       onclick={() => showAdvance(parent.id)}>Needs {parent.name}</button
                     >
-                  {:else if !lockedGovernment}{actionReason(advance.reason)}{/if}</span
+                  {:else if !choice && !lockedGovernment}{actionReason(advance.reason)}{/if}</span
                 >
                 {#if !borrowing && !freeResearch}
                   {#each researchFreeHints(advance, advances) as source}

@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "एक स्थान से बार-बार संसाधन लें",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "D2 से इकट्ठा करें। तीन लकड़ी चुनने के लिए C2 के जंगल पर तीन बार क्लिक करें, फिर पुष्टि करें। उत्पादन फोकस यह बार-बार संग्रह करने देता है; नगर की कुल संग्रह क्षमता नहीं बढ़ाता।",
   "One card, one use": "एक कार्ड, एक उपयोग",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "आपने तीन लकड़ी पाई और इकट्ठा करने पर एक कार्य खर्च किया। कार्ड ने स्वयं कोई कार्य नहीं लिया। दूसरे कार्डों में कार्य या संसाधन लग सकते हैं; खेलने से पहले उनका खर्च और समय देखें।"
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "आपने तीन लकड़ी पाई और इकट्ठा करने पर एक कार्य खर्च किया। कार्ड ने स्वयं कोई कार्य नहीं लिया। दूसरे कार्डों में कार्य या संसाधन लग सकते हैं; खेलने से पहले उनका खर्च और समय देखें।",
+  "Finish Move": "चाल समाप्त करें",
+  "Choose a highlighted advance.": "हाइलाइट की गई उन्नति चुनें।",
+  "Separate roll: no 5 or 6. No hit cancelled.": "अलग पासा फेंका: कोई 5 या 6 नहीं। कोई प्रहार रद्द नहीं हुआ।",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "बर्बर केवल उस खिलाड़ी के शहरों की ओर बढ़ते हैं जिसने घटना शुरू की थी। यदि कोई सेना नहीं चल सकती, तो गति की घटना इसके बजाय एक शहर बनाने का प्रयास करती है।"
 }

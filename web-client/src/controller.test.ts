@@ -786,11 +786,14 @@ test('Expansion keeps its new settler and destination selected across repeated p
     assert.deepEqual(session!.selectedUnits, [newSettler.id]);
     assert.equal(session!.moveTarget, target);
     assert.equal(session!.moveDestination, selection);
-    // City clicks inspect consistently; selecting a unit resumes movement.
+    // Inspecting pieces never resumes movement until Move is explicitly opened.
     controller.patch({ mode: 'overview', tilePanel: false });
     controller.selectTile(city, { kind: 'city', player: seat });
     assert.equal(session!.mode, 'overview');
     assert.equal(session!.tilePanel, true);
+    controller.selectTile(city, { kind: 'unit', player: seat, unit: newSettler.id });
+    assert.equal(session!.mode, 'overview');
+    controller.openSettlers();
     controller.selectTile(city, { kind: 'unit', player: seat, unit: newSettler.id });
     assert.equal(session!.mode, 'settlers');
     assert.ok(session!.moveDestinations.length);
@@ -1749,6 +1752,42 @@ test('recap navigation skips empty phases across multiple opponents while keepin
       'seeking an empty phase shows the preceding action',
     );
     assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('city, tile and unit clicks inspect the same city until Move is opened', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const raw = fixture('advances/writing');
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    const unit = app
+      .session()
+      .view!.units!.find((u) => app.session().view!.cities.some((city) => city.position === u.position))!;
+    assert.ok(unit);
+    for (const pick of [
+      { kind: 'tile' },
+      { kind: 'city', player: 0 },
+      { kind: 'unit', player: 0, unit: unit.id },
+      { kind: 'units', player: 0 },
+    ] as const) {
+      c.selectTile(unit.position, pick);
+      assert.equal(app.session().mode, 'overview');
+      assert.equal(app.session().tilePanel, true);
+      assert.equal(app.session().focus, unit.position);
+      assert.equal(app.session().city, unit.position);
+      assert.deepEqual(app.session().selectedUnits, []);
+    }
+    c.inspectTile(unit.position);
+    assert.equal(app.session().tilePanel, true, 'the city dock opens these same tile details');
+    c.openSettlers();
+    c.selectTile(unit.position, { kind: 'unit', player: 0, unit: unit.id });
+    assert.equal(app.session().mode, 'settlers');
+    assert.ok(app.session().selectedUnits.includes(unit.id));
+    assert.deepEqual(app.sent, [], 'inspection and selection never submit a move');
   } finally {
     app.close();
   }

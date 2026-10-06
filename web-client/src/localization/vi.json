@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "Thu thập nhiều lần từ một ô",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "Thu thập từ D2. Nhấn rừng tại C2 ba lần để chọn ba gỗ, rồi xác nhận. Tập trung Sản xuất cho phép thu thập lặp này; không tăng lượng thành phố thu được.",
   "One card, one use": "Một lá bài, một lần dùng",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Bạn nhận ba gỗ và dùng một hành động Thu thập. Bản thân lá bài không tốn hành động. Bài khác có thể tốn hành động hoặc tài nguyên; hãy kiểm tra chi phí và thời điểm trước khi chơi."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Bạn nhận ba gỗ và dùng một hành động Thu thập. Bản thân lá bài không tốn hành động. Bài khác có thể tốn hành động hoặc tài nguyên; hãy kiểm tra chi phí và thời điểm trước khi chơi.",
+  "Finish Move": "Kết thúc di chuyển",
+  "Choose a highlighted advance.": "Chọn một tiến bộ được tô sáng.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "Lượt gieo riêng: không có 5 hoặc 6. Không hủy được đòn đánh nào.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Quân man rợ chỉ di chuyển về phía các thành phố của người chơi đã kích hoạt sự kiện. Nếu không đội quân nào có thể di chuyển, sự kiện di chuyển sẽ thử tạo một thành phố thay thế."
 }

@@ -200,6 +200,17 @@
   border-color: #c2a46e;
   box-shadow: 0 1px 4px #86652c12;
 }
+.research-node.choice-available {
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 22%, transparent);
+}
+.research-node.choice-unavailable:not(.selected) {
+  opacity: 0.55;
+}
+.research-header .research-choice-hint {
+  font-weight: 700;
+  color: var(--gold);
+}
 .research-node.selected {
   outline: 2px solid #a67e3d;
   outline-offset: 2px;

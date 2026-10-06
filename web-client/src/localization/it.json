@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "Raccogli più volte dalla stessa tessera",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "Raccogli con D2. Clicca tre volte sulla foresta in C2 per selezionare tre legni, poi conferma. Focus sulla Produzione permette questa raccolta ripetuta; non aumenta la quantità raccolta dalla città.",
   "One card, one use": "Una carta, un utilizzo",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Hai ottenuto tre legni e speso un’azione per Raccogli. La carta stessa non è costata alcuna azione. Altre carte possono costare un’azione o risorse; controlla il costo e quando possono essere giocate prima di usarle."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Hai ottenuto tre legni e speso un’azione per Raccogli. La carta stessa non è costata alcuna azione. Altre carte possono costare un’azione o risorse; controlla il costo e quando possono essere giocate prima di usarle.",
+  "Finish Move": "Termina movimento",
+  "Choose a highlighted advance.": "Scegli un progresso evidenziato.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "Tiro separato: nessun 5 o 6. Nessun colpo annullato.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "I barbari si muovono solo verso le città del giocatore che ha attivato l’evento. Se nessun esercito può muoversi, un evento di movimento tenta invece di creare una città."
 }

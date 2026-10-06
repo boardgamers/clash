@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "Собирайте многократно с одной клетки",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "Собирайте из D2. Нажмите на лес на C2 три раза, чтобы выбрать три единицы дерева, затем подтвердите. «Фокус производства» позволяет этот повторный сбор; он не увеличивает количество ресурсов, которое собирает город.",
   "One card, one use": "Одна карта, одно применение",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Вы получили три дерева и потратили одно действие на сбор. Сама карта не стоила действия. Другие карты могут стоить действие или ресурсы; проверьте их стоимость и время применения перед использованием."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "Вы получили три дерева и потратили одно действие на сбор. Сама карта не стоила действия. Другие карты могут стоить действие или ресурсы; проверьте их стоимость и время применения перед использованием.",
+  "Finish Move": "Завершить движение",
+  "Choose a highlighted advance.": "Выберите выделенное достижение.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "Отдельный бросок: ни 5, ни 6. Ни одно попадание не отменено.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Варвары движутся только к городам игрока, вызвавшего событие. Если ни одна армия не может двигаться, событие движения вместо этого пытается создать город."
 }

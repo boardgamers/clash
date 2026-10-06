@@ -15,6 +15,7 @@ export interface CombatSide {
   cancelledHits?: { before: number; reasons: string[] };
   modifiers: string[];
   tactics?: string;
+  tacticsEffect?: string;
 }
 export interface CombatRound {
   round?: number;
@@ -201,6 +202,13 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
       // Only move known roll modifiers into the table; keep other effects below.
       const remainder: string[] = [];
       for (const clause of clauses) {
+        if (/^(?:Pelts|Peltasts) rolls no 5 or 6$/.test(clause)) {
+          target.tacticsEffect = 'Separate roll: no 5 or 6. No hit cancelled.';
+          continue;
+        }
+        if (/^Peltasts rolls a \d+ and ignored a hit$/.test(clause)) {
+          target.tacticsEffect = clause.replace('rolls a', 'rolled a');
+        }
         if (/combat value|extra die/i.test(clause) || cancelsHits(clause)) target.modifiers.push(clause);
         else remainder.push(clause);
       }

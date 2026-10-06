@@ -81,6 +81,7 @@ test('rosters, tactics and rolls combine across payment prompts without treating
   const output = combatJournal(entries),
     [combat] = rounds(entries);
   assert.equal(combat.attacker.tactics, 'Peltasts');
+  assert.equal(combat.attacker.tacticsEffect, 'Peltasts rolled a 6 and ignored a hit');
   assert.equal(combat.defender.tactics, 'Encircled');
   assert.deepEqual(combat.attacker.modifiers, [
     'steel weapons added 1 combat value',
@@ -229,4 +230,18 @@ test('active combat is found below nested decisions and disappears after combat 
     activeCombat({ events: [{ event_type: { CombatRoundStart: { combat: { stats: combat } } } }] }),
     combat,
   );
+});
+
+test('a failed Peltasts check is explained next to tactics, independently of combat dice', () => {
+  const entries = journal(fixture('combat_all_modifiers.outcome5'));
+  for (const entry of entries)
+    entry.notes = entry.notes.map((note) =>
+      note.replace('Peltasts rolls a 6 and ignored a hit', 'Pelts rolls no 5 or 6'),
+    );
+  const [combat] = rounds(entries);
+  assert.equal(combat.attacker.tactics, 'Peltasts');
+  assert.equal(combat.attacker.tacticsEffect, 'Separate roll: no 5 or 6. No hit cancelled.');
+  assert.ok(combat.attacker.dice!.some((die) => die.value >= 5));
+  assert.ok(combat.attacker.modifiers.every((m) => !m.includes('Pelt')));
+  assert.ok(combat.outcomes.every((e) => e.notes.every((n) => !n.includes('Pelts'))));
 });

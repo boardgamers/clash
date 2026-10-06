@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "같은 칸에서 반복 수집하기",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "D2에서 수집하세요. C2의 숲을 세 번 클릭하여 나무 셋을 선택한 뒤 확인하세요. 생산 집중은 이런 반복 수집을 허용할 뿐 도시의 수집량을 늘리지는 않습니다.",
   "One card, one use": "한 카드, 한 번의 사용",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "나무 셋을 얻었고 수집에 행동 하나를 사용했습니다. 카드 자체에는 행동이 들지 않았습니다. 다른 카드는 행동이나 자원이 들 수 있으므로 사용 전에 비용과 사용 시점을 확인하세요."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "나무 셋을 얻었고 수집에 행동 하나를 사용했습니다. 카드 자체에는 행동이 들지 않았습니다. 다른 카드는 행동이나 자원이 들 수 있으므로 사용 전에 비용과 사용 시점을 확인하세요.",
+  "Finish Move": "이동 마치기",
+  "Choose a highlighted advance.": "강조 표시된 발전을 선택하세요.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "별도 굴림: 5나 6이 나오지 않았습니다. 명중을 취소하지 못했습니다.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "야만인은 사건을 발생시킨 플레이어의 도시를 향해서만 이동합니다. 이동할 수 있는 군대가 없으면 이동 사건은 대신 도시 생성을 시도합니다."
 }

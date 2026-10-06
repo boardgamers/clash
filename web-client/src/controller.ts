@@ -908,7 +908,7 @@ export class Controller {
       return;
     }
     if (
-      (s.mode === 'settlers' || s.view?.stopMovement) &&
+      s.mode === 'settlers' &&
       pick.kind !== 'unit' &&
       pick.kind !== 'units' &&
       s.view?.nomadCities?.includes(position)
@@ -920,22 +920,12 @@ export class Controller {
       this.focusUnitPosition(position, pick.kind === 'unit' ? pick.unit : undefined);
       return;
     }
-    const units = s.view?.units?.filter((u) => u.position === position) ?? [];
-    const city = s.view?.cities.find((c) => c.position === position);
-    const pickedUnit = pick.player === s.seat ? units.find((u) => u.id === pick.unit) : undefined;
-    const inspectLeader =
-      (pick.kind === 'tile' || pick.kind === 'units') && units.some((u) => typeof u.type === 'object');
-    if (
-      canMoveOnMap(s.view, s.game) &&
-      units.length &&
-      (pickedUnit ||
-        (pick.kind === 'units' && pick.player === s.seat && !inspectLeader) ||
-        s.mode === 'settlers')
-    ) {
-      this.openUnits(this.defaultMovementGroup(position, pickedUnit?.id));
-      return;
-    }
-    if (city) this.selectCity(position);
+    this.inspectTile(position);
+  }
+  inspectTile(position: string) {
+    const s = get(this.session);
+    if (s.pending || s.playback) return;
+    if (s.view?.cities.some((c) => c.position === position)) this.selectCity(position);
     this.closeActivity();
     this.patch({ focus: position, tilePanel: true, mode: 'overview', abilitiesOpen: false, error: '' });
   }

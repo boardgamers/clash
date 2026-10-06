@@ -336,3 +336,11 @@
     padding: 2px 4px;
   }
 }
+
+.combat-tactics-effect {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}

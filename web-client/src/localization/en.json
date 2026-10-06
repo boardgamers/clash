@@ -4575,5 +4575,9 @@
   "Collect repeatedly from one tile": "Collect repeatedly from one tile",
   "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.": "Collect from D2. Click the forest at C2 three times to select three wood, then confirm. Production Focus allows this repeated collection; it does not increase how much the city collects.",
   "One card, one use": "One card, one use",
-  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them."
+  "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.": "You gained three wood and spent one action on Collect. The card itself cost no action. Other cards may cost an action or resources; check their cost and timing before playing them.",
+  "Finish Move": "Finish Move",
+  "Choose a highlighted advance.": "Choose a highlighted advance.",
+  "Separate roll: no 5 or 6. No hit cancelled.": "Separate roll: no 5 or 6. No hit cancelled.",
+  "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead.": "Barbarians only move toward the cities of the player who triggered the event. If no army can move, a movement event tries to spawn a city instead."
 }

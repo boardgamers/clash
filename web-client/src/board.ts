@@ -1778,53 +1778,52 @@ export class World {
       for (const { from, to } of barbarianMoves) {
         const [x, z] = positionXY(from),
           [tx, tz] = positionXY(to);
-        const material = new THREE.LineDashedMaterial({
-          color: '#e96a55',
-          dashSize: 0.14,
-          gapSize: 0.08,
-          depthTest: false,
-        });
-        const geometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(x, 0.5, z),
-          new THREE.Vector3(tx, 0.5, tz),
-        ]);
-        this.geometries.add(geometry);
-        this.materials.add(material);
-        const line = new THREE.Line(geometry, material);
-        line.computeLineDistances();
-        line.renderOrder = 3;
-        this.rings.add(line);
         const dx = tx - x,
           dz = tz - z,
-          length = Math.hypot(dx, dz),
-          ux = dx / length,
+          length = Math.hypot(dx, dz);
+        if (!length) continue;
+        const ux = dx / length,
           uz = dz / length;
-        const ax = x + dx * 0.68,
-          az = z + dz * 0.68;
-        const arrowGeo = new THREE.BufferGeometry().setAttribute(
-          'position',
-          new THREE.Float32BufferAttribute(
-            [
-              ax + ux * 0.18,
-              0.51,
-              az + uz * 0.18,
-              ax - ux * 0.1 - uz * 0.12,
-              0.51,
-              az - uz * 0.1 + ux * 0.12,
-              ax - ux * 0.1 + uz * 0.12,
-              0.51,
-              az - uz * 0.1 - ux * 0.12,
-            ],
-            3,
-          ),
-        );
-        const arrowMat = new THREE.MeshBasicMaterial({
-          color: '#e96a55',
-          side: THREE.DoubleSide,
-          depthTest: false,
-        });
-        this.materials.add(arrowMat);
-        this.rings.add(this.mesh(arrowGeo, arrowMat));
+        // Filled arrows retain their width on mobile; the dark outline separates
+        // them from terrain, units and city pieces in both map themes.
+        for (const [width, head, inset, color, order] of [
+          [0.12, 0.28, 0, '#242630', 6],
+          [0.065, 0.21, 0.045, '#ffb568', 7],
+        ] as const) {
+          const start = length * 0.22 + inset,
+            tip = length * 0.84 - inset,
+            neck = length * 0.63;
+          const points = [
+            new THREE.Vector2(start, -width),
+            new THREE.Vector2(neck, -width),
+            new THREE.Vector2(neck, -head),
+            new THREE.Vector2(tip, 0),
+            new THREE.Vector2(neck, head),
+            new THREE.Vector2(neck, width),
+            new THREE.Vector2(start, width),
+          ];
+          const vertices = THREE.ShapeUtils.triangulateShape(points, []).flatMap((face) =>
+            face.flatMap((i) => {
+              const p = points[i];
+              return [x + ux * p.x - uz * p.y, 0.52, z + uz * p.x + ux * p.y];
+            }),
+          );
+          const geometry = new THREE.BufferGeometry().setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(vertices, 3),
+          );
+          const material = new THREE.MeshBasicMaterial({
+            color,
+            side: THREE.DoubleSide,
+            depthTest: false,
+            depthWrite: false,
+          });
+          this.materials.add(material);
+          const arrow = this.mesh(geometry, material);
+          arrow.renderOrder = order;
+          arrow.castShadow = false;
+          this.rings.add(arrow);
+        }
       }
     }
     const collectionCity =

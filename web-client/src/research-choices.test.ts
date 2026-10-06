@@ -199,3 +199,21 @@ test('old unrestricted saves stop at the migration boundary and all future infor
     assert.throws(() => move(revealed, 'Undo'), /undone/);
   }
 });
+
+test('Teach Us highlights only the defeated player’s advances without an event warning', () => {
+  let game = fixture('action_cards/teach_us');
+  game.players[1].advances.push('Fishing');
+  game = move(game, { Movement: { Move: { units: [0, 1, 2, 3, 4, 5], destination: 'C1', payment: {} } } });
+  game = move(game, { Response: { SelectHandCards: [{ ActionCard: 35 }] } });
+  const seat = engine.currentPlayer(serialize(game));
+  game.players[seat].incident_tokens = 1;
+  const v = view(game);
+  exactChoices(v);
+  assert.equal(v.decision!.name, 'Teach us');
+  assert.ok(v.advances.some((a) => a.action));
+  assert.ok(v.advances.every((a) => !a.triggersEvent));
+  const advance = v.advances.find((a) => a.action)!;
+  const result = move(game, advance.action);
+  assert.equal(result.players[seat].incident_tokens, 1);
+  assert.ok(result.players[seat].advances.includes(advance.id));
+});
