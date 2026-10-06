@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -111,12 +112,12 @@ if (!process.argv.includes('--dry-run')) {
   };
   const current = await api(endpoint);
   if (
-    JSON.stringify(current.viewer) !== JSON.stringify(previous.viewer) ||
-    JSON.stringify(current.preferences) !== JSON.stringify(previous.preferences) ||
-    JSON.stringify(current.settings) !== JSON.stringify(previous.settings) ||
-    JSON.stringify(current.options) !== JSON.stringify(previous.options) ||
-    JSON.stringify(current.tutorial) !== JSON.stringify(previous.tutorial) ||
-    JSON.stringify(current.engine) !== JSON.stringify(previous.engine)
+    !isDeepStrictEqual(current.viewer, previous.viewer) ||
+    !isDeepStrictEqual(current.preferences, previous.preferences) ||
+    !isDeepStrictEqual(current.settings, previous.settings) ||
+    !isDeepStrictEqual(current.options, previous.options) ||
+    !isDeepStrictEqual(current.tutorial, previous.tutorial) ||
+    !isDeepStrictEqual(current.engine, previous.engine)
   )
     throw new Error('The viewer or preferences changed during upload; version metadata was not changed');
   if (engineBytes) {
@@ -139,11 +140,11 @@ if (!process.argv.includes('--dry-run')) {
   if (
     saved.viewer.url !== uploaded.url ||
     saved.viewer.topLevelVariable !== 'clash3d' ||
-    JSON.stringify(saved.preferences) !== JSON.stringify(preferences) ||
-    JSON.stringify(saved.settings) !== JSON.stringify(settings) ||
-    JSON.stringify(saved.options) !== JSON.stringify(options) ||
-    JSON.stringify(saved.tutorial) !== JSON.stringify(tutorial) ||
-    JSON.stringify(saved.engine) !== JSON.stringify(expectedEngine)
+    !isDeepStrictEqual(saved.preferences, preferences) ||
+    !isDeepStrictEqual(saved.settings, settings) ||
+    !isDeepStrictEqual(saved.options, options) ||
+    !isDeepStrictEqual(saved.tutorial, tutorial) ||
+    !isDeepStrictEqual(saved.engine, expectedEngine)
   )
     throw new Error('Published version verification failed; inspect the saved backup');
   console.log(
