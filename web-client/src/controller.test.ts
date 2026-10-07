@@ -877,7 +877,7 @@ test('Expansion keeps its new settler and destination selected across repeated p
   }
 });
 
-test('unit decisions open a hex without picking a casualty and lock while a move is pending', async () => {
+test('unit decisions open a hex, pick only the clicked unit model and lock while a move is pending', async () => {
   const app = paymentController(),
     c = app.controller;
   const state = fixture('incidents/pandemics/black_death.outcome');
@@ -888,7 +888,14 @@ test('unit decisions open a hex without picking a casualty and lock while a move
     assert.deepEqual(app.session().decisionSelection, []);
     assert.equal(app.session().decisionPosition, 'C2');
     c.selectTile('C2', { kind: 'unit', player: 0, unit: 3 });
-    assert.deepEqual(app.session().decisionSelection, []);
+    const clicked = app
+      .session()
+      .view!.decision!.options.findIndex((o) => o.mapTarget?.kind === 'unit' && o.mapTarget.unit === 3);
+    assert.ok(clicked >= 0);
+    assert.deepEqual(app.session().decisionSelection, [clicked], 'the clicked model is chosen, not confirmed');
+    assert.deepEqual(app.sent, []);
+    c.selectTile('C2', { kind: 'unit', player: 0, unit: 3 });
+    assert.deepEqual(app.session().decisionSelection, [], 'clicking it again deselects');
     c.selectDecisionOption(2);
     assert.deepEqual(app.session().decisionSelection, [2]);
     assert.deepEqual(app.sent, []);
@@ -904,6 +911,69 @@ test('unit decisions open a hex without picking a casualty and lock while a move
     c.selectTile('C2', { kind: 'decision', decisionIndex: 0 });
     assert.deepEqual(app.session().decisionSelection, []);
     assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('Heavy Earthquake structures toggle from building and city clicks and wait for confirmation', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  const state = engine.tryMove(
+    fixture('incidents/earthquake/earthquake'),
+    JSON.stringify({ Playing: { Advance: { advance: 'Storage', payment: { gold: 2 } } } }),
+    0,
+  );
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(state, 0));
+    const options = app.session().view!.decision!.options;
+    const at = (position: string, name: string) => options.findIndex((o) => o.name === `${name} · ${position}`);
+    c.selectTile('C2', { kind: 'city', player: 0 });
+    assert.equal(app.session().decisionPosition, 'C2');
+    assert.deepEqual(app.session().decisionSelection, [], 'a city with several structures only opens its list');
+    c.selectTile('C2', { kind: 'city', player: 0, structure: 'Building:Temple' });
+    c.selectTile('B2', { kind: 'city', player: 0 });
+    assert.equal(app.session().decisionPosition, 'B2');
+    assert.deepEqual(app.session().decisionSelection, [at('C2', 'Temple'), at('B2', 'City center')]);
+    c.selectTile('C2', { kind: 'city', player: 0, structure: 'Building:Temple' });
+    assert.deepEqual(app.session().decisionSelection, [at('B2', 'City center')], 'a second click deselects');
+    c.selectTile('A1', { kind: 'city', player: 1, structure: 'CityCenter' });
+    assert.deepEqual(app.session().decisionSelection, [at('B2', 'City center')]);
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('cultural influence opens a map mode where clicking the target building chooses it', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const g = JSON.parse(fixture('base/cultural_influence_instant'));
+    g.current_player_index = 0;
+    g.players[1].cities[0].city_pieces = { temple: 1, academy: 1 };
+    g.players[0].cities = [{ position: 'A1', mood_state: 'Happy' }];
+    g.players[0].resources.culture_tokens = 7;
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    c.patch({ abilitiesOpen: true });
+    c.chooseInfluence();
+    assert.equal(app.session().abilitiesOpen, true);
+    assert.equal(app.session().influenceMode, true);
+    c.selectTile('C1', { kind: 'city', player: 1 });
+    assert.equal(app.session().influencePosition, 'C1');
+    assert.equal(app.session().influenceTarget, null, 'Temple and Academy: the city opens its list');
+    assert.equal(app.session().tilePanel, false, 'map clicks do not open the tile inspector');
+    c.selectTile('C1', { kind: 'city', player: 1, structure: 'Building:Temple' });
+    const temple = app.session().view!.influence!.find((o) => o.name === 'Temple')!;
+    assert.equal(app.session().influenceTarget, `C1/Temple/${temple.variant}`);
+    c.selectTile('A1', { kind: 'city', player: 0 });
+    assert.equal(app.session().influenceOrigin, 'A1');
+    assert.deepEqual(app.sent, [], 'choosing a target never starts the attempt');
+    c.patch({ abilitiesOpen: false });
+    assert.equal(app.session().influenceMode, false);
+    assert.equal(app.session().influenceTarget, null);
   } finally {
     app.close();
   }

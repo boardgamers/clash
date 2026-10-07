@@ -12,6 +12,8 @@ import {
 import type { MapPick } from './types';
 import * as THREE from 'three';
 import { activeCityAbility } from './abilities';
+import { activeInfluence, influenceTarget } from './influence';
+import { mapDecisionOptions, structureKey } from './decision-controls';
 import { happinessCities } from './happiness';
 import { ExplorationOverlay } from './exploration-overlay';
 import { explorationPreview } from './exploration-preview';
@@ -29,7 +31,6 @@ import { activeCombat } from './active-combat';
 import { Swords } from 'lucide-svelte';
 import { mount, unmount } from 'svelte';
 import UnitMapBadge from './UnitMapBadge.svelte';
-import { mapDecisionOptions } from './decision-controls';
 import { portPlacement } from './port-layout';
 import { buildingOrder, cityLayout, cityPose, ownershipMarkers, portDock } from './city-layout';
 import { frameDetails } from './playback';
@@ -121,6 +122,10 @@ export class World {
     tick();
   }
   private hoverRing: THREE.Mesh;
+  /** Pointers above the exact buildings selected for a decision or influence attempt. */
+  private structureMarkers = new THREE.Group();
+  private structureMarker: [THREE.BufferGeometry, THREE.Material];
+  private structureModels = new Map<string, THREE.Object3D>();
   private hovered: string | null = null;
   private tileTooltip: TileTooltip;
   private referenceRing: THREE.Mesh;
@@ -257,6 +262,13 @@ export class World {
     this.hoverRing.visible = false;
     this.hoverRing.castShadow = false;
     this.scene.add(this.hoverRing);
+    const markerMaterial = new THREE.MeshBasicMaterial({ color: '#ffd45c', depthTest: false });
+    this.materials.add(markerMaterial);
+    const markerGeometry = new THREE.ConeGeometry(0.16, 0.34, 4);
+    markerGeometry.rotateX(Math.PI);
+    this.geometries.add(markerGeometry);
+    this.structureMarker = [markerGeometry, markerMaterial];
+    this.scene.add(this.structureMarkers);
     this.scene.add(this.seaOverlay.group);
     this.scene.add(this.combatOverlay.group);
     this.combatLabel = document.createElement('div');
@@ -414,6 +426,7 @@ export class World {
             kind: cityPosition && !inspectPort ? 'tile' : (object.userData.kind ?? 'tile'),
             player: object.userData.player,
             unit: object.userData.unit,
+            structure: !cityPosition || inspectPort ? object.userData.structure : undefined,
           },
         };
       }
@@ -597,6 +610,7 @@ export class World {
     const overlays = [
       this.rings,
       this.hoverRing,
+      this.structureMarkers,
       this.referenceRing,
       this.seaOverlay.group,
       this.combatOverlay.group,
@@ -886,6 +900,7 @@ export class World {
     this.tiles.clear();
     this.pieces = [];
     this.buildings.clear();
+    this.structureModels.clear();
     this.labelHost.replaceChildren();
     this.labelPositions = [];
     this.moveMarkerSignature = '';
@@ -1008,6 +1023,7 @@ export class World {
     const pieceDecision = mapChoices.some((o) => o.mapTarget);
     this.decisionPositions = decisionPositions;
     const ability = activeCityAbility(s);
+    const influence = ability ? undefined : activeInfluence(s);
     const moodPositions = s.mode === 'happiness' ? happinessCities(s) : [];
     const combat = battle?.location ?? (playback ? (playback.frame?.combat ?? null) : activeCombat(s.game));
     const exploration = s.view?.explorationDecision;
@@ -1016,12 +1032,17 @@ export class World {
     this.explorationLabel.textContent = exploration ? 'Exploring' : 'Will reveal';
     this.explorationLabel.hidden = !this.explorationPositions.length;
     this.explorationLabel.dataset.positions = this.explorationPositions.join(' ');
-    const abilityPositions = [...new Set(ability?.offers.map((offer) => offer.position!) ?? [])];
+    // City abilities and cultural influence both choose highlighted pieces on the map.
+    const abilityPositions = influence
+      ? influence.positions
+      : [...new Set(ability?.offers.map((offer) => offer.position!) ?? [])];
+    const abilitySelected = influence ? influence.selected : s.abilityCity ? [s.abilityCity] : [];
+    const choosingCity = !!ability || !!influence;
     this.interactionPositions = exploration
       ? this.explorationPositions
       : s.view?.decision?.tacticsSelection && combat
         ? [combat.attacker.position, combat.defender.position]
-        : ability
+        : choosingCity
           ? abilityPositions
           : s.mode === 'happiness'
             ? moodPositions
@@ -1059,7 +1080,7 @@ export class World {
       s.mode === 'settlers' ||
       s.tilePanel ||
       mapChoices.length > 0 ||
-      !!ability ||
+      choosingCity ||
       !!exploration ||
       !!s.view?.decision?.tacticsSelection;
     if (interacting !== this.boardInteraction) {
@@ -1071,7 +1092,7 @@ export class World {
     this.seaGuide = seaGuide;
     this.seaPreviewAllowed =
       s.mode === 'overview' &&
-      !ability &&
+      !choosingCity &&
       !s.pending &&
       !s.view?.decision &&
       !s.view?.explorationDecision &&
@@ -1130,7 +1151,7 @@ export class World {
                   ...s.moveDestinations.map((d) => d.position),
                   ...(s.landingTargets ?? []),
                 ])
-              : ability
+              : choosingCity
                 ? new Set(abilityPositions)
                 : null;
     const signature = JSON.stringify([
@@ -1256,6 +1277,16 @@ export class World {
             settlement.scale.setScalar(layout.settlement.scale);
             settlement.position.set(layout.settlement.x, 0, layout.settlement.z);
             cityModel.add(settlement);
+            const structure = (model: THREE.Object3D, key: string) => {
+              Object.assign(model.userData, {
+                position: city.position,
+                kind: 'city',
+                player: player.id,
+                structure: key,
+              });
+              this.structureModels.set(`${city.position}|${key}`, model);
+            };
+            structure(settlement, 'CityCenter');
             const pole = this.mesh(
               new THREE.CylinderGeometry(
                 markers.pole.radiusTop,
@@ -1332,6 +1363,7 @@ export class World {
               annex.scale.setScalar(place.scale);
               annex.position.set(place.x, 0, place.z);
               cityModel.add(annex);
+              structure(annex, `Building:${name[0].toUpperCase()}${name.slice(1)}`);
               this.buildings.set(`${city.position}:building:${name}`, annex);
             }
             wonders.forEach((name, index) => {
@@ -1340,6 +1372,7 @@ export class World {
               landmark.scale.setScalar(place.scale);
               landmark.position.set(place.x, 0, place.z);
               landmark.userData.wonder = name;
+              structure(landmark, `Wonder:${name}`);
               cityModel.add(landmark);
               this.buildings.set(`${city.position}:wonder:${name}`, landmark);
             });
@@ -1374,7 +1407,9 @@ export class World {
                 kind: 'city',
                 player: player.id,
                 building: 'port',
+                structure: 'Building:Port',
               };
+              this.structureModels.set(`${city.position}|Building:Port`, dock);
               this.board.add(dock);
               this.pieces.push(dock);
               this.buildings.set(`${city.position}:building:port`, dock);
@@ -1643,9 +1678,7 @@ export class World {
                 ? s.selection.map((c) => c.position)
                 : s.tilePanel && focusedPosition
                   ? [focusedPosition]
-                  : ability && s.abilityCity
-                    ? [s.abilityCity]
-                    : [];
+                  : abilitySelected;
     const available = mapChoices.length
       ? decisionPositions
       : placement
@@ -1671,7 +1704,7 @@ export class World {
       !s.view?.choiceDecision &&
       !s.view?.objectiveDecision &&
       !exploration &&
-      !ability;
+      !choosingCity;
     const pirateSpawns = pirateGuide
       ? s.view?.pirateSpawns?.find(
           (p) => p.player === (s.pirateSpawnPlayer ?? s.seat ?? s.view?.activePlayer),
@@ -1995,6 +2028,7 @@ export class World {
       barbarianCityChoice,
       s.view?.decision?.name,
       ability?.key,
+      !!influence,
       s.mode,
     ]);
     if (markerSignature !== this.moveMarkerSignature) {
@@ -2010,7 +2044,7 @@ export class World {
         label.textContent = '';
         const terrain = s.game.map.tiles.find(([p]) => p === position)?.[1];
         const city =
-          (ability || s.mode === 'happiness') && s.view?.cities.find((city) => city.position === position);
+          (choosingCity || s.mode === 'happiness') && s.view?.cities.find((city) => city.position === position);
         const description = city
           ? `${city.mood} city · Size ${city.size}`
           : terrain
@@ -2019,7 +2053,7 @@ export class World {
         label.dataset.description = description;
         label.setAttribute(
           'aria-label',
-          `${s.mode === 'happiness' ? 'Select happiness city' : ability ? 'Choose city' : pieceDecision ? 'Choose units' : 'Choose hex'} · ${description}`,
+          `${s.mode === 'happiness' ? 'Select happiness city' : influence ? 'Choose target' : ability ? 'Choose city' : pieceDecision ? 'Choose units' : 'Choose hex'} · ${description}`,
         );
         label.onclick = () => {
           if (this.canPick(position)) this.pick(position);
@@ -2041,7 +2075,7 @@ export class World {
       );
       this.rings.visible = false;
     } else this.rings.visible = true;
-    this.labelHost.classList.toggle('choosing-ability', !!ability);
+    this.labelHost.classList.toggle('choosing-ability', choosingCity);
     this.labelHost.classList.toggle('hide-unit-badges', !s.unitBadges);
     this.labelHost.classList.toggle('choosing-pieces', pieceDecision || s.mode === 'settlers');
     for (const label of this.labelPositions) {
@@ -2061,12 +2095,12 @@ export class World {
               : decisionSelected.includes(label.position)
             : s.mode === 'happiness'
               ? !!s.happinessSteps?.[label.position]
-              : ability
-                ? label.position === s.abilityCity
+              : choosingCity
+                ? abilitySelected.includes(label.position)
                 : label.position === (label.kind === 'destination' ? s.moveTarget : focusedPosition),
         );
-      if (label.kind === 'destination' && ability)
-        label.node.setAttribute('aria-pressed', String(label.position === s.abilityCity));
+      if (label.kind === 'destination' && choosingCity)
+        label.node.setAttribute('aria-pressed', String(abilitySelected.includes(label.position)));
       if (label.kind === 'destination' && s.mode === 'happiness')
         label.node.setAttribute('aria-pressed', String(!!s.happinessSteps?.[label.position]));
       if ((label.kind === 'destination' || label.kind === 'barbarian-city') && mapChoices.length) {
@@ -2104,8 +2138,33 @@ export class World {
       this.centerInteraction();
       if (exploration) this.locateExploration();
     }
+    this.updateStructureMarkers(s, influence);
     this.setHovered(this.hovered);
     this.invalidate();
+  }
+  private updateStructureMarkers(s: Session, influence: ReturnType<typeof activeInfluence>) {
+    const options = mapDecisionOptions(s.view?.decision);
+    const target = influence?.target ? influenceTarget(influence.target) : null;
+    const keys = [
+      ...s.decisionSelection.flatMap((i) => {
+        const o = options[i];
+        return o?.mapTarget?.kind === 'structure' ? [`${o.position}|${structureKey(o.mapTarget.structure)}`] : [];
+      }),
+      ...(influence?.target && target?.kind === 'structure'
+        ? [`${influence.target.position}|${target.structure}`]
+        : []),
+    ];
+    this.structureMarkers.clear();
+    for (const key of keys) {
+      const model = this.structureModels.get(key);
+      if (!model) continue;
+      const box = new THREE.Box3().setFromObject(model);
+      if (box.isEmpty()) continue;
+      const marker = new THREE.Mesh(...this.structureMarker);
+      marker.renderOrder = 10;
+      marker.position.set((box.min.x + box.max.x) / 2, box.max.y + 0.2, (box.min.z + box.max.z) / 2);
+      this.structureMarkers.add(marker);
+    }
   }
   destroy() {
     this.clearBarbarianCityBadges();

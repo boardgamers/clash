@@ -15,6 +15,14 @@ export function mapDecisionOptions(decision?: Decision | null) {
     : [];
 }
 
+type StructureTarget = string | { Building: string } | { Wonder: string };
+
+/** Stable key shared by decision options, influence offers and board models. */
+export function structureKey(structure: StructureTarget) {
+  if (typeof structure === 'string') return structure;
+  return 'Building' in structure ? `Building:${structure.Building}` : `Wonder:${structure.Wonder}`;
+}
+
 export function mapDecisionIndex(decision: Decision, position: string, pick: MapPick) {
   const options = mapDecisionOptions(decision);
   if (pick.kind === 'decision') {
@@ -31,9 +39,19 @@ export function mapDecisionIndex(decision: Decision, position: string, pick: Map
             o.mapTarget.unit === pick.unit)),
     );
   }
+  if (pick.structure) {
+    // A clicked building model chooses exactly that structure.
+    const exact = options.findIndex(
+      (o) =>
+        o.position === position &&
+        o.mapTarget?.kind === 'structure' &&
+        structureKey(o.mapTarget.structure) === pick.structure,
+    );
+    if (exact >= 0) return exact;
+  }
   const matches = options.flatMap((o, index) => (o.position === position ? [index] : []));
   // A tile or stack click must never silently choose one of several pieces.
-  return matches.length === 1 && !options[matches[0]].mapTarget ? matches[0] : -1;
+  return matches.length === 1 ? matches[0] : -1;
 }
 
 export function toggleDecisionSelection(decision: Decision, selected: number[], index: number) {

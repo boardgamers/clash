@@ -1,64 +1,69 @@
 <script lang="ts">
-  import { Drama, ArrowRight, Landmark, Footprints, RotateCcw, Zap } from 'lucide-svelte';
+  import { Drama, ArrowRight, ArrowLeft, Landmark, Footprints, RotateCcw, Zap, X } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import { influenceUpfrontCost, type InfluenceOffer } from './influence';
+  import { activeInfluence, influenceKey, influenceUpfrontCost } from './influence';
   import ResourceAmount from './ResourceAmount.svelte';
   let {
     controller,
     onHighlight,
   }: { controller: Controller; onHighlight: (position: string | null) => void } = $props();
   const session = $derived(controller.session);
-  const offers = $derived($session.view?.influence ?? []);
-  const key = (offer: InfluenceOffer) => `${offer.position}/${offer.name}/${offer.variant}`;
-  let chosen = $state<string | null>(null);
-  let chosenOrigin = $state<string | null>(null);
-  const target = $derived(offers.find((o) => key(o) === chosen));
-  const origin = $derived(
-    target?.origins?.find((o) => o.position === (chosenOrigin ?? target.origin)) ?? target?.origins?.[0],
-  );
+  const influence = $derived(activeInfluence($session));
+  const offers = $derived(influence?.offers ?? []);
+  const target = $derived(influence?.target ?? null);
+  const origin = $derived(influence?.origin ?? null);
   const rangePayment = $derived(origin?.payment ?? target?.payment ?? {});
   const actionPayment = $derived(origin?.actionPayment ?? target?.actionPayment ?? {});
   const upfront = $derived(influenceUpfrontCost(actionPayment, rangePayment));
-  const groups = $derived([...new Set(offers.map((o) => o.position))]);
+  // A city clicked on the map narrows the list to its own candidates.
+  const groups = $derived(influence?.position ? [influence.position] : (influence?.targets ?? []));
   const bonus = $derived(origin?.rollBonus ?? target?.rollBonus ?? 0);
   const preventBoost = $derived(origin?.preventBoost ?? target?.preventBoost ?? false);
 </script>
 
+<header class="movement-heading">
+  <button
+    class="icon-button"
+    aria-label="Back to abilities"
+    onclick={() => controller.patch({ influenceMode: false })}><ArrowLeft size={17} /></button
+  >
+  <h2><Drama size={18} />Cultural influence</h2>
+  <button
+    class="icon-button close-movement"
+    aria-label="Close abilities"
+    onclick={() => controller.patch({ abilitiesOpen: false })}><X size={18} /></button
+  >
+</header>
 <div class="influence-picker">
-  <h3><Drama size={18} />Cultural influence</h3>
   <ol class="influence-steps" aria-label="Influence progress">
     <li class="current" aria-current="step">Target</li>
     <li>Roll</li>
     <li>Resolve</li>
   </ol>
   {#if !target}
-    <p class="movement-hint">
-      Choose a target, then the city to influence from. Only one successful attempt per turn.
-    </p>
+    <p class="movement-hint">Click a highlighted city or building on the map, or choose below.</p>
     <div class="influence-targets">
       {#each groups as position}<div class="influence-target-group">
           <strong>At {position}</strong>
           <div class="decision-options">
             {#each offers.filter((o) => o.position === position) as offer}<button
-                class:selected={chosen === key(offer)}
-                aria-pressed={chosen === key(offer)}
                 onmouseenter={() => onHighlight(offer.position)}
                 onmouseleave={() => onHighlight(null)}
                 onfocus={() => onHighlight(offer.position)}
                 onblur={() => onHighlight(null)}
                 onclick={() => {
-                  chosen = key(offer);
-                  chosenOrigin = null;
+                  controller.selectInfluenceTarget(influenceKey(offer));
+                  onHighlight(null);
                 }}>{offer.name}<small>{offer.variant}</small></button
               >{/each}
           </div>
         </div>{:else}<p class="settler-empty">No eligible targets.</p>{/each}
     </div>
-  {:else}<button
+  {/if}
+  {#if target || influence?.position}<button
       class="secondary compact influence-change"
       onclick={() => {
-        chosen = null;
-        chosenOrigin = null;
+        controller.patch({ influencePosition: null, influenceTarget: null, influenceOrigin: null });
         onHighlight(null);
       }}>Change target</button
     >{/if}
@@ -78,7 +83,7 @@
               onmouseleave={() => onHighlight(null)}
               onfocus={() => onHighlight(from.position)}
               onblur={() => onHighlight(null)}
-              onclick={() => (chosenOrigin = from.position)}
+              onclick={() => controller.selectInfluenceOrigin(from.position)}
             >
               {#if from.settlers}<Footprints size={15} />{:else}<Landmark size={15} />{/if}{from.position}
               {#if Object.values(from.payment).some(Boolean)}<ResourceAmount

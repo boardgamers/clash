@@ -99,6 +99,7 @@
   import { combatJournal } from './combat-journal';
   import ActionCardsDialog from './ActionCardsDialog.svelte';
   import { activeCityAbility } from './abilities';
+  import { activeInfluence } from './influence';
   import { mobilePanels } from './mobile-panels';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
@@ -346,7 +347,7 @@
           if (mapModalMinimized) return;
           if (
             !mapMinimized &&
-            ($session.activityOpen || ($session.abilitiesOpen && !activeCityAbility($session)) || confirmEnd)
+            ($session.activityOpen || ($session.abilitiesOpen && !activeCityAbility($session) && !activeInfluence($session)) || confirmEnd)
           )
             dismissMapDetails();
           controller.selectTile(p, pick);
@@ -685,6 +686,7 @@
     $session.mode === 'settlers' ||
     $session.tilePanel ||
     !!activeCityAbility($session) ||
+    !!activeInfluence($session) ||
     !!$session.view?.decision?.tacticsSelection ||
     !!$session.view?.explorationDecision ||
     mapMinimized ||

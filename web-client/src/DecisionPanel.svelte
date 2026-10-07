@@ -15,6 +15,7 @@
   import DecisionOptionContent from './DecisionOptionContent.svelte';
   import TacticsOption from './TacticsOption.svelte';
   import UnitPicker, { type UnitChoice } from './UnitPicker.svelte';
+  import StructurePicker, { type StructureChoice } from './StructurePicker.svelte';
   import { researchPresentation } from './research';
   import { canCancelAbility, mapDecisionOptions } from './decision-controls';
   import { steelWeaponsBenefit } from './active-combat';
@@ -43,6 +44,18 @@
   );
   const pieceChoice = $derived(mapChoice && decision.options.some((option) => option.mapTarget));
   const unitChoice = $derived(pieceChoice && decision.options.every((o) => o.mapTarget?.kind === 'unit'));
+  const structureChoices: StructureChoice[] = $derived(
+    pieceChoice
+      ? decision.options.flatMap((option, id) =>
+          option.mapTarget?.kind === 'structure' && option.position
+            ? [{ id, position: option.position, structure: option.mapTarget.structure }]
+            : [],
+        )
+      : [],
+  );
+  const structureChoice = $derived(
+    structureChoices.length > 0 && structureChoices.length === decision.options.length,
+  );
   const unitChoices: UnitChoice[] = $derived(
     decision.options.flatMap((option, id) => {
       const target = option.mapTarget;
@@ -255,6 +268,17 @@
         colorBlind={$session.colorBlind}
         playerColors={$session.playerColors}
         label={count}
+        onPosition={(position) => controller.focusDecisionPosition(position)}
+        onSelect={toggle}
+        {onHighlight}
+      />
+    {:else if structureChoice}
+      <StructurePicker
+        choices={structureChoices}
+        {selected}
+        position={$session.decisionPosition ?? null}
+        limit={decision.max}
+        pending={$session.pending}
         onPosition={(position) => controller.focusDecisionPosition(position)}
         onSelect={toggle}
         {onHighlight}

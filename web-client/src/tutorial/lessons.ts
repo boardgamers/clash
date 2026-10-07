@@ -730,7 +730,7 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
     if (step.kind === 'found')
       return ['Move', ...(id === 'movement-founding' ? ['C2'] : []), 'Found city here'];
     if (step.kind === 'stop') return ['Finish moving'];
-    if (step.kind === 'influence') return ['Abilities', 'Temple', 'A1', 'C1', 'Confirm'];
+    if (step.kind === 'influence') return ['Abilities', 'Choose target', 'C1', 'A1', 'Pay & roll'];
     if (step.kind === 'leader') return ['Recruit', city, 'Caesar', 'Recruit'];
     if (step.kind === 'draft') return ['Recruit', 'A1', 'Infantry', 'Payment', 'Mood', 'Recruit'];
     if (['range', 'boost', 'protect'].includes(step.kind ?? '')) return ['Payment', 'Pay'];

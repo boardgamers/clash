@@ -995,6 +995,56 @@
   background: var(--paper2);
   box-shadow: inset 0 0 0 1px var(--gold);
 }
+/* Structure choices: the city clicked on the map, then its eligible buildings. */
+.structure-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.3rem 0;
+}
+.structure-cities button {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+.structure-cities button.selected {
+  border-color: var(--gold);
+  background: var(--paper2);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+.structure-city-count {
+  min-width: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #241a07;
+  font-size: 11px;
+  text-align: center;
+}
+.structure-selection .movement-hint {
+  margin: 0;
+}
+.game-shell .structure-selection .structure-options {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 6px;
+  margin: 4px 0;
+  max-height: none;
+  overflow: visible;
+}
+.game-shell .structure-selection .structure-options .decision-option {
+  min-height: 40px;
+  padding: 6px 8px;
+}
+.influence-mode .influence-picker .influence-steps {
+  margin: 0.3rem 0;
+}
+.influence-mode .influence-targets {
+  margin: 0.4rem 0;
+}
 .ability-cost {
   display: inline-flex;
   flex-wrap: wrap;

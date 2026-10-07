@@ -1,4 +1,4 @@
-import { influencePaymentMatches } from './influence';
+import { activeInfluence, influenceKey, influenceMapPick, influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
 import { get, writable } from 'svelte/store';
 import { ChatController } from '@boardgamers/protocol/chat';
@@ -139,6 +139,12 @@ export class Controller {
       if (!next.abilitiesOpen || next.mode !== 'overview') {
         next.abilityChoice = null;
         next.abilityCity = null;
+        next.influenceMode = false;
+      }
+      if (!next.influenceMode) {
+        next.influencePosition = null;
+        next.influenceTarget = null;
+        next.influenceOrigin = null;
       }
       return next;
     });
@@ -369,8 +375,16 @@ export class Controller {
         old.game.age !== game.age);
     const resetMovement = movementEnded || turnChanged || (!view.canPlay && !view.stopMovement);
     const ability = groupAbilities(view.specialActions).find((group) => group.key === old.abilityChoice);
+    const influenceTarget = view.influence?.find((offer) => influenceKey(offer) === old.influenceTarget);
     clearTimeout(this.refreshTimer);
     this.patch({
+      influenceTarget: influenceTarget ? old.influenceTarget : null,
+      influencePosition: view.influence?.some((offer) => offer.position === old.influencePosition)
+        ? old.influencePosition
+        : null,
+      influenceOrigin: influenceTarget?.origins?.some((o) => o.position === old.influenceOrigin)
+        ? old.influenceOrigin
+        : null,
       abilityChoice: ability?.key ?? null,
       abilityCity: ability?.offers.some((offer) => offer.position === old.abilityCity)
         ? old.abilityCity
@@ -868,11 +882,9 @@ export class Controller {
     if (get(this.session).playback) return;
     const s = get(this.session);
     if (mapDecisionOptions(s.view?.decision).length) {
-      if (s.view!.decision!.options.some((o) => o.mapTarget)) {
-        this.focusDecisionPosition(position);
-        return;
-      }
       const index = mapDecisionIndex(s.view!.decision!, position, pick);
+      // Pieces: open the clicked hex, and choose the clicked unit/building (or a lone candidate).
+      if (s.view!.decision!.options.some((o) => o.mapTarget)) this.focusDecisionPosition(position);
       if (index >= 0) this.selectDecisionOption(index);
       return;
     }
@@ -885,6 +897,19 @@ export class Controller {
     )
       return;
     this.audio.play('select');
+    const influence = activeInfluence(s);
+    if (influence) {
+      const offer = influenceMapPick(influence.offers, position, pick);
+      if (influence.targets.includes(position))
+        this.patch({
+          influencePosition: position,
+          influenceTarget: offer ? influenceKey(offer) : null,
+          influenceOrigin: null,
+          error: '',
+        });
+      else if (influence.origins.includes(position)) this.patch({ influenceOrigin: position, error: '' });
+      return;
+    }
     const ability = activeCityAbility(s);
     if (ability) {
       if (ability.offers.some((offer) => offer.position === position))
@@ -961,6 +986,38 @@ export class Controller {
       pirateSpawns: false,
       error: '',
     });
+  }
+  chooseInfluence() {
+    const s = get(this.session);
+    if (s.pending || !s.view?.canPlay || !s.view.influence?.length) return;
+    this.closeActivity();
+    this.patch({
+      abilitiesOpen: true,
+      abilityChoice: null,
+      abilityCity: null,
+      influenceMode: true,
+      influencePosition: null,
+      influenceTarget: null,
+      influenceOrigin: null,
+      mode: 'overview',
+      tilePanel: false,
+      seaRoutes: false,
+      pirateSpawns: false,
+      error: '',
+    });
+  }
+  selectInfluenceTarget(key: string | null) {
+    const s = get(this.session);
+    const offer = s.view?.influence?.find((o) => influenceKey(o) === key);
+    this.patch({
+      influenceTarget: offer ? key : null,
+      influencePosition: offer?.position ?? s.influencePosition ?? null,
+      influenceOrigin: null,
+      error: '',
+    });
+  }
+  selectInfluenceOrigin(position: string) {
+    this.patch({ influenceOrigin: position, error: '' });
   }
   selectDecisionOption(index: number) {
     const s = get(this.session);

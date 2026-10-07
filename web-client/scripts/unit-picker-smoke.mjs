@@ -144,8 +144,13 @@ try {
     await decision.getByRole('button', { name: 'Infantry', exact: true }).nth(0).click();
     await tapHex(page, 'B3');
     assert.equal(await decision.locator('.unit-choice').count(), 1);
-    assert.match(await decision.innerText(), /1 \/ 2 selected/);
-    await decision.getByRole('button', { name: 'Settler', exact: true }).click();
+    // B3 has a single eligible unit: tapping it on the map chooses it (confirmation still required).
+    assert.match(await decision.innerText(), /2 \/ 2 selected/);
+    assert.equal(
+      await decision.getByRole('button', { name: 'Settler', exact: true }).getAttribute('aria-pressed'),
+      'true',
+    );
+    assert.equal(sent.length, 1);
     await decision.getByRole('button', { name: 'Show next group of units', exact: true }).click();
     assert.equal(
       await decision

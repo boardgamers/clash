@@ -2,7 +2,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { influencePaymentMatches, influenceUpfrontCost } from './influence.ts';
+import {
+  activeInfluence,
+  influenceKey,
+  influenceMapPick,
+  influencePaymentMatches,
+  influenceTarget,
+  influenceUpfrontCost,
+} from './influence.ts';
+import type { Session } from './types.ts';
 import type { View } from './types.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const npcs = JSON.parse(await engine.init(2, [], {}, 'influence-npcs', {})).players.slice(2);
@@ -82,4 +90,32 @@ test('Buddhism keeps the same influence context through an optional reroll', () 
   const rerolled = move(rolled, { Response: { Bool: true } });
   assert.equal(view(rerolled).influenceContext, null);
   assert.ok(rerolled.successful_cultural_influence);
+});
+
+test('influence map clicks choose the exact clicked building and only auto-pick a lone candidate', () => {
+  const g = influenceFixture();
+  g.players[1].cities[0].city_pieces = { temple: 1, academy: 1 };
+  const v = view(g);
+  const offers = v.influence!;
+  const temple = offers.find((o) => o.name === 'Temple')!;
+  assert.deepEqual(influenceTarget(temple), { kind: 'structure', structure: 'Building:Temple' });
+  assert.equal(influenceMapPick(offers, 'C1', { kind: 'city', structure: 'Building:Temple' }), temple);
+  assert.equal(influenceMapPick(offers, 'C1', { kind: 'city' }), null, 'two buildings: the city opens a list');
+  assert.equal(influenceMapPick(offers, 'C1', { kind: 'city', structure: 'CityCenter' }), null);
+  assert.equal(influenceMapPick(offers, 'A1', { kind: 'city' }), null);
+  const lone = view(influenceFixture()).influence!;
+  assert.equal(influenceMapPick(lone, 'C1', { kind: 'tile' })?.name, 'Temple');
+  const s = (patch: Partial<Session>) =>
+    ({ view: v, mode: 'overview', abilitiesOpen: true, influenceMode: true, ...patch }) as Session;
+  assert.equal(activeInfluence(s({ influenceMode: false })), undefined);
+  assert.equal(activeInfluence(s({ abilitiesOpen: false })), undefined);
+  const browsing = activeInfluence(s({ influencePosition: 'C1' }))!;
+  assert.deepEqual(browsing.targets, ['C1']);
+  assert.equal(browsing.target, null);
+  assert.deepEqual(browsing.selected, ['C1']);
+  const chosen = activeInfluence(s({ influenceTarget: influenceKey(temple) }))!;
+  assert.equal(chosen.target, temple);
+  assert.equal(chosen.source, 'A1');
+  assert.deepEqual(chosen.selected, ['C1', 'A1']);
+  assert.deepEqual(chosen.positions, ['C1', 'A1'], 'the source city is highlighted with the targets');
 });

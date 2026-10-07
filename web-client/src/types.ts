@@ -537,6 +537,11 @@ export interface Session {
   abilitiesOpen: boolean;
   abilityChoice?: string | null;
   abilityCity?: string | null;
+  /** Cultural influence target mode, entered from the abilities menu. */
+  influenceMode?: boolean;
+  influencePosition?: string | null;
+  influenceTarget?: string | null;
+  influenceOrigin?: string | null;
   seaRoutes: boolean;
   pirateSpawns: boolean;
   pirateSpawnPlayer?: number | null;
@@ -598,6 +603,8 @@ export interface MapPick {
   player?: number;
   unit?: number;
   decisionIndex?: number;
+  /** A specific city structure model: `CityCenter`, `Building:Temple` or `Wonder:GreatGardens`. */
+  structure?: string;
 }
 export interface UnitView {
   movementNotes?: string[];

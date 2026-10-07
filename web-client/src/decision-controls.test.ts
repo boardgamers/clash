@@ -7,6 +7,7 @@ import {
   researchDecision,
   mapDecisionOptions,
   mapDecisionIndex,
+  structureKey,
   toggleDecisionSelection,
 } from './decision-controls.ts';
 import type { View } from './types.ts';
@@ -344,6 +345,39 @@ test('Earthquake offers separate building choices at the same city and respects 
   let selected: number[] = [];
   for (let i = 0; i < options.length; i++) selected = toggleDecisionSelection(d, selected, i);
   assert.equal(selected.length, d.max);
+});
+
+test('Heavy Earthquake structures are chosen by clicking their building model or a single-structure city', () => {
+  const state = engine.tryMove(
+    fixture('incidents/earthquake/earthquake'),
+    JSON.stringify({ Playing: { Advance: { advance: 'Storage', payment: { gold: 2 } } } }),
+    0,
+  );
+  const d = view(state, 0).decision!;
+  assert.equal(d.eventContext?.name, 'Heavy Earthquake');
+  const index = (position: string, key: string) =>
+    d.options.findIndex(
+      (o) => o.position === position && o.mapTarget?.kind === 'structure' && structureKey(o.mapTarget.structure) === key,
+    );
+  assert.equal(structureKey('CityCenter'), 'CityCenter');
+  assert.equal(structureKey({ Building: 'Temple' }), 'Building:Temple');
+  assert.equal(structureKey({ Wonder: 'GreatGardens' }), 'Wonder:GreatGardens');
+  for (const key of ['CityCenter', 'Building:Fortress', 'Building:Temple', 'Wonder:GreatGardens']) {
+    assert.ok(index('C2', key) >= 0, key);
+    assert.equal(mapDecisionIndex(d, 'C2', { kind: 'city', player: 0, structure: key }), index('C2', key));
+  }
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'city', player: 0 }), -1, 'several structures: open the city');
+  assert.equal(mapDecisionIndex(d, 'C2', { kind: 'city', structure: 'Building:Port' }), -1);
+  assert.equal(mapDecisionIndex(d, 'B2', { kind: 'tile' }), index('B2', 'CityCenter'), 'only a city center');
+  assert.equal(mapDecisionIndex(d, 'A1', { kind: 'city', structure: 'CityCenter' }), -1, 'not your city');
+  const values = [index('B2', 'CityCenter'), index('C2', 'Building:Fortress'), index('C2', 'Wonder:GreatGardens')].map(
+    (i) => d.options[i].value,
+  );
+  const { action } = JSON.parse(
+    engine.webQuery(engine.stripSecret(state, 0), 0, JSON.stringify({ kind: 'decision', values, payments: [] })),
+  );
+  assert.deepEqual(action.Response.SelectStructures, values);
+  assert.doesNotThrow(() => engine.tryMove(state, JSON.stringify(action), 0));
 });
 
 
