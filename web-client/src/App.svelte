@@ -71,6 +71,7 @@
     Info,
   } from 'lucide-svelte';
   import { mountChat } from '@boardgamers/protocol/chat/dom';
+  import { chatPlayerColor, chatPlayerIndex } from './chat-presentation';
   import { World } from './board';
   import { militarySummary } from './strategy';
   import { positionStrategyKey, positionMapGuide } from './strategy-key';
@@ -380,6 +381,31 @@
     const panel = mountChat(node, {
       chat: controller.chat,
       openPlayer: controller.commands.openPlayer,
+      renderAuthor(message) {
+        if (message.type === 'system') return node.ownerDocument.createDocumentFragment();
+        const index = chatPlayerIndex(
+          message,
+          $session.game?.players ?? [],
+          controller.chat.snapshot.mentions,
+        );
+        const author = node.ownerDocument.createElement(index === undefined ? 'strong' : 'button');
+        author.className = 'chat-author';
+        author.setAttribute('translate', 'no');
+        if (index !== undefined) {
+          author.style.color = chatPlayerColor(index, $session);
+          if ($session.colorBlind) {
+            const symbol = node.ownerDocument.createElement('span');
+            symbol.className = 'chat-player-symbol';
+            symbol.setAttribute('aria-hidden', 'true');
+            symbol.textContent = playerSymbol(index, $session.playerSymbols);
+            author.append(symbol);
+          }
+          author.setAttribute('type', 'button');
+          author.addEventListener('click', () => controller.commands.openPlayer(index));
+        }
+        author.append(node.ownerDocument.createTextNode(message.author ?? 'Game'));
+        return author;
+      },
       labels: {
         title: 'Chat',
         empty: 'No messages yet.',
@@ -387,7 +413,25 @@
       },
     });
     controller.chat.setOpen($session.activityOpen && $session.tab === 'chat');
-    return { destroy: () => panel.destroy() };
+    let identity = '';
+    const unsubscribe = controller.session.subscribe((state) => {
+      const next = JSON.stringify([
+        state.dark,
+        state.colorBlind,
+        state.playerColors,
+        state.playerSymbols,
+        state.game?.players.map((player) => [player.id, player.name]),
+      ]);
+      if (identity === next) return;
+      identity = next;
+      panel.refresh();
+    });
+    return {
+      destroy: () => {
+        unsubscribe();
+        panel.destroy();
+      },
+    };
   }
   function showDialog(node: HTMLDialogElement) {
     node.showModal();

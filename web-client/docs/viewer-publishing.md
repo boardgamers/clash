@@ -51,3 +51,5 @@ Viewer 0.1.25 replaces Yes/No prompts with the actual outcomes and explains cons
 Viewer 0.1.26 stacks descriptive choices in full-width rows so outcome labels and consequences are easier to read. Only plain Yes/No pairs retain the compact side-by-side layout. Engine 0.4.39 is unchanged.
 
 Viewer 0.1.27 uses inline resource icons in choice buttons and their consequence text. Amounts use compact icon-and-number labels while the button keeps its complete accessible name. Unnumbered mood and culture references also receive the appropriate token icon. Engine 0.4.39 is unchanged.
+
+Viewer 0.1.28 colors chat authors by player, adjusting shades for contrast in light and dark themes and respecting custom colors and color-blind symbols. Author buttons still open player profiles. System events appear as centered dividers with a timestamp and no chat author label. The shared BGS chat controller and its editing, translation, mentions and scrolling behavior remain in use. Engine 0.4.39 is unchanged.

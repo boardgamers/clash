@@ -1416,6 +1416,30 @@ small {
   color: var(--ink);
   background: var(--paper2);
 }
+.chat-panel .chat-player-symbol {
+  margin-right: 5px;
+}
+.chat-panel .bgs-game-chat article:not(.system) {
+  border-bottom: 0;
+  padding: 6px 0;
+}
+.chat-panel .bgs-game-chat article.system {
+  margin: 16px 0;
+  padding: 10px 12px;
+  border: 0;
+  border-block: 1px solid var(--line);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.chat-panel .bgs-game-chat article.system time {
+  display: block;
+  margin: 3px 0 0;
+  font-size: 10px;
+  font-weight: 400;
+}
 .toast {
   position: fixed;
   bottom: 35px;
