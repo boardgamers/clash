@@ -590,6 +590,7 @@ export interface Session {
   unitBadges: boolean;
   replayAutoplay: boolean;
   availableOnly: boolean;
+  confirmMoves: boolean;
   skipRazeCity: boolean;
 }
 export interface MapPick {

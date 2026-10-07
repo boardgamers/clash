@@ -207,6 +207,76 @@ test('movement group defaults exclude blocked units and keep ship passengers abo
   }
 });
 
+test('clicking another movable group switches selection, while legal destinations keep their move', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const g = JSON.parse(fixture('movement/movement'));
+    g.players[0].advances.push('Tactics');
+    g.map.tiles.push(['E2', 'Fertile'], ['E3', 'Fertile']);
+    g.players[0].units.push({ id: 8, position: 'E2', unit_type: 'Infantry' });
+    g.players[0].next_unit_id = 9;
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    c.openUnits([4]);
+    assert.ok(app.session().moveDestinations.some((d) => d.position === 'C2'));
+    assert.ok(!app.session().moveDestinations.some((d) => d.position === 'E2'));
+    c.selectTile('E2', { kind: 'unit', player: 0, unit: 8 });
+    assert.deepEqual(app.session().selectedUnits, [8], 'Not a destination: select its own units instead');
+    assert.equal(app.session().unitPosition, 'E2');
+    assert.equal(app.session().mode, 'settlers');
+    assert.ok(app.session().moveDestinations.length, 'The new group shows its own destinations');
+    c.selectTile('B2');
+    assert.deepEqual(app.session().selectedUnits, [4]);
+    c.selectTile('C2', { kind: 'units', player: 0 });
+    assert.deepEqual(app.session().selectedUnits, [4], 'A legal destination is still a destination');
+    assert.equal(app.session().moveTarget, 'C2');
+    c.selectTile('E2');
+    assert.deepEqual(app.session().selectedUnits, [8], 'A chosen target does not block switching groups');
+    assert.equal(app.session().moveTarget, null);
+    assert.deepEqual(app.sent, []);
+  } finally {
+    app.close();
+  }
+});
+
+test('turning off move confirmation submits plain map moves but still confirms attacks', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const g = JSON.parse(fixture('movement/movement'));
+    g.players[0].advances.push('Tactics');
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    assert.equal(app.session().confirmMoves, true);
+    c.openUnits([4]);
+    c.selectTile('C2');
+    assert.equal(app.session().moveTarget, 'C2');
+    assert.deepEqual(app.sent, [], 'Confirmation is on by default');
+    c.setPreferences({ confirmMoves: false });
+    c.focusUnitPosition('B2');
+    const route = app.session().moveDestinations.find((d) => d.position === 'C2')!;
+    c.selectTile('C2');
+    assert.deepEqual(app.sent.map((m) => JSON.parse(m)), [route.action]);
+    assert.equal(app.session().pending, true);
+    c.patch({ pending: false });
+    c.focusUnitPosition('C2');
+    const army = [0, 1, 2, 3];
+    c.selectUnits(army);
+    const attack = app.session().moveDestinations.find((d) => d.position === 'C1');
+    assert.ok(attack?.attack, 'C1 holds enemy units');
+    c.selectTile('C1');
+    assert.equal(app.session().moveTarget, 'C1');
+    assert.equal(app.sent.length, 1, 'Attacks keep their confirmation');
+    // Picking units in the panel with a target already chosen never submits on its own.
+    c.selectUnits([0, 1], 'C1');
+    c.selectUnits([4], 'C2');
+    assert.equal(app.sent.length, 1);
+  } finally {
+    app.close();
+  }
+});
+
 test('map happiness selects multiple cities, preserves them across variants, and confirms together', async () => {
   const app = paymentController(),
     c = app.controller;

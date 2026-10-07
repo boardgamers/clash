@@ -38,6 +38,12 @@
         cursor: pointer;
         text-decoration: none;
       }
+      #preview-bar label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+      }
       #preview-bar select option {
         color: #222;
         background: #eee;
@@ -91,7 +97,10 @@
         <option value="0">Player 1</option>
         <option value="1">Player 2</option>
         <option value="spectator">Spectator</option></select
-      ><button id="reset">New game</button><button id="theme">Theme</button>
+      ><button id="reset">New game</button><button id="theme">Theme</button
+      ><label title="BGS account preference"
+        ><input id="confirm-moves" type="checkbox" checked />Confirm unit moves</label
+      >
       <span id="status">Connecting to local game…</span>
     </div>
     <div id="host-error" role="alert"></div>

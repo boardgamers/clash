@@ -43,3 +43,21 @@ export function passengerLandings(
     }
   return [...targets].map(([position, units]) => ({ position, units }));
 }
+
+// With move confirmation turned off, a map click can submit the move directly only
+// when there is exactly one way to reach the hex and the move is easy to take back.
+// Attacks roll dice and exploration reveals tiles (both lock Undo); boarding an allied
+// pirate ship and paid moves have extra consequences: those keep the confirm step.
+export function instantMove(destinations: MoveDestination[], position: string) {
+  const options = destinations.filter((d) => d.position === position);
+  const [only] = options;
+  if (
+    options.length !== 1 ||
+    only.attack ||
+    only.terrain === 'Unexplored' ||
+    only.pirateCarrier != null ||
+    Object.values(only.payment ?? {}).some(Boolean)
+  )
+    return null;
+  return only;
+}

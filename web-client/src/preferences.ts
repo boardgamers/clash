@@ -27,5 +27,7 @@ export function readPreferences(preferences: Record<string, unknown>) {
     unitBadges: preferences.unitBadges === true,
     replayAutoplay: preferences.replayAutoplay !== false,
     availableOnly: preferences.availableOnly === true,
+    // Confirmation stays on unless the player explicitly turns it off.
+    confirmMoves: preferences.confirmMoves !== false,
   };
 }

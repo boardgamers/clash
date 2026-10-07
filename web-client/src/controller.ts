@@ -9,7 +9,7 @@ import { loadBridge } from './bridge';
 import { readPreferences } from './preferences';
 import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
-import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
+import { canMoveOnMap, instantMove, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
 import { recapStart, sinceLastTurn, frameAt, frameEffects } from './playback';
@@ -79,6 +79,7 @@ export class Controller {
     unitBadges: false,
     replayAutoplay: true,
     availableOnly: false,
+    confirmMoves: true,
     skipRazeCity: false,
   });
   readonly chat = new ChatController();
@@ -918,7 +919,9 @@ export class Controller {
     }
     // A destination takes priority over pieces on it (boarding or attacking).
     if (s.mode === 'settlers' && s.moveDestinations.some((d) => d.position === position)) {
+      const instant = s.confirmMoves ? null : instantMove(s.moveDestinations, position);
       this.chooseMoveDestination(position);
+      if (instant) this.submit(instant.action);
       return;
     }
     if (
