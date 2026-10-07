@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Footprints, Swords, Ship, Crown, Beef, PawPrint } from 'lucide-svelte';
+  import { Footprints, Swords, Ship, Crown, ChessKnight, PawPrint } from 'lucide-svelte';
   let { type, size = 16 }: { type: string | { Leader: string }; size?: number } = $props();
   const Icon = $derived(
     typeof type === 'object'
@@ -9,7 +9,7 @@
         : type === 'Ship'
           ? Ship
           : type === 'Cavalry'
-            ? Beef
+            ? ChessKnight
             : type === 'Elephant'
               ? PawPrint
               : Swords,

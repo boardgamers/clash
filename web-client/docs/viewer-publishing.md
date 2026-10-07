@@ -55,3 +55,5 @@ Viewer 0.1.27 uses inline resource icons in choice buttons and their consequence
 Viewer 0.1.28 colors chat authors by player, adjusting shades for contrast in light and dark themes and respecting custom colors and color-blind symbols. Author buttons still open player profiles. System events appear as centered dividers with a timestamp and no chat author label. The shared BGS chat controller and its editing, translation, mentions and scrolling behavior remain in use. Engine 0.4.39 is unchanged.
 
 Viewer 0.1.29 opens finished games directly on the final state and closes automatic catch-up when a game finishes during playback. Manual replay remains available. Publish with engine 0.4.40, which removes the duplicate game-ended/winner chat announcement while retaining the winner in the journal; BGS supplies the end-of-game system message.
+
+Viewer 0.1.30 replaces the cavalry symbol with a recognizable horse head, consistently across combat dice, journals and unit summaries. Engine 0.4.40 is unchanged.
