@@ -959,6 +959,21 @@ small {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+.choice-outcome {
+  display: grid;
+  gap: 6px;
+}
+.collection-choices .choice-outcome > small {
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 0;
+}
+.binary-choices > button > svg {
+  flex-shrink: 0;
+  margin-left: auto;
+}
 .collection-choices button {
   display: flex;
   align-items: center;

@@ -319,6 +319,11 @@
             </p>{/if}
           <div class="leader-grid">
             {#each visibleLeaders as leader}
+              {@const reason =
+                cityReason(leader.reason ?? null) ||
+                (!$session.recruits.leader && occupiedCapacity >= capacity
+                  ? 'The selection exceeds this city’s recruitment capacity.'
+                  : '')}
               <article class="leader-card" class:selected={$session.recruits.leader === leader.id}>
                 <button
                   class="leader-select"
@@ -327,7 +332,7 @@
                   disabled={$session.pending ||
                     (!!leader.reason && $session.recruits.leader !== leader.id) ||
                     (!$session.recruits.leader && occupiedCapacity >= capacity)}
-                  title={leader.reason ?? undefined}
+                  title={reason || undefined}
                   onclick={() =>
                     controller.setRecruits({
                       ...$session.recruits,
@@ -346,9 +351,7 @@
                     >
                   </span>
                 </button>
-                {#if cityReason(leader.reason ?? null) && leader.reason !== 'Not enough resources'}<small
-                    class="reason">{cityReason(leader.reason ?? null)}</small
-                  >{/if}
+                {#if reason}<small class="reason">{reason}</small>{/if}
                 <dl class="leader-abilities">
                   {#each leader.abilities as ability}{@const Icon = abilityIcon(ability.description)}
                     <div>

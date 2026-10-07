@@ -16,6 +16,24 @@ use crate::recruit::{Recruit, recruit_cost};
 use crate::unit::{UnitType, Units};
 use serde_json::{Value, json};
 
+pub(super) fn leader_unavailable_reason(
+    p: &crate::player::Player,
+    leader: crate::leader::Leader,
+) -> Option<String> {
+    if let Some(unit) = p
+        .units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Leader(leader))
+    {
+        return Some(format!("Already on board at {}", unit.position));
+    }
+    if p.recruited_leaders.contains(&leader) {
+        return Some("Killed or replaced · Cannot recruit again".into());
+    }
+    // Guillotine removes the remaining unplayed leaders from the supply.
+    (!p.available_leaders.contains(&leader)).then(|| "Unavailable after Guillotine".into())
+}
+
 fn recruit_cost_options(game: &Game, cost: &crate::player_events::CostInfo) -> Vec<String> {
     let mut names = Vec::new();
     for (origin, _) in &cost.info.log {
@@ -474,11 +492,13 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
                 });
                 json!({"steps":steps,"lawgiver":lawgiver,"mood":if steps==max_steps {"Happy"} else {"Neutral"},"payment":payment,"reason":reason,"action":action})
             }).collect::<Vec<_>>();
-        let leaders = p.available_leaders.iter().map(|l| {
+        let leaders = p.civilization.leaders.iter().map(|info| {
+            let l = &info.leader;
             let mut units = Units::empty();
             units += &UnitType::Leader(*l);
             let result = crate::recruit::recruit_cost_without_replaced(game, p, &units, city.position, CostTrigger::NoModifiers);
-            let reason = action_reason(game, seat, can_play, PlayingActionType::Recruit)
+            let reason = leader_unavailable_reason(p, *l)
+                .or_else(|| action_reason(game, seat, can_play, PlayingActionType::Recruit))
                 .or_else(|| result.as_ref().err().cloned());
             let payment = result.map(|c| c.cost.first_valid_payment(&p.resources).unwrap_or_else(|| c.cost.default_payment()))
                 .unwrap_or_else(|_| UnitType::Leader(*l).cost());

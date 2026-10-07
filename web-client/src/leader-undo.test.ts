@@ -73,9 +73,13 @@ test('recruiting and undoing Pakal restores resources, recruitment and construct
     (unit: { unit_type: unknown }) => typeof unit.unit_type === 'string',
   );
   assert.deepEqual(
-    roster(JSON.stringify(retired)),
-    roster(recruited),
+    roster(JSON.stringify(retired)).map(({ reason, ...leader }) => leader),
+    roster(recruited).map(({ reason, ...leader }) => leader),
     'a removed leader remains in the roster',
+  );
+  assert.equal(
+    roster(JSON.stringify(retired)).find((leader) => leader.id === 'Pakal')!.reason,
+    'Killed or replaced · Cannot recruit again',
   );
   assert.equal(view(JSON.stringify(retired)).players[seat].leaders.length, 0);
 });

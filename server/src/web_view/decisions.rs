@@ -17,6 +17,80 @@ use itertools::Itertools;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
 
+pub(super) fn boolean_choice_labels(
+    game: &Game,
+    origin: &EventOrigin,
+) -> (&'static str, &'static str) {
+    match origin.name(game).as_str() {
+        "Guillotine" => ("Choose a new leader", "Gain 2 victory points"),
+        "Metallurgy" => ("Convert 1 ore to 1 gold", "Keep the ore"),
+        "Great Athlete" => ("Culture → mood tokens", "Mood → culture tokens"),
+        "Retreat" => ("Retreat", "Continue battle"),
+        "Great Mausoleum" => ("Draw from discard pile", "Draw from deck"),
+        "Draw Wonder Card" => ("Take the public wonder", "Draw from deck"),
+        "Great Engineer" => ("Construct a building", "Skip construction"),
+        "Shogunate" => ("Play without spending an action", "Spend 1 action"),
+        "Scholar" => ("Buy an advance", "Skip research"),
+        "Buddhism" => ("Reroll with Buddhism", "Keep this roll"),
+        "Human Sacrifice" => ("Sacrifice 1 captive", "Resolve the event"),
+        "Storm Master" => ("Restore event losses", "Keep event losses"),
+        "Horse Master" => ("Cancel 1 hit", "Keep combat value"),
+        "Sacrifice" => ("Sacrifice Dido", "Keep Dido"),
+        "Rune Stones" => ("Create a Rune Stone", "Keep the Obelisk"),
+        "Strategist" => ("Use +2 combat value", "Use tactics card effects"),
+        _ => ("Use ability", "Skip ability"),
+    }
+}
+
+pub(super) fn boolean_choice_consequences(
+    game: &Game,
+    origin: &EventOrigin,
+) -> Option<(&'static str, &'static str)> {
+    Some(match origin.name(game).as_str() {
+        "Guillotine" => (
+            "Place one remaining leader. All other unused leaders become unavailable for the rest of the game.",
+            "All remaining leaders become unavailable. You cannot recruit leaders for the rest of the game.",
+        ),
+        "Great Athlete" => (
+            "Choose how many culture tokens to exchange for mood tokens.",
+            "Choose how many mood tokens to exchange for culture tokens.",
+        ),
+        "Great Mausoleum" | "Draw Wonder Card" => (
+            "Take the displayed card.",
+            "Draw an unknown card from the deck.",
+        ),
+        "Great Engineer" => (
+            "Pay the normal resource cost; no extra action or city activation.",
+            "Keep your resources and skip the optional building.",
+        ),
+        "Shogunate" => (
+            "Use this turn’s Shogunate card allowance.",
+            "Keep Shogunate available for another card this turn.",
+        ),
+        "Scholar" => (
+            "Pay the normal research cost without spending an action.",
+            "Keep your resources; do not research an additional advance.",
+        ),
+        "Human Sacrifice" => (
+            "Return 1 captive, cancel this event and its icon, and draw another event.",
+            "Keep the captive and resolve this event normally.",
+        ),
+        "Storm Master" => (
+            "Restore the mood and units lost to this event. Event icons still apply.",
+            "The mood and units lost to this event are not restored.",
+        ),
+        "Sacrifice" => (
+            "Replace Dido with Infantry and force the attacker to retreat.",
+            "Keep Dido and continue the battle.",
+        ),
+        "Rune Stones" => (
+            "Remove 1 Obelisk from your supply and gain 1 objective point.",
+            "Keep the Obelisk in your supply; gain no point.",
+        ),
+        _ => return None,
+    })
+}
+
 // Advance requests either grant an advance, purchase it in a subsequent payment
 // request, or borrow its effect. Keep these distinctions in the shared tree.
 pub(super) fn advance_mode(game: &Game, handler: &PersistentEventHandler) -> &'static str {

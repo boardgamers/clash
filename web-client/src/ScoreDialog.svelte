@@ -219,8 +219,8 @@
         {#each player.civilizationLeaders ?? [] as leader (leader.id)}
           {@const active = player?.leaders?.find((l) => l.id === leader.id)}
           <section aria-label={leader.name} class:in-play={!!active}>
-            {#if active || leader.recruited}<div class="public-leader-status">
-                <span>{active ? 'In play' : 'Previously recruited'}</span>
+            {#if leader.reason || active || leader.recruited}<div class="public-leader-status">
+                <span>{leader.reason ?? (active ? 'In play' : 'Previously recruited')}</span>
                 {#if active}<button
                     class="secondary"
                     disabled={$session.pending}

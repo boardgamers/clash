@@ -1300,27 +1300,18 @@
               {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
             </section>
           {/if}
-          <div
-            class="collection-choices"
-            class:binary-choices={choiceDecision.choices.length === 2 &&
-              choiceDecision.choices.every((choice) => choice.name === 'Yes' || choice.name === 'No')}
-          >
-            {#each choiceDecision.choices as choice}<button
+          <div class="collection-choices" class:binary-choices={choiceDecision.binary}>
+            {#each choiceDecision.choices as choice, index}<button
                 class="secondary wide"
-                aria-label={$session.view?.influenceContext?.stage === 'reroll'
-                  ? choice.name === 'Yes'
-                    ? 'Reroll with Buddhism'
-                    : 'Keep this roll'
-                  : choice.pile
-                    ? pileText(choice.pile)
-                    : choice.name}
+                aria-label={choice.pile ? pileText(choice.pile) : choice.name}
+                aria-describedby={choice.description ? `choice-consequence-${index}` : undefined}
                 disabled={$session.pending}
                 onclick={() => controller.submit(choice.action)}
-                >{#if choice.pile}<ResourceAmount
-                    pile={choice.pile}
-                  />{:else if $session.view?.influenceContext?.stage === 'reroll'}{choice.name === 'Yes'
-                    ? 'Reroll with Buddhism'
-                    : 'Keep this roll'}{:else}{choice.name}{/if}<ArrowRight size={17} /></button
+                >{#if choice.pile}<ResourceAmount pile={choice.pile} />{:else}<span class="choice-outcome"
+                    ><strong>{choice.name}</strong>{#if choice.description}<small
+                        id={`choice-consequence-${index}`}>{choice.description}</small
+                      >{/if}</span
+                  >{/if}<ArrowRight size={17} /></button
               >{/each}
           </div>
         {:else if objectiveDecision}

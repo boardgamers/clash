@@ -206,6 +206,7 @@ export interface PlayerView {
     id: string;
     name: string;
     recruited: boolean;
+    reason?: string | null;
     abilities: { name: string; description: string }[];
   }[];
   leaders?: {
@@ -331,8 +332,9 @@ export interface View {
   stopMovement: Move | null;
   choiceDecision?: {
     name: string;
+    binary?: boolean;
     preview?: { name: string; rules: string[]; affected?: string } | null;
-    choices: { name: string; pile?: Pile; action: Move }[];
+    choices: { name: string; description?: string | null; pile?: Pile; action: Move }[];
   } | null;
   advances: AdvanceView[];
   objectiveCards: {

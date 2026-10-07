@@ -223,6 +223,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         }).collect::<Vec<_>>(),
         "civilizationLeaders": p.civilization.leaders.iter().map(|info| json!({
             "id":info.leader,"name":info.name,"recruited":p.recruited_leaders.contains(&info.leader),
+            "reason":actions::leader_unavailable_reason(p, info.leader),
             "abilities":info.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()
         })).collect::<Vec<_>>(),
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
@@ -540,6 +541,8 @@ fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
             Some(json!({"name":request.name,"choices":choices}))
         }
         PersistentEventRequest::BoolRequest(name) => {
+            let (accept, decline) = decisions::boolean_choice_labels(game, &handler.origin);
+            let consequences = decisions::boolean_choice_consequences(game, &handler.origin);
             let preview = if handler.origin.name(game) == "Great Mausoleum" {
                 match &event.event_type {
                     PersistentEventType::ChooseIncident(_) => game.incidents_discarded.last().map(|id| {
@@ -560,9 +563,9 @@ fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
             } else {
                 None
             };
-            Some(json!({"name":name,"preview":preview,"choices":[
-                {"name":"Yes","action":Action::Response(EventResponse::Bool(true))},
-                {"name":"No","action":Action::Response(EventResponse::Bool(false))}]}))
+            Some(json!({"name":name,"preview":preview,"binary":true,"choices":[
+                {"name":accept,"description":consequences.map(|c|c.0),"action":Action::Response(EventResponse::Bool(true))},
+                {"name":decline,"description":consequences.map(|c|c.1),"action":Action::Response(EventResponse::Bool(false))}]}))
         }
         _ => None,
     }

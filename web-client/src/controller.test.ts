@@ -376,7 +376,7 @@ test('selecting a new leader accounts for the current one without asking for unr
     await c.load(engine.stripSecret(raw, seat));
     c.openCities(city, 'recruit');
     const existing = app.session().view!.units!.find((u) => typeof u.type === 'object')!;
-    const next = app.session().view!.cityActions[0].leaders![0].id;
+    const next = app.session().view!.cityActions[0].leaders!.find((leader) => !leader.reason)!.id;
     c.setRecruits({ leader: next });
     assert.deepEqual(app.session().replacements, [existing.id]);
     assert.ok(app.session().recruitPreview);
