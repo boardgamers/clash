@@ -380,6 +380,9 @@ export interface Bridge {
   webView: (state: string, seat?: number) => string;
   webCollectPreview: (state: string, seat: number, city: string, choices: string) => string;
   webRecruitPreview: (state: string, seat: number, city: string, units: string) => string;
+  /** Local prediction only; the server validates and executes every move. */
+  tryMove?: (state: string, move: string, seat: number) => string;
+  stripSecret?: (state: string, seat?: number) => string;
 }
 export type UnitKind = 'Settler' | 'Infantry' | 'Cavalry' | 'Elephant' | 'Ship';
 export type RecruitSelection = Partial<

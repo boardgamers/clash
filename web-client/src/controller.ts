@@ -19,12 +19,14 @@ import { contextualCards, type CardContext } from './contextual-cards';
 import { recruitDiscardSelection, requiredRecruitDiscards } from './recruit-discards';
 import { happinessTargets } from './happiness';
 import { UndoPreview } from './undo-preview';
+import { fingerprint, isTrap, predictMove, predictUndo } from './prediction';
 import {
   researchDecision,
   mapDecisionOptions,
   mapDecisionIndex,
   toggleDecisionSelection,
 } from './decision-controls';
+const WAITING = 'Waiting for the game to confirm your action…';
 export class Controller {
   readonly session = writable<Session>({
     decisionSelection: [],
@@ -106,9 +108,21 @@ export class Controller {
         | 'happinessLawgiver'
       > & { id: number })
     | null = null;
+  /** The state currently shown and queried: the server's, or a local prediction on top of it. */
   private raw = '';
+  /** The latest state received from the host. */
+  private confirmedRaw = '';
+  private confirmedPrint: string | null = null;
+  /**
+   * Moves awaiting the server, oldest first. Only the head has been sent; the
+   * rest wait for its confirmation so the host always receives moves in order.
+   * `print` is the predicted state's fingerprint, or null when the result
+   * depends on information this seat does not have.
+   */
+  private outbox: { move: Move; print: string | null; announced: boolean }[] = [];
+  private predictions: boolean;
+  private moveAnnounced = false;
   private undoPreview = new UndoPreview();
-  private undoRestore: Partial<Session> | null = null;
   private playerSettings: Record<string, unknown> | null = null;
   private legacySkipRaze = false;
   private migratedSkipRaze = false;
@@ -125,7 +139,9 @@ export class Controller {
   constructor(
     readonly commands: ViewerCommands<string> & { clearReplayInfo?: () => void },
     readonly assetBase: URL,
+    options: { predict?: boolean } = {},
   ) {
+    this.predictions = options.predict ?? true;
     this.chat.setOpen(false);
     this.chatOff = this.chat.subscribe(() => this.patch({ unread: this.chat.unread }));
   }
@@ -248,7 +264,9 @@ export class Controller {
   }
   handleError(error: unknown) {
     clearTimeout(this.refreshTimer);
-    this.restoreUndoPreview();
+    // A rejected move invalidates its prediction and every move queued behind it.
+    this.outbox = [];
+    this.showConfirmed();
     this.keepCitiesRequest = null;
     this.cardContinuation = null;
     this.submittedMove = null;
@@ -259,6 +277,12 @@ export class Controller {
     this.audio.play('error');
     this.patch({ error: String(error), pending: false, automaticPayment: false });
   }
+  /** The host's verdict on a sent move. A rejection withdraws its prediction at once. */
+  moveResult({ move, ok, error }: { move?: unknown; ok: boolean; error?: string }) {
+    const head = this.outbox[0];
+    if (ok || !head || (typeof move === 'string' && move !== JSON.stringify(head.move))) return;
+    this.handleError(error || 'The action could not be sent. Please try again.');
+  }
   async load(raw: unknown) {
     if (typeof raw !== 'string') throw new Error('Clash expects a serialized game state.');
     if (!this.engine) {
@@ -268,15 +292,71 @@ export class Controller {
     const old = get(this.session);
     // The platform can resend an unchanged snapshot after seat metadata or a reconnect.
     // It is not an acknowledgement of a pending move and must preserve local selections.
-    if (raw === this.raw && old.view) return;
+    if (raw === this.confirmedRaw && old.view) return;
+    if (this.outbox.length && this.reconcile(raw)) return;
+    clearTimeout(this.refreshTimer);
+    this.confirmedRaw = raw;
+    this.confirmedPrint = null;
+    this.apply(raw);
+  }
+  private confirmedFingerprint() {
+    return (this.confirmedPrint ??= fingerprint(this.confirmedRaw));
+  }
+  /** Matches a host state against the predicted moves. Returns true when it was handled. */
+  private reconcile(raw: string) {
+    const print = fingerprint(raw);
+    // A resend of the state before the move (hidden piles are reshuffled per send).
+    if (print === this.confirmedFingerprint()) return true;
+    const head = this.outbox[0],
+      base = this.confirmedRaw;
+    this.confirmedRaw = raw;
+    this.confirmedPrint = print;
+    clearTimeout(this.refreshTimer);
+    if (head.print === print) {
+      // Exactly as predicted: nothing visible changes, nothing replays.
+      this.outbox.shift();
+      if (this.outbox.length) this.sendHead();
+      else {
+        this.raw = raw;
+        this.markSeen();
+        if (get(this.session).error === WAITING) this.patch({ error: '' });
+      }
+      return true;
+    }
+    if (head.print === null) {
+      // The awaited result of a move that could not be predicted.
+      this.outbox = [];
+      this.submittedMove = head.move;
+      this.moveAnnounced = head.announced;
+      this.apply(raw);
+      return true;
+    }
+    // The server disagrees with the prediction (or another player moved first).
+    // Rewind to the last confirmed position quietly, then show the server's state
+    // as a regular update so new draws, battles and recap effects are reported.
+    this.outbox = [];
+    if (this.raw !== base) this.apply(base, { quiet: true });
+    this.apply(raw);
+    this.notify('Game updated.');
+    return true;
+  }
+  private apply(raw: string, { predicted = false, quiet = false } = {}) {
+    if (!this.engine) return;
+    if (quiet) {
+      // Withdrawn moves must not continue with their quoted payments or card flows.
+      this.quotedActionPayment = null;
+      this.quotedInfluenceRangePayment = null;
+      this.quotedFreeEducation = null;
+      this.cardContinuation = null;
+    }
+    const old = get(this.session);
     const game = JSON.parse(raw) as Game;
     if (game.board_history) game.board_history = { ...game.board_history, frames: groupPlaybackFrames(game) };
     const changed = raw !== this.raw;
     this.raw = raw;
     this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
-    this.undoRestore = null;
-    this.undoPreview.remember(game, view, old.seat, raw.length * 2);
+    this.undoPreview.remember(raw, game, view, old.seat);
     if (view.influenceContext) this.influenceAttemptPending = true;
     const quotedPayment = this.quotedActionPayment;
     this.quotedActionPayment = null;
@@ -376,7 +456,6 @@ export class Controller {
     const resetMovement = movementEnded || turnChanged || (!view.canPlay && !view.stopMovement);
     const ability = groupAbilities(view.specialActions).find((group) => group.key === old.abilityChoice);
     const influenceTarget = view.influence?.find((offer) => influenceKey(offer) === old.influenceTarget);
-    clearTimeout(this.refreshTimer);
     this.patch({
       influenceTarget: influenceTarget ? old.influenceTarget : null,
       influencePosition: view.influence?.some((offer) => offer.position === old.influencePosition)
@@ -503,25 +582,34 @@ export class Controller {
       const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);
       if (next) this.selectUnits([next.id]);
     }
-    if (bonusGranted) {
+    if (quiet) {
+      // Effects of a withdrawn prediction must not linger on the board.
+      this.dismissEffects(true);
+      this.showBattles([]);
+    }
+    const announced = this.moveAnnounced;
+    this.moveAnnounced = false;
+    if (quiet) {
+      /* Rewinding a prediction: the confirmed state was already announced. */
+    } else if (bonusGranted) {
       this.audio.play('research');
       this.notify(`${bonus.source} · ${bonus.label}`);
     } else if (drawn.length) {
       this.audio.play('draw');
-    } else if (old.pending && changed && !automaticPayment) {
+    } else if (old.pending && changed && !automaticPayment && !announced) {
       this.audio.play(moveSound(this.submittedMove));
       if (!this.influenceAttemptPending) this.notify('Game updated.');
     }
-    if (this.influenceAttemptPending && changed && !automaticPayment && !game.events?.length) {
+    if (!quiet && this.influenceAttemptPending && changed && !automaticPayment && !game.events?.length) {
       this.notify(
         game.successful_cultural_influence ? 'Cultural influence succeeded' : 'Cultural influence failed',
       );
       this.influenceAttemptPending = false;
     }
     this.submittedMove = null;
-    if (automaticPayment) this.submit(automaticPayment);
-    this.afterPlaybackLoad(old, game);
+    this.afterPlaybackLoad(old, game, !predicted);
     this.migrateRazeSetting();
+    if (automaticPayment) this.submit(automaticPayment);
   }
   private seenKey() {
     const s = get(this.session);
@@ -545,12 +633,12 @@ export class Controller {
       );
     } catch {}
   }
-  private afterPlaybackLoad(old: Session, game: Game) {
+  private afterPlaybackLoad(old: Session, game: Game, confirmed = true) {
     const s = get(this.session),
       frames = game.board_history?.frames ?? [];
     if (game.state === 'Finished' && s.playback?.automatic) {
       this.endPlayback();
-      this.markSeen();
+      if (confirmed) this.markSeen();
       return;
     }
     if (s.analysis || !frames.length) return;
@@ -607,7 +695,8 @@ export class Controller {
         this.scheduleEffect();
       }
     } else this.showBattles([]);
-    this.markSeen();
+    // Predicted positions are marked seen once the server confirms them.
+    if (confirmed) this.markSeen();
   }
   replayLastTurn() {
     const s = get(this.session);
@@ -793,7 +882,7 @@ export class Controller {
   }
   setPlayer(index?: number) {
     if (get(this.session).seat === index) return;
-    this.restoreUndoPreview();
+    this.settleToConfirmed();
     this.undoPreview.clear();
     if (get(this.session).seat !== undefined) this.playerSettings = null;
     this.migratedSkipRaze = false;
@@ -1527,50 +1616,88 @@ export class Controller {
         ))
     )
       return;
+    if ((move === 'Undo' && !s.view?.canUndo) || (move === 'Redo' && !s.view?.canRedo)) return;
     this.patch({ pending: true, error: '' });
     this.submittedMove = move;
     this.quotedActionPayment =
       quotedPayment && Object.values(quotedPayment).some(Boolean) ? { ...quotedPayment } : null;
-    if (!this.commands.move(JSON.stringify(move))) {
-      this.handleError('The action could not be sent. Please try again.');
-      return;
+    const predicted = this.predict(move, s);
+    this.outbox.push({ move, print: predicted && fingerprint(predicted), announced: !!predicted });
+    if (this.outbox.length === 1 && !this.sendHead()) return;
+    // Show the result immediately. Queries and follow-up moves use the predicted
+    // state; the host still validates every move and its state stays authoritative.
+    if (predicted) this.apply(predicted, { predicted: true });
+  }
+  /** The visible result of `move`, when it does not depend on hidden information. */
+  private predict(move: Move, s: Session): string | null {
+    const engine = this.engine;
+    if (
+      !this.predictions ||
+      !engine?.tryMove ||
+      !engine.stripSecret ||
+      s.analysis ||
+      s.seat === undefined ||
+      !s.game ||
+      !s.view ||
+      this.outbox.some((entry) => entry.print === null)
+    )
+      return null;
+    try {
+      if (move === 'Undo') {
+        // Undo patches are stripped from the browser's state: restore the
+        // position this seat was shown one step earlier on the same branch.
+        const previous = this.undoPreview.previous(s.game, s.view);
+        const undone = previous && predictUndo(previous, this.raw);
+        return undone ? engine.stripSecret(undone, s.seat) : null;
+      }
+      const prediction = predictMove(
+        { tryMove: engine.tryMove, stripSecret: engine.stripSecret },
+        this.raw,
+        move,
+        s.seat,
+      );
+      return 'raw' in prediction ? prediction.raw : null;
+    } catch (error) {
+      // A trapped engine must not be exercised for optional work again.
+      if (isTrap(error)) this.predictions = false;
+      return null;
     }
-    if (move === 'Undo') this.showUndoPreview();
+  }
+  private sendHead() {
+    const head = this.outbox[0];
+    if (!this.commands.move(JSON.stringify(head.move))) {
+      this.handleError('The action could not be sent. Please try again.');
+      return false;
+    }
+    clearTimeout(this.refreshTimer);
     this.refreshTimer = setTimeout(() => {
-      this.restoreUndoPreview();
+      // Show the confirmed position again and wait, as for an unpredictable move.
+      this.settleToConfirmed();
       this.commands.fetchState();
-      this.patch({ error: 'Waiting for the game to confirm your action…' });
+      this.patch({ error: WAITING });
     }, 8000);
+    return true;
   }
-  private showUndoPreview() {
-    const s = get(this.session);
-    if (!s.pending || !s.game || !s.view || s.analysis) return;
-    const snapshot = this.undoPreview.previous(s.game, s.view);
-    if (!snapshot) return;
-    const patch: Partial<Session> = {
-      game: snapshot.game,
-      view: snapshot.view,
-      mode: 'overview',
-      tilePanel: false,
-      cardsOpen: false,
-      wondersOpen: false,
-      objectivesOpen: false,
-      abilitiesOpen: false,
-      abilityChoice: null,
-      abilityCity: null,
-      publicEffects: [],
-      battles: [],
-    };
-    this.undoRestore = Object.fromEntries(Object.keys(patch).map((key) => [key, s[key as keyof Session]]));
-    // Keep the authoritative raw state and pending lock until the host confirms.
-    // No queries, automatic payments or other game moves use this preview.
-    this.patch(patch);
+  /**
+   * Withdraws every prediction: unsent moves are dropped, and the sent move is
+   * still awaited, but any new server state now counts as its result.
+   */
+  private settleToConfirmed() {
+    clearTimeout(this.refreshTimer);
+    const head = this.outbox[0];
+    this.outbox = head ? [{ ...head, print: null }] : [];
+    if (this.outbox.length > 0 || this.raw !== this.confirmedRaw) {
+      this.showConfirmed();
+      if (head) this.patch({ pending: true });
+    }
   }
-  private restoreUndoPreview() {
-    if (!this.undoRestore) return;
-    const restore = this.undoRestore;
-    this.undoRestore = null;
-    this.patch(restore);
+  /** Rewinds the display to the last state received from the host, without effects. */
+  private showConfirmed() {
+    if (!this.confirmedRaw || this.raw === this.confirmedRaw) return;
+    this.apply(this.confirmedRaw, { quiet: true });
+    // The withdrawn move's "Game updated." no longer applies.
+    clearTimeout(this.timer);
+    this.patch({ toast: '' });
   }
   playContextualCard(id: number, context: CardContext) {
     const s = get(this.session);
@@ -1624,7 +1751,7 @@ export class Controller {
   }
   destroy() {
     this.undoPreview.clear();
-    this.undoRestore = null;
+    this.outbox = [];
     clearTimeout(this.battleTimer);
     this.destroyed = true;
     clearTimeout(this.playbackTimer);

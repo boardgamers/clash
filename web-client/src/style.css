@@ -5891,6 +5891,22 @@ small {
   margin-top: 1px;
   color: var(--muted);
 }
+/* Only moves whose result depends on hidden information wait for the server. */
+.turn-banner.confirming > svg {
+  flex-shrink: 0;
+  color: var(--muted);
+  animation: confirming-pulse 1.2s ease-in-out infinite;
+}
+@keyframes confirming-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn-banner.confirming > svg {
+    animation: none;
+  }
+}
 .waiting-action {
   display: block;
   margin-top: 3px;

@@ -2,15 +2,14 @@ import type { Game, View } from './types.ts';
 
 interface Snapshot {
   game: Game;
-  view: View;
-  bytes: number;
+  raw: string;
 }
 
 const turn = (game: Game) => game.log?.at(-1)?.rounds.at(-1)?.turns.at(-1);
 const prefix = (game: Game, count: number) =>
   JSON.stringify((turn(game)?.actions ?? []).slice(0, count).map((entry) => entry.action));
 
-/** Only retain states actually received for this seat, never simulate hidden undo patches. */
+/** Only retain states shown for this seat, never simulate hidden undo patches. */
 export class UndoPreview {
   private scope = '';
   private snapshots: Snapshot[] = [];
@@ -20,7 +19,7 @@ export class UndoPreview {
     this.snapshots = [];
   }
 
-  remember(game: Game, view: View, seat: number | undefined, bytes: number) {
+  remember(raw: string, game: Game, view: View, seat: number | undefined) {
     if (seat === undefined || !game.board_history?.id || !turn(game)) {
       this.clear();
       return;
@@ -44,20 +43,21 @@ export class UndoPreview {
         snapshot.game.log_index < game.log_index &&
         prefix(snapshot.game, snapshot.game.log_index) === prefix(game, snapshot.game.log_index),
     );
-    this.snapshots.push({ game, view, bytes });
+    this.snapshots.push({ game, raw });
     while (
       this.snapshots.length > 8 ||
-      this.snapshots.reduce((sum, snapshot) => sum + snapshot.bytes, 0) > 8 * 1024 * 1024
+      this.snapshots.reduce((sum, snapshot) => sum + snapshot.raw.length * 2, 0) > 8 * 1024 * 1024
     )
       this.snapshots.shift();
   }
 
+  /** The serialized state one undo step before `game`, if it was shown on this branch. */
   previous(game: Game, view: View) {
     if (!view.canUndo) return undefined;
     return this.snapshots.find(
       (snapshot) =>
         snapshot.game.log_index === game.log_index - 1 &&
         prefix(snapshot.game, snapshot.game.log_index) === prefix(game, snapshot.game.log_index),
-    );
+    )?.raw;
   }
 }

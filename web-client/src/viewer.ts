@@ -82,6 +82,9 @@ export const viewer = registerViewer<string, string>(
       onReplayEnd() {
         controller.endPlayback();
       },
+      onMoveResult(result) {
+        controller.moveResult(result);
+      },
       onPlayer({ index }) {
         controller.setPlayer(index);
       },

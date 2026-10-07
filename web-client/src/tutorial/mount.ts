@@ -92,6 +92,8 @@ export const mountTutorial: TutorialMount = async (target, options) => {
       setReplayInfo: () => true,
     },
     new URL('.', document.baseURI),
+    // Lessons validate each step and answer for scripted opponents; show their results only.
+    { predict: false },
   );
   controller.setPlayer(0);
   controller.setPreferences(preferences);

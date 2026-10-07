@@ -717,14 +717,22 @@ test('Free Economy pays the displayed fee once, with no second click or duplicat
     assert.ok(app.session().preview);
     const before = JSON.parse(state);
     c.collect();
+    // This save has no playback history yet; its id comes from the secret seed,
+    // so the first move waits for the server.
     assert.equal(app.sent.length, 1);
+    assert.equal(app.session().pending, true);
     await c.load(engine.stripSecret(state, 0));
     assert.equal(app.sent.length, 1);
     state = engine.tryMove(state, app.sent[0], 0);
     await c.load(engine.stripSecret(state, 0));
     assert.equal(app.sent.length, 2);
-    assert.equal(app.session().automaticPayment, true);
-    assert.equal(app.session().pending, true);
+    // The automatic fee is shown as paid immediately.
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().automaticPayment, false);
+    assert.equal(
+      app.session().game!.players[0].resources!.mood_tokens,
+      before.players[0].resources.mood_tokens - 1,
+    );
     assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [{ mood_tokens: 1 }] } });
     await c.load(engine.stripSecret(state, 0));
     assert.equal(app.sent.length, 2);
@@ -1558,14 +1566,17 @@ test('Undo immediately previews a confirmed earlier state, ignores stale snapsho
     c.submit('Undo');
     assert.deepEqual(app.session().game!.players[0].resources, before.players[0].resources);
     assert.equal(app.session().game!.actions_left, before.actions_left);
-    assert.equal(app.session().pending, true, 'server confirmation still gates further moves');
+    assert.equal(app.session().pending, false, 'the predicted undo does not wait for the server');
+    assert.equal(app.session().view!.canUndo, false);
+    assert.equal(app.session().view!.canRedo, true, 'Redo is offered immediately');
     c.submit('Undo');
     assert.equal(app.sent.length, 2, 'one collection and one undo, without duplicate submissions');
+    const shown = app.session();
     await c.load(engine.stripSecret(app.after, 0));
-    assert.deepEqual(app.session().game!.players[0].resources, before.players[0].resources);
-    assert.equal(app.session().pending, true, 'the old snapshot does not acknowledge Undo');
+    assert.equal(app.session(), shown, 'the old snapshot does not acknowledge or revert Undo');
     const undone = engine.tryMove(app.after, JSON.stringify('Undo'), 0);
     await c.load(engine.stripSecret(undone, 0));
+    assert.equal(app.session(), shown, 'a matching confirmation changes nothing on screen');
     assert.equal(app.session().pending, false);
     assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(undone).players[0].resources);
     assert.equal(app.session().view!.canRedo, true);

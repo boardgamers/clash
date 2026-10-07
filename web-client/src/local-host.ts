@@ -147,8 +147,10 @@ addEventListener('message', async (event) => {
     try {
       showError('');
       await post('/api/move', { move: payload, seat, revision });
+      send('move:result', { move: payload, ok: true });
     } catch (error) {
       showError(String(error));
+      send('move:result', { move: payload, ok: false, error: String(error) });
     }
     await refresh(true);
   }

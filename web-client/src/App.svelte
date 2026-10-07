@@ -1108,8 +1108,17 @@
       </div>
     </section>
     <div class="board-toolbar" class:has-redo={$session.view?.canRedo} aria-label="Game controls">
-      <div class="turn-banner" class:waiting={!!waiting} role="status" aria-live="polite">
-        {#if waiting}<Hourglass size={15} aria-hidden="true" />{:else}<span class="turn-light"></span>{/if}
+      <div
+        class="turn-banner"
+        class:waiting={!!waiting}
+        class:confirming={$session.pending}
+        role="status"
+        aria-live="polite"
+        aria-busy={$session.pending}
+      >
+        {#if waiting || $session.pending}<Hourglass size={15} aria-hidden="true" />{:else}<span
+            class="turn-light"
+          ></span>{/if}
         <div class="turn-copy">
           <strong>{actionTitle}</strong>
           {#if waiting}<span class="waiting-action"
