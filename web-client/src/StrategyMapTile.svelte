@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Swords, Ship, Footprints, Landmark, Shield, Skull } from 'lucide-svelte';
+  import { Swords, Ship, Footprints, Landmark, Shield, Skull, Smile, Meh, Frown } from 'lucide-svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import { playerColor, playerSymbol } from './types';
@@ -28,7 +28,16 @@
             size={17}
           />{/if}{occupant.size}{#if occupant.city.city_pieces?.fortress != null}<Shield
             size={16}
-          />{/if}</span
+          />{/if}{#if occupant.city.mood_state}{@const Mood =
+            occupant.city.mood_state === 'Happy'
+              ? Smile
+              : occupant.city.mood_state === 'Angry'
+                ? Frown
+                : Meh}<span
+            class="city-mood strategy-mood"
+            data-mood={occupant.city.mood_state.toLowerCase()}
+            title={occupant.city.mood_state}><Mood size={17} aria-hidden="true" /></span
+          >{/if}</span
       >{/if}
     {#if occupant.army || occupant.ships || occupant.settlers}<span class="strategy-forces">
         {#if occupant.army - occupant.aboard > 0}<span

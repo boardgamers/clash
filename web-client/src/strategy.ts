@@ -55,6 +55,7 @@ export function strategyDescription(tile: StrategyTile) {
       [
         o.player.civilization,
         o.city ? `city size ${o.size}${o.city.city_pieces?.fortress != null ? ', Fortress' : ''}` : '',
+        o.city?.mood_state ?? '',
         o.army ? `${o.army} army${o.aboard ? ` (${o.aboard} aboard)` : ''}` : '',
         o.ships ? `${o.ships} ships` : '',
         o.settlers ? `${o.settlers} settlers` : '',

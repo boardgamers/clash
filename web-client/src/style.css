@@ -4158,8 +4158,12 @@ small {
 .game-shell .decision-tile-list {
   margin-bottom: 6px;
 }
-.world-labels.choosing-pieces :is(.city-map-label, .unit-map-label) {
+.world-labels.choosing-pieces .unit-map-label {
   display: none !important;
+}
+/* Card effects and casualties often hinge on mood: keep faces visible, but never intercept unit picks. */
+.world-labels.choosing-pieces .city-map-label {
+  pointer-events: none;
 }
 
 @media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {

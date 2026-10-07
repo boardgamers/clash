@@ -61,3 +61,10 @@ test('strategy markers use public positions, retain different city and army owne
   assert.equal(strategyDescription(tiles[2]), 'Exhausted mountain');
   assert.doesNotMatch(strategyDescription(tiles[0]), /B2|Pakal/);
 });
+test('strategy city markers announce the city mood', () => {
+  const tiles = strategyTiles({
+    map: { tiles: [['A1', 'Fertile']] },
+    players: [{ id: 0, civilization: 'Rome', cities: [{ position: 'A1', mood_state: 'Angry' }] }],
+  });
+  assert.equal(strategyDescription(tiles[0]), 'Fertile · Rome · city size 1 · Angry');
+});
