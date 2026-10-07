@@ -12,6 +12,7 @@
     {
       "event_type": {
         "CombatRoundEnd": {
+          "phase": "Retreat",
           "attacker": {
             "opponent_hit_cancels": 1,
             "opponent_fighters": 2,
@@ -45,6 +46,9 @@
                 "player": 1,
                 "present": {
                   "ships": 2
+                },
+                "losses": {
+                  "ships": 1
                 }
               }
             }
@@ -212,11 +216,6 @@
         }
       ],
       "units": [
-        {
-          "position": "D2",
-          "unit_type": "Ship",
-          "id": 0
-        },
         {
           "position": "D2",
           "unit_type": "Ship",
@@ -439,6 +438,26 @@
                         },
                         "balance": "Loss",
                         "position": "C3"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Remove 1 of their defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss",
+                        "position": "D2"
                       },
                       "origin": {
                         "Ability": "Combat"

@@ -11,6 +11,7 @@
     {
       "event_type": {
         "CombatRoundEnd": {
+          "phase": "Retreat",
           "attacker": {
             "opponent_fighters": 2,
             "combat_value": 1

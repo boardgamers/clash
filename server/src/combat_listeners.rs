@@ -1,4 +1,4 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedWithoutChoices};
 use crate::advance::Advance;
 use crate::combat::{Combat, CombatRetreatState, capture_position, log_round};
 use crate::combat_roll::CombatHits;
@@ -72,6 +72,7 @@ pub enum CombatEventPhase {
     Default,
     RevealTacticsCard,
     TacticsCard,
+    Retreat,
     Done,
 }
 
@@ -168,6 +169,8 @@ pub struct CombatRoundEnd {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub final_result: Option<CombatResult>,
     pub combat: Combat,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub(crate) retreat_decided: bool,
 }
 
 impl CombatRoundEnd {
@@ -179,6 +182,7 @@ impl CombatRoundEnd {
             final_result: None,
             combat,
             phase: CombatEventPhase::TacticsCard,
+            retreat_decided: false,
         };
         combat_round_end.set_final_result();
         combat_round_end
@@ -285,7 +289,7 @@ pub(crate) fn combat_round_start(
             CombatEventPhase::Default => |e| &mut e.combat_round_start,
             CombatEventPhase::RevealTacticsCard => |e| &mut e.combat_round_start_reveal_tactics,
             CombatEventPhase::TacticsCard => |e| &mut e.combat_round_start_tactics,
-            CombatEventPhase::Done => panic!("Invalid round type"),
+            CombatEventPhase::Retreat | CombatEventPhase::Done => panic!("Invalid round type"),
         },
         |s| &mut s.phase,
         |s| &s.combat,
@@ -294,8 +298,11 @@ pub(crate) fn combat_round_start(
     )
 }
 
-const ROUND_END_TYPES: &[CombatEventPhase; 2] =
-    &[CombatEventPhase::TacticsCard, CombatEventPhase::Default];
+const ROUND_END_TYPES: &[CombatEventPhase; 3] = &[
+    CombatEventPhase::TacticsCard,
+    CombatEventPhase::Default,
+    CombatEventPhase::Retreat,
+];
 
 pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Combat> {
     let e = event_with_tactics(
@@ -306,6 +313,7 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
         |phase| match phase {
             CombatEventPhase::Default => |e| &mut e.combat_round_end,
             CombatEventPhase::TacticsCard => |e| &mut e.combat_round_end_tactics,
+            CombatEventPhase::Retreat => |e| &mut e.combat_retreat,
             _ => panic!("Invalid round type"),
         },
         |s| &mut s.phase,
@@ -416,13 +424,14 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
         let reveal_card = matches!(t, CombatEventPhase::RevealTacticsCard);
 
         event_type = (match t {
-            CombatEventPhase::Default | CombatEventPhase::AllowTacticsCard => game
-                .trigger_persistent_event(
-                    &get_combat(&event_type).players(),
-                    event,
-                    event_type,
-                    store_type,
-                ),
+            CombatEventPhase::Default
+            | CombatEventPhase::AllowTacticsCard
+            | CombatEventPhase::Retreat => game.trigger_persistent_event(
+                &get_combat(&event_type).players(),
+                event,
+                event_type,
+                store_type,
+            ),
             CombatEventPhase::RevealTacticsCard | CombatEventPhase::TacticsCard => {
                 trigger_tactics_event(
                     game,
@@ -609,13 +618,21 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
 
 pub(crate) fn offer_retreat() -> Ability {
     Ability::builder("Retreat", "Do you want to retreat?")
+        // Accept an already saved retreat response from the old round-end phase,
+        // but never create new prompts before the defender's casualties.
         .add_bool_request(
             |event| &mut event.combat_round_end,
+            0,
+            |_, _, _| None,
+            resolve_retreat,
+        )
+        .add_bool_request(
+            |event| &mut event.combat_retreat,
             0,
             |game, p, r| {
                 let player = p.index;
                 let c = &r.combat;
-                if c.attacker() == player && r.can_retreat() {
+                if c.attacker() == player && !r.retreat_decided && r.can_retreat() {
                     let name = game.player_name(player);
                     p.log(game, &format!("{name} can retreat",));
                     Some("Do you want to retreat?".to_string())
@@ -623,18 +640,19 @@ pub(crate) fn offer_retreat() -> Ability {
                     None
                 }
             },
-            |game, s, e| {
-                if s.choice {
-                    s.log(game, "Retreat");
-                } else {
-                    s.log(game, "Do not retreat");
-                }
-                if s.choice {
-                    e.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
-                }
-            },
+            resolve_retreat,
         )
         .build()
+}
+
+fn resolve_retreat(game: &mut Game, s: &SelectedWithoutChoices<bool>, e: &mut CombatRoundEnd) {
+    e.retreat_decided = true;
+    if s.choice {
+        s.log(game, "Retreat");
+        e.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
+    } else {
+        s.log(game, "Do not retreat");
+    }
 }
 
 pub(crate) fn place_settler() -> Ability {

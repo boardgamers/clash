@@ -288,6 +288,26 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Text": "Remove 1 of their defending units",
+                      "origin": {
+                        "Ability": "Choose Casualties"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Text": "Player1 can retreat",
                       "origin": {
@@ -332,26 +352,6 @@
                       "Text": "Do not retreat",
                       "origin": {
                         "Ability": "Retreat"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Text": "Remove 1 of their defending units",
-                      "origin": {
-                        "Ability": "Choose Casualties"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Units": {
-                        "units": {
-                          "infantry": 1
-                        },
-                        "balance": "Loss",
-                        "position": "C1"
-                      },
-                      "origin": {
-                        "Ability": "Combat"
                       }
                     },
                     {

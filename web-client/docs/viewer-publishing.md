@@ -59,3 +59,5 @@ Viewer 0.1.29 opens finished games directly on the final state and closes automa
 Viewer 0.1.30 replaces the cavalry symbol with a recognizable horse head, consistently across combat dice, journals and unit summaries. Engine 0.4.40 is unchanged.
 
 Viewer 0.1.31 and engine 0.4.41 make the Gold deposits event rule explicitly say “Gain 2 gold”, with the usual inline resource icon in journal rules and translations in every locale. Fire now actually deducts 1 wood when the triggering player has no forest cities, recording a structured resource loss instead of a text-only claim. Existing game history is preserved.
+
+Viewer 0.1.32 and engine 0.4.42 offer retreat only after both armies have resolved their casualties and round-end effects. The map therefore shows the surviving defenders before the attacker chooses whether to continue. Saves already waiting at the previous retreat prompt still accept their answer, apply the remaining casualties once, and do not repeat the same round's retreat question. Publish the matching viewer and engine together.
