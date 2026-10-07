@@ -53,3 +53,5 @@ Viewer 0.1.26 stacks descriptive choices in full-width rows so outcome labels an
 Viewer 0.1.27 uses inline resource icons in choice buttons and their consequence text. Amounts use compact icon-and-number labels while the button keeps its complete accessible name. Unnumbered mood and culture references also receive the appropriate token icon. Engine 0.4.39 is unchanged.
 
 Viewer 0.1.28 colors chat authors by player, adjusting shades for contrast in light and dark themes and respecting custom colors and color-blind symbols. Author buttons still open player profiles. System events appear as centered dividers with a timestamp and no chat author label. The shared BGS chat controller and its editing, translation, mentions and scrolling behavior remain in use. Engine 0.4.39 is unchanged.
+
+Viewer 0.1.29 opens finished games directly on the final state and closes automatic catch-up when a game finishes during playback. Manual replay remains available. Publish with engine 0.4.40, which removes the duplicate game-ended/winner chat announcement while retaining the winner in the journal; BGS supplies the end-of-game system message.

@@ -544,8 +544,6 @@ impl Game {
             .max_by(|(_, player), (_, other)| compare_score(player, other, self))
             .expect("there should be at least one player in the game")
             .0;
-        let winner_name = self.player_name(winner_player_index);
-        self.add_message(&format!("The game has ended. {winner_name} has won"));
         add_start_turn_action_if_needed(self, 0);
         EventPlayer::new(
             winner_player_index,

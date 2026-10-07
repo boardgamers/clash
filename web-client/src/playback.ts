@@ -5,6 +5,7 @@ import { activeHistory } from './active-history.ts';
 import { officialWonderText, wonderName } from './wonder-names.ts';
 
 export function recapStart(game: Game, seat: number | undefined, seen = 0): number | null {
+  if (game.state === 'Finished') return null;
   const frames = game.board_history?.frames ?? [];
   if (seat === undefined || frames.length < 2 || seen >= frames.at(-1)!.cursor) return null;
   const responses = latestTurnResponses(game, frames, seat);

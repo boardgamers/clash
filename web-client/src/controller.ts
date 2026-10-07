@@ -533,6 +533,11 @@ export class Controller {
   private afterPlaybackLoad(old: Session, game: Game) {
     const s = get(this.session),
       frames = game.board_history?.frames ?? [];
+    if (game.state === 'Finished' && s.playback?.automatic) {
+      this.endPlayback();
+      this.markSeen();
+      return;
+    }
     if (s.analysis || !frames.length) return;
     if (s.playback) {
       if (old.game?.board_history?.id !== game.board_history?.id) this.endPlayback();

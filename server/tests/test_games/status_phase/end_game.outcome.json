@@ -320,8 +320,7 @@
   "round": 7,
   "age": 6,
   "messages": [
-    "The game has started",
-    "The game has ended. Player2 has won"
+    "The game has started"
   ],
   "dice_roll_outcomes": [
     1,

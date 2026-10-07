@@ -23,6 +23,12 @@ test('catch-up resumes only unseen opponent actions after the viewer ended their
     null,
   );
 });
+test('finished games skip automatic catch-up while keeping manual last-turn replay available', () => {
+  const finished = { ...game, state: 'Finished' };
+  assert.equal(recapStart(finished, 0), null);
+  assert.equal(recapStart(finished, 0, 11), null);
+  assert.deepEqual(sinceLastTurn(finished, 0), { start: 0, end: 3 });
+});
 test('replay cursors clamp to the recorded range; effects identify card types only', () => {
   assert.equal(frameAt(frames, 0), 0);
   assert.equal(frameAt(frames, 100), 3);

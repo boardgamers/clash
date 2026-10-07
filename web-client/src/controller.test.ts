@@ -1071,6 +1071,73 @@ test('opponent recap steps animate and pause, replay stays within its turn, and 
   }
 });
 
+test('finished games open on the final state and stop an automatic recap already in progress', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const game = JSON.parse(await engine.init(2, [], {}, 'finished-recap', {}));
+  const snapshot = {
+    ended_turn: false,
+    age: game.age,
+    round: game.round,
+    tiles: game.map.tiles,
+    players: game.players.map(({ id, civilization, cities = [], units = [] }: any) => ({
+      id,
+      civilization,
+      cities,
+      units,
+    })),
+  };
+  game.board_history = {
+    id: 'finished-recap',
+    frames: [
+      { ...snapshot, cursor: 100, actor: 0, title: 'End turn', ended_turn: true },
+      {
+        ...snapshot,
+        cursor: 101,
+        actor: 1,
+        title: 'Research',
+        effects: [{ player: 1, kind: 'action', label: 'Drew an action card' }],
+      },
+    ],
+  };
+  const playing = JSON.stringify(game);
+  const finished = JSON.stringify({ ...game, state: 'Finished' });
+  for (const autoplay of [true, false]) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      c.setPlayer(0);
+      c.setPreferences({ replayAutoplay: autoplay });
+      await c.load(finished);
+      assert.equal(app.session().game!.state, 'Finished');
+      assert.equal(app.session().playback ?? null, null, 'no automatic recap, even if autoplay is disabled');
+      c.replayLastTurn();
+      assert.equal(app.session().playback!.range, 'last-turn', 'manual replay remains available');
+      c.seekPlayback(100);
+      assert.equal(app.session().playback!.range, 'all', 'full history remains available');
+      await c.load(JSON.stringify({ ...game, state: 'Finished', actions_left: 0 }));
+      assert.equal(app.session().playback!.range, 'all', 'refreshing a finished game keeps manual replay');
+      assert.deepEqual(app.sent, []);
+    } finally {
+      app.close();
+    }
+    const app2 = paymentController(),
+      c2 = app2.controller;
+    try {
+      c2.setPlayer(0);
+      c2.setPreferences({ replayAutoplay: autoplay });
+      await c2.load(playing);
+      assert.equal(app2.session().playback!.automatic, true, 'ongoing games still catch up');
+      await c2.load(finished);
+      assert.equal(app2.session().playback, null, 'completion closes playing or paused automatic recap');
+      t.mock.timers.tick(10000);
+      assert.equal(app2.session().playback, null, 'the recap timer cannot restart after completion');
+      assert.deepEqual(app2.sent, []);
+    } finally {
+      app2.close();
+    }
+  }
+});
+
 test('explicit keep-cities choice saves engine settings before answering the current decision', async () => {
   const app = paymentController(),
     c = app.controller;

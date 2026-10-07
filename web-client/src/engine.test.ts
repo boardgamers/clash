@@ -12,6 +12,18 @@ async function initial() {
   return engine.init(2, [], { civilization: 'Random' }, 'clash-preview-20260927', {});
 }
 
+test('finishing a game retains the journal winner without duplicating the BGS chat announcement', () => {
+  const raw = readFileSync(
+    new URL('../../server/tests/test_games/status_phase/end_game.json', import.meta.url),
+    'utf8',
+  );
+  const clean = engine.messages(raw).data;
+  const finished = engine.tryMove(clean, JSON.stringify({ Playing: 'EndTurn' }), 0);
+  assert.equal(engine.ended(finished), true);
+  assert.deepEqual(engine.messages(finished).messages, []);
+  assert.match(JSON.stringify(JSON.parse(finished).log), /wins the game/);
+});
+
 test('published WASM opens a frozen 0.4.16 save and preserves its journal for all viewers', () => {
   const raw = readFileSync(
     new URL('../../server/tests/fixtures/legacy_0_4_16/setup.json', import.meta.url),
