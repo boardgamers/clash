@@ -1315,8 +1315,9 @@
                 disabled={$session.pending}
                 onclick={() => controller.submit(choice.action)}
                 >{#if choice.pile}<ResourceAmount pile={choice.pile} />{:else}<span class="choice-outcome"
-                    ><strong>{choice.name}</strong>{#if choice.description}<small
-                        id={`choice-consequence-${index}`}>{choice.description}</small
+                    ><strong><ResourceText text={choice.name} namedResources compactResources /></strong
+                    >{#if choice.description}<small id={`choice-consequence-${index}`}
+                        ><ResourceText text={choice.description} namedResources /></small
                       >{/if}</span
                   >{/if}<ArrowRight size={17} /></button
               >{/each}

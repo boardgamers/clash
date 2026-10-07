@@ -49,3 +49,5 @@ Viewer 0.1.24 previews Undo immediately when the exact preceding state was alrea
 Viewer 0.1.25 replaces Yes/No prompts with the actual outcomes and explains consequences for optional card and civilization abilities, including Guillotine's permanent loss of unused leaders. Recruitment and civilization details retain unavailable leaders with their status: already on the board, previously killed or replaced, or removed by Guillotine. All supported locales include the new wording. Engine 0.4.39 is unchanged; the bundled viewer rules bridge supplies these presentation changes.
 
 Viewer 0.1.26 stacks descriptive choices in full-width rows so outcome labels and consequences are easier to read. Only plain Yes/No pairs retain the compact side-by-side layout. Engine 0.4.39 is unchanged.
+
+Viewer 0.1.27 uses inline resource icons in choice buttons and their consequence text. Amounts use compact icon-and-number labels while the button keeps its complete accessible name. Unnumbered mood and culture references also receive the appropriate token icon. Engine 0.4.39 is unchanged.
