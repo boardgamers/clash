@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { City, Player } from './types';
-import { pieceStyle, type PieceStyle } from './piece-styles';
+import { pieceStyle, type PieceStyle } from './piece-styles.ts';
 
 export type BuildingKind = Exclude<keyof NonNullable<City['city_pieces']>, 'wonders'>;
 type UnitKind = NonNullable<Player['units']>[number]['unit_type'];
@@ -9,10 +9,15 @@ type UnitKind = NonNullable<Player['units']>[number]['unit_type'];
 // these resources so replacing a game state also disposes every mesh/material.
 export class PieceModels {
   private palette = new Map<string, THREE.Material>();
+  private material: (color: string) => THREE.Material;
+  private mesh: (geometry: THREE.BufferGeometry, material: THREE.Material) => THREE.Mesh;
   constructor(
-    private material: (color: string) => THREE.Material,
-    private mesh: (geometry: THREE.BufferGeometry, material: THREE.Material) => THREE.Mesh,
-  ) {}
+    material: (color: string) => THREE.Material,
+    mesh: (geometry: THREE.BufferGeometry, material: THREE.Material) => THREE.Mesh,
+  ) {
+    this.material = material;
+    this.mesh = mesh;
+  }
   private add(group: THREE.Group, geometry: THREE.BufferGeometry, color: string, x = 0, y = 0, z = 0) {
     let mat = this.palette.get(color);
     if (!mat) this.palette.set(color, (mat = this.material(color)));

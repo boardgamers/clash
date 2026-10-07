@@ -31,6 +31,7 @@ import { mount, unmount } from 'svelte';
 import UnitMapBadge from './UnitMapBadge.svelte';
 import { mapDecisionOptions } from './decision-controls';
 import { portPlacement } from './port-layout';
+import { buildingOrder, cityLayout, cityPose, ownershipMarkers, portDock } from './city-layout';
 import { frameDetails } from './playback';
 import { strategyTiles, strategyDescription } from './strategy';
 import StrategyMapTile from './StrategyMapTile.svelte';
@@ -1248,15 +1249,23 @@ export class World {
                 typeof entry[1] === 'number' &&
                 !(entry[0] === 'port' && portSites.has(city.position)),
             );
+            additions.sort(([a], [b]) => buildingOrder.indexOf(a) - buildingOrder.indexOf(b));
+            const layout = cityLayout(additions.length, wonders.length);
+            const markers = ownershipMarkers;
             const settlement = models.settlement(ownerColor, player.civilization);
-            settlement.scale.setScalar(additions.length ? 0.57 : 0.88);
-            settlement.position.set(additions.length === 1 ? -0.2 : 0, 0, -0.09);
+            settlement.scale.setScalar(layout.settlement.scale);
+            settlement.position.set(layout.settlement.x, 0, layout.settlement.z);
             cityModel.add(settlement);
             const pole = this.mesh(
-              new THREE.CylinderGeometry(0.018, 0.024, 1.06, 6),
+              new THREE.CylinderGeometry(
+                markers.pole.radiusTop,
+                markers.pole.radiusBottom,
+                markers.pole.height,
+                6,
+              ),
               this.material('#624d30'),
             );
-            pole.position.set(0.12, 0.54, -0.12);
+            pole.position.set(markers.pole.x, markers.pole.y, markers.pole.z);
             cityModel.add(pole);
             const flagEdge = this.material(ownerColor);
             const flagFace = new THREE.MeshBasicMaterial({
@@ -1264,29 +1273,37 @@ export class World {
               toneMapped: false,
             });
             this.materials.add(flagFace);
-            const flag = this.mesh(new THREE.BoxGeometry(0.45, 0.3, 0.025), [
-              flagEdge,
-              flagEdge,
-              flagEdge,
-              flagEdge,
-              flagFace,
-              flagFace,
-            ]);
-            flag.position.set(0.345, 0.93, -0.12);
+            const flag = this.mesh(
+              new THREE.BoxGeometry(markers.flag.width, markers.flag.height, markers.flag.depth),
+              [flagEdge, flagEdge, flagEdge, flagEdge, flagFace, flagFace],
+            );
+            flag.position.set(markers.flag.x, markers.flag.y, markers.flag.z);
             cityModel.add(flag);
             const ownershipPieces: THREE.Object3D[] = [pole, flag];
-            cityModel.position.set(x, 0.315, z);
-            cityModel.rotation.y = 0.25;
+            cityModel.position.set(x, cityPose.y, z);
+            cityModel.rotation.y = cityPose.rotation;
             const capital = s.view?.players.find((p) => p.index === player.id)?.capital === city.position;
             if (capital) {
               const gold = this.material('#d5af55');
-              const band = this.mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.07, 12), gold);
-              band.position.set(0.12, 1.12, -0.12);
+              const band = this.mesh(
+                new THREE.CylinderGeometry(
+                  markers.crown.radius,
+                  markers.crown.radius,
+                  markers.crown.height,
+                  12,
+                ),
+                gold,
+              );
+              band.position.set(markers.pole.x, markers.crown.y, markers.pole.z);
               cityModel.add(band);
               ownershipPieces.push(band);
               for (let i = 0; i < 3; i++) {
                 const point = this.mesh(new THREE.ConeGeometry(0.055, 0.15, 4), gold);
-                point.position.set(0.12 + (i - 1) * 0.11, 1.22, -0.12);
+                point.position.set(
+                  markers.pole.x + (i - 1) * markers.crown.pointSpacing,
+                  markers.crown.pointY,
+                  markers.pole.z,
+                );
                 cityModel.add(point);
                 ownershipPieces.push(point);
               }
@@ -1300,82 +1317,35 @@ export class World {
                 s.playerSymbols,
                 player.civilization === 'Barbarians',
               );
-              badge.position.set(0.27, 1.27, -0.12);
+              badge.position.set(markers.badge.x, markers.badge.y, markers.pole.z);
               cityModel.add(badge);
               ownershipBadge = badge;
               ownershipPieces.push(badge);
             }
-            const slots =
-              additions.length === 1
-                ? [[0.4, 0.18]]
-                : additions.length === 2
-                  ? [
-                      [-0.45, 0.18],
-                      [0.45, 0.18],
-                    ]
-                  : additions.length === 3
-                    ? [
-                        [0, -0.52],
-                        [-0.43, 0.28],
-                        [0.43, 0.28],
-                      ]
-                    : [
-                        [-0.42, -0.37],
-                        [0.42, -0.37],
-                        [-0.42, 0.37],
-                        [0.42, 0.37],
-                      ];
-            const heights: BuildingKind[] = [
-              'obelisk',
-              'observatory',
-              'fortress',
-              'temple',
-              'port',
-              'academy',
-              'market',
-            ];
-            additions.sort(([a], [b]) => heights.indexOf(a) - heights.indexOf(b));
-            const ordinary = [settlement];
             for (const [j, [name, buildingOwner]] of additions.entries()) {
               const annex = models.building(
                 name,
                 playerColor(buildingOwner, s.colorBlind, s.playerColors),
                 player.civilization,
               );
-              const [ax, az] = slots[j % slots.length];
-              annex.scale.setScalar(additions.length < 3 ? 0.62 : 0.55);
-              annex.position.set(ax, 0, az);
+              const place = layout.buildings[j];
+              annex.scale.setScalar(place.scale);
+              annex.position.set(place.x, 0, place.z);
               cityModel.add(annex);
               this.buildings.set(`${city.position}:building:${name}`, annex);
-              ordinary.push(annex);
             }
-            if (wonders.length) {
-              // Reserve the rear of the hex for landmarks; keep ordinary buildings,
-              // the settlement and ownership flag visible in the foreground.
-              ordinary.forEach((piece, index) => {
-                const count = Math.min(3, ordinary.length),
-                  row = Math.floor(index / 3);
-                const rowCount = Math.min(3, ordinary.length - row * 3);
-                piece.scale.setScalar(ordinary.length > 3 ? 0.36 : 0.46);
-                piece.position.set(((index % count) - (rowCount - 1) / 2) * 0.43, 0, row ? 0.57 : 0.18);
-              });
-              wonders.forEach((name, index) => {
-                const landmark = models.wonder(name, ownerColor);
-                const columns = Math.min(3, wonders.length),
-                  row = Math.floor(index / columns);
-                const scale =
-                  wonders.length === 1 ? 0.8 : wonders.length === 2 ? 0.57 : wonders.length <= 3 ? 0.4 : 0.28;
-                landmark.scale.setScalar(scale);
-                landmark.position.set(
-                  ((index % columns) - (columns - 1) / 2) * scale * 1.08,
-                  0,
-                  wonders.length <= 3 ? -0.33 : -0.55 + row * 0.24,
-                );
-                landmark.userData.wonder = name;
-                cityModel.add(landmark);
-                this.buildings.set(`${city.position}:wonder:${name}`, landmark);
-              });
-              for (const marker of ownershipPieces) marker.position.x += 0.28;
+            wonders.forEach((name, index) => {
+              const landmark = models.wonder(name, ownerColor);
+              const place = layout.wonders[index];
+              landmark.scale.setScalar(place.scale);
+              landmark.position.set(place.x, 0, place.z);
+              landmark.userData.wonder = name;
+              cityModel.add(landmark);
+              this.buildings.set(`${city.position}:wonder:${name}`, landmark);
+            });
+            for (const marker of ownershipPieces) {
+              marker.position.x += layout.ownership.x;
+              marker.position.z += layout.ownership.z;
             }
             const portSite = portSites.get(city.position);
             if (portSite && city.city_pieces?.port != null) {
@@ -1385,14 +1355,18 @@ export class World {
                 playerColor(city.city_pieces.port, s.colorBlind, s.playerColors),
                 player.civilization,
               );
-              port.scale.setScalar(0.5);
+              port.scale.setScalar(portDock.scale);
               dock.add(port);
               // A short sloping gangway connects the water-level wharf to its city.
-              const gangway = this.mesh(new THREE.BoxGeometry(0.16, 0.04, 0.36), this.material('#a28250'));
-              gangway.position.set(0, 0.19, -0.31);
-              gangway.rotation.x = 0.53;
+              const plank = portDock.gangway;
+              const gangway = this.mesh(
+                new THREE.BoxGeometry(plank.width, plank.height, plank.depth),
+                this.material('#a28250'),
+              );
+              gangway.position.set(0, plank.y, plank.z);
+              gangway.rotation.x = plank.tilt;
               dock.add(gangway);
-              dock.position.set(portSite.x, 0.01, portSite.z);
+              dock.position.set(portSite.x, portDock.y, portSite.z);
               dock.rotation.y = portSite.rotation;
               dock.userData = {
                 position: portSite.water,
