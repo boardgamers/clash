@@ -10,12 +10,14 @@ use crate::content::persistent_events::{
 };
 use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
+use crate::log::ActionLogBalance;
 use crate::map::{Map, Terrain};
 use crate::objective_card::discard_objective_card;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
+use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
@@ -266,7 +268,7 @@ fn fire() -> Incident {
                 .collect_vec();
             if cities.is_empty() {
                 if player.resources.wood > 0 {
-                    p.log(game, "Lose 1 wood");
+                    p.lose_resources(game, ResourcePile::wood(1), ActionLogBalance::Loss);
                     return None;
                 }
                 p.log(game, "No cities on a Forest and no wood to lose");

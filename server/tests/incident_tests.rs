@@ -577,3 +577,74 @@ fn test_fire() {
         ],
     );
 }
+
+#[test]
+fn fire_without_forest_cities_loses_wood_and_keeps_mood() {
+    use server::log::{ActionLogBalance, ActionLogEntry};
+    use server::map::Terrain;
+    for wood in [0_u8, 1, 4] {
+        let mut game = PANDEMICS.load_game("fire");
+        let cities = game
+            .player(0)
+            .cities
+            .iter()
+            .map(|c| c.position)
+            .collect::<Vec<_>>();
+        for position in cities {
+            game.map.tiles.insert(position, Terrain::Fertile);
+        }
+        game.player_mut(0).resources.wood = wood;
+        let moods = game
+            .players
+            .iter()
+            .flat_map(|p| p.cities.iter().map(|c| c.mood_state.clone()))
+            .collect::<Vec<_>>();
+        let gold = game.player(0).resources.gold;
+        let game = server::game_api::execute(
+            game,
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
+            0,
+        );
+        assert_eq!(game.player(0).resources.wood, wood.saturating_sub(1));
+        assert_eq!(
+            game.player(0).resources.gold,
+            gold,
+            "Gold deposits restores the 2 gold spent on research"
+        );
+        assert!(
+            game.events.is_empty(),
+            "No forest city needs a selection or mood loss"
+        );
+        assert_eq!(
+            game.players
+                .iter()
+                .flat_map(|p| p.cities.iter().map(|c| c.mood_state.clone()))
+                .collect::<Vec<_>>(),
+            moods
+        );
+        let losses = game
+            .log
+            .iter()
+            .flat_map(|a| &a.rounds)
+            .flat_map(|r| &r.turns)
+            .flat_map(|t| &t.actions)
+            .flat_map(|a| &a.items)
+            .filter(|item| {
+                item.player == 0
+                    && item.origin == server::events::EventOrigin::Incident(53)
+                    && matches!(
+                        &item.entry,
+                        ActionLogEntry::Resources {
+                            resources,
+                            balance: ActionLogBalance::Loss,
+                        } if *resources == ResourcePile::wood(1)
+                    )
+            })
+            .count();
+        assert_eq!(
+            losses,
+            usize::from(wood > 0),
+            "The journal records the actual wood deduction exactly once"
+        );
+    }
+}

@@ -57,3 +57,5 @@ Viewer 0.1.28 colors chat authors by player, adjusting shades for contrast in li
 Viewer 0.1.29 opens finished games directly on the final state and closes automatic catch-up when a game finishes during playback. Manual replay remains available. Publish with engine 0.4.40, which removes the duplicate game-ended/winner chat announcement while retaining the winner in the journal; BGS supplies the end-of-game system message.
 
 Viewer 0.1.30 replaces the cavalry symbol with a recognizable horse head, consistently across combat dice, journals and unit summaries. Engine 0.4.40 is unchanged.
+
+Viewer 0.1.31 and engine 0.4.41 make the Gold deposits event rule explicitly say “Gain 2 gold”, with the usual inline resource icon in journal rules and translations in every locale. Fire now actually deducts 1 wood when the triggering player has no forest cities, recording a structured resource loss instead of a text-only claim. Existing game history is preserved.

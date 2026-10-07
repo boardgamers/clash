@@ -1,8 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { journal } from './journal.ts';
+import { journalParts } from './model.ts';
+import { localizedParts } from './localized-parts.ts';
+import { createTranslator } from './localization/runtime.js';
 import type { EventInfo, Game, LoggedAction, View } from './types.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
@@ -28,6 +31,52 @@ test('events expose engine rules and protections to spectators without revealing
   assert.deepEqual(famine.targets, ['active']);
   assert.equal(famine.protectionAdvance, 'Irrigation');
   assert.equal(view(state).objectiveCards.length, 0);
+});
+
+test('Fire keeps its own title and forest rules while explaining and recording its gold and wood effects', () => {
+  const raw = JSON.parse(fixture('pandemics/fire'));
+  const cityPositions = new Set(raw.players[0].cities.map((c: { position: string }) => c.position));
+  raw.map.tiles = raw.map.tiles.map(([position, terrain]: [string, unknown]) => [
+    position,
+    cityPositions.has(position) ? 'Fertile' : terrain,
+  ]);
+  raw.players[0].resources.wood = 4;
+  const state = run(JSON.stringify(raw), advance);
+  assert.equal(JSON.parse(state).players[0].resources.wood, 3);
+  const event = entries(state).find((entry) => entry.event)!;
+  assert.equal(event.title, 'Fire');
+  assert.equal(event.event!.info!.id, 53);
+  assert.equal(event.event!.info!.name, event.title);
+  assert.ok(event.event!.info!.rules.includes('Gold deposits: Gain 2 gold.'));
+  assert.match(event.event!.info!.rules.at(-1)!, /If you have no cities on a Forest, lose 1 wood/);
+  assert.deepEqual(
+    event.event!.outcomes.map((o) => [o.title, o.tokens.map((t) => [t.icon, t.value])]),
+    [
+      ['Gold deposits', [['gold', '+2']]],
+      ['Fire', [['wood', '−1']]],
+    ],
+  );
+  assert.equal(event.event!.pending, undefined);
+  for (const info of view(state).eventCatalog!.filter((e) => e.baseEffect === 'Gold deposits.')) {
+    assert.ok(info.rules.includes('Gold deposits: Gain 2 gold.'), `${info.name} explains its gold icon`);
+  }
+});
+
+test('Gold deposits rules retain the gold resource icon in every locale', () => {
+  const source = 'Gold deposits: Gain 2 gold.';
+  const directory = new URL('./localization/', import.meta.url);
+  for (const file of readdirSync(directory).filter((name) => name.endsWith('.json'))) {
+    const locale = file.slice(0, -5);
+    const catalog = JSON.parse(readFileSync(new URL(file, directory), 'utf8'));
+    const translator = createTranslator({ [locale]: catalog }, locale);
+    const parts = localizedParts(source, journalParts(source), (text) => translator.translate(text));
+    assert.equal(parts.map((part) => part.text).join(''), catalog[source], locale);
+    assert.deepEqual(
+      parts.filter((part) => 'resource' in part),
+      [{ text: translator.translate('2 gold'), resource: 'gold' }],
+      locale,
+    );
+  }
 });
 
 test('Great Seer explains the pirate raid and exposes the later card price before spending a bribe', () => {

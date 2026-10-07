@@ -64,7 +64,10 @@ impl Incident {
         let mut h = vec![];
 
         if !matches!(self.base_effect, IncidentBaseEffect::None) {
-            h.push(self.base_effect.to_string());
+            h.push(match self.base_effect {
+                IncidentBaseEffect::GoldDeposits => "Gold deposits: Gain 2 gold.".to_string(),
+                _ => self.base_effect.to_string(),
+            });
         }
         if let Some(p) = &self.protection_advance {
             h.push(format!("Protection advance: {}", p.name(game)));
