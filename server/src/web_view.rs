@@ -563,9 +563,11 @@ fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
             } else {
                 None
             };
-            Some(json!({"name":name,"preview":preview,"binary":true,"choices":[
+            Some(
+                json!({"name":name,"preview":preview,"binary":true,"choices":[
                 {"name":accept,"description":consequences.map(|c|c.0),"action":Action::Response(EventResponse::Bool(true))},
-                {"name":decline,"description":consequences.map(|c|c.1),"action":Action::Response(EventResponse::Bool(false))}]}))
+                {"name":decline,"description":consequences.map(|c|c.1),"action":Action::Response(EventResponse::Bool(false))}]}),
+            )
         }
         _ => None,
     }

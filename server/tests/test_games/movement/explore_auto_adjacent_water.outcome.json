@@ -376,6 +376,13 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Rotation forced: the revealed water must connect to existing water",
+                      "origin": {
+                        "Ability": "Move"
+                      }
                     }
                   ]
                 }

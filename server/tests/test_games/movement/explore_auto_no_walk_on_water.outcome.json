@@ -403,6 +403,13 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Rotation forced: land units cannot move into water",
+                      "origin": {
+                        "Ability": "Move"
+                      }
                     }
                   ]
                 }

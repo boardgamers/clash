@@ -345,6 +345,13 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Rotation forced: the revealed water must touch the map edge",
+                      "origin": {
+                        "Ability": "Move"
+                      }
                     }
                   ]
                 }

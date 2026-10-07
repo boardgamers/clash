@@ -207,10 +207,9 @@ pub(crate) fn pirate_spawn_positions(
         .keys()
         .filter(|&pos| {
             game.map.is_sea(*pos)
-                && game
-                    .players
-                    .iter()
-                    .all(|p| p.civilization.is_pirates() || p.units.iter().all(|u| u.position != *pos))
+                && game.players.iter().all(|p| {
+                    p.civilization.is_pirates() || p.units.iter().all(|u| u.position != *pos)
+                })
         })
         .copied()
         .collect_vec();

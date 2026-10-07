@@ -50,6 +50,12 @@ pub(crate) fn ship_explore_destination() -> Ability {
         .build()
 }
 
+const SHIP_SEA_REASON: &str = "Rotation forced: the revealed water must connect to the ships' sea";
+const NO_WATER_DESTINATION_REASON: &str = "Rotation forced: land units cannot move into water";
+const WATER_CONNECTED_REASON: &str =
+    "Rotation forced: the revealed water must connect to existing water";
+const WATER_OUTSIDE_REASON: &str = "Rotation forced: the revealed water must touch the map edge";
+
 pub(crate) fn move_to_unexplored_tile(
     game: &mut Game,
     player: &EventPlayer,
@@ -88,8 +94,9 @@ pub(crate) fn move_to_unexplored_block(
 
     let ship_explore = is_any_ship(game, player.index, units);
 
-    let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
+    let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport, reason: &str| {
         add_block_tiles_with_log(game, player, &move_to.position, &move_to.block, rotation);
+        player.log(game, reason);
         if let Some(destination) = destination {
             move_to_explored_tile(
                 game,
@@ -115,7 +122,7 @@ pub(crate) fn move_to_unexplored_block(
             } else {
                 opposite
             };
-            return instant_explore(game, rotation, true);
+            return instant_explore(game, rotation, true, SHIP_SEA_REASON);
         }
         ship_can_teleport = base_has_connected_sea && opposite_has_connected_sea;
     } else if let Some(destination) = destination {
@@ -128,10 +135,10 @@ pub(crate) fn move_to_unexplored_block(
 
         // first rule: don't move into water
         if t.is_water() {
-            return instant_explore(game, opposite, false);
+            return instant_explore(game, opposite, false, NO_WATER_DESTINATION_REASON);
         }
         if rotated.is_water() {
-            return instant_explore(game, base, false);
+            return instant_explore(game, base, false, NO_WATER_DESTINATION_REASON);
         }
     }
 
@@ -144,7 +151,7 @@ pub(crate) fn move_to_unexplored_block(
         } else {
             opposite
         };
-        return instant_explore(game, rotation, false);
+        return instant_explore(game, rotation, false, WATER_CONNECTED_REASON);
     }
 
     // third rule: prefer outside neighbors
@@ -156,7 +163,7 @@ pub(crate) fn move_to_unexplored_block(
         } else {
             opposite
         };
-        return instant_explore(game, rotation, false);
+        return instant_explore(game, rotation, false, WATER_OUTSIDE_REASON);
     }
 
     let resolution_state = ExploreResolutionState {

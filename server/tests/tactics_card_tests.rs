@@ -316,7 +316,14 @@ fn fortress_without_army_cannot_use_tactical_retreat_even_from_a_saved_prompt() 
     assert_eq!(options[0]["value"]["ActionCard"], 25);
 
     // An already pending request may still contain choices saved by the old engine.
-    let handler = game.events.last_mut().unwrap().player.handler.as_mut().unwrap();
+    let handler = game
+        .events
+        .last_mut()
+        .unwrap()
+        .player
+        .handler
+        .as_mut()
+        .unwrap();
     let PersistentEventRequest::SelectHandCards(request) = &mut handler.request else {
         panic!("Expected tactics choice");
     };

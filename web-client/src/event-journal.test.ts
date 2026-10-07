@@ -401,3 +401,17 @@ test('city thresholds explain an ineligible civilization without mislabelling pe
   game.players[0].cities = [{ position: 'D2', mood_state: 'Happy' }];
   assert.equal(journal(game, publicView([disaster]))[0].event!.explanations[0].text, '1 city · requires 4+');
 });
+
+test('automatic exploration explains why the block rotation was forced', () => {
+  const state = readFileSync(
+    new URL('../../server/tests/test_games/movement/explore_auto_adjacent_water.json', import.meta.url),
+    'utf8',
+  );
+  const after = run(state, {
+    Movement: { Move: { units: [0], destination: 'C7', embark_carrier_id: null, payment: {} } },
+  });
+  assert.match(
+    JSON.stringify(entries(after)),
+    /Rotation forced: the revealed water must connect to existing water/,
+  );
+});

@@ -422,6 +422,13 @@
                       "origin": {
                         "Ability": "Move"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Rotation forced: the revealed water must connect to the ships' sea",
+                      "origin": {
+                        "Ability": "Move"
+                      }
                     }
                   ]
                 }
