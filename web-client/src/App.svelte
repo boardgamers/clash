@@ -1300,7 +1300,14 @@
               {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
             </section>
           {/if}
-          <div class="collection-choices" class:binary-choices={choiceDecision.binary}>
+          <div
+            class="collection-choices"
+            class:binary-choices={choiceDecision.binary}
+            class:compact-choices={choiceDecision.choices.length === 2 &&
+              choiceDecision.choices.every(
+                (choice) => !choice.description && (choice.name === 'Yes' || choice.name === 'No'),
+              )}
+          >
             {#each choiceDecision.choices as choice, index}<button
                 class="secondary wide"
                 aria-label={choice.pile ? pileText(choice.pile) : choice.name}
