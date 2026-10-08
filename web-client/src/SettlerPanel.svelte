@@ -209,11 +209,6 @@
           text="This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat."
         />
       </p>
-      <button
-        class="secondary"
-        disabled={$session.pending}
-        onclick={() => controller.patch({ moveTarget: null, moveDestination: null })}>Cancel</button
-      >
     </div>
   {/if}
   {#if destination}<div class="settler-confirm">
