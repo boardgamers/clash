@@ -586,6 +586,61 @@ fn test_collect_port() {
 }
 
 #[test]
+fn collection_per_tile_limit_does_not_depend_on_selection_order() {
+    use server::content::effects::{CollectEffect, PermanentEffect};
+    let mut game = JSON.load_game("collect_port");
+    let city = Position::from_offset("C2");
+    game.player_mut(0).get_city_mut(city).mood_state = server::city::MoodState::Happy;
+    game.player_mut(0).get_city_mut(city).activations = 0;
+    let choices = [
+        PositionCollection::new(Position::from_offset("C3"), ResourcePile::gold(1)),
+        PositionCollection::new(city, ResourcePile::wood(1)),
+        PositionCollection::new(Position::from_offset("C3"), ResourcePile::mood_tokens(1)),
+    ];
+    let quote = |game: &Game, selected: &[PositionCollection]| {
+        collect::get_total_collection(
+            game,
+            0,
+            &check_event_origin(),
+            city,
+            selected,
+            CostTrigger::NoModifiers,
+        )
+    };
+    for order in [
+        [0, 1, 2],
+        [0, 2, 1],
+        [1, 0, 2],
+        [1, 2, 0],
+        [2, 0, 1],
+        [2, 1, 0],
+    ] {
+        let selected = order.map(|i| choices[i].clone());
+        assert_eq!(
+            quote(&game, &selected).unwrap_err(),
+            "You can only collect 1 resources from each tile"
+        );
+    }
+    assert!(
+        quote(
+            &game,
+            &[choices[0].clone(), choices[1].clone(), choices[0].clone()]
+        )
+        .is_err()
+    );
+    assert!(quote(&game, &[choices[0].times(2)]).is_err());
+    for sea in [0, 2] {
+        assert!(quote(&game, &[choices[sea].clone(), choices[1].clone()]).is_ok());
+    }
+    game.permanent_effects
+        .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
+    assert_eq!(
+        quote(&game, &choices).unwrap().total,
+        ResourcePile::gold(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1)
+    );
+}
+
+#[test]
 fn test_collect_husbandry() {
     let action = Action::Playing(Collect(collect::Collect::new(
         Position::from_offset("B3"),

@@ -1,5 +1,6 @@
 import { activeInfluence, influenceKey, influenceMapPick, influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
+import { nextCollectionSelection } from './collection-yield';
 import { get, writable } from 'svelte/store';
 import { ChatController } from '@boardgamers/protocol/chat';
 import type { ViewerCommands } from '@boardgamers/protocol/viewer';
@@ -1546,17 +1547,11 @@ export class Controller {
   toggleChoice(choice: Choice) {
     const s = get(this.session);
     if (s.pending || !s.view?.canPlay || s.seat === undefined || !s.city || !this.engine) return;
-    const selected = s.selection.find(
-      (c) => c.position === choice.position && JSON.stringify(c.pile) === JSON.stringify(choice.pile),
-    );
     const city = s.view.cities.find((c) => c.position === s.city)!;
-    const capacity = city.capacity + Number(!!s.ballcourts && !!city.ballcourts);
-    const selection = selected
-      ? selected.times < city.maxPerTile && s.selection.reduce((sum, c) => sum + c.times, 0) < capacity
-        ? s.selection.map((c) => (c === selected ? { ...c, times: c.times + 1 } : c))
-        : s.selection.filter((c) => c !== selected)
-      : [...s.selection, { ...choice, times: 1 }];
-    if (selection.length > capacity) {
+    const extraCapacity = Number(!!s.ballcourts && !!city.ballcourts);
+    const capacity = city.capacity + extraCapacity;
+    const selection = nextCollectionSelection(choice, s.selection, city, extraCapacity);
+    if (!selection) {
       this.patch({
         error: `Choose up to ${capacity} ${capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection first.`,
       });

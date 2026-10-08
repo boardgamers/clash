@@ -54,15 +54,26 @@ function collectionTotal(choices: Selection[], context = choices): Pile {
   return result;
 }
 
-function nextSelection(choice: Choice, selection: Selection[], city: CityView, extraCapacity: number) {
+export function nextCollectionSelection(
+  choice: Choice,
+  selection: Selection[],
+  city: CityView,
+  extraCapacity = 0,
+) {
   const selected = selection.find((c) => sameCollection(c, choice));
+  const sameTile = selection.find((c) => c.position === choice.position);
+  const usedOnTile = selection
+    .filter((c) => c.position === choice.position)
+    .reduce((sum, c) => sum + c.times, 0);
   const used = selection.reduce((sum, c) => sum + c.times, 0);
   const capacity = city.capacity + extraCapacity;
   const next = selected
-    ? selected.times < city.maxPerTile && used < capacity
+    ? usedOnTile < city.maxPerTile && used < capacity
       ? selection.map((c) => (c === selected ? { ...c, times: c.times + 1 } : c))
       : selection.filter((c) => c !== selected)
-    : [...selection, { ...choice, times: 1 }];
+    : city.maxPerTile === 1 && sameTile
+      ? selection.map((c) => (c === sameTile ? { ...choice, times: 1 } : c))
+      : [...selection, { ...choice, times: 1 }];
   const nextIsValid =
     next.reduce((sum, c) => sum + c.times, 0) <= capacity &&
     next.filter((c) => c.position === choice.position).reduce((sum, c) => sum + c.times, 0) <=
@@ -82,7 +93,7 @@ export function collectionBonusIndicators(
   const reaches = (pile: Pile, bonus: CollectionBonus) =>
     Object.entries(bonus.minimum).every(([r, n]) => (pile[r as Resource] ?? 0) >= n!);
   const selected = selection.find((c) => sameCollection(c, choice));
-  const next = nextSelection(choice, selection, city, extraCapacity);
+  const next = nextCollectionSelection(choice, selection, city, extraCapacity);
   const current = collectionTotal(selection);
   return city.collectionBonuses.filter((bonus) => {
     if (reaches(current, bonus)) {
@@ -109,7 +120,9 @@ export function collectionStorageWaste(
   const index = selection.findIndex((c) => sameCollection(c, choice));
   const before = index < 0 ? selection : selection.slice(0, index);
   const after =
-    index < 0 ? nextSelection(choice, selection, city, extraCapacity) : selection.slice(0, index + 1);
+    index < 0
+      ? nextCollectionSelection(choice, selection, city, extraCapacity)
+      : selection.slice(0, index + 1);
   if (!after) return {};
   const previous = collectionTotal(before, index < 0 ? before : selection);
   const next = collectionTotal(after, index < 0 ? after : selection);

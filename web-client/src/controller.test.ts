@@ -987,6 +987,87 @@ test('cultural influence opens a map mode where clicking the target building cho
   }
 });
 
+test('port resource choices replace one another even after selecting another tile or filling capacity', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/collect_port'));
+    Object.assign(
+      game.players[0].cities.find((city: any) => city.position === 'C2'),
+      {
+        mood_state: 'Neutral',
+        activations: 0,
+      },
+    );
+    const raw = JSON.stringify(game);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    c.beginCollect('C2');
+    const city = app.session().view!.cities.find((city) => city.position === 'C2')!;
+    const gold = city.choices.find((choice) => choice.pile.gold)!;
+    const mood = city.choices.find((choice) => choice.pile.mood_tokens)!;
+    const wood = city.choices.find((choice) => choice.position === 'C2')!;
+    assert.equal(gold.position, mood.position);
+    c.toggleChoice(gold);
+    c.toggleChoice(wood);
+    c.toggleChoice(mood);
+    assert.deepEqual(app.session().selection, [
+      { ...mood, times: 1 },
+      { ...wood, times: 1 },
+    ]);
+    assert.equal(app.session().error, '');
+    assert.equal(app.session().preview!.total.gold ?? 0, 0);
+    assert.equal(app.session().preview!.total.mood_tokens, 1);
+    const third = city.choices.find((choice) => ![gold.position, wood.position].includes(choice.position))!;
+    c.toggleChoice(third);
+    assert.equal(app.session().selection.length, city.capacity);
+    c.toggleChoice(gold);
+    assert.equal(app.session().selection.length, city.capacity, 'A replacement needs no extra capacity');
+    assert.equal(app.session().selection.filter((choice) => choice.position === gold.position).length, 1);
+    assert.equal(app.session().preview!.total.mood_tokens ?? 0, 0);
+    assert.equal(app.session().preview!.total.gold, 1);
+    assert.equal(app.session().error, '');
+
+    const illegal = [gold, wood, mood].map((choice) => ({ ...choice, times: 1 }));
+    assert.throws(
+      () =>
+        engine.webQuery(
+          engine.stripSecret(raw, 0),
+          0,
+          JSON.stringify({
+            kind: 'collect',
+            city: 'C2',
+            variant: 'Collect',
+            selections: illegal,
+          }),
+        ),
+      /each tile/,
+    );
+    assert.throws(
+      () =>
+        engine.tryMove(
+          raw,
+          JSON.stringify({
+            Playing: {
+              Collect: {
+                city_position: 'C2',
+                collections: illegal,
+                action_type: 'Collect',
+              },
+            },
+          }),
+          0,
+        ),
+      /each tile/,
+    );
+    c.collect();
+    assert.equal(app.sent.length, 1);
+    assert.doesNotThrow(() => engine.tryMove(raw, app.sent[0], 0));
+  } finally {
+    app.close();
+  }
+});
+
 test('Ballcourts preserves collection choices and invalidates an oversized draft when disabled', async () => {
   const app = paymentController(),
     c = app.controller;

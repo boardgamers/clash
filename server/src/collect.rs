@@ -12,7 +12,6 @@ use crate::playing_actions::{PlayingActionType, base_or_modified_available};
 use crate::position::Position;
 use crate::resource::gain_resources_with_modifiers;
 use crate::resource_pile::ResourcePile;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
@@ -153,10 +152,11 @@ pub(crate) fn get_total_collection_with_ballcourts(
         ));
     }
 
-    for (_, group) in &collections.iter().chunk_by(|c| c.position) {
-        let used = group.map(|c| c.times).sum::<u8>();
-
-        if used > i.max_per_tile {
+    let mut used_per_tile = HashMap::<Position, u16>::new();
+    for c in collections {
+        let used = used_per_tile.entry(c.position).or_default();
+        *used += u16::from(c.times);
+        if *used > u16::from(i.max_per_tile) {
             return Err(format!(
                 "You can only collect {} resources from each tile",
                 i.max_per_tile,

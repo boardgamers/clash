@@ -1,10 +1,38 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { collectionBonusIndicators, collectionStorageWaste } from './collection-yield.ts';
+import {
+  collectionBonusIndicators,
+  collectionStorageWaste,
+  nextCollectionSelection,
+} from './collection-yield.ts';
 import type { Selection, View } from './types.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
+
+test('repeated collection choices share tile and city capacity while allowing Production Focus', () => {
+  const city = { capacity: 3, maxPerTile: 3 } as View['cities'][number];
+  const gold = { position: 'C3', pile: { gold: 1 } };
+  const mood = { position: 'C3', pile: { mood_tokens: 1 } };
+  const wood = { position: 'C2', pile: { wood: 1 } };
+  let selection = nextCollectionSelection(gold, [], city)!;
+  selection = nextCollectionSelection(mood, selection, city)!;
+  selection = nextCollectionSelection(gold, selection, city)!;
+  assert.deepEqual(selection, [
+    { ...gold, times: 2 },
+    { ...mood, times: 1 },
+  ]);
+  assert.equal(
+    nextCollectionSelection(wood, selection, city),
+    null,
+    'Repeated yields count toward city capacity',
+  );
+  assert.deepEqual(
+    nextCollectionSelection(gold, selection, city, 1),
+    [{ ...mood, times: 1 }],
+    'Ballcourts does not let a tile exceed its own limit; clicking a full choice deselects it',
+  );
+});
 const serialize = (game: any) => JSON.stringify(game);
 const view = (game: any, seat: number): View =>
   JSON.parse(engine.webView(engine.stripSecret(serialize(game), seat), seat));
