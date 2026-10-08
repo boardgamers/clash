@@ -83,28 +83,47 @@ impl Unit {
     /// Panics if unit is at a valid position
     #[must_use]
     pub fn can_found_city(&self, game: &Game) -> bool {
-        if crate::content::civilizations::huns::raided_settler(game, self) {
-            return false;
-        }
+        self.found_city_blocker(game).is_none()
+    }
+
+    ///
+    /// Explains why this unit cannot found a city where it stands, if it can't.
+    ///
+    /// # Panics
+    ///
+    /// Panics if unit is at a valid position
+    #[must_use]
+    pub fn found_city_blocker(&self, game: &Game) -> Option<&'static str> {
         if !self.is_settler() {
-            return false;
+            return Some("Only Settlers can found cities");
         }
         if self.is_transported() {
-            return false;
+            return Some("Disembark the Settler to found a city");
         }
         let player = &game.players[self.player_index];
         if player.try_get_city(self.position).is_some() {
-            return false;
+            return Some("Move to an empty land tile to found a city");
         }
-
         let terrain = game.map.get(self.position).expect("Unit should be on map");
         if !(is_valid_city_terrain(terrain)
             || (*terrain == crate::map::Terrain::Barren
                 && player.has_special_advance(SpecialAdvance::FloodPlains)))
         {
-            return false;
+            return Some(match terrain {
+                crate::map::Terrain::Barren => "Cities cannot be founded on Barren land",
+                crate::map::Terrain::Exhausted(_) => "Cities cannot be founded on exhausted land",
+                _ => "Move to an empty land tile to found a city",
+            });
         }
-        player.is_city_available()
+        if crate::content::civilizations::huns::raided_settler(game, self) {
+            return Some(
+                "Raiders: an enemy Huns army within 2 spaces prevents founding, unless your own army shares this space",
+            );
+        }
+        if !player.is_city_available() {
+            return Some("You have reached your city limit");
+        }
+        None
     }
 
     #[must_use]

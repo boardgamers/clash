@@ -548,7 +548,7 @@ pub fn settlers(game: &Game, seat: usize, can_move: bool) -> Vec<Value> {
         let founder = p.active_leader()==Some(crate::leader::Leader::QueenDido) && crate::leader::leader_position(p)==unit.position;
         let found_kind=if founder {crate::content::custom_actions::CustomActionType::Founder.playing_action_type()} else {PlayingActionType::FoundCity};
         let found_reason = action_reason(game,seat,game.state==GameState::Playing && seat==game.active_player(),found_kind)
-            .or_else(||(!unit.can_found_city(game)).then(||"Move to an empty land tile to found a city".into()));
+            .or_else(||unit.found_city_blocker(game).map(Into::into));
         json!({"id":unit.id,"position":unit.position,"destinations":destinations,"foundReason":found_reason,
             "foundFree":founder,"foundAction":found_reason.is_none().then(||if founder {Action::Playing(PlayingAction::Custom(crate::content::custom_actions::CustomAction::new(crate::content::custom_actions::CustomActionType::Founder,Some(unit.position))))}else{Action::Playing(PlayingAction::FoundCity{settler:unit.id})})})
     }).collect()

@@ -733,6 +733,59 @@ mod tests {
             .is_err()
         );
     }
+    #[test]
+    fn raided_settlers_explain_why_they_cannot_found_a_city() {
+        use crate::special_advance::SpecialAdvance;
+        use crate::unit::{Unit, UnitType};
+        let mut game = game();
+        let seat = game.active_player();
+        let enemy = 1 - seat;
+        let site = game
+            .map
+            .tiles
+            .iter()
+            .find(|(pos, terrain)| {
+                crate::city::is_valid_city_terrain(terrain)
+                    && game.players.iter().all(|p| {
+                        p.cities.iter().all(|c| c.position != **pos)
+                            && p.units.iter().all(|u| u.position != **pos)
+                    })
+            })
+            .map(|(pos, _)| *pos)
+            .expect("free land tile");
+        let army_site = *game
+            .map
+            .tiles
+            .keys()
+            .find(|pos| pos.distance(site) == 2)
+            .expect("tile 2 spaces away");
+        game.players[seat]
+            .units
+            .push(Unit::new(seat, site, UnitType::Settler, 900));
+        game.players[enemy]
+            .units
+            .push(Unit::new(enemy, army_site, UnitType::Infantry, 900));
+        game.players[enemy]
+            .special_advances
+            .insert(SpecialAdvance::Raiders);
+        let reason = |game: &Game| {
+            view(game, Some(seat))["settlers"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|s| s["id"] == 900)
+                .unwrap()["foundReason"]
+                .clone()
+        };
+        assert_eq!(
+            reason(&game),
+            "Raiders: an enemy Huns army within 2 spaces prevents founding, unless your own army shares this space"
+        );
+        game.players[seat]
+            .units
+            .push(Unit::new(seat, site, UnitType::Infantry, 901));
+        assert_eq!(reason(&game), Value::Null);
+    }
 }
 
 fn research_plan(game: &Game, seat: usize, input: &Value) -> Result<Value, String> {
