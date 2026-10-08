@@ -118,6 +118,73 @@ test('Synergies uses the research tree for both paid choices, with the second re
   assert.equal(g.players[0].event_tokens, initial.players[0].event_tokens);
 });
 
+test('New Ideas respects Math and Astronomy: free research spends nothing and still grants two ideas', () => {
+  for (const card of [41, 42]) {
+    for (const [source, advance] of [
+      ['Math', 'Roads'],
+      ['Math', 'Engineering'],
+      ['Astronomy', 'Navigation'],
+      ['Astronomy', 'Cartography'],
+    ]) {
+      const initial = fixture('action_cards/new_ideas');
+      const p = initial.players[0];
+      p.action_cards = [card];
+      p.advances.push('Math', 'Fishing', source);
+      p.advances = [...new Set(p.advances)];
+      p.resources = {};
+      let g = move(initial, { Playing: { ActionCard: card } });
+      const selected = view(g).advances.find((a) => a.id === advance)!;
+      assert.equal(selected.costAmount, 0, `${source} makes ${advance} free`);
+      assert.ok(selected.action, 'Free advances remain available without resources');
+      assert.equal(selected.triggersEvent, false);
+      g = move(g, selected.action);
+      assert.ok(g.players[0].advances.includes(advance));
+      assert.deepEqual(g.players[0].resources, { ideas: 2, ...(selected.bonus ?? {}) });
+      assert.equal(g.players[0].incident_tokens, p.incident_tokens);
+      assert.equal(g.actions_left, initial.actions_left - 1);
+      assert.equal(view(g).decision, null);
+      if (advance === 'Roads') {
+        const completed = g;
+        g = move(g, 'Undo');
+        assert.ok(researchDecision(view(g)));
+        assert.ok(!g.players[0].advances.includes(advance));
+        assert.deepEqual(g.players[0].resources ?? {}, {});
+        g = move(g, 'Redo');
+        assert.deepEqual(g.players[0].resources, completed.players[0].resources);
+        assert.equal(view(g).decision, null);
+      }
+    }
+  }
+});
+
+test('Synergies skips both payment prompts for Engineering and Roads with Math', () => {
+  const initial = fixture('action_cards/new_ideas');
+  initial.players[0].action_cards = [34];
+  initial.players[0].advances.push('Math');
+  initial.players[0].resources = {};
+  let g = move(initial, { Playing: { ActionCard: 34 } });
+  g = move(g, { Response: { SelectAdvance: 'Engineering' } });
+  assert.ok(researchDecision(view(g)), 'Go directly to the second advance');
+  assert.ok(g.players[0].advances.includes('Engineering'));
+  g = move(g, { Response: { SelectAdvance: 'Roads' } });
+  assert.equal(view(g).decision, null);
+  assert.ok(g.players[0].advances.includes('Roads'));
+  assert.deepEqual(g.players[0].resources, { culture_tokens: 1 });
+  assert.equal(g.players[0].incident_tokens, initial.players[0].incident_tokens);
+  assert.equal(g.actions_left, initial.actions_left - 1);
+});
+
+test('New Ideas consumes Priesthood’s once-per-turn free research when skipping payment', () => {
+  const initial = fixture('action_cards/new_ideas');
+  initial.players[0].advances.push('Myths', 'Priesthood');
+  initial.players[0].resources = { food: 2 };
+  let g = move(initial, { Playing: { ActionCard: 41 } });
+  g = move(g, { Response: { SelectAdvance: 'Math' } });
+  assert.equal(view(g).decision, null);
+  assert.deepEqual(g.players[0].resources, { food: 2, ideas: 2, culture_tokens: 1 });
+  assert.equal(view(g).advances.find((a) => a.id === 'Astronomy')!.costAmount, 2);
+});
+
 test('Philosophy adds a sourced idea bonus to Science cards and it matches the awarded resources', () => {
   const g = fixture('advances/writing');
   const p = g.players[0];

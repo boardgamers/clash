@@ -546,7 +546,9 @@
                 : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
             {#if !selected.owned}<span
                 >{#if eventImminent}<ScrollText size={13} aria-hidden="true" />{/if}{#if borrowing}Until end
-                  of turn{:else if freeResearch}Free{:else if choice}Pay research cost next{:else}{#if selectedPayment}Pay
+                  of turn{:else if freeResearch}Free{:else if choice}{selected.costAmount === 0
+                    ? 'Free'
+                    : 'Pay research cost next'}{:else}{#if selectedPayment}Pay
                     <ResourceAmount
                       pile={buyFreeEducation && researchPlan.affordable
                         ? { ...selectedPayment.payment, ideas: (selectedPayment.payment.ideas ?? 0) + 1 }

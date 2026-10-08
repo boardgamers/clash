@@ -291,10 +291,15 @@
   {/if}
   {#if directPayments}
     {@const field = decision.fields[0]}
+    {@const noResourceCost =
+      !decision.reward &&
+      !field.optional &&
+      directPayments.length > 0 &&
+      directPayments.every((choice) => !Object.values(choice.payment).some(Boolean))}
     {#if field.name !== decision.name && !combatBenefit && !$session.view?.influenceContext}<p
         class="decision-description"
       >
-        <ResourceText text={field.name} />
+        <ResourceText text={noResourceCost ? 'Free' : field.name} />
       </p>{/if}
     {#if $session.view?.influenceContext}
       {@const context = $session.view.influenceContext}

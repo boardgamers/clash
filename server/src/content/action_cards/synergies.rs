@@ -243,9 +243,15 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
         |game, player, i| {
             let p = player.get(game);
             let advance = i.selected_advance.expect("advance not found");
+            let cost = p.advance_cost(advance, game, game.execute_cost_trigger());
+            if cost.cost.is_free() {
+                let payment = ResourcePile::empty();
+                cost.pay(game, &payment);
+                gain_advance_without_payment(game, advance, player, payment, false);
+                return None;
+            }
             Some(vec![PaymentRequest::mandatory(
-                p.advance_cost(advance, game, game.execute_cost_trigger())
-                    .cost,
+                cost.cost,
                 &format!("Pay for {}", advance.name(game)),
             )])
         },
