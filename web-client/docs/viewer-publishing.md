@@ -75,3 +75,5 @@ Viewer 0.1.37 and engine 0.4.46 skip the payment prompt when New Ideas or Synerg
 Viewer 0.1.38 and engine 0.4.47 explicitly confirm attacks that break Great Diplomat agreements, explaining the 2-culture cost and card discard with resource icons. Capturing an undefended city or settlers now ends the agreement and discards its owner's Great Diplomat, just like a battle with defenders. Empty cities also require the diplomatic payment. Attacks involving a third party preserve the agreement. All supported locales include the confirmation. Publish the matching viewer and engine together.
 
 Viewer 0.1.39 removes the redundant Cancel button from the diplomatic attack warning. The existing movement controls cancel the move; the warning and explicit attack confirmation remain. Engine 0.4.47 is unchanged.
+
+Viewer 0.1.40 keeps full-game replay under the BGS toolbar: the extra bottom recap panel and card/objective notifications are hidden while seeking through the game. Battle results remain available, and ongoing-game last-turn recaps keep their controls and notifications. Engine 0.4.47 is unchanged.

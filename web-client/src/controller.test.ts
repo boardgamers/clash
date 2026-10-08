@@ -1331,6 +1331,68 @@ test('opponent recap steps animate and pause, replay stays within its turn, and 
   }
 });
 
+test('BGS full-game replay clears recap notifications and stays silent while seeking', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const app = paymentController(),
+    c = app.controller;
+  const report = t.mock.method(c.commands, 'setReplayInfo');
+  try {
+    const effect = { player: 1, kind: 'action' as const, label: 'Drew an action card' };
+    const frames = [
+      { cursor: 100, actor: 0, title: 'End turn', ended_turn: true },
+      { cursor: 101, actor: 1, title: 'Research', effects: [effect] },
+      { cursor: 102, actor: 1, title: 'Collect' },
+    ].map((f) => ({ players: [], tiles: [], age: 1, round: 1, ended_turn: false, ...f }));
+    c.patch({
+      game: {
+        state: 'Finished',
+        players: [],
+        map: { tiles: [] },
+        current_player_index: 0,
+        actions_left: 0,
+        age: 1,
+        round: 1,
+        log_index: 0,
+        board_history: { id: 'platform-replay', frames },
+      },
+      seat: 0,
+    });
+    c.replayLastTurn();
+    c.stepPlayback(1);
+    assert.equal(app.session().publicEffects?.length, 1, 'last-turn recap still shows card notifications');
+    c.togglePlayback();
+
+    // The same calls as the viewer's replay:start and replay:to protocol handlers.
+    c.startPlayback();
+    assert.deepEqual(app.session().publicEffects, [], 'entering full replay clears any recap notification');
+    assert.deepEqual(report.mock.calls.at(-1)?.arguments, [{ start: 100, current: 100, end: 102 }]);
+    for (const cursor of [102, 100, 101, 102]) {
+      c.seekPlayback(cursor);
+      assert.equal(app.session().playback!.frame!.cursor, cursor);
+      assert.equal(app.session().playback!.range, 'all');
+      assert.deepEqual(app.session().publicEffects, [], 'seeking does not show recap notifications');
+      assert.deepEqual(report.mock.calls.at(-1)?.arguments, [{ start: 100, current: cursor, end: 102 }]);
+      t.mock.timers.tick(10000);
+      assert.equal(
+        app.session().playback!.frame!.cursor,
+        cursor,
+        'old recap timers cannot advance BGS replay',
+      );
+    }
+    c.endPlayback();
+    c.replayLastTurn();
+    c.stepPlayback(1);
+    assert.equal(
+      app.session().publicEffects?.length,
+      1,
+      'leaving full replay restores normal recap behavior',
+    );
+    assert.deepEqual(app.sent, [], 'replay never submits game moves');
+  } finally {
+    app.close();
+  }
+});
+
 test('finished games open on the final state and stop an automatic recap already in progress', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const game = JSON.parse(await engine.init(2, [], {}, 'finished-recap', {}));

@@ -33,18 +33,18 @@
   const recap = $derived(playback?.range !== 'all');
 </script>
 
-{#if playback}
+{#if playback && recap}
   <section class="playback-bar floating-panel" aria-label="Board replay">
     {#if $session.battles?.length}<BattlePlayback {controller} />{/if}
     <div class="playback-description" aria-live="polite">
       <strong
-        ><History size={16} />{playback.range === 'all' ? 'Replay' : 'Since your last turn'}
+        ><History size={16} />Since your last turn
         {#if playback.end > playback.start}<span class="playback-progress"
             >{atStart ? 'Start' : `Action ${progress} of ${count}`}</span
           >{/if}
       </strong>
       <small
-        >{#if atStart && recap}Use Next to step through, or Play to watch.{:else}<ResourceText
+        >{#if atStart}Use Next to step through, or Play to watch.{:else}<ResourceText
             text={details.caption}
             compactResources
           />{/if}</small
@@ -72,15 +72,15 @@
           >
         {/if}
       </div>{/if}
-    {#if recap}<label class="playback-preference" title="Remember this preference for future opponent recaps">
-        <input
-          type="checkbox"
-          checked={$session.replayAutoplay}
-          onchange={(event) => controller.setReplayAutoplay(event.currentTarget.checked)}
-        />Autoplay on return
-      </label>{/if}
+    <label class="playback-preference" title="Remember this preference for future opponent recaps">
+      <input
+        type="checkbox"
+        checked={$session.replayAutoplay}
+        onchange={(event) => controller.setReplayAutoplay(event.currentTarget.checked)}
+      />Autoplay on return
+    </label>
     <button class="playback-exit" onclick={() => controller.endPlayback()}>
-      {atEnd ? 'Back to game' : recap ? 'Skip' : 'Done'}<X size={15} />
+      {atEnd ? 'Back to game' : 'Skip'}<X size={15} />
     </button>
   </section>
 {/if}

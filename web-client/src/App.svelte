@@ -1285,7 +1285,7 @@
       {#if !$session.playback}<ContextualCards {controller} context="after-battle" />{/if}
     </div>
     <nav class="table-tools" aria-label="Table controls">
-      {#if lastTurn && !$session.analysis}<button
+      {#if lastTurn && !$session.analysis && !$session.playback}<button
           class="last-turn-button"
           title="Replay all actions since your last turn"
           aria-label="Replay since your last turn"
@@ -1717,7 +1717,7 @@
         use:chatPanel
       ></div>
     </section>
-    {#if !$session.playback && $session.battles?.length}<div class="live-battle floating-panel">
+    {#if (!$session.playback || $session.playback.range === 'all') && $session.battles?.length}<div class="live-battle floating-panel">
         <BattlePlayback {controller} />
       </div>{/if}
   </main>

@@ -800,10 +800,13 @@ export class Controller {
         playing: playing && index < p.end,
         animate: index !== p.index && !s.reducedMotion,
       },
-      publicEffects: (index === p.start ? [] : (frames[index].effects ?? [])).map((e, i) => ({
-        ...e,
-        key: `replay:${frames[index].cursor}:${i}`,
-      })),
+      // Full-game replay is controlled by the BGS toolbar, without recap notifications.
+      publicEffects: (p.range === 'all' || index === p.start ? [] : (frames[index].effects ?? [])).map(
+        (e, i) => ({
+          ...e,
+          key: `replay:${frames[index].cursor}:${i}`,
+        }),
+      ),
     });
     this.reportPlayback();
     this.scheduleEffect();
