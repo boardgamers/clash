@@ -590,7 +590,13 @@ pub(crate) fn move_with_possible_combat(game: &mut Game, player_index: usize, m:
             return;
         }
 
-        // there was no combat
+        // Capturing an undefended city or settlers is still an attack, even
+        // though it skips the combat-start listeners.
+        crate::content::incidents::great_diplomat::end_diplomatic_relations_on_attack(
+            game,
+            player_index,
+            defender,
+        );
         let mut stats = new_combat_stats(
             game,
             defender,

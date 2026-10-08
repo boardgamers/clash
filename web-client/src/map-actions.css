@@ -327,6 +327,24 @@
   display: grid;
   gap: 10px;
 }
+.diplomacy-warning {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--gold);
+  border-radius: 5px;
+  background: var(--paper2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.diplomacy-warning strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.diplomacy-warning p {
+  margin: 0;
+}
 .collection-tile-options {
   display: flex;
   flex-wrap: wrap;

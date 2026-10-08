@@ -239,7 +239,14 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
     for carrier in carriers {
         for route in possible_move_routes(p, game, &units, start, carrier).unwrap_or_default() {
             if let Some(payment) = route.cost.first_valid_payment(&p.resources) {
-                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":terrain_notes(game,p,&units,route.destination),"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),
+                let breaks_diplomacy =
+                    route
+                        .cost
+                        .modifiers
+                        .contains(&crate::events::EventOrigin::Incident(
+                            crate::content::incidents::great_diplomat::DIPLOMAT_ID,
+                        ));
+                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":terrain_notes(game,p,&units,route.destination),"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),"breaksDiplomacy":breaks_diplomacy,
                     "action":Action::Movement(MovementAction::Move(MoveUnits::new(units.clone(),route.destination,carrier,payment)))});
                 if !destinations.contains(&offer) {
                     destinations.push(offer);

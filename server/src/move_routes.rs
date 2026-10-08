@@ -84,7 +84,9 @@ fn add_diplomatic_relations(player: &Player, game: &Game, base: &mut Vec<MoveRou
     if let Some(partner) = diplomatic_relations_partner(game, player.index) {
         let partner = game.player(partner);
         for r in base {
-            if !partner.get_units(r.destination).is_empty() {
+            if !partner.get_units(r.destination).is_empty()
+                || partner.try_get_city(r.destination).is_some()
+            {
                 r.cost.default += ResourcePile::culture_tokens(2);
                 r.cost.modifiers.push(EventOrigin::Incident(DIPLOMAT_ID));
             }

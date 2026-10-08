@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "공급처에서 오벨리스크 1개를 제거하고 목표 점수 1점을 얻습니다.",
   "Keep the Obelisk in your supply; gain no point.": "오벨리스크를 공급처에 유지합니다. 점수를 얻지 않습니다.",
   "Click a highlighted city or building on the map, or choose below.": "지도에서 강조된 도시나 건물을 클릭하거나 아래에서 선택하세요.",
-  "Choose target": "대상 선택"
+  "Choose target": "대상 선택",
+  "Break agreement & attack": "협정을 깨고 공격",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "이 공격은 문화 토큰 2개를 소비하고 외교 협정을 종료하며 위대한 외교관 카드를 버립니다."
 }

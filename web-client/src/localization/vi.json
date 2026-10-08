@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "Bỏ 1 Đài tưởng niệm khỏi kho và nhận 1 điểm mục tiêu.",
   "Keep the Obelisk in your supply; gain no point.": "Giữ Đài tưởng niệm trong kho; không nhận điểm.",
   "Click a highlighted city or building on the map, or choose below.": "Nhấp vào thành phố hoặc công trình được làm nổi bật trên bản đồ, hoặc chọn bên dưới.",
-  "Choose target": "Chọn mục tiêu"
+  "Choose target": "Chọn mục tiêu",
+  "Break agreement & attack": "Phá bỏ thỏa thuận và tấn công",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "Cuộc tấn công này tốn 2 token văn hóa, chấm dứt thỏa thuận ngoại giao và bỏ lá Đại Ngoại giao."
 }

@@ -94,9 +94,6 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "action_cards": [
-        157
-      ],
       "next_unit_id": 8
     },
     {
@@ -472,6 +469,21 @@
                     },
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 157
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Diplomatic Relations"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "CombatRoll": {
                         "rolls": [
                           {
@@ -584,6 +596,9 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    157
   ],
   "incidents_discarded": [
     57

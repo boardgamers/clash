@@ -1,8 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::ActionCard;
+use crate::action_card::{ActionCard, discard_action_card};
+use crate::card::HandCardLocation;
 use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
-use crate::content::incidents::great_persons::{GreatPersonType, great_person_card};
+use crate::content::incidents::great_persons::{
+    GREAT_PERSON_OFFSET, GreatPersonType, great_person_card,
+};
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::IncidentBuilder;
 use crate::player_events::IncidentTarget;
@@ -31,7 +35,7 @@ pub(crate) fn great_diplomat() -> ActionCard {
         |game, p, _| {
             p.log(game, "Ended diplomatic relations.");
             remove_element_by(&mut game.permanent_effects, |e| {
-                matches!(e, PermanentEffect::DiplomaticRelations(_))
+                matches!(e, PermanentEffect::DiplomaticRelations(r) if r.active_player == p.index)
             });
         },
     )
@@ -97,22 +101,49 @@ pub(crate) fn use_diplomatic_relations() -> Ability {
         .add_simple_persistent_event_listener(
             |e| &mut e.combat_start,
             2,
-            |game, p, _| {
-                if let Some(partner) = diplomatic_relations_partner(game, p.index) {
-                    p.log(
-                        game,
-                        &format!(
-                            "Diplomatic relations with {} ended with a surprise attack.",
-                            game.player_name(partner),
-                        ),
-                    );
-                    remove_element_by(&mut game.permanent_effects, |e| {
-                        matches!(e, PermanentEffect::DiplomaticRelations(_))
-                    });
-                }
+            |game, _, combat| {
+                end_diplomatic_relations_on_attack(game, combat.attacker(), combat.defender());
             },
         )
         .build()
+}
+
+pub(crate) fn end_diplomatic_relations_on_attack(
+    game: &mut Game,
+    attacker: usize,
+    defender: usize,
+) {
+    let Some(PermanentEffect::DiplomaticRelations(relations)) = remove_element_by(
+        &mut game.permanent_effects,
+        |e| matches!(e, PermanentEffect::DiplomaticRelations(r) if r.partner(attacker) == Some(defender)),
+    ) else {
+        return;
+    };
+    let player = EventPlayer::new(
+        attacker,
+        EventOrigin::Ability("Diplomatic Relations".into()),
+    );
+    player.log(
+        game,
+        &format!(
+            "Diplomatic relations with {} ended with a surprise attack.",
+            game.player_name(defender),
+        ),
+    );
+    let card = DIPLOMAT_ID + GREAT_PERSON_OFFSET;
+    if game
+        .player(relations.active_player)
+        .action_cards
+        .contains(&card)
+    {
+        discard_action_card(
+            game,
+            relations.active_player,
+            card,
+            &player.origin,
+            HandCardLocation::DiscardPile,
+        );
+    }
 }
 
 pub(crate) fn diplomatic_relations_partner(game: &Game, p: usize) -> Option<usize> {

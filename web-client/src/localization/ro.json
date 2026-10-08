@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "Elimină 1 Obelisc din rezerva ta și câștigă 1 punct de obiectiv.",
   "Keep the Obelisk in your supply; gain no point.": "Păstrează Obeliscul în rezerva ta; nu câștigi niciun punct.",
   "Click a highlighted city or building on the map, or choose below.": "Dă clic pe un oraș sau o clădire evidențiată pe hartă ori alege mai jos.",
-  "Choose target": "Alege ținta"
+  "Choose target": "Alege ținta",
+  "Break agreement & attack": "Rupe acordul și atacă",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "Acest atac costă 2 jetoane de cultură, încheie acordul vostru diplomatic și aruncă Marele diplomat."
 }

@@ -630,6 +630,7 @@ export interface HappinessPreview {
   reason: string | null;
 }
 export interface MoveDestination {
+  breaksDiplomacy?: boolean;
   terrainNotes?: string[];
   label?: string;
   pirateCarrier?: number;

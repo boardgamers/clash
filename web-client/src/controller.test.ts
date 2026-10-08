@@ -277,6 +277,37 @@ test('turning off move confirmation submits plain map moves but still confirms a
   }
 });
 
+test('a diplomatic attack waits for explicit confirmation even with move confirmation disabled', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const game = JSON.parse(fixture('movement/movement'));
+    game.players[0].advances.push('Tactics');
+    game.players[1].units = [];
+    game.players[1].action_cards = [157];
+    game.permanent_effects = [{ DiplomaticRelations: { active_player: 1, passive_player: 0 } }];
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.setPreferences({ confirmMoves: false });
+    c.openUnits([0]);
+    c.selectTile('C1');
+    const destination = app.session().moveDestinations[app.session().moveDestination!];
+    assert.equal(destination.breaksDiplomacy, true);
+    assert.deepEqual(destination.payment, { culture_tokens: 2 });
+    assert.deepEqual(app.sent, []);
+    c.patch({ moveTarget: null, moveDestination: null });
+    assert.deepEqual(app.sent, [], 'Cancel leaves the agreement and units untouched');
+    c.selectTile('C1');
+    c.submit(destination.action);
+    assert.deepEqual(
+      app.sent.map((s) => JSON.parse(s)),
+      [destination.action],
+    );
+  } finally {
+    app.close();
+  }
+});
+
 test('map happiness selects multiple cities, preserves them across variants, and confirms together', async () => {
   const app = paymentController(),
     c = app.controller;

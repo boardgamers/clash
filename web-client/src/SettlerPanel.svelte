@@ -13,6 +13,7 @@
   } from 'lucide-svelte';
   import type { Controller } from './controller';
   import ResourceAmount from './ResourceAmount.svelte';
+  import ResourceText from './ResourceText.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import TerrainRules from './TerrainRules.svelte';
   import UnitPicker from './UnitPicker.svelte';
@@ -200,6 +201,21 @@
       terrain={destination.terrain}
       notes={destination.terrainNotes}
     />{/if}
+  {#if destination?.breaksDiplomacy}
+    <div class="diplomacy-warning" role="alert">
+      <strong><TriangleAlert size={16} />Great Diplomat</strong>
+      <p>
+        <ResourceText
+          text="This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat."
+        />
+      </p>
+      <button
+        class="secondary"
+        disabled={$session.pending}
+        onclick={() => controller.patch({ moveTarget: null, moveDestination: null })}>Cancel</button
+      >
+    </div>
+  {/if}
   {#if destination}<div class="settler-confirm">
       {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
       <button
@@ -207,15 +223,17 @@
         disabled={$session.pending}
         onclick={() => controller.submit(destination.action)}
       >
-        {destination.attack
-          ? 'Attack'
-          : destination.carrier != null || destination.pirateCarrier != null
-            ? 'Board ship'
-            : destination.terrain === 'Unexplored'
-              ? 'Explore'
-              : disembarking
-                ? 'Disembark'
-                : 'Move here'}
+        {destination.breaksDiplomacy
+          ? 'Break agreement & attack'
+          : destination.attack
+            ? 'Attack'
+            : destination.carrier != null || destination.pirateCarrier != null
+              ? 'Board ship'
+              : destination.terrain === 'Unexplored'
+                ? 'Explore'
+                : disembarking
+                  ? 'Disembark'
+                  : 'Move here'}
         {#if !$session.view?.stopMovement}<span class="settler-action-cost" aria-label="Costs 1 action"
             ><Zap size={13} />1</span
           >{/if}<ArrowRight size={16} />

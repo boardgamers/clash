@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "Verwijder 1 Obelisk uit je voorraad en ontvang 1 doeloverwinningspunt.",
   "Keep the Obelisk in your supply; gain no point.": "Behoud de Obelisk in je voorraad; je ontvangt geen punt.",
   "Click a highlighted city or building on the map, or choose below.": "Klik op een gemarkeerde stad of een gemarkeerd gebouw op de kaart, of kies hieronder.",
-  "Choose target": "Doel kiezen"
+  "Choose target": "Doel kiezen",
+  "Break agreement & attack": "Verbreek overeenkomst en val aan",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "Deze aanval kost 2 cultuurfiches, beëindigt jullie diplomatieke overeenkomst en legt Groot Diplomaat af."
 }

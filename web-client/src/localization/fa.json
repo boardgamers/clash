@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "۱ ابلیسک از ذخیرهٔ خود حذف کنید و ۱ امتیاز هدف بگیرید.",
   "Keep the Obelisk in your supply; gain no point.": "ابلیسک را در ذخیرهٔ خود نگه دارید؛ امتیازی نمی‌گیرید.",
   "Click a highlighted city or building on the map, or choose below.": "روی شهر یا ساختمان مشخص‌شده روی نقشه کلیک کنید یا از پایین انتخاب کنید.",
-  "Choose target": "انتخاب هدف"
+  "Choose target": "انتخاب هدف",
+  "Break agreement & attack": "پایان توافق و حمله",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "این حمله 2 نشان فرهنگ هزینه دارد، توافق دیپلماتیک شما را پایان می‌دهد و کارت دیپلمات بزرگ را دور می‌اندازد."
 }

@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "आपूर्ति से 1 ओबिलिस्क हटाएँ और 1 उद्देश्य अंक पाएँ।",
   "Keep the Obelisk in your supply; gain no point.": "ओबिलिस्क आपूर्ति में रखें; कोई अंक नहीं मिलता।",
   "Click a highlighted city or building on the map, or choose below.": "मानचित्र पर हाइलाइट किए गए नगर या भवन पर क्लिक करें, या नीचे से चुनें।",
-  "Choose target": "लक्ष्य चुनें"
+  "Choose target": "लक्ष्य चुनें",
+  "Break agreement & attack": "समझौता तोड़ें और हमला करें",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "इस हमले में 2 संस्कृति टोकन खर्च होंगे, आपका राजनयिक समझौता समाप्त होगा और महान राजनयिक कार्ड त्याग दिया जाएगा।"
 }

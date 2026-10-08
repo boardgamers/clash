@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "Fjern 1 Obelisk fra dit lager, og få 1 målpoint.",
   "Keep the Obelisk in your supply; gain no point.": "Behold Obelisken i dit lager; få intet point.",
   "Click a highlighted city or building on the map, or choose below.": "Klik på en fremhævet by eller bygning på kortet, eller vælg nedenfor.",
-  "Choose target": "Vælg mål"
+  "Choose target": "Vælg mål",
+  "Break agreement & attack": "Bryd aftalen og angrib",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "Dette angreb koster 2 kulturpoletter, afslutter jeres diplomatiske aftale og kasserer Stor diplomat."
 }

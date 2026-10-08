@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "Usuń 1 Obelisk ze swojej rezerwy i zdobądź 1 punkt celu.",
   "Keep the Obelisk in your supply; gain no point.": "Zachowaj Obelisk w swojej rezerwie; nie zdobywasz punktu.",
   "Click a highlighted city or building on the map, or choose below.": "Kliknij podświetlone miasto lub budynek na mapie albo wybierz poniżej.",
-  "Choose target": "Wybierz cel"
+  "Choose target": "Wybierz cel",
+  "Break agreement & attack": "Zerwij porozumienie i zaatakuj",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "Ten atak kosztuje 2 żetony kultury, kończy wasze porozumienie dyplomatyczne i powoduje odrzucenie Wielkiego dyplomaty."
 }

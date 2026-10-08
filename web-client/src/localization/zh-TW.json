@@ -4646,5 +4646,7 @@
   "Remove 1 Obelisk from your supply and gain 1 objective point.": "從供應區移除1個方尖碑，獲得1目標分。",
   "Keep the Obelisk in your supply; gain no point.": "將方尖碑保留在供應區；不獲得分數。",
   "Click a highlighted city or building on the map, or choose below.": "點擊地圖上標示的城市或建築，或從下方選擇。",
-  "Choose target": "選擇目標"
+  "Choose target": "選擇目標",
+  "Break agreement & attack": "解除協議並攻擊",
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "這次攻擊花費 2 個文化標記，結束你們的外交協議並棄置大外交家。"
 }
