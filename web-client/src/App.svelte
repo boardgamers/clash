@@ -695,6 +695,7 @@
   class:activity-open={$session.activityOpen}
   class="game-shell"
   class:playing-back={!!$session.playback}
+  class:full-replay={$session.playback?.range === 'all'}
   class:civilization-setup={!!$session.view?.civilizationDraft}
   style:--civilization-accent={civilizationAccent(identity?.civilization)}
 >

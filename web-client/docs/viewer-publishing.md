@@ -77,3 +77,5 @@ Viewer 0.1.38 and engine 0.4.47 explicitly confirm attacks that break Great Dipl
 Viewer 0.1.39 removes the redundant Cancel button from the diplomatic attack warning. The existing movement controls cancel the move; the warning and explicit attack confirmation remain. Engine 0.4.47 is unchanged.
 
 Viewer 0.1.40 keeps full-game replay under the BGS toolbar: the extra bottom recap panel and card/objective notifications are hidden while seeking through the game. Battle results remain available, and ongoing-game last-turn recaps keep their controls and notifications. Engine 0.4.47 is unchanged.
+
+Viewer 0.1.41 restores the player cards and their civilization details in full-game replay, while keeping last-turn recap controls and notifications hidden. Scores and civilization details continue to describe the saved game; board-history frames contain the historical map and pieces. Engine 0.4.47 is unchanged.

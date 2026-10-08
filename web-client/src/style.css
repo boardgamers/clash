@@ -5348,7 +5348,7 @@ small {
 /* Playback leaves the board and camera controls available, hiding live decisions. */
 .playing-back .header-actions,
 .playing-back .resource-bar,
-.playing-back .player-list,
+.playing-back:not(.full-replay) .player-list,
 .playing-back .board-toolbar,
 .playing-back .city-dock,
 .playing-back .action-panel,
