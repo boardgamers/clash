@@ -4,6 +4,7 @@ use crate::advance::{find_government_special_advance, remove_advance};
 use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
 use crate::content::ability::Ability;
+use crate::content::civilizations::egypt::{MAN_GOD, grants_advance};
 use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitTypeRequest};
 use crate::events::{EventOrigin, EventPlayer};
@@ -280,6 +281,21 @@ fn anarchy() -> Incident {
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _| {
         let old = p.get(game).advances.len();
+        let lost_abilities = MAN_GOD
+            .iter()
+            .filter(|(_, granted)| {
+                grants_advance(p.get(game), *granted)
+                    && !p.get(game).has_advance(*granted)
+                    && p.get(game).great_library_advance != Some(*granted)
+            })
+            .map(|(owned, granted)| {
+                format!(
+                    "Losing {} also disables {} (Man God)",
+                    owned.name(game),
+                    granted.name(game)
+                )
+            })
+            .collect_vec();
 
         let remove = p
             .get(game)
@@ -302,6 +318,9 @@ fn anarchy() -> Incident {
         let lost = old - player.advances.len();
         player.gain_event_victory_points(lost as f32, &p.origin);
         if lost > 0 {
+            for reason in lost_abilities {
+                p.log(game, &reason);
+            }
             p.log(
                 game,
                 &format!(

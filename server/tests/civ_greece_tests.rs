@@ -42,6 +42,69 @@ fn sparta_battle() {
 }
 
 #[test]
+fn sparta_uses_unit_counts_in_both_combat_roles() {
+    use server::cache::Cache;
+    use server::content::persistent_events::PersistentEventType;
+    use server::game::{Game, GameContext};
+    use server::game_data::GameData;
+
+    for greek_player in [0, 1] {
+        for (greek_count, opponent_count) in [(1, 2), (2, 2), (4, 2), (4, 4)] {
+            for greek_ids_first in [false, true] {
+                let mut data: serde_json::Value = serde_json::from_str(include_str!(
+                    "test_games/civilizations/greece/sparta_battle.json"
+                ))
+                .unwrap();
+                for player in 0..2 {
+                    let greek = player == greek_player;
+                    let count = if greek { greek_count } else { opponent_count };
+                    let first_id = if greek == greek_ids_first { 0 } else { 100 };
+                    data["players"][player]["advances"] = if greek {
+                        serde_json::json!(["Farming", "Mining", "Tactics", "Draft"])
+                    } else {
+                        serde_json::json!(["Farming", "Mining", "Tactics"])
+                    };
+                    data["players"][player]["action_cards"] = serde_json::json!([18]);
+                    data["players"][player]["units"] = serde_json::json!(
+                        (0..count)
+                            .map(|i| serde_json::json!({
+                                "id": first_id + i,
+                                "position": if player == 0 { "C2" } else { "C1" },
+                                "unit_type": "Infantry"
+                            }))
+                            .collect::<Vec<_>>()
+                    );
+                    data["players"][player]["next_unit_id"] = serde_json::json!(first_id + count);
+                }
+                let data: GameData = serde_json::from_value(data).unwrap();
+                let cache = Cache::new(&data.options);
+                let game = Game::from_data(data, cache, GameContext::Play);
+                let attackers = game.player(0).units.iter().map(|u| u.id).collect();
+                let game = server::game_api::execute(
+                    game,
+                    move_action(attackers, Position::from_offset("C1")),
+                    0,
+                );
+                let PersistentEventType::CombatRoundStart(round) = &game.current_event().event_type
+                else {
+                    panic!("Expected battle card selection");
+                };
+                let opponent_strength = if greek_player == 0 {
+                    &round.defender_strength
+                } else {
+                    &round.attacker_strength
+                };
+                assert_eq!(
+                    opponent_strength.deny_tactics_card,
+                    greek_count < opponent_count,
+                    "Greek player {greek_player}, {greek_count} vs {opponent_count}, Greek IDs first: {greek_ids_first}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn hellenistic_culture_staring_point() {
     let game = &JSON.load_game("hellenistic_culture");
 

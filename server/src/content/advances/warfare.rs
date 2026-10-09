@@ -127,11 +127,13 @@ fn steel_weapons() -> AdvanceBuilder {
             if player.can_afford(&cost) {
                 Some(vec![PaymentRequest::optional(cost, "Use steel weapons")])
             } else {
+                p.log(game, "Steel Weapons not used: cannot afford 1 ore or gold");
                 None
             }
         },
-        |_game, s, c| {
+        |game, s, c| {
             if s.choice[0].is_empty() {
+                s.log(game, "Declined to use Steel Weapons");
                 return;
             }
             add_steel_weapons(s.player_index, c);

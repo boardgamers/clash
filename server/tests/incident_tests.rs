@@ -706,3 +706,35 @@ fn fire_without_forest_cities_loses_wood_and_keeps_mood() {
         );
     }
 }
+
+#[test]
+fn anarchy_explains_lost_man_god_abilities() {
+    use server::cache::Cache;
+    use server::game::{Game, GameContext};
+    use server::game_data::GameData;
+    let mut data = serde_json::to_value(TROJAN.load_game("anarchy").data()).unwrap();
+    data["players"][0]["civilization"] = serde_json::json!("Egypt");
+    data["players"][0]["advances"] = serde_json::json!([
+        "Farming",
+        "Mining",
+        "Priesthood",
+        "StateReligion",
+        "Dogma",
+        "Conversion",
+        "Fanaticism"
+    ]);
+    let data: GameData = serde_json::from_value(data).unwrap();
+    let cache = Cache::new(&data.options);
+    let game = Game::from_data(data, cache, GameContext::Play);
+    let game = server::game_api::execute(
+        game,
+        advance_action(Advance::Storage, ResourcePile::gold(2)),
+        0,
+    );
+    let log = serde_json::to_string(&game.log).unwrap();
+    assert!(log.contains("Losing Conversion also disables Absolute Power (Man God)"));
+    assert!(log.contains("Losing Dogma also disables Nationalism (Man God)"));
+    assert!(log.contains("Losing Fanaticism also disables Forced Labor (Man God)"));
+    assert!(!log.contains("Losing Devotion"));
+    assert!(!game.player(0).can_use_advance(Advance::AbsolutePower));
+}

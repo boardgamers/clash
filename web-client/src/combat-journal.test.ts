@@ -245,3 +245,33 @@ test('a failed Peltasts check is explained next to tactics, independently of com
   assert.ok(combat.attacker.modifiers.every((m) => !m.includes('Pelt')));
   assert.ok(combat.outcomes.every((e) => e.notes.every((n) => !n.includes('Pelts'))));
 });
+
+test('blocked tactics name the ability, preserving new army counts and legacy explanations', () => {
+  for (const [reason, ability] of [
+    ['Sparta blocks tactics cards: fighting units — Greece 1; opponent 2', 'Sparta'],
+    ['Sparta denies playing tactics cards', 'Sparta'],
+    ['Trojan Horse denied playing Tactics Cards', 'Trojan Horse'],
+    ['Battering Rams prevents tactics', 'Battering Rams'],
+    ['Mighty Army: five units, no tactics or dice-symbol abilities', 'Mighty Army'],
+  ]) {
+    const game = fixture('remove_casualties_attacker.outcome');
+    game.log![0].rounds[0].turns[0].actions = [
+      {
+        log: [
+          'Combat round 1',
+          'Player1: Combat: Attacking with 1 infantry',
+          'Player2: Combat: Defending with 2 infantry',
+          `Player2: Combat: Combat modifiers: ${reason}`,
+        ],
+      },
+    ];
+    game.log_index = 1;
+    const entries = journal(game),
+      original = JSON.stringify(entries);
+    const [combat] = rounds(entries);
+    assert.equal(combat.defender.tactics, `Blocked by ${ability}`);
+    assert.equal(combat.defender.tacticsBlocked, reason);
+    assert.equal(combat.attacker.tactics, undefined);
+    assert.equal(JSON.stringify(entries), original);
+  }
+});

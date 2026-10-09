@@ -82,15 +82,17 @@ fn sparta() -> SpecialAdvanceInfo {
         0,
         |game, player, r| {
             let opponent = r.combat.opponent(player.index);
-            if r.combat.fighting_units(game, player.index) < r.combat.fighting_units(game, opponent)
-            {
+            let greek_units = r.combat.fighting_units(game, player.index).len();
+            let opponent_units = r.combat.fighting_units(game, opponent).len();
+            if greek_units < opponent_units {
                 update_combat_strength(
                     game,
                     opponent,
                     r,
                     |_game, _combat, s: &mut CombatStrength, _role| {
-                        s.roll_log
-                            .push("Sparta denies playing tactics cards".to_string());
+                        s.roll_log.push(format!(
+                            "Sparta blocks tactics cards: fighting units — Greece {greek_units}; opponent {opponent_units}"
+                        ));
                         s.deny_tactics_card = true;
                     },
                 );

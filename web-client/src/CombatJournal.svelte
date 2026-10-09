@@ -48,6 +48,13 @@
     {#if sides.some((s) => s.tactics)}<tr
         ><th scope="row">Tactics</th>{#each sides as side}<td
             >{side.tactics ?? '—'}
+            {#if side.tacticsBlocked}<span class="combat-tactics-effect"
+                ><ResourceText
+                  text={side.tacticsBlocked}
+                  research={researchReferences(researchCatalog ?? null, side.player)}
+                  {onResearch}
+                /></span
+              >{/if}
             {#if side.tacticsEffect}<span class="combat-tactics-effect"
                 ><ResourceText text={side.tacticsEffect} /></span
               >{/if}

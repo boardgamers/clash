@@ -16,6 +16,7 @@ export interface CombatSide {
   modifiers: string[];
   tactics?: string;
   tacticsEffect?: string;
+  tacticsBlocked?: string;
 }
 export interface CombatRound {
   round?: number;
@@ -197,11 +198,27 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
     }
     text = text.replace(/^,\s*|,\s*$/g, '');
     if (text.startsWith('Combat modifiers: ')) {
-      const clauses = text.slice('Combat modifiers: '.length).split(/,\s*(?![^()]*\))/);
+      const clauses = text
+        .slice('Combat modifiers: '.length)
+        .split(/,(?!\s*(?:[^()]*\)|no tactics or dice-symbol abilities))\s*/);
       // A journal entry can merge later captures into the same player's roll.
       // Only move known roll modifiers into the table; keep other effects below.
       const remainder: string[] = [];
       for (const clause of clauses) {
+        const blockedBy = /^Sparta (?:denies playing tactics cards|blocks tactics cards:)/i.test(clause)
+          ? 'Sparta'
+          : /Trojan Horse.*(?:denied|denies).*Tactics Cards/i.test(clause)
+            ? 'Trojan Horse'
+            : /^Battering Rams prevents tactics/.test(clause)
+              ? 'Battering Rams'
+              : /^Mighty Army:.*no tactics/.test(clause)
+                ? 'Mighty Army'
+                : null;
+        if (blockedBy) {
+          target.tactics = `Blocked by ${blockedBy}`;
+          target.tacticsBlocked = clause;
+          continue;
+        }
         if (/^(?:Pelts|Peltasts) rolls no 5 or 6$/.test(clause)) {
           target.tacticsEffect = 'Separate roll: no 5 or 6. No hit cancelled.';
           continue;

@@ -796,3 +796,38 @@ fn has_husbandry_field(game: &Game) -> bool {
     );
     info.choices.contains_key(&Position::from_offset("E2"))
 }
+
+#[test]
+fn steel_weapons_explains_missing_and_declined_payments() {
+    use server::cache::Cache;
+    use server::game::{Game, GameContext};
+    use server::game_data::GameData;
+    for affordable in [false, true] {
+        let mut data: serde_json::Value = serde_json::from_str(include_str!(
+            "test_games/civilizations/greece/sparta_battle.json"
+        ))
+        .unwrap();
+        data["players"][0]["advances"] =
+            serde_json::json!(["Farming", "Mining", "Tactics", "SteelWeapons"]);
+        data["players"][0]["resources"]["ore"] = serde_json::json!(u8::from(affordable));
+        data["players"][0]["resources"]["gold"] = serde_json::json!(0);
+        let data: GameData = serde_json::from_value(data).unwrap();
+        let cache = Cache::new(&data.options);
+        let game = Game::from_data(data, cache, GameContext::Play);
+        let mut game = server::game_api::execute(
+            game,
+            common::move_action(vec![0], Position::from_offset("C1")),
+            0,
+        );
+        if affordable {
+            game = server::game_api::execute(game, payment_response(ResourcePile::empty()), 0);
+        }
+        let log = serde_json::to_string(&game.log).unwrap();
+        assert!(log.contains(if affordable {
+            "Declined to use Steel Weapons"
+        } else {
+            "Steel Weapons not used: cannot afford 1 ore or gold"
+        }));
+        assert!(!log.contains("steel weapons added"));
+    }
+}
