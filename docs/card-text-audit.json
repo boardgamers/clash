@@ -1,6 +1,6 @@
 {
   "edition": "Monumental Edition",
-  "reviewed": "2026-09-30",
+  "reviewed": "2026-10-09",
   "complete_english_deck_verified": false,
   "method": "Check card conditions against their implemented targets, timing and costs; compare readable English card faces where available. Wording edits are not represented as verbatim transcriptions.",
   "sources": {
@@ -16,9 +16,14 @@
         31
       ],
       "verified": "Card use, objective timing, Steel Weapons and Metallurgy."
+    },
+    "english-epidemic-photo": {
+      "url": "https://discussion.tekeli.li/uploads/default/original/2X/e/e15d4c5a9466c355d78e13412f87c936032f8dd4.jpeg",
+      "context": "https://discussion.tekeli.li/t/clash-of-cultures-game-1/3448/616",
+      "verified": "Printed Monumental Edition card E2 (Epidemic): applies from two units inclusive; lose one unit, or two with Roads, Navigation, or Trade Routes. Sanitation prevents these losses."
     }
   },
-  "availability": "Searched BGG and publisher sources, including all nine pages of the Monumental Edition game image gallery. A complete readable English Action, Objective and Event deck was not located. English card scans are still needed for exact per-card verification.",
+  "availability": "Searched BGG and publisher sources, including all nine pages of the Monumental Edition game image gallery. A complete readable English Action, Objective and Event deck was not located. English card scans are still needed for exact per-card verification. The Epidemic (E2) card photograph was located in a public play-by-post game on 2026-10-09; the complete deck remains unverified.",
   "objective_cards": [
     {
       "id": 1,
@@ -909,8 +914,11 @@
     {
       "id": 2,
       "name": "Epidemics",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "threshold-and-protection-verified",
+      "printed_name": "Epidemic",
+      "source": "english-epidemic-photo",
+      "reviewed": "2026-10-09"
     },
     {
       "id": 3,

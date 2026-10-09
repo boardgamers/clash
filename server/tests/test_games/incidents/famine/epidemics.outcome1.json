@@ -1,5 +1,43 @@
 {
   "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "Incident": {
+          "incident_id": 2,
+          "cause": {
+            "Advance": "Storage"
+          },
+          "active_player": 0
+        }
+      },
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectUnits": {
+            "player": 1,
+            "choices": [
+              0,
+              1
+            ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
+            "description": "Select units to kill"
+          }
+        },
+        "origin": {
+          "Incident": 2
+        }
+      }
+    }
+  ],
   "players": [
     {
       "id": 0,
@@ -301,7 +339,7 @@
     }
   ],
   "log_index": 2,
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 2,
   "round": 1,
   "age": 1,

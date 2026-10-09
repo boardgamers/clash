@@ -4648,5 +4648,7 @@
   "Click a highlighted city or building on the map, or choose below.": "지도에서 강조된 도시나 건물을 클릭하거나 아래에서 선택하세요.",
   "Choose target": "대상 선택",
   "Break agreement & attack": "협정을 깨고 공격",
-  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "이 공격은 문화 토큰 2개를 소비하고 외교 협정을 종료하며 위대한 외교관 카드를 버립니다."
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "이 공격은 문화 토큰 2개를 소비하고 외교 협정을 종료하며 위대한 외교관 카드를 버립니다.",
+  "Barbarians block collection on their tile. Events can spawn, move, or reinforce them; cavalry or elephants may be placed in a city that already has infantry. Winning a battle against barbarians gives 1 gold total, whether attacking or defending. Capturing a barbarian city gives 1 gold in addition to any battle reward.": "야만인은 자신이 있는 칸의 수집을 막습니다. 사건으로 야만인이 등장하거나 이동하거나 증원될 수 있습니다. 보병이 이미 있는 도시에는 기병이나 코끼리를 놓을 수 있습니다. 야만인과의 전투에서 승리하면 공격과 방어에 관계없이 총 1 금을 얻습니다. 야만인 도시를 점령하면 전투 보상과 별도로 1 금을 얻습니다.",
+  "Pirates block sea collection and Trade Routes on their tile and adjacent sea tiles. Attack by moving or recruiting ships onto their tile. For each pirate ship destroyed in battle, gain 1 gold and your choice of 1 mood token or 1 culture token, even if you lose. Pirates controlled by Carthage give no reward.": "해적은 자신이 있는 칸과 인접한 바다 칸의 해상 수집 및 교역로를 막습니다. 그 칸으로 함선을 이동하거나 모집하여 공격합니다. 전투에서 파괴한 해적선마다 1 금과 함께 1 기분 토큰 또는 1 문화 토큰 중 하나를 선택해 얻으며, 패배해도 받습니다. 카르타고가 통제하는 해적은 보상을 주지 않습니다."
 }

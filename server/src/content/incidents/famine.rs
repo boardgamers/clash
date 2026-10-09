@@ -111,6 +111,7 @@ pub(crate) fn pestilence_permanent_effect() -> Ability {
     .build()
 }
 
+// Printed E2 requires at least two units; see english-epidemic-photo in docs/card-text-audit.json.
 fn epidemics() -> Incident {
     Incident::builder(
         2,
@@ -131,7 +132,7 @@ fn epidemics() -> Incident {
             } else {
                 1
             };
-            if units.len() <= 2 {
+            if units.len() < 2 {
                 None
             } else {
                 Some(UnitsRequest::new(

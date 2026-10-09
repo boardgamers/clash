@@ -177,6 +177,21 @@ test('pending events never claim to have whiffed and casualties attach to the ev
   assert.match(event.event!.pending!, /Waiting for Rome/);
   assert.equal(event.event!.explanations.length, 0);
   state = run(state, { Response: { SelectUnits: [7] } });
+  event = entries(state).find((e) => e.event)!;
+  assert.match(event.event!.pending!, /Waiting for Greece/);
+  assert.equal(event.event!.explanations.length, 0);
+
+  // Older engines incorrectly completed the event without asking the two-unit player.
+  const legacy = JSON.parse(state);
+  legacy.events = [];
+  assert.ok(
+    entries(JSON.stringify(legacy))
+      .find((e) => e.event)!
+      .event!.explanations.some((e) => e.player === 1 && e.text === '2 units · no loss recorded'),
+    'Historical skipped losses must not be presented as a legitimate exemption',
+  );
+
+  state = run(state, { Response: { SelectUnits: [0] } }, 1);
   const log = entries(state);
   event = log.find((e) => e.event)!;
   assert.equal(event.event!.pending, undefined);
@@ -189,9 +204,11 @@ test('pending events never claim to have whiffed and casualties attach to the ev
     ),
   );
   assert.ok(
-    event.event!.explanations.some((e) => e.player === 1 && e.text === '2 units · no loss recorded'),
-    'The historical two-unit engine bug must not be presented as a legitimate exemption',
+    event.event!.outcomes.some(
+      (e) => e.civilization === 'Greece' && e.tokens.some((t) => t.icon === 'unit' && t.value === '−1'),
+    ),
   );
+  assert.equal(event.event!.explanations.length, 0);
 });
 
 test('Irrigation protection is explicit while barbarian side effects remain visible', () => {

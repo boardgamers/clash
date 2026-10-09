@@ -193,9 +193,67 @@ fn test_epidemics() {
         "epidemics",
         vec![
             TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
-            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
+            TestAction::not_undoable(1, Action::Response(EventResponse::SelectUnits(vec![0])))
+                .skip_json()
+                .with_post_assert(|game| {
+                    assert_eq!(game.player(1).units.len(), 1);
+                    assert!(game.events.is_empty());
+                }),
         ],
     );
+}
+
+#[test]
+fn epidemics_unit_threshold_and_protection() {
+    use server::content::persistent_events::PersistentEventRequest;
+
+    for (unit_count, advance, losses) in [
+        (0, None, 0),
+        (1, None, 0),
+        (1, Some(Advance::Roads), 0),
+        (2, None, 1),
+        (3, None, 1),
+        (2, Some(Advance::Roads), 2),
+        (2, Some(Advance::Navigation), 2),
+        (2, Some(Advance::TradeRoutes), 2),
+        (3, Some(Advance::Roads), 2),
+        (2, Some(Advance::Sanitation), 0),
+        (3, Some(Advance::Sanitation), 0),
+    ] {
+        let mut game = FAMINE.load_game("epidemics");
+        game.player_mut(0).units.truncate(unit_count);
+        game.player_mut(1).units.clear();
+        if let Some(advance) = advance {
+            game.player_mut(0).advances.insert(advance);
+        }
+        let mut game = server::game_api::execute(
+            game,
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
+            0,
+        );
+        if losses > 0 && losses < unit_count {
+            let handler = game
+                .current_event_handler()
+                .expect("Must choose casualties");
+            let PersistentEventRequest::SelectUnits(request) = &handler.request else {
+                panic!("Expected a casualty selection");
+            };
+            assert_eq!(request.request.needed, losses as u8..=losses as u8);
+            let selected = request.request.choices[..losses].to_vec();
+            game = server::game_api::execute(
+                game,
+                Action::Response(EventResponse::SelectUnits(selected)),
+                0,
+            );
+        }
+        assert_eq!(
+            game.player(0).units.len(),
+            unit_count - losses,
+            "Epidemics with {unit_count} units and {advance:?}"
+        );
+        assert!(game.events.is_empty());
+    }
 }
 
 const GOOD_YEAR: JsonTest = JsonTest::child("incidents", "good_year");

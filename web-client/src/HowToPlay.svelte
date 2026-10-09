@@ -122,8 +122,13 @@
     },
     {
       icon: ScrollText,
-      title: 'Barbarians and pirates',
-      text: 'Events can create, move, or reinforce hostile units. Barbarians block collection on their tile; pirates disrupt sea collection and Trade Routes nearby. When placing a barbarian in a city that already has infantry, cavalry or an elephant may be chosen instead. Attack pirates by moving or recruiting ships onto their tile.',
+      title: 'Barbarians',
+      text: 'Barbarians block collection on their tile. Events can spawn, move, or reinforce them; cavalry or elephants may be placed in a city that already has infantry. Winning a battle against barbarians gives 1 gold total, whether attacking or defending. Capturing a barbarian city gives 1 gold in addition to any battle reward.',
+    },
+    {
+      icon: Ship,
+      title: 'Pirates',
+      text: 'Pirates block sea collection and Trade Routes on their tile and adjacent sea tiles. Attack by moving or recruiting ships onto their tile. For each pirate ship destroyed in battle, gain 1 gold and your choice of 1 mood token or 1 culture token, even if you lose. Pirates controlled by Carthage give no reward.',
     },
   ]);
   function show(node: HTMLDialogElement) {

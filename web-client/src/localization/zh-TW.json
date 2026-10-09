@@ -4648,5 +4648,7 @@
   "Click a highlighted city or building on the map, or choose below.": "點擊地圖上標示的城市或建築，或從下方選擇。",
   "Choose target": "選擇目標",
   "Break agreement & attack": "解除協議並攻擊",
-  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "這次攻擊花費 2 個文化標記，結束你們的外交協議並棄置大外交家。"
+  "This attack costs 2 culture tokens, ends your diplomatic agreement and discards Great Diplomat.": "這次攻擊花費 2 個文化標記，結束你們的外交協議並棄置大外交家。",
+  "Barbarians block collection on their tile. Events can spawn, move, or reinforce them; cavalry or elephants may be placed in a city that already has infantry. Winning a battle against barbarians gives 1 gold total, whether attacking or defending. Capturing a barbarian city gives 1 gold in addition to any battle reward.": "野蠻人會阻止其所在格的採集。事件可以讓他們出現、移動或獲得增援；已有步兵的城市可以放置騎兵或大象。無論進攻或防守，贏得對野蠻人的戰鬥共獲得 1 黃金。佔領野蠻人城市可獲得 1 黃金，另加任何戰鬥獎勵。",
+  "Pirates block sea collection and Trade Routes on their tile and adjacent sea tiles. Attack by moving or recruiting ships onto their tile. For each pirate ship destroyed in battle, gain 1 gold and your choice of 1 mood token or 1 culture token, even if you lose. Pirates controlled by Carthage give no reward.": "海盜會阻止其所在格及相鄰海域的海上採集和貿易路線。將船隻移入或招募到海盜所在格即可發動攻擊。戰鬥中每摧毀一艘海盜船，可獲得 1 黃金，並自選 1 心情標記或 1 文化標記，即使戰敗也能獲得。迦太基控制的海盜不提供獎勵。"
 }
