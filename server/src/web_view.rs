@@ -25,6 +25,7 @@ use serde_json::{Value, json};
 mod actions;
 mod collection_potential;
 mod decisions;
+mod effects;
 mod journal;
 mod turn;
 mod waiting;
@@ -103,6 +104,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         );
     let can_play = seat == Some(active) && playing;
     let event_catalog = journal::catalog(game);
+    let active_effects = effects::describe(game);
     // Static rules reference: includes no hand identities or deck order.
     let card_catalog = game.cache.get_action_cards().iter()
         .chain(game.cache.get_incidents().iter().filter_map(|i| i.action_card.as_ref()))
@@ -229,7 +231,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
+        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"activeEffects":active_effects,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -367,7 +369,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         item
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
-    json!({"logOriginNames":log_origin_names,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
+    let mut result = json!({"logOriginNames":log_origin_names,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "influenceContext":decisions::influence_context(game, seat), "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "wonderCatalog":wonder_catalog, "builtWonders":built_wonders, "decision":decision,
         "civilizations":crate::game_setup::civilization_choices(game, seat).iter().map(|c|json!({"name":c.name,
             "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),
@@ -383,7 +385,9 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "endTurnTradeWarning":if can_play { turn::trade_warning(game, seat) } else { None },
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
-        "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()})
+        "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()});
+    result["activeEffects"] = json!(active_effects);
+    result
 }
 
 fn movement_notes(
@@ -556,10 +560,26 @@ fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
                     }),
                     PersistentEventType::ChooseActionCard => game.action_cards_discarded.last().map(|id| {
                         let card = game.cache.get_action_card(*id);
-                        json!({"name":card.civil_card.name,"rules":[card.civil_card.description]})
+                        let mut rules = vec![if card.civil_card.action_type.free { "Free action".to_string() } else { "Costs 1 action".to_string() }, card.civil_card.description.clone()];
+                        if let Some(tactics) = &card.tactics_card {
+                            rules.push(format!("Battle use — {}: {}", tactics.name, tactics.description));
+                        }
+                        json!({"name":card.civil_card.name,"rules":rules})
                     }),
                     _ => None,
                 }
+            } else if handler.origin.name(game) == "Draw Wonder Card" {
+                game.permanent_effects.iter().find_map(|effect| {
+                    if let crate::content::effects::PermanentEffect::PublicWonderCard(wonder) = effect {
+                        let info = wonder.info(game);
+                        Some(json!({"name": info.name(), "rules": [], "wonder": {
+                            "id": wonder, "name": info.name(), "description": info.description,
+                            "cost": info.cost.default_payment(), "requiredAdvance": info.required_advance.name(game),
+                            "requiredAdvanceOwned": game.player(seat).has_advance(info.required_advance),
+                            "builtPoints": info.built_victory_points, "ownedPoints": info.owned_victory_points
+                        }}))
+                    } else { None }
+                })
             } else {
                 None
             };
@@ -690,6 +710,31 @@ mod tests {
     use crate::{game::GameOptions, game_api, resource_pile::ResourcePile};
     fn game() -> Game {
         game_api::init(2, "web-view-test".into(), GameOptions::default())
+    }
+    #[test]
+    fn public_wonder_choice_shows_the_card_without_drawing_it() {
+        let mut game = game();
+        let seat = game.active_player();
+        game.permanent_effects
+            .push(crate::content::effects::PermanentEffect::PublicWonderCard(
+                Wonder::Colosseum,
+            ));
+        crate::wonder::draw_wonder_card(
+            &mut game,
+            &crate::events::EventPlayer::new(
+                seat,
+                crate::events::EventOrigin::Advance(Advance::Engineering),
+            ),
+        );
+        let before = serde_json::to_string(&game.cloned_data()).unwrap();
+        let displayed = view(&game, Some(seat));
+        let card = &displayed["choiceDecision"]["preview"]["wonder"];
+        assert_eq!(card["id"], "Colosseum");
+        assert!(card["description"].as_str().unwrap().contains("combat"));
+        assert!(card["cost"].is_object());
+        assert!(card["requiredAdvance"].is_string());
+        assert!(view(&game, Some(1 - seat))["choiceDecision"].is_null());
+        assert_eq!(before, serde_json::to_string(&game.cloned_data()).unwrap());
     }
     #[test]
     fn spectators_and_waiting_players_have_no_actions() {

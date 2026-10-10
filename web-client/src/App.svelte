@@ -12,6 +12,7 @@
   import InfluenceFlow from './InfluenceFlow.svelte';
   import BattlePlayback from './BattlePlayback.svelte';
   import PublicEffects from './PublicEffects.svelte';
+  import ActiveEffectsDialog from './ActiveEffectsDialog.svelte';
   import EventMarkers from './EventMarkers.svelte';
   import CivilizationPicker from './CivilizationPicker.svelte';
   import TilePanel from './TilePanel.svelte';
@@ -84,6 +85,7 @@
   import ExplorationPanel from './ExplorationPanel.svelte';
   import ScoreDialog from './ScoreDialog.svelte';
   import WondersDialog from './WondersDialog.svelte';
+  import WonderReferenceDialog from './WonderReferenceDialog.svelte';
   import HowToPlay from './HowToPlay.svelte';
   import CardReveal from './CardReveal.svelte';
   import ActivationStatus from './ActivationStatus.svelte';
@@ -104,7 +106,7 @@
   import { mobilePanels } from './mobile-panels';
   import AbilitiesPanel from './AbilitiesPanel.svelte';
   import type { Controller } from './controller';
-  import type { Resource, JournalEntry, View } from './types';
+  import type { Resource, JournalEntry, View, WonderCard } from './types';
   import { researchReferences, type ResearchReference } from './research-links';
   import { resources, resourceNames, playerColor, playerSymbol } from './types';
   import { journal, pileText } from './model';
@@ -125,10 +127,12 @@
   let boardHost: HTMLDivElement;
   let world: World;
   let boardError = $state('');
+  let effectsOpen = $state(false);
   let fullscreenEnabled = $state(false);
   let fullscreen = $state(false);
   let confirmEnd = $state(false);
   let cardReference = $state<CardRule | null>(null);
+  let wonderReference = $state<WonderCard | null>(null);
   const journalCards = $derived(cardReferences($session.view));
   function showJournalCard(reference: CardReference) {
     cardReference = reference.card;
@@ -758,6 +762,11 @@
       >
     </div>
     <nav class="header-actions">
+      {#if $session.view?.activeEffects?.length}
+        <button class="text-button effects-button" aria-label={`Active effects: ${$session.view.activeEffects.length}`} onclick={() => effectsOpen = true}>
+          <Sparkles size={17} /><span>Effects</span><span class="card-count">{$session.view.activeEffects.length}</span>
+        </button>
+      {/if}
       {#if $session.seat !== undefined}
         <button
           class="text-button cards-button"
@@ -1352,11 +1361,13 @@
               context={$session.view.influenceContext}
             />{:else}<h2>{printedCardName(choiceDecision.name)}</h2>{/if}
           {#if choiceDecision.preview}
-            <section class="decision-card-preview" aria-label="Discarded card rules">
+            <section class="decision-card-preview" aria-label="Card rules">
+              {#if choiceDecision.preview.wonder}<button class="text-button" onclick={() => wonderReference = choiceDecision.preview!.wonder!}><Landmark size={17} />{printedCardName(choiceDecision.preview.wonder.name)}<BookOpen size={15} /></button>{:else}
               <h3>{printedCardName(choiceDecision.preview.name)}</h3>
               {#if choiceDecision.preview.affected}<small>Affects: {choiceDecision.preview.affected}</small
                 >{/if}
               {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
+              {/if}
             </section>
           {/if}
           <div
@@ -1732,6 +1743,7 @@
         <BattlePlayback {controller} />
       </div>{/if}
   </main>
+  {#if wonderReference}<WonderReferenceDialog card={wonderReference} onClose={() => wonderReference = null} />{/if}
   {#if cardReference}<CardReferenceDialog
       card={cardReference}
       onDismiss={() => (cardReference = null)}
@@ -1752,6 +1764,7 @@
   {#if !$session.playback}<CardReveal {controller} />{/if}
   <PlaybackPanel {controller} />
   <PublicEffects {controller} />
+  {#if effectsOpen}<ActiveEffectsDialog effects={$session.view?.activeEffects ?? []} players={$session.view?.players ?? []} onClose={() => effectsOpen = false} />{/if}
   {#if $session.toast}<div class="toast" role="status"><Check size={16} />{$session.toast}</div>{/if}
   {#if $session.objectivesOpen && $session.seat !== undefined}
     <dialog

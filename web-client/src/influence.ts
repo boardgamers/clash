@@ -95,3 +95,22 @@ export function activeInfluence(s: Session) {
     selected: [position, source].filter((p): p is string => !!p),
   };
 }
+
+/** Recommend only an eligible city for this same target and action variant. */
+export function cheaperInfluenceOrigin(
+  offer: InfluenceOffer | null,
+  selected: NonNullable<InfluenceOffer['origins']>[number] | null,
+) {
+  if (!offer) return null;
+  const currentCost = (selected?.payment ?? offer.payment).culture_tokens ?? 0;
+  return (
+    (offer.origins ?? [])
+      .filter(
+        (from) =>
+          !from.settlers &&
+          from.position !== (selected?.position ?? offer.origin) &&
+          (from.payment.culture_tokens ?? 0) < currentCost,
+      )
+      .sort((a, b) => (a.payment.culture_tokens ?? 0) - (b.payment.culture_tokens ?? 0))[0] ?? null
+  );
+}

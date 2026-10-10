@@ -4746,5 +4746,9 @@
   "Great Statesman": "Great Statesman",
   "Great Oracle": "Great Oracle",
   "Severe Famine": "Severe Famine",
-  "Great Pyramids": "Great Pyramids"
+  "Great Pyramids": "Great Pyramids",
+  "Active effects": "Active effects",
+  "Active effects: {p0}": "Active effects: {p0}",
+  "Close active effects": "Close active effects",
+  "No active effects.": "No active effects."
 }

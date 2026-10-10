@@ -259,7 +259,14 @@ export interface InfluenceContext {
   rollBonus: number;
   threshold: number;
 }
+export interface ActiveEffect {
+  name: string;
+  scope: string;
+  players: number[];
+  rules: string[];
+}
 export interface View {
+  activeEffects?: ActiveEffect[];
   cardCatalog?: Pick<ActionCard, 'id' | 'name' | 'description' | 'free' | 'tactics'>[];
   influenceContext?: InfluenceContext | null;
   waitingFor?: { player: number; action: string; source: string | null } | null;
@@ -333,7 +340,7 @@ export interface View {
   choiceDecision?: {
     name: string;
     binary?: boolean;
-    preview?: { name: string; rules: string[]; affected?: string } | null;
+    preview?: { name: string; rules: string[]; affected?: string; wonder?: WonderCard } | null;
     choices: { name: string; description?: string | null; pile?: Pile; action: Move }[];
   } | null;
   advances: AdvanceView[];

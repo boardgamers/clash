@@ -4746,5 +4746,9 @@
   "Great Statesman": "資深政治家",
   "Great Oracle": "大預言家",
   "Severe Famine": "嚴重饑荒",
-  "Great Pyramids": "大金字塔"
+  "Great Pyramids": "大金字塔",
+  "Active effects": "生效中的效果",
+  "Active effects: {p0}": "生效中的效果: {p0}",
+  "Close active effects": "關閉生效中的效果",
+  "No active effects.": "目前沒有生效中的效果。"
 }

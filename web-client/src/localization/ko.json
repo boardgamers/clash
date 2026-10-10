@@ -4746,5 +4746,9 @@
   "Great Statesman": "원로 정치가",
   "Great Oracle": "위대한 선견자",
   "Severe Famine": "극심한 기근",
-  "Great Pyramids": "대피라미드"
+  "Great Pyramids": "대피라미드",
+  "Active effects": "활성 효과",
+  "Active effects: {p0}": "활성 효과: {p0}",
+  "Close active effects": "활성 효과 닫기",
+  "No active effects.": "활성 효과가 없습니다."
 }

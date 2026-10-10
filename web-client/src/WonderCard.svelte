@@ -4,6 +4,7 @@
   import { Landmark, GraduationCap, Check, Trophy } from 'lucide-svelte';
   import { wonderIcons } from './wonder-icons';
   import ResourceAmount from './ResourceAmount.svelte';
+  import ResourceText from './ResourceText.svelte';
   import type { WonderCard } from './types';
   let { card }: { card: WonderCard } = $props();
   let Icon = $derived(wonderIcons[card.id] ?? Landmark);
@@ -17,7 +18,7 @@
       <h3>{printedCardName(card.name)}</h3>
     </div>
   </div>
-  <p class="wonder-effect">{card.description}</p>
+  <p class="wonder-effect"><ResourceText text={card.description} /></p>
   <div class="wonder-requirement">
     <GraduationCap size={16} /><span>Requires <strong>{card.requiredAdvance}</strong></span
     >{#if card.requiredAdvanceOwned}<Check size={15} aria-label="Researched" />{/if}

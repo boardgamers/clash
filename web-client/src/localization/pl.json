@@ -4746,5 +4746,9 @@
   "Great Statesman": "Starszy mąż stanu",
   "Great Oracle": "Wielki Jasnowidz",
   "Severe Famine": "Dotkliwy głód",
-  "Great Pyramids": "Wielka Piramida"
+  "Great Pyramids": "Wielka Piramida",
+  "Active effects": "Aktywne efekty",
+  "Active effects: {p0}": "Aktywne efekty: {p0}",
+  "Close active effects": "Zamknij aktywne efekty",
+  "No active effects.": "Brak aktywnych efektów."
 }

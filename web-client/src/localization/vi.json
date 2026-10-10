@@ -4746,5 +4746,9 @@
   "Great Statesman": "Chính khách Lão luyện",
   "Great Oracle": "Nhà tiên kiến vĩ đại",
   "Severe Famine": "Nạn đói nghiêm trọng",
-  "Great Pyramids": "Đại Kim tự tháp"
+  "Great Pyramids": "Đại Kim tự tháp",
+  "Active effects": "Hiệu ứng đang hoạt động",
+  "Active effects: {p0}": "Hiệu ứng đang hoạt động: {p0}",
+  "Close active effects": "Đóng hiệu ứng đang hoạt động",
+  "No active effects.": "Không có hiệu ứng đang hoạt động."
 }

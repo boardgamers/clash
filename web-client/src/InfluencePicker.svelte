@@ -1,7 +1,17 @@
 <script lang="ts">
-  import { Drama, ArrowRight, ArrowLeft, Landmark, Footprints, RotateCcw, Zap, X } from 'lucide-svelte';
+  import {
+    Drama,
+    ArrowRight,
+    ArrowLeft,
+    Landmark,
+    Footprints,
+    RotateCcw,
+    Zap,
+    X,
+    TriangleAlert,
+  } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import { activeInfluence, influenceKey, influenceUpfrontCost } from './influence';
+  import { activeInfluence, influenceKey, influenceUpfrontCost, cheaperInfluenceOrigin } from './influence';
   import ResourceAmount from './ResourceAmount.svelte';
   let {
     controller,
@@ -12,6 +22,21 @@
   const offers = $derived(influence?.offers ?? []);
   const target = $derived(influence?.target ?? null);
   const origin = $derived(influence?.origin ?? null);
+  const cheaper = $derived(cheaperInfluenceOrigin(target, origin));
+  const attemptKey = $derived(`${target ? influenceKey(target) : ''}:${origin?.position}`);
+  let confirmedSource = $state<string | null>(null);
+  $effect(() => {
+    attemptKey;
+    confirmedSource = null;
+  });
+  function roll() {
+    if (!target) return;
+    if (cheaper && confirmedSource !== attemptKey) {
+      confirmedSource = attemptKey;
+      return;
+    }
+    controller.startInfluence(origin?.action ?? target.action, actionPayment, rangePayment);
+  }
   const rangePayment = $derived(origin?.payment ?? target?.payment ?? {});
   const actionPayment = $derived(origin?.actionPayment ?? target?.actionPayment ?? {});
   const upfront = $derived(influenceUpfrontCost(actionPayment, rangePayment));
@@ -116,15 +141,36 @@
           : 'After rolling, you can choose whether to spend culture to reach 5.'}{#if origin?.reroll}
           Buddhism offers one optional reroll.{/if}
       </p>
-      <button
-        class="primary wide"
-        disabled={$session.pending}
-        onclick={() =>
-          controller.startInfluence(origin?.action ?? target.action, actionPayment, rangePayment)}
-      >
-        {Object.values(upfront).some(Boolean)
-          ? 'Pay & roll'
-          : 'Roll for influence'}{#if Object.values(upfront).some(Boolean)}<ResourceAmount
+      {#if cheaper}
+        <div class="influence-source-warning" role="status">
+          <p>
+            <TriangleAlert size={16} />{cheaper.position} can influence this same target with a lower range cost.
+          </p>
+          <button
+            class="secondary wide"
+            disabled={$session.pending}
+            onclick={() => {
+              controller.selectInfluenceOrigin(cheaper.position);
+              confirmedSource = null;
+            }}
+          >
+            Switch source to {cheaper.position}<span
+              >Save <ResourceAmount
+                pile={{
+                  culture_tokens: (rangePayment.culture_tokens ?? 0) - (cheaper.payment.culture_tokens ?? 0),
+                }}
+                compact
+              /></span
+            >
+          </button>
+        </div>
+      {/if}
+      <button class="primary wide" disabled={$session.pending} onclick={roll}>
+        {cheaper && confirmedSource === attemptKey
+          ? `Use ${origin?.position ?? target.origin} anyway`
+          : Object.values(upfront).some(Boolean)
+            ? 'Pay & roll'
+            : 'Roll for influence'}{#if Object.values(upfront).some(Boolean)}<ResourceAmount
             pile={upfront}
             compact
           />{/if}<ArrowRight size={16} />
@@ -132,3 +178,27 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .influence-source-warning {
+    margin: 0.8rem 0;
+    padding: 0.75rem;
+    border: 1px solid var(--gold, #b79351);
+    border-radius: 6px;
+  }
+  .influence-source-warning p {
+    display: flex;
+    gap: 0.5rem;
+    align-items: start;
+    margin: 0 0 0.65rem;
+    font-size: 0.85rem;
+  }
+  .influence-source-warning p :global(svg) {
+    flex-shrink: 0;
+  }
+  .influence-source-warning button > span {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+</style>

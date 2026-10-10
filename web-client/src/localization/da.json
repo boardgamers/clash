@@ -4746,5 +4746,9 @@
   "Great Statesman": "Ældre statsmand",
   "Great Oracle": "Stor seer",
   "Severe Famine": "Alvorlig hungersnød",
-  "Great Pyramids": "Stor Pyramide"
+  "Great Pyramids": "Stor Pyramide",
+  "Active effects": "Aktive effekter",
+  "Active effects: {p0}": "Aktive effekter: {p0}",
+  "Close active effects": "Luk aktive effekter",
+  "No active effects.": "Ingen aktive effekter."
 }

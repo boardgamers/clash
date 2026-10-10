@@ -4746,5 +4746,9 @@
   "Great Statesman": "वरिष्ठ राजनेता",
   "Great Oracle": "महान द्रष्टा",
   "Severe Famine": "भीषण अकाल",
-  "Great Pyramids": "महान पिरामिड"
+  "Great Pyramids": "महान पिरामिड",
+  "Active effects": "सक्रिय प्रभाव",
+  "Active effects: {p0}": "सक्रिय प्रभाव: {p0}",
+  "Close active effects": "सक्रिय प्रभाव बंद करें",
+  "No active effects.": "कोई सक्रिय प्रभाव नहीं।"
 }

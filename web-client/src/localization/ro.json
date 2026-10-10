@@ -4746,5 +4746,9 @@
   "Great Statesman": "Om de Stat Venerabil",
   "Great Oracle": "Mare Vizionar",
   "Severe Famine": "Foamete severă",
-  "Great Pyramids": "Marea Piramidă"
+  "Great Pyramids": "Marea Piramidă",
+  "Active effects": "Efecte active",
+  "Active effects: {p0}": "Efecte active: {p0}",
+  "Close active effects": "Închide efectele active",
+  "No active effects.": "Nu există efecte active."
 }

@@ -4746,5 +4746,9 @@
   "Great Statesman": "Oudere Staatsman",
   "Great Oracle": "Groot Ziener",
   "Severe Famine": "Ernstige hongersnood",
-  "Great Pyramids": "Grote Piramide"
+  "Great Pyramids": "Grote Piramide",
+  "Active effects": "Actieve effecten",
+  "Active effects: {p0}": "Actieve effecten: {p0}",
+  "Close active effects": "Actieve effecten sluiten",
+  "No active effects.": "Geen actieve effecten."
 }

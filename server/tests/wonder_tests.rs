@@ -201,3 +201,29 @@ fn test_great_wall() {
         ],
     );
 }
+
+#[test]
+fn great_mausoleum_previews_visible_discards() {
+    let game = JSON.load_game("great_mausoleum");
+    let game = server::game_api::execute(game, Action::Playing(PlayingAction::ActionCard(123)), 0);
+    let game = server::game_api::execute(game, Action::Response(EventResponse::Bool(true)), 0);
+    let displayed = server::web_view::view(&game, Some(0));
+    let preview = &displayed["choiceDecision"]["preview"];
+    assert!(preview["name"].is_string());
+    assert!(preview["rules"].as_array().unwrap().len() >= 2);
+    let game = server::game_api::execute(game, Action::Response(EventResponse::Bool(false)), 0);
+    let game = server::game_api::execute(
+        game,
+        advance_action(Advance::Storage, ResourcePile::ideas(2)),
+        0,
+    );
+    let displayed = server::web_view::view(&game, Some(0));
+    assert!(displayed["choiceDecision"]["preview"]["name"].is_string());
+    assert!(
+        displayed["choiceDecision"]["preview"]["rules"]
+            .as_array()
+            .unwrap()
+            .len()
+            >= 2
+    );
+}

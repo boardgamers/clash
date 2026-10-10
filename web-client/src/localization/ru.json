@@ -4746,5 +4746,9 @@
   "Great Statesman": "Старейшина",
   "Great Oracle": "Великий провидец",
   "Severe Famine": "Сильный голод",
-  "Great Pyramids": "Великая пирамида"
+  "Great Pyramids": "Великая пирамида",
+  "Active effects": "Активные эффекты",
+  "Active effects: {p0}": "Активные эффекты: {p0}",
+  "Close active effects": "Закрыть активные эффекты",
+  "No active effects.": "Нет активных эффектов."
 }

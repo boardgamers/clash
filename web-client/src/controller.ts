@@ -581,7 +581,7 @@ export class Controller {
     );
     if (view.stopMovement && !get(this.session).moveDestinations.length) {
       const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);
-      if (next) this.selectUnits([next.id]);
+      if (next) this.focusUnitPosition(next.position, next.id);
     }
     if (quiet) {
       // Effects of a withdrawn prediction must not linger on the board.
@@ -949,7 +949,7 @@ export class Controller {
       });
       if (view.stopMovement) {
         const next = view.units?.find((unit) => this.movementDestinations([unit.id]).length);
-        if (next) this.selectUnits([next.id]);
+        if (next) this.focusUnitPosition(next.position, next.id);
       }
       const loaded = get(this.session);
       if (index !== undefined && loaded.game) this.afterPlaybackLoad({ ...loaded, game: null }, loaded.game);

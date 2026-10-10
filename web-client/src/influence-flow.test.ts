@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import {
   activeInfluence,
+  cheaperInfluenceOrigin,
   influenceKey,
   influenceMapPick,
   influencePaymentMatches,
@@ -100,7 +101,11 @@ test('influence map clicks choose the exact clicked building and only auto-pick 
   const temple = offers.find((o) => o.name === 'Temple')!;
   assert.deepEqual(influenceTarget(temple), { kind: 'structure', structure: 'Building:Temple' });
   assert.equal(influenceMapPick(offers, 'C1', { kind: 'city', structure: 'Building:Temple' }), temple);
-  assert.equal(influenceMapPick(offers, 'C1', { kind: 'city' }), null, 'two buildings: the city opens a list');
+  assert.equal(
+    influenceMapPick(offers, 'C1', { kind: 'city' }),
+    null,
+    'two buildings: the city opens a list',
+  );
   assert.equal(influenceMapPick(offers, 'C1', { kind: 'city', structure: 'CityCenter' }), null);
   assert.equal(influenceMapPick(offers, 'A1', { kind: 'city' }), null);
   const lone = view(influenceFixture()).influence!;
@@ -118,4 +123,28 @@ test('influence map clicks choose the exact clicked building and only auto-pick 
   assert.equal(chosen.source, 'A1');
   assert.deepEqual(chosen.selected, ['C1', 'A1']);
   assert.deepEqual(chosen.positions, ['C1', 'A1'], 'the source city is highlighted with the targets');
+});
+
+test('influence warns about a cheaper eligible city for the same target', () => {
+  const g = influenceFixture();
+  g.players[0].cities.push({ position: 'B1', mood_state: 'Happy' });
+  const offer = view(g).influence!.find((o) => o.position === 'C1' && o.name === 'Temple')!;
+  const remote = offer.origins!.find((o) => o.position === 'A1')!;
+  const closer = cheaperInfluenceOrigin(offer, remote)!;
+  assert.equal(closer.position, 'B1');
+  assert.ok((closer.payment.culture_tokens ?? 0) < (remote.payment.culture_tokens ?? 0));
+  assert.equal(cheaperInfluenceOrigin(offer, closer), null, 'no warning once the cheaper city is chosen');
+  const switched = move(g, closer.action);
+  const context = view(switched).influenceContext;
+  if (context) assert.equal(context.source, 'B1');
+  assert.equal(
+    cheaperInfluenceOrigin({ ...offer, origins: [remote, { ...closer, settlers: true }] }, remote),
+    null,
+    'do not present settlers as a closer city',
+  );
+  assert.equal(
+    cheaperInfluenceOrigin({ ...offer, origins: [remote, { ...closer, payment: remote.payment }] }, remote),
+    null,
+    'equal range costs need no warning',
+  );
 });

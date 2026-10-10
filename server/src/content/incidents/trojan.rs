@@ -23,7 +23,7 @@ pub(crate) fn trojan_incidents() -> Vec<Incident> {
     vec![trojan_horse(), solar_eclipse(), anarchy(), guillotine()]
 }
 
-const TROJAN_DESCRIPTION: &str = "In a land battle against a defended city \
+const TROJAN_DESCRIPTION: &str = "In a land battle against another player's defended city \
     (Army unit or Fortress), \
     the attacker may pay 1 wood and 1 culture token to get 1 victory point and to \
     deny the defender tactics cards in the first round of combat.";
@@ -85,6 +85,7 @@ pub(crate) fn decide_trojan_horse() -> Ability {
 fn is_land_battle_against_defended_city(game: &Game, player_index: usize, combat: &Combat) -> bool {
     combat.is_land_battle(game)
         && combat.attacker() == player_index
+        && game.player(combat.defender()).is_human()
         && combat.defender_city(game).is_some()
 }
 

@@ -440,6 +440,51 @@ fn test_envoy() {
 const TROJAN: JsonTest = JsonTest::child("incidents", "trojan");
 
 #[test]
+fn trojan_horse_only_offered_against_another_players_defended_city() {
+    use server::content::effects::PermanentEffect;
+    use server::events::EventOrigin;
+
+    for (defender, city, fortress, active, expected) in [
+        (1, true, false, true, true),
+        (1, true, true, true, true),
+        (2, true, false, true, false),
+        (2, false, false, true, false),
+        (1, false, false, true, false),
+        (1, true, false, false, false),
+    ] {
+        let mut game = TROJAN.load_game("trojan_horse");
+        let target = Position::from_offset("C1");
+        if active {
+            game.permanent_effects.push(PermanentEffect::TrojanHorse);
+        }
+        let mut target_city = game.player_mut(1).cities.remove(0);
+        let units = std::mem::take(&mut game.player_mut(1).units);
+        if fortress {
+            target_city.pieces.fortress = Some(defender);
+        } else {
+            game.player_mut(defender).units = units;
+        }
+        if city {
+            game.player_mut(defender).cities.push(target_city);
+        }
+        let game = server::game_api::execute(game, move_action(vec![0, 1, 2, 3], target), 0);
+        let offered = game
+            .current_event_handler()
+            .is_some_and(|handler| handler.origin == EventOrigin::Ability("Trojan Horse".into()));
+        assert_eq!(
+            offered, expected,
+            "defender {defender}, city {city}, fortress {fortress}, active {active}"
+        );
+        assert_eq!(
+            game.permanent_effects
+                .iter()
+                .any(|effect| matches!(effect, PermanentEffect::TrojanHorse)),
+            active
+        );
+    }
+}
+
+#[test]
 fn test_trojan_horse() {
     TROJAN.test(
         "trojan_horse",

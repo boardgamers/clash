@@ -4746,5 +4746,9 @@
   "Great Statesman": "Estadista Ancião",
   "Great Oracle": "Grande Vidente",
   "Severe Famine": "Fome severa",
-  "Great Pyramids": "Grande Pirâmide"
+  "Great Pyramids": "Grande Pirâmide",
+  "Active effects": "Efeitos ativos",
+  "Active effects: {p0}": "Efeitos ativos: {p0}",
+  "Close active effects": "Fechar efeitos ativos",
+  "No active effects.": "Nenhum efeito ativo."
 }

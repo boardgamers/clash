@@ -4746,5 +4746,9 @@
   "Great Statesman": "Πρεσβύτερος Πολιτικός",
   "Great Oracle": "Μεγάλος Μάντης",
   "Severe Famine": "Σφοδρός λιμός",
-  "Great Pyramids": "Μεγάλη Πυραμίδα"
+  "Great Pyramids": "Μεγάλη Πυραμίδα",
+  "Active effects": "Ενεργά αποτελέσματα",
+  "Active effects: {p0}": "Ενεργά αποτελέσματα: {p0}",
+  "Close active effects": "Κλείσιμο ενεργών αποτελεσμάτων",
+  "No active effects.": "Δεν υπάρχουν ενεργά αποτελέσματα."
 }

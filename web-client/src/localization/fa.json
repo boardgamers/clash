@@ -4746,5 +4746,9 @@
   "Great Statesman": "سیاستمدار کهنه‌کار",
   "Great Oracle": "پیشگوی بزرگ",
   "Severe Famine": "قحطی شدید",
-  "Great Pyramids": "هرم بزرگ"
+  "Great Pyramids": "هرم بزرگ",
+  "Active effects": "اثرات فعال",
+  "Active effects: {p0}": "اثرات فعال: {p0}",
+  "Close active effects": "بستن اثرات فعال",
+  "No active effects.": "هیچ اثر فعالی وجود ندارد."
 }

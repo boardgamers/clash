@@ -2322,3 +2322,22 @@ test('city, tile and unit clicks inspect the same city until Move is opened', as
     app.close();
   }
 });
+
+
+test('automatic next movement group selects all its units after a group finishes moving', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const g = JSON.parse(fixture('movement/movement'));
+    g.players[0].advances.push('Tactics');
+    g.players[0].units.push({ id: 8, position: 'B2', unit_type: 'Settler' });
+    g.players[0].next_unit_id = 9;
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    c.focusUnitPosition('C2');
+    g.state.Movement.moved_units = [0, 1, 2, 3, 5, 6, 7];
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    assert.equal(app.session().unitPosition, 'B2');
+    assert.deepEqual(app.session().selectedUnits, [4, 8]);
+    assert.deepEqual(app.sent, [], 'preselection does not perform a move');
+  } finally { app.close(); }
+});
