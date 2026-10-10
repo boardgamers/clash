@@ -442,10 +442,10 @@ export const chapters: {
       {
         id: 'score',
         title: 'Builder points and ownership',
-        text: 'How many wonder points does merely owning a captured Great Pyramid give?',
+        text: 'How many wonder points does merely owning a captured Great Pyramids give?',
         answers: ['0 wonder points', '5.1 wonder points'],
         correct: '0 wonder points',
-        hint: 'The civilization that built Great Pyramid receives 5.1 points. Ownership alone gives 0 wonder points.',
+        hint: 'The civilization that built Great Pyramids receives 5.1 points. Ownership alone gives 0 wonder points.',
       },
       {
         id: 'conditions',

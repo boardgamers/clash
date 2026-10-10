@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { Check, Swords, ChevronRight } from 'lucide-svelte';
   import type { Decision } from './types';
   import ResourceText from './ResourceText.svelte';
@@ -23,14 +24,14 @@
     <button
       class="decision-option tactics-option"
       class:selected
-      aria-label={`Select ${card.tactics.name}`}
+      aria-label={`Select ${printedCardName(card.tactics.name)}`}
       aria-describedby={`${id}-battle`}
       aria-pressed={selected}
       disabled={pending}
       onclick={onSelect}
     >
       <span class="decision-option-content">
-        <strong><Swords size={15} />{card.tactics.name}</strong>
+        <strong><Swords size={15} />{printedCardName(card.tactics.name)}</strong>
         <span class="decision-rule" id={`${id}-battle`}><ResourceText text={card.tactics.description} /></span
         >
       </span>
@@ -39,7 +40,7 @@
       >
     </button>
     <details class="tactics-civil">
-      <summary><ChevronRight size={13} />Civil action · {card.name}</summary>
+      <summary><ChevronRight size={13} />Civil action · {printedCardName(card.name)}</summary>
       <div>
         <small>Unavailable during battle</small>
         <p><ResourceText text={card.description} /></p>

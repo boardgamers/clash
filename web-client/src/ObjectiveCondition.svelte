@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { Hourglass, Zap, CircleCheck } from 'lucide-svelte';
   import ObjectiveArt from './ObjectiveArt.svelte';
   import ResourceText from './ResourceText.svelte';
@@ -10,7 +11,7 @@
   <header>
     <ObjectiveArt name={objective.name} />
     <div>
-      <h3>{objective.name}</h3>
+      <h3>{printedCardName(objective.name, 'objective')}</h3>
       <span
         class="objective-timing"
         title={objective.timing === 'Status phase'

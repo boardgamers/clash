@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { formatPoints } from './score';
   import { Landmark, GraduationCap, Check, Trophy } from 'lucide-svelte';
   import { wonderIcons } from './wonder-icons';
@@ -8,12 +9,12 @@
   let Icon = $derived(wonderIcons[card.id] ?? Landmark);
 </script>
 
-<article class="wonder-card" aria-label={`Wonder card: ${card.name}`}>
+<article class="wonder-card" aria-label={`Wonder card: ${printedCardName(card.name)}`}>
   <div class="wonder-heading">
     <span class="wonder-emblem" aria-hidden="true"><Icon size={34} strokeWidth={1.3} /></span>
     <div>
       <span class="card-eyebrow">Wonder</span>
-      <h3>{card.name}</h3>
+      <h3>{printedCardName(card.name)}</h3>
     </div>
   </div>
   <p class="wonder-effect">{card.description}</p>

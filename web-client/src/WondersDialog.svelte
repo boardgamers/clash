@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { X, Landmark, Hammer, BookOpen, Layers } from 'lucide-svelte';
   import WonderCard from './WonderCard.svelte';
   import type { Controller } from './controller';
@@ -56,7 +57,7 @@
           disabled={!card.action || $session.pending}
           title={card.reason ?? 'Choose a city and pay to construct this wonder'}
           onclick={() => card.action && controller.submit(card.action)}
-          ><Hammer size={16} />Construct {card.name}</button
+          ><Hammer size={16} />Construct {printedCardName(card.name)}</button
         >
       </div>
     {:else}

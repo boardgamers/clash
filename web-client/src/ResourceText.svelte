@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName, printedCardPart } from './card-names';
   import { Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Link } from 'lucide-svelte';
   import type { CardReference } from './card-reference';
   import { journalParts } from './model';
@@ -57,7 +58,9 @@
   );
   const translate = $derived((value: string) => translateText(value, $currentLocale));
   const parts = $derived(
-    localizedParts(text, sourceParts, (value) => translateText(value, $currentLocale)) as typeof sourceParts,
+    (
+      localizedParts(text, sourceParts, (value) => translateText(value, $currentLocale)) as typeof sourceParts
+    ).map((part) => ($currentLocale === 'en' ? printedCardPart(part) : part)),
   );
   const icons = {
     food: Wheat,
@@ -74,12 +77,12 @@
 <span data-localized-text
   >{#each parts as part}{#if part.card}<button
         class="journal-research-link"
-        title={translate(`View ${part.card.name} rules`)}
+        title={translate(`View ${printedCardName(part.card.name)} rules`)}
         onclick={() => onCard?.(part.card!)}>{part.text}</button
       >
     {:else if part.objective}<button
         class="journal-research-link"
-        title={translate(`View completed objective ${part.objective.name}`)}
+        title={translate(`View completed objective ${printedCardName(part.objective.name, 'objective')}`)}
         onclick={() => onObjective?.(part.objective!)}>{part.text}</button
       >{:else if part.research}<button
         class="journal-research-link"

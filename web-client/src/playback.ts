@@ -3,6 +3,7 @@ import { frameResources, describeResources } from './resource-playback.ts';
 import { frameHasContent } from './replay-actions.ts';
 import { activeHistory } from './active-history.ts';
 import { officialWonderText, wonderName } from './wonder-names.ts';
+import { printedCardName, printedCardText } from './card-names.ts';
 
 export function recapStart(game: Game, seat: number | undefined, seen = 0): number | null {
   if (game.state === 'Finished') return null;
@@ -216,7 +217,11 @@ export function frameDetails(
         : [description, ...details].join(' · ');
   }
   return {
-    caption: officialWonderText(actor ? `${actor} · ${description}` : description),
+    caption: officialWonderText(
+      actor
+        ? `${actor} · ${printedCardText(printedCardName(description))}`
+        : printedCardText(printedCardName(description)),
+    ),
     positions: [...positions],
   };
 }

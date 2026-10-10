@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { RotateCcw } from 'lucide-svelte';
   import type { CombatDie, CombatRound } from './combat-journal';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
@@ -47,7 +48,7 @@
     >
     {#if sides.some((s) => s.tactics)}<tr
         ><th scope="row">Tactics</th>{#each sides as side}<td
-            >{side.tactics ?? '—'}
+            >{side.tactics ? printedCardName(side.tactics) : '—'}
             {#if side.tacticsBlocked}<span class="combat-tactics-effect"
                 ><ResourceText
                   text={side.tacticsBlocked}

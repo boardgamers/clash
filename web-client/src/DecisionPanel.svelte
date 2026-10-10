@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
   import { Check, Sparkles, Layers, BookOpen, ChevronRight, Zap } from 'lucide-svelte';
@@ -180,7 +181,7 @@
   class:unit-decision={unitChoice}
   class:card-decision={decision.options.some((option) => option.card)}
   class:tactics-decision={decision.tacticsSelection}
-  aria-label={decision.name}
+  aria-label={printedCardName(decision.name)}
 >
   {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
   <header class="decision-heading">
@@ -191,7 +192,7 @@
     {/if}
     {#if $session.view?.influenceContext}
       <InfluenceFlow context={$session.view.influenceContext} />
-    {:else}<h2><Sparkles size={21} />{decision.name}</h2>{/if}
+    {:else}<h2><Sparkles size={21} />{printedCardName(decision.name)}</h2>{/if}
     {#if decision.eventContext}
       {@const context = decision.eventContext}
       <div class="decision-event-context" class:full-context={!!context.card}>
@@ -209,8 +210,8 @@
             <ResourceAmount pile={card.cost} />
           </div>
           <details class="event-rules">
-            <summary aria-label={`${card.name} event details`}
-              ><BookOpen size={13} />{card.name}<ChevronRight size={13} /></summary
+            <summary aria-label={`${printedCardName(card.name)} event details`}
+              ><BookOpen size={13} />{printedCardName(card.name)}<ChevronRight size={13} /></summary
             >
             {#if context.placement}<p>{context.placement}</p>{/if}
             {#if context.raid}<p class="event-raid"><ResourceText text={context.raid} /></p>{/if}
@@ -229,7 +230,7 @@
           </details>
         {:else}
           <details class="event-rules">
-            <summary aria-label={`${context.name} event details`}
+            <summary aria-label={`${printedCardName(context.name)} event details`}
               ><BookOpen size={13} />Event rules<ChevronRight size={13} /></summary
             >
             {#if context.placement}<p>{context.placement}</p>{/if}

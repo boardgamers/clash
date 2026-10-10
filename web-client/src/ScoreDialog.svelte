@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { formatPoints } from './score';
   import {
     Landmark,
@@ -179,10 +180,12 @@
             data-objective={objective.name}
             tabindex="-1"
             class:highlighted={$session.scoreObjective === objective.name}
-            aria-label={objective.name}
+            aria-label={printedCardName(objective.name, 'objective')}
           >
             <header>
-              <Target size={19} /><strong>{objective.name}</strong><span>{formatPoints(objective.points)} VP</span>
+              <Target size={19} /><strong>{printedCardName(objective.name, 'objective')}</strong><span
+                >{formatPoints(objective.points)} VP</span
+              >
             </header>
             <p><ResourceText text={objective.description} /></p>
             <small>Completed</small>

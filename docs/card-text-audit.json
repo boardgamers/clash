@@ -1,8 +1,8 @@
 {
   "edition": "Monumental Edition",
-  "reviewed": "2026-10-09",
-  "complete_english_deck_verified": false,
-  "method": "Check card conditions against their implemented targets, timing and costs; compare readable English card faces where available. Wording edits are not represented as verbatim transcriptions.",
+  "reviewed": "2026-10-10",
+  "complete_english_deck_verified": true,
+  "method": "Matched all printed English titles to card IDs in readable Monumental Edition deck scans. This verifies names; the gameplay-rule audit remains separate. Wording edits are not represented as verbatim transcriptions.",
   "sources": {
     "english-objective-photo": {
       "url": "https://boardgamegeek.com/image/6509349/bigleaguecreative",
@@ -21,9 +21,39 @@
       "url": "https://discussion.tekeli.li/uploads/default/original/2X/e/e15d4c5a9466c355d78e13412f87c936032f8dd4.jpeg",
       "context": "https://discussion.tekeli.li/t/clash-of-cultures-game-1/3448/616",
       "verified": "Printed Monumental Edition card E2 (Epidemic): applies from two units inclusive; lose one unit, or two with Roads, Navigation, or Trade Routes. Sanitation prevents these losses."
+    },
+    "english-objective-deck": {
+      "url": "https://cdn.steamusercontent.com/ugc/1781731512046605829/43DEFEAC6C24E28AFBE67BD5DB2E44AA9B5BD073/",
+      "type": "printed English card scan",
+      "provenance": "Clash of Cultures ME (Scripted), Steam Workshop 2651868219; read-only CustomDeck textures",
+      "verified": "2026-10-10"
+    },
+    "english-action-deck": {
+      "url": "https://cdn.steamusercontent.com/ugc/1781731512046582765/54C4F5AA6E9F0654E9E9379CD3D4BEECF8F7293C/",
+      "type": "printed English card scan",
+      "provenance": "Clash of Cultures ME (Scripted), Steam Workshop 2651868219; read-only CustomDeck textures",
+      "verified": "2026-10-10"
+    },
+    "english-event-deck-1": {
+      "url": "https://cdn.steamusercontent.com/ugc/1781731512046920408/E10408D4482864585C2C9FF7B972D4E0FDA0A223/",
+      "type": "printed English card scan",
+      "provenance": "Clash of Cultures ME (Scripted), Steam Workshop 2651868219; read-only CustomDeck textures",
+      "verified": "2026-10-10"
+    },
+    "english-event-deck-2": {
+      "url": "https://cdn.steamusercontent.com/ugc/1781731512046586752/CA63167260ACC3960AA34B0FF8A82BB4F9511461/",
+      "type": "printed English card scan",
+      "provenance": "Clash of Cultures ME (Scripted), Steam Workshop 2651868219; read-only CustomDeck textures",
+      "verified": "2026-10-10"
+    },
+    "english-wonder-deck": {
+      "url": "https://cdn.steamusercontent.com/ugc/1781731512046607257/9436A1A70D0F86A72576FA9011D9D54AD81B7845/",
+      "type": "printed English card scan",
+      "provenance": "Clash of Cultures ME (Scripted), Steam Workshop 2651868219; read-only CustomDeck texture",
+      "verified": "2026-10-10"
     }
   },
-  "availability": "Searched BGG and publisher sources, including all nine pages of the Monumental Edition game image gallery. A complete readable English Action, Objective and Event deck was not located. English card scans are still needed for exact per-card verification. The Epidemic (E2) card photograph was located in a public play-by-post game on 2026-10-09; the complete deck remains unverified.",
+  "availability": "Complete readable English decks located on 2026-10-10 in the Monumental Edition Tabletop Simulator reference: 38 Objectives, 42 Actions and their Tactics, 58 Events, and 8 Wonders. Printed Objective photo and Epidemic E2 photo independently corroborate the deck scans.",
   "objective_cards": [
     {
       "id": 1,
@@ -31,12 +61,16 @@
         {
           "name": "Large Civilization",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Civilization!",
+          "source": "english-objective-deck"
         },
         {
           "name": "Draft",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Draft",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -48,14 +82,14 @@
           "review": "implementation-checked",
           "english_face": "verified",
           "printed_name": "Academic",
-          "source": "english-objective-photo"
+          "source": "english-objective-deck"
         },
         {
           "name": "Conqueror",
           "review": "implementation-checked",
           "english_face": "verified",
           "printed_name": "Conqueror",
-          "source": "english-objective-photo"
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -65,12 +99,16 @@
         {
           "name": "Coastal Culture",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Coastal Culture",
+          "source": "english-objective-deck"
         },
         {
           "name": "Warmonger",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Warmonger",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -80,12 +118,16 @@
         {
           "name": "Advanced Culture",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Advanced",
+          "source": "english-objective-deck"
         },
         {
           "name": "Warmonger",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Warmonger",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -95,14 +137,16 @@
         {
           "name": "Religious Fervor",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Religious",
+          "source": "english-objective-deck"
         },
         {
           "name": "General",
           "review": "implementation-checked",
           "english_face": "verified",
           "printed_name": "Warlord",
-          "source": "english-objective-photo"
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -112,12 +156,16 @@
         {
           "name": "City Planner",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "City Planner",
+          "source": "english-objective-deck"
         },
         {
           "name": "Great Battle",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Great Battle",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -127,12 +175,16 @@
         {
           "name": "Eureka!",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Ideas!",
+          "source": "english-objective-deck"
         },
         {
           "name": "Defiance",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Against All Odds",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -142,14 +194,16 @@
         {
           "name": "Happy Population",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Happy",
+          "source": "english-objective-deck"
         },
         {
           "name": "Conqueror",
           "review": "implementation-checked",
           "english_face": "verified",
           "printed_name": "Conqueror",
-          "source": "english-objective-photo"
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -159,12 +213,16 @@
         {
           "name": "Education Lead",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Enlightened",
+          "source": "english-objective-deck"
         },
         {
           "name": "Sea Blockade",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Blockade",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -174,12 +232,16 @@
         {
           "name": "Optimized Storage",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Well Stocked",
+          "source": "english-objective-deck"
         },
         {
           "name": "Naval Assault",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Amphibious Assault",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -189,12 +251,16 @@
         {
           "name": "Wealth",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Rich",
+          "source": "english-objective-deck"
         },
         {
           "name": "Large Fleet",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Great Navy",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -204,12 +270,16 @@
         {
           "name": "Ore Supplies",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Ore!",
+          "source": "english-objective-deck"
         },
         {
           "name": "Large Army",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Great Army",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -219,12 +289,16 @@
         {
           "name": "Wood Supplies",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Wood!",
+          "source": "english-objective-deck"
         },
         {
           "name": "Fortifications",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Fortified",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -234,12 +308,16 @@
         {
           "name": "Food Supplies",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Food!",
+          "source": "english-objective-deck"
         },
         {
           "name": "Standing Army",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Standing Army",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -249,12 +327,16 @@
         {
           "name": "Architecture",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "City Planner",
+          "source": "english-objective-deck"
         },
         {
           "name": "Militarized",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Militarized",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -264,12 +346,16 @@
         {
           "name": "Goal Focused",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Focused",
+          "source": "english-objective-deck"
         },
         {
           "name": "Bold",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Daring",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -279,12 +365,16 @@
         {
           "name": "Colony",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Colony",
+          "source": "english-objective-deck"
         },
         {
           "name": "Threat",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Threat",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -294,12 +384,16 @@
         {
           "name": "Culture Focus",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Culture",
+          "source": "english-objective-deck"
         },
         {
           "name": "Legendary Battle",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Legend",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -309,12 +403,16 @@
         {
           "name": "Consulate",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Consulates",
+          "source": "english-objective-deck"
         },
         {
           "name": "Great Battle",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Great Battle",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -324,12 +422,16 @@
         {
           "name": "Science Focus",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Science",
+          "source": "english-objective-deck"
         },
         {
           "name": "Naval Assault",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Amphibious Assault",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -339,12 +441,16 @@
         {
           "name": "Trade Focus",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Merchant",
+          "source": "english-objective-deck"
         },
         {
           "name": "Scavenger",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Marauder",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -356,14 +462,14 @@
           "review": "implementation-checked",
           "english_face": "verified",
           "printed_name": "Citadel",
-          "source": "english-objective-photo"
+          "source": "english-objective-deck"
         },
         {
           "name": "General",
           "review": "implementation-checked",
           "english_face": "verified",
           "printed_name": "Warlord",
-          "source": "english-objective-photo"
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -373,12 +479,16 @@
         {
           "name": "Seafarers",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Seafarer",
+          "source": "english-objective-deck"
         },
         {
           "name": "Aggressor",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Aggressor",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -388,12 +498,16 @@
         {
           "name": "Government",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Government",
+          "source": "english-objective-deck"
         },
         {
           "name": "Barbarian Conquest",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Assimilator",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -403,12 +517,16 @@
         {
           "name": "Government",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Government",
+          "source": "english-objective-deck"
         },
         {
           "name": "Aggressor",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Aggressor",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -418,12 +536,16 @@
         {
           "name": "Expansionist",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Dominion",
+          "source": "english-objective-deck"
         },
         {
           "name": "Military Might",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Military Might",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -433,12 +555,16 @@
         {
           "name": "City Founder",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "New Founder",
+          "source": "english-objective-deck"
         },
         {
           "name": "Resistance",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Defiance",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -448,12 +574,16 @@
         {
           "name": "Trade Power",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Trader",
+          "source": "english-objective-deck"
         },
         {
           "name": "Resistance",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Defiance",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -463,12 +593,16 @@
         {
           "name": "Shipping Routes",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Sea Lanes",
+          "source": "english-objective-deck"
         },
         {
           "name": "Terror Regime",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Draconian",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -478,12 +612,16 @@
         {
           "name": "Diversified Research",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Balanced",
+          "source": "english-objective-deck"
         },
         {
           "name": "Bold",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Daring",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -493,12 +631,16 @@
         {
           "name": "Culture Power",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Influence",
+          "source": "english-objective-deck"
         },
         {
           "name": "Barbarian Conquest",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Assimilator",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -508,12 +650,16 @@
         {
           "name": "Magnificent Culture",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Wonderful",
+          "source": "english-objective-deck"
         },
         {
           "name": "Outpost",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Outposts",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -523,12 +669,16 @@
         {
           "name": "Star Gazers",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Scientists",
+          "source": "english-objective-deck"
         },
         {
           "name": "Horse Power",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Equestrian",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -538,12 +688,16 @@
         {
           "name": "Traders",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Mercantile",
+          "source": "english-objective-deck"
         },
         {
           "name": "Great Commander",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Great Commander",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -553,12 +707,16 @@
         {
           "name": "Versatility",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Tactical Diversity",
+          "source": "english-objective-deck"
         },
         {
           "name": "Brutus",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "King Slayer",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -568,12 +726,16 @@
         {
           "name": "Legacy",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Legacy",
+          "source": "english-objective-deck"
         },
         {
           "name": "Ivory Tower",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Ivory Tide",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -583,12 +745,16 @@
         {
           "name": "Migration",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Great Migration",
+          "source": "english-objective-deck"
         },
         {
           "name": "Trample",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Stampede",
+          "source": "english-objective-deck"
         }
       ]
     },
@@ -598,12 +764,16 @@
         {
           "name": "High Culture",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Civilization of Ages",
+          "source": "english-objective-deck"
         },
         {
           "name": "Sea Cleansing",
           "review": "implementation-checked",
-          "english_face": "not-located"
+          "english_face": "verified",
+          "printed_name": "Cleanse the Seas",
+          "source": "english-objective-deck"
         }
       ]
     }
@@ -614,302 +784,430 @@
       "name": "Quick Advance",
       "tactics": "Peltasts",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Advance",
+      "printed_tactics": "Peltasts",
+      "source": "english-action-deck"
     },
     {
       "id": 2,
       "name": "Quick Advance",
       "tactics": "Encircled",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Advance",
+      "printed_tactics": "Routing",
+      "source": "english-action-deck"
     },
     {
       "id": 3,
       "name": "Inspiration",
       "tactics": "Encircled",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Inspiration",
+      "printed_tactics": "Routing",
+      "source": "english-action-deck"
     },
     {
       "id": 4,
       "name": "Inspiration",
       "tactics": "Peltasts",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Inspiration",
+      "printed_tactics": "Peltasts",
+      "source": "english-action-deck"
     },
     {
       "id": 5,
       "name": "Hero General",
       "tactics": "Wedge Formation",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Heroic General",
+      "printed_tactics": "Wedge Formation",
+      "source": "english-action-deck"
     },
     {
       "id": 6,
       "name": "Hero General",
       "tactics": "High Morale",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Heroic General",
+      "printed_tactics": "High Morale",
+      "source": "english-action-deck"
     },
     {
       "id": 7,
       "name": "Spy",
       "tactics": "Heavy Resistance",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Spies",
+      "printed_tactics": "Defiant Stand",
+      "source": "english-action-deck"
     },
     {
       "id": 8,
       "name": "Spy",
       "tactics": "High Morale",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Spies",
+      "printed_tactics": "High Morale",
+      "source": "english-action-deck"
     },
     {
       "id": 9,
       "name": "Ideas",
       "tactics": "High Ground",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Leap of Knowledge",
+      "printed_tactics": "High Ground",
+      "source": "english-action-deck"
     },
     {
       "id": 10,
       "name": "Ideas",
       "tactics": "Surprise",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Leap of Knowledge",
+      "printed_tactics": "Tactical Surprise",
+      "source": "english-action-deck"
     },
     {
       "id": 11,
       "name": "Great Ideas",
       "tactics": "Siege",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Good Ideas",
+      "printed_tactics": "The Siege",
+      "source": "english-action-deck"
     },
     {
       "id": 12,
       "name": "Great Ideas",
       "tactics": "High Ground",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Good Ideas",
+      "printed_tactics": "High Ground",
+      "source": "english-action-deck"
     },
     {
       "id": 13,
       "name": "Mercenaries",
       "tactics": "For the People",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Mercenaries",
+      "printed_tactics": "For the People",
+      "source": "english-action-deck"
     },
     {
       "id": 14,
       "name": "Mercenaries",
       "tactics": "Heavy Resistance",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Mercenaries",
+      "printed_tactics": "Defiant Stand",
+      "source": "english-action-deck"
     },
     {
       "id": 15,
       "name": "Cultural Takeover",
       "tactics": "Heavy Resistance",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Cultural Awe",
+      "printed_tactics": "Defiant Stand",
+      "source": "english-action-deck"
     },
     {
       "id": 16,
       "name": "Cultural Takeover",
       "tactics": "Improved Defenses",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Cultural Awe",
+      "printed_tactics": "Upgraded Defenses",
+      "source": "english-action-deck"
     },
     {
       "id": 17,
       "name": "City Development",
       "tactics": "Tactical Retreat",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "City Growth",
+      "printed_tactics": "Tactical Retreat",
+      "source": "english-action-deck"
     },
     {
       "id": 18,
       "name": "City Development",
       "tactics": "Peltasts",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "City Growth",
+      "printed_tactics": "Peltasts",
+      "source": "english-action-deck"
     },
     {
       "id": 19,
       "name": "Production Focus",
       "tactics": "Tactical Retreat",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Focused Collection",
+      "printed_tactics": "Tactical Retreat",
+      "source": "english-action-deck"
     },
     {
       "id": 20,
       "name": "Production Focus",
       "tactics": "Peltasts",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Focused Collection",
+      "printed_tactics": "Peltasts",
+      "source": "english-action-deck"
     },
     {
       "id": 21,
       "name": "Explorer",
       "tactics": "Encircled",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Explorers",
+      "printed_tactics": "Routing",
+      "source": "english-action-deck"
     },
     {
       "id": 22,
       "name": "Explorer",
       "tactics": "Defensive Formation",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Explorers",
+      "printed_tactics": "Prepared Defenses",
+      "source": "english-action-deck"
     },
     {
       "id": 23,
       "name": "Negotiations",
       "tactics": "Scout",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Negotiations",
+      "printed_tactics": "Scouts",
+      "source": "english-action-deck"
     },
     {
       "id": 24,
       "name": "Negotiations",
       "tactics": "Martyr",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Negotiations",
+      "printed_tactics": "Martyr",
+      "source": "english-action-deck"
     },
     {
       "id": 25,
       "name": "Leadership",
       "tactics": "High Ground",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Leadership",
+      "printed_tactics": "High Ground",
+      "source": "english-action-deck"
     },
     {
       "id": 26,
       "name": "Leadership",
       "tactics": "Archers",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Leadership",
+      "printed_tactics": "Archers",
+      "source": "english-action-deck"
     },
     {
       "id": 27,
       "name": "Assassination",
       "tactics": "High Ground",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Assassination",
+      "printed_tactics": "High Ground",
+      "source": "english-action-deck"
     },
     {
       "id": 28,
       "name": "Assassination",
       "tactics": "Archers",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Assassination",
+      "printed_tactics": "Archers",
+      "source": "english-action-deck"
     },
     {
       "id": 29,
       "name": "Mass Production",
       "tactics": "Defensive Formation",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Mass Collection",
+      "printed_tactics": "Prepared Defenses",
+      "source": "english-action-deck"
     },
     {
       "id": 30,
       "name": "Mass Production",
       "tactics": "Encircled",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Mass Collection",
+      "printed_tactics": "Routing",
+      "source": "english-action-deck"
     },
     {
       "id": 31,
       "name": "New Plans",
       "tactics": "Flanking",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "New Goals",
+      "printed_tactics": "Flanking",
+      "source": "english-action-deck"
     },
     {
       "id": 32,
       "name": "New Plans",
       "tactics": "High Morale",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "New Goals",
+      "printed_tactics": "High Morale",
+      "source": "english-action-deck"
     },
     {
       "id": 33,
       "name": "Synergies",
       "tactics": "Defensive Formation",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Tech Synergy",
+      "printed_tactics": "Prepared Defenses",
+      "source": "english-action-deck"
     },
     {
       "id": 34,
       "name": "Synergies",
       "tactics": "Archers",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Tech Synergy",
+      "printed_tactics": "Archers",
+      "source": "english-action-deck"
     },
     {
       "id": 35,
       "name": "Teach Us",
       "tactics": "Defensive Formation",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Teach Us Now!",
+      "printed_tactics": "Prepared Defenses",
+      "source": "english-action-deck"
     },
     {
       "id": 36,
       "name": "Teach Us",
       "tactics": "Archers",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Teach Us Now!",
+      "printed_tactics": "Archers",
+      "source": "english-action-deck"
     },
     {
       "id": 37,
       "name": "Militia",
       "tactics": "Wedge Formation",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Militia",
+      "printed_tactics": "Wedge Formation",
+      "source": "english-action-deck"
     },
     {
       "id": 38,
       "name": "Militia",
       "tactics": "High Morale",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Militia",
+      "printed_tactics": "High Morale",
+      "source": "english-action-deck"
     },
     {
       "id": 39,
       "name": "Technology Trade",
       "tactics": "Surprise",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Tech Exchange",
+      "printed_tactics": "Tactical Surprise",
+      "source": "english-action-deck"
     },
     {
       "id": 40,
       "name": "Technology Trade",
       "tactics": "High Ground",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Tech Exchange",
+      "printed_tactics": "High Ground",
+      "source": "english-action-deck"
     },
     {
       "id": 41,
       "name": "New Ideas",
       "tactics": "High Morale",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Idea Synergy",
+      "printed_tactics": "High Morale",
+      "source": "english-action-deck"
     },
     {
       "id": 42,
       "name": "New Ideas",
       "tactics": "Flanking",
       "review": "implementation-checked",
-      "english_face": "not-located"
+      "english_face": "verified",
+      "printed_name": "Idea Synergy",
+      "printed_tactics": "Flanking",
+      "source": "english-action-deck"
     }
   ],
   "event_cards": [
     {
       "id": 1,
       "name": "Pestilence",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Plague",
+      "source": "english-event-deck-1"
     },
     {
       "id": 2,
@@ -917,366 +1215,534 @@
       "english_face": "verified",
       "review": "threshold-and-protection-verified",
       "printed_name": "Epidemic",
-      "source": "english-epidemic-photo",
+      "source": "english-event-deck-1",
       "reviewed": "2026-10-09"
     },
     {
       "id": 3,
       "name": "Famine",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Famine",
+      "source": "english-event-deck-1"
     },
     {
       "id": 4,
       "name": "Famine",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Famine",
+      "source": "english-event-deck-1"
     },
     {
       "id": 5,
       "name": "Famine",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Famine",
+      "source": "english-event-deck-1"
     },
     {
       "id": 6,
       "name": "Severe famine",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Severe Famine",
+      "source": "english-event-deck-1"
     },
     {
       "id": 7,
       "name": "Severe famine",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Severe Famine",
+      "source": "english-event-deck-1"
     },
     {
       "id": 8,
       "name": "Severe famine",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Severe Famine",
+      "source": "english-event-deck-1"
     },
     {
       "id": 9,
       "name": "A good year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Fine Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 10,
       "name": "A good year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Fine Year",
+      "source": "english-event-deck-2"
     },
     {
       "id": 11,
       "name": "A good year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Fine Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 12,
       "name": "An awesome year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Good Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 13,
       "name": "An awesome year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Good Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 14,
       "name": "An awesome year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Good Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 15,
       "name": "A fantastic year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Splendid Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 16,
       "name": "A fantastic year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Splendid Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 17,
       "name": "A fantastic year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Splendid Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 27,
       "name": "Population Boom",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Population Boom",
+      "source": "english-event-deck-2"
     },
     {
       "id": 28,
       "name": "Population Boom",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Population Boom",
+      "source": "english-event-deck-1"
     },
     {
       "id": 54,
       "name": "A successful year",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "A Prosperous Year",
+      "source": "english-event-deck-1"
     },
     {
       "id": 29,
       "name": "Vulcan",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Volcano",
+      "source": "english-event-deck-1"
     },
     {
       "id": 30,
       "name": "Earthquake",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Earthquake",
+      "source": "english-event-deck-1"
     },
     {
       "id": 31,
       "name": "Heavy Earthquake",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Major Earthquake",
+      "source": "english-event-deck-1"
     },
     {
       "id": 32,
       "name": "Flood",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Local Flood",
+      "source": "english-event-deck-1"
     },
     {
       "id": 33,
       "name": "Heavy Flood",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Major Flood",
+      "source": "english-event-deck-1"
     },
     {
       "id": 34,
       "name": "Migration",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Migration",
+      "source": "english-event-deck-1"
     },
     {
       "id": 35,
       "name": "Migration",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Migration",
+      "source": "english-event-deck-1"
     },
     {
       "id": 36,
       "name": "Civil War",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Civil War",
+      "source": "english-event-deck-1"
     },
     {
       "id": 37,
       "name": "Civil War",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Civil War",
+      "source": "english-event-deck-1"
     },
     {
       "id": 38,
       "name": "Revolution",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Revolution",
+      "source": "english-event-deck-1"
     },
     {
       "id": 39,
       "name": "Uprising",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Revolution: Uprising",
+      "source": "english-event-deck-1"
     },
     {
       "id": 40,
       "name": "Envoy",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Envoys Meet",
+      "source": "english-event-deck-1"
     },
     {
       "id": 42,
       "name": "Trojan Horse",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Trojan Horse",
+      "source": "english-event-deck-1"
     },
     {
       "id": 41,
       "name": "Solar Eclipse",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Solar Eclipse",
+      "source": "english-event-deck-1"
     },
     {
       "id": 44,
       "name": "Anarchy",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Revolution: Anarchy",
+      "source": "english-event-deck-1"
     },
     {
       "id": 43,
       "name": "Guillotine",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Revolution: “Et tu, Brute?”",
+      "source": "english-event-deck-1"
     },
     {
       "id": 45,
       "name": "Scientific Trade",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Meeting of Academics",
+      "source": "english-event-deck-1"
     },
     {
       "id": 46,
       "name": "Flourishing Trade",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Brisk Trade",
+      "source": "english-event-deck-1"
     },
     {
       "id": 47,
       "name": "Era of Stability",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Era of Stability",
+      "source": "english-event-deck-1"
     },
     {
       "id": 48,
       "name": "Reformation",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Reformation",
+      "source": "english-event-deck-1"
     },
     {
       "id": 49,
       "name": "Pandemics",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Epidemic: Pandemic",
+      "source": "english-event-deck-1"
     },
     {
       "id": 50,
       "name": "Black Death",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Black Death",
+      "source": "english-event-deck-1"
     },
     {
       "id": 51,
       "name": "Famine: Vermin",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Famine: Pests",
+      "source": "english-event-deck-1"
     },
     {
       "id": 52,
       "name": "Famine: Draught",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Famine: Drought",
+      "source": "english-event-deck-1"
     },
     {
       "id": 53,
       "name": "Fire",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Wildfire",
+      "source": "english-event-deck-2"
     },
     {
       "id": 18,
       "name": "Great Explorer",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Discoverer",
+      "source": "english-event-deck-1"
     },
     {
       "id": 19,
       "name": "Great Artist",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Artist",
+      "source": "english-event-deck-1"
     },
     {
       "id": 20,
       "name": "Great Prophet",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Prophet",
+      "source": "english-event-deck-1"
     },
     {
       "id": 21,
       "name": "Great Philosopher",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Philosopher",
+      "source": "english-event-deck-1"
     },
     {
       "id": 22,
       "name": "Great Scientist",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Scientist",
+      "source": "english-event-deck-1"
     },
     {
       "id": 23,
       "name": "Elder Statesman",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Statesman",
+      "source": "english-event-deck-1"
     },
     {
       "id": 24,
       "name": "Great Warlord",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Warlord",
+      "source": "english-event-deck-1"
     },
     {
       "id": 25,
       "name": "Great Merchant",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Merchant",
+      "source": "english-event-deck-1"
     },
     {
       "id": 26,
       "name": "Great Engineer",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Engineer",
+      "source": "english-event-deck-1"
     },
     {
       "id": 55,
       "name": "Great Architect",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Architect",
+      "source": "english-event-deck-1"
     },
     {
       "id": 56,
       "name": "Great Athlete",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Athlete",
+      "source": "english-event-deck-1"
     },
     {
       "id": 57,
       "name": "Great Diplomat",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Diplomat",
+      "source": "english-event-deck-1"
     },
     {
       "id": 58,
       "name": "Great Seer",
-      "english_face": "not-located",
-      "review": "pending-complete-source-audit"
+      "english_face": "verified",
+      "review": "pending-complete-source-audit",
+      "printed_name": "Great Oracle",
+      "source": "english-event-deck-1"
     }
   ],
   "follow_up_rule_discrepancies": [
     {
       "name": "Bold",
-      "issue": "The fewer-Warfare-advances branch is not gated by winning the battle. Locate the English card and add a loss regression before changing it."
+      "issue": "The fewer-Warfare-advances branch is not gated by winning the battle. Locate the English card and add a loss regression before changing it.",
+      "printed_sources_now_available": true
     },
     {
       "name": "Naval Assault / Barbarian Conquest / Aggressor",
-      "issue": "Capture/attacker requirements are missing explicit attacker-role checks in some predicates. Verify the printed requirements and cover defensive victories."
+      "issue": "Capture/attacker requirements are missing explicit attacker-role checks in some predicates. Verify the printed requirements and cover defensive victories.",
+      "printed_sources_now_available": true
     },
     {
       "name": "Sea Blockade",
-      "issue": "Current predicate includes the player's own ports and counts passengers as well as ships. Verify whether two ships must occupy one port or can occupy different ports."
+      "issue": "Current predicate includes the player's own ports and counts passengers as well as ships. Verify whether two ships must occupy one port or can occupy different ports.",
+      "printed_sources_now_available": true
     },
     {
       "name": "Magnificent Culture",
-      "issue": "The status-phase predicate does not check that no other Wonder was built. Verify Monumental Edition wording before changing the condition."
+      "issue": "The status-phase predicate does not check that no other Wonder was built. Verify Monumental Edition wording before changing the condition.",
+      "printed_sources_now_available": true
     },
     {
       "name": "Mercenaries",
-      "issue": "Description names cities/army units for range; the code uses all owned units. Printed English wording is needed to resolve the difference."
+      "issue": "Description names cities/army units for range; the code uses all owned units. Printed English wording is needed to resolve the difference.",
+      "printed_sources_now_available": true
+    }
+  ],
+  "name_compatibility": "Printed names are presentation aliases. Existing engine names, card IDs, saved choices, readiness and history are preserved.",
+  "wonder_cards": [
+    {
+      "id": "Colosseum",
+      "printed_name": "Great Arena",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
+    },
+    {
+      "id": "Pyramids",
+      "printed_name": "Great Pyramids",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
+    },
+    {
+      "id": "GreatGardens",
+      "printed_name": "Great Gardens",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
+    },
+    {
+      "id": "GreatLibrary",
+      "printed_name": "Great Library",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
+    },
+    {
+      "id": "GreatLighthouse",
+      "printed_name": "Great Lighthouse",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
+    },
+    {
+      "id": "GreatMausoleum",
+      "printed_name": "Great Mausoleum",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
+    },
+    {
+      "id": "GreatStatue",
+      "printed_name": "Great Statue",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
+    },
+    {
+      "id": "GreatWall",
+      "printed_name": "Great Wall",
+      "source": "english-wonder-deck",
+      "english_face": "verified"
     }
   ]
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { formatPoints } from './score';
   import { Landmark, Trophy, X } from 'lucide-svelte';
   import { wonderIcons } from './wonder-icons';
@@ -70,7 +71,7 @@
     {@const Icon = wonderIcons[id] ?? Landmark}
     <li>
       <button class:expanded={expanded === id} aria-expanded={expanded === id} onclick={() => toggle(id)}
-        ><Icon size={16} /><span>{card?.name ?? wonderName(id)}</span></button
+        ><Icon size={16} /><span>{printedCardName(card?.name ?? wonderName(id))}</span></button
       >
     </li>
   {/each}
@@ -86,7 +87,8 @@
     </header>
     <p><ResourceText text={effect} /></p>
     {#if wonder}<small class="built-wonder-points"
-        ><Trophy size={14} />{formatPoints(wonder.builtPoints)} VP for building · {formatPoints(wonder.ownedPoints)} VP
-        for owning</small
+        ><Trophy size={14} />{formatPoints(wonder.builtPoints)} VP for building · {formatPoints(
+          wonder.ownedPoints,
+        )} VP for owning</small
       >{/if}
   </section>{/if}

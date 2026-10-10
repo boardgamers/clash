@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName } from './card-names';
   import { formatPoints } from './score';
   import { currentLocale, translateText } from './localization';
   const translate = $derived((value: string) => translateText(value, $currentLocale));
@@ -347,7 +348,9 @@
           if (mapModalMinimized) return;
           if (
             !mapMinimized &&
-            ($session.activityOpen || ($session.abilitiesOpen && !activeCityAbility($session) && !activeInfluence($session)) || confirmEnd)
+            ($session.activityOpen ||
+              ($session.abilitiesOpen && !activeCityAbility($session) && !activeInfluence($session)) ||
+              confirmEnd)
           )
             dismissMapDetails();
           controller.selectTile(p, pick);
@@ -508,7 +511,7 @@
       {#if entry.civilization}<strong>{entry.civilization}</strong>{/if}
       {#if !outcome}<span class:journal-event-title={!!entry.event}
           >{#if !entry.event}<EntryIcon size={13} aria-hidden="true" />{/if}<ResourceText
-            text={entry.title}
+            text={entry.event || entry.kind === 'event' ? printedCardName(entry.title) : entry.title}
             {research}
             onResearch={showJournalResearch}
             cards={journalCards}
@@ -645,7 +648,7 @@
         </p>{/if}
       {#if entry.event.info}
         <details class="event-rules">
-          <summary aria-label={`${entry.title} rules`}
+          <summary aria-label={`${entry.event ? printedCardName(entry.title) : entry.title} rules`}
             ><BookOpen size={13} /> Rules <ChevronRight size={13} /></summary
           >
           {#each entry.event.info.rules as rule}
@@ -1347,10 +1350,10 @@
         {#if choiceDecision}
           {#if $session.view?.influenceContext}<InfluenceFlow
               context={$session.view.influenceContext}
-            />{:else}<h2>{choiceDecision.name}</h2>{/if}
+            />{:else}<h2>{printedCardName(choiceDecision.name)}</h2>{/if}
           {#if choiceDecision.preview}
             <section class="decision-card-preview" aria-label="Discarded card rules">
-              <h3>{choiceDecision.preview.name}</h3>
+              <h3>{printedCardName(choiceDecision.preview.name)}</h3>
               {#if choiceDecision.preview.affected}<small>Affects: {choiceDecision.preview.affected}</small
                 >{/if}
               {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
@@ -1379,11 +1382,16 @@
               >{/each}
           </div>
         {:else if objectiveDecision}
-          <h2>{objectiveDecision.name}</h2>
+          <h2>{printedCardName(objectiveDecision.name, 'objective')}</h2>
           <p><ResourceText text={objectiveDecision.description} /></p>
           {#each objectiveDecision.cards as card (card.id)}
             <div class="objective-claim">
-              <small>Card: {card.name.replaceAll('/', ' / ')}</small>
+              <small
+                >Card: {card.name
+                  .split('/')
+                  .map((name) => printedCardName(name, 'objective'))
+                  .join(' / ')}</small
+              >
               <button
                 class="primary wide"
                 disabled={$session.pending}
@@ -1718,7 +1726,9 @@
         use:chatPanel
       ></div>
     </section>
-    {#if (!$session.playback || $session.playback.range === 'all') && $session.battles?.length}<div class="live-battle floating-panel">
+    {#if (!$session.playback || $session.playback.range === 'all') && $session.battles?.length}<div
+        class="live-battle floating-panel"
+      >
         <BattlePlayback {controller} />
       </div>{/if}
   </main>
@@ -1764,7 +1774,7 @@
       {#each $session.view?.objectiveCards ?? [] as card (card.id)}
         <article
           class="objective-card"
-          aria-label={`Objective card: ${card.objectives.map((o) => o.name).join(' / ')}`}
+          aria-label={`Objective card: ${card.objectives.map((o) => printedCardName(o.name, 'objective')).join(' / ')}`}
         >
           {#each card.objectives as objective, index}
             {#if index > 0}<div class="objective-divider">or</div>{/if}

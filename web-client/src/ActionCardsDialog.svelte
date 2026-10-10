@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName, printedCardText } from './card-names';
   import { X, Layers, Zap, Swords } from 'lucide-svelte';
   import ResourceText from './ResourceText.svelte';
   import ResourceAmount from './ResourceAmount.svelte';
@@ -37,11 +38,11 @@
   {#each $session.view?.actionCards ?? [] as card}
     <article class="play-card">
       <header class="play-card-header">
-        <h3>{card.name}</h3>
+        <h3>{printedCardName(card.name)}</h3>
         <button
           class="primary card-play-button"
-          aria-label={`Play ${card.name}`}
-          title={card.reason ?? 'Play this card'}
+          aria-label={`Play ${printedCardName(card.name)}`}
+          title={printedCardText(card.reason ?? 'Play this card')}
           disabled={!card.action || $session.pending}
           onclick={() => card.action && controller.submit(card.action, card.cost)}
           ><span>Play</span>
@@ -55,10 +56,13 @@
         >
       </header>
       <p><ResourceText text={handCardDescription(card.description)} /></p>
-      {#if actionReason(card.reason)}<small>{actionReason(card.reason)}</small>{/if}
-      {#if card.tactics}<section class="card-battle-use" aria-label={`Battle use: ${card.tactics.name}`}>
+      {#if actionReason(card.reason)}<small>{printedCardText(actionReason(card.reason) ?? '')}</small>{/if}
+      {#if card.tactics}<section
+          class="card-battle-use"
+          aria-label={`Battle use: ${printedCardName(card.tactics.name)}`}
+        >
           <div class="card-use-label"><Swords size={15} />Or · Battle use</div>
-          <h4>{card.tactics.name}</h4>
+          <h4>{printedCardName(card.tactics.name)}</h4>
           <p><ResourceText text={card.tactics.description} /></p>
         </section>{/if}
     </article>

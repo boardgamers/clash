@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { printedCardName, printedCardText } from './card-names';
   import { Check, Layers, Zap } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { contextualCards, activeCollectionCard, type CardContext } from './contextual-cards';
@@ -21,14 +22,16 @@
       <button
         class="secondary contextual-card"
         disabled={$session.pending}
-        title={`${card.description}\nDiscard this card after use.${card.tactics ? ` Also gives up ${card.tactics.name}, its battle effect.` : ''}`}
+        title={`${printedCardText(card.description)}\nDiscard this card after use.${card.tactics ? ` Also gives up ${printedCardName(card.tactics.name)}, its battle effect.` : ''}`}
         onclick={() => controller.playContextualCard(card.id, context)}
       >
-        <Layers size={14} /><span>{context === 'after-battle' ? card.name : `Play ${card.name}`}</span><strong
-          >{benefit}</strong
-        >
+        <Layers size={14} /><span
+          >{context === 'after-battle'
+            ? printedCardName(card.name)
+            : `Play ${printedCardName(card.name)}`}</span
+        ><strong>{benefit}</strong>
         {#if offers.filter((o) => o.card.name === card.name).length > 1 && card.tactics}
-          <small>({card.tactics.name})</small>
+          <small>({printedCardName(card.tactics.name)})</small>
         {/if}
         {#if Object.values(card.cost).some(Boolean)}<ResourceAmount pile={card.cost} />{/if}
         {#if !card.free}<span class="contextual-card-cost"><Zap size={12} />1</span>{/if}
