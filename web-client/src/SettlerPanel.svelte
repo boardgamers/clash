@@ -158,7 +158,10 @@
         <LeaderDetails
           {leader}
           compact
-          actions={$session.view?.specialActions}
+          actions={[
+            ...($session.view?.specialActions ?? []),
+            ...($session.view?.unavailableSpecialActions ?? []),
+          ]}
           pending={$session.pending}
           onUse={(action, payment) => controller.submit(action, payment)}
         />

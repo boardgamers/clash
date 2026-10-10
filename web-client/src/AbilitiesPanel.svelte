@@ -1,6 +1,6 @@
 <script lang="ts">
   import { X, Sparkles, Zap, ArrowLeft, MapPin, Drama, ArrowRight } from 'lucide-svelte';
-  import { activeCityAbility, groupAbilities } from './abilities';
+  import { activeCityAbility, groupAbilities, abilityReason } from './abilities';
   import CityFacts from './CityFacts.svelte';
   import InfluencePicker from './InfluencePicker.svelte';
   import { activeInfluence } from './influence';
@@ -14,7 +14,12 @@
   }: { controller: Controller; onHighlight: (position: string | null) => void } = $props();
   const session = $derived(controller.session);
   const drafts = $derived($session.view && controller.shogunateDraftOffers());
-  const groups = $derived(groupAbilities($session.view?.specialActions));
+  const groups = $derived(
+    groupAbilities([
+      ...($session.view?.specialActions ?? []),
+      ...($session.availableOnly ? [] : ($session.view?.unavailableSpecialActions ?? [])),
+    ]),
+  );
   const active = $derived(activeCityAbility($session));
   const influence = $derived(activeInfluence($session));
   const influenceTargets = $derived($session.view?.influence ?? []);
@@ -84,13 +89,14 @@
     {#each groups as group}
       {@const action = group.offer}
       {@const city = $session.view?.cities.find((c) => c.position === action.activatesCity)}
-      <article class="ability-offer">
+      <article class="ability-offer" class:unavailable={!!action.reason}>
         <h3>{action.name}</h3>
         <p><ResourceText text={action.description} /></p>
+        {#if action.reason}<p class="settler-empty">{abilityReason(action.reason)}</p>{/if}
         {#if city && city.activations > 0}<ActivationStatus {city} warning />{/if}
         <button
           class="primary wide"
-          disabled={!!$session.playback || $session.pending}
+          disabled={!!action.reason || !!$session.playback || $session.pending}
           onclick={() =>
             action.position
               ? controller.chooseAbility(group.key)

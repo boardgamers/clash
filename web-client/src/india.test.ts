@@ -127,6 +127,7 @@ test('Golden Age researches a new category for culture plus resources, activates
     !view(g).specialActions?.some((a) => a.name === 'Golden Age'),
     'No dead-end action when research is unaffordable',
   );
+  assert.ok(view(g).unavailableSpecialActions?.some((a) => a.name === 'Golden Age' && a.reason), 'owned Golden Age stays visible with a disabled reason');
 });
 
 async function influence(leader = false) {

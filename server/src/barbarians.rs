@@ -425,6 +425,15 @@ pub(crate) fn reinforce_barbarians() -> Ability {
             1,
             |game, _, cities| {
                 cities.retain(|pos| !get_barbarian_reinforcement_choices(game, *pos).is_empty());
+                // Empty cities have a forced Infantry placement. If the shared
+                // supply can serve all of them, choosing their order changes nothing.
+                if cities.iter().all(|pos| {
+                    get_barbarian_reinforcement_choices(game, *pos) == vec![UnitType::Infantry]
+                }) && usize::from(get_barbarians_player(game).available_units().infantry)
+                    >= cities.len()
+                {
+                    return None;
+                }
                 Some(PositionRequest::new(cities.clone(), 1..=1, "Choose a Barbarian city to reinforce"))
             },
             |_, selection, cities| {

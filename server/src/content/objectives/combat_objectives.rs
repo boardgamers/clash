@@ -13,6 +13,10 @@ use itertools::Itertools;
 #[path = "bold_tests.rs"]
 mod bold_tests;
 
+#[cfg(test)]
+#[path = "assimilator_tests.rs"]
+mod assimilator_tests;
+
 // English card face: https://boardgamegeek.com/image/6509349/bigleaguecreative
 pub(crate) fn conqueror() -> Objective {
     let name = "Conqueror";
@@ -297,10 +301,11 @@ pub(crate) fn barbarian_conquest() -> Objective {
         11,
         |game, p, s| {
             let player = p.index;
-            if s.is_winner(player)
+            if s.is_attacker(player)
+                && s.is_winner(player)
                 && s.battleground.is_city()
-                && !s.opponent_is_human(player, game)
-                && s.defender.present.amount() >= 2
+                && s.opponent_player(player, game).civilization.is_barbarian()
+                && s.defender.fighters(s.battleground).amount() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
             }

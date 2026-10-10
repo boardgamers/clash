@@ -22,7 +22,7 @@ async function setup(civ: string, leader?: string) {
     {},
   );
   g = move(g, { ChooseCivilization: civ });
-  g = move(g, { ChooseCivilization: 'Rome' });
+  g = move(g, { ChooseCivilization: civ === 'Rome' ? 'India' : 'Rome' });
   const p = g.players[seat(g)];
   p.resources = { food: 7, wood: 7, ore: 7, ideas: 7, gold: 7, mood_tokens: 8, culture_tokens: 8 };
   p.resource_limit.food = 7;
@@ -82,6 +82,7 @@ test('Beloved charges once and records protected city tokens', async () => {
   assert.equal(after.players[index].resources.culture_tokens, 7);
   assert.equal(after.players[index].custom_data[`Beloved:${city}`].Number, 1);
   assert.ok(!view(after).specialActions.some((a: any) => a.name === 'Beloved'));
+  assert.ok(view(after).unavailableSpecialActions.some((a: any) => a.name === 'Beloved' && /already played/.test(a.reason)));
 });
 test('Imhotep discounts an Academy and Innovator pays once on activation', async () => {
   const g = await setup('Egypt', 'Imhotep'),
@@ -1335,11 +1336,17 @@ test('An allied pirate is removed before a colored ship in a naval battle', asyn
   assert.equal(after.players[pirates.id].held_units?.ships ?? 0, 0);
 });
 
-test('all 27 new leaders load with full research under each government', async (t) => {
+test('all 45 leaders load with full research under each government', async (t) => {
   const picker = view(
     await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'all-leader-abilities', {}),
   );
   for (const name of [
+    'Rome',
+    'Greece',
+    'China',
+    'Vikings',
+    'Babylonia',
+    'India',
     'Aztecs',
     'Carthage',
     'Celts',
@@ -1378,9 +1385,9 @@ test('all 27 new leaders load with full research under each government', async (
           const visible = view(state, index);
           assert.equal(visible.players[index].leaders[0].name, leader.name);
           assert.equal(
-            visible.players[index].civilizationAdvances.filter((a: any) => a.owned).length,
+            visible.players[index].civilizationAdvances.length,
             4,
-            `${name}: all civilization advances unlock`,
+            `${name}: all civilization advances remain visible`,
           );
         });
       }

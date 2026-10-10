@@ -149,3 +149,45 @@ fn each_city_receives_one_unit_and_supply_is_rechecked_between_choices() {
     assert_eq!(get_barbarians_player(&game).get_units(first).len(), 2);
     assert_eq!(get_barbarians_player(&game).get_units(second).len(), 2);
 }
+
+#[test]
+fn three_empty_cities_reinforce_automatically_when_supply_can_serve_them_all() {
+    let mut game = setup();
+    let cities = ["B1", "B3", "D2"].map(|pos| city(&mut game, pos, &[]));
+    on_reinforce_barbarians(&mut game, 0, cities.to_vec());
+    assert!(
+        game.events.is_empty(),
+        "forced placements must not ask for city order"
+    );
+    for pos in cities {
+        let units = get_barbarians_player(&game).get_units(pos);
+        assert_eq!(units.len(), 1);
+        assert_eq!(units[0].unit_type, UnitType::Infantry);
+    }
+}
+
+#[test]
+fn insufficient_infantry_supply_keeps_the_city_choice() {
+    let mut game = setup();
+    let first = city(&mut game, "B1", &[]);
+    let second = city(&mut game, "B3", &[]);
+    let barbarian = get_barbarians_player(&game).index;
+    let limit = game.players[barbarian].unit_limit().infantry;
+    for id in 0..u32::from(limit - 1) {
+        game.players[barbarian].units.push(Unit::new(
+            barbarian,
+            Position::from_offset("D2"),
+            UnitType::Infantry,
+            id,
+        ));
+    }
+    game.players[barbarian].next_unit_id = u32::from(limit);
+    on_reinforce_barbarians(&mut game, 0, vec![first, second]);
+    assert!(
+        matches!(&game.current_event_handler().unwrap().request, PersistentEventRequest::SelectPositions(r) if r.choices == vec![first, second])
+    );
+    game = choose(game, EventResponse::SelectPositions(vec![second]));
+    assert!(game.events.is_empty());
+    assert!(get_barbarians_player(&game).get_units(first).is_empty());
+    assert_eq!(get_barbarians_player(&game).get_units(second).len(), 1);
+}

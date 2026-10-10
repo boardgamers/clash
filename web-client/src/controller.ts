@@ -529,7 +529,7 @@ export class Controller {
       cardsOpen: old.pending || view.decision ? false : old.cardsOpen,
       wondersOpen: old.pending || view.decision ? false : old.wondersOpen,
       abilitiesOpen:
-        old.pending || view.decision || (!view.specialActions?.length && !view.influence?.length)
+        old.pending || view.decision || (!view.specialActions?.length && !view.unavailableSpecialActions?.length && !view.influence?.length)
           ? false
           : old.abilitiesOpen,
       cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>

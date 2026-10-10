@@ -282,6 +282,13 @@
         c.happiness.some((h) => !!h.action),
     ),
   );
+  let recruitAvailable = $derived(
+    !$session.playback &&
+      $session.view?.cityActions.some(
+        (c) =>
+          c.recruits.some((r) => !r.reason && r.available > 0) || c.leaders?.some((l) => l.reason === null),
+      ),
+  );
   let settlersAvailable = $derived(
     !!$session.view?.stopMovement ||
       (!!$session.view?.canPlay &&
@@ -290,6 +297,7 @@
   );
   let abilitiesAvailable = $derived(
     !!$session.view?.specialActions?.length ||
+      !!$session.view?.unavailableSpecialActions?.length ||
       !!$session.view?.influence?.length ||
       !!($session.view && controller.shogunateDraftOffers().length),
   );
@@ -1175,7 +1183,8 @@
         <button
           class:active={$session.mode === 'collect'}
           title={collectAvailable
-            ? ($session.view?.collectActions?.find((offer) => offer.free)?.name ?? 'Collect resources · 1 action')
+            ? ($session.view?.collectActions?.find((offer) => offer.free)?.name ??
+              'Collect resources · 1 action')
             : (city?.reason ?? 'No city can collect resources')}
           data-tutorial="collect"
           aria-label="Collect resources"
@@ -1222,14 +1231,22 @@
         <button
           class="desktop-action"
           class:active={$session.mode === 'city' && $session.cityTab === 'recruit'}
+          class:inspect-only={!recruitAvailable}
           data-tutorial="recruit"
           aria-label="Recruit units"
-          title="Recruit units · 1 action"
-          disabled={!city || (!$session.playback && (!$session.view?.canPlay || $session.pending))}
+          title={recruitAvailable
+            ? 'Recruit units · 1 action'
+            : 'View cities · Browse buildings, units and costs'}
+          disabled={!city}
           onclick={() => {
             confirmEnd = false;
             controller.openCities(undefined, 'recruit');
-          }}><Users size={21} /><span>Recruit</span></button
+          }}
+          ><Users size={21} /><span>Recruit</span>{#if !recruitAvailable}<Eye
+              class="action-inspect"
+              size={10}
+              aria-hidden="true"
+            />{/if}</button
         >
         <button
           class="desktop-action"

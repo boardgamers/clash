@@ -344,15 +344,23 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
 
 pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     use crate::content::custom_actions::{CustomAction, SpecialActionExecution};
-    if !can_play {
-        return vec![];
-    }
-    game.available_custom_actions(seat).iter().flat_map(|info| {
+    game.player(seat).special_actions.values().flat_map(|info| {
         let SpecialActionExecution::Action(execution) = &info.execution else { return vec![]; };
-        let cities = if info.city_bound().is_some() {
+        let mut reason = if seat != game.active_player() {
+            Some("Wait for your turn".to_string())
+        } else if !can_play {
+            Some("Finish the current decision first".to_string())
+        } else {
+            info.action.playing_action_type().is_available(game, seat).err()
+        };
+        let mut cities: Vec<Option<Position>> = if info.city_bound().is_some() {
             game.player(seat).cities.iter().filter(|c|info.is_city_available(game,c)).map(|c|Some(c.position)).collect()
         } else { vec![None] };
-        cities.into_iter().map(|city|json!({"name":info.event_origin.name(game),"description":execution.ability.description,"position":city,
+        if cities.is_empty() {
+            reason.get_or_insert_with(|| "Custom action cannot be played".to_string());
+            cities.push(None);
+        }
+        cities.into_iter().map(|city|json!({"name":info.event_origin.name(game),"description":execution.ability.description,"position":city,"reason":reason,
             "cost":info.cost.cost.payment_options(game.player(seat),info.event_origin.clone()).default_payment(),
             "free":info.cost.cost.free,
             "activatesCity":(info.custom_action_type() == crate::content::custom_actions::CustomActionType::GoldenAge)

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Crown, Sparkles, ChevronRight, ArrowRight } from 'lucide-svelte';
   import type { PlayerView, View, Move, Pile } from './types';
+  import { abilityReason } from './abilities';
   import ResourceText from './ResourceText.svelte';
   let {
     leader,
@@ -32,9 +33,14 @@
       <strong><Sparkles size={13} />{ability.name}</strong>
       <p><ResourceText text={ability.description} /></p>
       {#if action && onUse}
-        <button class="primary wide" disabled={pending} onclick={() => onUse?.(action.action, action.cost)}>
+        <button
+          class="primary wide"
+          disabled={pending || !!action.reason}
+          onclick={() => onUse?.(action.action, action.cost)}
+        >
           Use {ability.name}<ArrowRight size={16} />
         </button>
+        {#if action.reason}<small>{abilityReason(action.reason)}</small>{/if}
       {/if}
     </div>
   {/each}

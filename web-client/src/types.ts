@@ -289,7 +289,9 @@ export interface View {
     leaders: { name: string; abilities: { name: string; description: string }[] }[];
   }[];
   actionCards?: ActionCard[];
+  unavailableSpecialActions?: View['specialActions'];
   specialActions?: {
+    reason?: string | null;
     name: string;
     description: string;
     position: string | null;

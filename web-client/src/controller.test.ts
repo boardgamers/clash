@@ -2378,3 +2378,34 @@ test('automatic next movement group selects all its units after a group finishes
     assert.deepEqual(app.sent, [], 'preselection does not perform a move');
   } finally { app.close(); }
 });
+
+
+test('Sri Gupta Golden Age opens the research tree and can be selected through the controller', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    let game = JSON.parse(await engine.init(2, [], { civilization: 'Random' }, 'golden-age-ui', {}));
+    const seat = engine.currentPlayer(JSON.stringify(game)), player = game.players[seat];
+    player.civilization = 'India';
+    player.units.push({ id: player.next_unit_id++, position: player.cities[0].position, unit_type: { Leader: 'SriGupta' } });
+    player.resources = { food: 7, wood: 7, ore: 7, ideas: 7, gold: 7, mood_tokens: 8, culture_tokens: 8 };
+    player.resource_limit.food = 7;
+    game.actions_left = 0;
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(JSON.stringify(game), seat));
+    const offer = app.session().view!.specialActions!.find((action) => action.name === 'Golden Age')!;
+    assert.ok(offer);
+    assert.equal(offer.free, true);
+    c.patch({ abilitiesOpen: true });
+    c.submit(offer.action, offer.cost);
+    let processed = 0;
+    while (processed < app.sent.length) {
+      game = JSON.parse(engine.tryMove(JSON.stringify(game), app.sent[processed++], seat));
+      await c.load(engine.stripSecret(JSON.stringify(game), seat));
+    }
+    assert.equal(app.session().mode, 'research');
+    assert.equal(app.session().view!.decision!.advanceMode, 'paid');
+    const writing = app.session().view!.advances.find((advance) => advance.id === 'Writing')!;
+    c.submit(writing.action!);
+    assert.deepEqual(JSON.parse(app.sent[processed]), { Response: { SelectAdvance: 'Writing' } });
+  } finally { app.close(); }
+});

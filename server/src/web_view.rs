@@ -369,13 +369,14 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         item
     }).collect::<Vec<_>>();
     advances.sort_by_key(|a| a["name"].as_str().unwrap_or_default().to_string());
+    let special_actions = actions::special(game, seat, can_play);
     let mut result = json!({"logOriginNames":log_origin_names,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer":active,"canPlay":can_play,"supportedPhase":supported_phase,"players":players,"cities":cities,"advances":advances,"objectiveCards":objective_cards,"objectiveDecision":objective_decision(game, seat),
         "influenceContext":decisions::influence_context(game, seat), "choiceDecision":choice, "explorationDecision":exploration, "wonderCards":wonder_cards, "wonderCatalog":wonder_catalog, "builtWonders":built_wonders, "decision":decision,
         "civilizations":crate::game_setup::civilization_choices(game, seat).iter().map(|c|json!({"name":c.name,
             "advances":c.special_advances.iter().map(|a|json!({"name":a.name,"description":a.description,"requirement":a.requirement.name(game)})).collect::<Vec<_>>(),
             "leaders":c.leaders.iter().map(|l|json!({"name":l.name,"abilities":l.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()})).collect::<Vec<_>>(),
             "action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>(),
-        "actionCards":actions::cards(game,seat,can_play), "specialActions":actions::special(game,seat,can_play), "influence":actions::influence(game,seat,can_play),
+        "actionCards":actions::cards(game,seat,can_play), "specialActions":special_actions.iter().filter(|a| a["reason"].is_null()).collect::<Vec<_>>(), "influence":actions::influence(game,seat,can_play),
         "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|{ let cost = a.cost(game,seat); json!({"value":a,"name":a.origin(p).name(game),"free":cost.free,"payment":cost.payment_options(p,a.origin(p)).default_payment()}) }).collect::<Vec<_>>()} else {vec![]},
         "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free,"surcharge":a.payment_options(game,seat).default})).collect::<Vec<_>>()} else {vec![]},
         "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate,"movementNotes":movement_notes(game,p,u)})).collect::<Vec<_>>(),
@@ -386,6 +387,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()});
+    result["unavailableSpecialActions"] = json!(special_actions.iter().filter(|a| !a["reason"].is_null()).collect::<Vec<_>>());
     result["activeEffects"] = json!(active_effects);
     result
 }

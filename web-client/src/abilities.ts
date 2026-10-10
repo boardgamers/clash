@@ -21,3 +21,10 @@ export function activeCityAbility(s: Session) {
     (group) => group.key === s.abilityChoice && group.offers.every((offer) => offer.position),
   );
 }
+
+
+export function abilityReason(reason?: string | null) {
+  if (reason === 'Custom action cannot be played' || reason === 'Custom action not available') return 'Unavailable';
+  if (reason === 'Not enough resources for action type') return 'Not enough resources';
+  return reason ?? '';
+}

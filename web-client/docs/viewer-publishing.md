@@ -108,3 +108,9 @@ Single-route trade rewards include Alphabet's 2-idea option. The compact reward 
 # Viewer 0.1.52
 
 The action bar selects an available free Collect or Increase happiness variant first, including Free Economy and Voting. Drawn action cards appear in the existing card reveal queue with their action and battle rules, including end-of-age draws. The Confirm unit moves preference has been removed from BGS and the viewer; moves always wait for confirmation, including for accounts with a previously disabled preference. Engine 0.4.54 is unchanged.
+
+# Viewer 0.1.53 / engine 0.4.55
+
+Assimilator requires winning as the attacker in a Barbarian city defended by at least two army units. Defending your own city no longer offers this objective, and non-army units do not count toward its threshold. Barbarian reinforcement skips city-order decisions when all remaining placements are forced Infantry and supply is sufficient for every city. Limited supply and unit-type choices still require a decision. Owned custom abilities remain visible with disabled controls and their engine availability reason, both in Abilities and leader details. Passive effects keep their automatic behavior. Golden Age controller coverage and all 45 leaders under each government are checked. Existing completed objectives and game history are preserved.
+
+Recruit remains open for inspection when recruiting is unavailable, with a muted label and eye icon, including after all actions have been spent and during replay.

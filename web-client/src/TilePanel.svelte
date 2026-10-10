@@ -141,7 +141,9 @@
         <LeaderDetails
           {leader}
           civilization={player.civilization}
-          actions={player.index === $session.seat ? $session.view?.specialActions : []}
+          actions={player.index === $session.seat
+            ? [...($session.view?.specialActions ?? []), ...($session.view?.unavailableSpecialActions ?? [])]
+            : []}
           pending={$session.pending}
           onUse={(action, payment) => controller.submit(action, payment)}
         />
