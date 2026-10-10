@@ -194,7 +194,7 @@
     {#if tab !== 'happiness'}<AvailabilityFilter {controller} />{/if}
   </nav>
   <div class="city-content" bind:this={content}>
-    <ContextualCards {controller} context={tab} />
+    {#if !$session.playback}<ContextualCards {controller} context={tab} />{/if}
     {#if city && (tab === 'recruit' || (tab === 'build' && buildActivatesCity))}<ActivationStatus
         {city}
         warning={tab === 'recruit' || (tab === 'build' && !!selected?.moodWillDecrease)}
@@ -392,7 +392,7 @@
       <div class="port-choices">
         {#each selected.choices as choice}<button
             class="primary"
-            disabled={$session.pending}
+            disabled={!!$session.playback || $session.pending}
             onclick={() => submitBuild(choice.action)}
             >Build {selected.name}{choice.position ? ` at ${choice.position}` : ''}</button
           >{/each}
@@ -419,7 +419,7 @@
         />{/if}
       <button
         class="primary"
-        disabled={!$session.recruitPreview || $session.pending}
+        disabled={!!$session.playback || !$session.recruitPreview || $session.pending}
         onclick={() => $session.recruitPreview && controller.submit($session.recruitPreview.action)}
         >{$session.pending
           ? 'Confirming…'

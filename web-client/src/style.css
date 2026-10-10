@@ -5345,16 +5345,12 @@ small {
   }
 }
 
-/* Playback leaves the board and camera controls available, hiding live decisions. */
+/* Keep reference controls and journal/chat available while hiding live decisions. */
 .playing-back .header-actions,
 .playing-back .resource-bar,
 .playing-back:not(.full-replay) .player-list,
-.playing-back .board-toolbar,
 .playing-back .city-dock,
-.playing-back .action-panel,
-.playing-back .journal-tools,
-.playing-back .table-tools,
-.playing-back .activity,
+.playing-back .action-panel:not(.board-collection):not(.board-movement):not(.happiness-panel):not(.abilities-panel),
 .playing-back .map-instruction,
 .playing-back .map-resume,
 .playing-back .map-minimize,
@@ -5364,7 +5360,7 @@ small {
 .playback-bar {
   position: absolute;
   z-index: 80;
-  bottom: 16px;
+  bottom: 126px;
   left: 50%;
   transform: translateX(-50%);
   width: 720px;
@@ -5514,7 +5510,7 @@ small {
   .playback-bar {
     grid-template-columns: 1fr auto;
     gap: 8px;
-    bottom: 12px;
+    bottom: 120px;
     width: calc(100% - 24px);
     padding: 10px 12px;
   }
@@ -6190,4 +6186,19 @@ small {
   background: #242630;
   color: #fff;
   font: bold 12px/1 sans-serif;
+}
+
+.game-shell.playing-back .activity.floating-panel {
+  bottom: 260px;
+  height: min(470px, calc(100% - 280px));
+}
+@media (max-width: 600px) {
+  .game-shell.playing-back .activity.floating-panel {
+    bottom: 285px;
+    height: max(120px, calc(100% - 405px));
+  }
+}
+
+.playing-back .board-toolbar {
+  display: block;
 }

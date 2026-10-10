@@ -57,7 +57,7 @@
       {:else}<span class="movement-hint">Choose a highlighted city.</span>{/if}
       <button
         class="primary"
-        disabled={!selected || $session.pending}
+        disabled={!!$session.playback || !selected || $session.pending}
         onclick={() => selected && controller.submit(selected.action, selected.cost)}
       >
         Use {active.offer.name}
@@ -90,7 +90,7 @@
         {#if city && city.activations > 0}<ActivationStatus {city} warning />{/if}
         <button
           class="primary wide"
-          disabled={$session.pending}
+          disabled={!!$session.playback || $session.pending}
           onclick={() =>
             action.position
               ? controller.chooseAbility(group.key)
@@ -126,7 +126,7 @@
         <p>Choose a target, then the city to influence from. Only one successful attempt per turn.</p>
         <button
           class="primary wide"
-          disabled={$session.pending}
+          disabled={!!$session.playback || $session.pending}
           onclick={() => controller.chooseInfluence()}>Choose target<ArrowRight size={16} /></button
         >
       {:else}<p class="settler-empty">No eligible targets.</p>{/if}

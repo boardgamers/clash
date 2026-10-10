@@ -1358,7 +1358,7 @@ export class Controller {
   }
   beginHappiness(position?: string) {
     const s = get(this.session);
-    if (s.pending || s.playback || s.seat === undefined) return;
+    if (s.pending || s.seat === undefined) return;
     this.closeActivity();
     this.patch({
       mode: 'happiness',

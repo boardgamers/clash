@@ -51,7 +51,7 @@
   } = $props();
   const session = $derived(controller.session);
   const view = $derived(reference?.view ?? $session.view);
-  const choice = $derived(!reference && researchDecision(view) ? view!.decision : null);
+  const choice = $derived(!reference && !$session.playback && researchDecision(view) ? view!.decision : null);
   const freeResearch = $derived(!!choice && choice.advanceMode === 'free');
   const borrowing = $derived(choice?.advanceMode === 'borrow');
   let query = $state('');
@@ -267,7 +267,7 @@
       /></label
     >
   </header>
-  {#if !choice && !reference}<ContextualCards {controller} context="research" />{/if}
+  {#if !choice && !reference && !$session.playback}<ContextualCards {controller} context="research" />{/if}
   <nav class="research-filters" aria-label="Research categories">
     <select
       class="research-status-filter"
@@ -498,7 +498,7 @@
         {#if unavailableReason(selected) && !selected.owned}<small>{unavailableReason(selected)}</small>{/if}
         {#if $session.error && !reference}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
-      {#if !reference}<div class="research-payment">
+      {#if !reference && !$session.playback}<div class="research-payment">
           {#if !choice && !selected.owned && selected.payments.length > 1}
             <PaymentPicker
               options={selected.payments.map((option) => ({

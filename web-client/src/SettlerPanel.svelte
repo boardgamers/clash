@@ -86,7 +86,7 @@
       >{/if}
     {#if $session.view?.stopMovement}<button
         class="movement-done"
-        disabled={$session.pending}
+        disabled={!!$session.playback || $session.pending}
         aria-label="Finish moving"
         onclick={() => $session.view?.stopMovement && controller.submit($session.view.stopMovement)}
         >Done<Check size={14} /></button
@@ -169,7 +169,7 @@
     <div class="settler-destinations" role="group" aria-label="Choose how to move">
       {#each $session.moveDestinations as d, i}{#if d.position === $session.moveTarget}
           <button
-            disabled={$session.pending}
+            disabled={!!$session.playback || $session.pending}
             onmouseenter={() => onHighlight(d.position)}
             onmouseleave={() => onHighlight(null)}
             onclick={() => controller.patch({ moveDestination: i })}
@@ -215,7 +215,7 @@
       {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
       <button
         class="primary wide"
-        disabled={$session.pending}
+        disabled={!!$session.playback || $session.pending}
         onclick={() => controller.submit(destination.action)}
       >
         {destination.breaksDiplomacy

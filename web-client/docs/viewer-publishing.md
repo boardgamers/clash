@@ -97,3 +97,6 @@ Component styles are bundled into the viewer script because BGS does not load a 
 # Viewer 0.1.49 / engine 0.4.53
 
 Fanaticism's free infantry now requires losing a battle fought in a city with a Temple. The engine records the Temple condition before capture, so it still applies when that city changes hands. The destination may be any eligible city you own. The advance text now says “If you lose that battle” to make the shared condition explicit. Source: official Monumental Edition rulebook, page 31.
+# Viewer 0.1.50
+
+Replay keeps the action toolbar and Journal/Chat controls visible. Research, city management, collection, movement, happiness and available abilities can be opened for inspection; submitting actions, undoing and ending the turn remain disabled. Replay transport and the journal have separate space above the bottom controls on desktop and mobile.

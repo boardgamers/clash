@@ -293,37 +293,39 @@
       !!$session.view?.influence?.length ||
       !!($session.view && controller.shogunateDraftOffers().length),
   );
-  let objectiveDecision = $derived($session.view?.objectiveDecision);
-  let choiceDecision = $derived($session.view?.choiceDecision);
+  let objectiveDecision = $derived($session.playback ? null : $session.view?.objectiveDecision);
+  let choiceDecision = $derived($session.playback ? null : $session.view?.choiceDecision);
   let activeMovementBonus = $derived(movementBonus($session.game));
   let actionTitle = $derived(
-    $session.pending
-      ? 'Confirming…'
-      : waiting
-        ? `Waiting for ${$session.view?.players.find((p) => p.index === waiting.player)?.civilization ?? 'another player'}`
-        : $session.seat === undefined
-          ? 'Spectating'
-          : $session.game?.state === 'Finished'
-            ? 'Game over'
-            : $session.view?.decision
-              ? $session.view.decision.endOfAge
-                ? 'End of age'
-                : $session.view.decision.name
-              : $session.view?.explorationDecision
-                ? 'Place explored terrain'
-                : choiceDecision
-                  ? 'Choose a bonus'
-                  : objectiveDecision
-                    ? 'Objective available'
-                    : $session.view?.stopMovement
-                      ? activeMovementBonus
-                        ? `${activeMovementBonus.source} moves`
-                        : 'Moving units'
-                      : readyToEnd
-                        ? 'Ready to end turn'
-                        : $session.view?.canPlay
-                          ? 'Your turn'
-                          : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
+    $session.playback
+      ? 'Replay · Browse game details'
+      : $session.pending
+        ? 'Confirming…'
+        : waiting
+          ? `Waiting for ${$session.view?.players.find((p) => p.index === waiting.player)?.civilization ?? 'another player'}`
+          : $session.seat === undefined
+            ? 'Spectating'
+            : $session.game?.state === 'Finished'
+              ? 'Game over'
+              : $session.view?.decision
+                ? $session.view.decision.endOfAge
+                  ? 'End of age'
+                  : $session.view.decision.name
+                : $session.view?.explorationDecision
+                  ? 'Place explored terrain'
+                  : choiceDecision
+                    ? 'Choose a bonus'
+                    : objectiveDecision
+                      ? 'Objective available'
+                      : $session.view?.stopMovement
+                        ? activeMovementBonus
+                          ? `${activeMovementBonus.source} moves`
+                          : 'Moving units'
+                        : readyToEnd
+                          ? 'Ready to end turn'
+                          : $session.view?.canPlay
+                            ? 'Your turn'
+                            : `${$session.view?.players.find((p) => p.index === $session.view?.activePlayer)?.civilization ?? 'Opponent'}’s turn`,
   );
   onMount(() => {
     fullscreenEnabled = document.fullscreenEnabled;
@@ -763,8 +765,14 @@
     </div>
     <nav class="header-actions">
       {#if $session.view?.activeEffects?.length}
-        <button class="text-button effects-button" aria-label={`Active effects: ${$session.view.activeEffects.length}`} onclick={() => effectsOpen = true}>
-          <Sparkles size={17} /><span>Effects</span><span class="card-count">{$session.view.activeEffects.length}</span>
+        <button
+          class="text-button effects-button"
+          aria-label={`Active effects: ${$session.view.activeEffects.length}`}
+          onclick={() => (effectsOpen = true)}
+        >
+          <Sparkles size={17} /><span>Effects</span><span class="card-count"
+            >{$session.view.activeEffects.length}</span
+          >
         </button>
       {/if}
       {#if $session.seat !== undefined}
@@ -1138,7 +1146,7 @@
               >{waiting.action}{waiting.source ? ` · ${waiting.source}` : ''}</span
             >{/if}
         </div>
-        {#if !waiting && !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.playback?.frame?.round ?? $session.game?.round ?? 1) <= 3}<span
+        {#if !$session.playback && !waiting && !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.game?.round ?? 1) <= 3}<span
             class="action-markers"
             role="img"
             aria-label={`${totalActions} ${totalActions === 1 ? 'action' : 'actions'} remaining`}
@@ -1171,7 +1179,9 @@
             : (city?.reason ?? 'No city can collect resources')}
           data-tutorial="collect"
           aria-label="Collect resources"
-          disabled={!$session.view?.canPlay || !collectAvailable || $session.pending}
+          disabled={$session.playback
+            ? !city
+            : !$session.view?.canPlay || !collectAvailable || $session.pending}
           onclick={() => {
             confirmEnd = false;
             controller.beginCollect();
@@ -1215,7 +1225,7 @@
           data-tutorial="recruit"
           aria-label="Recruit units"
           title="Recruit units · 1 action"
-          disabled={!$session.view?.canPlay || !city || $session.pending}
+          disabled={!city || (!$session.playback && (!$session.view?.canPlay || $session.pending))}
           onclick={() => {
             confirmEnd = false;
             controller.openCities(undefined, 'recruit');
@@ -1227,7 +1237,7 @@
           data-tutorial="happiness"
           aria-label="Increase happiness"
           title="Increase happiness · Select cities on the map"
-          disabled={!$session.view?.canPlay || !city || $session.pending}
+          disabled={!city || (!$session.playback && (!$session.view?.canPlay || $session.pending))}
           onclick={() => {
             confirmEnd = false;
             controller.beginHappiness();
@@ -1271,13 +1281,13 @@
           title="Undo last action"
           data-tutorial="undo"
           aria-label="Undo last action"
-          disabled={!$session.view?.canUndo || $session.pending}
+          disabled={!!$session.playback || !$session.view?.canUndo || $session.pending}
           onclick={() => controller.submit('Undo')}><Undo2 size={19} /><span>Undo</span></button
         >
         {#if $session.view?.canRedo}<button
             title="Redo last undone action"
             aria-label="Redo last undone action"
-            disabled={$session.pending}
+            disabled={!!$session.playback || $session.pending}
             onclick={() => controller.submit('Redo')}><Redo2 size={19} /><span>Redo</span></button
           >{/if}
         <button
@@ -1286,7 +1296,7 @@
           title="End turn"
           data-tutorial="end"
           aria-label="End turn"
-          disabled={!$session.view?.canEndTurn || $session.pending}
+          disabled={!!$session.playback || !$session.view?.canEndTurn || $session.pending}
           onclick={() => {
             controller.closeActivity();
             controller.patch({ mode: 'overview', tilePanel: false });
@@ -1340,7 +1350,7 @@
         ><Shapes size={19} /></button
       >
     </nav>
-    {#if choiceDecision || objectiveDecision || ($session.game && !$session.view?.supportedPhase && $session.seat === $session.view?.activePlayer) || $session.mode === 'collect' || confirmEnd || ($session.error && $session.mode === 'overview')}
+    {#if choiceDecision || objectiveDecision || (!$session.playback && $session.game && !$session.view?.supportedPhase && $session.seat === $session.view?.activePlayer) || $session.mode === 'collect' || confirmEnd || ($session.error && $session.mode === 'overview')}
       <section
         class="action-panel floating-panel"
         class:board-collection={$session.mode === 'collect'}
@@ -1362,11 +1372,17 @@
             />{:else}<h2>{printedCardName(choiceDecision.name)}</h2>{/if}
           {#if choiceDecision.preview}
             <section class="decision-card-preview" aria-label="Card rules">
-              {#if choiceDecision.preview.wonder}<button class="text-button" onclick={() => wonderReference = choiceDecision.preview!.wonder!}><Landmark size={17} />{printedCardName(choiceDecision.preview.wonder.name)}<BookOpen size={15} /></button>{:else}
-              <h3>{printedCardName(choiceDecision.preview.name)}</h3>
-              {#if choiceDecision.preview.affected}<small>Affects: {choiceDecision.preview.affected}</small
-                >{/if}
-              {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
+              {#if choiceDecision.preview.wonder}<button
+                  class="text-button"
+                  onclick={() => (wonderReference = choiceDecision.preview!.wonder!)}
+                  ><Landmark size={17} />{printedCardName(choiceDecision.preview.wonder.name)}<BookOpen
+                    size={15}
+                  /></button
+                >{:else}
+                <h3>{printedCardName(choiceDecision.preview.name)}</h3>
+                {#if choiceDecision.preview.affected}<small>Affects: {choiceDecision.preview.affected}</small
+                  >{/if}
+                {#each choiceDecision.preview.rules as rule}<p><ResourceText text={rule} /></p>{/each}
               {/if}
             </section>
           {/if}
@@ -1464,7 +1480,7 @@
                     />{/if}{#if !variant.free}<Zap size={12} />1{/if}</button
                 >{/each}
             </div>{/if}
-          <ContextualCards {controller} context="collect" />
+          {#if !$session.playback}<ContextualCards {controller} context="collect" />{/if}
           {#if city && !city.reason}<CollectionBonusHints {city} selection={$session.selection} />{/if}
           {#if city?.ballcourts}<label class="ballcourts-toggle"
               ><input
@@ -1619,7 +1635,7 @@
               </div>{/if}
             <button
               class="primary wide collect-submit"
-              disabled={!$session.preview || $session.pending}
+              disabled={!!$session.playback || !$session.preview || $session.pending}
               title={`${collectionCostLabel} · Activates this city`}
               aria-label={`Collect resources${$session.preview ? `: ${pileText($session.preview.total)}` : ''} · ${collectionCostLabel}`}
               aria-describedby={Object.values($session.preview?.waste ?? {}).some(Boolean)
@@ -1663,11 +1679,11 @@
         {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </section>
     {/if}
-    {#if $session.mode === 'happiness' && !$session.view?.explorationDecision && !$session.view?.decision && !choiceDecision && !objectiveDecision}<HappinessPanel
+    {#if $session.mode === 'happiness' && ($session.playback || (!$session.view?.explorationDecision && !$session.view?.decision)) && !choiceDecision && !objectiveDecision}<HappinessPanel
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
-    {#if $session.mode === 'settlers' && !$session.view?.explorationDecision && !$session.view?.decision && !choiceDecision && !objectiveDecision}<SettlerPanel
+    {#if $session.mode === 'settlers' && ($session.playback || (!$session.view?.explorationDecision && !$session.view?.decision)) && !choiceDecision && !objectiveDecision}<SettlerPanel
         {controller}
         onHighlight={(position) => world?.highlightCoordinate(position)}
       />{/if}
@@ -1743,7 +1759,10 @@
         <BattlePlayback {controller} />
       </div>{/if}
   </main>
-  {#if wonderReference}<WonderReferenceDialog card={wonderReference} onClose={() => wonderReference = null} />{/if}
+  {#if wonderReference}<WonderReferenceDialog
+      card={wonderReference}
+      onClose={() => (wonderReference = null)}
+    />{/if}
   {#if cardReference}<CardReferenceDialog
       card={cardReference}
       onDismiss={() => (cardReference = null)}
@@ -1753,8 +1772,8 @@
       reference={researchReference}
       onDismiss={() => (researchReference = null)}
     />
-  {:else if !$session.playback && $session.mode === 'research'}<ResearchTree {controller} />{/if}
-  {#if !$session.playback && $session.mode === 'city'}<CityPanel {controller} />{/if}
+  {:else if $session.mode === 'research'}<ResearchTree {controller} />{/if}
+  {#if $session.mode === 'city'}<CityPanel {controller} />{/if}
   {#if $session.scorePlayer !== null}<ScoreDialog
       {controller}
       onLocate={(position) => world?.locateCoordinate(position)}
@@ -1764,7 +1783,13 @@
   {#if !$session.playback}<CardReveal {controller} />{/if}
   <PlaybackPanel {controller} />
   <PublicEffects {controller} />
-  {#if effectsOpen}<ActiveEffectsDialog effects={$session.view?.activeEffects ?? []} players={$session.view?.players ?? []} events={$session.view?.eventCatalog ?? []} cards={$session.view?.cardCatalog ?? []} onClose={() => effectsOpen = false} />{/if}
+  {#if effectsOpen}<ActiveEffectsDialog
+      effects={$session.view?.activeEffects ?? []}
+      players={$session.view?.players ?? []}
+      events={$session.view?.eventCatalog ?? []}
+      cards={$session.view?.cardCatalog ?? []}
+      onClose={() => (effectsOpen = false)}
+    />{/if}
   {#if $session.toast}<div class="toast" role="status"><Check size={16} />{$session.toast}</div>{/if}
   {#if $session.objectivesOpen && $session.seat !== undefined}
     <dialog

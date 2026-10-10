@@ -54,12 +54,12 @@
       onclick={() => controller.patch({ mode: 'overview', error: '' })}><X size={18} /></button
     >
   </header>
-  <ContextualCards {controller} context="happiness" />
+  {#if !$session.playback}<ContextualCards {controller} context="happiness" />{/if}
   {#if choices.length > 1}<div class="variant-picker" aria-label="Happiness action">
       {#each choices as choice, i}<button
           class:selected={($session.happinessVariant ?? 0) === i}
           aria-pressed={($session.happinessVariant ?? 0) === i}
-          disabled={$session.pending}
+          disabled={!!$session.playback || $session.pending}
           onclick={() => controller.switchHappinessVariant(i)}
         >
           {choice.name}<span
@@ -114,7 +114,7 @@
             class="icon-button"
             aria-label={`Remove ${cityName(focused.position)} from happiness selection`}
             title="Remove city"
-            disabled={$session.pending}
+            disabled={!!$session.playback || $session.pending}
             onclick={() => controller.setHappinessCity(focused.position, 0)}><X size={15} /></button
           >{/if}
       </div>
@@ -136,7 +136,7 @@
     </span>
     <button
       class="primary"
-      disabled={!preview.action || $session.pending}
+      disabled={!!$session.playback || !preview.action || $session.pending}
       onclick={() => preview.action && controller.submit(preview.action)}
     >
       {selected.length

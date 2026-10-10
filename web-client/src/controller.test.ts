@@ -1287,6 +1287,14 @@ test('opponent recap steps animate and pause, replay stays within its turn, and 
     assert.equal(app.session().playback!.index, 1);
     assert.equal(app.session().playback!.end, 2);
     assert.equal(app.session().playback!.playing, false);
+    c.openCities();
+    assert.equal(app.session().mode, 'city', 'city reference stays available during replay');
+    c.beginHappiness();
+    assert.equal(app.session().mode, 'happiness', 'happiness reference stays available during replay');
+    c.setTab('journal');
+    assert.equal(app.session().activityOpen, true, 'journal can open without ending replay');
+    c.submit({ Playing: 'EndTurn' });
+    assert.deepEqual(app.sent, [], 'reference panels cannot submit a move during replay');
     c.stepPlayback(1);
     assert.equal(app.session().playback!.index, 2);
     assert.equal(app.session().playback!.animate, true);
