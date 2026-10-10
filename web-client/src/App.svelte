@@ -296,10 +296,11 @@
         (!!$session.view?.units?.length || !!$session.view?.nomadCities?.length)),
   );
   let abilitiesAvailable = $derived(
-    !!$session.view?.specialActions?.length ||
-      !!$session.view?.unavailableSpecialActions?.length ||
-      !!$session.view?.influence?.length ||
-      !!($session.view && controller.shogunateDraftOffers().length),
+    !$session.playback &&
+      !$session.pending &&
+      (!!$session.view?.specialActions?.length ||
+        !!$session.view?.influence?.length ||
+        !!($session.view && controller.shogunateDraftOffers().length)),
   );
   let objectiveDecision = $derived($session.playback ? null : $session.view?.objectiveDecision);
   let choiceDecision = $derived($session.playback ? null : $session.view?.choiceDecision);
@@ -1288,11 +1289,17 @@
           data-tutorial="influence"
           aria-label="Abilities and cultural influence"
           class:active={$session.abilitiesOpen}
-          disabled={!abilitiesAvailable || $session.pending}
+          class:inspect-only={!abilitiesAvailable}
+          disabled={!$session.view}
           onclick={() => {
             controller.closeActivity();
             controller.patch({ mode: 'overview', tilePanel: false, abilitiesOpen: !$session.abilitiesOpen });
-          }}><Sparkles size={21} /><span>Abilities</span></button
+          }}
+          ><Sparkles size={21} /><span>Abilities</span>{#if !abilitiesAvailable}<Eye
+              class="action-inspect"
+              size={10}
+              aria-hidden="true"
+            />{/if}</button
         >
         <button
           title="Undo last action"

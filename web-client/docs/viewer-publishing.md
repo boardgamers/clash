@@ -114,3 +114,7 @@ The action bar selects an available free Collect or Increase happiness variant f
 Assimilator requires winning as the attacker in a Barbarian city defended by at least two army units. Defending your own city no longer offers this objective, and non-army units do not count toward its threshold. Barbarian reinforcement skips city-order decisions when all remaining placements are forced Infantry and supply is sufficient for every city. Limited supply and unit-type choices still require a decision. Owned custom abilities remain visible with disabled controls and their engine availability reason, both in Abilities and leader details. Passive effects keep their automatic behavior. Golden Age controller coverage and all 45 leaders under each government are checked. Existing completed objectives and game history are preserved.
 
 Recruit remains open for inspection when recruiting is unavailable, with a muted label and eye icon, including after all actions have been spent and during replay.
+
+# Viewer 0.1.54
+
+Abilities uses a muted label and eye icon when no custom action, cultural influence or Shogunate draft can be activated. Owned unavailable abilities remain inspectable, including during replay. Engine 0.4.55 is unchanged.
