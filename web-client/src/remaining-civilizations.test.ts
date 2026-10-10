@@ -131,6 +131,26 @@ test('Embalming rewards battles only at four or fewer culture', async () => {
     assert.equal(after.players[0].resources.culture_tokens, 5);
   }
 });
+test('Alphabet offers and grants two ideas for a single trade route', async () => {
+  const g = await fixture('advances/trade_routes', 'Rome'),
+    p = g.players[1];
+  p.civilization = 'Phoenicia';
+  addAdvance(p, 'Writing', 'Currency');
+  p.units = [{ id: 0, position: 'D8', unit_type: 'Settler' }];
+  p.next_unit_id = 1;
+  g.map.tiles.find(([pos]: string[]) => pos === 'D7')[1] = 'Fertile';
+  g.players[0].cities = [{ position: 'D6', mood_state: 'Happy' }];
+  p.resources.ideas = 0;
+  const after = move(g, { Playing: 'EndTurn' }),
+    choices = view(after).choiceDecision.choices,
+    ideas = choices.find((c: any) => c.pile.ideas === 2);
+  assert.ok(ideas, 'one route must offer two ideas through Alphabet');
+  assert.equal(choices.length, 4);
+  for (const resource of ['food', 'gold', 'culture_tokens']) {
+    assert.ok(choices.some((c: any) => c.pile[resource] === 1));
+  }
+  assert.equal(move(after, ideas.action).players[1].resources.ideas, 2);
+});
 test('Alphabet shares a two-route allowance between culture and double ideas', async () => {
   const g = await fixture('advances/trade_routes', 'Rome'),
     p = g.players[1];

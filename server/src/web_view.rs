@@ -525,8 +525,6 @@ fn exploration_decision(game: &Game, seat: usize) -> Option<Value> {
 }
 
 fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
-    use crate::resource::ResourceType;
-    use crate::resource_pile::ResourcePile;
     let event = game.events.last()?;
     if event.player.index != seat {
         return None;
@@ -539,8 +537,9 @@ fn choice_decision(game: &Game, seat: usize) -> Option<Value> {
         PersistentEventRequest::ResourceReward(request)
             if request.reward.payment_options.default.amount() == 1 =>
         {
-            let choices = ResourceType::all().into_iter().map(|r| ResourcePile::of(r,1))
-                .filter(|pile|request.reward.payment_options.is_valid_payment(pile))
+            let choices = decisions::payment_choices(
+                &request.reward.payment_options, &ResourcePile::empty(), true, false,
+            )?.into_iter()
                 .map(|pile|json!({"name":pile.to_string(),"pile":pile,"action":Action::Response(EventResponse::ResourceReward(pile.clone()))})).collect::<Vec<_>>();
             Some(json!({"name":request.name,"choices":choices}))
         }

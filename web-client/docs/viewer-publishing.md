@@ -100,3 +100,7 @@ Fanaticism's free infantry now requires losing a battle fought in a city with a 
 # Viewer 0.1.50
 
 Replay keeps the action toolbar and Journal/Chat controls visible. Research, city management, collection, movement, happiness and available abilities can be opened for inspection; submitting actions, undoing and ending the turn remain disabled. Replay transport and the journal have separate space above the bottom controls on desktop and mobile.
+
+# Viewer 0.1.51 / engine 0.4.54
+
+Single-route trade rewards include Alphabet's 2-idea option. The compact reward picker now lists complete engine-validated conversions instead of assuming every choice contains one resource. Existing saves and historical rewards are preserved.

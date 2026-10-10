@@ -309,7 +309,8 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
         PersistentEventRequest::ExploreResolution => return None,
         PersistentEventRequest::BoolRequest(_) => return None,
         PersistentEventRequest::ResourceReward(r)
-            if r.reward.payment_options.default.amount() == 1 =>
+            if r.reward.payment_options.default.amount() == 1
+                && payment_choices(&r.reward.payment_options, &ResourcePile::empty(), true, false).is_some() =>
         {
             return None;
         }
