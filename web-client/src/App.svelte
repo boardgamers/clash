@@ -1361,7 +1361,7 @@
             ? 'collect'
             : undefined}
       >
-        {#if !choiceDecision && !objectiveDecision && $session.view?.supportedPhase}<button
+        {#if !choiceDecision && !objectiveDecision && ($session.playback || $session.view?.supportedPhase)}<button
             class="icon-button close-action"
             aria-label="Close action"
             onclick={closeAction}><X size={18} /></button
