@@ -1764,7 +1764,7 @@
   {#if !$session.playback}<CardReveal {controller} />{/if}
   <PlaybackPanel {controller} />
   <PublicEffects {controller} />
-  {#if effectsOpen}<ActiveEffectsDialog effects={$session.view?.activeEffects ?? []} players={$session.view?.players ?? []} onClose={() => effectsOpen = false} />{/if}
+  {#if effectsOpen}<ActiveEffectsDialog effects={$session.view?.activeEffects ?? []} players={$session.view?.players ?? []} events={$session.view?.eventCatalog ?? []} cards={$session.view?.cardCatalog ?? []} onClose={() => effectsOpen = false} />{/if}
   {#if $session.toast}<div class="toast" role="status"><Check size={16} />{$session.toast}</div>{/if}
   {#if $session.objectivesOpen && $session.seat !== undefined}
     <dialog

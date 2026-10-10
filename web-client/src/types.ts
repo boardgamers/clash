@@ -260,6 +260,7 @@ export interface InfluenceContext {
   threshold: number;
 }
 export interface ActiveEffect {
+  source?: { kind: 'Event' | 'Action card'; name: string; id?: number | null };
   name: string;
   scope: string;
   players: number[];
