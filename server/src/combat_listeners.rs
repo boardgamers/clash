@@ -342,6 +342,8 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
 }
 
 fn attacker_wins(game: &mut Game, mut c: Combat) {
+    // Also recover the condition for combats saved before this field existed.
+    c.stats.city_has_temple |= c.defender_temple(game);
     log_winner(game, c.attacker(), None);
     move_units(
         game,
@@ -378,7 +380,9 @@ pub(crate) fn draw(game: &mut Game, c: Combat) {
 }
 
 fn end_combat_and_store_stats(game: &mut Game, e: CombatEnd) {
+    let city_has_temple = e.combat.defender_temple(game);
     let mut stats = e.combat.stats;
+    stats.city_has_temple |= city_has_temple;
     stats.result = Some(e.result.clone());
     end_combat(game, stats);
 }

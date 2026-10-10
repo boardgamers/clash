@@ -439,7 +439,8 @@
                       }
                     },
                     "result": "AttackerWins",
-                    "city_mood": "Angry"
+                    "city_mood": "Angry",
+                    "city_has_temple": true
                   },
                   "items": [
                     {

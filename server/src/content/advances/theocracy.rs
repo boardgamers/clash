@@ -130,7 +130,7 @@ fn fanaticism() -> AdvanceBuilder {
         "Fanaticism",
         "During a battle in a city with a Temple, \
         whether you are the attacker or defender, you add +2 combat value to your first combat roll. \
-        If you lose the battle, you get 1 free Infantry Unit after the battle and \
+        If you lose that battle, you get 1 free Infantry Unit and \
         place it in one of your cities.",
     )
         .add_combat_strength_listener(1, |game, c, s, _role| {
@@ -145,7 +145,8 @@ fn fanaticism() -> AdvanceBuilder {
             104,
             |game, p, i| {
                 let player_index = p.index;
-                if i.is_loser(player_index)
+                if i.city_has_temple
+                    && i.is_loser(player_index)
                     && !game.player(player_index).cities.is_empty()
                     && game.player(player_index).available_units().infantry > 0
                 {

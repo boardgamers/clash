@@ -102,6 +102,8 @@ pub struct CombatStats {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub city_mood: Option<MoodState>, // before capture
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub city_has_temple: bool, // before capture or removal of city pieces
 }
 
 impl CombatStats {
@@ -125,6 +127,7 @@ impl CombatStats {
             selected_card: None,
             round: 1,
             city_mood,
+            city_has_temple: false,
         }
     }
 
@@ -260,7 +263,7 @@ pub(crate) fn new_combat_stats(
         "Combat in a shared space requires pirate ships or a converted army unit"
     );
 
-    CombatStats::new(
+    let mut stats = CombatStats::new(
         battleground,
         battleground.is_land() && game.map.is_sea(attacker_position),
         CombatPlayerStats::new(attacker, to_units(attackers, a), attacker_position),
@@ -274,7 +277,9 @@ pub(crate) fn new_combat_stats(
         ),
         result,
         city.map(|c| c.mood_state.clone()),
-    )
+    );
+    stats.city_has_temple = city.is_some_and(|c| c.pieces.temple.is_some());
+    stats
 }
 
 fn to_units(units: &[u32], p: &Player) -> Units {

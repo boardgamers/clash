@@ -204,7 +204,7 @@ const advances = {
   ],
   Fanaticism: [
     Zap,
-    'Attacking or defending a city with a Temple: +2 combat value in round 1. After losing a battle, place 1 infantry from your supply in one of your cities.',
+    'Attacking or defending a city with a Temple: +2 combat value in round 1. If you lose that battle, place 1 infantry from your supply in one of your cities.',
   ],
 } as const;
 

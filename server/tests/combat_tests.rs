@@ -261,6 +261,32 @@ fn test_combat_fanaticism() {
 }
 
 #[test]
+fn fanaticism_infantry_requires_a_temple_at_the_battle_city() {
+    for temple in [true, false] {
+        let mut game = JSON.load_game("combat_fanaticism");
+        game.player_mut(1)
+            .get_city_mut(Position::from_offset("C1"))
+            .pieces
+            .temple = temple.then_some(1);
+        let game = execute(
+            game,
+            move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
+            0,
+        );
+        // C1 is captured before Fanaticism resolves. The replacement is placed
+        // in C2, which has no Temple: only the battle city needs one.
+        assert_eq!(
+            game.player(1)
+                .units
+                .iter()
+                .filter(|u| u.unit_type == UnitType::Infantry)
+                .count(),
+            usize::from(temple),
+        );
+    }
+}
+
+#[test]
 fn test_retreat() {
     JSON.test(
         "retreat",

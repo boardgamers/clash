@@ -94,3 +94,6 @@ Viewer 0.1.47 and engine 0.4.52 label active effects with their source event or 
 # Viewer 0.1.48
 
 Component styles are bundled into the viewer script because BGS does not load a separate stylesheet. This restores active-effect spacing and source-label layout, as well as the cultural-influence warning styles, in the published game.
+# Viewer 0.1.49 / engine 0.4.53
+
+Fanaticism's free infantry now requires losing a battle fought in a city with a Temple. The engine records the Temple condition before capture, so it still applies when that city changes hands. The destination may be any eligible city you own. The advance text now says “If you lose that battle” to make the shared condition explicit. Source: official Monumental Edition rulebook, page 31.

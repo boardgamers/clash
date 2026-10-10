@@ -24,6 +24,8 @@ async function capture() {
   });
   game.players[0].units = game.players[0].units.filter((u: any) => [0, 2].includes(u.id));
   game.players[1].units = game.players[1].units.slice(0, 1);
+  // Fanaticism only replaces infantry after losing a battle at a Temple city.
+  game.players[1].cities.find((city: any) => city.position === 'C1').city_pieces = { temple: 1 };
   game.players[1].cities.push(
     { position: 'B1', mood_state: 'Neutral' },
     { position: 'D2', mood_state: 'Neutral' },
