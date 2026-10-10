@@ -144,7 +144,6 @@ test('map view, orientation and unit badges round-trip through BGS preferences a
     unitBadges: true,
     replayAutoplay: true,
     availableOnly: false,
-    confirmMoves: true,
   });
   assert.equal(writes, 1);
   viewer.updatePreference('unitBadges', false);
@@ -178,11 +177,8 @@ test('availability filtering defaults on and restores the player’s show-all pr
   assert.equal(readPreferences({ availableOnly: false }).availableOnly, false);
 });
 
-test('unit moves keep their confirmation step unless the player explicitly turns it off', () => {
-  assert.equal(readPreferences({}).confirmMoves, true);
-  assert.equal(readPreferences({ confirmMoves: true }).confirmMoves, true);
-  assert.equal(readPreferences({ confirmMoves: 'false' }).confirmMoves, true);
-  assert.equal(readPreferences({ confirmMoves: false }).confirmMoves, false);
+test('the removed move confirmation preference is ignored', () => {
+  assert.deepEqual(readPreferences({ confirmMoves: false }), readPreferences({}));
 });
 
 test('tile and control hover sounds are throttled and obey global mute', () => {

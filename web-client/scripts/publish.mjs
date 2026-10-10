@@ -49,6 +49,7 @@ const options = [
 ];
 const declaredPreferences = JSON.parse(await fs.readFile(path.join(root, 'bgs-preferences.json'), 'utf8'));
 const replacedPreferences = new Set([
+  'confirmMoves', // Removed; moves always require confirmation.
   'skipRazeCity', // Migrated from account preferences to engine-managed player settings.
   'ui_scale',
   'world_zoom_factor',

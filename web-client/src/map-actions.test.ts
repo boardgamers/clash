@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { canMoveOnMap, instantMove, moveOrigins } from './map-actions.ts';
+import { canMoveOnMap, moveOrigins } from './map-actions.ts';
 import { movementBonus } from './movement-bonus.ts';
 import { collectionYield } from './collection-yield.ts';
 import { journal } from './journal.ts';
@@ -35,32 +35,6 @@ test('destination-first movement offers legal units and requires no game mutatio
   assert.deepEqual(after.units, v.units, 'Read-only offers never move a unit');
   assert.equal(after.canUndo, v.canUndo, 'Read-only offers never perform an action');
   assert.deepEqual(after.cities, v.cities);
-});
-
-test('moves without confirmation only skip the confirm step for a single, undoable route', async () => {
-  const state = await initial();
-  const seat = engine.currentPlayer(state);
-  const v = view(state, seat);
-  const offers: MoveDestination[] = v.units!.flatMap(
-    (u) => query(state, seat, { kind: 'movement', units: [u.id] }).destinations,
-  );
-  const explore = offers.find((d) => d.terrain === 'Unexplored');
-  assert.ok(explore, 'The starting position borders unexplored land');
-  assert.equal(instantMove([explore], explore.position), null, 'Exploring reveals tiles and locks Undo');
-  const plain = offers.find((d) => d.terrain !== 'Unexplored' && !d.attack)!;
-  assert.equal(instantMove([plain], plain.position), plain);
-  assert.equal(instantMove([plain], 'Z9'), null);
-  assert.equal(instantMove([{ ...plain, attack: true }], plain.position), null, 'Attacks roll dice');
-  assert.equal(instantMove([{ ...plain, pirateCarrier: 4 }], plain.position), null);
-  assert.equal(instantMove([{ ...plain, payment: { food: 1, ore: 1 } }], plain.position), null);
-  assert.equal(instantMove([{ ...plain, payment: { food: 0 } }], plain.position)?.position, plain.position);
-  assert.equal(
-    instantMove([plain, { ...plain, carrier: 7 }], plain.position),
-    null,
-    'Walking or boarding a ship stays an explicit choice',
-  );
-  const moved = engine.tryMove(state, JSON.stringify(plain.action), seat);
-  assert.equal(view(moved, seat).canUndo, true, 'An instant move can still be undone');
 });
 
 test('map movement never offers opponent, spectator, exhausted or decision-bound actions', async () => {

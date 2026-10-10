@@ -4750,5 +4750,6 @@
   "Active effects": "生效中的效果",
   "Active effects: {p0}": "生效中的效果: {p0}",
   "Close active effects": "關閉生效中的效果",
-  "No active effects.": "目前沒有生效中的效果。"
+  "No active effects.": "目前沒有生效中的效果。",
+  "action cards": "行動牌"
 }

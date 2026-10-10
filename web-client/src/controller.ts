@@ -10,7 +10,7 @@ import { loadBridge } from './bridge';
 import { readPreferences } from './preferences';
 import { GameAudio, moveSound } from './audio';
 import { CardDrawTracker } from './card-draws';
-import { canMoveOnMap, instantMove, moveOrigins, passengerLandings } from './map-actions';
+import { canMoveOnMap, moveOrigins, passengerLandings } from './map-actions';
 import { movementBonus } from './movement-bonus';
 import { activeCityAbility, groupAbilities } from './abilities';
 import { recapStart, sinceLastTurn, frameAt, frameEffects } from './playback';
@@ -82,7 +82,6 @@ export class Controller {
     unitBadges: false,
     replayAutoplay: true,
     availableOnly: false,
-    confirmMoves: true,
     skipRazeCity: false,
   });
   readonly chat = new ChatController();
@@ -536,7 +535,9 @@ export class Controller {
       cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>
         draw.kind === 'wonder'
           ? view.wonderCards.some((card) => card.id === draw.card.id)
-          : view.objectiveCards.some((card) => card.id === draw.card.id),
+          : draw.kind === 'action'
+            ? view.actionCards?.some((card) => card.id === draw.card.id)
+            : view.objectiveCards.some((card) => card.id === draw.card.id),
       ),
     });
     const continuation = this.cardContinuation;
@@ -1037,9 +1038,7 @@ export class Controller {
     }
     // A destination takes priority over pieces on it (boarding or attacking).
     if (s.mode === 'settlers' && s.moveDestinations.some((d) => d.position === position)) {
-      const instant = s.confirmMoves ? null : instantMove(s.moveDestinations, position);
       this.chooseMoveDestination(position);
-      if (instant) this.submit(instant.action);
       return;
     }
     if (
@@ -1258,10 +1257,12 @@ export class Controller {
       index < 0 ? (direction > 0 ? 0 : water.length - 1) : (index + direction + water.length) % water.length;
     this.patch({ seaRouteStart: water[next] });
   }
-  beginCollect(position?: string) {
+  beginCollect(position?: string, preferFree = false) {
     const s = get(this.session);
     if (s.pending) return;
-    const variant = s.view?.collectActions?.[0]?.value ?? 'Collect';
+    const offers = s.view?.collectActions ?? [];
+    const variant =
+      (preferFree ? offers.find((offer) => offer.free) : undefined)?.value ?? offers[0]?.value ?? 'Collect';
     const city =
       position ??
       defaultCity(
@@ -1356,7 +1357,7 @@ export class Controller {
       error: '',
     });
   }
-  beginHappiness(position?: string) {
+  beginHappiness(position?: string, preferFree = false) {
     const s = get(this.session);
     if (s.pending || s.seat === undefined) return;
     this.closeActivity();
@@ -1369,7 +1370,9 @@ export class Controller {
       abilitiesOpen: false,
       happinessSteps: {},
       happinessCity: null,
-      happinessVariant: 0,
+      happinessVariant: preferFree
+        ? Math.max(0, s.view?.happinessActions?.findIndex((offer) => offer.free) ?? -1)
+        : 0,
       happinessLawgiver: null,
       error: '',
     });

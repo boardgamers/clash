@@ -1175,7 +1175,7 @@
         <button
           class:active={$session.mode === 'collect'}
           title={collectAvailable
-            ? 'Collect resources · 1 action'
+            ? ($session.view?.collectActions?.find((offer) => offer.free)?.name ?? 'Collect resources · 1 action')
             : (city?.reason ?? 'No city can collect resources')}
           data-tutorial="collect"
           aria-label="Collect resources"
@@ -1184,7 +1184,7 @@
             : !$session.view?.canPlay || !collectAvailable || $session.pending}
           onclick={() => {
             confirmEnd = false;
-            controller.beginCollect();
+            controller.beginCollect(undefined, true);
           }}><Wheat size={21} /><span>Collect</span></button
         >
         <button
@@ -1240,7 +1240,7 @@
           disabled={!city || (!$session.playback && (!$session.view?.canPlay || $session.pending))}
           onclick={() => {
             confirmEnd = false;
-            controller.beginHappiness();
+            controller.beginHappiness(undefined, true);
           }}><Smile size={21} /><span>Happiness</span></button
         >
         <button

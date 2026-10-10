@@ -20,7 +20,6 @@ const preferences: Record<string, unknown> = {
   unitBadges: false,
   availableOnly: false,
   replayAutoplay: true,
-  confirmMoves: true,
 };
 try {
   const saved = JSON.parse(localStorage.getItem('clash-preview-preferences') ?? '{}');
@@ -31,7 +30,6 @@ try {
     'unitBadges',
     'availableOnly',
     'replayAutoplay',
-    'confirmMoves',
     'skipRazeCity',
   ])
     if (typeof saved[key] === 'boolean') preferences[key] = saved[key];
@@ -46,7 +44,6 @@ function savePreference(name: string, value: unknown) {
       'unitBadges',
       'availableOnly',
       'replayAutoplay',
-      'confirmMoves',
     ].includes(name) &&
       typeof value === 'boolean') ||
     (name === 'mapView' && (value === '3d' || value === 'strategy'))
@@ -58,10 +55,6 @@ function savePreference(name: string, value: unknown) {
   } catch {}
   send('preferences', preferences);
 }
-// BGS shows account preferences outside the viewer; the preview bar stands in for them.
-const confirmMoves = document.querySelector<HTMLInputElement>('#confirm-moves')!;
-confirmMoves.checked = preferences.confirmMoves !== false;
-confirmMoves.onchange = () => savePreference('confirmMoves', confirmMoves.checked);
 function showError(message: string) {
   document.querySelector('#host-error')!.textContent = message;
 }

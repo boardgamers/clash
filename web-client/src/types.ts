@@ -249,7 +249,9 @@ export interface WonderCard {
   ownedPoints: number;
 }
 export type CardDraw =
-  { kind: 'wonder'; card: WonderCard } | { kind: 'objective'; card: View['objectiveCards'][number] };
+  | { kind: 'wonder'; card: WonderCard }
+  | { kind: 'objective'; card: View['objectiveCards'][number] }
+  | { kind: 'action'; card: ActionCard };
 export interface InfluenceContext {
   stage: 'payment' | 'range' | 'reroll' | 'boost';
   source: string | null;
@@ -606,7 +608,6 @@ export interface Session {
   unitBadges: boolean;
   replayAutoplay: boolean;
   availableOnly: boolean;
-  confirmMoves: boolean;
   skipRazeCity: boolean;
 }
 export interface MapPick {

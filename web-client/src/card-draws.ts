@@ -22,6 +22,9 @@ export class CardDrawTracker {
     if (!before || seat === undefined || before.seat !== seat || progress(game) <= progress(before.game))
       return [];
     return [
+      ...(view.actionCards ?? [])
+        .filter((card) => !before.view.actionCards?.some((old) => old.id === card.id))
+        .map((card) => ({ kind: 'action' as const, card })),
       ...view.wonderCards
         .filter((card) => !before.view.wonderCards.some((old) => old.id === card.id))
         .map((card) => ({ kind: 'wonder' as const, card })),

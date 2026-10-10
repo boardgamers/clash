@@ -2,7 +2,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { instantMove } from './map-actions.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const npcs = JSON.parse(await engine.init(2, [], {}, 'diplomacy', {})).players.slice(2);
@@ -40,7 +39,6 @@ for (const owner of [0, 1]) {
       assert.ok(attack?.attack);
       assert.equal(attack.breaksDiplomacy, true);
       assert.deepEqual(attack.payment, { culture_tokens: 2 });
-      assert.equal(instantMove(offered, 'C1'), null, 'Breaking diplomacy always requires confirmation');
       const after = move(game, attack.action);
       assert.equal(after.players[0].resources.culture_tokens, game.players[0].resources.culture_tokens - 2);
       assert.ok(!after.permanent_effects?.some((e: any) => e.DiplomaticRelations));

@@ -104,3 +104,7 @@ Replay keeps the action toolbar and Journal/Chat controls visible. Research, cit
 # Viewer 0.1.51 / engine 0.4.54
 
 Single-route trade rewards include Alphabet's 2-idea option. The compact reward picker now lists complete engine-validated conversions instead of assuming every choice contains one resource. Existing saves and historical rewards are preserved.
+
+# Viewer 0.1.52
+
+The action bar selects an available free Collect or Increase happiness variant first, including Free Economy and Voting. Drawn action cards appear in the existing card reveal queue with their action and battle rules, including end-of-age draws. The Confirm unit moves preference has been removed from BGS and the viewer; moves always wait for confirmation, including for accounts with a previously disabled preference. Engine 0.4.54 is unchanged.

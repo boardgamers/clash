@@ -240,7 +240,7 @@ test('clicking another movable group switches selection, while legal destination
   }
 });
 
-test('turning off move confirmation submits plain map moves but still confirms attacks', async () => {
+test('plain map moves and attacks always wait for confirmation', async () => {
   const app = paymentController(),
     c = app.controller;
   try {
@@ -248,18 +248,14 @@ test('turning off move confirmation submits plain map moves but still confirms a
     g.players[0].advances.push('Tactics');
     c.setPlayer(0);
     await c.load(engine.stripSecret(JSON.stringify(g), 0));
-    assert.equal(app.session().confirmMoves, true);
     c.openUnits([4]);
     c.selectTile('C2');
     assert.equal(app.session().moveTarget, 'C2');
     assert.deepEqual(app.sent, [], 'Confirmation is on by default');
     c.setPreferences({ confirmMoves: false });
     c.focusUnitPosition('B2');
-    const route = app.session().moveDestinations.find((d) => d.position === 'C2')!;
     c.selectTile('C2');
-    assert.deepEqual(app.sent.map((m) => JSON.parse(m)), [route.action]);
-    assert.equal(app.session().pending, true);
-    c.patch({ pending: false });
+    assert.deepEqual(app.sent, [], 'An old stored preference cannot bypass confirmation');
     c.focusUnitPosition('C2');
     const army = [0, 1, 2, 3];
     c.selectUnits(army);
@@ -267,17 +263,17 @@ test('turning off move confirmation submits plain map moves but still confirms a
     assert.ok(attack?.attack, 'C1 holds enemy units');
     c.selectTile('C1');
     assert.equal(app.session().moveTarget, 'C1');
-    assert.equal(app.sent.length, 1, 'Attacks keep their confirmation');
+    assert.equal(app.sent.length, 0, 'Attacks keep their confirmation');
     // Picking units in the panel with a target already chosen never submits on its own.
     c.selectUnits([0, 1], 'C1');
     c.selectUnits([4], 'C2');
-    assert.equal(app.sent.length, 1);
+    assert.equal(app.sent.length, 0);
   } finally {
     app.close();
   }
 });
 
-test('a diplomatic attack waits for explicit confirmation even with move confirmation disabled', async () => {
+test('a diplomatic attack waits for explicit confirmation', async () => {
   const app = paymentController(),
     c = app.controller;
   try {
@@ -308,6 +304,39 @@ test('a diplomatic attack waits for explicit confirmation even with move confirm
   }
 });
 
+test('action bar defaults to available free collection and happiness variants', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(fixture('advances/collect_free_economy'), 0));
+    c.beginCollect(undefined, true);
+    const economy = app.session().view!.collectActions!.find((offer) => offer.name === 'Free Economy')!;
+    assert.deepEqual(app.session().collectVariant, economy.value);
+    c.patch({
+      view: {
+        ...app.session().view!,
+        collectActions: app.session().view!.collectActions!.filter((offer) => !offer.free),
+      },
+    });
+    c.beginCollect(undefined, true);
+    assert.deepEqual(app.session().collectVariant, app.session().view!.collectActions![0].value);
+    await c.load(engine.stripSecret(fixture('advances/increase_happiness_voting'), 0));
+    c.beginHappiness(undefined, true);
+    assert.equal(app.session().view!.happinessActions![app.session().happinessVariant!].name, 'Voting');
+    c.patch({
+      view: {
+        ...app.session().view!,
+        happinessActions: app.session().view!.happinessActions!.filter((offer) => !offer.free),
+      },
+    });
+    c.beginHappiness(undefined, true);
+    assert.equal(app.session().happinessVariant, 0);
+    assert.deepEqual(app.sent, [], 'opening an action never submits it');
+  } finally {
+    app.close();
+  }
+});
 test('map happiness selects multiple cities, preserves them across variants, and confirms together', async () => {
   const app = paymentController(),
     c = app.controller;
@@ -740,8 +769,8 @@ test('Free Economy pays the displayed fee once, with no second click or duplicat
     c.setPlayer(0);
     await c.load(engine.stripSecret(state, 0));
     const fee = app.session().view!.collectActions!.find((a) => a.name === 'Free Economy')!;
-    c.beginCollect();
-    c.patch({ collectVariant: fee.value });
+    c.beginCollect(undefined, true);
+    assert.deepEqual(app.session().collectVariant, fee.value);
     c.toggleChoice(
       app.session().view!.cities.find((city) => city.position === app.session().city)!.choices[0],
     );
