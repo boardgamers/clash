@@ -107,7 +107,7 @@ pub(crate) fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec
         .collect()
 }
 
-fn players_in_range2(game: &Game, player: &Player) -> Vec<usize> {
+pub(crate) fn players_in_range2(game: &Game, player: &Player) -> Vec<usize> {
     let my = player_positions(player);
 
     game.players

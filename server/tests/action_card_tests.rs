@@ -415,3 +415,62 @@ fn test_new_ideas() {
         ],
     );
 }
+
+#[test]
+fn technology_trade_only_offers_partners_within_two_spaces() {
+    use server::cache::Cache;
+    use server::game::{Game, GameContext};
+    use server::game_data::GameData;
+    for card in [39, 40] {
+        for unit_contact in [false, true] {
+            for (position, in_range) in [("C4", true), ("C5", false)] {
+                let mut data: serde_json::Value =
+                    serde_json::from_str(include_str!("test_games/action_cards/tech_trade.json"))
+                        .unwrap();
+                data["players"][0]["cities"] =
+                    serde_json::json!([{ "position": "C2", "mood_state": "Happy" }]);
+                data["players"][0]["units"] = serde_json::json!([]);
+                data["players"][0]["action_cards"] = serde_json::json!([card]);
+                data["players"][1]["cities"] =
+                    serde_json::json!([{ "position": "C1", "mood_state": "Happy" }]);
+                data["players"][1]["units"] = serde_json::json!([]);
+                let mut nearby = data["players"][1].clone();
+                nearby["id"] = serde_json::json!(2);
+                nearby["cities"][0]["position"] = serde_json::json!("C3");
+                let mut target = data["players"][1].clone();
+                target["id"] = serde_json::json!(3);
+                if unit_contact {
+                    target["cities"] = serde_json::json!([]);
+                    target["units"] = serde_json::json!([{ "position": position, "unit_type": "Settler", "id": 0 }]);
+                } else {
+                    target["cities"][0]["position"] = serde_json::json!(position);
+                }
+                let players = data["players"].as_array_mut().unwrap();
+                players.insert(2, nearby);
+                players.insert(3, target);
+                for (i, player) in players.iter_mut().enumerate() {
+                    player["id"] = serde_json::json!(i);
+                }
+                let data: GameData = serde_json::from_value(data).unwrap();
+                let cache = Cache::new(&data.options);
+                let game = Game::from_data(data, cache, GameContext::Play);
+                let game = server::game_api::execute(
+                    game,
+                    Action::Playing(PlayingAction::ActionCard(card)),
+                    0,
+                );
+                let event = serde_json::to_value(game.current_event()).unwrap();
+                let choices = &event["handler"]["request"]["SelectPlayer"]["choices"];
+                assert_eq!(
+                    choices,
+                    &if in_range {
+                        serde_json::json!([1, 2, 3])
+                    } else {
+                        serde_json::json!([1, 2])
+                    },
+                    "card {card}, unit contact {unit_contact}, position {position}"
+                );
+            }
+        }
+    }
+}

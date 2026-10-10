@@ -437,9 +437,9 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 return None;
             }
             let player = p.get(game);
-            let choices = game
-                .players
-                .iter()
+            let choices = inspiration::players_in_range2(game, player)
+                .into_iter()
+                .map(|index| game.player(index))
                 .filter(|teacher| !teachable_advances(teacher, player, game).is_empty())
                 .map(|p| p.index)
                 .collect();

@@ -1275,10 +1275,6 @@
       "issue": "The status-phase predicate does not check that no other Wonder was built. Verify Monumental Edition wording before changing the condition."
     },
     {
-      "name": "Technology Trade",
-      "issue": "Availability checks proximity, but the subsequent partner list does not consistently enforce that range."
-    },
-    {
       "name": "Mercenaries",
       "issue": "Description names cities/army units for range; the code uses all owned units. Printed English wording is needed to resolve the difference."
     }
