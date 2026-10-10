@@ -7,6 +7,14 @@ export default defineConfig({
   publicDir: false,
   plugins: [
     {
+      name: 'viewer-styles-in-script',
+      generateBundle(_, bundle) {
+        if (Object.values(bundle).some((file) => file.fileName.endsWith('.css'))) {
+          this.error('BGS only loads viewer.js; bundle all styles into the viewer script.');
+        }
+      },
+    },
+    {
       name: 'localization-font-licenses',
       generateBundle() {
         const licenses = Object.fromEntries(
@@ -35,7 +43,8 @@ export default defineConfig({
         );
       },
     },
-    svelte(),
+    // BGS loads the viewer script alone, so component styles must travel with it.
+    svelte({ emitCss: false }),
     previewApi(),
   ],
   build: {
