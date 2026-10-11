@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { frameDetails } from './playback.ts';
+import { journal } from './journal.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const serialize = (g: any) => (typeof g === 'string' ? g : JSON.stringify(g));
 const seat = (g: any) => engine.currentPlayer(serialize(g));
@@ -555,6 +556,11 @@ test('Nomads moves a city with units, pays one action, activates it, and gives t
   assert.equal(after.players[index].units[0].position, offer.position);
   assert.equal(after.players[index].cities[0].activations, 1);
   assert.equal(after.players[index].resources.wood, 1);
+  const relocation = journal(after).filter((entry) => entry.notes.some((note) =>
+    new RegExp(`^Move(?:d)? city ${city} to ${offer.position}$`).test(note)));
+  assert.equal(relocation.length, 1, 'Nomads and Move produce one journal relocation');
+  assert.ok(relocation[0].tokens.some((token) => token.icon === 'wood' && token.value === '+1'));
+
   assert.equal(after.actions_left, g.actions_left - 1);
   if (view(after).stopMovement)
     assert.equal(query(after, { kind: 'movement', city: offer.position, units: [] }).destinations.length, 0);

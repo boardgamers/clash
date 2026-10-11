@@ -167,7 +167,8 @@ fn philosophy() -> AdvanceBuilder {
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,
-        0,
+        // Award the Science idea before Free Education offers its extra payment.
+        2,
         |game, p, advance| {
             if game
                 .cache

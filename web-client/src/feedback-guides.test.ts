@@ -82,3 +82,28 @@ test('Free Education quote requires a remaining idea and accounts for Philosophy
   assert.deepEqual(query(g, philosophy), { eligible: true, affordable: true, combined: true });
   assert.equal(JSON.stringify(g), before);
 });
+
+test('Free Education can spend the Philosophy idea from each purchased Science advance', () => {
+  for (const advance of ['Math', 'Astronomy', 'Medicine', 'Metallurgy']) {
+    const g = fixture('advances/free_education'), p = g.players[0];
+    p.advances = [...new Set([...p.advances, 'Philosophy', ...(advance === 'Math' ? [] : ['Math'])])].filter(a => a !== advance);
+    p.incident_tokens = 3;
+    p.resources = { ...p.resources, food: 0, ideas: 2, gold: 0, mood_tokens: 0 };
+    const action = view(g, 0).advances.find((a: any) => a.id === advance).action;
+    assert.ok(action, advance);
+    assert.deepEqual(query(g, action), { eligible: true, affordable: true, combined: true }, advance);
+    const researched = engine.tryMove(JSON.stringify(g), JSON.stringify(action), 0);
+    assert.equal(JSON.parse(researched).players[0].resources.ideas, 1, `${advance}: gain before payment choice`);
+    const paid = JSON.parse(engine.tryMove(researched, JSON.stringify({ Response: { Payment: [{ ideas: 1 }] } }), 0));
+    assert.equal(paid.players[0].resources.ideas ?? 0, 0);
+    assert.equal(paid.players[0].resources.mood_tokens, 1);
+    const skipped = JSON.parse(engine.tryMove(researched, JSON.stringify({ Response: { Payment: [{}] } }), 0));
+    assert.equal(skipped.players[0].resources.ideas, 1, 'skipping keeps the Philosophy reward');
+    assert.equal(skipped.players[0].resources.mood_tokens ?? 0, 0);
+
+    const foodOnly = structuredClone(g);
+    foodOnly.players[0].resources = { ...p.resources, food: 2, ideas: 0 };
+    const foodAction = view(foodOnly, 0).advances.find((a: any) => a.id === advance).action;
+    assert.deepEqual(query(foodOnly, foodAction), { eligible: false, affordable: false }, 'bonus idea does not make a food-only purchase eligible');
+  }
+});

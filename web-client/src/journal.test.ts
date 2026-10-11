@@ -355,3 +355,31 @@ test('compact replay resource names retain typed icons for ideas, tokens and cap
     ['ideas', 'ideas', 'mood_tokens', 'culture_tokens', 'captives', 'captives'],
   );
 });
+
+
+test('Nomads city movement collapses duplicate origins but keeps rewards, units and separate moves', () => {
+  const action = { log: [
+    'Leif: Nomads: Moved city D2 to D1',
+    'Leif: Nomads: Gain 1 food',
+    'Leif: Move: Move city D2 to D1',
+    'Leif: Move: Move 1 infantry from D2 to D1',
+    'Leif: Move: Pay 1 action',
+  ] };
+  const state = game([action, action]);
+  const before = JSON.stringify(state);
+  const entries = journal(state);
+  assert.equal(entries.length, 2, 'separate moves remain separate');
+  for (const entry of entries) {
+    assert.equal(entry.title, 'Nomads');
+    assert.deepEqual(entry.notes, ['Moved city D2 to D1', 'Move 1 infantry from D2 to D1']);
+    assert.ok(entry.tokens.some((token) => token.icon === 'food' && token.value === '+1'));
+    assert.ok(entry.tokens.some((token) => token.icon === 'action' && token.value === '−1'));
+  }
+  assert.equal(JSON.stringify(state), before);
+  const other = journal(game([{ log: [
+    'Leif: Nomads: Moved city D2 to D1',
+    'Aurelia: Move: Move city D2 to D1',
+    'Leif: Move: Move city C2 to C1',
+  ] }]));
+  assert.equal(other.length, 3, 'different actors and routes are not duplicates');
+});

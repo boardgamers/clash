@@ -141,3 +141,9 @@ Exploration requires two destination clicks: the first outlines all four tiles i
 # Viewer 0.1.57
 
 Happiness stays open for inspection with the same muted label and eye icon as other unavailable actions. Availability checks affordable happiness increases across all action variants, including free Voting, so spending the last regular action does not incorrectly mute a usable free action. Replay remains inspection-only. Engine 0.4.56 is unchanged.
+
+# Viewer 0.1.58 / engine 0.4.57
+
+Nomads city relocations collapse their matching Move journal entry, retaining resource rewards, action costs and accompanying unit movement. Separate actions, routes and players remain separate; historical structured and legacy logs use the same presentation fix.
+
+Philosophy awards its Science idea before Free Education offers the optional extra payment, so that newly gained idea can pay for the mood token. The research purchase must still spend at least one idea or gold. Food-only purchases and free advances remain ineligible, and declining the payment keeps the Philosophy idea.

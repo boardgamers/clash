@@ -388,6 +388,19 @@ export function journal(
               addClause(entry, factionText(game, clause), payments);
           }
           confirmPayments(action, payments, entries);
+          // Nomads and Move log the same city relocation under different origins.
+          // Fold only matching routes within this action and actor; retain gains,
+          // payments and accompanying unit movement in the Nomads entry.
+          for (const nomads of entries.filter((entry) => entry.title === 'Nomads')) {
+            const routes = new Set(nomads.notes.filter((note) => /^Moved city \S+ to \S+$/.test(note))
+              .map((note) => note.replace(/^Moved /, 'Move ')));
+            for (const duplicate of entries.filter((entry) => entry.title === 'Move' &&
+              entry.player === nomads.player && entry.notes.some((note) => routes.has(note)))) {
+              nomads.tokens.push(...duplicate.tokens);
+              nomads.notes.push(...duplicate.notes.filter((note) => !routes.has(note)));
+              entries.splice(entries.indexOf(duplicate), 1);
+            }
+          }
           explainCollection(action, entries, historicalCities.get(id));
           for (const entry of entries)
             entry.text = [
