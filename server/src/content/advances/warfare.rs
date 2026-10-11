@@ -115,6 +115,9 @@ fn steel_weapons() -> AdvanceBuilder {
         |e| &mut e.combat_start,
         1,
         |game, p, c| {
+            if !c.is_land_battle(game) {
+                return None;
+            }
             let player_index = p.index;
             let player = p.get(game);
 
@@ -213,6 +216,10 @@ fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
 }
 
 fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
+    // Also ignore invalid modifiers in naval combats saved by older engines.
+    if !c.is_land_battle(game) {
+        return;
+    }
     let steel_weapon_value = if game
         .player(c.attacker())
         .can_use_advance(Advance::SteelWeapons)

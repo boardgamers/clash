@@ -155,3 +155,7 @@ Attack destinations now use the exploration-style preview: the first click shows
 # Viewer 0.1.60 / engine 0.4.58
 
 Paid Roads moves no longer add Mountain or Forest restrictions at their destination. A group can move again in a new Move action during the same turn, provided it has not fought a battle; unrelated existing restrictions remain intact. The route preview states that Roads ignores those terrain penalties instead of incorrectly warning of a destination stop.
+
+# Viewer 0.1.61 / engine 0.4.59
+
+Steel Weapons activates and adds combat value only in land battles. Naval battles against players or pirates no longer request its ore payment or receive its free Metallurgy bonus. Existing invalid naval modifiers are ignored on subsequent rounds, and the viewer does not describe a Steel Weapons benefit at sea. Troops disembarking into a land battle still qualify normally.

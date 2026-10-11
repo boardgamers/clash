@@ -29,7 +29,7 @@ export function activeCombat(game: Pick<Game, 'events'>): ActiveCombat | null {
 /** Public advances include borrowed abilities, just as the engine's combat calculation does. */
 export function steelWeaponsBenefit(game: Game | null, view: View | null, player?: number): string | null {
   const combat = game && activeCombat(game);
-  if (!combat || !view) return null;
+  if (!combat || !view || game?.map.tiles.find(([position]) => position === combat.defender.position)?.[1] === 'Water') return null;
   const enemy =
     combat.attacker.player === player
       ? combat.defender.player

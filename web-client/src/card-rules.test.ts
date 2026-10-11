@@ -143,3 +143,64 @@ test('leader-only recruitment is offered with a real cost, and unavailable citie
   assert.ok(view(g).cityActions[0].leaders.every((l: any) => l.reason));
   assert.ok(view(g, 1 - seat).cityActions[0].leaders.every((l: any) => !!l.reason));
 });
+
+for (const metallurgy of [false, true]) {
+  for (const pirates of [false, true]) {
+    test(`Steel Weapons never activates in naval combat (Metallurgy=${metallurgy}, pirates=${pirates})`, () => {
+      const g = fixture('combat/ship_combat');
+      for (const p of g.players.slice(0, 2)) {
+        p.advances.push('SteelWeapons', ...(metallurgy ? ['Metallurgy'] : []));
+        p.action_cards = []; p.objective_cards = [];
+        p.resources.ore = 3;
+      }
+      if (pirates) {
+        g.players[3].units = g.players[1].units;
+        g.players[1].units = [];
+      }
+      const after = move(g, { Movement: { Move: { units: [7, 8], destination: 'D2' } } }, 0);
+      assert.ok(!after.events?.some((e: any) => e.handler?.origin?.Advance === 'SteelWeapons'));
+      assert.equal(after.players[0].resources.ore, 3);
+      assert.equal(after.players[1].resources.ore, 3);
+      const battles = combatJournal(journal(after)).filter((entry) => entry.combat);
+      assert.ok(battles.length, 'the ships actually fought');
+      for (const entry of battles) {
+        assert.ok(![...entry.combat!.attacker.modifiers, ...entry.combat!.defender.modifiers].some((m: string) => /steel weapons/i.test(m)));
+      }
+    });
+  }
+}
+
+test('Steel Weapons remains available when troops disembark into a land battle', () => {
+  const g = fixture('combat/direct_capture_city_metallurgy');
+  g.players[0].advances = g.players[0].advances.filter((a: string) => a !== 'Metallurgy');
+  g.map.tiles.find((t: any) => t[0] === 'C2')[1] = 'Water';
+  g.players[0].cities = g.players[0].cities.filter((c: any) => c.position !== 'C2');
+  g.players[0].units = [{ id: 99, unit_type: 'Ship', position: 'C2', carried_units: [{ id: 0, unit_type: 'Infantry' }] }];
+  const after = attack(g, [0]);
+  assert.equal(after.events.at(-1).handler.origin.Advance, 'SteelWeapons');
+  assert.deepEqual(after.events.at(-1).handler.request.Payment[0].cost.default, { ore: 1 });
+});
+
+test('old naval combat modifiers do not grant Steel Weapons in later rounds', () => {
+  const g = fixture('combat/ship_combat');
+  for (const p of g.players.slice(0, 2)) {
+    p.advances.push('SteelWeapons');
+    p.action_cards = []; p.objective_cards = [];
+  }
+  g.dice_roll_outcomes = Array(40).fill(0);
+  const after = move(g, { Movement: { Move: { units: [7, 8], destination: 'D2' } } }, 0);
+  assert.equal(steelWeaponsBenefit(after, view(after), 0), null);
+  let changed = false;
+  for (const event of after.events ?? []) {
+    const combat = event.event_type?.CombatRoundEnd?.combat;
+    if (combat) {
+      combat.modifiers = [...(combat.modifiers ?? []), 'SteelWeaponsAttacker', 'SteelWeaponsDefender'];
+      changed = true;
+    }
+  }
+  assert.ok(changed, 'fixture pauses between rounds');
+  const continued = move(after, { Response: { Bool: false } });
+  const rounds = combatJournal(journal(continued)).filter((entry) => entry.combat);
+  assert.ok(rounds.length >= 2);
+  for (const entry of rounds) assert.ok(![...entry.combat!.attacker.modifiers, ...entry.combat!.defender.modifiers].some((m: string) => /steel weapons/i.test(m)));
+});
