@@ -155,6 +155,17 @@ pub(crate) fn move_units(
     to: Position,
     embark_carrier_id: Option<u32>,
 ) {
+    move_units_with_terrain(game, player_index, units, to, embark_carrier_id, false);
+}
+
+fn move_units_with_terrain(
+    game: &mut Game,
+    player_index: usize,
+    units: &[u32],
+    to: Position,
+    embark_carrier_id: Option<u32>,
+    ignore_terrain: bool,
+) {
     let p = game.player(player_index);
     let nomad = p
         .event_info
@@ -194,7 +205,8 @@ pub(crate) fn move_units(
         unit.carrier_id = embark_carrier_id;
 
         if let Some(terrain) = terrain_movement_restriction(&game.map, to, unit) {
-            if !(hannibal && terrain == MovementRestriction::Mountain)
+            if !(ignore_terrain && matches!(terrain, MovementRestriction::Mountain | MovementRestriction::Forest))
+                && !(hannibal && terrain == MovementRestriction::Mountain)
                 && !(terracing
                     && terrain == MovementRestriction::Mountain
                     && (unit.is_settler() || unit.unit_type.is_leader()))
@@ -420,6 +432,7 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
         )?;
     result?;
 
+    let ignore_terrain = dest.ignore_terrain_movement_restrictions;
     let c = &dest.cost;
     if c.is_free() {
         assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
@@ -499,6 +512,10 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
     }
     if dest_terrain == Unexplored {
         move_to_unexplored_tile(game, player, &m.units, starting_position, m.destination);
+    } else if ignore_terrain && game.enemy_player(player.index, m.destination).is_none() {
+        // Roads ignore the arrival penalty too, not only existing restrictions
+        // while validating the route. Battles still impose their own stop.
+        move_units_with_terrain(game, player.index, &m.units, m.destination, m.embark_carrier_id, true);
     } else {
         move_with_possible_combat(game, player.index, m);
     }

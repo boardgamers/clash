@@ -136,3 +136,28 @@ test('a newly recruited leader needs Tactics to move, and the unit explains why'
   assert(routes(state).length > 0, 'Recruitment does not prevent movement');
   assert.doesNotThrow(() => engine.tryMove(state, JSON.stringify(routes(state)[0].action), seat));
 });
+
+test('paid Roads ignore both crossed and destination terrain, then allow a new Move action', () => {
+  for (const terrain of ['Mountain', 'Forest']) {
+    const g = fixture('Mountain');
+    g.actions_left = 3;
+    g.players[0].advances.push('Roads');
+    g.players[0].resources = { food: 5, ore: 5 };
+    for (const tile of g.map.tiles) if (['A1', 'B1', 'B2'].includes(tile[0])) tile[1] = terrain;
+    g.players[0].units[0].movement_restrictions = ['Fertile'];
+    const destinations = (raw: string) => JSON.parse(engine.webQuery(engine.stripSecret(raw, 0), 0,
+      JSON.stringify({ kind: 'movement', units: [0] }))).destinations;
+    const option = destinations(JSON.stringify(g)).find((d: any) => d.position === 'A1');
+    assert.deepEqual(option.payment, { food: 1, ore: 1 });
+    const moved = engine.tryMove(JSON.stringify(g), JSON.stringify(option.action), 0);
+    const state = JSON.parse(moved), unit = state.players[0].units.find((u: any) => u.id === 0);
+    assert.equal(unit.position, 'A1');
+    assert.deepEqual(unit.movement_restrictions, ['Fertile'], 'Roads does not add Mountain/Forest or erase unrelated restrictions');
+    assert.equal(state.players[0].resources.food, 4);
+    assert.equal(state.players[0].resources.ore, 4);
+    assert.doesNotMatch(option.terrainNotes.join(' '), /cannot move again|cannot make a later attack/);
+    const v = JSON.parse(engine.webView(engine.stripSecret(moved, 0), 0));
+    const next = v.stopMovement ? engine.tryMove(moved, JSON.stringify(v.stopMovement), 0) : moved;
+    assert.ok(destinations(next).some((d: any) => !Object.values(d.payment).some(Boolean)), 'can move again without paying for Roads again');
+  }
+});

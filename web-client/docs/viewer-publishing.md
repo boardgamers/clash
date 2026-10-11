@@ -151,3 +151,7 @@ Philosophy awards its Science idea before Free Education offers the optional ext
 # Viewer 0.1.59
 
 Attack destinations now use the exploration-style preview: the first click shows the defending units, leaders and city buildings; clicking the destination again or the Attack button commits the move. Changing the group, route or game state requires a fresh preview. Diplomatic costs remain visible before committing. Ordinary movement remains immediate. Engine 0.4.57 is unchanged.
+
+# Viewer 0.1.60 / engine 0.4.58
+
+Paid Roads moves no longer add Mountain or Forest restrictions at their destination. A group can move again in a new Move action during the same turn, provided it has not fought a battle; unrelated existing restrictions remain intact. The route preview states that Roads ignores those terrain penalties instead of incorrectly warning of a destination stop.

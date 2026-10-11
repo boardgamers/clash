@@ -246,7 +246,7 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
                         .contains(&crate::events::EventOrigin::Incident(
                             crate::content::incidents::great_diplomat::DIPLOMAT_ID,
                         ));
-                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":terrain_notes(game,p,&units,route.destination),"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),"breaksDiplomacy":breaks_diplomacy,
+                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":if route.ignore_terrain_movement_restrictions { vec!["Roads: ignores Mountain and Forest penalties. These units can move again in a new Move action unless they fight a battle."] } else { terrain_notes(game,p,&units,route.destination) },"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),"breaksDiplomacy":breaks_diplomacy,
                     "action":Action::Movement(MovementAction::Move(MoveUnits::new(units.clone(),route.destination,carrier,payment)))});
                 if !destinations.contains(&offer) {
                     destinations.push(offer);
