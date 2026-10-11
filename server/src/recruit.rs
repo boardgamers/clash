@@ -58,7 +58,7 @@ pub(crate) fn execute_recruit(
     r: Recruit,
 ) -> Result<(), String> {
     crate::content::civilizations::carthage::validate_recruit(game, game.player(player_index), &r)?;
-    let cost = recruit_cost_with_options(
+    let mut cost = recruit_cost_with_options(
         game,
         game.player(player_index),
         &r.units,
@@ -68,6 +68,48 @@ pub(crate) fn execute_recruit(
         r.ballcourts,
         r.draft_card,
     )?;
+    // Cost listeners describe available substitutions. Keep only a consistent
+    // set needed to explain the payment actually chosen, not every owned ability.
+    let candidates = cost
+        .info
+        .log
+        .iter()
+        .map(|(origin, _)| origin.clone())
+        .unique()
+        .collect::<Vec<_>>();
+    let mut unused = Vec::new();
+    for origin in candidates {
+        if !matches!(
+            origin,
+            crate::events::EventOrigin::Advance(
+                crate::advance::Advance::Draft | crate::advance::Advance::Sanitation
+            ) | crate::events::EventOrigin::SpecialAdvance(
+                SpecialAdvance::Sparta | SpecialAdvance::Mercenaries
+            )
+        ) {
+            continue;
+        }
+        let mut excluded = unused.clone();
+        excluded.push(origin.clone());
+        if recruit_cost_options_excluding(
+            game,
+            game.player(player_index),
+            &r.units,
+            r.city_position,
+            game.execute_cost_trigger(),
+            r.ballcourts,
+            r.draft_card,
+            &excluded,
+        )
+        .is_ok_and(|without| without.cost.is_valid_payment(&r.payment))
+        {
+            unused.push(origin);
+        }
+    }
+    cost.info.log.retain(|(origin, _)| !unused.contains(origin));
+    cost.cost
+        .modifiers
+        .retain(|origin| !unused.contains(origin));
     cost.pay(game, &r.payment);
     let origin = cost.origin();
     for unit in &r.replaced_units {
@@ -288,6 +330,29 @@ fn recruit_cost_options(
     ballcourts: bool,
     draft_card: bool,
 ) -> Result<CostInfo, String> {
+    recruit_cost_options_excluding(
+        game,
+        player,
+        units,
+        city_position,
+        execute,
+        ballcourts,
+        draft_card,
+        &[],
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn recruit_cost_options_excluding(
+    game: &Game,
+    player: &Player,
+    units: &Units,
+    city_position: Position,
+    execute: CostTrigger,
+    ballcourts: bool,
+    draft_card: bool,
+    excluded: &[crate::events::EventOrigin],
+) -> Result<CostInfo, String> {
     let city = player.get_city(city_position);
     if draft_card
         && (!player.has_special_advance(SpecialAdvance::Shogunate)
@@ -354,7 +419,16 @@ fn recruit_cost_options(
         ),
     );
     base_cost.city_position = Some(city_position);
-    let mut cost = player.trigger_cost_event(|e| &e.recruit_cost, base_cost, units, game, execute);
+    let mut cost = if excluded.is_empty() {
+        player.trigger_cost_event(|e| &e.recruit_cost, base_cost, units, game, execute)
+    } else {
+        let mut event = player.events.transient.recruit_cost.clone();
+        for origin in excluded {
+            event.remove_listener_mut_by_key(origin);
+        }
+        event.trigger(&mut base_cost, units, game, &mut ());
+        base_cost
+    };
     if ballcourts {
         cost.cost.default.mood_tokens += 1;
     }

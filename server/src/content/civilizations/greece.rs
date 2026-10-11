@@ -65,7 +65,7 @@ fn sparta() -> SpecialAdvanceInfo {
         |cost, units, game, p| {
             if units.infantry > 0 {
                 cost.info
-                    .add_log(p, "Can pay the Draft cost as culture tokens");
+                    .add_log(p, "Paid Draft with culture tokens");
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(

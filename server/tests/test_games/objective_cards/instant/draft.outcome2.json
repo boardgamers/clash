@@ -266,7 +266,7 @@
                     },
                     {
                       "player": 0,
-                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
+                      "Text": "Used Draft for 1 Infantry",
                       "origin": {
                         "Advance": "Draft"
                       }
@@ -333,7 +333,7 @@
                     },
                     {
                       "player": 0,
-                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
+                      "Text": "Used Draft for 1 Infantry",
                       "origin": {
                         "Advance": "Draft"
                       }

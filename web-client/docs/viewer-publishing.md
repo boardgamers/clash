@@ -165,3 +165,8 @@ Steel Weapons activates and adds combat value only in land battles. Naval battle
 Action sounds have a higher master level and longer click/action envelopes; hover cues remain subtle and the existing sound preference still mutes everything.
 
 A Trade Routes icon joins the map guides. It draws the selected civilization's current eligible trade pairings using the engine's reward-route calculation, with a civilization selector, endpoint links and empty/unresearched explanations. It is read-only and mutually exclusive with sea, pirate and barbarian guides. Routes reflect the current board and are recalculated when the player's next turn starts.
+
+
+# Viewer 0.1.63 / engine 0.4.61
+
+Recruitment logs attribute Draft, Sanitation, Sparta and Mercenaries only when the actual payment needs those substitutions. Ambiguous payments retain a single consistent explanation. Old availability-only messages are hidden in the journal without modifying saves. Split primary action rows are combined within the same action and actor; recruitment discount explanations are included in the Recruit row. Separate events, battles, refunds and other players remain distinct.

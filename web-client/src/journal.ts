@@ -401,6 +401,28 @@ export function journal(
               entries.splice(entries.indexOf(duplicate), 1);
             }
           }
+          // Payment and results can interleave with bonuses. Consolidate only
+          // within this action and actor; preserve separate events and combat.
+          if (!action.combat_stats && !entries.some(entry => entry.event)) {
+            const primaryTitles = new Set(['Recruit', 'Construct', 'Research', 'Found city', 'Increase Happiness', 'Move']);
+            for (const primary of [...entries]) {
+              if (!primaryTitles.has(primary.title) || !entries.includes(primary)) continue;
+              for (const duplicate of [...entries]) {
+                if (duplicate === primary || duplicate.player !== primary.player || duplicate.title !== primary.title) continue;
+                primary.tokens.push(...duplicate.tokens);
+                primary.notes.push(...duplicate.notes);
+                entries.splice(entries.indexOf(duplicate), 1);
+              }
+              if (primary.title === 'Recruit') {
+                for (const discount of [...entries]) {
+                  if (discount.player !== primary.player || !['Draft', 'Sanitation', 'Sparta', 'Mercenaries'].includes(discount.title) || discount.tokens.length) continue;
+                  if (!discount.notes.every(note => /^(Used (Draft|Sanitation|Mercenaries)|Paid Draft with culture tokens)/.test(note))) continue;
+                  primary.notes.push(...discount.notes);
+                  entries.splice(entries.indexOf(discount), 1);
+                }
+              }
+            }
+          }
           explainCollection(action, entries, historicalCities.get(id));
           for (const entry of entries)
             entry.text = [

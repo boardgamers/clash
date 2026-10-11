@@ -56,7 +56,7 @@ fn sanitation() -> AdvanceBuilder {
             if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
                 cost.info
-                    .add_log(p, "Reduce the cost of 1 Settler to 1 mood token");
+                    .add_log(p, "Used Sanitation for 1 Settler");
 
                 cost.cost.conversions.insert(
                     0,

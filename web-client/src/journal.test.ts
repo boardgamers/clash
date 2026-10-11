@@ -383,3 +383,34 @@ test('Nomads city movement collapses duplicate origins but keeps rewards, units 
   ] }]));
   assert.equal(other.length, 3, 'different actors and routes are not duplicates');
 });
+
+test('split action rows collapse without merging different actions or actors', () => {
+  const action = { action: { Playing: { Recruit: {} } }, log: [
+    'Leif: Recruit: Gain 1 infantry at A1',
+    'Leif: Draft: Used Draft for 1 Infantry',
+    'Leif: Recruit: Pay 1 action, Pay 1 mood token',
+    'Leif: Medicine: Gain 1 food',
+    'Aurelia: Recruit: Gain 1 infantry at B2',
+  ] };
+  const rows = journal(game([action, action]));
+  const own = rows.filter(row => row.title === 'Recruit' && row.player === 0);
+  assert.equal(own.length, 2);
+  assert(own.every(row => row.notes.includes('Used Draft for 1 Infantry')));
+  assert(own.every(row => row.tokens.some(t => t.icon === 'mood_tokens' && t.value === '−1')));
+  assert.equal(rows.filter(row => row.title === 'Medicine').length, 2);
+  assert.equal(rows.filter(row => row.title === 'Recruit' && row.player === 1).length, 2);
+});
+
+test('old prose-only recruitment discount offers are not reported as uses', () => {
+  const rows = journal(game([{ log: [
+    'Leif: Recruit: Gain 1 infantry at A1',
+    'Leif: Draft: Reduce the cost of 1 Infantry to 1 mood token',
+    'Leif: Sanitation: Reduce the cost of 1 Settler to 1 mood token',
+    'Leif: Sparta: Can pay the Draft cost as culture tokens',
+    'Leif: Recruit: Pay 1 food, Pay 1 ore',
+  ] }]));
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].title, 'Recruit');
+  assert(rows[0].tokens.some(t => t.icon === 'food' && t.value === '−1'));
+  assert(!rows[0].text.includes('mood'));
+});

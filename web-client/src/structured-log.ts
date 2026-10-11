@@ -38,7 +38,10 @@ function source(item: Item, context?: Context): string {
 // Keep the journal's presentation parsers at a single boundary. Engine records
 // remain structured and immutable; legacy saved logs already contain prose.
 function lines(game: Game, action: LoggedAction, context?: Context): string[] {
-  if (action.log) return action.log;
+  // Older saves logged optional cost conversions merely for owning the advance.
+  // Their payment records remain authoritative; do not present those offers as uses.
+  const offeredDiscount = (text: string) => /(?:^|: )(?:Reduce the cost of 1 (?:Infantry|Settler) to 1 mood token|Can pay the Draft cost as culture tokens|Mercenaries: Draft 1 Infantry or Ship with mood or gold)$/.test(text);
+  if (action.log) return action.log.filter(line => !offeredDiscount(line));
   const result: string[] = [];
   const stats = action.combat_stats as { attacker?: { player?: number } } | undefined;
   let attacker = stats?.attacker?.player;
@@ -54,7 +57,7 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
   for (const item of action.items ?? []) {
     const origin = source(item, context);
     const write = (text: string) => add(item.player, origin, text);
-    if (item.Text !== undefined) {
+    if (item.Text !== undefined && !offeredDiscount(item.Text)) {
       const event = item.Text.match(/^triggers the event (.+)$/);
       if (event) result.push(`A new game event has been triggered: ${event[1]}`);
       else if (item.Text === 'wins the battle')

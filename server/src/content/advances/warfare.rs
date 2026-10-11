@@ -161,7 +161,7 @@ fn draft() -> AdvanceBuilder {
 
                 let pile = ResourcePile::mood_tokens(draft_cost(p.get(game)));
                 cost.info
-                    .add_log(p, "Reduce the cost of 1 Infantry to 1 mood token");
+                    .add_log(p, "Used Draft for 1 Infantry");
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(UnitType::cost(&UnitType::Infantry), pile, 1),

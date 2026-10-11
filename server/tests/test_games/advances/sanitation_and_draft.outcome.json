@@ -316,23 +316,13 @@
                       },
                       "modifiers": [
                         {
-                          "Advance": "Draft"
-                        },
-                        {
                           "Advance": "Sanitation"
                         }
                       ]
                     },
                     {
                       "player": 0,
-                      "Text": "Reduce the cost of 1 Infantry to 1 mood token",
-                      "origin": {
-                        "Advance": "Draft"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Text": "Reduce the cost of 1 Settler to 1 mood token",
+                      "Text": "Used Sanitation for 1 Settler",
                       "origin": {
                         "Advance": "Sanitation"
                       }

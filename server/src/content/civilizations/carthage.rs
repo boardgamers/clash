@@ -213,7 +213,7 @@ fn mercenaries() -> SpecialAdvanceInfo {
                 if let Some(c)=cost.cost.conversions.iter_mut().find(|c|c.from.contains(&UnitType::Infantry.cost())){c.from.push(UnitType::Ship.cost());}
                 else {cost.cost.conversions.insert(0,PaymentConversion::limited(UnitType::Ship.cost(),draft.clone(),1));}
             }
-            if units.ships>0||units.infantry>0 {cost.cost.conversions.push(PaymentConversion::limited(ResourcePile::mood_tokens(1),ResourcePile::gold(1),draft.amount()));cost.info.add_log(p,"Mercenaries: Draft 1 Infantry or Ship with mood or gold");}
+            if units.ships>0||units.infantry>0 {cost.cost.conversions.push(PaymentConversion::limited(ResourcePile::mood_tokens(1),ResourcePile::gold(1),draft.amount()));cost.info.add_log(p,"Used Mercenaries for recruitment");}
         }).build()
 }
 fn pirate_allies() -> SpecialAdvanceInfo {
