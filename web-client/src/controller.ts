@@ -529,7 +529,9 @@ export class Controller {
       cardsOpen: old.pending || view.decision ? false : old.cardsOpen,
       wondersOpen: old.pending || view.decision ? false : old.wondersOpen,
       abilitiesOpen:
-        old.pending || view.decision || (!view.specialActions?.length && !view.unavailableSpecialActions?.length && !view.influence?.length)
+        old.pending ||
+        view.decision ||
+        (!view.specialActions?.length && !view.unavailableSpecialActions?.length && !view.influence?.length)
           ? false
           : old.abilitiesOpen,
       cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>
@@ -1032,7 +1034,8 @@ export class Controller {
       );
       if (landing) {
         this.patch({ disembarkCarriers: ships });
-        this.selectUnits(landing.units, position);
+        this.selectUnits(landing.units);
+        this.chooseMoveDestination(position);
         return;
       }
     }
@@ -1155,6 +1158,7 @@ export class Controller {
     if (s.pending) return;
     const indices = s.moveDestinations.flatMap((d, i) => (d.position === position ? [i] : []));
     this.patch({ moveTarget: position, moveDestination: indices.length === 1 ? indices[0] : null });
+    if (indices.length === 1) this.submit(s.moveDestinations[indices[0]].action);
   }
   movementDestinations(ids: number[], city: string | null = null) {
     const s = get(this.session);
@@ -1192,7 +1196,8 @@ export class Controller {
       abilitiesOpen: false,
       error: '',
     });
-    this.selectUnits(ids, target);
+    this.selectUnits(ids);
+    if (target) this.chooseMoveDestination(target);
   }
   selectCollectionTile(position: string) {
     const s = get(this.session);
@@ -1469,7 +1474,11 @@ export class Controller {
       moveDestination: null,
       moveTarget: null,
     });
-    if (target) this.chooseMoveDestination(target);
+    if (target) {
+      const destinations = get(this.session).moveDestinations;
+      const indices = destinations.flatMap((d, i) => (d.position === target ? [i] : []));
+      this.patch({ moveTarget: target, moveDestination: indices.length === 1 ? indices[0] : null });
+    }
   }
   setBallcourts(enabled: boolean) {
     const s = get(this.session);

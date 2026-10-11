@@ -118,3 +118,7 @@ Recruit remains open for inspection when recruiting is unavailable, with a muted
 # Viewer 0.1.54
 
 Abilities uses a muted label and eye icon when no custom action, cultural influence or Shogunate draft can be activated. Owned unavailable abilities remain inspectable, including during replay. Engine 0.4.55 is unchanged.
+
+# Viewer 0.1.55
+
+Clicking a movement destination submits immediately, including attacks, embarking, disembarking and Move here shortcuts. If several routes or carriers share a destination, selecting one submits it directly. The removed Confirm unit moves setting never adds a confirmation step. Deterministic status-phase decisions, including pirate placements, payments and Undo, now predict locally and queue without waiting for the backend. Objective completion, combat and hidden draws still wait when masked information is required. Engine 0.4.55 is unchanged.

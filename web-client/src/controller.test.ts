@@ -231,49 +231,41 @@ test('clicking another movable group switches selection, while legal destination
     c.selectTile('C2', { kind: 'units', player: 0 });
     assert.deepEqual(app.session().selectedUnits, [4], 'A legal destination is still a destination');
     assert.equal(app.session().moveTarget, 'C2');
-    c.selectTile('E2');
-    assert.deepEqual(app.session().selectedUnits, [8], 'A chosen target does not block switching groups');
-    assert.equal(app.session().moveTarget, null);
-    assert.deepEqual(app.sent, []);
+    assert.equal(app.sent.length, 1, 'clicking a legal destination submits the move immediately');
   } finally {
     app.close();
   }
 });
 
-test('plain map moves and attacks always wait for confirmation', async () => {
-  const app = paymentController(),
-    c = app.controller;
-  try {
-    const g = JSON.parse(fixture('movement/movement'));
-    g.players[0].advances.push('Tactics');
-    c.setPlayer(0);
-    await c.load(engine.stripSecret(JSON.stringify(g), 0));
-    c.openUnits([4]);
-    c.selectTile('C2');
-    assert.equal(app.session().moveTarget, 'C2');
-    assert.deepEqual(app.sent, [], 'Confirmation is on by default');
-    c.setPreferences({ confirmMoves: false });
-    c.focusUnitPosition('B2');
-    c.selectTile('C2');
-    assert.deepEqual(app.sent, [], 'An old stored preference cannot bypass confirmation');
-    c.focusUnitPosition('C2');
-    const army = [0, 1, 2, 3];
-    c.selectUnits(army);
-    const attack = app.session().moveDestinations.find((d) => d.position === 'C1');
-    assert.ok(attack?.attack, 'C1 holds enemy units');
-    c.selectTile('C1');
-    assert.equal(app.session().moveTarget, 'C1');
-    assert.equal(app.sent.length, 0, 'Attacks keep their confirmation');
-    // Picking units in the panel with a target already chosen never submits on its own.
-    c.selectUnits([0, 1], 'C1');
-    c.selectUnits([4], 'C2');
-    assert.equal(app.sent.length, 0);
-  } finally {
-    app.close();
+test('clicking a map destination submits moves and attacks without a second confirmation', async () => {
+  for (const [ids, target] of [
+    [[4], 'C2'],
+    [[0, 1, 2, 3], 'C1'],
+  ] as const) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('movement/movement'));
+      g.players[0].advances.push('Tactics');
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(JSON.stringify(g), 0));
+      c.setPreferences({ confirmMoves: true });
+      c.openUnits([...ids]);
+      const destination = app.session().moveDestinations.find((d) => d.position === target)!;
+      assert.ok(destination);
+      assert.deepEqual(app.sent, [], 'selecting units does not move them');
+      c.selectTile(target);
+      assert.deepEqual(
+        app.sent.map((m) => JSON.parse(m)),
+        [destination.action],
+      );
+    } finally {
+      app.close();
+    }
   }
 });
 
-test('a diplomatic attack waits for explicit confirmation', async () => {
+test('clicking a diplomatic attack submits its displayed cost without a second confirmation', async () => {
   const app = paymentController(),
     c = app.controller;
   try {
@@ -284,19 +276,13 @@ test('a diplomatic attack waits for explicit confirmation', async () => {
     game.permanent_effects = [{ DiplomaticRelations: { active_player: 1, passive_player: 0 } }];
     c.setPlayer(0);
     await c.load(engine.stripSecret(JSON.stringify(game), 0));
-    c.setPreferences({ confirmMoves: false });
     c.openUnits([0]);
-    c.selectTile('C1');
-    const destination = app.session().moveDestinations[app.session().moveDestination!];
+    const destination = app.session().moveDestinations.find((d) => d.position === 'C1')!;
     assert.equal(destination.breaksDiplomacy, true);
     assert.deepEqual(destination.payment, { culture_tokens: 2 });
-    assert.deepEqual(app.sent, []);
-    c.patch({ moveTarget: null, moveDestination: null });
-    assert.deepEqual(app.sent, [], 'Cancel leaves the agreement and units untouched');
     c.selectTile('C1');
-    c.submit(destination.action);
     assert.deepEqual(
-      app.sent.map((s) => JSON.parse(s)),
+      app.sent.map((m) => JSON.parse(m)),
       [destination.action],
     );
   } finally {
@@ -916,7 +902,7 @@ test('Expansion keeps its new settler and destination selected across repeated p
     assert.deepEqual(session!.selectedUnits, [newSettler.id]);
     assert.ok(session!.moveDestinations.length);
     const target = session!.moveDestinations[0].position;
-    controller.selectTile(target);
+    controller.selectUnits([newSettler.id], target);
     const selection = session!.moveDestination;
     controller.setPlayer(seat);
     await load();
@@ -936,9 +922,11 @@ test('Expansion keeps its new settler and destination selected across repeated p
     assert.equal(session!.mode, 'settlers');
     assert.ok(session!.moveDestinations.length);
     // Duplicate snapshots must not acknowledge an action the server has not applied.
-    controller.submit(session!.moveDestinations[0].action);
+    const destination = session!.moveDestinations.find((d) => d.terrain !== 'Unexplored')!;
+    controller.selectTile(destination.position);
+    const shown = session!;
     await load();
-    assert.equal(session!.pending, true);
+    assert.equal(session!, shown, 'a stale snapshot preserves the immediate move result');
   } finally {
     off();
     controller.destroy();
@@ -960,7 +948,11 @@ test('unit decisions open a hex, pick only the clicked unit model and lock while
       .session()
       .view!.decision!.options.findIndex((o) => o.mapTarget?.kind === 'unit' && o.mapTarget.unit === 3);
     assert.ok(clicked >= 0);
-    assert.deepEqual(app.session().decisionSelection, [clicked], 'the clicked model is chosen, not confirmed');
+    assert.deepEqual(
+      app.session().decisionSelection,
+      [clicked],
+      'the clicked model is chosen, not confirmed',
+    );
     assert.deepEqual(app.sent, []);
     c.selectTile('C2', { kind: 'unit', player: 0, unit: 3 });
     assert.deepEqual(app.session().decisionSelection, [], 'clicking it again deselects');
@@ -996,10 +988,15 @@ test('Heavy Earthquake structures toggle from building and city clicks and wait 
     c.setPlayer(0);
     await c.load(engine.stripSecret(state, 0));
     const options = app.session().view!.decision!.options;
-    const at = (position: string, name: string) => options.findIndex((o) => o.name === `${name} · ${position}`);
+    const at = (position: string, name: string) =>
+      options.findIndex((o) => o.name === `${name} · ${position}`);
     c.selectTile('C2', { kind: 'city', player: 0 });
     assert.equal(app.session().decisionPosition, 'C2');
-    assert.deepEqual(app.session().decisionSelection, [], 'a city with several structures only opens its list');
+    assert.deepEqual(
+      app.session().decisionSelection,
+      [],
+      'a city with several structures only opens its list',
+    );
     c.selectTile('C2', { kind: 'city', player: 0, structure: 'Building:Temple' });
     c.selectTile('B2', { kind: 'city', player: 0 });
     assert.equal(app.session().decisionPosition, 'B2');
@@ -2360,9 +2357,9 @@ test('city, tile and unit clicks inspect the same city until Move is opened', as
   }
 });
 
-
 test('automatic next movement group selects all its units after a group finishes moving', async () => {
-  const app = paymentController(), c = app.controller;
+  const app = paymentController(),
+    c = app.controller;
   try {
     const g = JSON.parse(fixture('movement/movement'));
     g.players[0].advances.push('Tactics');
@@ -2376,17 +2373,24 @@ test('automatic next movement group selects all its units after a group finishes
     assert.equal(app.session().unitPosition, 'B2');
     assert.deepEqual(app.session().selectedUnits, [4, 8]);
     assert.deepEqual(app.sent, [], 'preselection does not perform a move');
-  } finally { app.close(); }
+  } finally {
+    app.close();
+  }
 });
 
-
 test('Sri Gupta Golden Age opens the research tree and can be selected through the controller', async () => {
-  const app = paymentController(), c = app.controller;
+  const app = paymentController(),
+    c = app.controller;
   try {
     let game = JSON.parse(await engine.init(2, [], { civilization: 'Random' }, 'golden-age-ui', {}));
-    const seat = engine.currentPlayer(JSON.stringify(game)), player = game.players[seat];
+    const seat = engine.currentPlayer(JSON.stringify(game)),
+      player = game.players[seat];
     player.civilization = 'India';
-    player.units.push({ id: player.next_unit_id++, position: player.cities[0].position, unit_type: { Leader: 'SriGupta' } });
+    player.units.push({
+      id: player.next_unit_id++,
+      position: player.cities[0].position,
+      unit_type: { Leader: 'SriGupta' },
+    });
     player.resources = { food: 7, wood: 7, ore: 7, ideas: 7, gold: 7, mood_tokens: 8, culture_tokens: 8 };
     player.resource_limit.food = 7;
     game.actions_left = 0;
@@ -2407,5 +2411,7 @@ test('Sri Gupta Golden Age opens the research tree and can be selected through t
     const writing = app.session().view!.advances.find((advance) => advance.id === 'Writing')!;
     c.submit(writing.action!);
     assert.deepEqual(JSON.parse(app.sent[processed]), { Response: { SelectAdvance: 'Writing' } });
-  } finally { app.close(); }
+  } finally {
+    app.close();
+  }
 });

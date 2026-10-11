@@ -44,14 +44,16 @@ export function resampleHidden(raw: string, seat: number): string {
 /**
  * Moves whose outcome is decided by other players' secret choices, or that
  * reach rules evaluating masked cards, which the filtered state cannot even
- * run: combat (dice and opponents' tactics cards) and the status phase
- * (every player's objectives).
+ * run: combat (dice and opponents' tactics cards) and status-phase objective
+ * completion (every player's objectives). Other end-of-age choices remain
+ * eligible until execution actually reveals hidden information.
  */
 function excluded(raw: string, move: unknown, seat: number) {
   const game = JSON.parse(raw) as Json;
   // The first recorded move names the playback history after the secret seed.
   if (!game.board_history?.id) return true;
-  if (JSON.stringify(game.events ?? []).includes('"StatusPhase"')) return true;
+  if ((game.events ?? []).some((event: Json) => event.event_type?.StatusPhase === 'CompleteObjectives'))
+    return true;
   if (typeof move !== 'object' || move === null) return false;
   // Ending a turn in the last round may start the status phase.
   if ((move as Json).Playing === 'EndTurn' && game.round >= 3) return true;

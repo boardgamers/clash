@@ -175,7 +175,7 @@
             disabled={!!$session.playback || $session.pending}
             onmouseenter={() => onHighlight(d.position)}
             onmouseleave={() => onHighlight(null)}
-            onclick={() => controller.patch({ moveDestination: i })}
+            onclick={() => controller.submit(d.action)}
           >
             {#if d.pirateCarrier != null}<Ship size={16} />Allied pirate
             {:else if d.carrier != null}<Ship size={16} />Board ship

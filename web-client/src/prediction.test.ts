@@ -357,3 +357,53 @@ function get(c: ControllerType) {
   c.session.subscribe((s) => (value = s))();
   return value;
 }
+
+test('end-of-age pirate placements and undo predict and queue without waiting', async () => {
+  const first = { Response: { SelectPositions: ['A2'] } };
+  const second = { Response: { SelectPositions: ['D2'] } };
+  const raw = fixture('incidents/pirates_spawn.outcome1', first);
+  const app = harness();
+  const c = app.controller;
+  try {
+    c.setPlayer(0);
+    await c.load(strip(raw));
+    c.submit(first);
+    assert.equal(app.session().pending, false, 'the next pirate choice opens immediately');
+    const afterFirst = move(raw, first);
+    assert.equal(fingerprint(JSON.stringify(app.session().game)), fingerprint(strip(afterFirst)));
+    c.submit(second);
+    assert.equal(app.session().pending, false, 'the second pirate placement also predicts');
+    const afterSecond = move(afterFirst, second);
+    assert.equal(app.session().view!.decision!.fields.length, 1, 'the incident reward is already available');
+    c.submit('Undo');
+    assert.equal(app.session().pending, false, 'undoing a pirate placement is immediate');
+    const undone = move(afterSecond, 'Undo');
+    assert.equal(fingerprint(JSON.stringify(app.session().game)), fingerprint(strip(undone)));
+    assert.equal(app.sent.length, 1, 'only the first move is sent before acknowledgement');
+    const visible = app.session();
+    for (const confirmed of [afterFirst, afterSecond, undone]) await c.load(strip(confirmed));
+    assert.equal(app.session(), visible, 'confirmations preserve the latest predicted choice');
+    assert.deepEqual(
+      app.sent.map((m) => JSON.parse(m)),
+      [first, second, 'Undo'],
+    );
+    c.submit(second);
+    await c.load(strip(afterSecond));
+    const payment = { Response: { Payment: [{ ore: 1 }] } };
+    assert.ok('raw' in predictMove(engine, strip(afterSecond), payment, 0));
+    c.submit(payment);
+    assert.equal(app.session().pending, false, 'the visible bribe also continues immediately');
+  } finally {
+    app.close();
+  }
+});
+
+test('the last end-of-age free advance waits when it draws hidden cards', () => {
+  const end = { Playing: 'EndTurn' };
+  let raw = fixture('status_phase/free_advance', end);
+  raw = move(raw, end);
+  raw = move(raw, { Response: { SelectAdvance: 'Storage' } }, 1);
+  assert.deepEqual(predictMove(engine, strip(raw), { Response: { SelectAdvance: 'Philosophy' } }, 0), {
+    reason: 'hidden',
+  });
+});
