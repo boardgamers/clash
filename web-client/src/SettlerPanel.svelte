@@ -175,7 +175,7 @@
             disabled={!!$session.playback || $session.pending}
             onmouseenter={() => onHighlight(d.position)}
             onmouseleave={() => onHighlight(null)}
-            onclick={() => controller.submit(d.action)}
+            onclick={() => controller.chooseMoveRoute(i)}
           >
             {#if d.pirateCarrier != null}<Ship size={16} />Allied pirate
             {:else if d.carrier != null}<Ship size={16} />Board ship
@@ -200,6 +200,9 @@
             : 'No moves available.'}
     </p>
   {/if}
+  {#if destination?.terrain === 'Unexplored'}
+    <p class="movement-hint" role="status">Click the destination again to explore the highlighted region.</p>
+  {/if}
   {#if destination && !$session.movingCity}<TerrainRules
       terrain={destination.terrain}
       notes={destination.terrainNotes}
@@ -214,7 +217,7 @@
       </p>
     </div>
   {/if}
-  {#if destination}<div class="settler-confirm">
+  {#if destination && destination.terrain !== 'Unexplored'}<div class="settler-confirm">
       {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
       <button
         class="primary wide"
@@ -227,11 +230,9 @@
             ? 'Attack'
             : destination.carrier != null || destination.pirateCarrier != null
               ? 'Board ship'
-              : destination.terrain === 'Unexplored'
-                ? 'Explore'
-                : disembarking
-                  ? 'Disembark'
-                  : 'Move here'}
+              : disembarking
+                ? 'Disembark'
+                : 'Move here'}
         {#if !$session.view?.stopMovement}<span class="settler-action-cost" aria-label="Costs 1 action"
             ><Zap size={13} />1</span
           >{/if}<ArrowRight size={16} />

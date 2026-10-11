@@ -133,3 +133,7 @@ Ordinary actions predict locally from the first recorded move, using a stable pu
 # Viewer 0.1.57
 
 Huns movement defaults to movable units when a settler shares the focused city. The Move city control can be toggled off without deselecting accompanying units, so a settler can leave while the city stays in place. Changing the selection recomputes legal destinations without submitting a move. City-only and combined Nomads movement remain available. Engine 0.4.56 is unchanged.
+
+# Viewer 0.1.58
+
+Exploration requires two destination clicks: the first outlines all four tiles in the unrevealed region, and the second submits the move. A translated hint explains the second click without adding a confirmation button. Changing destinations or the selected units requires a fresh preview. Ordinary movement and attacks remain immediate. Engine 0.4.56 is unchanged.

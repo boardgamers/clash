@@ -4751,5 +4751,6 @@
   "Active effects: {p0}": "Ενεργά αποτελέσματα: {p0}",
   "Close active effects": "Κλείσιμο ενεργών αποτελεσμάτων",
   "No active effects.": "Δεν υπάρχουν ενεργά αποτελέσματα.",
-  "action cards": "κάρτες ενέργειας"
+  "action cards": "κάρτες ενέργειας",
+  "Click the destination again to explore the highlighted region.": "Κάντε ξανά κλικ στον προορισμό για να εξερευνήσετε την επισημασμένη περιοχή."
 }

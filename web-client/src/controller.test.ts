@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { build } from 'esbuild';
 import type { Controller as ControllerType } from './controller';
 import type { Session } from './types';
+import { explorationPreview } from './exploration-preview.ts';
 import { contextualCards, activeCollectionCard } from './contextual-cards.ts';
 import { requiredRecruitDiscards } from './recruit-discards.ts';
 import { happinessPreview, happinessCities } from './happiness.ts';
@@ -2469,6 +2470,37 @@ test('Sri Gupta Golden Age opens the research tree and can be selected through t
     const writing = app.session().view!.advances.find((advance) => advance.id === 'Writing')!;
     c.submit(writing.action!);
     assert.deepEqual(JSON.parse(app.sent[processed]), { Response: { SelectAdvance: 'Writing' } });
+  } finally {
+    app.close();
+  }
+});
+
+test('exploration previews four tiles before a second destination click submits', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const raw = await engine.init(2, [], { civilization: 'Random' }, 'exploration-selection', {});
+    const seat = engine.currentPlayer(raw);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    c.openSettlers();
+    const destinations = app.session().moveDestinations.filter((d) => d.terrain === 'Unexplored');
+    assert.ok(destinations.length >= 2);
+    const [first, second] = destinations;
+    c.selectTile(first.position);
+    assert.deepEqual(app.sent, []);
+    assert.equal(explorationPreview(app.session()).length, 4);
+    c.selectTile(second.position);
+    assert.deepEqual(app.sent, [], 'changing destination needs another click');
+    c.selectUnits(app.session().selectedUnits, second.position);
+    c.selectTile(second.position);
+    assert.deepEqual(app.sent, [], 'changing units requires a fresh first click');
+    c.selectTile(second.position);
+    assert.deepEqual(
+      app.sent.map((m) => JSON.parse(m)),
+      [second.action],
+    );
+    assert.doesNotThrow(() => engine.tryMove(raw, app.sent[0], seat));
   } finally {
     app.close();
   }

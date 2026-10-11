@@ -127,6 +127,7 @@ export class Controller {
   private legacySkipRaze = false;
   private migratedSkipRaze = false;
   private keepCitiesRequest: { seat: number; raw: string } | null = null;
+  private explorationSelection: string | null = null;
   private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -1155,10 +1156,32 @@ export class Controller {
   }
   chooseMoveDestination(position: string) {
     const s = get(this.session);
-    if (s.pending) return;
+    if (s.pending || s.playback) return;
     const indices = s.moveDestinations.flatMap((d, i) => (d.position === position ? [i] : []));
-    this.patch({ moveTarget: position, moveDestination: indices.length === 1 ? indices[0] : null });
-    if (indices.length === 1) this.submit(s.moveDestinations[indices[0]].action);
+    const index =
+      indices.length === 1
+        ? indices[0]
+        : s.moveTarget === position && indices.includes(s.moveDestination!)
+          ? s.moveDestination
+          : null;
+    this.patch({ moveTarget: position, moveDestination: index });
+    if (index != null) this.chooseMoveRoute(index);
+    else this.explorationSelection = null;
+  }
+  chooseMoveRoute(index: number) {
+    const s = get(this.session);
+    if (s.pending || s.playback) return;
+    const destination = s.moveDestinations[index];
+    if (!destination) return;
+    const selection = this.raw + JSON.stringify(destination.action);
+    const confirmed = s.moveTarget === destination.position && this.explorationSelection === selection;
+    this.patch({ moveTarget: destination.position, moveDestination: index });
+    if (destination.terrain === 'Unexplored' && !confirmed) {
+      this.explorationSelection = selection;
+      return;
+    }
+    this.explorationSelection = null;
+    this.submit(destination.action);
   }
   movementDestinations(ids: number[], city: string | null = null) {
     const s = get(this.session);
@@ -1466,6 +1489,7 @@ export class Controller {
     this.selectUnits(s.selectedUnits, s.moveTarget);
   }
   selectUnits(selectedUnits: number[], target: string | null = null) {
+    this.explorationSelection = null;
     const s = get(this.session);
     const city =
       s.movingCity &&

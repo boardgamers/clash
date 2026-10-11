@@ -4751,5 +4751,6 @@
   "Active effects: {p0}": "生效中的效果: {p0}",
   "Close active effects": "關閉生效中的效果",
   "No active effects.": "目前沒有生效中的效果。",
-  "action cards": "行動牌"
+  "action cards": "行動牌",
+  "Click the destination again to explore the highlighted region.": "再次點擊目的地以探索標示的區域。"
 }

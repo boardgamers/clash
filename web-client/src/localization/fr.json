@@ -4751,5 +4751,6 @@
   "Active effects: {p0}": "Effets actifs: {p0}",
   "Close active effects": "Fermer les effets actifs",
   "No active effects.": "Aucun effet actif.",
-  "action cards": "cartes Action"
+  "action cards": "cartes Action",
+  "Click the destination again to explore the highlighted region.": "Cliquez à nouveau sur la destination pour explorer la région en surbrillance."
 }
