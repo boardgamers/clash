@@ -170,3 +170,8 @@ A Trade Routes icon joins the map guides. It draws the selected civilization's c
 # Viewer 0.1.63 / engine 0.4.61
 
 Recruitment logs attribute Draft, Sanitation, Sparta and Mercenaries only when the actual payment needs those substitutions. Ambiguous payments retain a single consistent explanation. Old availability-only messages are hidden in the journal without modifying saves. Split primary action rows are combined within the same action and actor; recruitment discount explanations are included in the Recruit row. Separate events, battles, refunds and other players remain distinct.
+
+
+# Viewer 0.1.64 / engine unchanged (0.4.61)
+
+Trade Routes reward amounts now swap directly between engine-approved combinations. Raising mood, gold or another reward reduces food first, preserves other choices when possible, and always keeps a complete legal reward. Taxes and other reward allocations retain their existing limits. Desktop/mobile smoke coverage exercises India's food/gold/mood choices and verifies the submitted reward.

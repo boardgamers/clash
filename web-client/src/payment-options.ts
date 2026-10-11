@@ -16,14 +16,14 @@ export function rewardWithAmount(choices: Pile[], current: Pile, resource: Resou
 }
 
 // Keep the requested amount exact and choose a complete legal payment. Prefer
-// adjusting gold substitutions over changing the other chosen resources.
-export function paymentWithAmount(choices: Pile[], current: Pile, resource: Resource, amount: number): Pile {
+// adjusting the preferred substitute before changing the other chosen resources.
+export function paymentWithAmount(choices: Pile[], current: Pile, resource: Resource, amount: number, preferred: Resource = 'gold'): Pile {
   let selected = current;
   let distance = Infinity;
   for (const choice of choices) {
     if ((choice[resource] ?? 0) !== amount) continue;
     const change = resources.reduce(
-      (sum, r) => sum + Math.abs((choice[r] ?? 0) - (current[r] ?? 0)) * (r === 'gold' ? 1 : 2),
+      (sum, r) => sum + Math.abs((choice[r] ?? 0) - (current[r] ?? 0)) * (r === preferred ? 1 : 2),
       0,
     );
     if (change < distance) {

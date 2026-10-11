@@ -44,3 +44,23 @@ test('payment changes preserve fixed costs and prefer gold substitutions', () =>
   assert(samePayment({ food: 2 }, { food: 2, gold: 0 }));
   assert(!samePayment({ food: 2 }, { food: 1, gold: 1 }));
 });
+
+
+test('Trade Routes swaps the requested reward directly, reducing food first', () => {
+  const choices: Pile[] = [];
+  for (let food = 0; food <= 3; food++)
+    for (let gold = 0; gold <= 3 - food; gold++) choices.push({ food, gold, mood_tokens: 3 - food - gold });
+  const next = paymentWithAmount(choices, { food: 2, gold: 1 }, 'mood_tokens', 2, 'food');
+  assert.deepEqual(next, { food: 0, gold: 1, mood_tokens: 2 });
+  assert.deepEqual(paymentWithAmount(choices, next, 'mood_tokens', 0, 'food'), { food: 2, gold: 1, mood_tokens: 0 });
+  for (const resource of ['food', 'gold', 'mood_tokens'] as const)
+    for (let amount = 0; amount <= 3; amount++) {
+      const changed = paymentWithAmount(choices, next, resource, amount, 'food');
+      assert.equal(changed[resource], amount);
+      assert.equal(Object.values(changed).reduce((a, b) => a + (b ?? 0), 0), 3);
+      assert(choices.includes(changed));
+    }
+  const limited = [{ food: 2 }, { food: 1, culture_tokens: 1 }, { food: 1, ideas: 2 }];
+  assert.deepEqual(paymentWithAmount(limited, limited[0], 'ideas', 2, 'food'), limited[2]);
+  assert.deepEqual(paymentWithAmount(limited, limited[0], 'culture_tokens', 2, 'food'), limited[0]);
+});

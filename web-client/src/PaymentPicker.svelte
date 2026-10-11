@@ -12,6 +12,7 @@
     pending = false,
     optional = false,
     reward = false,
+    rebalance = false,
     label = 'Payment',
   }: {
     options: { payment: Pile; disabled?: boolean }[];
@@ -21,6 +22,7 @@
     pending?: boolean;
     optional?: boolean;
     reward?: boolean;
+    rebalance?: boolean;
     label?: string;
   } = $props();
   const icons = {
@@ -38,9 +40,9 @@
   const paid = $derived(available.filter((option) => !empty(option.payment)));
   const selected = $derived(
     available.find((option) => samePayment(option.payment, value)) ??
-      (reward && options.length > 4 ? undefined : available[0]),
+      (reward && !rebalance && options.length > 4 ? undefined : available[0]),
   );
-  const allocation = $derived(reward ? value : selected?.payment);
+  const allocation = $derived(reward && !rebalance ? value : selected?.payment);
   const totals = $derived([
     ...new Set(paid.map((option) => Object.values(option.payment).reduce((sum, n) => sum + (n ?? 0), 0))),
   ]);
@@ -76,7 +78,7 @@
     onChange(payment);
   }
   function setAmount(resource: Resource, amount: number) {
-    if (reward) {
+    if (reward && !rebalance) {
       choose(
         rewardWithAmount(
           paid.map((option) => option.payment),
@@ -94,11 +96,12 @@
           selected.payment,
           resource,
           amount,
+          rebalance ? 'food' : 'gold',
         ),
       );
   }
   $effect(() => {
-    if (reward && options.length > 4) {
+    if (reward && !rebalance && options.length > 4) {
       const withFixed = { ...value, ...fixed };
       if (!samePayment(withFixed, value)) {
         onChange(withFixed);
@@ -165,7 +168,7 @@
             >
               {#each field.amounts as amount}<option
                   value={amount}
-                  disabled={reward &&
+                  disabled={reward && !rebalance &&
                     !canCompletePayment(
                       paid.map((option) => option.payment),
                       { ...allocation, [field.resource]: amount },
@@ -176,7 +179,7 @@
         {/each}
       </div>
       <small class="payment-builder-hint"
-        >{#if reward}{#if totals.length === 1}{allocated} / {totals[0]} selected · {totals[0] - allocated} remaining{:else}Choose
+        >{#if reward && !rebalance}{#if totals.length === 1}{allocated} / {totals[0]} selected · {totals[0] - allocated} remaining{:else}Choose
             a complete resource combination.{/if}{:else}Changing one amount adjusts the others.{/if}</small
       >
       <div class="payment-builder-total">
