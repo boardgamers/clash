@@ -241,7 +241,7 @@ test('clicking another movable group switches selection, while legal destination
   }
 });
 
-test('clicking a map destination submits moves and attacks without a second confirmation', async () => {
+test('ordinary moves submit immediately while attacks preview before a second click', async () => {
   for (const [ids, target] of [
     [[4], 'C2'],
     [[0, 1, 2, 3], 'C1'],
@@ -259,6 +259,14 @@ test('clicking a map destination submits moves and attacks without a second conf
       assert.ok(destination);
       assert.deepEqual(app.sent, [], 'selecting units does not move them');
       c.selectTile(target);
+      if (destination.attack) {
+        assert.deepEqual(app.sent, [], 'battle destination is inspected before committing');
+        assert.equal(app.session().moveTarget, target);
+        c.selectUnits([...ids], target);
+        c.selectTile(target);
+        assert.deepEqual(app.sent, [], 'changing the group requires a fresh preview');
+        c.selectTile(target);
+      }
       assert.deepEqual(
         app.sent.map((m) => JSON.parse(m)),
         [destination.action],
@@ -269,7 +277,7 @@ test('clicking a map destination submits moves and attacks without a second conf
   }
 });
 
-test('clicking a diplomatic attack submits its displayed cost without a second confirmation', async () => {
+test('diplomatic attacks preview their cost before confirmation', async () => {
   const app = paymentController(),
     c = app.controller;
   try {
@@ -284,6 +292,8 @@ test('clicking a diplomatic attack submits its displayed cost without a second c
     const destination = app.session().moveDestinations.find((d) => d.position === 'C1')!;
     assert.equal(destination.breaksDiplomacy, true);
     assert.deepEqual(destination.payment, { culture_tokens: 2 });
+    c.selectTile('C1');
+    assert.deepEqual(app.sent, [], 'preview does not pay or end diplomacy');
     c.selectTile('C1');
     assert.deepEqual(
       app.sent.map((m) => JSON.parse(m)),

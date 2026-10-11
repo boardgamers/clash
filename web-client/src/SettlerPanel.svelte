@@ -18,6 +18,8 @@
   import TerrainRules from './TerrainRules.svelte';
   import UnitPicker from './UnitPicker.svelte';
   import LeaderDetails from './LeaderDetails.svelte';
+  import TileUnits from './TileUnits.svelte';
+  import CityBuildings from './CityBuildings.svelte';
   import FoundCityAction from './FoundCityAction.svelte';
   import { terrainInfo } from './terrain';
   import { movementBonus } from './movement-bonus';
@@ -199,6 +201,23 @@
             ? 'No legal destinations for this group.'
             : 'No moves available.'}
     </p>
+  {/if}
+  {#if destination?.attack}
+    <div class="movement-leader-info" aria-label="Attack preview">
+      <h3><Swords size={16} />Attack · {destination.position}</h3>
+      <TileUnits players={$session.game?.players ?? []} position={destination.position} />
+      {#each $session.game?.players ?? [] as player}
+        {#each player.cities?.filter((city) => city.position === destination.position) ?? [] as city}
+          <CityBuildings {city} owner={player.id} players={$session.game?.players ?? []} wonders={$session.view?.builtWonders} />
+        {/each}
+      {/each}
+      {#each $session.view?.players ?? [] as player}
+        {#each player.leaders?.filter((leader) => leader.position === destination.position) ?? [] as leader}
+          <LeaderDetails {leader} civilization={player.civilization} />
+        {/each}
+      {/each}
+      <p class="movement-hint" role="status">Click the destination again or choose Attack to start the battle.</p>
+    </div>
   {/if}
   {#if destination?.terrain === 'Unexplored'}
     <p class="movement-hint" role="status">Click the destination again to explore the highlighted region.</p>

@@ -147,3 +147,7 @@ Happiness stays open for inspection with the same muted label and eye icon as ot
 Nomads city relocations collapse their matching Move journal entry, retaining resource rewards, action costs and accompanying unit movement. Separate actions, routes and players remain separate; historical structured and legacy logs use the same presentation fix.
 
 Philosophy awards its Science idea before Free Education offers the optional extra payment, so that newly gained idea can pay for the mood token. The research purchase must still spend at least one idea or gold. Food-only purchases and free advances remain ineligible, and declining the payment keeps the Philosophy idea.
+
+# Viewer 0.1.59
+
+Attack destinations now use the exploration-style preview: the first click shows the defending units, leaders and city buildings; clicking the destination again or the Attack button commits the move. Changing the group, route or game state requires a fresh preview. Diplomatic costs remain visible before committing. Ordinary movement remains immediate. Engine 0.4.57 is unchanged.
