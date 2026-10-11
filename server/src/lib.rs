@@ -45,6 +45,7 @@ pub mod events;
 mod explore;
 pub mod game;
 pub mod game_api;
+mod move_summary;
 pub mod game_api_wrapper;
 pub mod game_data;
 pub mod game_setup;

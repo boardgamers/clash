@@ -413,7 +413,7 @@ pub struct LogSliceOptions {
     pub end: Option<usize>,
 }
 
-pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
+pub(crate) fn linear_action_entries(game: &Game) -> Vec<&ActionLogAction> {
     let turns: Vec<_> = game
         .log
         .iter()
@@ -428,11 +428,15 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
             } else {
                 turn.actions.len()
             };
-            turn.actions
-                .iter()
-                .take(limit)
-                .map(|item| item.action.clone())
+            turn.actions.iter().take(limit)
         })
+        .collect()
+}
+
+pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
+    linear_action_entries(game)
+        .into_iter()
+        .map(|item| item.action.clone())
         .collect()
 }
 

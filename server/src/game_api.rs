@@ -72,6 +72,38 @@ pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Action> {
     log.get(options.start..end).unwrap_or_default().to_vec()
 }
 
+/// BGS consumes `text` for its ongoing-game list; replay keeps using saved actions.
+#[derive(serde::Serialize)]
+pub struct PlatformLogEntry<'a> {
+    pub action: &'a Action,
+    pub player: usize,
+    pub text: String,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    pub kind: Option<&'static str>,
+}
+
+#[must_use]
+pub fn platform_log_slice<'a>(
+    game: &'a Game,
+    options: &LogSliceOptions,
+) -> Vec<PlatformLogEntry<'a>> {
+    let log = crate::log::linear_action_entries(game);
+    let end = options
+        .end
+        .map_or(log.len(), |end| end.saturating_add(1).min(log.len()));
+    log.get(options.start..end)
+        .unwrap_or_default()
+        .iter()
+        .map(|entry| PlatformLogEntry {
+            action: &entry.action,
+            player: entry.player,
+            kind: (matches!(entry.action, Action::StartTurn) && entry.items.is_empty())
+                .then_some("phase"),
+            text: crate::move_summary::summary(game, entry),
+        })
+        .collect()
+}
+
 #[must_use]
 pub fn set_player_name(mut game: Game, player_index: usize, name: String) -> Game {
     game.players[player_index].set_name(name);

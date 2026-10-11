@@ -194,7 +194,7 @@ pub fn log_length(game: String) -> JsValue {
 pub fn log_slice(game: String, options: JsValue) -> JsValue {
     let game = get_game(game);
     let options = serde_wasm_bindgen::from_value(options).expect("options should be serializable");
-    let log = game_api::log_slice(&game, &options);
+    let log = game_api::platform_log_slice(&game, &options);
     serde_wasm_bindgen::to_value(&log).expect("log should be serializable")
 }
 

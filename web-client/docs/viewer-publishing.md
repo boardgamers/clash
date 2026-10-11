@@ -192,3 +192,7 @@ Separation of Power protects only its owner as defender. Wonders no longer make 
 # Viewer 0.1.67 / engine unchanged (0.4.62)
 
 Recap captions replace generic choice/payment labels with recorded outcomes: unit placements and losses by player and location, research, gained buildings, payments, happiness changes, and public card-draw effects. Existing saved frames use only their public historical interval, never current hands. Existing action grouping retains follow-up payments without merging different players or combat/event boundaries.
+
+# Viewer 0.1.68 / engine 0.4.63
+
+BGS logSlice now returns entries with public readable text and player metadata alongside the original action. Only the requested active-history interval is summarized; log length, inclusive slice bounds, Undo truncation and saved replay actions are unchanged. The ongoing-game list can use the latest summary without a viewer being open. Empty StartTurn bookkeeping is marked as a phase so it cannot displace the preceding real move. Draw summaries expose card types only, never private card names or private log prose. Existing stored list summaries update on the next move.
