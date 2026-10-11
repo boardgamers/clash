@@ -2,6 +2,8 @@ import type { Move } from './types.ts';
 
 export type SoundCue =
   'hover' | 'select' | 'collect' | 'build' | 'research' | 'draw' | 'move' | 'confirm' | 'undo' | 'error';
+// Keep action cues audible without making repeated map hovers intrusive.
+const MASTER_GAIN = 0.4;
 const notes: Record<SoundCue, number[]> = {
   hover: [560],
   select: [420],
@@ -43,7 +45,7 @@ export class GameAudio {
   setEnabled(enabled: boolean) {
     this.enabled = enabled;
     if (!enabled) this.stop();
-    if (this.context) this.volume?.gain.setValueAtTime(enabled ? 0.13 : 0, this.context.currentTime);
+    if (this.context) this.volume?.gain.setValueAtTime(enabled ? MASTER_GAIN : 0, this.context.currentTime);
   }
 
   unlock() {
@@ -52,7 +54,7 @@ export class GameAudio {
       if (!this.context) {
         this.context = this.createContext();
         this.volume = this.context.createGain();
-        this.volume.gain.value = 0.13;
+        this.volume.gain.value = MASTER_GAIN;
         this.volume.connect(this.context.destination);
       }
       if (this.context.state === 'suspended') void this.context.resume().catch(() => {});
@@ -78,7 +80,7 @@ export class GameAudio {
       this.lastHover = context.currentTime;
     }
     const duration =
-      cue === 'hover' ? 0.025 : cue === 'select' ? 0.045 : cue === 'research' || cue === 'draw' ? 0.24 : 0.12;
+      cue === 'hover' ? 0.025 : cue === 'select' ? 0.075 : cue === 'research' || cue === 'draw' ? 0.24 : 0.18;
     notes[cue].forEach((frequency, index) => {
       const start = context.currentTime + index * (cue === 'research' ? 0.075 : 0.055);
       const oscillator = context.createOscillator();
@@ -88,7 +90,7 @@ export class GameAudio {
       oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.96, start + duration);
       gain.gain.setValueAtTime(0, start);
       gain.gain.linearRampToValueAtTime(
-        cue === 'hover' ? 0.07 : cue === 'select' ? 0.25 : 0.4,
+        cue === 'hover' ? 0.025 : cue === 'select' ? 0.25 : 0.4,
         start + 0.006,
       );
       gain.gain.exponentialRampToValueAtTime(0.001, start + duration);

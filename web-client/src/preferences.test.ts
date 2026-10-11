@@ -77,6 +77,7 @@ test('live BGS sound preferences silence active and queued notes without replayi
   audio.unlock();
   audio.play('research');
   assert.equal(voices.length, 3);
+  assert.equal(gains[0].gain.value, 0.4, 'Audible master level after unlocking');
   viewer.emitter.receive('preferences', { sound: false });
   assert.equal(gains[0].gain.value, 0);
   assert.ok(
@@ -87,6 +88,7 @@ test('live BGS sound preferences silence active and queued notes without replayi
   assert.equal(voices.length, 3);
   viewer.emitter.receive('preferences', { sound: true });
   assert.equal(voices.length, 3, 'Enabling sound does not replay missed effects');
+  assert.equal(gains[0].gain.value, 0.4, 'Unmuting restores the same master level');
   audio.play('collect');
   assert.equal(voices.length, 5);
   audio.destroy();

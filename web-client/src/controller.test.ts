@@ -2515,3 +2515,24 @@ test('exploration previews four tiles before a second destination click submits'
     app.close();
   }
 });
+
+test('trade-route toggle is read-only and exclusive with other map guides', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(fixture('advances/trade_routes'), 0));
+    const game = app.session().game;
+    c.showTradeRoutes();
+    assert.equal(app.session().tradeRoutes, true);
+    assert.equal(app.session().tradeRoutePlayer, 0);
+    c.showSeaRoutes();
+    assert.equal(app.session().tradeRoutes, false);
+    c.showTradeRoutes();
+    assert.equal(app.session().seaRoutes, false);
+    c.showPirateSpawns(true, 'barbarians');
+    assert.equal(app.session().tradeRoutes, false);
+    c.showTradeRoutes(false);
+    assert.equal(app.session().game, game);
+    assert.deepEqual(app.sent, []);
+  } finally { app.close(); }
+});

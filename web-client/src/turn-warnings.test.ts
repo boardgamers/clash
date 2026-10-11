@@ -198,3 +198,22 @@ test('all eight wonders are referenceable independently of private hands and dec
   assert.deepEqual(catalog, view(g).wonderCatalog);
   assert.deepEqual(catalog, view(g, 0).wonderCatalog);
 });
+
+test('trade-route guide is public, read-only and matches current eligible pairings', () => {
+  const g = trading(), before = JSON.stringify(g);
+  const routes = view(g).tradeRoutes!.find(p => p.player === 1)!;
+  assert.equal(routes.enabled, true);
+  assert.equal(routes.routes.length, view(g).endTurnTradeWarning!.routes);
+  assert.equal(new Set(routes.routes.map(r => r.to)).size, routes.routes.length);
+  for (const route of routes.routes) {
+    assert.ok(g.players[1].units.some((u: any) => u.id === route.unit && u.position === route.from));
+    assert.ok(g.players[0].cities.some((c: any) => c.position === route.to));
+  }
+  assert.deepEqual(view(g, 0).tradeRoutes, view(g, 1).tradeRoutes);
+  assert.deepEqual(JSON.parse(engine.webView(engine.stripSecret(JSON.stringify(g)))).tradeRoutes, view(g).tradeRoutes);
+  assert.equal(JSON.stringify(g), before);
+  for (const city of g.players[0].cities) city.mood_state = 'Angry';
+  assert.deepEqual(view(g).tradeRoutes!.find(p => p.player === 1)!.routes, []);
+  g.players[1].advances = g.players[1].advances.filter((a: string) => a !== 'TradeRoutes');
+  assert.equal(view(g).tradeRoutes!.find(p => p.player === 1)!.enabled, false);
+});

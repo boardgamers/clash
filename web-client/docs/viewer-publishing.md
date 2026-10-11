@@ -159,3 +159,9 @@ Paid Roads moves no longer add Mountain or Forest restrictions at their destinat
 # Viewer 0.1.61 / engine 0.4.59
 
 Steel Weapons activates and adds combat value only in land battles. Naval battles against players or pirates no longer request its ore payment or receive its free Metallurgy bonus. Existing invalid naval modifiers are ignored on subsequent rounds, and the viewer does not describe a Steel Weapons benefit at sea. Troops disembarking into a land battle still qualify normally.
+
+# Viewer 0.1.62 / engine 0.4.60
+
+Action sounds have a higher master level and longer click/action envelopes; hover cues remain subtle and the existing sound preference still mutes everything.
+
+A Trade Routes icon joins the map guides. It draws the selected civilization's current eligible trade pairings using the engine's reward-route calculation, with a civilization selector, endpoint links and empty/unresearched explanations. It is read-only and mutually exclusive with sea, pirate and barbarian guides. Routes reflect the current board and are recalculated when the player's next turn starts.

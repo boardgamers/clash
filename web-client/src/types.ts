@@ -326,6 +326,7 @@ export interface View {
   units?: UnitView[];
   movementLeft?: number;
   nomadCities?: string[];
+  tradeRoutes?: { player: number; enabled: boolean; routes: { from: string; to: string; unit: number | null }[] }[];
   seaRoutes?: string[][];
   barbarianGuide?: {
     player: number;
@@ -557,6 +558,8 @@ export interface Session {
   influencePosition?: string | null;
   influenceTarget?: string | null;
   influenceOrigin?: string | null;
+  tradeRoutes?: boolean;
+  tradeRoutePlayer?: number | null;
   seaRoutes: boolean;
   pirateSpawns: boolean;
   pirateSpawnPlayer?: number | null;

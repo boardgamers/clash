@@ -61,6 +61,7 @@
     RotateCw,
     Zap,
     Ship,
+    Route,
     Frown,
     Meh,
     Crown,
@@ -364,6 +365,7 @@
         return;
       }
       if ($session.seaRoutes) controller.showSeaRoutes(false);
+      if ($session.tradeRoutes) controller.showTradeRoutes(false);
       if ($session.cardDraws.length) controller.patch({ cardDraws: [] });
       dismissMapDetails();
     };
@@ -983,6 +985,36 @@
             <div><i class="route-line dashed" aria-hidden="true"></i>Shortcut requiring Navigation</div>
             <p>Hover a sea tile to preview. Click here to show all routes.</p>
           </div>
+        </div>
+        <div class="map-control-help">
+          <button title="Trade Routes" aria-label="Show trade routes"
+            class:active={$session.tradeRoutes && $session.mode === 'overview'}
+            aria-pressed={!!$session.tradeRoutes && $session.mode === 'overview'}
+            disabled={!!$session.playback || !!$session.view?.decision || !!choiceDecision || !!objectiveDecision || !!$session.view?.explorationDecision || !$session.view?.tradeRoutes}
+            onclick={() => controller.showTradeRoutes(!($session.tradeRoutes && $session.mode === 'overview'))}
+          ><Route size={18} /></button>
+          {#if $session.tradeRoutes && $session.mode === 'overview' && !$session.playback && !$session.view?.decision && !choiceDecision && !objectiveDecision && !$session.view?.explorationDecision}
+            {@const guide = $session.view?.tradeRoutes?.find(p => p.player === ($session.tradeRoutePlayer ?? $session.seat ?? $session.view?.activePlayer))}
+            <div class="map-tooltip pirate-spawn-key" role="status" use:positionMapGuide>
+              <strong>Trade Routes</strong>
+              <label>Civilization
+                <select aria-label="Trade route player" value={$session.tradeRoutePlayer ?? $session.seat ?? $session.view?.activePlayer}
+                  onchange={(event) => controller.patch({ tradeRoutePlayer: Number(event.currentTarget.value) })}>
+                  {#each $session.view?.players ?? [] as player}<option value={player.index}>{player.civilization}</option>{/each}
+                </select>
+              </label>
+              {#if !guide?.enabled}<p>Requires Trade Routes.</p>
+              {:else if !guide.routes.length}<p>No eligible trade routes.</p>
+              {:else}
+                <p>Current eligible pairings · {guide.routes.length}</p>
+                {#each guide.routes as route}
+                  <div><button class="coordinate-link" onclick={() => world?.locateCoordinate(route.from)}>{route.from}</button>
+                    → <button class="coordinate-link" onclick={() => world?.locateCoordinate(route.to)}>{route.to}</button></div>
+                {/each}
+                <p>Routes are recalculated at the start of your turn.</p>
+              {/if}
+            </div>
+          {/if}
         </div>
         <div class="map-control-help">
           <button

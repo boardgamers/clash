@@ -745,6 +745,7 @@ export class Controller {
       help: false,
       scorePlayer: null,
       seaRoutes: false,
+      tradeRoutes: false,
       pirateSpawns: false,
       cardDraws: [],
     });
@@ -1079,6 +1080,7 @@ export class Controller {
       mode: 'overview',
       tilePanel: false,
       seaRoutes: false,
+      tradeRoutes: false,
       pirateSpawns: false,
       error: '',
     });
@@ -1098,6 +1100,7 @@ export class Controller {
       mode: 'overview',
       tilePanel: false,
       seaRoutes: false,
+      tradeRoutes: false,
       pirateSpawns: false,
       error: '',
     });
@@ -1215,6 +1218,7 @@ export class Controller {
       mode: 'settlers',
       tilePanel: false,
       seaRoutes: false,
+      tradeRoutes: false,
       pirateSpawns: false,
       abilitiesOpen: false,
       error: '',
@@ -1234,10 +1238,18 @@ export class Controller {
     this.beginCollect(city);
     this.selectCollectionTile(tile);
   }
+  showTradeRoutes(show = true) {
+    this.closeActivity();
+    const s = get(this.session);
+    this.patch({ tradeRoutes: show, tradeRoutePlayer: s.seat ?? s.view?.activePlayer,
+      seaRoutes: false, pirateSpawns: false, tilePanel: false, mode: 'overview',
+      abilitiesOpen: false, selection: [], preview: null, focus: null, error: '' });
+  }
   showSeaRoutes(show = true) {
     this.closeActivity();
     this.patch({
       seaRoutes: show,
+      tradeRoutes: false,
       pirateSpawns: false,
       tilePanel: false,
       seaRouteStart: null,
@@ -1255,6 +1267,7 @@ export class Controller {
       threatGuide: guide,
       pirateSpawnPlayer: s.seat ?? s.view?.activePlayer,
       seaRoutes: false,
+      tradeRoutes: false,
       seaRouteStart: null,
       tilePanel: false,
       mode: 'overview',
@@ -1306,6 +1319,7 @@ export class Controller {
       tilePanel: false,
       collectionTile: null,
       seaRoutes: false,
+      tradeRoutes: false,
       pirateSpawns: false,
       selection: [],
       preview: null,
@@ -1394,6 +1408,7 @@ export class Controller {
       cityTab: 'happiness',
       tilePanel: false,
       seaRoutes: false,
+      tradeRoutes: false,
       pirateSpawns: false,
       abilitiesOpen: false,
       happinessSteps: {},

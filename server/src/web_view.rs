@@ -170,6 +170,14 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         .filter(|p| p.is_human())
         .map(|p| crate::barbarians::map_guide(game, p.index))
         .collect::<Vec<_>>();
+    let trade_routes = game.players.iter().filter(|p| p.civilization.is_human()).map(|p| {
+        let enabled = p.can_use_advance(Advance::TradeRoutes);
+        let routes = if enabled {
+            crate::content::advances::trade_routes::find_trade_routes(game, p, false)
+                .iter().map(|r| json!({"from":r.from,"to":r.to,"unit":r.unit_id})).collect::<Vec<_>>()
+        } else { vec![] };
+        json!({"player":p.index,"enabled":enabled,"routes":routes})
+    }).collect::<Vec<_>>();
     let pirate_spawns = game
         .players
         .iter()
@@ -231,7 +239,9 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        return json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"activeEffects":active_effects,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
+        let mut result = json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"activeEffects":active_effects,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
+        result["tradeRoutes"] = json!(trade_routes);
+        return result;
     };
     let p = game.player(seat);
     let wonder_cards = p.wonder_cards.iter().filter(|wonder| **wonder != Wonder::Hidden).map(|wonder| {
@@ -387,6 +397,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cityActions":actions::cities(game, seat, can_play), "settlers":actions::settlers(game, seat, (can_play && PlayingActionType::MoveUnits.is_available(game,seat).is_ok()) || (moving && seat == active)),
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()});
+    result["tradeRoutes"] = json!(trade_routes);
     result["unavailableSpecialActions"] = json!(special_actions.iter().filter(|a| !a["reason"].is_null()).collect::<Vec<_>>());
     result["activeEffects"] = json!(active_effects);
     result
