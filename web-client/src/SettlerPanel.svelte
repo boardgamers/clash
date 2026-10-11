@@ -115,7 +115,7 @@
           aria-pressed={$session.movingCity === position}
           onmouseenter={() => onHighlight(position)}
           onmouseleave={() => onHighlight(null)}
-          onclick={() => controller.openNomadCity(position)}
+          onclick={() => controller.toggleNomadCity(position)}
           ><Landmark size={15} />Move city {position}</button
         >{/each}
     </div>{/if}

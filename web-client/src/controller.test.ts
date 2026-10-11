@@ -229,7 +229,11 @@ test('clicking another movable group switches selection, while legal destination
     c.selectTile('B2');
     assert.deepEqual(app.session().selectedUnits, [4]);
     c.selectTile('C2', { kind: 'units', player: 0 });
-    assert.equal(app.session().view!.units!.find(u => u.id === 4)!.position, 'C2', 'The legal destination moves the original group immediately');
+    assert.equal(
+      app.session().view!.units!.find((u) => u.id === 4)!.position,
+      'C2',
+      'The legal destination moves the original group immediately',
+    );
     assert.equal(app.sent.length, 1, 'clicking a legal destination submits the move immediately');
   } finally {
     app.close();
@@ -1689,6 +1693,62 @@ test('Huns can start city-only movement and select other Nomad cities directly o
     c.selectTile(dest.position);
     // A legal destination remains a move, rather than selecting the city beneath it.
     assert.ok(app.sent.length || app.session().moveDestination || app.session().moveTarget);
+  } finally {
+    app.close();
+  }
+});
+
+test('Huns can move a settler from a city without moving the city, including after deselecting Nomads', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    let raw = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'nomads-exploration', {});
+    for (const civilization of ['Huns', 'Rome']) {
+      raw = engine.tryMove(
+        raw,
+        JSON.stringify({ ChooseCivilization: civilization }),
+        engine.currentPlayer(raw),
+      );
+    }
+    const g = JSON.parse(raw);
+    const city = g.players[0].cities[0].position;
+    g.players[0].civilization = 'Huns';
+    g.players[0].advances.push('Storage');
+    g.players[0].units = [{ id: 7, position: city, unit_type: 'Settler' }];
+    g.actions_left = 2;
+    raw = JSON.stringify(g);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    c.inspectTile(city);
+    c.openSettlers();
+    assert.equal(app.session().movingCity, null, 'Move defaults to units on the focused city');
+    assert.deepEqual(app.session().selectedUnits, [7]);
+    c.openNomadCity(city);
+    c.selectUnits([7]);
+    assert.equal(app.session().movingCity, city);
+    const sharedDestination = app.session().moveDestinations.find((d) => d.terrain !== 'Unexplored')!;
+    assert.ok(sharedDestination);
+    c.patch({ moveTarget: sharedDestination.position });
+    c.toggleNomadCity(city);
+    assert.equal(app.session().movingCity, null);
+    assert.deepEqual(app.session().selectedUnits, [7], 'deselecting the city keeps its settler selected');
+    assert.equal(app.session().moveTarget, sharedDestination.position);
+    assert.equal(app.sent.length, 0, 'changing the selection must not submit a move');
+    const destination = app.session().moveDestinations.find((d) => d.terrain !== 'Unexplored')!;
+    assert.ok(destination);
+    c.selectTile(destination.position);
+    const after = JSON.parse(engine.tryMove(raw, app.sent.at(-1)!, 0));
+    assert.equal(after.players[0].cities[0].position, city);
+    assert.equal(
+      after.players[0].units.find((u: { id: number }) => u.id === 7).position,
+      destination.position,
+    );
+    await c.load(engine.stripSecret(raw, 0));
+    c.openNomadCity(city);
+    c.toggleNomadCity(city);
+    assert.equal(app.session().movingCity, null);
+    assert.deepEqual(app.session().selectedUnits, []);
+    assert.deepEqual(app.session().moveDestinations, []);
   } finally {
     app.close();
   }

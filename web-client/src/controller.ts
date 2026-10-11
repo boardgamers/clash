@@ -1430,7 +1430,10 @@ export class Controller {
     const cities = s.view?.nomadCities ?? [];
     const positions = [...new Set(s.view?.units?.map((u) => u.position) ?? [])];
     const movable = positions.filter((p) => this.movementDestinations(this.defaultMovementGroup(p)).length);
-    if ((s.focus && cities.includes(s.focus)) || (!movable.length && cities.length)) {
+    if (
+      (s.focus && cities.includes(s.focus) && !movable.includes(s.focus)) ||
+      (!movable.length && cities.length)
+    ) {
       this.openNomadCity(s.focus && cities.includes(s.focus) ? s.focus : cities[0]);
       return;
     }
@@ -1451,6 +1454,16 @@ export class Controller {
     this.openUnits([]);
     this.patch({ movingCity: position, focus: position });
     this.selectUnits([]);
+  }
+  toggleNomadCity(position: string) {
+    const s = get(this.session);
+    if (s.pending || s.playback || !canMoveOnMap(s.view, s.game)) return;
+    if (s.movingCity !== position) {
+      this.openNomadCity(position);
+      return;
+    }
+    this.patch({ movingCity: null });
+    this.selectUnits(s.selectedUnits, s.moveTarget);
   }
   selectUnits(selectedUnits: number[], target: string | null = null) {
     const s = get(this.session);

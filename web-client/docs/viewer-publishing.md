@@ -91,12 +91,15 @@ Viewer 0.1.45 uses the printed English Monumental Edition names for Objectives, 
 Viewer 0.1.46 and engine 0.4.51 add an Effects indicator with a count and a rules dialog for active public effects, including Trojan Horse, Great Diplomat agreements, Negotiations and public wonders. Scopes distinguish shared effects, affected players and the current player's temporary action effects. Great Seer assignments remain private. Public-wonder draw choices display the wonder's effect, construction cost, required advance and points; Great Mausoleum discard previews include event rules and both uses of action cards. Trojan Horse now requires another human player's defended city, as stated on printed E42, and is no longer offered against barbarians. Existing saved activation prompts remain valid: decline an already-pending barbarian activation to continue without paying. Publish the matching viewer and engine together; historical battle outcomes are preserved. Cultural influence warns before rolling when another eligible city has a lower range cost, offers a source switch with the culture saving, and requires an explicit second click to retain the more expensive source. Automatic movement-group selection and switching seats during movement now select the whole compatible group instead of only its first unit.
 
 Viewer 0.1.47 and engine 0.4.52 label active effects with their source event or action card. Source names use the same quiet link style as advance references and open the full source rules without changing the game. Event sources include their printed E number; action-card sources use the played copy from public history, ignoring undone actions. Older effects without a recoverable copy show the common action rules without inventing a battle use. Each effect has its own padded block with spacing between blocks. Saved effect data and game outcomes are unchanged.
+
 # Viewer 0.1.48
 
 Component styles are bundled into the viewer script because BGS does not load a separate stylesheet. This restores active-effect spacing and source-label layout, as well as the cultural-influence warning styles, in the published game.
+
 # Viewer 0.1.49 / engine 0.4.53
 
 Fanaticism's free infantry now requires losing a battle fought in a city with a Temple. The engine records the Temple condition before capture, so it still applies when that city changes hands. The destination may be any eligible city you own. The advance text now says “If you lose that battle” to make the shared condition explicit. Source: official Monumental Edition rulebook, page 31.
+
 # Viewer 0.1.50
 
 Replay keeps the action toolbar and Journal/Chat controls visible. Research, city management, collection, movement, happiness and available abilities can be opened for inspection; submitting actions, undoing and ending the turn remain disabled. Replay transport and the journal have separate space above the bottom controls on desktop and mobile.
@@ -126,3 +129,7 @@ Clicking a movement destination submits immediately, including attacks, embarkin
 # Viewer 0.1.56 / engine 0.4.56
 
 Ordinary actions predict locally from the first recorded move, using a stable public playback identity published by the engine. Construction, recruitment, happiness, research, abilities, movement, collection, payments, turn changes and available Undo can continue while earlier deterministic moves await confirmation. Slow confirmations retain the predicted position and queued moves instead of rolling them back after eight seconds. The last round only waits at the actual end-of-age objective boundary. Dice rolls, hidden draws and Spy hand reveals require server results; random-number use and shrinking hidden decks are checked explicitly before accepting a prediction. Server rejection or a different authoritative result still corrects the position and cancels unsent moves.
+
+# Viewer 0.1.57
+
+Huns movement defaults to movable units when a settler shares the focused city. The Move city control can be toggled off without deselecting accompanying units, so a settler can leave while the city stays in place. Changing the selection recomputes legal destinations without submitting a move. City-only and combined Nomads movement remain available. Engine 0.4.56 is unchanged.
