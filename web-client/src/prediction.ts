@@ -28,7 +28,14 @@ export function fingerprint(raw: string): string {
   delete game.rng;
   delete game.seed;
   delete game.messages;
-  return JSON.stringify(Object.fromEntries(Object.entries(game).sort(([a], [b]) => (a < b ? -1 : 1))));
+  // Rust maps can serialize in different insertion orders between executions.
+  // Canonicalize every object, including nested player/event data; array order
+  // still matters for actions, choices and history.
+  return JSON.stringify(game, (_key, value) =>
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1)))
+      : value,
+  );
 }
 
 /** The same public state with every kind of masked information resampled. */

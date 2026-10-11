@@ -175,3 +175,8 @@ Recruitment logs attribute Draft, Sanitation, Sparta and Mercenaries only when t
 # Viewer 0.1.64 / engine unchanged (0.4.61)
 
 Trade Routes reward amounts now swap directly between engine-approved combinations. Raising mood, gold or another reward reduces food first, preserves other choices when possible, and always keeps a complete legal reward. Taxes and other reward allocations retain their existing limits. Desktop/mobile smoke coverage exercises India's food/gold/mood choices and verifies the submitted reward.
+
+
+# Viewer 0.1.65 / engine unchanged (0.4.61)
+
+Prediction and server-acknowledgement fingerprints now canonicalize nested object fields, preserving array order and all visible values. Rust map serialization order could previously make equivalent states compare unequal, intermittently forcing deterministic actions such as Theaters to wait for the backend. Regression coverage checks semantic differences and completing Theaters before either server acknowledgement. The browser smoke test can also accept a local pre-Theaters state via THEATERS_STATE; no live game moves are submitted.

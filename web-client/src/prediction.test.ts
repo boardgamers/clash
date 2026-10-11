@@ -504,3 +504,43 @@ test('Spy waits before looking at a masked hand without trapping the local engin
   const next = fixture('advances/collect_free_economy', ore);
   assert.ok('raw' in predictMove(engine, strip(next), ore, 0));
 });
+
+
+test('prediction fingerprints ignore nested map field order but preserve values and array order', () => {
+  const a = { players: [{ id: 0, resources: { food: 2, gold: 1 }, event_info: { first: 'a', second: 'b' } }], events: [{ details: { target: 'A1', amount: 1 } }] };
+  const b = { events: [{ details: { amount: 1, target: 'A1' } }], players: [{ event_info: { second: 'b', first: 'a' }, resources: { gold: 1, food: 2 }, id: 0 }] };
+  assert.equal(fingerprint(JSON.stringify(a)), fingerprint(JSON.stringify(b)));
+  b.players[0].resources.food = 3;
+  assert.notEqual(fingerprint(JSON.stringify(a)), fingerprint(JSON.stringify(b)));
+  assert.notEqual(fingerprint('{"choices":[1,2]}'), fingerprint('{"choices":[2,1]}'));
+});
+
+test('Theaters opens its direction choice and completes locally before any server acknowledgement', async () => {
+  const g = JSON.parse(fixture('advances/sanitation_and_draft', { Playing: 'EndTurn' }));
+  g.players[0].advances.push('Arts', 'Theaters');
+  g.players[0].resources.mood_tokens = 2;
+  g.players[0].resources.culture_tokens = 2;
+  // Multiple nested map entries exercise hash-map iteration in engine serialization.
+  g.players[0].event_info = { first: 'a', second: 'b', third: 'c' };
+  const raw = JSON.stringify(g), app = harness();
+  try {
+    app.controller.setPlayer(0);
+    await app.controller.load(strip(raw));
+    const theater = app.session().view!.specialActions!.find(a => a.name === 'Theaters')!;
+    app.controller.submit(theater.action);
+    assert.equal(app.sent.length, 1);
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().view!.decision?.name, 'Theaters');
+    const response = app.controller.query<{action: any}>({kind: 'decision', values: [], payments: [{mood_tokens: 1}]}).action;
+    app.controller.submit(response);
+    assert.equal(app.sent.length, 1, 'Second move is queued without waiting to update the UI');
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().game!.players[0].resources!.culture_tokens, 3);
+    const first = move(raw, theater.action);
+    await app.controller.load(strip(first));
+    assert.equal(app.sent.length, 2);
+    await app.controller.load(strip(move(first, response)));
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().game!.players[0].resources!.culture_tokens, 3);
+  } finally { app.close(); }
+});
