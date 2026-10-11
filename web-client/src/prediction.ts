@@ -50,13 +50,24 @@ export function resampleHidden(raw: string, seat: number): string {
  */
 function excluded(raw: string, move: unknown, seat: number) {
   const game = JSON.parse(raw) as Json;
-  // The first recorded move names the playback history after the secret seed.
+  // Older hosts do not publish the stable history identity before the first move.
   if (!game.board_history?.id) return true;
   if ((game.events ?? []).some((event: Json) => event.event_type?.StatusPhase === 'CompleteObjectives'))
     return true;
+  // Spy reveals another player's masked hand as its fee/target resolves.
+  if ((game.events ?? []).some((event: Json) => {
+    const type = event.event_type;
+    return [7, 8].includes(type?.PayAction?.action?.ActionCard) ||
+      [7, 8].includes(type?.ActionCard?.id);
+  })) return true;
   if (typeof move !== 'object' || move === null) return false;
   // Ending a turn in the last round may start the status phase.
-  if ((move as Json).Playing === 'EndTurn' && game.round >= 3) return true;
+  if ((move as Json).Playing === 'EndTurn' && game.round >= 3) {
+    const humans = game.players.filter((p: Json) => !['Barbarians', 'Pirates'].includes(p.civilization) && !game.dropped_players?.includes(p.id)).length;
+    let next = (game.current_player_index + 1) % humans;
+    for (let skipped = 0; skipped < humans && next !== game.starting_player_index && game.dropped_players?.includes(next); skipped++) next = (next + 1) % humans;
+    if (next === game.starting_player_index) return true;
+  }
   if ('ChooseCivilization' in move) return true;
   const destination = (move as Json).Movement?.Move?.destination;
   if (!destination) return false;
@@ -84,7 +95,16 @@ export function predictMove(engine: PredictionEngine, raw: string, move: unknown
   const serialized = JSON.stringify(move);
   let predicted: string;
   try {
-    predicted = engine.stripSecret(engine.tryMove(raw, serialized, seat), seat);
+    const result = engine.tryMove(raw, serialized, seat);
+    const before = JSON.parse(raw) as Json, after = JSON.parse(result) as Json;
+    // Never guess a roll or hidden draw, even if two sampled outcomes happen
+    // to coincide. Check before stripSecret resets the random stream.
+    if (before.rng !== after.rng ||
+        (before.dice_roll_log?.length ?? 0) !== (after.dice_roll_log?.length ?? 0) ||
+        HIDDEN_PILES.some(pile => (after[pile]?.length ?? 0) < (before[pile]?.length ?? 0))) {
+      return { reason: 'hidden' };
+    }
+    predicted = engine.stripSecret(result, seat);
   } catch (error) {
     if (isTrap(error)) throw error;
     return { reason: 'rejected' };

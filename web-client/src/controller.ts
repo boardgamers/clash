@@ -1681,10 +1681,10 @@ export class Controller {
     }
     clearTimeout(this.refreshTimer);
     this.refreshTimer = setTimeout(() => {
-      // Show the confirmed position again and wait, as for an unpredictable move.
-      this.settleToConfirmed();
+      // A slow acknowledgement does not invalidate deterministic local moves.
+      // Keep them (and Undo) usable while refreshing the authoritative state.
       this.commands.fetchState();
-      this.patch({ error: WAITING });
+      if (get(this.session).pending) this.patch({ error: WAITING });
     }, 8000);
     return true;
   }

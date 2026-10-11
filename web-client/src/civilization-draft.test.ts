@@ -81,7 +81,7 @@ test('private offers and locked choices never leak through player/spectator stat
   let s = await start(3);
   const offers = Array.from({ length: 3 }, (_, i) => options(s, i));
   s = choose(s, 2, offers[2][0]);
-  assert.equal(JSON.parse(s).board_history, undefined, 'no empty-map or private draft frames');
+  assert.deepEqual(JSON.parse(s).board_history?.frames ?? [], [], 'no empty-map or private draft frames');
   for (const seat of [undefined, 0, 1, 2]) {
     const stripped = engine.stripSecret(s, seat),
       g = JSON.parse(stripped);

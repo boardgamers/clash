@@ -122,3 +122,7 @@ Abilities uses a muted label and eye icon when no custom action, cultural influe
 # Viewer 0.1.55
 
 Clicking a movement destination submits immediately, including attacks, embarking, disembarking and Move here shortcuts. If several routes or carriers share a destination, selecting one submits it directly. The removed Confirm unit moves setting never adds a confirmation step. Deterministic status-phase decisions, including pirate placements, payments and Undo, now predict locally and queue without waiting for the backend. Objective completion, combat and hidden draws still wait when masked information is required. Engine 0.4.55 is unchanged.
+
+# Viewer 0.1.56 / engine 0.4.56
+
+Ordinary actions predict locally from the first recorded move, using a stable public playback identity published by the engine. Construction, recruitment, happiness, research, abilities, movement, collection, payments, turn changes and available Undo can continue while earlier deterministic moves await confirmation. Slow confirmations retain the predicted position and queued moves instead of rolling them back after eight seconds. The last round only waits at the actual end-of-age objective boundary. Dice rolls, hidden draws and Spy hand reveals require server results; random-number use and shrinking hidden decks are checked explicitly before accepting a prediction. Server rejection or a different authoritative result still corrects the position and cancels unsent moves.

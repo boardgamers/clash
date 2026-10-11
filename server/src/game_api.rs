@@ -134,6 +134,9 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     game.wonders_left.shuffle(&mut game.rng);
     game.action_cards_left.shuffle(&mut game.rng);
     game.objective_cards_left.shuffle(&mut game.rng);
+    // Publish the stable history identity before the first move, so a filtered
+    // client can predict that move without needing the secret setup seed.
+    game.board_history.ensure_id(&game.seed);
     game.seed = String::new();
     game.rng = Rng::default();
     let mut players = mem::take(&mut game.players);

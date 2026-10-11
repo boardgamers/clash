@@ -136,7 +136,7 @@ test('moves revealing hidden tiles or cards, battles and setup choices are never
   // Without playback history the first recorded frame is named after the secret seed.
   const legacy = JSON.parse(explore);
   delete legacy.board_history;
-  assert.deepEqual(predictMove(engine, strip(JSON.stringify(legacy), 1), { Playing: 'EndTurn' }, 1), {
+  assert.deepEqual(predictMove(engine, JSON.stringify(legacy), { Playing: 'EndTurn' }, 1), {
     reason: 'unsupported',
   });
   // Illegal moves are left to the server's error message.
@@ -301,7 +301,7 @@ test('an unpredictable move shows a pending state and applies the server result 
   }
 });
 
-test('a confirmation timeout withdraws the prediction and a late result applies without a second sound', async (t) => {
+test('slow confirmations keep predictions and queued moves without replaying their effects', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const app = await loaded();
   const c = app.controller;
@@ -309,10 +309,11 @@ test('a confirmation timeout withdraws the prediction and a late result applies 
     const confirmed = app.session().game!;
     c.submit(ore);
     c.submit({ Playing: 'EndTurn' });
+    const shownGame = app.session().game;
     t.mock.timers.tick(8000);
-    assert.deepEqual(app.session().game!.players[0].resources, confirmed.players[0].resources);
-    assert.equal(app.session().pending, true);
-    assert.match(app.session().error, /Waiting for the game/);
+    assert.equal(app.session().game, shownGame);
+    assert.equal(app.session().pending, false);
+    assert.equal(app.session().error, '');
     await c.load(strip(move(app.raw, ore)));
     assert.equal(app.session().pending, false);
     assert.equal(app.session().error, '');
@@ -321,7 +322,9 @@ test('a confirmation timeout withdraws the prediction and a late result applies 
       (confirmed.players[0].resources!.ore ?? 0) + 1,
     );
     assert.deepEqual(app.sounds, ['collect', 'confirm']);
-    assert.equal(app.sent.length, 1, 'the queued End turn was withdrawn');
+    assert.equal(app.sent.length, 2, 'the queued End turn is sent after the first acknowledgement');
+    await c.load(strip(move(move(app.raw, ore), { Playing: 'EndTurn' })));
+    assert.equal(app.session().game, shownGame);
   } finally {
     app.close();
   }
@@ -406,4 +409,98 @@ test('the last end-of-age free advance waits when it draws hidden cards', () => 
   assert.deepEqual(predictMove(engine, strip(raw), { Response: { SelectAdvance: 'Philosophy' } }, 0), {
     reason: 'hidden',
   });
+});
+
+test('a fresh game exposes a stable public history ID and predicts its first action and Undo', async () => {
+  const raw = await engine.init(2, [], { civilization: 'Random' }, 'first-action-prediction', {});
+  const seat = engine.currentPlayer(raw);
+  const publicRaw = strip(raw, seat), initial = JSON.parse(publicRaw);
+  assert.ok(initial.board_history.id);
+  assert.deepEqual(initial.board_history.frames, []);
+  assert.ok(!initial.seed);
+  const app = harness();
+  try {
+    app.controller.setPlayer(seat);
+    await app.controller.load(publicRaw);
+    const city = app.session().view!.cities.find(c => !c.reason && c.choices.length)!;
+    const choice = city.choices[0];
+    const preview = JSON.parse(engine.webCollectPreview(publicRaw, seat, city.position, JSON.stringify([{...choice, times: 1}])));
+    app.controller.submit(preview.action);
+    assert.equal(app.session().pending, false);
+    const after = move(raw, preview.action, seat);
+    assert.equal(JSON.parse(after).board_history.id, initial.board_history.id);
+    app.controller.submit('Undo');
+    assert.equal(app.session().pending, false);
+    assert.deepEqual(app.session().game!.players[seat].resources, initial.players[seat].resources);
+    await app.controller.load(strip(after, seat));
+    const shown = app.session();
+    await app.controller.load(strip(move(after, 'Undo', seat), seat));
+    assert.equal(app.session(), shown);
+  } finally { app.close(); }
+});
+
+test('normal actions use prediction by default across construction, recruitment, happiness, research and abilities', async () => {
+  const g = JSON.parse(await engine.init(2, [], { civilization: 'Random' }, 'all-action-prediction', {}));
+  const seat = engine.currentPlayer(JSON.stringify(g)), p = g.players[seat];
+  p.civilization = 'Rome';
+  p.resources = { food: 7, wood: 7, ore: 7, ideas: 7, gold: 7, mood_tokens: 7, culture_tokens: 7 };
+  p.advances = ['Farming', 'Mining', 'Tactics', 'Myths', 'Fishing', 'Bartering', 'Storage', 'Taxes'];
+  p.incident_tokens = 3;
+  p.cities[0].mood_state = 'Neutral';
+  const empty = g.map.tiles.find(([pos, terrain]: string[]) => ['Fertile', 'Forest', 'Mountain'].includes(terrain) && !g.players.some((q: any) => (q.cities ?? []).some((c: any) => c.position === pos)));
+  p.cities.push({ position: empty[0], mood_state: 'Happy' });
+  const raw = JSON.stringify(g), filtered = strip(raw, seat);
+  const view = JSON.parse(engine.webView(filtered, seat));
+  const city = view.cityActions[0];
+  const query = (q: unknown) => JSON.parse(engine.webQuery(filtered, seat, JSON.stringify(q)));
+  const actions: [string, unknown][] = [
+    ['construction', city.buildings.find((b: any) => b.name === 'Fortress').choices[0].action],
+    ['recruitment', query({ kind: 'recruit', city: city.position, units: { infantry: 1 }, replaced: [] }).action],
+    ['happiness', city.happiness[0].action],
+    ['research', view.advances.find((a: any) => a.id === 'Irrigation' || a.name === 'Irrigation').action],
+    ['ability', view.specialActions.find((a: any) => a.name === 'Taxes').action],
+    ['end turn', { Playing: 'EndTurn' }],
+  ];
+  for (const [name, action] of actions) {
+    assert.ok(action, name);
+    const prediction = predictMove(engine, filtered, action, seat);
+    assert.ok('raw' in prediction, `${name}: ${JSON.stringify(prediction)}`);
+    assert.equal(fingerprint(prediction.raw), fingerprint(strip(move(raw, action, seat), seat)), name);
+  }
+});
+
+test('round three End turn predicts until it actually reaches objective completion', () => {
+  const g = JSON.parse(fixture('advances/collect_free_economy', ore));
+  g.round = 3; g.current_player_index = 0; g.starting_player_index = 0;
+  const raw = JSON.stringify(g), end = { Playing: 'EndTurn' };
+  const prediction = predictMove(engine, strip(raw), end, 0);
+  assert.ok('raw' in prediction);
+  const next = move(raw, end);
+  assert.equal(fingerprint(prediction.raw), fingerprint(strip(next)));
+  assert.deepEqual(predictMove(engine, strip(next, 1), end, 1), { reason: 'unsupported' });
+});
+
+test('rolls and hidden draws wait even when sampled visible outcomes could coincide', () => {
+  const before = { board_history: { id: 'known', frames: [] }, rng: '1', action_cards_left: [1, 2] };
+  for (const change of [{ rng: '2' }, { dice_roll_log: [1] }, { action_cards_left: [2] }]) {
+    let executions = 0;
+    const simulation = {
+      tryMove: () => { executions++; return JSON.stringify({ ...before, ...change }); },
+      stripSecret: () => JSON.stringify(before),
+    };
+    assert.deepEqual(predictMove(simulation, JSON.stringify(before), { Playing: 'EndTurn' }, 0), { reason: 'hidden' });
+    assert.equal(executions, 1);
+  }
+});
+
+test('Spy waits before looking at a masked hand without trapping the local engine', () => {
+  const game = JSON.parse(readFileSync(new URL('../../server/tests/test_games/action_cards/spy.json', import.meta.url), 'utf8'));
+  for (const npc of npcs) if (!game.players.some((p: any) => p.civilization === npc.civilization)) game.players.push({ ...npc, id: game.players.length });
+  const raw = JSON.stringify(game);
+  const card = JSON.parse(engine.webView(strip(raw), 0)).actionCards.find((c: any) => c.id === 7);
+  const payment = move(raw, card.action);
+  assert.deepEqual(predictMove(engine, strip(payment), { Response: { Payment: [{ culture_tokens: 1 }] } }, 0), { reason: 'unsupported' });
+  // The reveal boundary must not disable prediction for subsequent ordinary actions.
+  const next = fixture('advances/collect_free_economy', ore);
+  assert.ok('raw' in predictMove(engine, strip(next), ore, 0));
 });

@@ -229,8 +229,7 @@ test('clicking another movable group switches selection, while legal destination
     c.selectTile('B2');
     assert.deepEqual(app.session().selectedUnits, [4]);
     c.selectTile('C2', { kind: 'units', player: 0 });
-    assert.deepEqual(app.session().selectedUnits, [4], 'A legal destination is still a destination');
-    assert.equal(app.session().moveTarget, 'C2');
+    assert.equal(app.session().view!.units!.find(u => u.id === 4)!.position, 'C2', 'The legal destination moves the original group immediately');
     assert.equal(app.sent.length, 1, 'clicking a legal destination submits the move immediately');
   } finally {
     app.close();
@@ -763,10 +762,9 @@ test('Free Economy pays the displayed fee once, with no second click or duplicat
     assert.ok(app.session().preview);
     const before = JSON.parse(state);
     c.collect();
-    // This save has no playback history yet; its id comes from the secret seed,
-    // so the first move waits for the server.
+    // Even the first recorded move and its already accepted fee predict locally.
     assert.equal(app.sent.length, 1);
-    assert.equal(app.session().pending, true);
+    assert.equal(app.session().pending, false);
     await c.load(engine.stripSecret(state, 0));
     assert.equal(app.sent.length, 1);
     state = engine.tryMove(state, app.sent[0], 0);
@@ -1810,14 +1808,14 @@ test('a rejected optimistic Undo restores the confirmed game without reverting p
   }
 });
 
-test('an Undo timeout restores the confirmed state and a late confirmation still applies', async (t) => {
+test('a slow Undo acknowledgement keeps its prediction usable until confirmation', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const app = await undoPreviewFixture();
   try {
     app.controller.submit('Undo');
     t.mock.timers.tick(8000);
-    assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(app.after).players[0].resources);
-    assert.equal(app.session().pending, true);
+    assert.deepEqual(app.session().game!.players[0].resources, JSON.parse(app.before).players[0].resources);
+    assert.equal(app.session().pending, false);
     const undone = engine.tryMove(app.after, JSON.stringify('Undo'), 0);
     await app.controller.load(engine.stripSecret(undone, 0));
     assert.equal(app.session().pending, false);

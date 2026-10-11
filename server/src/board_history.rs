@@ -20,7 +20,13 @@ pub struct BoardHistory {
 }
 impl BoardHistory {
     pub fn is_empty(&self) -> bool {
-        self.frames.is_empty()
+        self.id.is_empty() && self.frames.is_empty()
+    }
+
+    pub(crate) fn ensure_id(&mut self, seed: &str) {
+        if self.id.is_empty() {
+            self.id = format!("{:x}", Sha256::digest(format!("clash-board-v1:{seed}")));
+        }
     }
 }
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
@@ -193,12 +199,7 @@ fn execute_one(mut game: Game, action: Action, player: usize) -> Result<Game, St
     let mut history = std::mem::take(&mut game.board_history);
     let before_cursor = log_length(&game);
     let before = snapshot(&game, None, "Earlier position".to_owned(), false);
-    if history.id.is_empty() {
-        history.id = format!(
-            "{:x}",
-            Sha256::digest(format!("clash-board-v1:{}", game.seed))
-        );
-    }
+    history.ensure_id(&game.seed);
     history.frames.retain(|frame| frame.cursor <= before.cursor);
     if !before.tiles.is_empty()
         && history
