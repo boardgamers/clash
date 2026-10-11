@@ -137,3 +137,7 @@ Huns movement defaults to movable units when a settler shares the focused city. 
 # Viewer 0.1.58
 
 Exploration requires two destination clicks: the first outlines all four tiles in the unrevealed region, and the second submits the move. A translated hint explains the second click without adding a confirmation button. Changing destinations or the selected units requires a fresh preview. Ordinary movement and attacks remain immediate. Engine 0.4.56 is unchanged.
+
+# Viewer 0.1.57
+
+Happiness stays open for inspection with the same muted label and eye icon as other unavailable actions. Availability checks affordable happiness increases across all action variants, including free Voting, so spending the last regular action does not incorrectly mute a usable free action. Replay remains inspection-only. Engine 0.4.56 is unchanged.

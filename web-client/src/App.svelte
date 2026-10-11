@@ -282,6 +282,19 @@
         c.happiness.some((h) => !!h.action),
     ),
   );
+  let happinessAvailable = $derived(
+    !$session.playback && !$session.pending && !!$session.view?.canPlay &&
+      ($session.view.happinessActions ?? []).some((variant) =>
+        $session.view!.cityActions.some((city) => city.happiness.some((target) => {
+          try {
+            return !!controller.query<{ action: unknown }>({
+              kind: 'happiness', cities: [[city.position, target.steps]],
+              variant: variant.value, lawgiver: !!target.lawgiver,
+            }).action;
+          } catch { return false; }
+        })),
+      ),
+  );
   let recruitAvailable = $derived(
     !$session.playback &&
       $session.view?.cityActions.some(
@@ -1252,14 +1265,19 @@
         <button
           class="desktop-action"
           class:active={$session.mode === 'happiness'}
+          class:inspect-only={!happinessAvailable}
           data-tutorial="happiness"
           aria-label="Increase happiness"
           title="Increase happiness · Select cities on the map"
-          disabled={!city || (!$session.playback && (!$session.view?.canPlay || $session.pending))}
+          disabled={!city || $session.pending}
           onclick={() => {
             confirmEnd = false;
             controller.beginHappiness(undefined, true);
-          }}><Smile size={21} /><span>Happiness</span></button
+          }}><Smile size={21} /><span>Happiness</span>{#if !happinessAvailable}<Eye
+              class="action-inspect"
+              size={10}
+              aria-hidden="true"
+            />{/if}</button
         >
         <button
           class:active={$session.mode === 'settlers' || !!$session.view?.stopMovement}
