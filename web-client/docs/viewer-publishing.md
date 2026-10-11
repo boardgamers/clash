@@ -187,3 +187,8 @@ Prediction and server-acknowledgement fingerprints now canonicalize nested objec
 Wonders shows a Great Architect suggestion when the player holds that card, explaining its culture discount and advance waiver while retaining Engineering. Its button uses the engine-provided card action and remains disabled with the normal reason when unavailable. Undo's retained-action comparison also uses canonical object ordering, so equivalent host serialization cannot discard a valid prior snapshot. Undo also handles historic turns with no action array, which previously threw and forced a server wait. Browser coverage exercises undoing Theaters without a server acknowledgement, and confirms Advance skips its already-quoted culture payment and opens research.
 
 Separation of Power protects only its owner as defender. Wonders no longer make a city count as foreign-influenced, restoring those cities as cultural influence sources, including India’s Proselytism range from settlers. Influence reserves the Arts fee after including interchangeable mood from Great Arena, avoiding unsigned underflow when culture is empty.
+
+
+# Viewer 0.1.67 / engine unchanged (0.4.62)
+
+Recap captions replace generic choice/payment labels with recorded outcomes: unit placements and losses by player and location, research, gained buildings, payments, happiness changes, and public card-draw effects. Existing saved frames use only their public historical interval, never current hands. Existing action grouping retains follow-up payments without merging different players or combat/event boundaries.

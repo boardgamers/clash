@@ -1,4 +1,4 @@
-import type { BoardFrame, Game, View } from './types.ts';
+import type { BoardFrame, Game, View, Pile } from './types.ts';
 import { frameResources, describeResources } from './resource-playback.ts';
 import { frameHasContent } from './replay-actions.ts';
 import { activeHistory } from './active-history.ts';
@@ -118,6 +118,30 @@ export function frameDetails(
   let description = ['Explore Resolution', 'Finish ship exploration'].includes(frame.title)
     ? 'Explore'
     : frame.title;
+  const generic = ['Resolve choice', 'Pay for action', 'Action'].includes(
+    frame.title,
+  );
+  const outcomes: string[] = [];
+  if (before && generic) {
+    for (const player of frame.players) {
+      for (const [from, to, verb] of [
+        [oldUnits, newUnits, 'placed'],
+        [newUnits, oldUnits, 'lost'],
+      ] as const) {
+        const counts = new Map<string, number>();
+        for (const [id, unit] of to) {
+          if (from.has(id) || !id.startsWith(`${player.id}:`)) continue;
+          const name = typeof unit.unit_type === 'string' ? unit.unit_type.toLowerCase() : 'leader';
+          const key = `${name} at ${unit.position}`;
+          counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
+        for (const [unit, count] of counts)
+          outcomes.push(
+            `${player.id === frame.actor ? '' : player.civilization + ': '}${verb} ${count} ${count > 1 ? unit.replace(/^(ship|settler|elephant|leader) at /, '$1s at ') : unit}`,
+          );
+      }
+    }
+  }
   if (before && frame.title === 'Recruit') {
     const counts = new Map<string, number>();
     for (const [id, unit] of newUnits) {
@@ -170,7 +194,7 @@ export function frameDetails(
         }
       }
     }
-    const details: string[] = [];
+    const details: string[] = [...outcomes];
     const readable = wonderName;
     for (const player of frame.players) {
       const own = items.filter((item) => item.player === player.id);
@@ -186,7 +210,7 @@ export function frameDetails(
             .join(', ')}`,
         );
       if (player.id !== frame.actor) continue;
-      if (frame.title === 'Build' || frame.title === 'Build wonder') {
+      if (generic || frame.title === 'Build' || frame.title === 'Build wonder') {
         const built = own.flatMap((item) => {
           const structure = item.Structure;
           if (
@@ -198,7 +222,29 @@ export function frameDetails(
           const value = Object.values(structure.structure)[0];
           return typeof value === 'string' ? [readable(value)] : [];
         });
-        if (built.length) details.push('built ' + [...new Set(built)].join(', '));
+        if (built.length) details.push((generic ? 'gained ' : 'built ') + [...new Set(built)].join(', '));
+      }
+    }
+    if (generic) {
+      for (const player of frame.players) {
+        const prefix = player.id === frame.actor ? '' : player.civilization + ': ';
+        const paid: Pile = {};
+        for (const item of items.filter((item) => item.player === player.id)) {
+          if (item.Resources?.balance === 'Pay')
+            for (const [resource, amount] of Object.entries(item.Resources.resources))
+              paid[resource as keyof typeof paid] =
+                (paid[resource as keyof typeof paid] ?? 0) + (amount ?? 0);
+          if (item.MoodChange)
+            details.push(`${prefix}${item.MoodChange.city} is now ${item.MoodChange.mood.toLowerCase()}`);
+        }
+        const payment = describeResources(paid);
+        if (payment) details.push(`${prefix}paid ${payment}`);
+      }
+      // Public effect labels identify card types without exposing private cards.
+      for (const effect of frame.effects ?? []) {
+        const player = frame.players.find((p) => p.id === effect.player);
+        const label = `${effect.player === frame.actor ? '' : (player?.civilization ?? 'Player') + ': '}${effect.label}`;
+        if (!details.includes(label)) details.push(label);
       }
     }
     const resources = frameResources(game, before.cursor, frame);
@@ -211,10 +257,46 @@ export function frameDetails(
       if (gained) details.push(`${prefix}${frame.title === 'Collect' ? 'collected' : 'gained'} ${gained}`);
       if (waste) details.push(`${prefix}${waste} not stored`);
     }
+    if (generic && !details.length) {
+      const result = items
+        .map((item) => item.Text)
+        .find(
+          (text) =>
+            text &&
+            /^(Decided to |Declined |Removed |Completed |Selected |Chose |Kept |Discarded |Passed)/i.test(
+              text,
+            ),
+        );
+      if (result) details.push(result);
+    }
     if (details.length)
-      description = ['Research', 'Build', 'Build wonder', 'Collect'].includes(frame.title)
-        ? details.join(' · ')
-        : [description, ...details].join(' · ');
+      description =
+        (generic && description === frame.title) ||
+        ['Research', 'Build', 'Build wonder', 'Collect'].includes(frame.title)
+          ? details.join(' · ')
+          : [description, ...details].join(' · ');
+  }
+  if (generic && description === frame.title) {
+    const action =
+      game &&
+      activeHistory(game)
+        .flatMap((a) => a.rounds.flatMap((r) => r.turns.flatMap((t) => t.actions ?? [])))
+        .slice(before?.cursor ?? frame.cursor, frame.cursor)
+        .at(-1)?.action;
+    const response = action && typeof action === 'object' ? action.Response : null;
+    const kind = response && typeof response === 'object' ? Object.keys(response)[0] : '';
+    description =
+      (
+        {
+          SelectAdvance: 'Research',
+          SelectUnits: 'Selected units',
+          SelectPositions: 'Selected a location',
+          Payment: 'Payment',
+          ResourceReward: 'Resource reward',
+          ExploreResolution: 'Explore',
+          Bool: 'Event decision',
+        } as Record<string, string>
+      )[kind] ?? 'Turn update';
   }
   return {
     caption: officialWonderText(

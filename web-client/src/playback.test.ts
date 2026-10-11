@@ -388,3 +388,68 @@ test('legacy ability captions fall back safely when the start entry is unavailab
   } as unknown as Game;
   assert.equal(frameDetails(before, after, game).caption, 'Civilization ability');
 });
+
+function choiceRecap(items: NonNullable<LoggedAction['items']>, effects: BoardFrame['effects'] = []) {
+  const before = {
+    cursor: 0,
+    actor: 0,
+    title: 'Earlier position',
+    tiles: [],
+    players: [
+      { id: 0, civilization: 'India', cities: [], units: [] },
+      { id: 4, civilization: 'Pirates', cities: [], units: [] },
+    ],
+  } as unknown as BoardFrame;
+  const after = { ...before, cursor: 1, title: 'Resolve choice', effects };
+  const game = {
+    log_index: 1,
+    log: [
+      {
+        age: 1,
+        rounds: [
+          {
+            round: 1,
+            turns: [{ turn_type: { Player: 0 }, actions: [{ action: { Response: { Bool: true } }, items }] }],
+          },
+        ],
+      },
+    ],
+  } as unknown as Game;
+  return { before, after, game };
+}
+
+test('choice recaps name research and payments without generic engine labels', () => {
+  const { before, after, game } = choiceRecap([
+    { player: 0, Advance: { advance: 'SteelWeapons', balance: 'Gain' } },
+    { player: 0, Resources: { balance: 'Pay', resources: { culture_tokens: 1 } } },
+  ]);
+  assert.equal(
+    frameDetails(before, after, game).caption,
+    'India · researched Steel Weapons · paid 1 culture',
+  );
+});
+
+test('choice recaps name pirate placements and card draws without revealing card identities', () => {
+  const { before, after, game } = choiceRecap(
+    [{ player: 0, HandCard: { card: { ActionCard: 156 }, to: { Hand: 0 } } }],
+    [{ player: 0, kind: 'action', label: 'Drew an action card' }],
+  );
+  after.players = structuredClone(before.players);
+  after.players[1].units = [{ id: 10, position: 'C4', unit_type: 'Ship' }];
+  const caption = frameDetails(before, after, game).caption;
+  assert.equal(caption, 'India · Pirates: placed 1 ship at C4 · Drew an action card');
+  assert.doesNotMatch(caption, /156|Resolve choice/);
+  assert.equal(frameDetails(before, { ...after, title: 'Pay for action' }, game).caption, caption);
+});
+
+test('choice recaps use public decisions and happiness outcomes', () => {
+  const { before, after, game } = choiceRecap([{ player: 0, MoodChange: { city: 'B7', mood: 'Happy' } }]);
+  assert.equal(frameDetails(before, after, game).caption, 'India · B7 is now happy');
+  game.log![0].rounds[0].turns[0].actions![0].items = [
+    { player: 0, Text: 'Decided to convert mood to culture tokens' },
+  ];
+  assert.equal(
+    frameDetails(before, after, game).caption,
+    'India · Decided to convert mood to culture tokens',
+  );
+});
