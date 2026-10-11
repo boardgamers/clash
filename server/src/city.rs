@@ -172,7 +172,7 @@ impl City {
 
     #[must_use]
     pub fn influenced(&self) -> bool {
-        self.uninfluenced_buildings() as usize != self.pieces.amount()
+        self.uninfluenced_buildings() as usize != self.pieces.buildings(None).len()
     }
 }
 

@@ -28,13 +28,15 @@ export function fingerprint(raw: string): string {
   delete game.rng;
   delete game.seed;
   delete game.messages;
-  // Rust maps can serialize in different insertion orders between executions.
-  // Canonicalize every object, including nested player/event data; array order
-  // still matters for actions, choices and history.
-  return JSON.stringify(game, (_key, value) =>
-    value && typeof value === 'object' && !Array.isArray(value)
-      ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1)))
-      : value,
+  return canonicalJson(game);
+}
+
+/** Stable map serialization; sequence order remains significant. */
+export function canonicalJson(value: unknown): string {
+  return JSON.stringify(value, (_key, item) =>
+    item && typeof item === 'object' && !Array.isArray(item)
+      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => (a < b ? -1 : 1)))
+      : item,
   );
 }
 
@@ -165,7 +167,10 @@ function logLength(game: Json) {
   const turns = (game.log ?? []).flatMap((age: Json) => age.rounds.flatMap((round: Json) => round.turns));
   return turns.reduce(
     (sum: number, turn: Json, i: number) =>
-      sum + (i + 1 === turns.length ? Math.min(game.log_index, turn.actions.length) : turn.actions.length),
+      sum +
+      (i + 1 === turns.length
+        ? Math.min(game.log_index, turn.actions?.length ?? 0)
+        : (turn.actions?.length ?? 0)),
     0,
   );
 }

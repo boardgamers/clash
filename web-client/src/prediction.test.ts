@@ -414,7 +414,8 @@ test('the last end-of-age free advance waits when it draws hidden cards', () => 
 test('a fresh game exposes a stable public history ID and predicts its first action and Undo', async () => {
   const raw = await engine.init(2, [], { civilization: 'Random' }, 'first-action-prediction', {});
   const seat = engine.currentPlayer(raw);
-  const publicRaw = strip(raw, seat), initial = JSON.parse(publicRaw);
+  const publicRaw = strip(raw, seat),
+    initial = JSON.parse(publicRaw);
   assert.ok(initial.board_history.id);
   assert.deepEqual(initial.board_history.frames, []);
   assert.ok(!initial.seed);
@@ -422,9 +423,11 @@ test('a fresh game exposes a stable public history ID and predicts its first act
   try {
     app.controller.setPlayer(seat);
     await app.controller.load(publicRaw);
-    const city = app.session().view!.cities.find(c => !c.reason && c.choices.length)!;
+    const city = app.session().view!.cities.find((c) => !c.reason && c.choices.length)!;
     const choice = city.choices[0];
-    const preview = JSON.parse(engine.webCollectPreview(publicRaw, seat, city.position, JSON.stringify([{...choice, times: 1}])));
+    const preview = JSON.parse(
+      engine.webCollectPreview(publicRaw, seat, city.position, JSON.stringify([{ ...choice, times: 1 }])),
+    );
     app.controller.submit(preview.action);
     assert.equal(app.session().pending, false);
     const after = move(raw, preview.action, seat);
@@ -436,26 +439,37 @@ test('a fresh game exposes a stable public history ID and predicts its first act
     const shown = app.session();
     await app.controller.load(strip(move(after, 'Undo', seat), seat));
     assert.equal(app.session(), shown);
-  } finally { app.close(); }
+  } finally {
+    app.close();
+  }
 });
 
 test('normal actions use prediction by default across construction, recruitment, happiness, research and abilities', async () => {
   const g = JSON.parse(await engine.init(2, [], { civilization: 'Random' }, 'all-action-prediction', {}));
-  const seat = engine.currentPlayer(JSON.stringify(g)), p = g.players[seat];
+  const seat = engine.currentPlayer(JSON.stringify(g)),
+    p = g.players[seat];
   p.civilization = 'Rome';
   p.resources = { food: 7, wood: 7, ore: 7, ideas: 7, gold: 7, mood_tokens: 7, culture_tokens: 7 };
   p.advances = ['Farming', 'Mining', 'Tactics', 'Myths', 'Fishing', 'Bartering', 'Storage', 'Taxes'];
   p.incident_tokens = 3;
   p.cities[0].mood_state = 'Neutral';
-  const empty = g.map.tiles.find(([pos, terrain]: string[]) => ['Fertile', 'Forest', 'Mountain'].includes(terrain) && !g.players.some((q: any) => (q.cities ?? []).some((c: any) => c.position === pos)));
+  const empty = g.map.tiles.find(
+    ([pos, terrain]: string[]) =>
+      ['Fertile', 'Forest', 'Mountain'].includes(terrain) &&
+      !g.players.some((q: any) => (q.cities ?? []).some((c: any) => c.position === pos)),
+  );
   p.cities.push({ position: empty[0], mood_state: 'Happy' });
-  const raw = JSON.stringify(g), filtered = strip(raw, seat);
+  const raw = JSON.stringify(g),
+    filtered = strip(raw, seat);
   const view = JSON.parse(engine.webView(filtered, seat));
   const city = view.cityActions[0];
   const query = (q: unknown) => JSON.parse(engine.webQuery(filtered, seat, JSON.stringify(q)));
   const actions: [string, unknown][] = [
     ['construction', city.buildings.find((b: any) => b.name === 'Fortress').choices[0].action],
-    ['recruitment', query({ kind: 'recruit', city: city.position, units: { infantry: 1 }, replaced: [] }).action],
+    [
+      'recruitment',
+      query({ kind: 'recruit', city: city.position, units: { infantry: 1 }, replaced: [] }).action,
+    ],
     ['happiness', city.happiness[0].action],
     ['research', view.advances.find((a: any) => a.id === 'Irrigation' || a.name === 'Irrigation').action],
     ['ability', view.specialActions.find((a: any) => a.name === 'Taxes').action],
@@ -471,8 +485,11 @@ test('normal actions use prediction by default across construction, recruitment,
 
 test('round three End turn predicts until it actually reaches objective completion', () => {
   const g = JSON.parse(fixture('advances/collect_free_economy', ore));
-  g.round = 3; g.current_player_index = 0; g.starting_player_index = 0;
-  const raw = JSON.stringify(g), end = { Playing: 'EndTurn' };
+  g.round = 3;
+  g.current_player_index = 0;
+  g.starting_player_index = 0;
+  const raw = JSON.stringify(g),
+    end = { Playing: 'EndTurn' };
   const prediction = predictMove(engine, strip(raw), end, 0);
   assert.ok('raw' in prediction);
   const next = move(raw, end);
@@ -485,30 +502,47 @@ test('rolls and hidden draws wait even when sampled visible outcomes could coinc
   for (const change of [{ rng: '2' }, { dice_roll_log: [1] }, { action_cards_left: [2] }]) {
     let executions = 0;
     const simulation = {
-      tryMove: () => { executions++; return JSON.stringify({ ...before, ...change }); },
+      tryMove: () => {
+        executions++;
+        return JSON.stringify({ ...before, ...change });
+      },
       stripSecret: () => JSON.stringify(before),
     };
-    assert.deepEqual(predictMove(simulation, JSON.stringify(before), { Playing: 'EndTurn' }, 0), { reason: 'hidden' });
+    assert.deepEqual(predictMove(simulation, JSON.stringify(before), { Playing: 'EndTurn' }, 0), {
+      reason: 'hidden',
+    });
     assert.equal(executions, 1);
   }
 });
 
 test('Spy waits before looking at a masked hand without trapping the local engine', () => {
-  const game = JSON.parse(readFileSync(new URL('../../server/tests/test_games/action_cards/spy.json', import.meta.url), 'utf8'));
-  for (const npc of npcs) if (!game.players.some((p: any) => p.civilization === npc.civilization)) game.players.push({ ...npc, id: game.players.length });
+  const game = JSON.parse(
+    readFileSync(new URL('../../server/tests/test_games/action_cards/spy.json', import.meta.url), 'utf8'),
+  );
+  for (const npc of npcs)
+    if (!game.players.some((p: any) => p.civilization === npc.civilization))
+      game.players.push({ ...npc, id: game.players.length });
   const raw = JSON.stringify(game);
   const card = JSON.parse(engine.webView(strip(raw), 0)).actionCards.find((c: any) => c.id === 7);
   const payment = move(raw, card.action);
-  assert.deepEqual(predictMove(engine, strip(payment), { Response: { Payment: [{ culture_tokens: 1 }] } }, 0), { reason: 'unsupported' });
+  assert.deepEqual(
+    predictMove(engine, strip(payment), { Response: { Payment: [{ culture_tokens: 1 }] } }, 0),
+    { reason: 'unsupported' },
+  );
   // The reveal boundary must not disable prediction for subsequent ordinary actions.
   const next = fixture('advances/collect_free_economy', ore);
   assert.ok('raw' in predictMove(engine, strip(next), ore, 0));
 });
 
-
 test('prediction fingerprints ignore nested map field order but preserve values and array order', () => {
-  const a = { players: [{ id: 0, resources: { food: 2, gold: 1 }, event_info: { first: 'a', second: 'b' } }], events: [{ details: { target: 'A1', amount: 1 } }] };
-  const b = { events: [{ details: { amount: 1, target: 'A1' } }], players: [{ event_info: { second: 'b', first: 'a' }, resources: { gold: 1, food: 2 }, id: 0 }] };
+  const a = {
+    players: [{ id: 0, resources: { food: 2, gold: 1 }, event_info: { first: 'a', second: 'b' } }],
+    events: [{ details: { target: 'A1', amount: 1 } }],
+  };
+  const b = {
+    events: [{ details: { amount: 1, target: 'A1' } }],
+    players: [{ event_info: { second: 'b', first: 'a' }, resources: { gold: 1, food: 2 }, id: 0 }],
+  };
   assert.equal(fingerprint(JSON.stringify(a)), fingerprint(JSON.stringify(b)));
   b.players[0].resources.food = 3;
   assert.notEqual(fingerprint(JSON.stringify(a)), fingerprint(JSON.stringify(b)));
@@ -522,16 +556,21 @@ test('Theaters opens its direction choice and completes locally before any serve
   g.players[0].resources.culture_tokens = 2;
   // Multiple nested map entries exercise hash-map iteration in engine serialization.
   g.players[0].event_info = { first: 'a', second: 'b', third: 'c' };
-  const raw = JSON.stringify(g), app = harness();
+  const raw = JSON.stringify(g),
+    app = harness();
   try {
     app.controller.setPlayer(0);
     await app.controller.load(strip(raw));
-    const theater = app.session().view!.specialActions!.find(a => a.name === 'Theaters')!;
+    const theater = app.session().view!.specialActions!.find((a) => a.name === 'Theaters')!;
     app.controller.submit(theater.action);
     assert.equal(app.sent.length, 1);
     assert.equal(app.session().pending, false);
     assert.equal(app.session().view!.decision?.name, 'Theaters');
-    const response = app.controller.query<{action: any}>({kind: 'decision', values: [], payments: [{mood_tokens: 1}]}).action;
+    const response = app.controller.query<{ action: any }>({
+      kind: 'decision',
+      values: [],
+      payments: [{ mood_tokens: 1 }],
+    }).action;
     app.controller.submit(response);
     assert.equal(app.sent.length, 1, 'Second move is queued without waiting to update the UI');
     assert.equal(app.session().pending, false);
@@ -542,5 +581,20 @@ test('Theaters opens its direction choice and completes locally before any serve
     await app.controller.load(strip(move(first, response)));
     assert.equal(app.session().pending, false);
     assert.equal(app.session().game!.players[0].resources!.culture_tokens, 3);
-  } finally { app.close(); }
+  } finally {
+    app.close();
+  }
+});
+
+test('Undo counts empty historic turns as zero actions', () => {
+  const previous = { log_index: 1, log: [{ rounds: [{ turns: [{}, { actions: [{ action: 'a' }] }] }] }] };
+  const current = structuredClone(previous);
+  current.log_index = 2;
+  current.log[0].rounds[0].turns[1].actions!.push({ action: 'b' });
+  const board_history = { id: 'empty-turn', frames: [{ cursor: 0 }, { cursor: 1 }, { cursor: 2 }] };
+  const undone = JSON.parse(
+    predictUndo(JSON.stringify(previous), JSON.stringify({ ...current, board_history }))!,
+  );
+  assert.equal(undone.log_index, 1);
+  assert.deepEqual(undone.board_history.frames, [{ cursor: 0 }, { cursor: 1 }]);
 });

@@ -829,3 +829,100 @@ fn steel_weapons_explains_missing_and_declined_payments() {
         assert!(!log.contains("steel weapons added"));
     }
 }
+
+#[test]
+fn separation_of_power_only_protects_its_owners_happy_cities() {
+    use server::cache::Cache;
+    use server::cultural_influence::influence_culture_boost_cost;
+    use server::game::GameContext;
+    use server::game_data::GameData;
+    for owner in [0, 1] {
+        for happy in [false, true] {
+            let mut data = serde_json::to_value(load_culture().cloned_data()).unwrap();
+            data["players"][owner]["advances"]
+                .as_array_mut()
+                .unwrap()
+                .push(serde_json::json!("SeparationOfPower"));
+            data["players"][0]["cities"][2]["mood_state"] =
+                serde_json::json!(if happy { "Happy" } else { "Neutral" });
+            let data: GameData = serde_json::from_value(data).unwrap();
+            let cache = Cache::new(&data.options);
+            let game = Game::from_data(data, cache, GameContext::Play);
+            let result = influence_culture_boost_cost(
+                &game,
+                1,
+                &SelectedStructure::new(Position::from_offset("C2"), Structure::Building(Temple)),
+                &PlayingActionType::InfluenceCultureAttempt,
+                true,
+                false,
+                0,
+            );
+            assert_eq!(
+                result.is_err(),
+                owner == 0 && happy,
+                "owner={owner}, happy={happy}"
+            );
+        }
+    }
+}
+
+#[test]
+fn proselytism_counts_settlers_in_a_wonder_city() {
+    use server::cache::Cache;
+    use server::cultural_influence::influence_culture_boost_cost_from;
+    use server::game::GameContext;
+    use server::game_data::GameData;
+    let mut data = serde_json::to_value(load_culture().cloned_data()).unwrap();
+    data["players"][1]["civilization"] = serde_json::json!("India");
+    data["players"][1]["advances"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!("StateReligion"));
+    let source = data["players"][1]["cities"][0]["position"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    data["players"][1]["cities"][0]["city_pieces"]["wonders"] =
+        serde_json::json!(["GreatMausoleum"]);
+    data["players"][1]["units"] = serde_json::json!([
+        {"id":100,"position":source,"unit_type":"Settler"},
+        {"id":101,"position":source,"unit_type":"Settler"}
+    ]);
+    let data: GameData = serde_json::from_value(data).unwrap();
+    let cache = Cache::new(&data.options);
+    let mut game = Game::from_data(data, cache, GameContext::Play);
+    let source = Position::from_offset(&source);
+    assert!(!game.players[1].get_city(source).influenced());
+    let result = influence_culture_boost_cost_from(
+        &game,
+        1,
+        &SelectedStructure::new(Position::from_offset("C2"), Structure::Building(Temple)),
+        &PlayingActionType::InfluenceCultureAttempt,
+        true,
+        false,
+        0,
+        Some(source),
+    )
+    .unwrap();
+    assert!(result.range_boost_cost.default.is_empty());
+    game.players[1].get_city_mut(source).pieces.academy = Some(0);
+    assert!(
+        game.players[1].get_city(source).influenced(),
+        "An actual foreign building still blocks the source"
+    );
+}
+
+#[test]
+fn arts_can_reserve_its_fee_from_great_arena_mood() {
+    use server::cultural_influence::influence_culture_boost_cost;
+    let mut game = execute_action(load_culture(), advance_action(Advance::Arts, ResourcePile::ideas(2)), 1);
+    game.players[1].wonders_owned.insert(Wonder::Colosseum);
+    game.players[1].resources = ResourcePile::mood_tokens(7);
+    let kind = PlayingActionType::Special(SpecialAction::Modifier(
+        PlayingActionModifier::ArtsInfluenceCultureAttempt,
+    ));
+    let target = SelectedStructure::new(Position::from_offset("C2"), Structure::Building(Temple));
+    assert!(influence_culture_boost_cost(&game, 1, &target, &kind, true, false, 0).is_ok());
+    game.players[1].resources = ResourcePile::empty();
+    assert!(influence_culture_boost_cost(&game, 1, &target, &kind, true, false, 0).is_err());
+}

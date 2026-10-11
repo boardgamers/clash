@@ -1,4 +1,5 @@
 import type { Game, View } from './types.ts';
+import { canonicalJson } from './prediction.ts';
 
 interface Snapshot {
   game: Game;
@@ -7,7 +8,7 @@ interface Snapshot {
 
 const turn = (game: Game) => game.log?.at(-1)?.rounds.at(-1)?.turns.at(-1);
 const prefix = (game: Game, count: number) =>
-  JSON.stringify((turn(game)?.actions ?? []).slice(0, count).map((entry) => entry.action));
+  canonicalJson((turn(game)?.actions ?? []).slice(0, count).map((entry) => entry.action));
 
 /** Only retain states shown for this seat, never simulate hidden undo patches. */
 export class UndoPreview {

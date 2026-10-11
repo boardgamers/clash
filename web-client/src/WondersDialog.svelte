@@ -2,9 +2,12 @@
   import { printedCardName } from './card-names';
   import { X, Landmark, Hammer, BookOpen, Layers } from 'lucide-svelte';
   import WonderCard from './WonderCard.svelte';
+  import ResourceText from './ResourceText.svelte';
+  import { actionReason } from './model';
   import type { Controller } from './controller';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
+  const architect = $derived($session.view?.actionCards?.find((card) => card.id === 155));
   let tab = $state<'hand' | 'reference'>('hand');
   const close = () => controller.patch({ wondersOpen: false });
   function show(node: HTMLDialogElement) {
@@ -49,6 +52,26 @@
       Private hand · {$session.view?.wonderCards.length ?? 0}
       {$session.view?.wonderCards.length === 1 ? 'card' : 'cards'}
     </p>
+    {#if architect}
+      <article class="play-card architect-suggestion">
+        <header class="play-card-header">
+          <h3>{printedCardName(architect.name)}</h3>
+          <button
+            class="primary card-play-button"
+            disabled={!architect.action || $session.pending || !!$session.playback}
+            title={architect.reason ?? 'Choose a wonder to build with Great Architect'}
+            onclick={() => architect?.action && controller.submit(architect.action, architect.cost)}
+            ><Hammer size={16} />Use Great Architect</button
+          >
+        </header>
+        <p>
+          <ResourceText
+            text="Save 3 culture tokens and ignore the wonder’s required advance. You still need Engineering."
+          />
+        </p>
+        {#if actionReason(architect.reason)}<small>{actionReason(architect.reason)}</small>{/if}
+      </article>
+    {/if}
     {#each $session.view?.wonderCards ?? [] as card (card.id)}
       <div class="wonder-hand-entry">
         <WonderCard {card} />

@@ -646,23 +646,28 @@ fn affordable_start_position(
         let player = game.player(player_index);
 
         let available = &player.resources;
-        let mut tokens = available.culture_tokens;
-        let mut action_cost = ResourcePile::empty();
-        if add_action_cost {
-            // either none (action cost and boost cost) or both can use Colosseum
-            action_cost = action_type.payment_options(game, player_index).default;
-            let c = action_cost.culture_tokens;
-            if c > 0 {
-                tokens -= c;
-            }
-        }
-        if player.wonders_owned.contains(Wonder::Colosseum) {
-            tokens += available.mood_tokens;
-            let m = action_cost.mood_tokens;
-            if m > 0 {
-                tokens -= m;
-            }
-        }
+        let arena = player.wonders_owned.contains(Wonder::Colosseum);
+        let tokens = u16::from(available.culture_tokens)
+            + if arena {
+                u16::from(available.mood_tokens)
+            } else {
+                0
+            };
+        // Include interchangeable mood before reserving the action fee.
+        let action_cost = if add_action_cost {
+            action_type.payment_options(game, player_index).default
+        } else {
+            ResourcePile::empty()
+        };
+        let fee = u16::from(action_cost.culture_tokens)
+            + if arena {
+                u16::from(action_cost.mood_tokens)
+            } else {
+                0
+            };
+        let tokens = tokens
+            .checked_sub(fee)
+            .ok_or("Cannot afford influence action")?;
 
         let start = influence_start_positions(game, player);
         start
@@ -673,14 +678,14 @@ fn affordable_start_position(
                     .distance(target_city.position)
                     .saturating_sub(size as u32) as u8;
 
-                if min_cost > tokens {
+                if u16::from(min_cost) > tokens {
                     // avoid unnecessary calculations
                     return None;
                 }
 
                 let distance = influence_distance(game, position, target_city.position);
                 let boost_cost = distance.saturating_sub(size as u8);
-                if boost_cost > tokens {
+                if u16::from(boost_cost) > tokens {
                     return None;
                 }
                 Some((position, boost_cost))

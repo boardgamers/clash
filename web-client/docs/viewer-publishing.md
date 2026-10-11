@@ -180,3 +180,10 @@ Trade Routes reward amounts now swap directly between engine-approved combinatio
 # Viewer 0.1.65 / engine unchanged (0.4.61)
 
 Prediction and server-acknowledgement fingerprints now canonicalize nested object fields, preserving array order and all visible values. Rust map serialization order could previously make equivalent states compare unequal, intermittently forcing deterministic actions such as Theaters to wait for the backend. Regression coverage checks semantic differences and completing Theaters before either server acknowledgement. The browser smoke test can also accept a local pre-Theaters state via THEATERS_STATE; no live game moves are submitted.
+
+
+# Viewer 0.1.66 / engine 0.4.62
+
+Wonders shows a Great Architect suggestion when the player holds that card, explaining its culture discount and advance waiver while retaining Engineering. Its button uses the engine-provided card action and remains disabled with the normal reason when unavailable. Undo's retained-action comparison also uses canonical object ordering, so equivalent host serialization cannot discard a valid prior snapshot. Undo also handles historic turns with no action array, which previously threw and forced a server wait. Browser coverage exercises undoing Theaters without a server acknowledgement, and confirms Advance skips its already-quoted culture payment and opens research.
+
+Separation of Power protects only its owner as defender. Wonders no longer make a city count as foreign-influenced, restoring those cities as cultural influence sources, including India’s Proselytism range from settlers. Influence reserves the Arts fee after including interchangeable mood from Great Arena, avoiding unsigned underflow when culture is empty.

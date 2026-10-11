@@ -810,6 +810,34 @@ test('Free Economy pays the displayed fee once, with no second click or duplicat
   }
 });
 
+test('Advance pays the quoted culture and opens research without a payment click', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  const game = JSON.parse(fixture('action_cards/spy'));
+  game.players[0].action_cards = [1];
+  let state = JSON.stringify(game);
+  try {
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(state, 0));
+    const card = app.session().view!.actionCards!.find((card) => card.id === 1)!;
+    c.submit(card.action!, card.cost);
+    assert.equal(app.session().view!.decision!.advanceSelection, true);
+    assert.equal(app.session().pending, false);
+    assert.equal(app.sent.length, 1);
+    state = engine.tryMove(state, app.sent[0], 0);
+    await c.load(engine.stripSecret(state, 0));
+    assert.equal(app.sent.length, 2);
+    assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [{ culture_tokens: 1 }] } });
+    assert.equal(app.session().view!.decision!.advanceSelection, true);
+    state = engine.tryMove(state, app.sent[1], 0);
+    await c.load(engine.stripSecret(state, 0));
+    assert.equal(app.sent.length, 2);
+    assert.equal(app.session().view!.decision!.advanceSelection, true);
+  } finally {
+    app.close();
+  }
+});
+
 test('only an accepted matching quote continues payment, and a send failure restores the controls', async () => {
   for (const mode of ['unquoted', 'changed', 'reconnect', 'rejected']) {
     const app = paymentController(),
@@ -2517,7 +2545,8 @@ test('exploration previews four tiles before a second destination click submits'
 });
 
 test('trade-route toggle is read-only and exclusive with other map guides', async () => {
-  const app = paymentController(), c = app.controller;
+  const app = paymentController(),
+    c = app.controller;
   try {
     c.setPlayer(0);
     await c.load(engine.stripSecret(fixture('advances/trade_routes'), 0));
@@ -2534,5 +2563,7 @@ test('trade-route toggle is read-only and exclusive with other map guides', asyn
     c.showTradeRoutes(false);
     assert.equal(app.session().game, game);
     assert.deepEqual(app.sent, []);
-  } finally { app.close(); }
+  } finally {
+    app.close();
+  }
 });
