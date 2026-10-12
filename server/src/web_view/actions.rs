@@ -238,7 +238,9 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
     let mut destinations = vec![];
     for carrier in carriers {
         for route in possible_move_routes(p, game, &units, start, carrier).unwrap_or_default() {
-            if let Some(payment) = route.cost.first_valid_payment(&p.resources) {
+            let payments = super::decisions::payment_choices(&route.cost, &p.resources, false, false)
+                .unwrap_or_else(|| route.cost.first_valid_payment(&p.resources).into_iter().collect());
+            for payment in payments {
                 let breaks_diplomacy =
                     route
                         .cost

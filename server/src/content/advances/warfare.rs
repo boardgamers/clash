@@ -51,6 +51,9 @@ fn siegecraft() -> AdvanceBuilder {
         |e| &mut e.combat_start,
         0,
         |game, player, c| {
+            if player.index != c.attacker() {
+                return None;
+            }
             let p = player.get(game);
             let extra_die =
                 player
@@ -84,6 +87,17 @@ fn siegecraft() -> AdvanceBuilder {
             }
         },
         |game, s, c| {
+            // Older saves can contain an invalid defender Siegecraft prompt.
+            // Finish it without disabling their fortress or spending resources.
+            if s.player_index != c.attacker() {
+                for payment in &s.choice {
+                    if !payment.is_empty() {
+                        s.player().gain_resources(game, payment.clone());
+                    }
+                }
+                s.log(game, "Siegecraft skipped: only the attacker may use it");
+                return;
+            }
             let mut modifiers: Vec<CombatModifier> = Vec::new();
             let payment = &s.choice;
             if !payment[0].is_empty() {

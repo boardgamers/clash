@@ -2660,3 +2660,31 @@ test('triggered event rules appear live and replay pauses on their historical fr
     assert.equal(app.session().playback?.events?.length,0);
   } finally {app.close();}
 });
+
+test('Roads offers food/gold choices before an attack and submits the selected payment', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const g = JSON.parse(fixture('advances/roads_unit_test'));
+    g.current_player_index = 1;
+    g.players[1].resources = { food: 1, ore: 1, gold: 2 };
+    const target = g.players[1].cities.find((city: any) => city.position === 'F7');
+    g.players[1].cities = g.players[1].cities.filter((city: any) => city.position !== 'F7');
+    g.players[0].cities.push(target);
+    c.setPlayer(1);
+    await c.load(engine.stripSecret(JSON.stringify(g), 1));
+    c.openUnits([0, 1]);
+    const offers = app.session().moveDestinations.filter(d => d.position === 'F7');
+    assert(offers.some(d => d.payment.food === 1 && d.payment.ore === 1));
+    assert(offers.some(d => d.payment.food === 1 && d.payment.gold === 1));
+    assert(offers.some(d => d.payment.gold === 2));
+    c.chooseMoveDestination('F7');
+    assert.deepEqual(app.sent, []);
+    const index = app.session().moveDestinations.findIndex(d => d.position === 'F7' && d.payment.food === 1 && d.payment.ore === 1);
+    c.chooseMoveRoute(index);
+    assert.deepEqual(app.sent, [], 'choosing payment previews the battle without starting it');
+    const action = app.session().moveDestinations[index].action;
+    c.chooseMoveRoute(index);
+    assert.deepEqual(app.sent.map(a => JSON.parse(a)), [action]);
+    assert.doesNotThrow(() => engine.tryMove(JSON.stringify(g), app.sent[0], 1));
+  } finally { app.close(); }
+});

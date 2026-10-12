@@ -261,3 +261,11 @@ Verified both responses against a local copy of Willful-vertex-9913 without subm
 # Viewer 0.1.81 / engine unchanged (0.4.69)
 
 Opening Chat, including switching from Journal, scrolls its message feed to the newest message after the panel becomes visible. Scrolling back while Chat remains open is preserved; pending scrolls are cancelled on close or teardown. Verified with desktop/mobile browser checks using an overflowing message history, type checks and production build.
+
+# Viewer 0.1.82 / engine 0.4.70
+
+Siegecraft is offered only to the attacker. Legacy defender prompts finish without cancelling fortress abilities, refund any selected payment, and explain the skipped ability in the journal. Verified declining and paying against a local copy of Willful-vertex-9913; no live moves submitted.
+
+Movement exposes all affordable payment combinations instead of selecting the first valid payment. Roads therefore offers food/ore and gold substitutions before committing the move. Attack destinations retain their preview after payment selection, and alternative payments remain available in the panel. Regression checks cover attacker/defender Siegecraft, legacy prompts, and choosing Roads payment before submitting an attack.
+
+All 737 tests, locale validation, type checks and production build pass. Desktop/mobile browser checks confirm four payment choices and no submitted move before the attack preview.

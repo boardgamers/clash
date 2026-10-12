@@ -170,11 +170,13 @@
       {/each}
     </div>
   {/if}
-  {#if $session.moveTarget && !destination && $session.moveDestinations.length}
+  {#if $session.moveTarget && $session.moveDestinations.filter((d) => d.position === $session.moveTarget).length > 1}
     <div class="settler-destinations" role="group" aria-label="Choose how to move">
       {#each $session.moveDestinations as d, i}{#if d.position === $session.moveTarget}
           <button
             disabled={!!$session.playback || $session.pending}
+            class:active={$session.moveDestination === i}
+            aria-pressed={$session.moveDestination === i}
             onmouseenter={() => onHighlight(d.position)}
             onmouseleave={() => onHighlight(null)}
             onclick={() => controller.chooseMoveRoute(i)}
