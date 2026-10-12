@@ -2590,8 +2590,7 @@ for (const predictions of [true, false]) test(`boarding across two ships spends 
     assert(destination?.boarding);
     assert.equal(destination.boarding.length,2);
     c.chooseMoveDestination('C3');
-    assert.equal(app.sent.length,0,'Preview must not move units');
-    c.boardSelectedUnits();
+    assert.equal(app.sent.length,1,'Clicking the fleet starts boarding immediately');
     for (let i=0; i<2; i++) {
       assert(app.sent[i], 'Boarding continues after server acknowledgement');
       raw = engine.tryMove(raw,app.sent[i],0);

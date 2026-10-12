@@ -47,10 +47,7 @@ try {
   await page.screenshot({path:`/tmp/clash-embark-before-${width}.png`});
   assert.match(await panel.innerText(), /3 selected/);
   await tap('C3');
-  const plan=page.getByRole('group',{name:'Board fleet'});
-  await plan.waitFor();
-  await page.screenshot({path:`/tmp/clash-embark-plan-${width}.png`});
-  await panel.getByRole('button',{name:'Board all 3 units'}).click();
+  assert.equal(await panel.getByRole('button',{name:/Board all/}).count(),0);
   let raw=JSON.stringify(state);
   for(let i=0;i<2;i++) {
     await page.waitForFunction(i=>sent.length>i,i);

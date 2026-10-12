@@ -1182,6 +1182,7 @@ export class Controller {
     if (!destination) return;
     if (destination.boarding) {
       this.patch({ moveTarget: destination.position, moveDestination: index });
+      this.boardSelectedUnits();
       return;
     }
     const selection = this.raw + JSON.stringify(destination.action);
@@ -1228,7 +1229,7 @@ export class Controller {
     }
     return [...destinations.filter(d => !(d.carrier != null && extra.some(e => e.position === d.position))), ...extra];
   }
-  boardSelectedUnits() {
+  private boardSelectedUnits() {
     const s = get(this.session), destination = s.moveDestination == null ? null : s.moveDestinations[s.moveDestination];
     if (s.pending || s.playback || !destination?.boarding) return;
     this.boardingQueue = destination.boarding.map(group => ({position: destination.position, group}));

@@ -228,3 +228,8 @@ Selecting a land group and a friendly fleet now offers boarding against the flee
 Hanno’s Navigator checks whether the ships have moved, without rejecting Hanno for earlier movement. Any eligible ships in his sea space can carry him; internal carrier IDs no longer prevent using another ship, and passenger redistribution preserves capacity. Once-per-turn and post-Navigator ship restrictions remain. Source: printed Hanno card (https://boardgamegeek.com/image/9490516); naval casualty capacity is confirmed by the official rulebook, p. 23, and remains pooled across surviving ships.
 
 Verified with 718 frontend/engine tests, type checks, production build, and desktop/mobile browser checks against both a fixture and a local copy of Stellar-tornado-4358. No moves were submitted to the live game.
+
+
+# Viewer 0.1.75 / engine unchanged (0.4.68)
+
+Clicking a friendly fleet now immediately boards the selected land group across its available capacity. Removed the redundant Board all confirmation. Desktop/mobile browser and controller tests cover immediate boarding with and without optimistic prediction, while retaining one group-move cost.
