@@ -123,5 +123,55 @@
   "complete_civilization_boards": [
     "https://boardgamegeek.com/image/9488277",
     "https://boardgamegeek.com/image/9488278"
-  ]
+  ],
+  "turn_limit_symbol_audit": {
+    "checked": "2026-10-12",
+    "scope": "Visually inspected once-per-turn symbols on all 15 Monumental Edition civilization boards and all 45 leader cards; compared marked abilities with engine guards, consumption, and end-turn reset. This is not a complete behavior audit of all card text.",
+    "board_sources": [
+      "https://boardgamegeek.com/image/9488277",
+      "https://boardgamegeek.com/image/9488278"
+    ],
+    "leader_sources": {
+      "Aztecs": "https://boardgamegeek.com/image/9490514",
+      "Babylonia": "https://boardgamegeek.com/image/9490515",
+      "Carthage": "https://boardgamegeek.com/image/9490516",
+      "Celts": "https://boardgamegeek.com/image/9490517",
+      "China": "https://boardgamegeek.com/image/9490518",
+      "Egypt": "https://boardgamegeek.com/image/9490519",
+      "Greece": "https://boardgamegeek.com/image/9490520",
+      "Huns": "https://boardgamegeek.com/image/9490522",
+      "India": "https://boardgamegeek.com/image/9490523",
+      "Japan": "https://boardgamegeek.com/image/9490524",
+      "Maya": "https://boardgamegeek.com/image/9490527",
+      "Persia": "https://boardgamegeek.com/image/9490528",
+      "Phoenicia": "https://boardgamegeek.com/image/9490529",
+      "Rome": "https://boardgamegeek.com/image/9490530",
+      "Vikings": "https://boardgamegeek.com/image/9490531"
+    },
+    "marked_civilization_abilities": [
+      "Japan: Pottery",
+      "Japan: Shogunate (two independent once-per-turn allowances)",
+      "Greece: City-States",
+      "Maya: Ball Courts (Spirituality research discount only)",
+      "China: Fighting Bands",
+      "India: Peace & Poetry",
+      "Celts: Tribal Allies (spawn action only)"
+    ],
+    "marked_leader_abilities": [
+      "Acamapichtli: Tributes",
+      "Ahuitzotl: Mass Sacrifice",
+      "Marqzen: Spread of Fear",
+      "Hanno: Navigator",
+      "Cleopatra: Beloved",
+      "Ashoka: Buddhism",
+      "Darius: Architect"
+    ],
+    "result": "All printed once-per-turn symbols have matching engine restrictions. No further missing turn-limit guard found.",
+    "boundary_notes": [
+      "Maharaja Sri Gupta: Golden Age has no once-per-turn symbol; city activation and new-category requirement apply.",
+      "Maya: Calendar has no once-per-turn symbol.",
+      "Cnut: Danegeld uses Taxation and shares its once-per-turn allowance despite having no separate symbol.",
+      "Once-per-battle and first-combat-round wording are distinct from once-per-turn symbols."
+    ]
+  }
 }
