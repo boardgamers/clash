@@ -263,3 +263,24 @@ test('choosing region orientation can open a ship destination choice and resume 
   assert.equal(JSON.parse(resolved).players[1].units[0].position, 'B5');
   assert.ok(!view(resolved, 1).decision);
 });
+
+
+test('ships explore beyond connected seas without crossing unrevealed tiles', () => {
+  const g = seaFixture();
+  g.players[1].advances = g.players[1].advances.filter((a: string) => a !== 'Navigation');
+  g.players[1].units[0].position = 'F5';
+  g.map.tiles.push(['G8', 'Unexplored'], ['G9', 'Unexplored']);
+  const ds = routes(JSON.stringify(g), 1, [1]);
+  assert.ok(ds.some((d: any) => d.position === 'G8'), 'explore from the far end of the sea area');
+  assert.ok(!ds.some((d: any) => d.position === 'G9'), 'do not traverse an unrevealed tile');
+  g.players[0].units = [{ id: 20, unit_type: 'Ship', position: 'F6' }];
+  assert.ok(!routes(JSON.stringify(g), 1, [1]).some((d: any) => d.position === 'G8'), 'enemy ships block the route');
+});
+
+test('Navigation can explore next to the destination sea area', () => {
+  const g = seaFixture();
+  g.map.tiles = g.map.tiles.map(([p, t]: [string, string]) => [p, p === 'B7' ? 'Unexplored' : t]);
+  assert.ok(routes(JSON.stringify(g), 1, [1]).some((d: any) => d.position === 'B7'));
+  g.players[1].advances = g.players[1].advances.filter((a: string) => a !== 'Navigation');
+  assert.ok(!routes(JSON.stringify(g), 1, [1]).some((d: any) => d.position === 'B7'));
+});

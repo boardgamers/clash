@@ -291,3 +291,5 @@ Movement animations follow successive terrain-compatible tile centers instead of
 Verified sea/land routing, reverse travel and Navigation perimeter regressions (745 tests), type checks, production build, and desktop/mobile ship movement using a local copy of ClashoftheTitans without submitting live moves.
 
 Viewer 0.1.87 / engine 0.4.72 ends a game immediately when dropping leaves only one active human player, clears pending decisions, and ranks withdrawn players below remaining players regardless of points. Full admin replay also repairs existing unfinished saves with only one remaining player; replaying to an earlier move does not prematurely end it. Multiplayer pending-choice/turn-skipping handling remains separate from this last-player victory fix.
+
+Viewer 0.1.88 / engine 0.4.73 restores ship exploration beside any reachable sea space, including the destination sea area after Navigation. Unrevealed tiles remain endpoints, and enemy ships still block traversal. Verified against a local copy of ClashoftheTitans; no live move was submitted.

@@ -335,7 +335,7 @@ pub(crate) fn sea_routes(
             }
         }
         for next in position.neighbors() {
-            if game.map.is_sea(next) {
+            if game.map.is_sea(next) || game.map.is_unexplored(next) {
                 queue.push_back((next, navigation));
             }
         }
