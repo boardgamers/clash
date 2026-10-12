@@ -40,3 +40,14 @@ test('structured combat records retain participants, dice and rule modifiers', (
     combat.attacker.modifiers.includes('steel weapons added 2 combat value (Metallurgy: no ore cost)'),
   );
 });
+
+
+test('declining government change omits the empty payment from the journal', () => {
+  const game = fixture('status_phase/keep_government.outcome1');
+  const before = JSON.stringify(game);
+  const entry = journal(game).find(e => e.title === 'Change Government');
+  assert.ok(entry);
+  assert.match(JSON.stringify(entry), /Keep current government/);
+  assert.doesNotMatch(JSON.stringify(entry), /Pay ,|Pay /);
+  assert.equal(JSON.stringify(game), before);
+});

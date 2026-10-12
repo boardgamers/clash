@@ -41,7 +41,7 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
   // Older saves logged optional cost conversions merely for owning the advance.
   // Their payment records remain authoritative; do not present those offers as uses.
   const offeredDiscount = (text: string) => /(?:^|: )(?:Reduce the cost of 1 (?:Infantry|Settler) to 1 mood token|Can pay the Draft cost as culture tokens|Mercenaries: Draft 1 Infantry or Ship with mood or gold)$/.test(text);
-  if (action.log) return action.log.filter(line => !offeredDiscount(line));
+  if (action.log) return action.log.filter(line => !offeredDiscount(line) && !/: Pay\s*$/.test(line));
   const result: string[] = [];
   const stats = action.combat_stats as { attacker?: { player?: number } } | undefined;
   let attacker = stats?.attacker?.player;
@@ -65,7 +65,7 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
       else if (item.Text === 'ends the battle in a draw') result.push('Battle ends in a draw');
       else write(item.Text);
     }
-    if (item.Resources)
+    if (item.Resources && (item.Resources.balance !== 'Pay' || Object.values(item.Resources.resources).some(Boolean)))
       write(
         `${item.Resources.balance === 'Gain' ? 'Gain' : item.Resources.balance === 'Pay' ? 'Pay' : 'Lose'} ${pileText(item.Resources.resources)}`,
       );

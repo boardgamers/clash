@@ -299,3 +299,5 @@ Viewer 0.1.89 adds Influence to the main action bar. Its map flow chooses a dest
 Viewer 0.1.90 / engine 0.4.74 fixes Earthquake's reported target scope: its mood continuation uses the same target as its destruction step. Ordinary Earthquake is shown as affecting only its triggering player; Heavy Earthquake still affects all players. Journal eligibility explanations no longer list unrelated civilizations for ordinary Earthquake.
 
 Viewer 0.1.91 / engine 0.4.75 labels the optional end-of-age government payment as “Decide whether to change government” in the public waiting status, instead of “Choose a payment”.
+
+Viewer 0.1.92 omits empty optional payments from journal prose, including older saved entries. Declining a government change now reads “Keep current government” without the stray “Pay ,” prefix. Actual payments and engine history are unchanged; engine remains 0.4.75.
