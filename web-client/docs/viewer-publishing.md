@@ -1,6 +1,6 @@
 # Publishing the viewer
 
-Reference links are declared in `bgs-reference-links.json`. Run `node scripts/update-reference-links.mjs --dry-run` to inspect them and omit `--dry-run` to update BGS metadata without uploading a viewer or engine. The script preserves other links, saves a metadata backup, and verifies the rules, links, engine, and viewer after updating. The English rules link points to WizKids' BGG upload: choose the September 30, 2021 final-print file (February 26 PDF), rather than the older February 5 PDF. The BGG game link uses Monumental Edition.
+Reference links are declared in `bgs-reference-links.json`. Run `node scripts/update-reference-links.mjs --dry-run` to inspect them and omit `--dry-run` to update BGS metadata without uploading a viewer or engine. The script preserves other links, saves a metadata backup, and verifies the rules, links, engine, and viewer after updating. The English rules link opens WizKids' February 5 PDF directly, as requested, instead of a BGG download page. The BGG game link uses Monumental Edition.
 
 Upload both `web-client/dist/viewer.js` and `web-client/dist/server_bg.wasm`. `npm run publish:bgs` now uploads and verifies the whole build before switching the viewer.
 
