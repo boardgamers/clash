@@ -33,6 +33,12 @@ test('events expose engine rules and protections to spectators without revealing
   assert.equal(view(state).objectiveCards.length, 0);
 });
 
+test('Earthquake targets only its triggering player; Heavy Earthquake targets everyone', () => {
+  const catalog = view(fixture('earthquake/earthquake')).eventCatalog!;
+  assert.deepEqual(catalog.find(e => e.id === 30)!.targets, ['active']);
+  assert.deepEqual(catalog.find(e => e.id === 31)!.targets, ['all']);
+});
+
 test('Fire keeps its own title and forest rules while explaining and recording its gold and wood effects', () => {
   const raw = JSON.parse(fixture('pandemics/fire'));
   const cityPositions = new Set(raw.players[0].cities.map((c: { position: string }) => c.position));
@@ -431,4 +437,17 @@ test('automatic exploration explains why the block rotation was forced', () => {
     JSON.stringify(entries(after)),
     /Rotation forced: the revealed water must connect to existing water/,
   );
+});
+
+test('Earthquake never labels a non-target player as below its city threshold', () => {
+  const catalog = view(fixture('earthquake/earthquake')).eventCatalog!;
+  const earthquake = catalog.find(e => e.id === 30)!;
+  const game = history([{ log: ['A new game event has been triggered: Earthquake'] }]);
+  game.players[0].cities = [{ position: 'D2', mood_state: 'Happy' }];
+  game.players.push({ id: 1, civilization: 'Carthage', advances: [], cities: [{ position: 'E2', mood_state: 'Happy' }] } as Game['players'][number]);
+  const v = publicView([earthquake]);
+  v.players.push({ index: 1, civilizationAdvances: [] } as unknown as View['players'][number]);
+  const event = journal(game, v)[0].event!;
+  assert.deepEqual(event.explanations.map(e => e.player), [0]);
+  assert.match(event.explanations[0].text, /requires 3/);
 });

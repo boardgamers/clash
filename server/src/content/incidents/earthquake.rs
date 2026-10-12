@@ -101,7 +101,7 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
         },
     )
     .add_decrease_mood(
-        IncidentTarget::AllPlayers,
+        target,
         MoodModifier::Decrease,
         move |_p, _game, i| {
             let c = &i.player.must_reduce_mood;
