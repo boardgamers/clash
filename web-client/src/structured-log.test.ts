@@ -51,3 +51,19 @@ test('declining government change omits the empty payment from the journal', () 
   assert.doesNotMatch(JSON.stringify(entry), /Pay ,|Pay /);
   assert.equal(JSON.stringify(game), before);
 });
+
+test('played action cards and their research results link to the exact public card', () => {
+  const game = fixture('action_cards/advance.outcome2');
+  const before = JSON.stringify(game);
+  const card = { id: 2, name: 'Advance', description: 'Gain an advance.', free: true, tactics: null };
+  const entries = journal(game, { players: [], cardCatalog: [
+    { ...card, id: 99 }, card,
+  ], logOriginNames: { '{"CivilCard":2}': 'Advance' } });
+  const played = entries.filter(entry => entry.title === 'Action card · Advance');
+  assert.equal(played.length, 3);
+  assert.ok(played.every(entry => entry.kind === 'card' && entry.card?.id === 2));
+  assert.ok(played.some(entry => entry.tokens.some(token => token.value === '−1')));
+  assert.ok(played.some(entry => /Storage/.test(entry.text)));
+  assert.ok(!entries.some(entry => entry.title === 'Action Card'));
+  assert.equal(JSON.stringify(game), before);
+});

@@ -566,7 +566,11 @@
     <div class="journal-heading">
       {#if entry.civilization}<strong>{entry.civilization}</strong>{/if}
       {#if !outcome}<span class:journal-event-title={!!entry.event}
-          >{#if !entry.event}<EntryIcon size={13} aria-hidden="true" />{/if}<ResourceText
+          >{#if !entry.event}<EntryIcon size={13} aria-hidden="true" />{/if}{#if entry.card}<span>Action card · <button
+            class="journal-research-link"
+            title={`View ${printedCardName(entry.card.name)} rules`}
+            onclick={() => showJournalCard({ name: entry.card!.name, card: entry.card! })}
+            >{printedCardName(entry.card.name)}</button></span>{:else}<ResourceText
             text={entry.event || entry.kind === 'event' ? printedCardName(entry.title) : entry.title}
             {research}
             onResearch={showJournalResearch}
@@ -574,7 +578,7 @@
             onCard={showJournalCard}
             positions={mapPositions}
             {...coordinateInteraction}
-          /></span
+          />{/if}</span
         >{/if}
     </div>
     {#if entry.combat}<CombatJournal
@@ -899,10 +903,6 @@
             : null}
           {@const progressLabel =
             status === 'current' ? 'Turn in progress' : status === 'left' ? 'Left game' : null}
-          {@const hand = ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p => p.id === player.index)}
-          {@const handCount = hand?.action_cards?.length ?? (!$session.playback && hand ? 0 : undefined)}
-          {@const objectiveCount = hand?.objective_cards?.length ?? (!$session.playback && hand ? 0 : undefined)}
-          {@const wonderCount = hand?.wonder_cards?.length ?? (!$session.playback && hand ? 0 : undefined)}
           <button
             class="player-card"
             class:active={!!turnLabel}
@@ -911,9 +911,6 @@
             aria-label={[
               `${translate(player.civilization)}: ${formatPoints(player.score)} ${translate('victory points')}`,
               player.index === $session.seat ? translate('You') : player.name,
-              handCount !== undefined ? `${translate('Action cards')}: ${handCount}` : '',
-              objectiveCount !== undefined ? `Objective cards in hand: ${objectiveCount}` : '',
-              wonderCount !== undefined ? `Wonder cards in hand: ${wonderCount}` : '',
               order ? translate(`Turn order ${order}.`).replace(/\.$/u, '') : '',
               turnLabel ? translate(turnLabel) : '',
               progressLabel ? translate(progressLabel) : '',
@@ -957,11 +954,6 @@
                     title={$session.playerBadges[player.index]!.label}
                   />{/if}</small
               ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span>
-              <span class="player-hands">
-                {#if handCount !== undefined}<span class="player-hand-count" title={`Action cards: ${handCount}`} aria-hidden="true"><Layers size={12} />{handCount}</span>{/if}
-                {#if objectiveCount !== undefined}<span class="player-hand-count" title={`Objective cards in hand: ${objectiveCount}`} aria-hidden="true"><Target size={12} />{objectiveCount}</span>{/if}
-                {#if wonderCount !== undefined}<span class="player-hand-count" title={`Wonder cards in hand: ${wonderCount}`} aria-hidden="true"><Landmark size={12} />{wonderCount}</span>{/if}
-              </span>
               {#if turnLabel || progressLabel}<span class="player-turn" class:round-inactive={!turnLabel}
                   >{#if turnLabel || status === 'current'}<ArrowRight
                       size={12}

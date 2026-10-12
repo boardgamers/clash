@@ -235,7 +235,7 @@ function addClause(entry: JournalEntry, clause: string, payments: PaymentLog[]):
 
 export function journal(
   game: Game,
-  view?: Pick<View, 'eventCatalog' | 'pendingEvent' | 'players' | 'logOriginNames'>,
+  view?: Pick<View, 'eventCatalog' | 'pendingEvent' | 'players' | 'logOriginNames' | 'cardCatalog'>,
 ): JournalEntry[] {
   game = readableHistory(game, view);
   const historicalCities = collectionCities(game);
@@ -354,7 +354,8 @@ export function journal(
             let entry = entries.at(-1);
             const sameSource =
               entry &&
-              (entry.title.split(' · ')[0].toLowerCase() === origin?.toLowerCase() ||
+              (entry.title.toLowerCase() === origin?.toLowerCase() ||
+                entry.title.split(' · ')[0].toLowerCase() === origin?.toLowerCase() ||
                 (entry.title === 'Research' &&
                   (origin === 'Advance' ||
                     entry.tokens.some((token) => token.icon === 'research' && token.label === origin))));
@@ -386,6 +387,18 @@ export function journal(
             }
             for (const clause of match[3].split(/,(?!\s*(?:\d|and\b))\s*/))
               addClause(entry, factionText(game, clause), payments);
+          }
+          for (const entry of entries) {
+            if (!entry.title.startsWith('Action card · ')) continue;
+            const name = entry.title.slice('Action card · '.length);
+            const cardIds = (action.items ?? []).filter(item => item.player === entry.player).flatMap(item => {
+              if (typeof item.origin?.CivilCard === 'number') return [item.origin.CivilCard];
+              const hand = item.HandCard;
+              return hand?.to === 'PlayToDiscard' && hand.card && typeof hand.card === 'object' &&
+                'ActionCard' in hand.card && typeof hand.card.ActionCard === 'number' ? [hand.card.ActionCard] : [];
+            });
+            entry.card = view?.cardCatalog?.find(card => cardIds.includes(card.id) && card.name === name);
+            entry.kind = 'card';
           }
           confirmPayments(action, payments, entries);
           // Nomads and Move log the same city relocation under different origins.

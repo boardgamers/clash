@@ -500,6 +500,7 @@ export interface JournalEntry {
   title: string;
   tokens: JournalToken[];
   notes: string[];
+  card?: import('./card-reference').CardRule;
   combat?: import('./combat-journal').CombatRound;
   collection?: {
     city?: { size: number; mood: string; structures: string[] };

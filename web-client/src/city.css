@@ -1263,23 +1263,13 @@
   margin: 0 0 8px;
 }
 
-.player-hand-count, .civilization-hand-count {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-.player-hand-count {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
+/* Private card identities stay hidden; these are public hand sizes. */
+.civilization-hand-summary { margin: .25rem 0 1.25rem; }
+.civilization-hand-label { display: block; color: var(--muted); font-size: .75rem; margin-bottom: .5rem; }
+.civilization-hands { display: flex; flex-wrap: wrap; gap: .5rem; }
 .civilization-hand-count {
-  margin: 0 0 1rem;
+  display: flex; align-items: center; gap: .4rem; flex: 1 1 135px;
+  margin: 0; padding: .5rem .65rem; font-size: .8rem;
+  border: 1px solid var(--line); border-radius: 6px; color: var(--muted);
 }
-
-.player-hands, .civilization-hands {
-  display: flex;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-}
-.player-info .player-hands { grid-area: 3 / 1 / 4 / 4; }
-.player-card .player-info .player-turn { grid-area: 4 / 1 / 5 / 4; }
+.civilization-hand-count strong { margin-left: auto; color: var(--ink); font-size: .95rem; }

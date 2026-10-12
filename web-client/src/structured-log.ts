@@ -3,7 +3,7 @@ import { officialWonderText } from './wonder-names.ts';
 
 type Units = Record<string, number | string>;
 type Item = NonNullable<LoggedAction['items']>[number];
-type Context = Pick<View, 'eventCatalog' | 'logOriginNames'>;
+type Context = Pick<View, 'eventCatalog' | 'logOriginNames' | 'cardCatalog'>;
 const words = (name: unknown): string =>
   typeof name === 'string'
     ? name.replace(/([a-z])([A-Z])/g, '$1 $2').replaceAll('_', ' ')
@@ -25,6 +25,10 @@ const actor = (game: Game, player: number): string =>
 function source(item: Item, context?: Context): string {
   const origin = item.origin ?? {};
   const label = context?.logOriginNames?.[JSON.stringify(origin)];
+  if (origin.CivilCard !== undefined) {
+    const card = context?.cardCatalog?.find(card => card.id === origin.CivilCard);
+    return `Action card · ${card?.name ?? label ?? `Card ${origin.CivilCard}`}`;
+  }
   if (label) return label;
   if (origin.Incident !== undefined)
     return (
@@ -55,7 +59,12 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
   if (collect && action.items?.length)
     add(action.player ?? action.items[0].player, 'Collect', `Use city ${collect.city_position}`);
   for (const item of action.items ?? []) {
-    const origin = source(item, context);
+    const played = item.HandCard?.to === 'PlayToDiscard' && item.HandCard.card &&
+      typeof item.HandCard.card === 'object' && 'ActionCard' in item.HandCard.card
+      ? item.HandCard.card.ActionCard : undefined;
+    const origin = typeof played === 'number'
+      ? source({ ...item, origin: { CivilCard: played } }, context)
+      : source(item, context);
     const write = (text: string) => add(item.player, origin, text);
     if (item.Text !== undefined && !offeredDiscount(item.Text)) {
       const event = item.Text.match(/^triggers the event (.+)$/);
