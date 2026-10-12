@@ -63,6 +63,7 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
     if actions.is_empty() {
         return Err("Cannot replay an empty action history".to_string());
     }
+    let full_replay = to.is_none_or(|to| to == actions.len());
     let to = to.unwrap_or(actions.len());
     if to > actions.len() {
         return Err(format!("Replay target {to} is outside the action history"));
@@ -131,5 +132,8 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         game.players[player.id].settings = player.settings;
     }
     game.dropped_players = data.dropped_players;
+    if full_replay {
+        game.finish_after_drop();
+    }
     Ok(game)
 }

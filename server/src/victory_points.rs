@@ -159,6 +159,12 @@ pub fn victory_points_parts(player: &Player, game: &Game) -> [(&'static str, f32
 pub(crate) fn compare_score(player: &Player, other: &Player, game: &Game) -> Ordering {
     use std::cmp::Ordering::{Equal, Greater, Less};
 
+    let dropped = game.dropped_players.contains(&player.index);
+    let other_dropped = game.dropped_players.contains(&other.index);
+    if dropped != other_dropped {
+        return if dropped { Less } else { Greater };
+    }
+
     let parts = victory_points_parts(player, game);
     let other_parts = victory_points_parts(other, game);
     let sum = parts.iter().map(|(_, v)| v).sum::<f32>();

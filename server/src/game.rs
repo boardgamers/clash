@@ -571,12 +571,37 @@ impl Game {
         self.messages.push(message.to_string());
     }
 
+    /// End by withdrawal independently of points or pending choices.
+    pub(crate) fn finish_after_drop(&mut self) -> bool {
+        if self.dropped_players.is_empty() || self.human_players_count() > 1 {
+            return false;
+        }
+        if matches!(self.state, GameState::Finished) {
+            return true;
+        }
+        self.events.clear();
+        if let Some(winner) = self.human_player_ids().first().copied() {
+            self.current_player_index = winner;
+            self.add_message(&format!(
+                "{} wins: all other players have left the game",
+                self.player_name(winner)
+            ));
+        }
+        self.state = GameState::Finished;
+        true
+    }
+
     pub fn drop_player(&mut self, player_index: usize) {
         if self.civilization_draft.is_some() {
             crate::game_setup::drop_draft_player(self, player_index);
             return;
         }
-        self.dropped_players.push(player_index);
+        if !self.dropped_players.contains(&player_index) {
+            self.dropped_players.push(player_index);
+        }
+        if self.finish_after_drop() {
+            return;
+        }
         self.add_message(&format!(
             "{} has left the game",
             self.player_name(player_index)

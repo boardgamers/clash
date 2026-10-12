@@ -119,7 +119,7 @@ pub fn rankings(game: &Game) -> Vec<u32> {
         }
         let mut rank = 1;
         for other in &game.players {
-            if compare_score(other, player, game) == Greater {
+            if other.is_human() && compare_score(other, player, game) == Greater {
                 rank += 1;
             }
         }
