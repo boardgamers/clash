@@ -183,7 +183,8 @@
           >
             {#if d.pirateCarrier != null}<Ship size={16} />Allied pirate
             {:else if d.carrier != null}<Ship size={16} />Board ship
-            {:else if d.attack}<Swords size={16} />Attack
+            {:else if d.attack}<Swords size={16} />{d.label ?? 'Attack'}
+            {:else if d.terrain === 'Water' && $session.moveDestinations.some(other => other.position === d.position && other.label === 'Attack pirates')}<Ship size={16} />Sail peacefully
             {:else}<TerrainIcon terrain={d.terrain} />{terrainInfo(d.terrain).label}{/if}
             {#if Object.values(d.payment).some(Boolean)}<ResourceAmount pile={d.payment} />{/if}
           </button>

@@ -279,3 +279,7 @@ Caesar's Proconsul grants infantry only when its one-gold payment is made. Previ
 Combat dice whose matching unit ability was prevented by High Ground or Mighty Army show a red border and crossed-circle marker in the journal and battle recap. A visible explanation and tooltip name the blocking effect. Matching respects available unit counts and does not flag unrelated or excess faces; historical rolls lacking a recorded roster are not guessed. Combat values and outcomes are unchanged.
 
 Collect preselects one resource choice per eligible tile when the number of distinct tiles exactly equals city capacity, on opening or switching cities. The engine validates the full selection before it appears, and resource choices remain editable. Opening Collect from one of those tiles does not immediately deselect it. Collection is never submitted automatically. Verified blocked-dice desktop/mobile browser checks, selection/payment regression tests, type checks and production build.
+
+# Viewer 0.1.85 / engine unchanged (0.4.71)
+
+Carthage's two routes to a pirate-occupied sea space are explicitly labelled Sail peacefully and Attack pirates. The peaceful option previously appeared only as Water. Verified on a read-only local copy of ClashoftheTitans: ship 4 and its settler move from A8 to E8 with no combat. Desktop/mobile browser clicks submit the peaceful action, and type checks and production build pass. No live move was submitted.
