@@ -379,3 +379,79 @@ fn test_recruit_combat() {
         ],
     );
 }
+
+#[test]
+fn surviving_defenders_are_restricted_only_for_their_current_turn() {
+    use server::movement::MovementRestriction;
+    for own_turn in [false, true] {
+        let mut game = execute(
+            retreat_casualties_game(false),
+            move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
+            0,
+        );
+        // Resolve the same battle as an ordinary out-of-turn defense or as
+        // an event battle during the defender's turn (including older saves).
+        if own_turn {
+            game.current_player_index = 1;
+            // A unit may already have fought in another defensive battle.
+            game.player_mut(1).units[0]
+                .movement_restrictions
+                .push(MovementRestriction::Battle);
+        }
+        let mut game = execute(game, Action::Response(EventResponse::Bool(true)), 0);
+        assert!(game.events.is_empty());
+        assert_eq!(game.player(1).units.len(), 2);
+        for unit in &game.player(1).units {
+            assert_eq!(
+                unit.movement_restrictions
+                    .iter()
+                    .filter(|r| **r == MovementRestriction::Battle)
+                    .count(),
+                usize::from(own_turn)
+            );
+        }
+        server::player::end_turn(&mut game, 1);
+        assert!(
+            game.player(1)
+                .units
+                .iter()
+                .all(|u| u.movement_restrictions.is_empty())
+        );
+    }
+}
+
+#[test]
+fn defending_ships_stop_but_passengers_and_longships_remain_free() {
+    use server::movement::MovementRestriction;
+    for longships in [false, true] {
+        let mut game = JSON.load_game("ship_combat");
+        let mut passenger = game.player(0).units[0].clone();
+        passenger.id = 99;
+        passenger.position = Position::from_offset("D2");
+        passenger.carrier_id = Some(1);
+        game.player_mut(1).units.push(passenger);
+        if longships {
+            game.player_mut(1)
+                .special_advances
+                .insert(serde_json::from_str("\"Longships\"").unwrap());
+        }
+        game.dice_roll_outcomes = vec![0; 3];
+        let mut game = execute(
+            game,
+            move_action(vec![7, 8], Position::from_offset("D2")),
+            0,
+        );
+        assert_retreat_round(&game, 1);
+        game.current_player_index = 1;
+        let game = execute(game, Action::Response(EventResponse::Bool(true)), 0);
+        assert!(game.events.is_empty());
+        assert_eq!(
+            game.player(1)
+                .get_unit(1)
+                .movement_restrictions
+                .contains(&MovementRestriction::Battle),
+            !longships
+        );
+        assert!(game.player(1).get_unit(99).movement_restrictions.is_empty());
+    }
+}

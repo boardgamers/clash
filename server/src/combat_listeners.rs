@@ -8,10 +8,11 @@ use crate::content::persistent_events::{PersistentEventType, PositionRequest, Un
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::current_action_log_mut;
-use crate::movement::move_units;
+use crate::movement::{MovementRestriction, move_units};
 use crate::player::gain_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
+use crate::special_advance::SpecialAdvance;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
 use crate::unit::{UnitType, kill_units};
 use itertools::Itertools;
@@ -322,6 +323,7 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
         |s| s.defender.tactics_card.as_ref(),
     );
     let e = e?;
+    restrict_defenders_after_battle(game, &e.combat.stats);
 
     if let Some(f) = &e.final_result {
         let c = e.combat;
@@ -385,6 +387,34 @@ fn end_combat_and_store_stats(game: &mut Game, e: CombatEnd) {
     stats.city_has_temple |= city_has_temple;
     stats.result = Some(e.result.clone());
     end_combat(game, stats);
+}
+
+fn restrict_defenders_after_battle(game: &mut Game, s: &CombatStats) {
+    // An event can make the turn owner defend. Battle restrictions expire at
+    // the owner's turn end, so out-of-turn defenders must not receive them.
+    // Do this before combat-end rewards: newly gained units did not fight.
+    let defender = s.defender.player;
+    if defender == game.current_player_index && game.player(defender).is_human() {
+        let longships = game
+            .player(defender)
+            .has_special_advance(SpecialAdvance::Longships);
+        let on_water = !s.battleground.is_land();
+        for unit in game.player_mut(defender).get_units_mut(s.defender.position) {
+            let fought = if on_water {
+                unit.is_ship()
+            } else {
+                unit.unit_type.is_army_unit()
+            };
+            if fought
+                && !(unit.is_ship() && longships)
+                && !unit
+                    .movement_restrictions
+                    .contains(&MovementRestriction::Battle)
+            {
+                unit.movement_restrictions.push(MovementRestriction::Battle);
+            }
+        }
+    }
 }
 
 pub(crate) fn end_combat(game: &mut Game, s: CombatStats) {

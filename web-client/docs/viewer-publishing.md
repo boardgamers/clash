@@ -196,3 +196,7 @@ Recap captions replace generic choice/payment labels with recorded outcomes: uni
 # Viewer 0.1.68 / engine 0.4.63
 
 BGS logSlice now returns entries with public readable text and player metadata alongside the original action. Only the requested active-history interval is summarized; log length, inclusive slice bounds, Undo truncation and saved replay actions are unchanged. The ongoing-game list can use the latest summary without a viewer being open. Empty StartTurn bookkeeping is marked as a phase so it cannot displace the preceding real move. Draw summaries expose card types only, never private card names or private log prose. Existing stored list summaries update on the next move.
+
+# Viewer 0.1.69 / engine 0.4.64
+
+Surviving defenders who fight during their own turn now receive the battle movement restriction, including event-triggered barbarian attacks and attacker retreats. The restriction expires at turn end and is not applied to out-of-turn defenses, uninvolved naval passengers, or ships with Longships. It is applied before combat-end rewards so newly awarded units remain free. Regression coverage includes repeated defenses, turn expiry, saved battles, passengers and Longships.
