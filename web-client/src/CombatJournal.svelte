@@ -1,6 +1,6 @@
 <script lang="ts">
   import { printedCardName } from './card-names';
-  import { RotateCcw } from 'lucide-svelte';
+  import { RotateCcw, CircleSlash } from 'lucide-svelte';
   import type { CombatDie, CombatRound } from './combat-journal';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import UnitIcon from './UnitIcon.svelte';
@@ -18,7 +18,7 @@
   } = $props();
   const sides = $derived([combat.attacker, combat.defender]);
   const dieLabel = (die: CombatDie) =>
-    `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : (die.effect ?? 'No ability activated')}` : 'Face not recorded'}`;
+    `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : (die.blockedBy ? `Ability blocked by ${die.blockedBy}` : die.effect ?? 'No ability activated')}` : 'Face not recorded'}`;
 </script>
 
 <table class="combat-table" aria-label={`Combat round ${combat.round ?? ''}`}>
@@ -67,6 +67,7 @@
             {#each side.dice ?? [] as die}<span
                 class="combat-die"
                 class:activated={!!die.effect}
+                class:ability-blocked={!!die.blockedBy}
                 class:rerolled={die.effect === 're-roll'}
                 role="img"
                 aria-label={dieLabel(die)}
@@ -75,9 +76,10 @@
                 <b>{die.value}</b>{#if die.symbol}<UnitIcon
                     type={die.symbol === 'Leader' ? { Leader: 'Leader' } : die.symbol}
                     size={14}
-                  />{/if}{#if die.effect === 're-roll'}<RotateCcw size={10} />{/if}
+                  />{/if}{#if die.blockedBy}<CircleSlash size={10} />{/if}{#if die.effect === 're-roll'}<RotateCcw size={10} />{/if}
               </span>{:else}{side.dice ? 'None' : '—'}{/each}
           </div>
+          {#if side.dice?.some(d => d.blockedBy)}<span class="combat-blocked-note">Dice-symbol abilities blocked by {side.diceBlockedBy}</span>{/if}
           {#each side.dice?.filter((d) => d.effect && d.effect !== 're-roll') ?? [] as die}
             <span class="combat-die-effect"
               ><UnitIcon type={die.symbol === 'Leader' ? { Leader: 'Leader' } : die.symbol!} size={12} />

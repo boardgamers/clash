@@ -275,3 +275,21 @@ test('blocked tactics name the ability, preserving new army counts and legacy ex
     assert.equal(JSON.stringify(entries), original);
   }
 });
+
+for (const source of ['High Ground', 'Mighty Army']) test(`${source} marks only dice with an eligible unused unit`, () => {
+  const game = fixture('remove_casualties_attacker.outcome');
+  game.log![0].rounds[0].turns[0].actions = [{ log: [
+    'Combat round 1',
+    'Player1: Combat: Attacking with 1 infantry and Caesar',
+    'Player2: Combat: Defending with 1 infantry',
+    'Player1: Combat: Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 5 (cavalry, no bonus), 1 (leader, no bonus) for combined combat value of 18 and gets 1 hits against defending units',
+    `Player1: Combat: Combat modifiers: ${source === 'High Ground' ? 'High Ground prevents opponent from using dice-symbol abilities' : 'Mighty Army: five units, no tactics or dice-symbol abilities'}`,
+  ] }];
+  game.log_index = 1;
+  const [combat] = rounds(journal(game));
+  assert.equal(combat.attacker.diceBlockedBy, source);
+  assert.deepEqual(combat.attacker.dice?.map(d => d.blockedBy), [source, undefined, undefined, source]);
+  assert(combat.attacker.dice?.every(d => !d.effect));
+  assert.equal(combat.attacker.value, 18);
+  assert.equal(combat.defender.diceBlockedBy, undefined);
+});

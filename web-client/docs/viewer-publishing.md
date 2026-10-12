@@ -273,3 +273,9 @@ All 737 tests, locale validation, type checks and production build pass. Desktop
 # Viewer 0.1.83 / engine 0.4.71
 
 Caesar's Proconsul grants infantry only when its one-gold payment is made. Previously the callback checked the payment list instead of its resource amount, granting an infantry even on decline. The latest D2 capture in a read-only copy of Willful-vertex-9913 confirms that exact sequence; the existing live unit was not removed. Paid/declined regression tests and all 739 tests, locale validation, type checks and production build pass.
+
+# Viewer 0.1.84 / engine unchanged (0.4.71)
+
+Combat dice whose matching unit ability was prevented by High Ground or Mighty Army show a red border and crossed-circle marker in the journal and battle recap. A visible explanation and tooltip name the blocking effect. Matching respects available unit counts and does not flag unrelated or excess faces; historical rolls lacking a recorded roster are not guessed. Combat values and outcomes are unchanged.
+
+Collect preselects one resource choice per eligible tile when the number of distinct tiles exactly equals city capacity, on opening or switching cities. The engine validates the full selection before it appears, and resource choices remain editable. Opening Collect from one of those tiles does not immediately deselect it. Collection is never submitted automatically. Verified blocked-dice desktop/mobile browser checks, selection/payment regression tests, type checks and production build.

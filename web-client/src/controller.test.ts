@@ -1102,6 +1102,7 @@ test('port resource choices replace one another even after selecting another til
     c.setPlayer(0);
     await c.load(engine.stripSecret(raw, 0));
     c.beginCollect('C2');
+    for (const choice of [...app.session().selection]) c.toggleChoice(choice);
     const city = app.session().view!.cities.find((city) => city.position === 'C2')!;
     const gold = city.choices.find((choice) => choice.pile.gold)!;
     const mood = city.choices.find((choice) => choice.pile.mood_tokens)!;
@@ -2686,5 +2687,31 @@ test('Roads offers food/gold choices before an attack and submits the selected p
     c.chooseMoveRoute(index);
     assert.deepEqual(app.sent.map(a => JSON.parse(a)), [action]);
     assert.doesNotThrow(() => engine.tryMove(JSON.stringify(g), app.sent[0], 1));
+  } finally { app.close(); }
+});
+
+test('Collect preselects all tiles only when their count equals capacity', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const raw = await engine.init(2, [], {}, 'collect-all-tiles', {});
+    const g = JSON.parse(raw), seat = engine.currentPlayer(raw);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    const city = app.session().view!.cities[0];
+    const positions = [...new Set(city.choices.map(choice => choice.position))];
+    assert(positions.length > city.capacity);
+    c.beginCollect(city.position);
+    assert.equal(app.session().selection.length, 0);
+    const keep = positions.slice(0, city.capacity);
+    for (const tile of g.map.tiles) if (positions.includes(tile[0]) && !keep.includes(tile[0])) tile[1] = 'Barren';
+    await c.load(engine.stripSecret(JSON.stringify(g), seat));
+    c.beginCollect(city.position);
+    assert.deepEqual(app.session().selection.map(choice => choice.position).sort(), [...keep].sort());
+    assert(app.session().preview?.action);
+    assert.deepEqual(app.sent, []);
+    c.collectFromTile(city.position, keep[0]);
+    assert.equal(app.session().selection.length, city.capacity, 'opening from a preselected tile must not deselect it');
+    c.toggleChoice(app.session().selection[0]);
+    assert.equal(app.session().selection.length, city.capacity - 1, 'manual deselection remains available');
   } finally { app.close(); }
 });

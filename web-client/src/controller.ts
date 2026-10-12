@@ -1309,7 +1309,7 @@ export class Controller {
   }
   collectFromTile(city: string, tile: string) {
     this.beginCollect(city);
-    this.selectCollectionTile(tile);
+    if (!get(this.session).selection.some(choice => choice.position === tile)) this.selectCollectionTile(tile);
   }
   showTradeRoutes(show = true) {
     this.closeActivity();
@@ -1404,6 +1404,24 @@ export class Controller {
       attackPirates: false,
       abilitiesOpen: false,
     });
+    this.preselectCollectionTiles();
+  }
+  private preselectCollectionTiles() {
+    const s = get(this.session);
+    const city = s.view?.cities.find(city => city.position === s.city);
+    if (!s.view?.canPlay || s.playback || !city || city.reason || !city.capacity) return;
+    const tiles = new Map<string, Choice>();
+    for (const choice of city.choices) if (!tiles.has(choice.position)) tiles.set(choice.position, choice);
+    if (tiles.size !== city.capacity) return;
+    const selection = [...tiles.values()].map(choice => ({ ...choice, times: 1 }));
+    try {
+      const preview = this.query<NonNullable<Session['preview']>>({
+        kind: 'collect', city: s.city, selections: selection, variant: s.collectVariant, ballcourts: false,
+      });
+      if (preview.action) this.patch({ selection, preview });
+    } catch {
+      // Range limits or special effects can make collecting every tile illegal.
+    }
   }
   switchCollectVariant(variant: Move) {
     const s = get(this.session);
@@ -1447,6 +1465,7 @@ export class Controller {
       collectionTile: null,
       error: '',
     });
+    this.preselectCollectionTiles();
   }
   openCities(position?: string, cityTab: Session['cityTab'] = 'build') {
     if (cityTab === 'happiness') {

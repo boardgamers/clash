@@ -4,6 +4,7 @@ export interface CombatDie {
   value: number;
   symbol?: 'Infantry' | 'Cavalry' | 'Elephant' | 'Leader';
   effect?: string;
+  blockedBy?: string;
 }
 export interface CombatSide {
   player?: number;
@@ -17,6 +18,7 @@ export interface CombatSide {
   tactics?: string;
   tacticsEffect?: string;
   tacticsBlocked?: string;
+  diceBlockedBy?: string;
 }
 export interface CombatRound {
   round?: number;
@@ -205,6 +207,14 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
       // Only move known roll modifiers into the table; keep other effects below.
       const remainder: string[] = [];
       for (const clause of clauses) {
+        if (/High Ground.*prevents.*dice-symbol abilities/i.test(clause)) {
+          target.diceBlockedBy = 'High Ground';
+          target.modifiers.push(clause);
+          continue;
+        }
+        if (/Mighty Army:.*no tactics or dice-symbol abilities/i.test(clause)) {
+          target.diceBlockedBy = 'Mighty Army';
+        }
         const blockedBy = /^Sparta (?:denies playing tactics cards|blocks tactics cards:)/i.test(clause)
           ? 'Sparta'
           : /Trojan Horse.*(?:denied|denies).*Tactics Cards/i.test(clause)
@@ -236,6 +246,19 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
   }
   for (const entry of output) {
     if (!entry.combat) continue;
+    for (const side of [entry.combat.attacker, entry.combat.defender]) {
+      if (!side.diceBlockedBy || !side.units) continue;
+      const remaining = new Map<string, number>();
+      for (const unit of side.units) {
+        const type = typeof unit.type === 'object' ? 'Leader' : unit.type;
+        remaining.set(type, (remaining.get(type) ?? 0) + unit.count);
+      }
+      for (const die of side.dice ?? []) {
+        if (!die.symbol || die.effect || !(remaining.get(die.symbol) ?? 0)) continue;
+        die.blockedBy = side.diceBlockedBy;
+        remaining.set(die.symbol, remaining.get(die.symbol)! - 1);
+      }
+    }
     explainCancelledHits(entry.combat.attacker, entry.combat.defender);
     explainCancelledHits(entry.combat.defender, entry.combat.attacker);
   }

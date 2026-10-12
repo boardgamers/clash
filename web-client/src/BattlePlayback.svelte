@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Swords, Shield, X } from 'lucide-svelte';
+  import { Swords, Shield, X, CircleSlash } from 'lucide-svelte';
   import type { Controller } from './controller';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import UnitIcon from './UnitIcon.svelte';
@@ -44,15 +44,17 @@
                 {#each side.dice as die, i}<span
                     class="battle-die"
                     class:activated={!!die.effect}
+                    class:ability-blocked={!!die.blockedBy}
                     style={`--die-delay:${i * 45}ms`}
-                    title={`${die.value}${die.symbol ? ` · ${die.symbol}` : ''}${die.effect ? ` · ${die.effect}` : ''}`}
+                    title={`${die.value}${die.symbol ? ` · ${die.symbol}` : ''}${die.blockedBy ? ` · Ability blocked by ${die.blockedBy}` : die.effect ? ` · ${die.effect}` : ''}`}
                   >
                     <b>{die.value}</b>{#if die.symbol}<UnitIcon
                         type={die.symbol === 'Leader' ? { Leader: 'Leader' } : die.symbol}
                         size={12}
-                      />{/if}
+                      />{/if}{#if die.blockedBy}<CircleSlash size={10} />{/if}
                   </span>{:else}<small>No dice</small>{/each}
               </div>
+              {#if side.dice.some(d => d.blockedBy)}<small class="combat-blocked-note">Abilities blocked by {side.diceBlockedBy}</small>{/if}
               <div class="battle-hit-count">
                 <span>{side.value} value</span><strong
                   >{#if side.cancelledHits}<s title={side.cancelledHits.reasons.join(' · ')}

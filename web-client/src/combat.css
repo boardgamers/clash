@@ -344,3 +344,15 @@
   line-height: 1.45;
   color: var(--muted);
 }
+
+.combat-die.ability-blocked,
+.battle-die.ability-blocked {
+  border: 2px solid #ce5c48;
+  box-shadow: 0 0 0 1px #ce5c4840;
+}
+.combat-blocked-note {
+  display: block;
+  margin-top: .3rem;
+  font-size: .75rem;
+  color: var(--text);
+}
