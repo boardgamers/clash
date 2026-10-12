@@ -297,3 +297,5 @@ Viewer 0.1.88 / engine 0.4.73 restores ship exploration beside any reachable sea
 Viewer 0.1.89 adds Influence to the main action bar. Its map flow chooses a destination and specific building first, preselects the cheapest eligible source, then explicitly presents Arts/Influence Culture and their upfront costs before rolling. A single available method still requires confirmation. Desktop, mobile and Strategy browser checks cover building selection, method changes, and no submission before confirmation. Engine remains 0.4.73.
 
 Viewer 0.1.90 / engine 0.4.74 fixes Earthquake's reported target scope: its mood continuation uses the same target as its destruction step. Ordinary Earthquake is shown as affecting only its triggering player; Heavy Earthquake still affects all players. Journal eligibility explanations no longer list unrelated civilizations for ordinary Earthquake.
+
+Viewer 0.1.91 / engine 0.4.75 labels the optional end-of-age government payment as “Decide whether to change government” in the public waiting status, instead of “Choose a payment”.

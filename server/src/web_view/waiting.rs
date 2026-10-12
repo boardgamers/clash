@@ -55,6 +55,9 @@ pub(super) fn describe(game: &Game) -> Option<Value> {
                 "Choose a battle card"
             }
             (Request::SelectHandCards(_), _) => "Choose a card",
+            (Request::Payment(_), EventOrigin::Ability(name)) if name == "Change Government" => {
+                "Decide whether to change government"
+            }
             (Request::Payment(_), _) => "Choose a payment",
             (Request::ResourceReward(_), _) => "Choose resources",
             (Request::SelectAdvance(_), _) => "Choose an advance",
