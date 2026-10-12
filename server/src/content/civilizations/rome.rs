@@ -122,8 +122,8 @@ fn provinces() -> SpecialAdvanceInfo {
         |event| &mut event.combat_end,
         21,
         |game, player, s| {
-            s.captured_city(player.index)
-                .is_some()
+            (s.captured_city(player.index).is_some()
+                && player.get(game).try_get_city(s.defender.position).is_some())
                 .then_some(vec![PaymentRequest::optional(
                     player
                         .payment_options()
@@ -132,6 +132,13 @@ fn provinces() -> SpecialAdvanceInfo {
                 )])
         },
         |game, c, s| {
+            // Older saved games may already be waiting for Provinces after the
+            // city was automatically razed at the city limit. Refund any payment
+            // and finish that obsolete choice without touching a missing city.
+            if game.player(c.player_index).try_get_city(s.defender.position).is_none() {
+                c.player().gain_resources(game, c.choice[0].clone());
+                return;
+            }
             set_city_mood(
                 game,
                 s.defender.position,

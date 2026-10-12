@@ -251,3 +251,9 @@ When Port has multiple legal sea spaces, city construction offers Choose port lo
 Public event triggers open a dismissible explanation with official display names, engine-provided rules and resource icons, including events that resolve without a decision. Joining during a pending event also shows its rules. Acknowledgements do not repeat the popup; undo removes withdrawn notices. Research-choice dialogs include the notice so it remains visible above the modal.
 
 Replay displays event explanations only for the displayed historical action interval, including since-my-turn recap and full replay. Recap autoplay pauses at a new event so the rules can be read, then resumes with Play. Public log origins disambiguate same-name cards; incomplete old records show only shared rules rather than guessing a variant. Verified live/replay desktop and mobile browser tests, controller autoplay/acknowledgement checks and history/undo tests.
+
+# Viewer 0.1.80 / engine 0.4.69
+
+Provinces only offers its happiness payment if the captured city still belongs to the attacker. Captures automatically razed at the seven-city limit no longer offer an impossible choice. Existing saved Provinces prompts for missing cities resolve safely; any culture payment is refunded before continuing combat-end rewards. Capture and razing gold remain unchanged.
+
+Verified both responses against a local copy of Willful-vertex-9913 without submitting live moves. Five regression tests cover retained-city happiness, obsolete prompts and automatic razing; all 732 tests, locale validation, type checks and production build pass.
