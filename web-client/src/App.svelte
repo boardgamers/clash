@@ -899,7 +899,10 @@
             : null}
           {@const progressLabel =
             status === 'current' ? 'Turn in progress' : status === 'left' ? 'Left game' : null}
-          {@const handCount = ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p => p.id === player.index)?.action_cards?.length}
+          {@const hand = ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p => p.id === player.index)}
+          {@const handCount = hand?.action_cards?.length ?? (!$session.playback && hand ? 0 : undefined)}
+          {@const objectiveCount = hand?.objective_cards?.length ?? (!$session.playback && hand ? 0 : undefined)}
+          {@const wonderCount = hand?.wonder_cards?.length ?? (!$session.playback && hand ? 0 : undefined)}
           <button
             class="player-card"
             class:active={!!turnLabel}
@@ -909,6 +912,8 @@
               `${translate(player.civilization)}: ${formatPoints(player.score)} ${translate('victory points')}`,
               player.index === $session.seat ? translate('You') : player.name,
               handCount !== undefined ? `${translate('Action cards')}: ${handCount}` : '',
+              objectiveCount !== undefined ? `Objective cards in hand: ${objectiveCount}` : '',
+              wonderCount !== undefined ? `Wonder cards in hand: ${wonderCount}` : '',
               order ? translate(`Turn order ${order}.`).replace(/\.$/u, '') : '',
               turnLabel ? translate(turnLabel) : '',
               progressLabel ? translate(progressLabel) : '',
@@ -951,8 +956,13 @@
                     alt={$session.playerBadges[player.index]!.label}
                     title={$session.playerBadges[player.index]!.label}
                   />{/if}</small
-              ><span class="player-events"><EventMarkers remaining={player.eventTokens} />{#if handCount !== undefined}<span class="player-hand-count" title={`Action cards: ${handCount}`} aria-hidden="true"><Layers size={12} />{handCount}</span>{/if}</span
-              >{#if turnLabel || progressLabel}<span class="player-turn" class:round-inactive={!turnLabel}
+              ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span>
+              <span class="player-hands">
+                {#if handCount !== undefined}<span class="player-hand-count" title={`Action cards: ${handCount}`} aria-hidden="true"><Layers size={12} />{handCount}</span>{/if}
+                {#if objectiveCount !== undefined}<span class="player-hand-count" title={`Objective cards in hand: ${objectiveCount}`} aria-hidden="true"><Target size={12} />{objectiveCount}</span>{/if}
+                {#if wonderCount !== undefined}<span class="player-hand-count" title={`Wonder cards in hand: ${wonderCount}`} aria-hidden="true"><Landmark size={12} />{wonderCount}</span>{/if}
+              </span>
+              {#if turnLabel || progressLabel}<span class="player-turn" class:round-inactive={!turnLabel}
                   >{#if turnLabel || status === 'current'}<ArrowRight
                       size={12}
                       aria-hidden="true"

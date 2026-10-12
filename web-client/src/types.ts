@@ -36,6 +36,7 @@ export interface Player {
   special_advances?: string[];
   action_cards?: number[];
   objective_cards?: number[];
+  wonder_cards?: string[];
 }
 export interface PublicEffect {
   player: number;

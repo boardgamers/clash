@@ -303,3 +303,5 @@ Viewer 0.1.91 / engine 0.4.75 labels the optional end-of-age government payment 
 Viewer 0.1.92 omits empty optional payments from journal prose, including older saved entries. Declining a government change now reads “Keep current government” without the stray “Pay ,” prefix. Actual payments and engine history are unchanged; engine remains 0.4.75.
 
 Viewer 0.1.93 shows public action-card hand counts with a card icon on civilization panels and in civilization details. Counts use the already-redacted public hand arrays; no card identities are exposed. Replay frames without historical hand counts omit the number instead of showing current information. Engine remains 0.4.75.
+
+Viewer 0.1.94 extends public hand counts to objective cards still in hand and unbuilt wonder cards. Each type has its own icon and tooltip on the player panel and an explicit label in civilization details. These counts exclude completed objectives and built wonders; historical frames without counts do not substitute current hands. Engine remains 0.4.75.

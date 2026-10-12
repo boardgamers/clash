@@ -1269,10 +1269,17 @@
   gap: 0.3rem;
 }
 .player-hand-count {
-  margin-left: 0.5rem;
   font-size: 0.75rem;
   color: var(--muted);
 }
 .civilization-hand-count {
   margin: 0 0 1rem;
 }
+
+.player-hands, .civilization-hands {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+.player-info .player-hands { grid-area: 3 / 1 / 4 / 4; }
+.player-card .player-info .player-turn { grid-area: 4 / 1 / 5 / 4; }

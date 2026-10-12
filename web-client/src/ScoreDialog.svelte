@@ -31,7 +31,12 @@
   const session = $derived(controller.session);
   let player = $derived($session.view?.players.find((p) => p.index === $session.scorePlayer));
   const publicPlayer = $derived($session.game?.players.find((p) => p.id === player?.index));
-  const handCount = $derived(($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p => p.id === player?.index)?.action_cards?.length);
+  const hand = $derived(($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p => p.id === player?.index));
+  const handCounts = $derived([
+    { label: 'Action cards', icon: Layers, count: hand?.action_cards?.length ?? (!$session.playback && hand ? 0 : undefined) },
+    { label: 'Objective cards in hand', icon: Target, count: hand?.objective_cards?.length ?? (!$session.playback && hand ? 0 : undefined) },
+    { label: 'Wonder cards in hand', icon: Landmark, count: hand?.wonder_cards?.length ?? (!$session.playback && hand ? 0 : undefined) },
+  ]);
   const resources = $derived(
     Object.fromEntries(
       Object.keys(resourceNames)
@@ -111,7 +116,7 @@
     <div class="civilization-resources" role="group" aria-label={`${player.civilization} resources`}>
       <ResourceAmount pile={resources} showZero />
     </div>
-    {#if handCount !== undefined}<p class="civilization-hand-count"><Layers size={17} /> Action cards <strong>{handCount}</strong></p>{/if}
+    <div class="civilization-hands">{#each handCounts as item}{#if item.count !== undefined}<p class="civilization-hand-count"><item.icon size={17} /> {item.label} <strong>{item.count}</strong></p>{/if}{/each}</div>
     <nav class="civilization-tabs" aria-label="Civilization details">
       <button class:active={tab === 'score'} aria-pressed={tab === 'score'} onclick={() => setTab('score')}
         ><Trophy size={16} /> Score</button
