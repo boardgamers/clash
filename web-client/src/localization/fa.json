@@ -4752,5 +4752,6 @@
   "Close active effects": "بستن اثرات فعال",
   "No active effects.": "هیچ اثر فعالی وجود ندارد.",
   "action cards": "کارت‌های اقدام",
-  "Click the destination again to explore the highlighted region.": "برای کاوش منطقهٔ مشخص‌شده، دوباره روی مقصد کلیک کنید."
+  "Click the destination again to explore the highlighted region.": "برای کاوش منطقهٔ مشخص‌شده، دوباره روی مقصد کلیک کنید.",
+  "No collection or Trade Routes on this sea tile.": "در این خانهٔ دریایی نمی‌توان منابع جمع‌آوری کرد یا از مسیرهای تجاری استفاده کرد."
 }

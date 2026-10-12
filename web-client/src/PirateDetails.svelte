@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Skull } from 'lucide-svelte';
+  import { Skull, Ban } from 'lucide-svelte';
+  import { pirateBlockade } from './pirate-blockade';
   import type { Game } from './types';
   import { positionXY } from './model';
   let {
@@ -22,6 +23,7 @@
   const blocked = $derived(
     game.map.tiles.filter(([p, t]) => t === 'Water' && (p === position || adjacent(p))).map(([p]) => p),
   );
+  const blockaded = $derived(pirateBlockade(game).includes(position));
 </script>
 
 {#if pirateShips.length}
@@ -37,6 +39,11 @@
           onblur={() => onHighlight(null)}>{p}</button
         >{/each}
     </div>
+  </section>
+{:else if blockaded}
+  <section class="pirate-details" aria-label="Pirate effects">
+    <h3><Ban size={17} />Pirate blockade</h3>
+    <p>No collection or Trade Routes on this sea tile.</p>
   </section>
 {:else if allied}
   <section class="pirate-details" aria-label="Allied pirate effects">

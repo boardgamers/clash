@@ -4752,5 +4752,6 @@
   "Close active effects": "Fechar efeitos ativos",
   "No active effects.": "Nenhum efeito ativo.",
   "action cards": "cartas de ação",
-  "Click the destination again to explore the highlighted region.": "Clique novamente no destino para explorar a região destacada."
+  "Click the destination again to explore the highlighted region.": "Clique novamente no destino para explorar a região destacada.",
+  "No collection or Trade Routes on this sea tile.": "Não é possível coletar recursos nem usar Rotas Comerciais neste espaço de mar."
 }

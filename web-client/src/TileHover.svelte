@@ -1,7 +1,7 @@
 <script lang="ts">
   import { buildingInfo } from './city';
   import type { Readable } from 'svelte/store';
-  import { Skull, Landmark, Star } from 'lucide-svelte';
+  import { Skull, Landmark, Star, Ban } from 'lucide-svelte';
   import type { TileHoverData } from './tile-hover';
   import { playerColor, playerSymbol } from './types';
   import { terrainInfo } from './terrain';
@@ -29,6 +29,12 @@
         <span><Icon size={14} />{name}</span>
       {/each}
       {#each $data.city.wonders as name}<span><Star size={14} />{name}</span>{/each}
+    </div>
+  {/if}
+  {#if $data.pirateBlockade}
+    <div class="tile-hover-blockade">
+      <strong><Ban size={15} />Pirate blockade</strong>
+      <small>No collection or Trade Routes on this sea tile.</small>
     </div>
   {/if}
   {#each $data.stacks as { player, groups }}

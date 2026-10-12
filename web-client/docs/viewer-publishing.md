@@ -233,3 +233,7 @@ Verified with 718 frontend/engine tests, type checks, production build, and desk
 # Viewer 0.1.75 / engine unchanged (0.4.68)
 
 Clicking a friendly fleet now immediately boards the selected land group across its available capacity. Removed the redundant Board all confirmation. Desktop/mobile browser and controller tests cover immediate boarding with and without optimistic prediction, while retaining one group-move cost.
+
+# Viewer 0.1.76 / engine unchanged (0.4.68)
+
+Sea spaces occupied by or adjacent to pirates now have persistent dashed red borders with a pale outline in both 3D and Strategy views. Hover and tile details explain that collection and Trade Routes are blocked. The guide follows live and replayed pirate positions, excludes land and unexplored spaces, and ignores escorted Pirate Allies controlled by Carthage. Thumbnail exports omit the overlay. All 16 locales include the explanation; the rules engine is unchanged. Verified with 721 tests, locale validation, type checks, and light/dark browser previews.

@@ -27,6 +27,8 @@ import { PieceModels, type BuildingKind } from './piece-models';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
 import { TradeOverlay } from './trade-overlay';
+import { PirateBlockadeOverlay } from './pirate-blockade-overlay';
+import { pirateBlockade } from './pirate-blockade';
 import { CombatOverlay } from './combat-overlay';
 import { PlacementAnimation } from './placement-animation';
 import { activeCombat } from './active-combat';
@@ -69,6 +71,7 @@ export class World {
   private rings = new THREE.Group();
   private seaOverlay = new SeaOverlay();
   private tradeOverlay = new TradeOverlay();
+  private pirateBlockadeOverlay = new PirateBlockadeOverlay();
   private combatOverlay = new CombatOverlay();
   private combatLabel: HTMLDivElement;
   private combatLabelText: Text;
@@ -272,7 +275,7 @@ export class World {
     this.geometries.add(markerGeometry);
     this.structureMarker = [markerGeometry, markerMaterial];
     this.scene.add(this.structureMarkers);
-    this.scene.add(this.seaOverlay.group, this.tradeOverlay.group);
+    this.scene.add(this.seaOverlay.group, this.tradeOverlay.group, this.pirateBlockadeOverlay.group);
     this.scene.add(this.combatOverlay.group);
     this.combatLabel = document.createElement('div');
     this.combatLabel.className = 'map-combat-label';
@@ -617,6 +620,7 @@ export class World {
       this.referenceRing,
       this.seaOverlay.group,
       this.tradeOverlay.group,
+      this.pirateBlockadeOverlay.group,
       this.combatOverlay.group,
       this.explorationOverlay.group,
       this.placement.group,
@@ -1104,6 +1108,7 @@ export class World {
       !s.view?.objectiveDecision;
     this.seaRouteStart = s.seaRouteStart;
     this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? []);
+    this.pirateBlockadeOverlay.update(pirateBlockade(s.game));
     const tradePlayer = s.tradeRoutePlayer ?? s.seat ?? s.view?.activePlayer;
     this.tradeOverlay.group.visible = !!s.tradeRoutes && s.mode === 'overview' && !s.playback &&
       !s.view?.decision && !s.view?.choiceDecision && !s.view?.objectiveDecision && !s.view?.explorationDecision;
@@ -2179,6 +2184,7 @@ export class World {
     this.unitBadges = [];
     this.seaOverlay.dispose();
     this.tradeOverlay.dispose();
+    this.pirateBlockadeOverlay.dispose();
     this.combatOverlay.dispose();
     this.explorationOverlay.dispose();
     this.explorationLabel.remove();

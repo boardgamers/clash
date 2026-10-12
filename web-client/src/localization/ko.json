@@ -4752,5 +4752,6 @@
   "Close active effects": "활성 효과 닫기",
   "No active effects.": "활성 효과가 없습니다.",
   "action cards": "행동 카드",
-  "Click the destination again to explore the highlighted region.": "강조된 지역을 탐험하려면 목적지를 다시 클릭하세요."
+  "Click the destination again to explore the highlighted region.": "강조된 지역을 탐험하려면 목적지를 다시 클릭하세요.",
+  "No collection or Trade Routes on this sea tile.": "이 바다 칸에서는 자원을 수집하거나 교역로를 이용할 수 없습니다."
 }

@@ -3,10 +3,12 @@ import { writable } from 'svelte/store';
 import type { Session, Terrain } from './types';
 import { tileUnitStacks } from './tile-units';
 import TileHover from './TileHover.svelte';
+import { pirateBlockade } from './pirate-blockade';
 
 export interface TileHoverData {
   position: string;
   terrain: Terrain;
+  pirateBlockade: boolean;
   city?: { owner: number; civilization: string; mood: string; buildings: string[]; wonders: string[] };
   stacks: ReturnType<typeof tileUnitStacks>;
   colorBlind: boolean;
@@ -78,6 +80,7 @@ export class TileTooltip {
     this.data.set({
       position: this.position,
       terrain,
+      pirateBlockade: pirateBlockade(session.game).includes(this.position),
       city:
         terrain === 'Unexplored'
           ? undefined

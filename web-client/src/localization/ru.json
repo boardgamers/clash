@@ -4752,5 +4752,6 @@
   "Close active effects": "Закрыть активные эффекты",
   "No active effects.": "Нет активных эффектов.",
   "action cards": "карты действий",
-  "Click the destination again to explore the highlighted region.": "Нажмите на место назначения ещё раз, чтобы исследовать выделенную область."
+  "Click the destination again to explore the highlighted region.": "Нажмите на место назначения ещё раз, чтобы исследовать выделенную область.",
+  "No collection or Trade Routes on this sea tile.": "На этой морской клетке нельзя собирать ресурсы или использовать торговые пути."
 }

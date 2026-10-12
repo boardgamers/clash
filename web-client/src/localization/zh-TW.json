@@ -4752,5 +4752,6 @@
   "Close active effects": "關閉生效中的效果",
   "No active effects.": "目前沒有生效中的效果。",
   "action cards": "行動牌",
-  "Click the destination again to explore the highlighted region.": "再次點擊目的地以探索標示的區域。"
+  "Click the destination again to explore the highlighted region.": "再次點擊目的地以探索標示的區域。",
+  "No collection or Trade Routes on this sea tile.": "此海洋格無法採集資源或使用貿易路線。"
 }
