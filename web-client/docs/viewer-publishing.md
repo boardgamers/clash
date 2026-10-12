@@ -257,3 +257,7 @@ Replay displays event explanations only for the displayed historical action inte
 Provinces only offers its happiness payment if the captured city still belongs to the attacker. Captures automatically razed at the seven-city limit no longer offer an impossible choice. Existing saved Provinces prompts for missing cities resolve safely; any culture payment is refunded before continuing combat-end rewards. Capture and razing gold remain unchanged.
 
 Verified both responses against a local copy of Willful-vertex-9913 without submitting live moves. Five regression tests cover retained-city happiness, obsolete prompts and automatic razing; all 732 tests, locale validation, type checks and production build pass.
+
+# Viewer 0.1.81 / engine unchanged (0.4.69)
+
+Opening Chat, including switching from Journal, scrolls its message feed to the newest message after the panel becomes visible. Scrolling back while Chat remains open is preserved; pending scrolls are cancelled on close or teardown. Verified with desktop/mobile browser checks using an overflowing message history, type checks and production build.

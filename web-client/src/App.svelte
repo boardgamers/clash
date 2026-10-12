@@ -461,7 +461,19 @@
     });
     controller.chat.setOpen($session.activityOpen && $session.tab === 'chat');
     let identity = '';
+    let chatVisible = false;
+    let scrollFrame: number | undefined;
     const unsubscribe = controller.session.subscribe((state) => {
+      const visible = state.activityOpen && state.tab === 'chat';
+      if (visible !== chatVisible) {
+        chatVisible = visible;
+        if (scrollFrame !== undefined) cancelAnimationFrame(scrollFrame);
+        scrollFrame = visible ? requestAnimationFrame(() => {
+          scrollFrame = undefined;
+          const messages = node.querySelector<HTMLElement>('.chat-messages');
+          if (messages) messages.scrollTop = messages.scrollHeight;
+        }) : undefined;
+      }
       const next = JSON.stringify([
         state.dark,
         state.colorBlind,
@@ -476,6 +488,7 @@
     return {
       destroy: () => {
         unsubscribe();
+        if (scrollFrame !== undefined) cancelAnimationFrame(scrollFrame);
         panel.destroy();
       },
     };
