@@ -1,5 +1,7 @@
 # Publishing the viewer
 
+Reference links are declared in `bgs-reference-links.json`. Run `node scripts/update-reference-links.mjs --dry-run` to inspect them and omit `--dry-run` to update BGS metadata without uploading a viewer or engine. The script preserves other links, saves a metadata backup, and verifies the rules, links, engine, and viewer after updating. The English rules link points to WizKids' BGG upload: choose the September 30, 2021 final-print file (February 26 PDF), rather than the older February 5 PDF. The BGG game link uses Monumental Edition.
+
 Upload both `web-client/dist/viewer.js` and `web-client/dist/server_bg.wasm`. `npm run publish:bgs` now uploads and verifies the whole build before switching the viewer.
 
 Run `npm run build`, then `npm run publish:bgs -- --dry-run` to review the target and `npm run publish:bgs` to publish. All assets share one immutable bundle directory. The script verifies their public contents before switching the viewer and saves the old metadata for rollback. It also removes the obsolete `undo` lobby option; the engine always locks undo when information is revealed. Existing saves with unrestricted undo seal their previous undo history once on load.
