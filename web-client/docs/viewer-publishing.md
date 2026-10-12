@@ -269,3 +269,7 @@ Siegecraft is offered only to the attacker. Legacy defender prompts finish witho
 Movement exposes all affordable payment combinations instead of selecting the first valid payment. Roads therefore offers food/ore and gold substitutions before committing the move. Attack destinations retain their preview after payment selection, and alternative payments remain available in the panel. Regression checks cover attacker/defender Siegecraft, legacy prompts, and choosing Roads payment before submitting an attack.
 
 All 737 tests, locale validation, type checks and production build pass. Desktop/mobile browser checks confirm four payment choices and no submitted move before the attack preview.
+
+# Viewer 0.1.83 / engine 0.4.71
+
+Caesar's Proconsul grants infantry only when its one-gold payment is made. Previously the callback checked the payment list instead of its resource amount, granting an infantry even on decline. The latest D2 capture in a read-only copy of Willful-vertex-9913 confirms that exact sequence; the existing live unit was not removed. Paid/declined regression tests and all 739 tests, locale validation, type checks and production build pass.

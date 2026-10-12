@@ -306,7 +306,7 @@ fn proconsul() -> LeaderAbility {
                 )])
         },
         |game, s, _| {
-            if !s.choice.is_empty() {
+            if !s.choice[0].is_empty() {
                 let p = s.player_index;
                 gain_unit(
                     game,
