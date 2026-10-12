@@ -100,6 +100,7 @@ test('deterministic moves are predicted exactly, including Undo and Redo', () =>
   const predicted = predictMove(engine, strip(raw), ore, 0);
   assert.ok('raw' in predicted);
   const after = move(raw, ore);
+  assert.equal(predicted.print, fingerprint(predicted.raw));
   assert.equal(fingerprint(predicted.raw), fingerprint(strip(after)));
   const undone = move(after, 'Undo');
   assert.equal(fingerprint(predictUndo(strip(raw), strip(after))!), fingerprint(strip(undone)));
@@ -597,4 +598,13 @@ test('Undo counts empty historic turns as zero actions', () => {
   );
   assert.equal(undone.log_index, 1);
   assert.deepEqual(undone.board_history.frames, [{ cursor: 0 }, { cursor: 1 }]);
+});
+
+test('canonical state comparisons preserve nested keys, arrays and special property names', async () => {
+  const { canonicalJson } = await import('./prediction.ts');
+  const source = JSON.parse('{"z":[{"b":2,"a":1},null],"__proto__":{"safe":true},"10":10,"2":2,"a":"é"}');
+  const old = JSON.stringify(source, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
+    ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a < b ? -1 : 1)) : item);
+  assert.equal(canonicalJson(source), old);
+  assert.deepEqual(JSON.parse(canonicalJson(source)), source);
 });

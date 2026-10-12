@@ -22,6 +22,23 @@ fn get_game(data: String) -> Game {
     Game::from_data(game_data, cache, GameContext::Play)
 }
 
+thread_local! {
+    // Only immutable viewer queries share this state. Keep one exact snapshot;
+    // changing games, seats' filtered data, Undo or predictions replaces it.
+    static VIEW_GAME: std::cell::RefCell<Option<(String, Game)>> = const { std::cell::RefCell::new(None) };
+}
+
+fn with_view_game<T>(data: String, query: impl FnOnce(&Game) -> T) -> T {
+    VIEW_GAME.with(|cache| {
+        let mut cached = cache.borrow_mut();
+        if cached.as_ref().is_none_or(|(raw, _)| raw != &data) {
+            let game = get_game(data.clone());
+            *cached = Some((data, game));
+        }
+        query(&cached.as_ref().expect("cached viewer state").1)
+    })
+}
+
 fn from_game(game: Game) -> String {
     serde_json::to_string(&game.data()).expect("game should be serializable")
 }
@@ -278,8 +295,10 @@ impl Messages {
 
 #[wasm_bindgen(js_name = "webView")]
 pub fn web_view(data: String, player: Option<usize>) -> Result<String, JsValue> {
-    serde_json::to_string(&crate::web_view::view(&get_game(data), player))
-        .map_err(|e| JsValue::from_str(&e.to_string()))
+    with_view_game(data, |game| {
+        serde_json::to_string(&crate::web_view::view(game, player))
+    })
+    .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 #[wasm_bindgen(js_name = "webCollectPreview")]
@@ -293,8 +312,10 @@ pub fn web_collect_preview(
         serde_json::from_str(&selections).map_err(|e| JsValue::from_str(&e.to_string()))?;
     let city = serde_json::from_value(serde_json::Value::String(city))
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    let result = crate::web_view::collect_preview(&get_game(data), player, city, selections)
-        .map_err(|e| JsValue::from_str(&e))?;
+    let result = with_view_game(data, |game| {
+        crate::web_view::collect_preview(game, player, city, selections)
+    })
+    .map_err(|e| JsValue::from_str(&e))?;
     serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
@@ -316,15 +337,17 @@ pub fn web_recruit_preview(
     let units = serde_json::from_str(&units).map_err(|e| JsValue::from_str(&e.to_string()))?;
     let city = serde_json::from_value(serde_json::Value::String(city))
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    let result = crate::web_view::recruit_preview(&get_game(data), player, city, units)
-        .map_err(|e| JsValue::from_str(&e))?;
+    let result = with_view_game(data, |game| {
+        crate::web_view::recruit_preview(game, player, city, units)
+    })
+    .map_err(|e| JsValue::from_str(&e))?;
     serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 #[wasm_bindgen(js_name = "webQuery")]
 pub fn web_query(data: String, player: usize, query: String) -> Result<String, JsValue> {
     let query = serde_json::from_str(&query).map_err(|e| JsValue::from_str(&e.to_string()))?;
-    let result = crate::web_view::query(&get_game(data), player, query)
+    let result = with_view_game(data, |game| crate::web_view::query(game, player, query))
         .map_err(|e| JsValue::from_str(&e))?;
     serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
 }

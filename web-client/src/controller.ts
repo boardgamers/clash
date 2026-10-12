@@ -1684,14 +1684,14 @@ export class Controller {
     this.quotedActionPayment =
       quotedPayment && Object.values(quotedPayment).some(Boolean) ? { ...quotedPayment } : null;
     const predicted = this.predict(move, s);
-    this.outbox.push({ move, print: predicted && fingerprint(predicted), announced: !!predicted });
+    this.outbox.push({ move, print: predicted?.print ?? null, announced: !!predicted });
     if (this.outbox.length === 1 && !this.sendHead()) return;
     // Show the result immediately. Queries and follow-up moves use the predicted
     // state; the host still validates every move and its state stays authoritative.
-    if (predicted) this.apply(predicted, { predicted: true });
+    if (predicted) this.apply(predicted.raw, { predicted: true });
   }
   /** The visible result of `move`, when it does not depend on hidden information. */
-  private predict(move: Move, s: Session): string | null {
+  private predict(move: Move, s: Session): { raw: string; print: string } | null {
     const engine = this.engine;
     if (
       !this.predictions ||
@@ -1710,7 +1710,9 @@ export class Controller {
         // position this seat was shown one step earlier on the same branch.
         const previous = this.undoPreview.previous(s.game, s.view);
         const undone = previous && predictUndo(previous, this.raw);
-        return undone ? engine.stripSecret(undone, s.seat) : null;
+        if (!undone) return null;
+        const raw = engine.stripSecret(undone, s.seat);
+        return { raw, print: fingerprint(raw) };
       }
       const prediction = predictMove(
         { tryMove: engine.tryMove, stripSecret: engine.stripSecret },
@@ -1718,7 +1720,7 @@ export class Controller {
         move,
         s.seat,
       );
-      return 'raw' in prediction ? prediction.raw : null;
+      return 'raw' in prediction ? prediction : null;
     } catch (error) {
       // A trapped engine must not be exercised for optional work again.
       if (isTrap(error)) this.predictions = false;

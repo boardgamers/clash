@@ -33,11 +33,16 @@ export function fingerprint(raw: string): string {
 
 /** Stable map serialization; sequence order remains significant. */
 export function canonicalJson(value: unknown): string {
-  return JSON.stringify(value, (_key, item) =>
-    item && typeof item === 'object' && !Array.isArray(item)
-      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => (a < b ? -1 : 1)))
-      : item,
-  );
+  // Traverse once rather than allocating/sorting Object.entries for every
+  // invocation of JSON.stringify's replacer (large histories dominate here).
+  function ordered(item: any): any {
+    if (Array.isArray(item)) return item.map(ordered);
+    if (!item || typeof item !== 'object') return item;
+    const result = Object.create(null);
+    for (const key of Object.keys(item).sort()) result[key] = ordered(item[key]);
+    return result;
+  }
+  return JSON.stringify(ordered(value));
 }
 
 /** The same public state with every kind of masked information resampled. */
@@ -88,7 +93,7 @@ function excluded(raw: string, move: unknown, seat: number) {
   );
 }
 
-export type Prediction = { raw: string } | { reason: 'hidden' | 'rejected' | 'unsupported' };
+export type Prediction = { raw: string; print: string } | { reason: 'hidden' | 'rejected' | 'unsupported' };
 
 /**
  * Executes `move` twice: on the received state and on a copy whose hidden
@@ -118,14 +123,16 @@ export function predictMove(engine: PredictionEngine, raw: string, move: unknown
     if (isTrap(error)) throw error;
     return { reason: 'rejected' };
   }
+  let print: string;
   try {
     const sample = engine.stripSecret(engine.tryMove(resampleHidden(raw, seat), serialized, seat), seat);
-    if (fingerprint(sample) !== fingerprint(predicted)) return { reason: 'hidden' };
+    print = fingerprint(predicted);
+    if (fingerprint(sample) !== print) return { reason: 'hidden' };
   } catch (error) {
     if (isTrap(error)) throw error;
     return { reason: 'hidden' };
   }
-  return { raw: predicted };
+  return { raw: predicted, print };
 }
 
 export function isTrap(error: unknown) {
