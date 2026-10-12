@@ -2567,3 +2567,38 @@ test('trade-route toggle is read-only and exclusive with other map guides', asyn
     app.close();
   }
 });
+
+
+for (const predictions of [true, false]) test(`boarding across two ships spends one group move (prediction ${predictions})`, async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const g = JSON.parse(fixture('movement/ship_embark'));
+    g.players[0].advances.push('Tactics');
+    g.players[0].units = [
+      {id:0,unit_type:'Infantry',position:'B3'},
+      {id:1,unit_type:'Infantry',position:'B3'},
+      {id:2,unit_type:'Settler',position:'B3'},
+      {id:7,unit_type:'Ship',position:'C3'},
+      {id:8,unit_type:'Ship',position:'C3'},
+    ];
+    c.setPlayer(0);
+    let raw = JSON.stringify(g);
+    await c.load(engine.stripSecret(raw,0));
+    (c as any).predictions = predictions;
+    c.openUnits([0,1,2]);
+    const destination = app.session().moveDestinations.find(d => d.position === 'C3' && d.boarding);
+    assert(destination?.boarding);
+    assert.equal(destination.boarding.length,2);
+    c.chooseMoveDestination('C3');
+    assert.equal(app.sent.length,0,'Preview must not move units');
+    c.boardSelectedUnits();
+    for (let i=0; i<2; i++) {
+      assert(app.sent[i], 'Boarding continues after server acknowledgement');
+      raw = engine.tryMove(raw,app.sent[i],0);
+      await c.load(engine.stripSecret(raw,0));
+    }
+    const after = JSON.parse(raw);
+    assert.equal(after.state.Movement.movement_actions_left,g.state.Movement.movement_actions_left-1);
+    assert.equal(after.players[0].units.filter((u:any) => u.unit_type==='Ship').flatMap((u:any)=>u.carried_units??[]).length,3);
+  } finally {app.close();}
+});

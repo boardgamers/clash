@@ -202,6 +202,14 @@
             : 'No moves available.'}
     </p>
   {/if}
+  {#if destination?.boarding}
+    <div class="boarding-plan" role="group" aria-label="Board fleet">
+      <h3><Ship size={16} />Board ships at {destination.position}</h3>
+      <p>{selectedUnits.length} land units · {units.filter(u => u.type === 'Ship' && u.position === destination.position).length} ships</p>
+      <p>Board together using the fleet’s available transport capacity. One group move.</p>
+      <button class="primary wide" disabled={$session.pending} onclick={() => controller.boardSelectedUnits()}>Board all {selectedUnits.length} units <ArrowRight size={16} /></button>
+    </div>
+  {/if}
   {#if destination?.attack}
     <div class="movement-leader-info" aria-label="Attack preview">
       <h3><Swords size={16} />Attack · {destination.position}</h3>
@@ -236,7 +244,7 @@
       </p>
     </div>
   {/if}
-  {#if destination && destination.terrain !== 'Unexplored'}<div class="settler-confirm">
+  {#if destination && !destination.boarding && destination.terrain !== 'Unexplored'}<div class="settler-confirm">
       {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
       <button
         class="primary wide"
@@ -263,3 +271,11 @@
   {#if !units.length && !$session.view?.nomadCities?.length}<p>Recruit units in a city to explore.</p>{/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>
+
+<style>
+  .boarding-plan { display: grid; gap: .65rem; }
+  .boarding-plan h3 { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+  .boarding-plan h3 { justify-content: flex-start; font-size: 1rem; }
+
+  .boarding-plan p { font-size: .8rem; color: var(--muted); margin: 0; }
+</style>

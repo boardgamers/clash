@@ -350,12 +350,6 @@ fn dido() -> LeaderInfo {
 fn navigator_ships(p: &Player) -> Vec<u32> {
     let pos = leader_position(p);
     let moved = moved_this_turn(p);
-    if p.units
-        .iter()
-        .any(|u| u.unit_type == UnitType::Leader(Leader::Hanno) && moved.contains(&u.id))
-    {
-        return vec![];
-    }
     p.get_units(pos)
         .iter()
         .filter(|u| {
@@ -373,10 +367,10 @@ fn navigator_ships(p: &Player) -> Vec<u32> {
 }
 fn hanno() -> LeaderInfo {
     LeaderInfo::new(Leader::Hanno,"Hanno",
-        LeaderAbility::builder("Navigator","Once per turn, move Hanno with a group of Ships as a free action. Those Ships must not have moved this turn and cannot move again afterwards.")
+        LeaderAbility::builder("Navigator","Once per turn, move Hanno with a group of Ships as a free action. Those Ships must not have moved this turn and cannot move again afterwards. Hanno may have moved earlier this turn.")
             .add_custom_action(CustomActionType::Navigator,|c|c.once_per_turn().free_action().no_resources(),|b|b.add_simple_persistent_event_listener(|e|&mut e.custom_action,-1,|game,p,_|{
                 let allowed=navigator_ships(p.get(game));let mut state=MoveState::new();state.unit_only=true;state.movement_actions_left=1;state.moved_units=p.get(game).units.iter().filter(|u|!allowed.contains(&u.id)).map(|u|u.id).collect();game.state=GameState::Movement(state);p.get_mut(game).event_info.insert("Navigator active".into(),"yes".into());
-            }),|_,p|p.units.iter().find(|u|u.unit_type==UnitType::Leader(Leader::Hanno)).is_some_and(|u|u.carrier_id.is_some_and(|id|navigator_ships(p).contains(&id))))
+            }),|_,p|p.units.iter().find(|u|u.unit_type==UnitType::Leader(Leader::Hanno)).is_some_and(|u|u.carrier_id.is_some()&&!navigator_ships(p).is_empty()))
             .add_transient_event_listener(|e|&mut e.after_action,29,|game,(),(),p|complete_navigator(game,p.index)).build(),
         LeaderAbility::builder("Fleet Commander","While Hanno is aboard a Ship, add +2 combat value in naval battles in his space.")
             .add_combat_strength_listener(120,|game,c,s,r|{let p=game.player(c.player(r));if c.is_sea_battle(game)&&p.units.iter().find(|u|u.unit_type==UnitType::Leader(Leader::Hanno)).is_some_and(|u|u.is_transported()&&u.position==c.stats.player(p.index).position){s.extra_combat_value+=2;s.roll_log.push("Fleet Commander adds +2 combat value".into());}}).build())
@@ -387,7 +381,30 @@ fn hannibal() -> LeaderInfo {
         LeaderAbility::builder("Hannibal ad Portas","A moving group containing Hannibal and Elephants ignores Mountain movement restrictions.").build())
 }
 
+// Transport capacity is shared within a sea space. Navigator may carry Hanno
+// with any eligible ships there, regardless of his internal save-file carrier.
+pub(crate) fn navigator_can_move_with(p: &Player, ids: &[u32]) -> bool {
+    p.units.iter().find(|u| u.unit_type == UnitType::Leader(Leader::Hanno))
+        .is_some_and(|h| h.carrier_id.is_some() && !ids.is_empty() && ids.iter().all(|id|
+            p.try_get_unit(*id).is_some_and(|u| u.is_ship() && u.position == h.position)))
+}
+
 pub(crate) fn prepare_move(game: &mut Game, p: usize, m: &mut MoveUnits) -> Result<(), String> {
+    if game.player(p).event_info.contains_key("Navigator active")
+        && navigator_can_move_with(game.player(p), &m.units)
+    {
+        let hanno = game.player(p).units.iter().find(|u| u.unit_type == UnitType::Leader(Leader::Hanno)).unwrap();
+        let id = hanno.id;
+        let old = hanno.carrier_id.unwrap();
+        if !m.units.contains(&old) {
+            let carrier = m.units[0];
+            let passengers = carried_units(carrier, game.player(p));
+            if passengers.len() >= crate::unit::ship_capacity(game.player(p)) as usize {
+                game.player_mut(p).get_unit_mut(passengers[0]).carrier_id = Some(old);
+            }
+            game.player_mut(p).get_unit_mut(id).carrier_id = Some(carrier);
+        }
+    }
     if let Some(id) = m.embark_pirate {
         if !game
             .player(p)

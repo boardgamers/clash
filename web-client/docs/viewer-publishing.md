@@ -219,3 +219,12 @@ Viewer 0.1.72 / engine 0.4.66 enforces Free Education once per turn, as marked o
 Research shows playable action cards beside eligible advances, with card details and direct play. Tech Synergy (engine name Synergies) appears on groups where two advances can be researched at normal resource costs; eligibility comes from the same engine helpers as the card prompt. Aqueduct adds Rome’s normal-cost, free-action Sanitation option to Research, including after regular actions run out.
 
 Payment and reward choice pickers preserve the edited resource amount and automatically rebalance the others among legal combinations. Payment selection avoids unnecessary extra resources, including Carthage’s discounted gold payment for drafting ships. Verified with engine-backed regression tests and desktop/mobile browser checks for research card details/play, Aqueduct and trade rewards. Publish the matching viewer and engine together.
+
+
+# Viewer 0.1.74 / engine 0.4.68
+
+Selecting a land group and a friendly fleet now offers boarding against the fleet’s combined available capacity. The viewer automatically submits validated embarkation steps without asking players to assign permanent ships; continuation from the same origin/destination consumes only one group move. Capacity and unit movement restrictions remain engine-validated, including when predictions are unavailable or a server acknowledgement is delayed.
+
+Hanno’s Navigator checks whether the ships have moved, without rejecting Hanno for earlier movement. Any eligible ships in his sea space can carry him; internal carrier IDs no longer prevent using another ship, and passenger redistribution preserves capacity. Once-per-turn and post-Navigator ship restrictions remain. Source: printed Hanno card (https://boardgamegeek.com/image/9490516); naval casualty capacity is confirmed by the official rulebook, p. 23, and remains pooled across surviving ships.
+
+Verified with 718 frontend/engine tests, type checks, production build, and desktop/mobile browser checks against both a fixture and a local copy of Stellar-tornado-4358. No moves were submitted to the live game.

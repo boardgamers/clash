@@ -644,6 +644,7 @@ export interface HappinessPreview {
   reason: string | null;
 }
 export interface MoveDestination {
+  boarding?: { carrier: number; units: number[] }[];
   breaksDiplomacy?: boolean;
   terrainNotes?: string[];
   label?: string;

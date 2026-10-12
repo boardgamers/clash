@@ -636,15 +636,10 @@ fn move_route_result(
     if !crate::content::civilizations::carthage::guard_moves(player, unit_ids) {
         return Err("Allied pirates must move with one of your colored units".into());
     }
-    if player.event_info.contains_key("Navigator active") {
-        let carrier = player
-            .units
-            .iter()
-            .find(|u| u.unit_type == UnitType::Leader(crate::leader::Leader::Hanno))
-            .and_then(|u| u.carrier_id);
-        if !carrier.is_some_and(|id| unit_ids.contains(&id)) {
-            return Err("Navigator must move Hanno's carrier".into());
-        }
+    if player.event_info.contains_key("Navigator active")
+        && !crate::content::civilizations::carthage::navigator_can_move_with(player, unit_ids)
+    {
+        return Err("Navigator must move ships from Hanno's sea space".into());
     }
     if game.map.is_sea(dest)
         && player.civilization.name == "Carthage"

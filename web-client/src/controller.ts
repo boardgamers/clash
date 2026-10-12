@@ -1,3 +1,4 @@
+import { boardingPlan, type BoardingGroup } from './boarding';
 import { activeInfluence, influenceKey, influenceMapPick, influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
 import { nextCollectionSelection } from './collection-yield';
@@ -128,6 +129,7 @@ export class Controller {
   private migratedSkipRaze = false;
   private keepCitiesRequest: { seat: number; raw: string } | null = null;
   private movePreviewSelection: string | null = null;
+  private boardingQueue: { position: string; group: BoardingGroup }[] = [];
   private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -267,6 +269,7 @@ export class Controller {
     clearTimeout(this.refreshTimer);
     // A rejected move invalidates its prediction and every move queued behind it.
     this.outbox = [];
+    this.boardingQueue = [];
     this.showConfirmed();
     this.keepCitiesRequest = null;
     this.cardContinuation = null;
@@ -615,6 +618,7 @@ export class Controller {
     this.afterPlaybackLoad(old, game, !predicted);
     this.migrateRazeSetting();
     if (automaticPayment) this.submit(automaticPayment);
+    else if (!quiet) this.continueBoarding();
   }
   private seenKey() {
     const s = get(this.session);
@@ -1176,6 +1180,10 @@ export class Controller {
     if (s.pending || s.playback) return;
     const destination = s.moveDestinations[index];
     if (!destination) return;
+    if (destination.boarding) {
+      this.patch({ moveTarget: destination.position, moveDestination: index });
+      return;
+    }
     const selection = this.raw + JSON.stringify(destination.action);
     const confirmed = s.moveTarget === destination.position && this.movePreviewSelection === selection;
     this.patch({ moveTarget: destination.position, moveDestination: index });
@@ -1186,7 +1194,7 @@ export class Controller {
     this.movePreviewSelection = null;
     this.submit(destination.action);
   }
-  movementDestinations(ids: number[], city: string | null = null) {
+  private rawMovementDestinations(ids: number[], city: string | null = null) {
     const s = get(this.session);
     if ((!ids.length && !city) || !canMoveOnMap(s.view, s.game)) return [];
     const key = (city ?? '') + [...ids].sort((a, b) => a - b).join(',');
@@ -1204,6 +1212,39 @@ export class Controller {
       this.moveCache.set(key, destinations);
     }
     return destinations;
+  }
+  movementDestinations(ids: number[], city: string | null = null) {
+    const destinations = this.rawMovementDestinations(ids, city);
+    const s = get(this.session);
+    if (city || !ids.length || ids.some(id => s.view?.units?.find(u => u.id === id)?.type === 'Ship')) return destinations;
+    const positions = new Set(this.rawMovementDestinations([ids[0]]).filter(d => d.carrier != null).map(d => d.position));
+    const extra: Session['moveDestinations'] = [];
+    for (const position of positions) {
+      const ships = s.view?.units?.filter(u => u.type === 'Ship' && u.position === position) ?? [];
+      if (ships.length < 2) continue;
+      const boarding = boardingPlan(ids, position, units => this.rawMovementDestinations(units));
+      const offer = this.rawMovementDestinations([ids[0]]).find(d => d.position === position && d.carrier != null);
+      if (boarding && offer) extra.push({ ...offer, boarding, carrier: null });
+    }
+    return [...destinations.filter(d => !(d.carrier != null && extra.some(e => e.position === d.position))), ...extra];
+  }
+  boardSelectedUnits() {
+    const s = get(this.session), destination = s.moveDestination == null ? null : s.moveDestinations[s.moveDestination];
+    if (s.pending || s.playback || !destination?.boarding) return;
+    this.boardingQueue = destination.boarding.map(group => ({position: destination.position, group}));
+    this.continueBoarding();
+  }
+  private continueBoarding() {
+    const s = get(this.session);
+    if (s.pending || !this.boardingQueue.length) return;
+    const next = this.boardingQueue.shift()!;
+    const offer = this.rawMovementDestinations(next.group.units).find(d => d.position === next.position && d.carrier === next.group.carrier);
+    if (!offer) {
+      this.boardingQueue = [];
+      this.patch({error: 'Boarding stopped because the remaining units can no longer board. Select them again.'});
+      return;
+    }
+    this.submit(offer.action);
   }
   moveOrigins(position: string) {
     const s = get(this.session);

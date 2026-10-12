@@ -1400,3 +1400,38 @@ test('all 45 leaders load with full research under each government', async (t) =
     }
   }
 });
+
+test('Navigator allows Hanno to have moved and uses any unmoved ships in his sea space', async () => {
+  const g = await carthageSea('Hanno'), index = seat(g), p = g.players[index];
+  g.players.find((p: any) => p.civilization === 'Pirates').units = [];
+  // Hanno is internally stored on a ship that already moved. Another full ship
+  // in the same sea space has not moved: the fleet can redistribute passengers.
+  p.units.push({id:2,position:'D3',unit_type:'Ship',carried_units:[
+    {id:3,unit_type:'Infantry'}, {id:4,unit_type:'Infantry'},
+  ]});
+  p.next_unit_id = 5;
+  p.event_info = {...p.event_info, 'Carthage moved units': JSON.stringify([0,1])};
+  g.actions_left = 0;
+  const navigator = view(g).specialActions.find((a: any)=>a.name==='Navigator');
+  assert(navigator?.action);
+  let after = move(g,navigator.action);
+  assert.equal(query(after,{kind:'movement',units:[0]}).destinations.length,0,'The already moved ship remains ineligible');
+  const route = query(after,{kind:'movement',units:[2]}).destinations.find((d: any)=>d.position==='D4');
+  assert(route);
+  after=move(after,route.action);
+  const ships=after.players[index].units;
+  assert(ships.find((u:any)=>u.id===2).carried_units.some((u:any)=>u.id===1),'Hanno travels with the selected eligible ship');
+  assert.equal(ships.find((u:any)=>u.id===0).position,'D3');
+  assert.equal(ships.flatMap((u:any)=>u.carried_units??[]).length,3);
+  if (after.state?.Movement) after=move(after,{Movement:'Stop'});
+  assert.equal(after.actions_left??0,0);
+  assert(!view(after).specialActions.some((a:any)=>a.name==='Navigator'));
+  after.actions_left = 1;
+  assert.equal(query(after,{kind:'movement',units:[2]}).destinations.length,0);
+});
+
+test('Navigator remains unavailable when all ships in Hanno’s space already moved', async () => {
+  const g=await carthageSea('Hanno'), p=g.players[seat(g)];
+  p.event_info={...p.event_info,'Carthage moved units':'[0]'};
+  assert(!view(g).specialActions.some((a:any)=>a.name==='Navigator'));
+});
