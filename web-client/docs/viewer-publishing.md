@@ -244,3 +244,10 @@ Viewer 0.1.77 lowers the pirate blockade border to the sea-tile surface, with mi
 # Viewer 0.1.78 / engine unchanged (0.4.68)
 
 When Port has multiple legal sea spaces, city construction offers Choose port location on map. The dialog closes, eligible sea spaces are highlighted, and clicking one constructs the port with the selected payment. Cancel returns to city management without submitting; changed game states discard stale placement choices. Single-location ports retain direct construction. Verified controller payment/cancel/state-change checks and desktop/mobile browser map clicks.
+
+
+# Viewer 0.1.79 / engine unchanged (0.4.68)
+
+Public event triggers open a dismissible explanation with official display names, engine-provided rules and resource icons, including events that resolve without a decision. Joining during a pending event also shows its rules. Acknowledgements do not repeat the popup; undo removes withdrawn notices. Research-choice dialogs include the notice so it remains visible above the modal.
+
+Replay displays event explanations only for the displayed historical action interval, including since-my-turn recap and full replay. Recap autoplay pauses at a new event so the rules can be read, then resumes with Play. Public log origins disambiguate same-name cards; incomplete old records show only shared rules rather than guessing a variant. Verified live/replay desktop and mobile browser tests, controller autoplay/acknowledgement checks and history/undo tests.

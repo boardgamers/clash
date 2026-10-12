@@ -57,6 +57,7 @@ export interface BoardFrame {
   effects?: PublicEffect[];
 }
 export interface Playback {
+  events?: import('./event-notices').EventNotice[];
   steps?: number[];
   frame: BoardFrame | null;
   index: number;
@@ -524,6 +525,7 @@ export interface EventInfo {
   targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
+  eventNotices?: import('./event-notices').EventNotice[];
   portPlacement?: {city: string; payment: Pile; choices: {position: string; action: Move}[]};
   landingTargets?: string[];
   disembarkCarriers?: number[];

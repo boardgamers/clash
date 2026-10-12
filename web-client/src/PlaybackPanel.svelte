@@ -3,6 +3,7 @@
   import type { Controller } from './controller';
   import { frameDetails } from './playback';
   import ResourceText from './ResourceText.svelte';
+  import EventExplanation from './EventExplanation.svelte';
   import BattlePlayback from './BattlePlayback.svelte';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
@@ -35,6 +36,9 @@
 
 {#if playback && recap}
   <section class="playback-bar floating-panel" aria-label="Board replay">
+    {#if playback.events?.length}<div class="replay-event-explanations" aria-label="Event explanation">
+      {#each playback.events as notice}<EventExplanation {notice}/>{/each}
+    </div>{/if}
     {#if $session.battles?.length}<BattlePlayback {controller} />{/if}
     <div class="playback-description" aria-live="polite">
       <strong
@@ -84,3 +88,12 @@
     </button>
   </section>
 {/if}
+
+{#if playback && !recap && playback.events?.length}
+  <aside class="card-reveal" aria-label="Replay event explanation">
+    {#each playback.events as notice}<EventExplanation {notice}/>{/each}
+  </aside>
+{/if}
+<style>
+  .replay-event-explanations { grid-column: 1 / -1; width:100%; max-height:35vh; overflow:auto; border-bottom:1px solid var(--line); padding-bottom:.6rem; }
+</style>

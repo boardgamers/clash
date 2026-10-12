@@ -1,4 +1,5 @@
 <script lang="ts">
+  import EventReveal from './EventReveal.svelte';
   import { tick, untrack } from 'svelte';
   import {
     X,
@@ -621,6 +622,7 @@
           : 'Select an advance for its full rules and confirmation.'}</span
       >
     </div>{/if}
+  {#if !reference}<EventReveal {controller}/>{/if}
 </dialog>
 
 {#if cardReference}<CardReferenceDialog card={cardReference} onDismiss={() => (cardReference = null)} />{/if}

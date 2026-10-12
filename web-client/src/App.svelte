@@ -13,6 +13,7 @@
   import BattlePlayback from './BattlePlayback.svelte';
   import PublicEffects from './PublicEffects.svelte';
   import ActiveEffectsDialog from './ActiveEffectsDialog.svelte';
+  import EventReveal from './EventReveal.svelte';
   import EventMarkers from './EventMarkers.svelte';
   import CivilizationPicker from './CivilizationPicker.svelte';
   import TilePanel from './TilePanel.svelte';
@@ -1876,7 +1877,8 @@
     />{/if}
   {#if $session.wondersOpen && $session.seat !== undefined}<WondersDialog {controller} />{/if}
   {#if $session.cardsOpen && $session.seat !== undefined}<ActionCardsDialog {controller} />{/if}
-  {#if !$session.playback}<CardReveal {controller} />{/if}
+  {#if !$session.playback && !$session.eventNotices?.length}<CardReveal {controller} />{/if}
+  {#if $session.mode !== 'research'}<EventReveal {controller}/>{/if}
   <PlaybackPanel {controller} />
   <PublicEffects {controller} />
   {#if effectsOpen}<ActiveEffectsDialog

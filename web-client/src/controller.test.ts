@@ -1,3 +1,4 @@
+import { eventNotices } from './event-notices.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -2631,5 +2632,31 @@ test('port map choice cancels without building and closes on changed game state'
     const changed=JSON.parse(raw);changed.actions_left=1;
     await c.load(engine.stripSecret(JSON.stringify(changed),0));
     assert.equal(app.session().portPlacement,undefined);
+  } finally {app.close();}
+});
+
+test('triggered event rules appear live and replay pauses on their historical frame', async () => {
+  const app=paymentController(),c=app.controller;
+  try {
+    const setup=JSON.parse(fixture('incidents/pandemics/fire'));
+    setup.map.tiles=setup.map.tiles.map(([position,terrain]:any[])=>[position,terrain==='Forest'?'Fertile':terrain]);
+    let raw=JSON.stringify(setup);
+    c.setPlayer(0);await c.load(engine.stripSecret(raw,0));
+    raw=engine.tryMove(raw,JSON.stringify({Playing:{Advance:{advance:'Storage',payment:{gold:2}}}}),0);
+    await c.load(engine.stripSecret(raw,0));
+    assert(app.session().eventNotices?.some(n=>n.name==='Fire' && n.rules.length));
+    c.patch({eventNotices:[]}); await c.load(engine.stripSecret(raw,0));
+    assert.equal(app.session().eventNotices?.length,0);
+    raw=engine.tryMove(raw,JSON.stringify({Playing:'EndTurn'}),0);
+    await c.load(engine.stripSecret(raw,0));
+    c.startPlayback();
+    const frames=app.session().game!.board_history!.frames;
+    const index=frames.findIndex((f,i)=>i>0 && eventNotices(app.session().game!,app.session().view!,frames[i-1].cursor,f.cursor).length);
+    assert(index>0 && index<app.session().playback!.end, 'The event is not the final replay step');
+    (c as any).showPlaybackFrame(index,true);
+    assert(app.session().playback?.events?.some(n=>n.name==='Fire'));
+    assert.equal(app.session().playback?.playing,false);
+    c.seekPlayback(frames[0].cursor);
+    assert.equal(app.session().playback?.events?.length,0);
   } finally {app.close();}
 });

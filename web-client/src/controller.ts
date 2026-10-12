@@ -1,3 +1,5 @@
+import { eventNotices, liveEventNotices } from './event-notices';
+import { publicActions } from './replay-actions';
 import { boardingPlan, type BoardingGroup } from './boarding';
 import { activeInfluence, influenceKey, influenceMapPick, influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
@@ -442,6 +444,7 @@ export class Controller {
     const researchChoice = researchDecision(view);
     const newDecision = changed || JSON.stringify(view.decision) !== JSON.stringify(old.view?.decision);
     const drawn = this.cardDraws.update(old.seat, game, view);
+    const notices = quiet ? [] : liveEventNotices(old.game, game, view);
     const bonus = movementBonus(game);
     const bonusGranted =
       !!old.game &&
@@ -540,6 +543,7 @@ export class Controller {
         (!view.specialActions?.length && !view.unavailableSpecialActions?.length && !view.influence?.length)
           ? false
           : old.abilitiesOpen,
+      eventNotices: quiet ? [] : [...(old.eventNotices ?? []).filter(n => n.cursor <= publicActions(game).length), ...notices],
       cardDraws: [...old.cardDraws, ...drawn].filter((draw) =>
         draw.kind === 'wonder'
           ? view.wonderCards.some((card) => card.id === draw.card.id)
@@ -754,6 +758,7 @@ export class Controller {
       tradeRoutes: false,
       pirateSpawns: false,
       cardDraws: [],
+      eventNotices: [],
     });
     this.reportPlayback();
     if (automatic && s.replayAutoplay) this.schedulePlayback();
@@ -802,10 +807,13 @@ export class Controller {
     const battles =
       index > p.start ? battleCues(s.game!, frames[previous].cursor, frames[index].cursor, s.view) : [];
     this.showBattles(battles, previous === p.index);
+    const events = index > p.start ? eventNotices(s.game!, s.view ?? {}, frames[previous].cursor, frames[index].cursor) : [];
+    if (events.length && index !== p.index) playing = false;
     this.patch({
       playback: {
         ...p,
         frame: frames[index],
+        events,
         index,
         total: frames.length,
         playing: playing && index < p.end,
@@ -916,6 +924,7 @@ export class Controller {
       seat: index,
       automaticPayment: false,
       cardDraws: [],
+      eventNotices: [],
       wondersOpen: false,
       scorePlayer: null,
       decisionSelection: [],
