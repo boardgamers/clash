@@ -60,7 +60,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn possible_advances(player: &Player, game: &Game) -> Vec<Advance> {
+pub(super) fn possible_advances(player: &Player, game: &Game) -> Vec<Advance> {
     game.cache
         .get_advances()
         .values()

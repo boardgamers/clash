@@ -18,8 +18,13 @@
     BookOpen,
     ScrollText,
     Map,
+    Layers,
+    Info,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
+  import CardReferenceDialog from './CardReferenceDialog.svelte';
+  import { printedCardName } from './card-names';
+  import type { ActionCard } from './types';
   import ResourceAmount from './ResourceAmount.svelte';
   import ContextualCards from './ContextualCards.svelte';
   import PaymentPicker from './PaymentPicker.svelte';
@@ -36,7 +41,7 @@
     type View,
   } from './types';
   import { buildingInfo } from './city';
-  import { researchOwners, researchFreeHints, type ResearchReference } from './research-links';
+  import { researchOwners, researchFreeHints, aqueductResearch, researchCardHints, type ResearchReference } from './research-links';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   import { researchDecision } from './decision-controls';
@@ -111,13 +116,25 @@
       !advances.some((a) => a.group === group && a.action)
     );
   }
+  let cardReference = $state<ActionCard | null>(null);
+  function cardHints(advance: AdvanceView) {
+    return !reference && !choice && !$session.playback ? researchCardHints(view, advance) : [];
+  }
+  function aqueduct(advance: AdvanceView | undefined) {
+    return !reference && !choice ? aqueductResearch(view, advance) : undefined;
+  }
+  function researchAvailable(advance: AdvanceView) {
+    const alternative = aqueduct(advance);
+    return !!advance.action || !!(alternative && !alternative.reason) || cardHints(advance).length > 0;
+  }
   function unavailableReason(advance: AdvanceView) {
+    if (researchAvailable(advance)) return "";
     return !advance.owned && governmentLocked(advance.group)
       ? `Your government is ${currentGovernment}. Switch to ${advance.group} at the end of an age for 1 mood token + 1 culture token. You must meet its prerequisite; your government advances are replaced with the same number from the new government.`
       : actionReason(advance.reason);
   }
   const availableAdvances = $derived(
-    advances.filter((a) => (researchedOnly ? a.owned : !availableOnly || !!a.action)),
+    advances.filter((a) => (researchedOnly ? a.owned : !availableOnly || researchAvailable(a))),
   );
   let player = $derived(
     view?.players.find(
@@ -161,6 +178,7 @@
     ),
   );
   let buyFreeEducation = $state(false);
+  const selectedAqueduct = $derived(aqueduct(selected));
   const selectedAction = $derived(choice ? selected?.action : selectedPayment?.action);
   const researchPlan = $derived(
     !choice && !reference
@@ -309,6 +327,15 @@
             >
           {:else if lockedGovernment}<LockKeyhole size={13} aria-label="Government unavailable" />{/if}
         </h3>
+        {#each (view?.actionCards ?? []).filter(card => card.name === 'Synergies' && advances.some(a => a.group === group && cardHints(a).includes(card))) as card}
+          <div class="research-card-hint">
+            <button class="research-advance-link" disabled={$session.pending}
+              onclick={() => controller.playContextualCard(card.id, 'research')}>
+              <Layers size={13} />Use {printedCardName(card.name)} · 2 advances · normal resource costs
+            </button>
+            <button class="icon-button" aria-label={`Details of ${printedCardName(card.name)}`} onclick={() => cardReference = card}><Info size={15} /></button>
+          </div>
+        {/each}
         {#if governmentGroups.includes(group)}<p class="government-rule">
             {#if lockedGovernment}
               <span>Only one government at a time.</span>
@@ -331,7 +358,7 @@
             class="research-node"
             class:child={statusFilter === 'all' && index > 0}
             class:owned={advance.owned}
-            class:available={!!advance.action}
+            class:available={researchAvailable(advance)}
             class:choice-available={!!choice && !!advance.action}
             class:choice-unavailable={!!choice && !advance.action && !advance.owned}
             class:selected={selected?.id === advance.id}
@@ -350,7 +377,7 @@
                 >{#if advance.owned}<Check
                     size={16}
                     aria-label="Researched"
-                  />{:else if !choice && !advance.action && (lockedGovernment || actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
+                  />{:else if !choice && !researchAvailable(advance) && (lockedGovernment || actionReason(advance.reason) || (parent && !parent.owned))}<LockKeyhole
                     size={13}
                     aria-label={lockedGovernment
                       ? 'Switch government at end of age'
@@ -409,7 +436,7 @@
                     {/each}
                   {/if}
                 </span><span class="research-availability"
-                  >{#if advance.action}
+                  >{#if researchAvailable(advance)}
                     {#if warnsEvent}<span
                         id={`research-${advance.id}-event`}
                         class="research-event-warning"
@@ -437,6 +464,17 @@
                   {/each}
                 {/if}
               </div>{/if}
+            {#each cardHints(advance).filter(card => card.name !== 'Synergies') as card}
+              <div class="research-card-hint">
+                <button class="research-advance-link" disabled={$session.pending}
+                  title={card.description}
+                  onclick={() => controller.playContextualCard(card.id, 'research')}>
+                  <Layers size={13} />Use {printedCardName(card.name)}{card.name === 'Synergies' ? ' · 2 advances in this category' : ''}
+                </button>
+                <button class="icon-button" aria-label={`Details of ${printedCardName(card.name)}`}
+                  onclick={() => (cardReference = card)}><Info size={14} /></button>
+              </div>
+            {/each}
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
               {@const UnlockIcon = researchPresentation(unlocked).icon}
               <button
@@ -513,6 +551,17 @@
               label="Research payment"
             />
           {/if}
+          {#if selectedAqueduct}
+            <button
+              class="secondary"
+              disabled={!!selectedAqueduct.reason || $session.pending}
+              title={selectedAqueduct.reason ? actionReason(selectedAqueduct.reason) : undefined}
+              onclick={() => controller.submit(selectedAqueduct!.action)}
+            >Research Sanitation · free action
+              <span>2 <Wheat size={14} /> / <Lightbulb size={14} /> / <Coins size={14} /> · any mix</span>
+            </button>
+            <small>Aqueduct: pay the normal research cost, or spend 1 action with no resources.</small>
+          {/if}
           {#if researchPlan.eligible}
             {#if researchPlan.combined}
               <label class="research-extra-payment"
@@ -573,3 +622,10 @@
       >
     </div>{/if}
 </dialog>
+
+{#if cardReference}<CardReferenceDialog card={cardReference} onDismiss={() => (cardReference = null)} />{/if}
+<style>
+  .research-card-hint { display: flex; align-items: center; gap: .4rem; padding: .35rem .6rem; border-top: 1px solid var(--border); }
+  .research-card-hint .research-advance-link { display: flex; align-items: center; gap: .35rem; text-align: left; font-size: .8rem; }
+  .research-card-hint .icon-button { flex-shrink: 0; }
+</style>

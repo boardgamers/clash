@@ -338,7 +338,6 @@
         pending={$session.pending}
         optional={field.optional}
         reward={decision.reward}
-        rebalance={decision.reward && decision.origin?.Advance === 'TradeRoutes'}
         label={field.name}
       />
     {/if}
@@ -356,7 +355,6 @@
             pending={$session.pending}
             optional={field.optional}
             reward={decision.reward}
-            rebalance={decision.reward && decision.origin?.Advance === 'TradeRoutes'}
             label={field.name}
           />
         {:else}

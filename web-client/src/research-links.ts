@@ -79,3 +79,14 @@ export function researchOwners(view: View | null | undefined, id: string, viewer
     []
   );
 }
+
+export function aqueductResearch(view: View | null | undefined, advance: AdvanceView | undefined) {
+  if (!advance || advance.id !== 'Sanitation' || advance.owned) return undefined;
+  return [...(view?.specialActions ?? []), ...(view?.unavailableSpecialActions ?? [])]
+    .find((offer) => offer.name === 'Aqueduct');
+}
+
+export function researchCardHints(view: View | null | undefined, advance: AdvanceView) {
+  if (advance.owned) return [];
+  return (view?.actionCards ?? []).filter((card) => card.action && card.researchAdvances?.includes(advance.id));
+}

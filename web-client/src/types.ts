@@ -656,6 +656,7 @@ export interface MoveDestination {
   action: Move;
 }
 export interface ActionCard {
+  researchAdvances?: string[];
   id: number;
   name: string;
   description: string;

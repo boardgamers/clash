@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Check, Wheat, Trees, Mountain, Lightbulb, Coins, Smile, Drama, Link } from 'lucide-svelte';
   import { resources, resourceNames, type Pile, type Resource } from './types';
-  import { samePayment, paymentWithAmount, rewardWithAmount, canCompletePayment } from './payment-options';
+  import { samePayment, paymentWithAmount } from './payment-options';
   import { pileText } from './model';
   import ResourceAmount from './ResourceAmount.svelte';
   let {
@@ -12,7 +12,6 @@
     pending = false,
     optional = false,
     reward = false,
-    rebalance = false,
     label = 'Payment',
   }: {
     options: { payment: Pile; disabled?: boolean }[];
@@ -22,7 +21,6 @@
     pending?: boolean;
     optional?: boolean;
     reward?: boolean;
-    rebalance?: boolean;
     label?: string;
   } = $props();
   const icons = {
@@ -40,13 +38,9 @@
   const paid = $derived(available.filter((option) => !empty(option.payment)));
   const selected = $derived(
     available.find((option) => samePayment(option.payment, value)) ??
-      (reward && !rebalance && options.length > 4 ? undefined : available[0]),
+      available[0],
   );
-  const allocation = $derived(reward && !rebalance ? value : selected?.payment);
-  const totals = $derived([
-    ...new Set(paid.map((option) => Object.values(option.payment).reduce((sum, n) => sum + (n ?? 0), 0))),
-  ]);
-  const allocated = $derived(Object.values(allocation ?? {}).reduce((sum, n) => sum + (n ?? 0), 0));
+  const allocation = $derived(selected?.payment);
   const emptyOption = $derived(options.find((option) => empty(option.payment)));
   const fields = $derived(
     resources
@@ -78,17 +72,6 @@
     onChange(payment);
   }
   function setAmount(resource: Resource, amount: number) {
-    if (reward && !rebalance) {
-      choose(
-        rewardWithAmount(
-          paid.map((option) => option.payment),
-          value,
-          resource,
-          amount,
-        ),
-      );
-      return;
-    }
     if (selected)
       choose(
         paymentWithAmount(
@@ -96,27 +79,12 @@
           selected.payment,
           resource,
           amount,
-          rebalance ? 'food' : 'gold',
+          reward ? 'food' : 'gold',
+          !reward,
         ),
       );
   }
   $effect(() => {
-    if (reward && !rebalance && options.length > 4) {
-      const withFixed = { ...value, ...fixed };
-      if (!samePayment(withFixed, value)) {
-        onChange(withFixed);
-        return;
-      }
-      if (
-        !canCompletePayment(
-          available.map((option) => option.payment),
-          value,
-        ) &&
-        available[0]
-      )
-        onChange(available[0].payment);
-      return;
-    }
     if (selected && !samePayment(selected.payment, value)) onChange(selected.payment);
   });
 </script>
@@ -167,20 +135,14 @@
               onchange={(event) => setAmount(field.resource, Number(event.currentTarget.value))}
             >
               {#each field.amounts as amount}<option
-                  value={amount}
-                  disabled={reward && !rebalance &&
-                    !canCompletePayment(
-                      paid.map((option) => option.payment),
-                      { ...allocation, [field.resource]: amount },
-                    )}>{amount}</option
+                  value={amount}>{amount}</option
                 >{/each}
             </select>
           </label>
         {/each}
       </div>
       <small class="payment-builder-hint"
-        >{#if reward && !rebalance}{#if totals.length === 1}{allocated} / {totals[0]} selected · {totals[0] - allocated} remaining{:else}Choose
-            a complete resource combination.{/if}{:else}Changing one amount adjusts the others.{/if}</small
+        >Choose an amount; other resources adjust automatically.</small
       >
       <div class="payment-builder-total">
         <span>{reward ? 'You gain' : 'You pay'}</span><ResourceAmount pile={allocation} />

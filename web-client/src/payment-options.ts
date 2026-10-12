@@ -11,17 +11,18 @@ export function canCompletePayment(choices: Pile[], current: Pile): boolean {
 }
 
 export function rewardWithAmount(choices: Pile[], current: Pile, resource: Resource, amount: number): Pile {
-  const next = { ...current, [resource]: amount };
-  return Number.isInteger(amount) && canCompletePayment(choices, next) ? next : current;
+  return paymentWithAmount(choices, current, resource, amount, 'food', false);
 }
 
 // Keep the requested amount exact and choose a complete legal payment. Prefer
 // adjusting the preferred substitute before changing the other chosen resources.
-export function paymentWithAmount(choices: Pile[], current: Pile, resource: Resource, amount: number, preferred: Resource = 'gold'): Pile {
+export function paymentWithAmount(choices: Pile[], current: Pile, resource: Resource, amount: number, preferred: Resource = 'gold', avoidOverpayment = true): Pile {
   let selected = current;
   let distance = Infinity;
-  for (const choice of choices) {
-    if ((choice[resource] ?? 0) !== amount) continue;
+  const candidates = choices.filter((choice) => (choice[resource] ?? 0) === amount);
+  // Honor the edited amount first. For costs, discard candidates that add
+  // unnecessary resources before preferring the smallest change to other fields.
+  for (const choice of avoidOverpayment ? withoutOverpayments(candidates) : candidates) {
     const change = resources.reduce(
       (sum, r) => sum + Math.abs((choice[r] ?? 0) - (current[r] ?? 0)) * (r === preferred ? 1 : 2),
       0,
@@ -32,4 +33,13 @@ export function paymentWithAmount(choices: Pile[], current: Pile, resource: Reso
     }
   }
   return selected;
+}
+
+// Substitutions can leave valid but needlessly expensive payments
+// (e.g. 1 gold + 1 wood when Mercenaries allows the same ship for 1 gold).
+function withoutOverpayments(choices: Pile[]): Pile[] {
+  return choices.filter((choice) => !choices.some((other) =>
+    resources.every((r) => (other[r] ?? 0) <= (choice[r] ?? 0)) &&
+    resources.some((r) => (other[r] ?? 0) < (choice[r] ?? 0)),
+  ));
 }

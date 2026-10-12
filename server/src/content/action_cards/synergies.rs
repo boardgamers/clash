@@ -262,7 +262,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
     )
 }
 
-fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance> {
+pub(super) fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance> {
     game.cache
         .get_advance_groups()
         .iter()
@@ -523,7 +523,7 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .build()
 }
 
-fn advances_that_can_be_gained(player: &Player, game: &Game) -> Vec<Advance> {
+pub(super) fn advances_that_can_be_gained(player: &Player, game: &Game) -> Vec<Advance> {
     game.cache
         .get_advances()
         .values()

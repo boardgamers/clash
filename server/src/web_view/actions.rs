@@ -337,6 +337,7 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
         let reason = action_reason(game,seat,can_play,PlayingActionType::ActionCard(*id));
         json!({"id":id,"name":c.civil_card.name,"description":c.civil_card.description,"free":PlayingActionType::ActionCard(*id).cost(game,seat).free,
             "cost":PlayingActionType::ActionCard(*id).payment_options(game,seat).default,
+            "researchAdvances":if reason.is_none() {crate::content::action_cards::research_choices(game, game.player(seat), &c.civil_card.name)} else {vec![]},
             "tactics":c.tactics_card.as_ref().map(|t|json!({"name":t.name,"description":t.description})),
             "reason":reason,"action":reason.is_none().then(||Action::Playing(PlayingAction::ActionCard(*id)))})
     }).collect()

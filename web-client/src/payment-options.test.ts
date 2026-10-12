@@ -3,27 +3,14 @@ import assert from 'node:assert/strict';
 import type { Pile } from './types.ts';
 import { paymentWithAmount, samePayment, rewardWithAmount, canCompletePayment } from './payment-options.ts';
 
-test('tax allocations keep other resources fixed and allow only the remaining total', () => {
+test('tax rewards replace other selected resources while preserving the total', () => {
   const choices: Pile[] = [];
   for (let food = 0; food <= 6; food++)
     for (let wood = 0; wood <= 6 - food; wood++) choices.push({ food, wood, ore: 6 - food - wood });
-  const full = { food: 4, ore: 2 };
-  assert.deepEqual(rewardWithAmount(choices, full, 'wood', 1), full);
-  const partial = rewardWithAmount(choices, full, 'food', 3);
-  assert.deepEqual(partial, { food: 3, ore: 2 });
-  assert(canCompletePayment(choices, partial));
-  assert(
-    !choices.some((choice) => samePayment(choice, partial)),
-    'partial selection is not ready to confirm',
-  );
-  assert.deepEqual(rewardWithAmount(choices, partial, 'wood', 2), partial);
-  const completed = rewardWithAmount(choices, partial, 'wood', 1);
-  assert.deepEqual(completed, { food: 3, ore: 2, wood: 1 });
-  assert(choices.some((choice) => samePayment(choice, completed)));
-  assert(
-    !canCompletePayment([{ mood_tokens: 2 }, { culture_tokens: 2 }], { mood_tokens: 1, culture_tokens: 1 }),
-    'restricted combinations remain restricted',
-  );
+  const changed = rewardWithAmount(choices, { food: 4, ore: 2 }, 'wood', 3);
+  assert.deepEqual(changed, { food: 1, wood: 3, ore: 2 });
+  assert.deepEqual(rewardWithAmount(choices, changed, 'ore', 6), { food: 0, wood: 0, ore: 6 });
+  assert(!canCompletePayment([{ mood_tokens: 2 }, { culture_tokens: 2 }], { mood_tokens: 1, culture_tokens: 1 }));
 });
 
 test('payment changes preserve fixed costs and prefer gold substitutions', () => {
@@ -63,4 +50,15 @@ test('Trade Routes swaps the requested reward directly, reducing food first', ()
   const limited = [{ food: 2 }, { food: 1, culture_tokens: 1 }, { food: 1, ideas: 2 }];
   assert.deepEqual(paymentWithAmount(limited, limited[0], 'ideas', 2, 'food'), limited[2]);
   assert.deepEqual(paymentWithAmount(limited, limited[0], 'culture_tokens', 2, 'food'), limited[0]);
+});
+
+test('cost selectors honor new amounts and remove unnecessary existing resources', () => {
+  const choices: Pile[] = [{ mood_tokens: 1 }, { gold: 1 }, { gold: 2 }, { wood: 1, gold: 1 }, { wood: 2 }];
+  assert.deepEqual(paymentWithAmount(choices, { wood: 2 }, 'gold', 1), { gold: 1 });
+  assert.deepEqual(paymentWithAmount(choices, { wood: 2 }, 'gold', 2), { gold: 2 }, 'the requested amount stays exact');
+  assert.deepEqual(paymentWithAmount(choices, { gold: 2 }, 'mood_tokens', 1), { mood_tokens: 1 });
+  const costs: Pile[] = [{ food: 2 }, { food: 1, ideas: 1 }, { ideas: 2 }, { gold: 2 }, { ideas: 1, gold: 1 }];
+  assert.deepEqual(paymentWithAmount(costs, { food: 2 }, 'ideas', 2), { ideas: 2 });
+  assert.deepEqual(paymentWithAmount(costs, { food: 2 }, 'ideas', 1), { food: 1, ideas: 1 });
+  assert.deepEqual(paymentWithAmount(costs, { ideas: 2 }, 'gold', 2), { gold: 2 });
 });
