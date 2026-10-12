@@ -899,6 +899,7 @@
             : null}
           {@const progressLabel =
             status === 'current' ? 'Turn in progress' : status === 'left' ? 'Left game' : null}
+          {@const handCount = ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p => p.id === player.index)?.action_cards?.length}
           <button
             class="player-card"
             class:active={!!turnLabel}
@@ -907,6 +908,7 @@
             aria-label={[
               `${translate(player.civilization)}: ${formatPoints(player.score)} ${translate('victory points')}`,
               player.index === $session.seat ? translate('You') : player.name,
+              handCount !== undefined ? `${translate('Action cards')}: ${handCount}` : '',
               order ? translate(`Turn order ${order}.`).replace(/\.$/u, '') : '',
               turnLabel ? translate(turnLabel) : '',
               progressLabel ? translate(progressLabel) : '',
@@ -949,7 +951,7 @@
                     alt={$session.playerBadges[player.index]!.label}
                     title={$session.playerBadges[player.index]!.label}
                   />{/if}</small
-              ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span
+              ><span class="player-events"><EventMarkers remaining={player.eventTokens} />{#if handCount !== undefined}<span class="player-hand-count" title={`Action cards: ${handCount}`} aria-hidden="true"><Layers size={12} />{handCount}</span>{/if}</span
               >{#if turnLabel || progressLabel}<span class="player-turn" class:round-inactive={!turnLabel}
                   >{#if turnLabel || status === 'current'}<ArrowRight
                       size={12}

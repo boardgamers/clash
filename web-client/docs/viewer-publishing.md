@@ -301,3 +301,5 @@ Viewer 0.1.90 / engine 0.4.74 fixes Earthquake's reported target scope: its mood
 Viewer 0.1.91 / engine 0.4.75 labels the optional end-of-age government payment as “Decide whether to change government” in the public waiting status, instead of “Choose a payment”.
 
 Viewer 0.1.92 omits empty optional payments from journal prose, including older saved entries. Declining a government change now reads “Keep current government” without the stray “Pay ,” prefix. Actual payments and engine history are unchanged; engine remains 0.4.75.
+
+Viewer 0.1.93 shows public action-card hand counts with a card icon on civilization panels and in civilization details. Counts use the already-redacted public hand arrays; no card identities are exposed. Replay frames without historical hand counts omit the number instead of showing current information. Engine remains 0.4.75.

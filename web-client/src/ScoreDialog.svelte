@@ -3,6 +3,7 @@
   import { formatPoints } from './score';
   import {
     Landmark,
+    Layers,
     GraduationCap,
     Target,
     Crown,
@@ -30,6 +31,7 @@
   const session = $derived(controller.session);
   let player = $derived($session.view?.players.find((p) => p.index === $session.scorePlayer));
   const publicPlayer = $derived($session.game?.players.find((p) => p.id === player?.index));
+  const handCount = $derived(($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p => p.id === player?.index)?.action_cards?.length);
   const resources = $derived(
     Object.fromEntries(
       Object.keys(resourceNames)
@@ -109,6 +111,7 @@
     <div class="civilization-resources" role="group" aria-label={`${player.civilization} resources`}>
       <ResourceAmount pile={resources} showZero />
     </div>
+    {#if handCount !== undefined}<p class="civilization-hand-count"><Layers size={17} /> Action cards <strong>{handCount}</strong></p>{/if}
     <nav class="civilization-tabs" aria-label="Civilization details">
       <button class:active={tab === 'score'} aria-pressed={tab === 'score'} onclick={() => setTab('score')}
         ><Trophy size={16} /> Score</button

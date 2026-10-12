@@ -1262,3 +1262,17 @@
 .decision-card-preview h3 {
   margin: 0 0 8px;
 }
+
+.player-hand-count, .civilization-hand-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.player-hand-count {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.civilization-hand-count {
+  margin: 0 0 1rem;
+}
