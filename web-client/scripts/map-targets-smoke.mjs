@@ -148,11 +148,11 @@ try {
     influence.players[1].cities[0].city_pieces = { temple: 1, academy: 1 };
     influence.players[0].cities = [{ position: 'A1', mood_state: 'Happy' }];
     influence.players[0].resources.culture_tokens = 7;
+    influence.players[0].advances.push('Arts');
     ({ page, errors, sent } = await open(width, height, influence, strategy));
-    await page.getByRole('button', { name: 'Abilities and cultural influence', exact: true }).click();
+    await page.getByRole('button', { name: 'Cultural influence', exact: true }).click();
     const panel = page.getByRole('region', { name: 'Abilities and influence', exact: true });
-    assert.equal(await panel.locator('.influence-targets').count(), 0, 'the menu no longer lists targets');
-    await panel.getByRole('button', { name: /Choose target/ }).click();
+
     await panel.locator('.influence-picker').waitFor();
     assert.equal(await page.locator('.map-hit-target[data-position="C1"]').count(), 1);
     await page.locator('.map-hit-target[data-position="C1"]').press('Enter');
@@ -174,6 +174,14 @@ try {
     );
     await page.screenshot({ path: `/tmp/clash-influence-map-${width}-${strategy ? 'strategy' : '3d'}.png` });
     assert.deepEqual(sent, []);
+    assert.equal(await panel.getByRole('button', { name: /Pay & roll|Roll for influence/ }).count(), 0);
+    await panel.getByRole('button', { name: 'Choose payment' }).click();
+    const methods = panel.getByLabel('Influence payment method');
+    await methods.waitFor();
+    assert.equal(await methods.getByRole('button').count(), 2);
+    await methods.getByRole('button', { name: /Arts/ }).click();
+    assert.equal(await methods.getByRole('button', { name: /Arts/ }).getAttribute('aria-pressed'), 'true');
+    assert.deepEqual(sent, [], 'source confirmation does not spend or roll');
     await panel.getByRole('button', { name: /Pay & roll|Roll for influence/ }).click();
     await page.waitForTimeout(100);
     assert.ok(sent.length >= 1);

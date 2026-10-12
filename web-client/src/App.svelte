@@ -1359,12 +1359,20 @@
         >
 
         <button
+          aria-label="Cultural influence"
+          title="Cultural influence · Choose a destination"
+          class:active={$session.abilitiesOpen && $session.influenceMode}
+          disabled={replaying || pending || !view?.canPlay || !view?.influence?.length}
+          onclick={() => { confirmEnd = false; controller.chooseInfluence(); }}
+        ><Drama size={21} /><span>Influence</span></button>
+
+        <button
           title={abilitiesAvailable
             ? 'Abilities and cultural influence'
             : 'No abilities or influence targets available'}
           data-tutorial="influence"
           aria-label="Abilities and cultural influence"
-          class:active={$session.abilitiesOpen}
+          class:active={$session.abilitiesOpen && !$session.influenceMode}
           class:inspect-only={!abilitiesAvailable}
           disabled={!$session.view}
           onclick={() => {

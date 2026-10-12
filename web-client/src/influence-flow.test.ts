@@ -4,6 +4,8 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import {
   activeInfluence,
+  bestInfluenceOrigin,
+  influenceDestinations,
   cheaperInfluenceOrigin,
   influenceKey,
   influenceMapPick,
@@ -147,4 +149,21 @@ test('influence warns about a cheaper eligible city for the same target', () => 
     null,
     'equal range costs need no warning',
   );
+});
+
+
+test('destination selection defers Arts versus regular influence and defaults to the cheapest source', () => {
+  const g = influenceFixture();
+  g.players[0].advances.push('Arts');
+  g.players[0].cities.push({ position: 'B1', mood_state: 'Happy' });
+  const v = view(g);
+  const offers = v.influence!.filter(o => o.name === 'Temple' && o.position === 'C1');
+  assert(offers.length >= 2);
+  assert.equal(influenceDestinations(offers).length, 1);
+  const target = influenceMapPick(offers, 'C1', { kind: 'tile' })!;
+  assert(target);
+  assert.equal(bestInfluenceOrigin(target)?.position, 'B1');
+  const state = { view: v, mode: 'overview', abilitiesOpen: true, influenceMode: true, influenceTarget: influenceKey(target) } as Session;
+  assert.equal(activeInfluence(state)?.source, 'B1');
+  assert.equal(activeInfluence({ ...state, influenceOrigin: 'A1' })?.source, 'A1');
 });

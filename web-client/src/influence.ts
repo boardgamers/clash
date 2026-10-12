@@ -35,6 +35,16 @@ type Attempt = {
 };
 export const influenceKey = (offer: InfluenceOffer) => `${offer.position}/${offer.name}/${offer.variant}`;
 
+export const influenceDestinationKey = (offer: InfluenceOffer) => `${offer.position}/${offer.name}`;
+export function bestInfluenceOrigin(offer: InfluenceOffer) {
+  const cost = (o: NonNullable<InfluenceOffer['origins']>[number]) =>
+    Object.values(influenceUpfrontCost(o.actionPayment, o.payment)).reduce((sum, n) => sum + (n ?? 0), 0);
+  return [...(offer.origins ?? [])].sort((a, b) => cost(a) - cost(b) || Number(!!b.free) - Number(!!a.free))[0] ?? null;
+}
+export function influenceDestinations(offers: InfluenceOffer[]) {
+  return offers.filter((o, i) => offers.findIndex(other => influenceDestinationKey(other) === influenceDestinationKey(o)) === i);
+}
+
 /** The board model an offer targets: a structure key or an army unit. */
 export function influenceTarget(offer: InfluenceOffer) {
   const action = offer.action as { Playing?: { InfluenceCultureAttempt?: Attempt } } | null;
@@ -46,7 +56,7 @@ export function influenceTarget(offer: InfluenceOffer) {
 
 /** Resolve a map click to one offer, or null when the hex has several candidates. */
 export function influenceMapPick(offers: InfluenceOffer[], position: string, pick: MapPick) {
-  const here = offers.filter((offer) => offer.position === position);
+  const here = influenceDestinations(offers.filter((offer) => offer.position === position));
   if (pick.kind === 'unit' || pick.structure) {
     const exact = here.filter((offer) => {
       const target = influenceTarget(offer);
@@ -73,8 +83,8 @@ export function activeInfluence(s: Session) {
   const offers = s.view.influence;
   const target = offers.find((offer) => influenceKey(offer) === s.influenceTarget) ?? null;
   const origin =
-    target?.origins?.find((o) => o.position === (s.influenceOrigin ?? target.origin)) ??
-    target?.origins?.[0] ??
+    target?.origins?.find((o) => o.position === s.influenceOrigin) ??
+    (target ? bestInfluenceOrigin(target) : null) ??
     null;
   const targets = [...new Set(offers.map((offer) => offer.position))];
   const position =

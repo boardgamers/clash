@@ -11,7 +11,7 @@
     TriangleAlert,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import { activeInfluence, influenceKey, influenceUpfrontCost, cheaperInfluenceOrigin } from './influence';
+  import { activeInfluence, influenceKey, influenceUpfrontCost, cheaperInfluenceOrigin, influenceDestinations, influenceDestinationKey } from './influence';
   import ResourceAmount from './ResourceAmount.svelte';
   let {
     controller,
@@ -22,6 +22,10 @@
   const offers = $derived(influence?.offers ?? []);
   const target = $derived(influence?.target ?? null);
   const origin = $derived(influence?.origin ?? null);
+  const methods = $derived(target ? offers.filter(o => influenceDestinationKey(o) === influenceDestinationKey(target) && (!origin || o.origins?.some(from => from.position === origin.position))) : []);
+  let paymentStep = $state(false);
+  const selectionKey = $derived(`${target ? influenceDestinationKey(target) : ''}:${origin?.position}`);
+  $effect(() => { selectionKey; paymentStep = false; });
   const cheaper = $derived(cheaperInfluenceOrigin(target, origin));
   const attemptKey = $derived(`${target ? influenceKey(target) : ''}:${origin?.position}`);
   let confirmedSource = $state<string | null>(null);
@@ -61,9 +65,9 @@
 </header>
 <div class="influence-picker">
   <ol class="influence-steps" aria-label="Influence progress">
-    <li class="current" aria-current="step">Target</li>
-    <li>Roll</li>
-    <li>Resolve</li>
+    {#each ['Destination', 'Source', 'Payment'] as label, i}
+      <li class:current={i === (!target ? 0 : paymentStep ? 2 : 1)} aria-current={i === (!target ? 0 : paymentStep ? 2 : 1) ? 'step' : undefined}>{label}</li>
+    {/each}
   </ol>
   {#if !target}
     <p class="movement-hint">Click a highlighted city or building on the map, or choose below.</p>
@@ -71,7 +75,7 @@
       {#each groups as position}<div class="influence-target-group">
           <strong>At {position}</strong>
           <div class="decision-options">
-            {#each offers.filter((o) => o.position === position) as offer}<button
+            {#each influenceDestinations(offers.filter((o) => o.position === position)) as offer}<button
                 onmouseenter={() => onHighlight(offer.position)}
                 onmouseleave={() => onHighlight(null)}
                 onfocus={() => onHighlight(offer.position)}
@@ -79,7 +83,7 @@
                 onclick={() => {
                   controller.selectInfluenceTarget(influenceKey(offer));
                   onHighlight(null);
-                }}>{offer.name}<small>{offer.variant}</small></button
+                }}>{offer.name}</button
               >{/each}
           </div>
         </div>{:else}<p class="settler-empty">No eligible targets.</p>{/each}
@@ -99,7 +103,7 @@
           >{target.name} at <b>{target.position}</b></span
         >
       </div>
-      {#if (target.origins?.length ?? 0) > 1}<div class="influence-origins" aria-label="Influence from">
+      {#if !paymentStep && (target.origins?.length ?? 0) > 0}<div class="influence-origins" aria-label="Influence from">
           <span>From</span>{#each target.origins ?? [] as from}<button
               class:selected={origin === from}
               aria-pressed={origin === from}
@@ -118,6 +122,25 @@
               {#if from.reroll}<RotateCcw size={14} />{/if}
             </button>{/each}
         </div>{/if}
+      {#if !paymentStep}
+        <p class="movement-hint">Choose the source on the map or above. The lowest-cost source is preselected.</p>
+        <button class="primary wide" onclick={() => paymentStep = true}>Choose payment<ArrowRight size={16} /></button>
+      {:else}
+        <button class="secondary compact" onclick={() => paymentStep = false}>Change source</button>
+        <div class="decision-options" aria-label="Influence payment method">
+          {#each methods as method}
+            {@const from = method.origins?.find(o => o.position === origin?.position)}
+            <button class:selected={method === target} aria-pressed={method === target} onclick={() => {
+              const position = origin?.position;
+              controller.selectInfluenceTarget(influenceKey(method));
+              if (position) controller.selectInfluenceOrigin(position);
+            }}>
+              {method.variant}
+              <small>{(from?.free ?? method.free) ? 'Free action' : '1 action'}</small>
+              <ResourceAmount pile={influenceUpfrontCost(from?.actionPayment ?? method.actionPayment, from?.payment ?? method.payment)} compact />
+            </button>
+          {/each}
+        </div>
       <div class="influence-cost-line">
         <span>Action</span><span
           >{#if origin?.free ?? target.free}Free action{:else}<Zap size={14} />1 action{/if}{#if Object.values(actionPayment).some(Boolean)}<ResourceAmount
@@ -175,6 +198,7 @@
             compact
           />{/if}<ArrowRight size={16} />
       </button>
+      {/if}
     </div>
   {/if}
 </div>
