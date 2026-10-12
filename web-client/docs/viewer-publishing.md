@@ -210,3 +210,5 @@ Map geometry and permanent labels now depend only on visible map content, owners
 # Viewer 0.1.71 / engine 0.4.65
 
 Read-only WASM view/preview queries retain one parsed game keyed by the exact serialized snapshot, avoiding repeated deserialization and rule initialization while selecting units, resources or payments. Move execution stays isolated. Regression checks cover seat changes, changed snapshots, returning to old states, fresh-query equivalence and non-mutation by queries or moves. Prediction's canonical comparison traverses JSON once without a stringify replacer, and its verified fingerprint is reused for server reconciliation instead of computed again. Hidden-information checks, array ordering, Undo and server validation are retained. Desktop/mobile Theaters/payment/Undo smoke passes without server acknowledgements.
+
+Viewer 0.1.72 / engine 0.4.66 enforces Free Education once per turn, as marked on the player board. Paying consumes the allowance; declining does not. The allowance resets at end of turn, and research previews and descriptions show the same restriction. Publish the matching viewer and engine together.

@@ -119,14 +119,16 @@ fn free_education() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::FreeEducation,
         "Free Education",
-        "After buying another advance with at least 1 gold or 1 idea, you may pay 1 extra idea to gain 1 mood token. This does not apply when buying Free Education itself.",
+        "Once per turn, after buying another advance with at least 1 gold or 1 idea, you may pay 1 extra idea to gain 1 mood token. This does not apply when buying Free Education itself.",
     )
     .with_advance_bonus(MoodToken)
     .add_payment_request_listener(
         |e| &mut e.advance,
         1,
         |game, p, i| {
-            if i.advance == Advance::FreeEducation {
+            if i.advance == Advance::FreeEducation
+                || p.get(game).event_info.contains_key(&p.origin.id())
+            {
                 None
             } else if i.payment.has_at_least(&ResourcePile::gold(1))
                 || i.payment.has_at_least(&ResourcePile::ideas(1))
@@ -145,8 +147,9 @@ fn free_education() -> AdvanceBuilder {
             if payment.is_empty() {
                 return;
             }
-            s.player()
-                .gain_resources(game, ResourcePile::mood_tokens(1));
+            let player = s.player();
+            player.get_mut(game).event_info.insert(player.origin.id(), "used".to_string());
+            player.gain_resources(game, ResourcePile::mood_tokens(1));
         },
     )
 }

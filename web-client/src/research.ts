@@ -84,7 +84,7 @@ const advances = {
   ],
   FreeEducation: [
     GraduationCap,
-    'After buying another advance with at least 1 gold or idea, you may pay 1 extra idea to gain 1 mood token.',
+    'Once per turn, after buying another advance with at least 1 gold or idea, you may pay 1 extra idea to gain 1 mood token.',
   ],
   Philosophy: [Brain, 'Gain 1 idea immediately, then 1 idea each time you gain a Science advance.'],
   Tactics: [

@@ -853,6 +853,7 @@ fn research_plan(game: &Game, seat: usize, input: &Value) -> Result<Value, Strin
     };
     let p = game.player(seat);
     let eligible = p.can_use_advance(Advance::FreeEducation)
+        && !p.event_info.contains_key(&crate::events::EventOrigin::Advance(Advance::FreeEducation).id())
         && a.advance != Advance::FreeEducation
         && (a.payment.ideas > 0 || a.payment.gold > 0);
     if !eligible {

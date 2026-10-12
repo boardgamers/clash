@@ -122,7 +122,10 @@
       "wonder_cards": [
         "GreatGardens"
       ],
-      "next_unit_id": 10
+      "next_unit_id": 10,
+      "event_info": {
+        "FreeEducation": "used"
+      }
     },
     {
       "id": 1,

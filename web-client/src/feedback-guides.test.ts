@@ -107,3 +107,25 @@ test('Free Education can spend the Philosophy idea from each purchased Science a
     assert.deepEqual(query(foodOnly, foodAction), { eligible: false, affordable: false }, 'bonus idea does not make a food-only purchase eligible');
   }
 });
+
+test('Free Education is consumed only when paid and resets after ending the turn', () => {
+  const g = fixture('advances/free_education');
+  g.actions_left = 3;
+  g.players[0].resources.ideas = 7;
+  g.players[0].incident_tokens = 3;
+  const move = (state: any, action: any) => JSON.parse(engine.tryMove(JSON.stringify(state), JSON.stringify(action), 0));
+  const first = view(g, 0).advances.find((a: any) => a.id === 'Irrigation').action;
+  const prompted = move(g, first);
+  const paid = move(prompted, { Response: { Payment: [{ ideas: 1 }] } });
+  const skipped = move(prompted, { Response: { Payment: [{}] } });
+  assert.equal(paid.players[0].event_info?.FreeEducation, 'used');
+  assert.equal(skipped.players[0].event_info?.FreeEducation, undefined);
+  for (const [state, eligible] of [[paid, false], [skipped, true]] as const) {
+    const second = view(state, 0).advances.find((a: any) => a.id === 'Philosophy').action;
+    assert.equal(query(state, second).eligible, eligible);
+    const after = move(state, second);
+    assert.equal(view(after, 0).decision?.origin?.Advance === 'FreeEducation', eligible);
+  }
+  const ended = move(paid, { Playing: 'EndTurn' });
+  assert.equal(ended.players[0].event_info?.FreeEducation, undefined);
+});
