@@ -124,7 +124,14 @@
   import { roundProgress, personalRoundLabel } from './round-progress';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
-  const lastTurn = $derived($session.game ? sinceLastTurn($session.game, $session.seat) : null);
+  // Preserve reference boundaries: opening panels or changing a selection does
+  // not require parsing the whole journal or recalculating recap history.
+  const game = $derived($session.game);
+  const view = $derived($session.view);
+  const seat = $derived($session.seat);
+  const pending = $derived($session.pending);
+  const replaying = $derived(!!$session.playback);
+  const lastTurn = $derived(game ? sinceLastTurn(game, seat) : null);
   let boardHost: HTMLDivElement;
   let world: World;
   let boardError = $state('');
@@ -134,7 +141,7 @@
   let confirmEnd = $state(false);
   let cardReference = $state<CardRule | null>(null);
   let wonderReference = $state<WonderCard | null>(null);
-  const journalCards = $derived(cardReferences($session.view));
+  const journalCards = $derived(cardReferences(view));
   function showJournalCard(reference: CardReference) {
     cardReference = reference.card;
   }
@@ -243,11 +250,16 @@
       ? $session.view?.waitingFor
       : null,
   );
+  const journalOpen = $derived($session.activityOpen && $session.tab === 'journal');
+  let journalScroll = 0;
+  function journalViewport(node: HTMLDivElement) {
+    node.scrollTop = journalScroll;
+  }
   let log = $derived(
-    $session.game ? combatJournal(journal($session.game, $session.view ?? undefined)).reverse() : [],
+    journalOpen && game ? combatJournal(journal(game, view ?? undefined)).reverse() : [],
   );
   const researchCatalog = $derived(
-    $session.view && ($session.view.advances.length ? $session.view : controller.researchReferenceView()),
+    view && (view.advances.length ? view : controller.researchReferenceView()),
   );
   function showJournalResearch(target: ResearchReference) {
     const view = controller.researchReferenceView(target.player);
@@ -284,9 +296,9 @@
     ),
   );
   let happinessAvailable = $derived(
-    !$session.playback && !$session.pending && !!$session.view?.canPlay &&
-      ($session.view.happinessActions ?? []).some((variant) =>
-        $session.view!.cityActions.some((city) => city.happiness.some((target) => {
+    !replaying && !pending && !!view?.canPlay &&
+      (view.happinessActions ?? []).some((variant) =>
+        view!.cityActions.some((city) => city.happiness.some((target) => {
           try {
             return !!controller.query<{ action: unknown }>({
               kind: 'happiness', cities: [[city.position, target.steps]],
@@ -310,11 +322,11 @@
         (!!$session.view?.units?.length || !!$session.view?.nomadCities?.length)),
   );
   let abilitiesAvailable = $derived(
-    !$session.playback &&
-      !$session.pending &&
-      (!!$session.view?.specialActions?.length ||
-        !!$session.view?.influence?.length ||
-        !!($session.view && controller.shogunateDraftOffers().length)),
+    !replaying &&
+      !pending &&
+      (!!view?.specialActions?.length ||
+        !!view?.influence?.length ||
+        !!(view && controller.shogunateDraftOffers().length)),
   );
   let objectiveDecision = $derived($session.playback ? null : $session.view?.objectiveDecision);
   let choiceDecision = $derived($session.playback ? null : $session.view?.choiceDecision);
@@ -1809,7 +1821,8 @@
           onclick={() => controller.closeActivity()}><X size={17} /></button
         >
       </div>
-      <div class="journal" hidden={$session.tab !== 'journal'} role="tabpanel" aria-label="Journal">
+      {#if journalOpen}<div class="journal" role="tabpanel" aria-label="Journal" use:journalViewport
+        onscroll={(event) => { journalScroll = event.currentTarget.scrollTop; }}>
         {#each log as entry, index (entry.id)}
           {#if index === 0 || entry.age !== log[index - 1].age || entry.round !== log[index - 1].round}
             <h3 class="journal-round">
@@ -1818,7 +1831,7 @@
           {/if}
           {@render journalRow(entry)}
         {/each}{#if log.length === 0}<p>No actions yet.</p>{/if}
-      </div>
+      </div>{/if}
       <div
         class="chat-panel"
         hidden={$session.tab !== 'chat'}

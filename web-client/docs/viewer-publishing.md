@@ -200,3 +200,7 @@ BGS logSlice now returns entries with public readable text and player metadata a
 # Viewer 0.1.69 / engine 0.4.64
 
 Surviving defenders who fight during their own turn now receive the battle movement restriction, including event-triggered barbarian attacks and attacker retreats. The restriction expires at turn end and is not applied to out-of-turn defenses, uninvolved naval passengers, or ships with Longships. It is applied before combat-end rewards so newly awarded units remain free. Regression coverage includes repeated defenses, turn expiry, saved battles, passengers and Longships.
+
+# Viewer 0.1.70 / engine unchanged (0.4.64)
+
+Map geometry and permanent labels now depend only on visible map content, ownership, capitals and display preferences. Resource changes, research, action availability, activation counters and battle restrictions no longer recreate the whole board. Interaction highlights and tooltips still update normally. Journal rows and their card/research links are rendered only while the journal is open, preserving its scroll position; stable game/view references also prevent unrelated panel updates from recalculating history or rerunning Happiness/Abilities availability queries. Browser regression coverage exercises Theaters/payment/Undo without server acknowledgements and checks that board labels are retained and the journal still opens.

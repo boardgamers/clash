@@ -1,3 +1,4 @@
+import { boardContentSignature } from './board-content';
 import { thumbnailCamera } from './thumbnail-camera';
 import CollectionMapBadge from './CollectionMapBadge.svelte';
 import CitySiteIcon from './CitySiteIcon.svelte';
@@ -1163,16 +1164,7 @@ export class World {
               : choosingCity
                 ? new Set(abilityPositions)
                 : null;
-    const signature = JSON.stringify([
-      mapTiles,
-      s.game.players.map((p) => [p.cities, p.units]),
-      s.view?.players,
-      s.seat,
-      s.colorBlind,
-      s.playerColors,
-      s.playerSymbols,
-      s.strategyMap,
-    ]);
+    const signature = boardContentSignature(s, mapTiles);
     if (signature !== this.lastSignature) {
       this.lastSignature = signature;
       this.settleMotion?.();
