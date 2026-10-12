@@ -1,3 +1,4 @@
+import { movementWaypoints } from './movement-animation';
 import { boardContentSignature } from './board-content';
 import { thumbnailCamera } from './thumbnail-camera';
 import CollectionMapBadge from './CollectionMapBadge.svelte';
@@ -94,17 +95,34 @@ export class World {
     const d = piece.userData;
     return `${d.kind}:${d.player}:${d.unit ?? d.cityPosition ?? d.position}:${d.building ?? ''}`;
   }
-  private animatePieces(previous: Map<string, THREE.Vector3>, appearing: Set<THREE.Group>) {
+  private animatePieces(previous: Map<string, {point: THREE.Vector3; position: string}>, appearing: Set<THREE.Group>, tiles: [string, Terrain][], navigation: string[][], navigationPlayers: Set<number>) {
     const moves = this.pieces
       .filter((piece) => !appearing.has(piece))
       .map((piece) => ({
         piece,
-        from: previous.get(this.pieceKey(piece)),
+        from: previous.get(this.pieceKey(piece))?.point,
+        origin: previous.get(this.pieceKey(piece))?.position,
         to: piece.position.clone(),
         scale: piece.scale.clone(),
       }))
       .filter((m) => m.from && m.from.distanceTo(m.to) > 0.02);
     if (!moves.length) return;
+    const paths = moves.map(m => {
+      const waypoints = movementWaypoints(tiles, m.origin!, m.piece.userData.position, m.piece.userData.ship, navigationPlayers.has(m.piece.userData.player) ? navigation : []);
+      const points = waypoints.map(([x,z],i) => {
+        const position = tiles.find(([p]) => { const [px,pz] = positionXY(p); return Math.hypot(px-x,pz-z) < .001; })?.[0];
+        const tile = position ? this.tiles.get(position) : undefined;
+        const surface = tile ? tile.parent!.position.y + (tile.geometry as THREE.CylinderGeometry).parameters.height / 2 : 0;
+        return new THREE.Vector3(x, Math.max(surface + .08, m.from!.y + (m.to.y-m.from!.y)*i/Math.max(1,waypoints.length-1)), z);
+      });
+      if (points.length > 1) { points[0] = m.from!.clone(); points[points.length-1] = m.to.clone(); }
+      else if (m.origin === m.piece.userData.position) return new THREE.LineCurve3(m.from!,m.to);
+      if (points.length < 2) return null;
+      const path = new THREE.CurvePath<THREE.Vector3>();
+      for (let i=1;i<points.length;i++) path.add(new THREE.LineCurve3(points[i-1],points[i]));
+      return path;
+    });
+    const duration = Math.min(2400, Math.max(650, ...paths.map(path => (path?.getLength() ?? 0)*180)));
     const start = performance.now();
     this.settleMotion = () => {
       cancelAnimationFrame(this.motionFrame);
@@ -116,11 +134,11 @@ export class World {
       this.invalidate();
     };
     const tick = () => {
-      const t = Math.min(1, (performance.now() - start) / 650),
+      const t = Math.min(1, (performance.now() - start) / duration),
         eased = t * t * (3 - 2 * t);
-      for (const m of moves) {
-        if (m.from) m.piece.position.lerpVectors(m.from, m.to, eased);
-      }
+      moves.forEach((m, i) => {
+        m.piece.position.copy(paths[i]?.getPointAt(eased) ?? m.to);
+      });
       this.invalidate();
       if (t < 1) this.motionFrame = requestAnimationFrame(tick);
       else this.settleMotion?.();
@@ -1174,7 +1192,7 @@ export class World {
       this.lastSignature = signature;
       this.settleMotion?.();
       this.placement.stop();
-      const previous = new Map(this.pieces.map((p) => [this.pieceKey(p), p.position.clone()]));
+      const previous = new Map(this.pieces.map((p) => [this.pieceKey(p), {point: p.position.clone(), position: p.userData.position as string}]));
       const previousBuildings = new Set(this.buildings.keys());
       const previousCities = new Set(
         this.pieces
@@ -1482,7 +1500,7 @@ export class World {
               unit.pirate,
               player.civilization,
             );
-            pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id };
+            pawn.userData = { position: unit.position, kind: 'unit', unit: unit.id, player: player.id, ship: unit.unit_type === 'Ship' };
             this.pieces.push(pawn);
             const stackIndex = unitStacks.get(unit.position) ?? 0;
             unitStacks.set(unit.position, stackIndex + 1);
@@ -1656,7 +1674,7 @@ export class World {
               })),
           ]
         : [];
-      if (animate) this.animatePieces(previous, new Set(appearing.map(({ model }) => model)));
+      if (animate) this.animatePieces(previous, new Set(appearing.map(({ model }) => model)), mapTiles, s.view?.seaRoutes ?? [], new Set(s.game.players.filter(p => p.advances?.includes('Navigation')).map(p => p.id)));
       this.placement.play(appearing, () => this.invalidate());
       // Frame a newly created map, including when the last opponent finishes choosing.
       if (!hadTiles && this.tiles.size > 0) this.reset();

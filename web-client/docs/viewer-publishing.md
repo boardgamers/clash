@@ -283,3 +283,9 @@ Collect preselects one resource choice per eligible tile when the number of dist
 # Viewer 0.1.85 / engine unchanged (0.4.71)
 
 Carthage's two routes to a pirate-occupied sea space are explicitly labelled Sail peacefully and Attack pirates. The peaceful option previously appeared only as Water. Verified on a read-only local copy of ClashoftheTitans: ship 4 and its settler move from A8 to E8 with no combat. Desktop/mobile browser clicks submit the peaceful action, and type checks and production build pass. No live move was submitted.
+
+# Viewer 0.1.86 / engine unchanged (0.4.71)
+
+Movement animations follow successive terrain-compatible tile centers instead of interpolating directly across the board. Ships and carried units stay on connected sea spaces; Navigation-capable players can follow the same perimeter waypoints as the sea-route guide. Land units traverse intermediate land tiles. Animation speed scales with route length, intermediate positions respect terrain surfaces, and unavailable historical routes snap to their destination rather than drawing an invalid shortcut. Reduced-motion behavior is preserved; rules and action costs are unchanged.
+
+Verified sea/land routing, reverse travel and Navigation perimeter regressions (745 tests), type checks, production build, and desktop/mobile ship movement using a local copy of ClashoftheTitans without submitting live moves.
