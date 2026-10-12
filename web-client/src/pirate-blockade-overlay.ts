@@ -13,9 +13,10 @@ export class PirateBlockadeOverlay {
     this.dispose();
     this.signature = signature;
     if (!positions.length) return;
+    // Water tile tops are at y = 0.01. Keep only enough clearance to avoid z-fighting.
     for (const [color, width, height] of [
-      ['#ffebc8', 0.075, 0.39],
-      ['#b3332b', 0.038, 0.405],
+      ['#ffebc8', 0.075, 0.018],
+      ['#b3332b', 0.038, 0.021],
     ] as const) {
       const segments: THREE.BufferGeometry[] = [];
       for (const position of positions) {
