@@ -239,3 +239,8 @@ Clicking a friendly fleet now immediately boards the selected land group across 
 Sea spaces occupied by or adjacent to pirates now have persistent dashed red borders with a pale outline in both 3D and Strategy views. Hover and tile details explain that collection and Trade Routes are blocked. The guide follows live and replayed pirate positions, excludes land and unexplored spaces, and ignores escorted Pirate Allies controlled by Carthage. Thumbnail exports omit the overlay. All 16 locales include the explanation; the rules engine is unchanged. Verified with 721 tests, locale validation, type checks, and light/dark browser previews.
 
 Viewer 0.1.77 lowers the pirate blockade border to the sea-tile surface, with minimal clearance to prevent flickering. Engine 0.4.68 is unchanged.
+
+
+# Viewer 0.1.78 / engine unchanged (0.4.68)
+
+When Port has multiple legal sea spaces, city construction offers Choose port location on map. The dialog closes, eligible sea spaces are highlighted, and clicking one constructs the port with the selected payment. Cancel returns to city management without submitting; changed game states discard stale placement choices. Single-location ports retain direct construction. Verified controller payment/cancel/state-change checks and desktop/mobile browser map clicks.

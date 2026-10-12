@@ -2601,3 +2601,35 @@ for (const predictions of [true, false]) test(`boarding across two ships spends 
     assert.equal(after.players[0].units.filter((u:any) => u.unit_type==='Ship').flatMap((u:any)=>u.carried_units??[]).length,3);
   } finally {app.close();}
 });
+
+
+test('port construction chooses a legal sea hex on the map and preserves payment', async () => {
+  const app=paymentController(), c=app.controller;
+  try {
+    const raw=fixture('base/construct_port');
+    c.setPlayer(0); await c.load(engine.stripSecret(raw,0));
+    c.selectCity('C2'); c.patch({mode:'city',cityTab:'build'});
+    c.choosePortOnMap({gold:3});
+    assert.equal(app.session().mode,'port');
+    assert.deepEqual(app.session().portPlacement!.choices.map(c=>c.position).sort(),['C3','D2']);
+    c.selectTile('A1'); assert.equal(app.sent.length,0);
+    c.selectTile('D2'); assert.equal(app.sent.length,1);
+    const after=JSON.parse(engine.tryMove(raw,app.sent[0],0));
+    assert.equal(after.players[0].cities.find((c:any)=>c.position==='C2').port_position,'D2');
+    assert.deepEqual(JSON.parse(app.sent[0]).Playing.Construct.payment,{gold:3});
+    assert.equal(app.session().portPlacement,undefined);
+  } finally {app.close();}
+});
+
+test('port map choice cancels without building and closes on changed game state', async () => {
+  const app=paymentController(),c=app.controller;
+  try {
+    const raw=fixture('base/construct_port'); c.setPlayer(0); await c.load(engine.stripSecret(raw,0));
+    c.selectCity('C2');c.choosePortOnMap({gold:3});c.patch({mode:'city'});
+    assert.equal(app.session().portPlacement,undefined);assert.equal(app.sent.length,0);
+    c.choosePortOnMap({gold:3});
+    const changed=JSON.parse(raw);changed.actions_left=1;
+    await c.load(engine.stripSecret(JSON.stringify(changed),0));
+    assert.equal(app.session().portPlacement,undefined);
+  } finally {app.close();}
+});

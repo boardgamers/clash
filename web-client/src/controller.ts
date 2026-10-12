@@ -151,6 +151,7 @@ export class Controller {
   patch(patch: Partial<Session>) {
     this.session.update((s) => {
       const next = { ...s, ...patch };
+      if (next.mode !== 'port') next.portPlacement = undefined;
       if ('scorePlayer' in patch && patch.scorePlayer !== s.scorePlayer) {
         next.scoreTab = patch.scoreTab ?? 'score';
         next.scoreObjective = patch.scoreObjective ?? null;
@@ -520,6 +521,7 @@ export class Controller {
               movementEnded ||
               turnChanged ||
               (old.mode === 'settlers' && resetMovement) ||
+              (old.mode === 'port' && changed) ||
               view.decision ||
               view.objectiveDecision ||
               view.choiceDecision ||
@@ -980,9 +982,29 @@ export class Controller {
       recruitPreview: null,
     });
   }
+  choosePortOnMap(payment: Pile) {
+    const s = get(this.session);
+    if (s.pending || s.playback || !s.city) return;
+    const port = s.view?.cityActions.find(c => c.position === s.city)?.buildings.find(b => b.name === 'Port');
+    const choices = port?.choices.flatMap(c => {
+      if (!c.position) return [];
+      const action = structuredClone(c.action) as {Playing: {Construct: {payment: Pile}}};
+      action.Playing.Construct.payment = {...payment};
+      return [{position:c.position, action}];
+    }) ?? [];
+    if (choices.length < 2) return;
+    this.closeActivity();
+    this.patch({mode:'port',portPlacement:{city:s.city,payment:{...payment},choices},tilePanel:false,seaRoutes:false,tradeRoutes:false,pirateSpawns:false,error:''});
+  }
   selectTile(position: string, pick: MapPick = { kind: 'tile' }) {
     if (get(this.session).playback) return;
     const s = get(this.session);
+    if (s.mode === 'port') {
+      if (s.pending) return;
+      const choice = s.portPlacement?.choices.find(c => c.position === position);
+      if (choice) this.submit(choice.action);
+      return;
+    }
     if (mapDecisionOptions(s.view?.decision).length) {
       const index = mapDecisionIndex(s.view!.decision!, position, pick);
       // Pieces: open the clicked hex, and choose the clicked unit/building (or a lone candidate).

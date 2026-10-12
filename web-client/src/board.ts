@@ -1041,11 +1041,11 @@ export class World {
     this.explorationLabel.hidden = !this.explorationPositions.length;
     this.explorationLabel.dataset.positions = this.explorationPositions.join(' ');
     // City abilities and cultural influence both choose highlighted pieces on the map.
-    const abilityPositions = influence
+    const abilityPositions = s.portPlacement ? s.portPlacement.choices.map(c => c.position) : influence
       ? influence.positions
       : [...new Set(ability?.offers.map((offer) => offer.position!) ?? [])];
     const abilitySelected = influence ? influence.selected : s.abilityCity ? [s.abilityCity] : [];
-    const choosingCity = !!ability || !!influence;
+    const choosingCity = !!ability || !!influence || !!s.portPlacement;
     this.interactionPositions = exploration
       ? this.explorationPositions
       : s.view?.decision?.tacticsSelection && combat

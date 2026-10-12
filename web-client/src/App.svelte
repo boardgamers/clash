@@ -1436,6 +1436,15 @@
         ><Shapes size={19} /></button
       >
     </nav>
+    {#if $session.mode === 'port' && $session.portPlacement}
+      <section class="action-panel floating-panel" aria-label="Choose port location">
+        <button class="icon-button close-action" aria-label="Cancel port placement"
+          onclick={() => controller.patch({mode:'city'})}><X size={18} /></button>
+        <h2>Build Port · {$session.portPlacement.city}</h2>
+        <p>Choose a highlighted sea space on the map.</p>
+        <ResourceAmount pile={$session.portPlacement.payment} />
+      </section>
+    {/if}
     {#if choiceDecision || objectiveDecision || (!$session.playback && $session.game && !$session.view?.supportedPhase && $session.seat === $session.view?.activePlayer) || $session.mode === 'collect' || confirmEnd || ($session.error && $session.mode === 'overview')}
       <section
         class="action-panel floating-panel"

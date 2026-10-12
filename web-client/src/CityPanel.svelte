@@ -390,12 +390,15 @@
           label={`Payment for ${selected.name}`}
         />{/if}
       <div class="port-choices">
-        {#each selected.choices as choice}<button
+        {#if selected.name === 'Port' && selected.choices.length > 1}
+          <button class="primary" disabled={!!$session.playback || $session.pending}
+            onclick={() => controller.choosePortOnMap(buildPayment ?? selected!.payment)}>Choose port location on map</button>
+        {:else}{#each selected.choices as choice}<button
             class="primary"
             disabled={!!$session.playback || $session.pending}
             onclick={() => submitBuild(choice.action)}
             >Build {selected.name}{choice.position ? ` at ${choice.position}` : ''}</button
-          >{/each}
+          >{/each}{/if}
       </div>
     </footer>{/if}
   {#if tab === 'recruit'}<footer class="city-confirm recruit-confirm">

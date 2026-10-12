@@ -524,6 +524,7 @@ export interface EventInfo {
   targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
+  portPlacement?: {city: string; payment: Pile; choices: {position: string; action: Move}[]};
   landingTargets?: string[];
   disembarkCarriers?: number[];
   analysis?: boolean;
@@ -570,7 +571,7 @@ export interface Session {
   seat?: number;
   city: string | null;
   focus: string | null;
-  mode: 'overview' | 'collect' | 'research' | 'city' | 'settlers' | 'happiness';
+  mode: 'port' | 'overview' | 'collect' | 'research' | 'city' | 'settlers' | 'happiness';
   selectedSettler: number | null;
   destination: string | null;
   explorationRotation: number | null;
