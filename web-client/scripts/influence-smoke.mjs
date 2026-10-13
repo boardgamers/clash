@@ -133,6 +133,17 @@ try {
     const confirm = methods.getByRole('button', { name: strategy ? /^Influence/ : /^Arts/ });
     const confirmBounds = await confirm.boundingBox();
     const panelBounds = await panel.boundingBox();
+    const actionCost = confirm.locator('.influence-action-cost');
+    assert.equal(await actionCost.getAttribute('aria-label'), strategy ? 'Costs 1 action' : 'Free action');
+    const layout = await confirm.evaluate(button => {
+      const title = button.querySelector('.method-title').getBoundingClientRect();
+      const boost = button.querySelector(':scope > small').getBoundingClientRect();
+      const action = button.querySelector('.influence-action-cost');
+      return { titleY: title.y + title.height / 2, boostY: boost.y + boost.height / 2,
+        actionColor: getComputedStyle(action).color, buttonColor: getComputedStyle(button).color };
+    });
+    assert.equal(layout.actionColor, layout.buttonColor, 'action cost inherits button contrast');
+    if (width >= 700) assert.ok(Math.abs(layout.titleY - layout.boostY) < 2, 'desktop label, costs and boost share a row');
     assert.ok(confirmBounds && panelBounds && confirmBounds.y >= panelBounds.y && confirmBounds.y + confirmBounds.height <= panelBounds.y + panelBounds.height, 'roll confirmation stays visible within the panel');
     await page.screenshot({ path: `/tmp/clash-influence-payment-${width}-${strategy ? 'strategy' : '3d'}.png` });
     assert.deepEqual(sent, [], 'source confirmation does not spend or roll');

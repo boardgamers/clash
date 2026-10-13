@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     Drama,
+    Zap,
     ArrowRight,
     ArrowLeft,
     Landmark,
@@ -176,14 +177,14 @@
           : 'Boost after rolling · 1 culture per +1.'}</span>
         {#if origin?.reroll}<span>Buddhism · One optional reroll</span>{/if}
       </div>
-      <div class="decision-options influence-methods" aria-label="Influence payment method">
+      <div class="influence-methods" aria-label="Influence payment method">
         {#each methods as method}
           {@const from = method.origins?.find(o => o.position === origin?.position)}
           {@const cost = influenceUpfrontCost(from?.actionPayment ?? method.actionPayment, from?.payment ?? method.payment)}
           {@const maxBoost = origin?.position === target.position || (from?.preventBoost ?? method.preventBoost) ? 0 : Math.min(Math.max(0, 4 - (from?.rollBonus ?? method.rollBonus ?? 0)), Math.max(0, culture - (cost.culture_tokens ?? 0)))}
           <button class="primary" disabled={$session.pending} onclick={() => roll(method)}>
             <span class="method-title">{method.variant === 'Arts' ? 'Arts' : 'Influence'}
-              <ResourceAmount pile={cost} compact /><small>{(from?.free ?? method.free) ? 'Free action' : '1 action'}</small>
+              <ResourceAmount pile={cost} compact /><span class="influence-action-cost" aria-label={(from?.free ?? method.free) ? 'Free action' : 'Costs 1 action'} title={(from?.free ?? method.free) ? 'Free action' : 'Costs 1 action'}>{(from?.free ?? method.free) ? 0 : 1}<Zap size={13} /></span>
             </span>
             <small>Maximum roll boost: +{maxBoost}</small>
           </button>
@@ -206,8 +207,15 @@
   .route-target { flex: 1; min-width: 0; }
   .influence-methods { display: flex; gap: 0.5rem; margin: 0; }
   .influence-methods button { flex: 1; flex-direction: column; align-items: stretch; gap: 0.3rem; }
+  .influence-action-cost { display: inline-flex; align-items: center; gap: 0.2rem; color: inherit; font-size: inherit; line-height: 1; }
   .method-title { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
   .influence-methods small { font-size: 11px; color: inherit; }
+  @media (min-width: 700px) {
+    .influence-methods { flex-direction: column; }
+    .influence-methods button { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .method-title { flex-wrap: nowrap; }
+    .influence-methods button > small { white-space: nowrap; }
+  }
   .roll-summary { display: grid; gap: 0.3rem; margin: 0.2rem 0 0.6rem; font-size: 12px; color: var(--muted); line-height: 1.5; }
   .roll-summary strong { color: var(--ink); font-size: 14px; }
   .range-note { display: flex; align-items: center; gap: 0.35rem; font-size: 12px; color: var(--muted); }
