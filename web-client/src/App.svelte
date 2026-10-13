@@ -1413,7 +1413,7 @@
               aria-hidden="true"
             />{/if}</button
         >
-        <UndoControl canUndo={!!$session.view?.canUndo} canRedo={!!$session.view?.canRedo}
+        <UndoControl canUndo={!!$session.view?.canUndo || !!activeInfluence($session)} canRedo={!!$session.view?.canRedo}
           blocked={!!$session.playback || $session.pending} submit={action => controller.submit(action)}/>
         <button
           class:active={confirmEnd}

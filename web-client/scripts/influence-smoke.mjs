@@ -91,6 +91,7 @@ try {
     const panel = page.getByRole('region', { name: 'Cultural influence', exact: true });
 
     await panel.locator('.influence-picker').waitFor();
+    assert.equal(await panel.locator('.influence-target-group').count(), 0, 'first step is map-only');
     assert.equal(await page.locator('.map-hit-target[data-position="C1"]').count(), 1);
     await page.locator('.map-hit-target[data-position="C1"]').press('Enter');
     await frame(page);
@@ -111,21 +112,31 @@ try {
     );
     await page.screenshot({ path: `/tmp/clash-influence-map-${width}-${strategy ? 'strategy' : '3d'}.png` });
     assert.deepEqual(sent, []);
-    assert.equal(await panel.getByRole('button', { name: /Pay & roll|Roll for influence/ }).count(), 0);
     await panel.getByRole('button', { name: 'Choose payment' }).click();
     const methods = panel.getByLabel('Influence payment method');
     await methods.waitFor();
     assert.equal(await methods.getByRole('button').count(), strategy ? 1 : 2);
-    if (!strategy) {
-      await methods.getByRole('button', { name: /Arts/ }).click();
-      assert.equal(await methods.getByRole('button', { name: /Arts/ }).getAttribute('aria-pressed'), 'true');
-    }
-    const confirmBounds = await panel.getByRole('button', { name: /Pay & roll|Roll for influence/ }).boundingBox();
+    assert.match(await methods.innerText(), /Maximum roll boost: \+4/);
+    // Desktop Undo and the mobile panel Back share the same local navigation.
+    const back = width < 600 ? panel.getByRole('button', { name: 'Previous influence step' }) : page.getByRole('button', { name: 'Undo last action', exact: true });
+    await back.click();
+    await panel.getByRole('button', { name: 'Choose payment' }).waitFor();
+    assert.equal(await methods.count(), 0);
+    await back.click();
+    await panel.locator('.influence-target-group').waitFor();
+    await back.click();
+    assert.equal(await panel.locator('.influence-target-group').count(), 0);
+    assert.deepEqual(sent, [], 'Undo during setup is local');
+    await page.locator('.map-hit-target[data-position="C1"]').press('Enter');
+    await panel.getByRole('button', { name: 'Temple', exact: true }).click();
+    await panel.getByRole('button', { name: 'Choose payment' }).click();
+    const confirm = methods.getByRole('button', { name: strategy ? /^Influence/ : /^Arts/ });
+    const confirmBounds = await confirm.boundingBox();
     const panelBounds = await panel.boundingBox();
     assert.ok(confirmBounds && panelBounds && confirmBounds.y >= panelBounds.y && confirmBounds.y + confirmBounds.height <= panelBounds.y + panelBounds.height, 'roll confirmation stays visible within the panel');
     await page.screenshot({ path: `/tmp/clash-influence-payment-${width}-${strategy ? 'strategy' : '3d'}.png` });
     assert.deepEqual(sent, [], 'source confirmation does not spend or roll');
-    await panel.getByRole('button', { name: /Pay & roll|Roll for influence/ }).click();
+    await confirm.click();
     await page.waitForTimeout(100);
     assert.ok(sent.length >= 1);
     assert.equal(sent[0].Playing.InfluenceCultureAttempt.selected_structure.position, 'C1');

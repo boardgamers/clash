@@ -10,7 +10,7 @@
     TriangleAlert,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
-  import { activeInfluence, influenceKey, influenceUpfrontCost, cheaperInfluenceOrigin, influenceDestinations, influenceDestinationKey } from './influence';
+  import { activeInfluence, influenceKey, influenceUpfrontCost, cheaperInfluenceOrigin, influenceDestinations, influenceDestinationKey, type InfluenceOffer } from './influence';
   import ResourceAmount from './ResourceAmount.svelte';
   let {
     controller,
@@ -22,9 +22,9 @@
   const target = $derived(influence?.target ?? null);
   const origin = $derived(influence?.origin ?? null);
   const methods = $derived(target ? offers.filter(o => influenceDestinationKey(o) === influenceDestinationKey(target) && (!origin || o.origins?.some(from => from.position === origin.position))) : []);
-  let paymentStep = $state(false);
+  const paymentStep = $derived(!!$session.influencePaymentStep);
   const selectionKey = $derived(`${target ? influenceDestinationKey(target) : ''}:${origin?.position}`);
-  $effect(() => { selectionKey; paymentStep = false; });
+  $effect(() => { selectionKey; controller.patch({ influencePaymentStep: false }); });
   const cheaper = $derived(cheaperInfluenceOrigin(target, origin));
   const attemptKey = $derived(`${target ? influenceKey(target) : ''}:${origin?.position}`);
   let confirmedSource = $state<string | null>(null);
@@ -32,19 +32,18 @@
     attemptKey;
     confirmedSource = null;
   });
-  function roll() {
-    if (!target) return;
+  function roll(method: InfluenceOffer) {
+    const from = method.origins?.find(o => o.position === origin?.position);
     if (cheaper && confirmedSource !== attemptKey) {
       confirmedSource = attemptKey;
       return;
     }
-    controller.startInfluence(origin?.action ?? target.action, actionPayment, rangePayment);
+    controller.startInfluence(from?.action ?? method.action, from?.actionPayment ?? method.actionPayment ?? {}, from?.payment ?? method.payment);
   }
+  const culture = $derived($session.game?.players[$session.seat ?? 0]?.resources?.culture_tokens ?? 0);
   const rangePayment = $derived(origin?.payment ?? target?.payment ?? {});
-  const actionPayment = $derived(origin?.actionPayment ?? target?.actionPayment ?? {});
-  const upfront = $derived(influenceUpfrontCost(actionPayment, rangePayment));
   // A city clicked on the map narrows the list to its own candidates.
-  const groups = $derived(influence?.position ? [influence.position] : (influence?.targets ?? []));
+  const groups = $derived(influence?.position ? [influence.position] : []);
   const bonus = $derived(origin?.rollBonus ?? target?.rollBonus ?? 0);
   const preventBoost = $derived(origin?.preventBoost ?? target?.preventBoost ?? false);
 </script>
@@ -52,8 +51,8 @@
 <header class="movement-heading">
   <button
     class="icon-button"
-    aria-label="Back to abilities"
-    onclick={() => controller.patch({ influenceMode: false })}><ArrowLeft size={17} /></button
+    aria-label="Previous influence step"
+    onclick={() => controller.backInfluence()}><ArrowLeft size={17} /></button
   >
   <h2><Drama size={18} />Cultural influence</h2>
   <button
@@ -64,13 +63,13 @@
 </header>
 <div class="influence-picker">
   <ol class="influence-steps" aria-label="Influence progress">
-    {#each ['Destination', 'Source', 'Payment'] as label, i}
-      <li class:current={i === (!target ? 0 : paymentStep ? 2 : 1)} aria-current={i === (!target ? 0 : paymentStep ? 2 : 1) ? 'step' : undefined}>{label}</li>
+    {#each ['Hex', 'Destination', 'Source', 'Payment'] as label, i}
+      <li class:current={i === (!influence?.position ? 0 : !target ? 1 : paymentStep ? 3 : 2)} aria-current={i === (!influence?.position ? 0 : !target ? 1 : paymentStep ? 3 : 2) ? 'step' : undefined}>{label}</li>
     {/each}
   </ol>
   {#if !target}
-    <p class="movement-hint">Click a highlighted city or building on the map, or choose below.</p>
-    <div class="influence-targets">
+    <p class="movement-hint">{influence?.position ? 'Choose a building in this hex, on the map or below.' : 'Choose a highlighted hex on the map.'}</p>
+    {#if influence?.position}<div class="influence-targets">
       {#each groups as position}<div class="influence-target-group">
           <strong>At {position}</strong>
           <div class="decision-options">
@@ -86,7 +85,7 @@
               >{/each}
           </div>
         </div>{:else}<p class="settler-empty">No eligible targets.</p>{/each}
-    </div>
+    </div>{/if}
   {/if}
   {#if !target && influence?.position}<button
       class="secondary compact influence-change"
@@ -98,7 +97,7 @@
   {#if target}
     <div class="influence-preview">
       <div class="influence-route">
-        <button class="route-choice" aria-label="Change source" onclick={() => paymentStep = false}>
+        <button class="route-choice" aria-label="Change source" onclick={() => controller.patch({ influencePaymentStep: false })}>
           <small>From</small><strong>{origin?.position ?? target.origin}</strong>
         </button>
         <ArrowRight size={16} />
@@ -111,7 +110,7 @@
           <span>From</span>{#each target.origins ?? [] as from}<button
               class:selected={origin === from}
               aria-pressed={origin === from}
-              title={from.reroll ? 'Buddhism reroll available' : from.settlers ? 'Settlers' : 'City'}
+              title={from.position === target.position ? 'Same hex: cannot boost the roll' : from.reroll ? 'Buddhism reroll available' : from.settlers ? 'Settlers' : 'City'}
               onmouseenter={() => onHighlight(from.position)}
               onmouseleave={() => onHighlight(null)}
               onfocus={() => onHighlight(from.position)}
@@ -123,27 +122,14 @@
                   pile={from.payment}
                   compact
                 />{:else}<small>In range</small>{/if}
+              {#if from.position === target.position}<span class="source-boost-warning" aria-label="Same hex: cannot boost the roll"><TriangleAlert size={15} /></span>{/if}
               {#if from.reroll}<RotateCcw size={14} />{/if}
             </button>{/each}
         </div>{/if}
       {#if !paymentStep}
         <p class="movement-hint">Choose a source on the map or above. When reclaiming, another city is preferred so you can boost the roll.</p>
-        <button class="primary wide" onclick={() => paymentStep = true}>Choose payment<ArrowRight size={16} /></button>
+        <button class="primary wide" onclick={() => controller.patch({ influencePaymentStep: true })}>Choose payment<ArrowRight size={16} /></button>
       {:else}
-        <div class="decision-options influence-methods" aria-label="Influence payment method">
-          {#each methods as method}
-            {@const from = method.origins?.find(o => o.position === origin?.position)}
-            <button class:selected={method === target} aria-pressed={method === target} onclick={() => {
-              const position = origin?.position;
-              controller.selectInfluenceTarget(influenceKey(method));
-              if (position) controller.selectInfluenceOrigin(position);
-            }}>
-              {method.variant}
-              <small>{(from?.free ?? method.free) ? 'Free action' : '1 action'}</small>
-              <ResourceAmount pile={influenceUpfrontCost(from?.actionPayment ?? method.actionPayment, from?.payment ?? method.payment)} compact />
-            </button>
-          {/each}
-        </div>
       {#if Object.values(rangePayment).some(Boolean)}
         <p class="range-note">Includes <ResourceAmount pile={rangePayment} compact /> for extra range.</p>
       {/if}
@@ -152,6 +138,7 @@
         <div class="influence-source-warning" role="status">
           <p>
             <TriangleAlert size={16} />{cheaper.position} can influence this same target with a lower range cost.
+            {#if confirmedSource === attemptKey}Choose Influence or Arts again to keep the current source.{/if}
           </p>
           <button
             class="secondary wide"
@@ -186,23 +173,28 @@
           ? 'Self-targeting · No roll boost'
           : preventBoost
           ? 'Protected target · No range or roll boost'
-          : 'You may boost the roll with culture.'}</span>
+          : 'Boost after rolling · 1 culture per +1.'}</span>
         {#if origin?.reroll}<span>Buddhism · One optional reroll</span>{/if}
       </div>
-      <button class="primary wide" disabled={$session.pending} onclick={roll}>
-        {cheaper && confirmedSource === attemptKey
-          ? `Use ${origin?.position ?? target.origin} anyway`
-          : Object.values(upfront).some(Boolean)
-            ? 'Pay & roll'
-            : 'Roll for influence'}{#if Object.values(upfront).some(Boolean)}<ResourceAmount
-            pile={upfront}
-            compact
-          />{/if}<ArrowRight size={16} />
-      </button>
+      <div class="decision-options influence-methods" aria-label="Influence payment method">
+        {#each methods as method}
+          {@const from = method.origins?.find(o => o.position === origin?.position)}
+          {@const cost = influenceUpfrontCost(from?.actionPayment ?? method.actionPayment, from?.payment ?? method.payment)}
+          {@const maxBoost = origin?.position === target.position || (from?.preventBoost ?? method.preventBoost) ? 0 : Math.min(Math.max(0, 4 - (from?.rollBonus ?? method.rollBonus ?? 0)), Math.max(0, culture - (cost.culture_tokens ?? 0)))}
+          <button class="primary" disabled={$session.pending} onclick={() => roll(method)}>
+            <span class="method-title">{method.variant === 'Arts' ? 'Arts' : 'Influence'}
+              <ResourceAmount pile={cost} compact /><small>{(from?.free ?? method.free) ? 'Free action' : '1 action'}</small>
+            </span>
+            <small>Maximum roll boost: +{maxBoost}</small>
+          </button>
+        {/each}
+      </div>
+
 </div>
 {/if}
 
 <style>
+  .source-boost-warning { display: inline-flex; color: var(--gold, #b79351); }
   .influence-picker { min-height: 0; overflow-y: auto; }
   .influence-submit { flex-shrink: 0; padding-top: 0.4rem; border-top: 1px solid var(--line); }
   .movement-heading { flex-shrink: 0; }
@@ -212,7 +204,10 @@
   .route-choice small { color: var(--muted); font-size: 11px; }
   .route-choice strong { font-size: 14px; }
   .route-target { flex: 1; min-width: 0; }
-  .influence-methods { margin: 0 0 0.8rem; }
+  .influence-methods { display: flex; gap: 0.5rem; margin: 0; }
+  .influence-methods button { flex: 1; flex-direction: column; align-items: stretch; gap: 0.3rem; }
+  .method-title { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .influence-methods small { font-size: 11px; color: inherit; }
   .roll-summary { display: grid; gap: 0.3rem; margin: 0.2rem 0 0.6rem; font-size: 12px; color: var(--muted); line-height: 1.5; }
   .roll-summary strong { color: var(--ink); font-size: 14px; }
   .range-note { display: flex; align-items: center; gap: 0.35rem; font-size: 12px; color: var(--muted); }

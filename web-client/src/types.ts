@@ -564,6 +564,7 @@ export interface Session {
   influencePosition?: string | null;
   influenceTarget?: string | null;
   influenceOrigin?: string | null;
+  influencePaymentStep?: boolean;
   tradeRoutes?: boolean;
   tradeRoutePlayer?: number | null;
   showRegions?: boolean;

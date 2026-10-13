@@ -1,7 +1,7 @@
 import { eventNotices, liveEventNotices } from './event-notices';
 import { publicActions } from './replay-actions';
 import { boardingPlan, type BoardingGroup } from './boarding';
-import { activeInfluence, influenceKey, influenceMapPick, influencePaymentMatches } from './influence';
+import { activeInfluence, influenceKey, influenceDestinations, influenceMapPick, influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
 import { nextCollectionSelection } from './collection-yield';
 import { get, writable } from 'svelte/store';
@@ -1032,7 +1032,7 @@ export class Controller {
     this.audio.play('select');
     const influence = activeInfluence(s);
     if (influence) {
-      const offer = influenceMapPick(influence.offers, position, pick);
+      const offer = influenceMapPick(influence.offers, position, influence.position === position ? pick : { kind: 'tile' });
       if (influence.targets.includes(position))
         this.patch({
           influencePosition: position,
@@ -1129,6 +1129,7 @@ export class Controller {
       abilityChoice: null,
       abilityCity: null,
       influenceMode: true,
+      influencePaymentStep: false,
       influencePosition: null,
       influenceTarget: null,
       influenceOrigin: null,
@@ -1139,6 +1140,18 @@ export class Controller {
       pirateSpawns: false,
       error: '',
     });
+  }
+  backInfluence() {
+    const s = get(this.session);
+    const influence = activeInfluence(s);
+    if (!influence) return false;
+    if (s.influencePaymentStep) this.patch({ influencePaymentStep: false });
+    else if (influence.target) {
+      const multiple = influenceDestinations(influence.offers.filter(o => o.position === influence.position)).length > 1;
+      this.patch({ influenceTarget: null, influenceOrigin: null, influencePosition: multiple ? influence.position : null });
+    } else if (influence.position) this.patch({ influencePosition: null });
+    else this.patch({ influenceMode: false, abilitiesOpen: false });
+    return true;
   }
   selectInfluenceTarget(key: string | null) {
     const s = get(this.session);
@@ -1756,6 +1769,7 @@ export class Controller {
     this.submit(action);
   }
   submit(move: Move, quotedPayment?: Pile) {
+    if (move === 'Undo' && this.backInfluence()) return;
     const s = get(this.session);
     if (
       s.pending ||
