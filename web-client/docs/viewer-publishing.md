@@ -341,3 +341,5 @@ Viewer 0.1.110 splits cultural influence into map-only hex selection, a building
 Viewer 0.1.111 replaces influence payment action text with a numeric action cost and the shared action icon, retaining accessible labels and tooltips. Action details and maximum boost share a row on desktop, with responsive wrapping when space is limited. Engine remains 0.4.81.
 
 Viewer 0.1.112 adds Hand, Discarded actions and Discarded events tabs to Cards. Discards show engine pile order with the top card first, counts and expandable full rules including battle uses. Verified both piles in the local saved-game preview; Svelte and production build pass. Engine remains 0.4.81.
+
+Viewer 0.1.113 / engine 0.4.82 fixes embarked naval defenders rolling dice and being eligible as direct combat casualties. Sea battles now admit only ships as fighters; excess passengers still resolve separately after ship losses. Verified against the reported Joyful-kraken-3479 battle and all 20 combat integration tests, including ship-only dice and remaining transport capacity.

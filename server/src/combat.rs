@@ -363,8 +363,8 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
 #[must_use]
 pub fn can_remove_after_combat(on_water: bool, unit_type: &UnitType) -> bool {
     if on_water {
-        // carried units may also have to be removed
-        true
+        // Passengers are handled separately after ship losses reduce capacity.
+        unit_type.is_ship()
     } else {
         unit_type.is_army_unit()
     }

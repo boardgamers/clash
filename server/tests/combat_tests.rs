@@ -455,3 +455,40 @@ fn defending_ships_stop_but_passengers_and_longships_remain_free() {
         assert!(game.player(1).get_unit(99).movement_restrictions.is_empty());
     }
 }
+
+#[test]
+fn naval_defenders_exclude_passengers_from_dice_and_combat_casualties() {
+    let mut game = JSON.load_game("ship_combat");
+    let mut ship = game.player(1).get_unit(1).clone();
+    ship.id = 2;
+    game.player_mut(1).units.push(ship);
+    for id in 90..94 {
+        let mut passenger = game.player(0).get_unit(0).clone();
+        passenger.id = id;
+        passenger.position = Position::from_offset("D2");
+        passenger.carrier_id = Some(if id < 92 { 1 } else { 2 });
+        game.player_mut(1).units.push(passenger);
+    }
+    assert_eq!(server::combat_stats::active_defenders(&game, 1, Position::from_offset("D2")), vec![1, 2]);
+    // Two dice per side; 3 on each die yields one hit per side.
+    game.dice_roll_outcomes = vec![4; 20];
+    let before = game.dice_roll_log.len();
+    let mut game = execute(game, move_action(vec![7, 8], Position::from_offset("D2")), 0);
+    assert_eq!(game.dice_roll_log.len() - before, 4, "only ships roll");
+    // Resolve the attacker's ship loss and any excess passengers first.
+    for _ in 0..4 {
+        let event = game.current_event();
+        if event.player.index == 1 { break; }
+        let PersistentEventRequest::SelectUnits(req) = &event.player.handler.as_ref().unwrap().request else { panic!("expected casualties"); };
+        let ids = req.request.choices.iter().take(*req.request.needed.start() as usize).copied().collect();
+        game = execute(game, Action::Response(EventResponse::SelectUnits(ids)), 0);
+    }
+    // Identical ships are removed automatically; the remaining prompt is only
+    // for passengers exceeding the surviving ship's two transport spaces.
+    assert_eq!(game.player(1).get_units(Position::from_offset("D2")).iter().filter(|u| u.is_ship()).count(), 1);
+    let event = game.current_event();
+    assert_eq!(event.player.index, 1);
+    let PersistentEventRequest::SelectUnits(req) = &event.player.handler.as_ref().unwrap().request else { panic!("expected excess passengers"); };
+    assert_eq!(req.request.choices, vec![90, 91, 92, 93]);
+    assert_eq!(req.request.needed, 2..=2);
+}
