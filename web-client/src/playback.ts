@@ -75,6 +75,7 @@ export function frameDetails(
   frame: BoardFrame | null,
   game?: Game | null,
   advances: View['advances'] = [],
+  cards: NonNullable<View['cardCatalog']> = [],
 ) {
   if (!frame) return { caption: 'No recorded positions yet.', positions: [] as string[] };
   const actor = frame.players.find((p) => p.id === frame.actor)?.civilization;
@@ -166,6 +167,15 @@ export function frameDetails(
       .flatMap((age) => age.rounds.flatMap((round) => round.turns.flatMap((turn) => turn.actions ?? [])))
       .slice(before.cursor, frame.cursor);
     const items = actions.flatMap((action) => action.items ?? []);
+    if (frame.title === 'Play action card') {
+      const played = actions.flatMap(action => {
+        const playing = typeof action.action === 'object' && action.action?.Playing;
+        return playing && typeof playing === 'object' && 'ActionCard' in playing && typeof playing.ActionCard === 'number'
+          ? [playing.ActionCard] : [];
+      });
+      const names = [...new Set(played.map(id => cards.find(card => card.id === id)?.name).filter(Boolean))];
+      if (names.length) description = `Played ${names.join(' · ')}`;
+    }
     if (frame.title === 'Civilization ability') {
       // Older frames kept a generic title. The public start entry already names
       // the advance or leader ability, including free actions with no cost item.

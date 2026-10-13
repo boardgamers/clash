@@ -453,3 +453,15 @@ test('choice recaps use public decisions and happiness outcomes', () => {
     'India · Decided to convert mood to culture tokens',
   );
 });
+
+test('recap names a publicly played action card, never a drawn card', () => {
+  const before = { cursor: 0, actor: 0, title: 'End turn', tiles: [], players: [{id:0,civilization:'Greece',units:[],cities:[]}] } as unknown as BoardFrame;
+  const after = {...before,cursor:1,title:'Play action card'};
+  const action = {player:0,action:{Playing:{ActionCard:2}},items:[]} as LoggedAction;
+  const history = {log_index:1,log:[{age:1,rounds:[{round:1,turns:[{actions:[action]}]}]}]} as Game;
+  const catalog = [{id:2,name:'Great Ideas',description:'Gain ideas.',free:true,tactics:null}];
+  assert.equal(frameDetails(before,after,history,[],catalog).caption,'Greece · Played Good Ideas');
+  action.action = {Response:{Bool:true}};
+  action.items = [{player:0,HandCard:{card:{ActionCard:2},to:{Hand:0}}}];
+  assert.ok(!frameDetails(before,after,history,[],catalog).caption.includes('Good Ideas'));
+});

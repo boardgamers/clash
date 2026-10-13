@@ -19,6 +19,7 @@
       frame ?? null,
       $session.game,
       $session.view?.advances,
+      $session.view?.cardCatalog,
     ),
   );
   const progress = $derived(
