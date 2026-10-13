@@ -22,9 +22,20 @@ const pileText = (pile: Pile): string =>
     .join(' and ');
 const actor = (game: Game, player: number): string =>
   game.players.find((p) => p.id === player)?.name ?? `Player ${player + 1}`;
+export function playedCardId(action: LoggedAction, item: Item): number | undefined {
+  const hand = item.HandCard;
+  if (hand?.to !== 'PlayToDiscard') return undefined;
+  const card = hand.card;
+  if (card && typeof card === 'object' && 'ActionCard' in card && typeof card.ActionCard === 'number' && card.ActionCard > 0) return card.ActionCard;
+  const playing = typeof action.action === 'object' && action.action?.Playing;
+  if (item.player === action.player && playing && typeof playing === 'object' && 'ActionCard' in playing && typeof playing.ActionCard === 'number' && playing.ActionCard > 0) return playing.ActionCard;
+  return undefined;
+}
+
 function source(item: Item, context?: Context): string {
   const origin = item.origin ?? {};
   const label = context?.logOriginNames?.[JSON.stringify(origin)];
+  if (origin.CivilCard === 0) return 'Action card';
   if (origin.CivilCard !== undefined) {
     const card = context?.cardCatalog?.find(card => card.id === origin.CivilCard);
     return `Action card · ${card?.name ?? label ?? `Card ${origin.CivilCard}`}`;
@@ -59,9 +70,7 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
   if (collect && action.items?.length)
     add(action.player ?? action.items[0].player, 'Collect', `Use city ${collect.city_position}`);
   for (const item of action.items ?? []) {
-    const played = item.HandCard?.to === 'PlayToDiscard' && item.HandCard.card &&
-      typeof item.HandCard.card === 'object' && 'ActionCard' in item.HandCard.card
-      ? item.HandCard.card.ActionCard : undefined;
+    const played = playedCardId(action, item);
     const origin = typeof played === 'number'
       ? source({ ...item, origin: { CivilCard: played } }, context)
       : source(item, context);

@@ -1,4 +1,4 @@
-import { readableHistory } from './structured-log.ts';
+import { readableHistory, playedCardId } from './structured-log.ts';
 import { activeHistory } from './active-history.ts';
 import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Player, Resource } from './types.ts';
 import type { View } from './types.ts';
@@ -393,9 +393,8 @@ export function journal(
             const name = entry.title.slice('Action card · '.length);
             const cardIds = (action.items ?? []).filter(item => item.player === entry.player).flatMap(item => {
               if (typeof item.origin?.CivilCard === 'number') return [item.origin.CivilCard];
-              const hand = item.HandCard;
-              return hand?.to === 'PlayToDiscard' && hand.card && typeof hand.card === 'object' &&
-                'ActionCard' in hand.card && typeof hand.card.ActionCard === 'number' ? [hand.card.ActionCard] : [];
+              const played = playedCardId(action, item);
+              return played === undefined ? [] : [played];
             });
             entry.card = view?.cardCatalog?.find(card => cardIds.includes(card.id) && card.name === name);
             entry.kind = 'card';

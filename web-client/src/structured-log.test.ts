@@ -67,3 +67,21 @@ test('played action cards and their research results link to the exact public ca
   assert.ok(!entries.some(entry => entry.title === 'Action Card'));
   assert.equal(JSON.stringify(game), before);
 });
+
+test('redacted card removal resolves the public played card while hidden discards stay unnamed', () => {
+  const game = fixture('action_cards/advance.outcome2');
+  const actions = game.log![0].rounds[0].turns[0].actions!;
+  const played = actions[0];
+  played.items![0].HandCard!.card = {ActionCard:0};
+  const card = {id:2,name:'Advance',description:'Gain an advance.',free:true,tactics:null};
+  const context = {players:[],cardCatalog:[card],logOriginNames:{'{"CivilCard":2}':'Advance'}};
+  let entries = journal(game,context);
+  assert.equal(entries[0].card?.id,2);
+  assert.equal(entries[0].title,'Action card · Advance');
+  assert.ok(!entries.some(entry=>/Card 0/.test(entry.text)));
+  played.action = {Response:{SelectHandCards:[]}};
+  entries = journal(game,context);
+  assert.equal(entries[0].card,undefined);
+  assert.equal(entries[0].title,'Action Card');
+  assert.ok(!entries.some(entry=>/Card 0/.test(entry.text)));
+});
