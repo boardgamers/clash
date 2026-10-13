@@ -122,6 +122,20 @@
   const count = $derived(
     decision.min === decision.max ? `Choose ${decision.max}` : `Choose ${decision.min}–${decision.max}`,
   );
+  const optionGroups = $derived.by(() => {
+    const indexed = decision.options.map((option, index) => ({option,index}));
+    if (new Set(indexed.map(({option})=>option.owner?.player).filter(p=>p!==undefined)).size < 2)
+      return [{label:'', options:indexed}];
+    const type = (option: typeof decision.options[number]) => option.card?.kind === 'action' ? 'Action cards' : option.card?.kind === 'objective' ? 'Objectives' : 'Wonders';
+    const groups = new Map<string, {label:string; options:typeof indexed; order:number}>();
+    for (const item of indexed) {
+      const owner=item.option.owner, kind=type(item.option);
+      const key=`${owner?.player}:${kind}`;
+      const group=groups.get(key) ?? {label:`${owner?.civilization ?? 'Cards'}${owner?.you ? ' · You' : ''} — ${kind}`, options:[], order:(owner?.you ? 0 : (owner?.player ?? 0)+1)*10+['Action cards','Objectives','Wonders'].indexOf(kind)};
+      group.options.push(item);groups.set(key,group);
+    }
+    return [...groups.values()].sort((a,b)=>a.order-b.order);
+  });
   function toggle(i: number) {
     controller.selectDecisionOption(i);
   }
@@ -130,7 +144,9 @@
 
 {#snippet options()}
   <div class="decision-options">
-    {#each decision.options as option, i}
+    {#each optionGroups as group}
+      {#if group.label}<h3 class="decision-card-group">{group.label} <small>({group.options.length})</small></h3>{/if}
+      {#each group.options as {option, index: i}}
       {@const unit =
         typeof option.value === 'string' && Object.hasOwn(unitInfo, option.value)
           ? unitInfo[option.value as UnitKind]
@@ -169,6 +185,7 @@
           >{#if selected.includes(i)}<Check size={13} />{/if}</span
         >
       </button>
+      {/each}
     {/each}
   </div>
 {/snippet}
@@ -452,3 +469,9 @@
   {/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>
+
+<style>
+  .decision-card-group { grid-column: 1 / -1; margin: 1rem 0 .25rem; font-size: .95rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+  .decision-card-group:first-child { margin-top: 0; }
+  .decision-card-group small { font-weight: normal; color: var(--muted); }
+</style>

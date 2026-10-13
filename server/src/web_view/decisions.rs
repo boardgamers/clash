@@ -530,12 +530,28 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                             .join("\n"),
                         HandCard::Wonder(w) => w.info(game).description.clone(),
                     };
+                    let owner = game.players.iter().find(|player| match card {
+                        HandCard::ActionCard(id) => *id != 0 && player.action_cards.contains(id),
+                        HandCard::ObjectiveCard(id) => *id != 0 && player.objective_cards.contains(id),
+                        HandCard::Wonder(w) => *w != crate::wonder::Wonder::Hidden && player.wonder_cards.contains(w),
+                    }).or_else(|| {
+                        // Spies reveals choices, but the opponent's hand stays redacted.
+                        if h.origin.name(game) != "Spy" { return None; }
+                        if let PersistentEventType::ActionCard(info) = &game.current_event().event_type {
+                            info.selected_player.map(|index| game.player(index))
+                        } else { None }
+                    });
                     let mut choice = option(card, card.name(game), text, None);
+                    if let Some(owner) = owner {
+                        choice["owner"] = json!({"player":owner.index,"civilization":owner.civilization.name,"you":owner.index == seat});
+                    }
                     choice["card"] = match card {
                         HandCard::ObjectiveCard(id) => {
                             let info = game.cache.get_objective_card(*id);
                             json!({"kind":"objective", "objectives":info.objectives.iter().map(|o| json!({
                                 "name":o.name, "description":o.description,
+                                "progress":owner.and_then(|owner| o.progress.as_ref().map(|progress| progress(game, owner))).unwrap_or_default(),
+                                "conditionMet":owner.is_some_and(|owner| o.status_phase_check.as_ref().is_some_and(|check| check(game, owner))),
                                 "timing":match o.get_type() {
                                     ObjectiveType::Instant => "Instant",
                                     ObjectiveType::StatusPhase => "Status phase",

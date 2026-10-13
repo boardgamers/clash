@@ -709,6 +709,7 @@ export interface Decision {
       | { kind: 'unit'; player: number; unit: number; unitType: UnitView['type'] }
       | { kind: 'structure'; structure: string | { Building: string } | { Wonder: string } };
     terrain?: Terrain;
+    owner?: { player: number; civilization: string; you: boolean };
     card?:
       | { kind: 'objective'; objectives: View['objectiveCards'][number]['objectives'] }
       | { kind: 'action'; name: string; description: string; tactics: ActionCard['tactics'] }
