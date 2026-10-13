@@ -88,7 +88,7 @@ try {
     if (!strategy) influence.players[0].advances.push('Arts');
     const { page, errors, sent } = await open(width, height, influence, strategy);
     await page.getByRole('button', { name: 'Cultural influence', exact: true }).click();
-    const panel = page.getByRole('region', { name: 'Abilities and influence', exact: true });
+    const panel = page.getByRole('region', { name: 'Cultural influence', exact: true });
 
     await panel.locator('.influence-picker').waitFor();
     assert.equal(await page.locator('.map-hit-target[data-position="C1"]').count(), 1);

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X, Sparkles, Zap, ArrowLeft, MapPin, Drama, ArrowRight } from 'lucide-svelte';
+  import { X, Sparkles, Zap, ArrowLeft, MapPin } from 'lucide-svelte';
   import { activeCityAbility, groupAbilities, abilityReason } from './abilities';
   import CityFacts from './CityFacts.svelte';
   import InfluencePicker from './InfluencePicker.svelte';
@@ -22,7 +22,6 @@
   );
   const active = $derived(activeCityAbility($session));
   const influence = $derived(activeInfluence($session));
-  const influenceTargets = $derived($session.view?.influence ?? []);
   const selected = $derived(active?.offers.find((offer) => offer.position === $session.abilityCity));
   const selectedCity = $derived($session.view?.cities.find((city) => city.position === selected?.position));
 </script>
@@ -32,7 +31,7 @@
   class:board-ability={!!active || !!influence}
   class:selection-tray={!!active || !!influence}
   class:influence-mode={!!influence}
-  aria-label="Abilities and influence"
+  aria-label={$session.influenceMode ? 'Cultural influence' : 'Abilities'}
 >
   {#if influence}
     <InfluencePicker {controller} {onHighlight} />
@@ -85,7 +84,8 @@
       aria-label="Close abilities"
       onclick={() => controller.patch({ abilitiesOpen: false })}><X size={18} /></button
     >
-    {#if groups.length || drafts?.length}<h2><Sparkles size={21} />Abilities</h2>{/if}
+    <h2><Sparkles size={21} />Abilities</h2>
+    {#if !groups.length && !drafts?.length}<p class="settler-empty">No abilities available.</p>{/if}
     {#each groups as group}
       {@const action = group.offer}
       {@const city = $session.view?.cities.find((c) => c.position === action.activatesCity)}
@@ -126,17 +126,6 @@
         </div>
       </article>
     {/if}
-    <article class="ability-offer">
-      <h3><Drama size={17} />Cultural influence</h3>
-      {#if influenceTargets.length}
-        <p>Choose a target, then the city to influence from. Only one successful attempt per turn.</p>
-        <button
-          class="primary wide"
-          disabled={!!$session.playback || $session.pending}
-          onclick={() => controller.chooseInfluence()}>Choose target<ArrowRight size={16} /></button
-        >
-      {:else}<p class="settler-empty">No eligible targets.</p>{/if}
-    </article>
   {/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>

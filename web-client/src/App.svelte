@@ -326,7 +326,6 @@
     !replaying &&
       !pending &&
       (!!view?.specialActions?.length ||
-        !!view?.influence?.length ||
         !!(view && controller.shogunateDraftOffers().length)),
   );
   let objectiveDecision = $derived($session.playback ? null : $session.view?.objectiveDecision);
@@ -1392,15 +1391,15 @@
           title="Cultural influence · Choose a destination"
           class:active={$session.abilitiesOpen && $session.influenceMode}
           disabled={replaying || pending || !view?.canPlay || !view?.influence?.length}
+          data-tutorial="influence"
           onclick={() => { confirmEnd = false; controller.chooseInfluence(); }}
         ><Drama size={21} /><span>Influence</span></button>
 
         <button
           title={abilitiesAvailable
-            ? 'Abilities and cultural influence'
-            : 'No abilities or influence targets available'}
-          data-tutorial="influence"
-          aria-label="Abilities and cultural influence"
+            ? 'Abilities'
+            : 'No abilities available'}
+          aria-label="Abilities"
           class:active={$session.abilitiesOpen && !$session.influenceMode}
           class:inspect-only={!abilitiesAvailable}
           disabled={!$session.view}
