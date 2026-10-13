@@ -3,6 +3,7 @@
   import { formatPoints } from './score';
   import { currentLocale, translateText } from './localization';
   const translate = $derived((value: string) => translateText(value, $currentLocale));
+  import UndoControl from './UndoControl.svelte';
   import CollectionBonusHints from './CollectionBonusHints.svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
   import CitySiteIcon from './CitySiteIcon.svelte';
@@ -47,8 +48,6 @@
     X,
     ChevronRight,
     Hourglass,
-    Undo2,
-    Redo2,
     GraduationCap,
     Target,
     MapPin,
@@ -1238,7 +1237,7 @@
           >{/each}
       </div>
     </section>
-    <div class="board-toolbar" class:has-redo={$session.view?.canRedo} aria-label="Game controls">
+    <div class="board-toolbar" aria-label="Game controls">
       <div
         class="turn-banner"
         class:waiting={!!waiting}
@@ -1415,19 +1414,8 @@
               aria-hidden="true"
             />{/if}</button
         >
-        <button
-          title="Undo last action"
-          data-tutorial="undo"
-          aria-label="Undo last action"
-          disabled={!!$session.playback || !$session.view?.canUndo || $session.pending}
-          onclick={() => controller.submit('Undo')}><Undo2 size={19} /><span>Undo</span></button
-        >
-        {#if $session.view?.canRedo}<button
-            title="Redo last undone action"
-            aria-label="Redo last undone action"
-            disabled={!!$session.playback || $session.pending}
-            onclick={() => controller.submit('Redo')}><Redo2 size={19} /><span>Redo</span></button
-          >{/if}
+        <UndoControl canUndo={!!$session.view?.canUndo} canRedo={!!$session.view?.canRedo}
+          blocked={!!$session.playback || $session.pending} submit={action => controller.submit(action)}/>
         <button
           class:active={confirmEnd}
           class:end-turn-ready={readyToEnd}

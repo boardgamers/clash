@@ -6221,7 +6221,34 @@ small {
 @media (max-width: 600px) {
   .game-shell .map-controls .map-view-toggle span { display: none; }
   .game-shell .map-controls .map-view-toggle { width: 38px; padding: 8px; }
-  .game-shell .map-controls { max-width: calc(100% - 16px); flex-wrap: wrap; justify-content: flex-end; }
+  .game-shell .map-controls {
+    max-width: calc(100% - 16px);
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    height: 48px;
+    bottom: var(--mobile-bottom);
+    right: 8px;
+  }
+  .game-shell .map-controls > * { flex-shrink: 0; }
+  .game-shell .map-controls button,
+  .game-shell .map-controls .map-view-toggle {
+    width: clamp(27px, calc((100vw - 40px) / 10), 34px);
+    min-width: 0;
+    height: 40px;
+    padding: 5px;
+  }
+  .game-shell:not(.board-interacting) .table-tools {
+    bottom: calc(var(--mobile-bottom) + 56px);
+    right: 8px;
+  }
 }
 
 .map-tooltip .region-city-count strong { display: inline; white-space: nowrap; }
+
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
+  .game-shell .player-list { left: 6px; }
+  .game-shell .play-layout .board-toolbar {
+    right: 6px;
+    max-width: calc(100% - clamp(118px, 35vw, 140px) - 22px);
+  }
+}
