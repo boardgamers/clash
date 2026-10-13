@@ -1,3 +1,4 @@
+import { RegionOverlay } from './region-overlay';
 import { movementWaypoints } from './movement-animation';
 import { boardContentSignature } from './board-content';
 import { thumbnailCamera } from './thumbnail-camera';
@@ -70,6 +71,7 @@ export class World {
   private controls: OrbitControls;
   private board = new THREE.Group();
   private rings = new THREE.Group();
+  private regionOverlay = new RegionOverlay();
   private seaOverlay = new SeaOverlay();
   private tradeOverlay = new TradeOverlay();
   private pirateBlockadeOverlay = new PirateBlockadeOverlay();
@@ -293,7 +295,7 @@ export class World {
     this.geometries.add(markerGeometry);
     this.structureMarker = [markerGeometry, markerMaterial];
     this.scene.add(this.structureMarkers);
-    this.scene.add(this.seaOverlay.group, this.tradeOverlay.group, this.pirateBlockadeOverlay.group);
+    this.scene.add(this.regionOverlay.group, this.seaOverlay.group, this.tradeOverlay.group, this.pirateBlockadeOverlay.group);
     this.scene.add(this.combatOverlay.group);
     this.combatLabel = document.createElement('div');
     this.combatLabel.className = 'map-combat-label';
@@ -636,6 +638,7 @@ export class World {
       this.hoverRing,
       this.structureMarkers,
       this.referenceRing,
+      this.regionOverlay.group,
       this.seaOverlay.group,
       this.tradeOverlay.group,
       this.pirateBlockadeOverlay.group,
@@ -1125,6 +1128,8 @@ export class World {
       !s.view?.choiceDecision &&
       !s.view?.objectiveDecision;
     this.seaRouteStart = s.seaRouteStart;
+    this.regionOverlay.group.visible = !!s.showRegions;
+    if (s.showRegions) this.regionOverlay.update(s.view?.regions ?? [], s.regionPlayer ?? s.seat ?? s.view?.activePlayer ?? 0);
     this.seaOverlay.update(s.game.map.tiles, s.view?.seaRoutes ?? []);
     this.pirateBlockadeOverlay.update(pirateBlockade(s.game));
     const tradePlayer = s.tradeRoutePlayer ?? s.seat ?? s.view?.activePlayer;
@@ -2200,6 +2205,7 @@ export class World {
     this.clearCollectionBadges();
     for (const badge of this.unitBadges) void unmount(badge);
     this.unitBadges = [];
+    this.regionOverlay.dispose();
     this.seaOverlay.dispose();
     this.tradeOverlay.dispose();
     this.pirateBlockadeOverlay.dispose();

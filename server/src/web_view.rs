@@ -155,6 +155,15 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             None
         }
     });
+    let setup = crate::map::get_map_setup(game.players.iter().filter(|p| p.is_human()).count());
+    let regions: Vec<Value> = setup.home_positions.iter().enumerate()
+        .map(|(player, home)| (Some(player), &home.position))
+        .chain(setup.free_positions.iter().map(|position| (None, position)))
+        .enumerate().map(|(index, (home, position))| {
+            let tiles: Vec<_> = crate::map::block_tiles(position).into_iter()
+                .filter(|tile| game.map.is_inside(*tile)).collect();
+            json!({"id":index + 1,"homePlayer":home,"tiles":tiles})
+        }).filter(|region| !region["tiles"].as_array().unwrap().is_empty()).collect();
     // A map-reading aid, not legal move offers. Use visible terrain only, including for spectators.
     let mut sea_routes = game
         .map
@@ -241,6 +250,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let Some(seat) = seat else {
         let mut result = json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"activeEffects":active_effects,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
         result["tradeRoutes"] = json!(trade_routes);
+    result["regions"] = json!(regions);
         return result;
     };
     let p = game.player(seat);
@@ -398,6 +408,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "stopMovement":if moving && seat == active {Some(Action::Movement(crate::movement::MovementAction::Stop))} else {None},
         "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()});
     result["tradeRoutes"] = json!(trade_routes);
+    result["regions"] = json!(regions);
     result["unavailableSpecialActions"] = json!(special_actions.iter().filter(|a| !a["reason"].is_null()).collect::<Vec<_>>());
     result["activeEffects"] = json!(active_effects);
     result

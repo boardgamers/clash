@@ -20,6 +20,7 @@
   import { onMount } from 'svelte';
   import {
     Skull,
+    Map as MapIcon,
     Landmark,
     Compass,
     Wheat,
@@ -981,6 +982,24 @@
         <TilePanel {controller} onHighlight={(p) => world?.highlightCoordinate(p)} />
       {/if}
       <div class="map-controls">
+        <div class="map-control-help">
+          <button title="Regions" aria-label="Show regions" aria-pressed={!!$session.showRegions}
+            class:active={$session.showRegions} onclick={() => controller.patch({showRegions: !$session.showRegions})}><MapIcon size={18}/></button>
+          {#if $session.showRegions}
+            {@const regionPlayer = $session.regionPlayer ?? $session.seat ?? $session.view?.activePlayer ?? 0}
+            {@const cities = ($session.playback?.frame?.players ?? $session.game?.players ?? []).find(p=>p.id===regionPlayer)?.cities ?? []}
+            {@const occupied = ($session.view?.regions ?? []).filter(r=>r.homePlayer !== regionPlayer && cities.some(c=>r.tiles.includes(c.position)))}
+            <div class="map-tooltip pirate-spawn-key" role="status" use:positionMapGuide>
+              <strong>Regions</strong>
+              <label>Civilization<select aria-label="Region player" value={regionPlayer} onchange={event=>controller.patch({regionPlayer:Number(event.currentTarget.value)})}>
+                {#each $session.view?.players ?? [] as player}<option value={player.index}>{player.civilization}</option>{/each}
+              </select></label>
+              <p>Borders separate regions. Gold marks this civilization’s starting region.</p>
+              <p>Regions with your cities, excluding your starting region: <strong>{occupied.length}</strong></p>
+              <p>Ruler of the World: +{occupied.length} combat value in a land battle with the leader.</p>
+            </div>
+          {/if}
+        </div>
         <div class="sr-only" id="sea-route-help" aria-live="polite">
           {$session.seaRouteStart
             ? `Sea routes from ${$session.seaRouteStart}. Arrow keys choose another sea tile.`

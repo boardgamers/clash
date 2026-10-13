@@ -6217,3 +6217,9 @@ small {
 .playing-back .board-toolbar {
   display: block;
 }
+
+@media (max-width: 600px) {
+  .game-shell .map-controls .map-view-toggle span { display: none; }
+  .game-shell .map-controls .map-view-toggle { width: 38px; padding: 8px; }
+  .game-shell .map-controls { max-width: calc(100% - 16px); flex-wrap: wrap; justify-content: flex-end; }
+}
