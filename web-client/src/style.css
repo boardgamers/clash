@@ -6223,3 +6223,5 @@ small {
   .game-shell .map-controls .map-view-toggle { width: 38px; padding: 8px; }
   .game-shell .map-controls { max-width: calc(100% - 16px); flex-wrap: wrap; justify-content: flex-end; }
 }
+
+.map-tooltip .region-city-count strong { display: inline; white-space: nowrap; }
