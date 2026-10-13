@@ -71,6 +71,8 @@ export interface Playback {
   animate: boolean;
 }
 export interface Game {
+  action_cards_discarded?: number[];
+  incidents_discarded?: number[];
   successful_cultural_influence?: boolean;
   options?: { length?: 'Standard' | 'Epic'; variant?: 'Standard' | 'Builder' };
   permanent_effects?: unknown[];
