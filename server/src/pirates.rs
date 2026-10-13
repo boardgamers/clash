@@ -130,13 +130,19 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
             }
 
             let pirates = get_pirates_player(game);
-            let pirate_ships = pirates
+            let pirate_ships: Vec<_> = pirates
                 .units
                 .iter()
                 .filter(|u| u.is_ship())
                 .map(|u| u.id)
                 .collect();
-            let needs_removal = 2_u8.saturating_sub(pirates.available_units().get(&UnitType::Ship));
+            // Allied ships are reserved in held_units and cannot be recycled.
+            let needs_removal = 2_u8
+                .saturating_sub(pirates.available_units().get(&UnitType::Ship))
+                .min(pirate_ships.len() as u8);
+            if needs_removal == 0 {
+                return None;
+            }
 
             Some(UnitsRequest::new(
                 pirates.index,
@@ -169,6 +175,12 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         IncidentTarget::ActivePlayer,
         priority,
         move |game, p, _i| {
+            if get_pirates_player(game).available_units().get(&UnitType::Ship) == 0 {
+                if blockade {
+                    p.log(game, "Pirate event has no effect: Carthage controls all four Pirate Ships");
+                }
+                return None;
+            }
             let sea_spaces = pirate_spawn_positions(game, p.index, blockade);
 
             if sea_spaces.is_empty() && blockade {
