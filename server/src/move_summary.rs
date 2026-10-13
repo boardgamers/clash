@@ -138,6 +138,11 @@ pub(crate) fn summary(game: &Game, entry: &ActionLogAction) -> String {
     } else {
         details.join(" · ")
     };
+    let civilization = game
+        .players
+        .get(entry.player)
+        .map_or("Player", |player| player.civilization.name.as_str());
+    let outcome = format!("{civilization}: {outcome}");
     // Keep the platform chip compact without cutting a Unicode character in half.
     if outcome.chars().count() > 240 {
         format!("{}…", outcome.chars().take(239).collect::<String>())

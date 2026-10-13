@@ -34,7 +34,11 @@ fn platform_delta_has_readable_text_and_preserves_replay_action() {
     assert_eq!(entries[0].action, &action);
     assert_eq!(entries[0].player, 0);
     assert!(entries[0].text.contains("1 ore"));
-    assert!(!entries[0].text.starts_with('{'));
+    assert!(
+        entries[0]
+            .text
+            .starts_with(&format!("{}: ", game.players[0].civilization.name))
+    );
     assert_eq!(log_slice(&game, &options(before, None)), vec![action]);
     assert_eq!(
         platform_log_slice(&game, &options(before, Some(before))).len(),
@@ -66,13 +70,13 @@ fn public_summary_does_not_reveal_drawn_cards_or_private_log_prose() {
     );
     assert_eq!(
         platform_log_slice(&game, &options(start, None))[0].text,
-        "Drew an action card"
+        format!("{}: Drew an action card", game.players[0].civilization.name)
     );
     let mut private = options(start, None);
     private.player = Some(0);
     assert_eq!(
         platform_log_slice(&game, &private)[0].text,
-        "Drew an action card"
+        format!("{}: Drew an action card", game.players[0].civilization.name)
     );
 }
 
@@ -87,7 +91,10 @@ fn latest_response_describes_the_actual_public_outcome() {
     );
     assert_eq!(
         platform_log_slice(&game, &options(start, None))[0].text,
-        "Researched Steel Weapons"
+        format!(
+            "{}: Researched Steel Weapons",
+            game.players[0].civilization.name
+        )
     );
     append(
         &mut game,
@@ -95,11 +102,15 @@ fn latest_response_describes_the_actual_public_outcome() {
     );
     assert_eq!(
         platform_log_slice(&game, &options(start + 1, None))[0].text,
-        "Ended turn"
+        format!("{}: Ended turn", game.players[0].civilization.name)
     );
     append(
         &mut game,
         serde_json::json!({"player":1,"action":"StartTurn"}),
+    );
+    assert_eq!(
+        platform_log_slice(&game, &options(start + 2, None))[0].text,
+        format!("{}: Started turn", game.players[1].civilization.name)
     );
     assert_eq!(
         platform_log_slice(&game, &options(start + 2, None))[0].kind,
@@ -121,6 +132,29 @@ fn founding_summary_does_not_describe_spending_the_settler_as_a_casualty() {
     );
     assert_eq!(
         platform_log_slice(&game, &options(start, None))[0].text,
-        "Founded city at D9"
+        format!("{}: Founded city at D9", game.players[0].civilization.name)
+    );
+}
+
+#[test]
+fn resource_summary_names_the_actor_and_other_recipients() {
+    let mut game = common::JsonTest::new("advances").load_game("collect_free_economy");
+    let start = log_length(&game);
+    append(
+        &mut game,
+        serde_json::json!({
+            "player": 0, "action": {"Response": {"Bool": true}},
+            "items": [
+                {"player": 0, "origin": {"Ability": "Reward"}, "Resources": {"resources": {"gold": 1}, "balance": "Gain"}},
+                {"player": 1, "origin": {"Ability": "Reward"}, "Resources": {"resources": {"gold": 2}, "balance": "Gain"}}
+            ]
+        }),
+    );
+    assert_eq!(
+        platform_log_slice(&game, &options(start, None))[0].text,
+        format!(
+            "{}: Gained 1 gold · {}: Gained 2 gold",
+            game.players[0].civilization.name, game.players[1].civilization.name
+        )
     );
 }

@@ -31,6 +31,7 @@ test('BGS receives a plain text field for just the new move, without changing hi
   assert.equal(log.length, 1);
   assert.equal(typeof log[0].text, 'string');
   assert.match(log[0].text, /Gained 1 ore/);
+  assert.ok(log[0].text.startsWith(`${game.players[0].civilization}: `));
   assert.equal(log[0].player, 0);
   assert.deepEqual(log[0].action, action);
   assert.equal(engine.logLength(after), start + 1);
