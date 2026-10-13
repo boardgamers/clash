@@ -6,7 +6,6 @@
     Landmark,
     Footprints,
     RotateCcw,
-    Zap,
     X,
     TriangleAlert,
   } from 'lucide-svelte';
@@ -89,7 +88,7 @@
         </div>{:else}<p class="settler-empty">No eligible targets.</p>{/each}
     </div>
   {/if}
-  {#if target || influence?.position}<button
+  {#if !target && influence?.position}<button
       class="secondary compact influence-change"
       onclick={() => {
         controller.patch({ influencePosition: null, influenceTarget: null, influenceOrigin: null });
@@ -99,9 +98,14 @@
   {#if target}
     <div class="influence-preview">
       <div class="influence-route">
-        <b>{origin?.position ?? target.origin}</b><ArrowRight size={15} /><span
-          >{target.name} at <b>{target.position}</b></span
-        >
+        <button class="route-choice" aria-label="Change source" onclick={() => paymentStep = false}>
+          <small>From</small><strong>{origin?.position ?? target.origin}</strong>
+        </button>
+        <ArrowRight size={16} />
+        <button class="route-choice route-target" aria-label="Change target" onclick={() => {
+          controller.patch({ influencePosition: null, influenceTarget: null, influenceOrigin: null });
+          onHighlight(null);
+        }}><small>Target</small><strong>{target.name} at {target.position}</strong></button>
       </div>
       {#if !paymentStep && (target.origins?.length ?? 0) > 0}<div class="influence-origins" aria-label="Influence from">
           <span>From</span>{#each target.origins ?? [] as from}<button
@@ -126,8 +130,7 @@
         <p class="movement-hint">Choose the source on the map or above. The lowest-cost source is preselected.</p>
         <button class="primary wide" onclick={() => paymentStep = true}>Choose payment<ArrowRight size={16} /></button>
       {:else}
-        <button class="secondary compact" onclick={() => paymentStep = false}>Change source</button>
-        <div class="decision-options" aria-label="Influence payment method">
+        <div class="decision-options influence-methods" aria-label="Influence payment method">
           {#each methods as method}
             {@const from = method.origins?.find(o => o.position === origin?.position)}
             <button class:selected={method === target} aria-pressed={method === target} onclick={() => {
@@ -141,31 +144,10 @@
             </button>
           {/each}
         </div>
-      <div class="influence-cost-line">
-        <span>Action</span><span
-          >{#if origin?.free ?? target.free}Free action{:else}<Zap size={14} />1 action{/if}{#if Object.values(actionPayment).some(Boolean)}<ResourceAmount
-              pile={actionPayment}
-              compact
-            />{/if}</span
-        >
-      </div>
-      <div class="influence-cost-line">
-        <span>Extra range</span><span
-          >{#if Object.values(rangePayment).some(Boolean)}<ResourceAmount
-              pile={rangePayment}
-              compact
-            />{:else}None needed{/if}</span
-        >
-      </div>
-      <p class="movement-hint">
-        Roll {Math.max(1, 5 - bonus)}+{#if bonus}
-          (+{bonus} bonus){/if} to succeed. {origin?.position === target?.position
-          ? 'A city targeting itself cannot spend culture to boost the roll.'
-          : preventBoost
-          ? 'This target prevents spending culture to boost range or the roll.'
-          : 'After rolling, you can choose whether to spend culture to reach 5.'}{#if origin?.reroll}
-          Buddhism offers one optional reroll.{/if}
-      </p>
+      {#if Object.values(rangePayment).some(Boolean)}
+        <p class="range-note">Includes <ResourceAmount pile={rangePayment} compact /> for extra range.</p>
+      {/if}
+
       {#if cheaper}
         <div class="influence-source-warning" role="status">
           <p>
@@ -190,6 +172,23 @@
           </button>
         </div>
       {/if}
+
+      {/if}
+    </div>
+  {/if}
+</div>
+
+{#if target && paymentStep}
+<div class="influence-submit">
+      <div class="roll-summary">
+        <strong>Roll {Math.max(1, 5 - bonus)}+ to succeed</strong>
+        <span>{origin?.position === target?.position
+          ? 'Self-targeting · No roll boost'
+          : preventBoost
+          ? 'Protected target · No range or roll boost'
+          : 'You may boost the roll with culture.'}</span>
+        {#if origin?.reroll}<span>Buddhism · One optional reroll</span>{/if}
+      </div>
       <button class="primary wide" disabled={$session.pending} onclick={roll}>
         {cheaper && confirmedSource === attemptKey
           ? `Use ${origin?.position ?? target.origin} anyway`
@@ -200,12 +199,24 @@
             compact
           />{/if}<ArrowRight size={16} />
       </button>
-      {/if}
-    </div>
-  {/if}
 </div>
+{/if}
 
 <style>
+  .influence-picker { min-height: 0; overflow-y: auto; }
+  .influence-submit { flex-shrink: 0; padding-top: 0.4rem; border-top: 1px solid var(--line); }
+  .movement-heading { flex-shrink: 0; }
+
+  .influence-route { display: flex; flex-wrap: nowrap; gap: 0.75rem; margin-bottom: 0.65rem; }
+  .route-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; padding: 0.6rem 0.8rem; text-align: left; }
+  .route-choice small { color: var(--muted); font-size: 11px; }
+  .route-choice strong { font-size: 14px; }
+  .route-target { flex: 1; min-width: 0; }
+  .influence-methods { margin: 0 0 0.8rem; }
+  .roll-summary { display: grid; gap: 0.3rem; margin: 0.2rem 0 0.6rem; font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .roll-summary strong { color: var(--ink); font-size: 14px; }
+  .range-note { display: flex; align-items: center; gap: 0.35rem; font-size: 12px; color: var(--muted); }
+
   .influence-source-warning {
     margin: 0.8rem 0;
     padding: 0.75rem;

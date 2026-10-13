@@ -120,6 +120,9 @@ try {
       await methods.getByRole('button', { name: /Arts/ }).click();
       assert.equal(await methods.getByRole('button', { name: /Arts/ }).getAttribute('aria-pressed'), 'true');
     }
+    const confirmBounds = await panel.getByRole('button', { name: /Pay & roll|Roll for influence/ }).boundingBox();
+    const panelBounds = await panel.boundingBox();
+    assert.ok(confirmBounds && panelBounds && confirmBounds.y >= panelBounds.y && confirmBounds.y + confirmBounds.height <= panelBounds.y + panelBounds.height, 'roll confirmation stays visible within the panel');
     await page.screenshot({ path: `/tmp/clash-influence-payment-${width}-${strategy ? 'strategy' : '3d'}.png` });
     assert.deepEqual(sent, [], 'source confirmation does not spend or roll');
     await panel.getByRole('button', { name: /Pay & roll|Roll for influence/ }).click();
