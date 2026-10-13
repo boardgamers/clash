@@ -637,10 +637,11 @@ fn affordable_start_position(
     add_action_cost: bool,
     selected: Option<Position>,
 ) -> Result<(Position, u8), String> {
-    if target_city.player_index == player_index {
-        if selected.is_some_and(|p| p != target_city.position) {
-            return Err("Reclaim buildings from their own city".into());
-        }
+    // Preserve self-targeting as the default, but allow another eligible origin
+    // to reclaim an influenced building using normal range and roll boosts.
+    if target_city.player_index == player_index
+        && selected.is_none_or(|p| p == target_city.position)
+    {
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);

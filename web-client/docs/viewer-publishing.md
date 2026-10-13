@@ -325,3 +325,5 @@ Viewer 0.1.102 / engine 0.4.79 labels Spies hand choices by current owner, inclu
 Viewer 0.1.103 fixes journal “Action card · Card 0” entries. Redacted card-removal records now use the same actor's public Playing ActionCard ID for the name and exact-card link. Genuinely hidden discards stay generic. Verified the reported game's history for all three seats and regression coverage for redacted plays versus hidden discards. Engine remains 0.4.79.
 
 Viewer 0.1.104 removes the duplicate Cultural Influence entry from Abilities and keeps its dedicated action-bar button. Abilities availability now depends only on abilities, and the influence tutorial targets the dedicated button. Checked Svelte and desktop/mobile influence selection flows. Engine remains 0.4.79.
+
+Viewer 0.1.105 / engine 0.4.80 allows reclaiming influenced buildings from another eligible city with normal range and roll boosts. Self-targeted attempts remain unboostable and now say so in the payment preview. Regression coverage verifies remote reclaim and boosting, self-target failure without spending, and rejection of another influenced source.

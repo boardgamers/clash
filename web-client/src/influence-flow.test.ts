@@ -167,3 +167,33 @@ test('destination selection defers Arts versus regular influence and defaults to
   assert.equal(activeInfluence(state)?.source, 'B1');
   assert.equal(activeInfluence({ ...state, influenceOrigin: 'A1' })?.source, 'A1');
 });
+
+
+test('reclaiming influence allows another city and boosting, but self-targeting cannot boost', () => {
+  const g = influenceFixture();
+  const reclaimedCity = g.players[1].cities.shift();
+  g.players[0].cities.push(reclaimedCity);
+  const target = view(g).influence!.find((t) => t.position === 'C1' && t.name === 'Temple')!;
+  const other = target.origins!.find((o) => o.position === 'A1');
+  const self = target.origins!.find((o) => o.position === 'C1');
+  assert.ok(other, 'another uninfluenced city is an available source');
+  assert.ok(self, 'the influenced city can still target itself');
+  let state = move(g, other.action);
+  if (view(state).influenceContext?.stage === 'range')
+    state = move(state, { Response: { Payment: [other.payment] } });
+  assert.equal(view(state).influenceContext?.stage, 'boost');
+  const cost = view(state).decision!.fields[0].cost;
+  state = move(state, { Response: { Payment: [cost] } });
+  assert.equal(state.players[0].cities.find((c: any) => c.position === 'C1').city_pieces.temple, 0);
+  assert.ok(state.successful_cultural_influence);
+
+  const failed = move(g, self.action);
+  assert.equal(view(failed).influenceContext, null);
+  assert.ok(!failed.successful_cultural_influence);
+  assert.equal(failed.players[0].cities.find((c: any) => c.position === 'C1').city_pieces.temple, 1);
+  assert.equal(failed.players[0].resources.culture_tokens, g.players[0].resources.culture_tokens);
+
+  g.players[0].cities[0].city_pieces = { academy: 1 };
+  const restricted = view(g).influence!.find((t) => t.position === 'C1' && t.name === 'Temple')!;
+  assert.ok(!restricted.origins!.some((o) => o.position === 'A1'), 'an influenced source cannot target another city');
+});

@@ -159,7 +159,9 @@
       </div>
       <p class="movement-hint">
         Roll {Math.max(1, 5 - bonus)}+{#if bonus}
-          (+{bonus} bonus){/if} to succeed. {preventBoost
+          (+{bonus} bonus){/if} to succeed. {origin?.position === target?.position
+          ? 'A city targeting itself cannot spend culture to boost the roll.'
+          : preventBoost
           ? 'This target prevents spending culture to boost range or the roll.'
           : 'After rolling, you can choose whether to spend culture to reach 5.'}{#if origin?.reroll}
           Buddhism offers one optional reroll.{/if}
