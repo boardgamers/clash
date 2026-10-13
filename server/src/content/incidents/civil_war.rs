@@ -133,7 +133,7 @@ fn revolution() -> Incident {
         |game, _player| can_lose_action(game),
     );
     b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, p, i| {
-        if can_lose_action(game) && i.player.sacrifice == 0 {
+        if can_lose_action(game) && i.player.sacrifice & 1 == 0 {
             if get_status_phase(game).is_some() {
                 p.log(game, "Lose an action for the next turn");
                 game.permanent_effects
@@ -153,7 +153,7 @@ fn revolution() -> Incident {
         b,
         |event| &mut event.incident,
         ChangeGovernmentOption::FreeAndMandatory,
-        |i, p, game| i.active_player == p && can_change_government_for_free(game.player(p), game),
+        |i, p, game| i.active_player == p && i.player.sacrifice & 2 == 0 && can_change_government_for_free(game.player(p), game),
         |_, _| {}, // don't need to pay
         |_| true,
     );
@@ -171,7 +171,7 @@ fn kill_unit_for_revolution(
         IncidentTarget::ActivePlayer,
         priority,
         move |game, p, i| {
-            i.player.sacrifice = 0;
+            if priority == 11 { i.player.sacrifice = 0; }
             let units = p
                 .get(game)
                 .units
@@ -190,10 +190,24 @@ fn kill_unit_for_revolution(
                 &description,
             ))
         },
-        |game, s, i| {
+        move |game, s, i| {
+            // Old saves reset the first choice when opening step two. Recover
+            // that already-paid sacrifice from the active history before adding
+            // this response's casualty. Never inspect undone future entries.
+            if priority == 10 && i.player.sacrifice == 0 {
+                for item in crate::log::linear_action_entries(game).iter().rev().flat_map(|a| a.items.iter().rev()) {
+                    if matches!(&item.entry, crate::log::ActionLogEntry::Text(text) if text == "triggers the event Revolution") { break; }
+                    if item.player == s.player_index && item.origin == crate::events::EventOrigin::Incident(38)
+                        && matches!(&item.entry, crate::log::ActionLogEntry::Units { balance: crate::log::ActionLogBalance::Loss, .. }) {
+                        i.player.sacrifice |= 1;
+                        break;
+                    }
+                }
+            }
             kill_incident_units(game, s);
             if !s.choice.is_empty() {
-                i.player.sacrifice = 1;
+                i.player.sacrifice |= if priority == 11 { 1 } else { 2 };
+                s.log(game, if priority == 11 { "Sacrificed an army unit: keep the action" } else { "Sacrificed an army unit: keep the current government" });
             }
         },
     )
