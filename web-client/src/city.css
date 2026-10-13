@@ -1279,3 +1279,8 @@
   max-height: min(440px, 65%);
   overflow: hidden;
 }
+
+.game-shell .play-layout .action-panel.floating-panel.selection-tray.board-movement.has-destination {
+  max-height: min(440px, 65%);
+  overflow: hidden;
+}

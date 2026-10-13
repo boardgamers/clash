@@ -74,6 +74,7 @@
 <section
   data-tutorial="movement"
   class="action-panel floating-panel settler-panel board-movement selection-tray"
+  class:has-destination={!!destination}
   aria-label="Unit movement"
 >
   <header class="movement-heading">
@@ -106,6 +107,7 @@
         })}><X size={18} /></button
     >
   </header>
+  <div class="movement-body">
   {#if bonus}<div class="movement-bonus"><strong>{bonus.source}</strong><span>{bonus.label}</span></div>{/if}
   {#if $session.view?.nomadCities?.length}<div
       class="settler-picker"
@@ -172,6 +174,7 @@
   {/if}
   {#if $session.moveTarget && $session.moveDestinations.filter((d) => d.position === $session.moveTarget).length > 1}
     <div class="settler-destinations" role="group" aria-label="Choose how to move">
+      <span class="route-label">{destination?.attack ? 'Attack payment' : 'Route / payment'}</span>
       {#each $session.moveDestinations as d, i}{#if d.position === $session.moveTarget}
           <button
             disabled={!!$session.playback || $session.pending}
@@ -183,7 +186,7 @@
           >
             {#if d.pirateCarrier != null}<Ship size={16} />Allied pirate
             {:else if d.carrier != null}<Ship size={16} />Board ship
-            {:else if d.attack}<Swords size={16} />{d.label ?? 'Attack'}
+            {:else if d.attack}<Swords size={16} />{Object.values(d.payment).some(Boolean) ? 'Pay' : (d.label ?? 'Attack')}
             {:else if d.terrain === 'Water' && $session.moveDestinations.some(other => other.position === d.position && other.label === 'Attack pirates')}<Ship size={16} />Sail peacefully
             {:else}<TerrainIcon terrain={d.terrain} />{terrainInfo(d.terrain).label}{/if}
             {#if Object.values(d.payment).some(Boolean)}<ResourceAmount pile={d.payment} />{/if}
@@ -207,7 +210,7 @@
   {/if}
   {#if destination?.attack}
     <div class="movement-leader-info" aria-label="Attack preview">
-      <h3><Swords size={16} />Attack · {destination.position}</h3>
+      <h3><Swords size={16} />Defenders</h3>
       <TileUnits players={$session.game?.players ?? []} position={destination.position} />
       {#each $session.game?.players ?? [] as player}
         {#each player.cities?.filter((city) => city.position === destination.position) ?? [] as city}
@@ -219,16 +222,16 @@
           <LeaderDetails {leader} civilization={player.civilization} />
         {/each}
       {/each}
-      <p class="movement-hint" role="status">Click the destination again or choose Attack to start the battle.</p>
     </div>
   {/if}
   {#if destination?.terrain === 'Unexplored'}
     <p class="movement-hint" role="status">Click the destination again to explore the highlighted region.</p>
   {/if}
-  {#if destination && !$session.movingCity}<TerrainRules
+  {#if destination && !$session.movingCity}<details class="movement-terrain"><summary><TerrainIcon terrain={destination.terrain} />{terrainInfo(destination.terrain).label}<span>Movement rules</span></summary><TerrainRules
       terrain={destination.terrain}
       notes={destination.terrainNotes}
-    />{/if}
+      showHeading={false}
+    /></details>{/if}
   {#if destination?.breaksDiplomacy}
     <div class="diplomacy-warning" role="alert">
       <strong><TriangleAlert size={16} />Great Diplomat</strong>
@@ -239,8 +242,13 @@
       </p>
     </div>
   {/if}
+  {#if settler && !$session.game?.players.some((p) => p.cities?.some((c) => c.position === settler.position))}
+    <FoundCityAction {controller} {settler} />
+  {/if}
+  {#if !units.length && !$session.view?.nomadCities?.length}<p>Recruit units in a city to explore.</p>{/if}
+  {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
+  </div>
   {#if destination && !destination.boarding && destination.terrain !== 'Unexplored'}<div class="settler-confirm">
-      {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
       <button
         class="primary wide"
         disabled={!!$session.playback || $session.pending}
@@ -255,14 +263,24 @@
               : disembarking
                 ? 'Disembark'
                 : 'Move here'}
+        {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
         {#if !$session.view?.stopMovement}<span class="settler-action-cost" aria-label="Costs 1 action"
             ><Zap size={13} />1</span
           >{/if}<ArrowRight size={16} />
       </button>
     </div>{/if}
-  {#if settler && !$session.game?.players.some((p) => p.cities?.some((c) => c.position === settler.position))}
-    <FoundCityAction {controller} {settler} />
-  {/if}
-  {#if !units.length && !$session.view?.nomadCities?.length}<p>Recruit units in a city to explore.</p>{/if}
-  {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>
+
+<style>
+  .movement-body { min-height: 0; overflow-y: auto; }
+  .movement-heading, .settler-confirm { flex-shrink: 0; }
+  .settler-confirm { border-top: 1px solid var(--line); padding-top: 0.5rem; }
+  .movement-body > :global(*) { margin-bottom: 0.65rem; }
+  .settler-destinations button.active { border-color: var(--gold); background: var(--paper2); box-shadow: inset 0 0 0 1px var(--gold); }
+  .route-label { grid-column: 1 / -1; color: var(--muted); font-size: 11px; }
+  .movement-leader-info { border-top: 1px solid var(--line); padding-top: 0.6rem; }
+  .movement-leader-info h3 { display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.5rem; font: inherit; font-weight: 600; }
+  .movement-terrain { font-size: 12px; }
+  .movement-terrain summary { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+  .movement-terrain summary span { margin-left: auto; color: var(--muted); text-decoration: underline; }
+</style>

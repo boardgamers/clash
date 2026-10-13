@@ -43,6 +43,7 @@ try {
     assert(box); await page.mouse.click(box.x+box.width/2,box.y+box.height/2); await page.waitForTimeout(250);
   }
   await tile('D8');
+  await page.screenshot({path:`/tmp/move-before-target-${width}.png`});
   await tile('F7');
   const choices=page.getByRole('group',{name:'Choose how to move'});
   await choices.waitFor();
@@ -51,6 +52,10 @@ try {
   await choices.getByRole('button').first().click();
   await page.getByLabel('Attack preview',{exact:true}).waitFor();
   assert.deepEqual(await page.evaluate(()=>sent),[]);
+  const bounds=await page.locator('[aria-label="Unit movement"]').boundingBox();
+  const attack=await page.locator('.settler-confirm button').boundingBox();
+  assert.ok(bounds && attack && attack.y >= bounds.y && attack.y + attack.height <= bounds.y + bounds.height, 'attack stays visible');
+  assert.equal(await page.getByLabel('Attack preview',{exact:true}).locator('h3').innerText(),'Defenders');
   await page.screenshot({path:`/tmp/clash-roads-payment-${width}.png`});
   assert.deepEqual(errors,[]);
   await page.close();
