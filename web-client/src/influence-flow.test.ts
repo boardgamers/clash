@@ -178,6 +178,13 @@ test('reclaiming influence allows another city and boosting, but self-targeting 
   const self = target.origins!.find((o) => o.position === 'C1');
   assert.ok(other, 'another uninfluenced city is an available source');
   assert.ok(self, 'the influenced city can still target itself');
+  assert.equal(bestInfluenceOrigin(target)?.position, 'A1', 'prefer a boostable city even with a range fee');
+  assert.equal(cheaperInfluenceOrigin(target, other), null, 'do not recommend unboostable self-targeting just to save range');
+  assert.equal(bestInfluenceOrigin({ ...target, origins: [self] })?.position, 'C1', 'fall back to self when necessary');
+  assert.equal(bestInfluenceOrigin({ ...target, origins: [self, { ...other, preventBoost: true }] })?.position, 'C1', 'do not pay extra when the other source cannot boost');
+  const selection = {view: view(g), mode: 'overview', abilitiesOpen: true, influenceMode: true, influenceTarget: influenceKey(target)} as Session;
+  assert.equal(activeInfluence(selection)?.source, 'A1');
+  assert.equal(activeInfluence({...selection, influenceOrigin: 'C1'})?.source, 'C1', 'respect explicit self-targeting');
   let state = move(g, other.action);
   if (view(state).influenceContext?.stage === 'range')
     state = move(state, { Response: { Payment: [other.payment] } });

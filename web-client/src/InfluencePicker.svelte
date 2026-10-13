@@ -127,7 +127,7 @@
             </button>{/each}
         </div>{/if}
       {#if !paymentStep}
-        <p class="movement-hint">Choose the source on the map or above. The lowest-cost source is preselected.</p>
+        <p class="movement-hint">Choose a source on the map or above. When reclaiming, another city is preferred so you can boost the roll.</p>
         <button class="primary wide" onclick={() => paymentStep = true}>Choose payment<ArrowRight size={16} /></button>
       {:else}
         <div class="decision-options influence-methods" aria-label="Influence payment method">

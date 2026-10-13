@@ -39,7 +39,13 @@ export const influenceDestinationKey = (offer: InfluenceOffer) => `${offer.posit
 export function bestInfluenceOrigin(offer: InfluenceOffer) {
   const cost = (o: NonNullable<InfluenceOffer['origins']>[number]) =>
     Object.values(influenceUpfrontCost(o.actionPayment, o.payment)).reduce((sum, n) => sum + (n ?? 0), 0);
-  return [...(offer.origins ?? [])].sort((a, b) => cost(a) - cost(b) || Number(!!b.free) - Number(!!a.free))[0] ?? null;
+  const origins = offer.origins ?? [];
+  const reclaiming = origins.some(o => o.position === offer.position);
+  const boostableCities = reclaiming
+    ? origins.filter(o => o.position !== offer.position && !o.settlers && !o.preventBoost)
+    : [];
+  return [...(boostableCities.length ? boostableCities : origins)]
+    .sort((a, b) => cost(a) - cost(b) || Number(!!b.free) - Number(!!a.free))[0] ?? null;
 }
 export function influenceDestinations(offers: InfluenceOffer[]) {
   return offers.filter((o, i) => offers.findIndex(other => influenceDestinationKey(other) === influenceDestinationKey(o)) === i);
@@ -118,6 +124,8 @@ export function cheaperInfluenceOrigin(
       .filter(
         (from) =>
           !from.settlers &&
+          // Self-targeting loses the ability to boost, so it is not an equivalent saving.
+          !(from.position === offer.position && selected?.position !== offer.position && !selected?.preventBoost) &&
           from.position !== (selected?.position ?? offer.origin) &&
           (from.payment.culture_tokens ?? 0) < currentCost,
       )
