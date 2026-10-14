@@ -1,7 +1,7 @@
 import type { Move } from './types.ts';
 
 export type SoundCue =
-  'hover' | 'select' | 'collect' | 'build' | 'research' | 'draw' | 'move' | 'confirm' | 'undo' | 'error';
+  'hover' | 'select' | 'collect' | 'build' | 'research' | 'draw' | 'move' | 'confirm' | 'undo' | 'error' | 'battle' | 'casualty' | 'sink';
 // Keep action cues audible without making repeated map hovers intrusive.
 const MASTER_GAIN = 0.4;
 const notes: Record<SoundCue, number[]> = {
@@ -15,6 +15,9 @@ const notes: Record<SoundCue, number[]> = {
   confirm: [392, 494],
   undo: [330, 220],
   error: [180, 160],
+  battle: [110, 165, 110, 220],
+  casualty: [294, 196, 98],
+  sink: [220, 165, 110, 55],
 };
 
 export function moveSound(move: Move | null): SoundCue {
@@ -37,6 +40,7 @@ export class GameAudio {
   private enabled = false;
   private disposed = false;
   private lastHover = -Infinity;
+  private soundGeneration = 0;
   private createContext: () => AudioContext;
   constructor(createContext: () => AudioContext = () => new AudioContext()) {
     this.createContext = createContext;
@@ -70,29 +74,44 @@ export class GameAudio {
       this.disposed ||
       !context ||
       !this.volume ||
-      context.state !== 'running' ||
       (typeof document !== 'undefined' && document.hidden)
     )
       return;
-    if (this.voices.size >= 12) return;
+    if (context.state === 'suspended') {
+      if (cue !== 'hover') {
+        const generation = this.soundGeneration;
+        void context.resume().then(() => {
+          if (context.state === 'running' && generation === this.soundGeneration) this.play(cue);
+        }).catch(() => {});
+      }
+      return;
+    }
+    if (context.state !== 'running') return;
+    if (this.voices.size >= 12) {
+      if (cue === 'hover') return;
+      this.stop();
+    }
     if (cue === 'hover') {
       if (context.currentTime - this.lastHover < 0.09) return;
       this.lastHover = context.currentTime;
     }
     const duration =
-      cue === 'hover' ? 0.025 : cue === 'select' ? 0.075 : cue === 'research' || cue === 'draw' ? 0.24 : 0.18;
+      cue === 'hover' ? 0.055 : cue === 'select' ? 0.075 : cue === 'sink' ? 0.32 : cue === 'casualty' ? 0.22 : cue === 'research' || cue === 'draw' ? 0.24 : 0.18;
     notes[cue].forEach((frequency, index) => {
       const start = context.currentTime + index * (cue === 'research' ? 0.075 : 0.055);
       const oscillator = context.createOscillator();
       const gain = context.createGain();
-      oscillator.type = cue === 'build' || cue === 'move' ? 'triangle' : 'sine';
+      oscillator.type = ['build', 'move', 'battle', 'casualty', 'sink'].includes(cue) ? 'triangle' : 'sine';
       oscillator.frequency.setValueAtTime(frequency, start);
-      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.96, start + duration);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * (cue === 'sink' ? 0.4 : cue === 'casualty' ? 0.65 : 0.96), start + duration);
       gain.gain.setValueAtTime(0, start);
       gain.gain.linearRampToValueAtTime(
-        cue === 'hover' ? 0.025 : cue === 'select' ? 0.25 : 0.4,
+        cue === 'hover' ? 0.18 : cue === 'select' ? 0.25 : 0.4,
         start + 0.006,
       );
+      if (cue !== 'hover') {
+        gain.gain.setValueAtTime(cue === 'select' ? 0.25 : 0.4, start + duration * 0.35);
+      }
       gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
       oscillator.connect(gain);
       gain.connect(this.volume!);
@@ -108,6 +127,7 @@ export class GameAudio {
   }
 
   private stop() {
+    this.soundGeneration++;
     for (const [oscillator, gain] of this.voices) {
       oscillator.stop();
       oscillator.disconnect();

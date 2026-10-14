@@ -349,3 +349,5 @@ Viewer 0.1.114 / engine 0.4.83 corrects E17 (A Splendid Year) to grant its state
 Viewer 0.1.115 / engine 0.4.84 separates the natural influence die roll from advance bonuses in journal messages, for example “rolls a 2 (+1 bonus = 3)”, including success and failure outcomes.
 
 Viewer 0.1.116 / engine 0.4.85 shortens influence roll bonuses to “rolls a 2 (+1)”.
+
+Viewer 0.1.117 makes hover more audible, sustains action sounds longer, and adds battle-roll, unit-loss and ship-sinking cues. Action sounds wait for browser audio to resume and respect mute cancellation. Adds a local-only sound tester. Engine remains 0.4.85.

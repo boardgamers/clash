@@ -253,3 +253,26 @@ test('home-at-bottom rotation is opt-in and only accepts an enabled boolean pref
   assert.equal(readPreferences({}).homeAtBottom, false);
   assert.equal(readPreferences({ homeAtBottom: true }).homeAtBottom, true);
 });
+
+test('action sounds wait for browser audio to resume, and mute cancels them', async () => {
+  const { device, voices } = audioDevice();
+  let finish!: () => void;
+  device.resume = () => new Promise<void>((resolve) => {
+    finish = () => { device.state = 'running'; resolve(); };
+  });
+  const audio = new GameAudio(() => device as unknown as AudioContext);
+  audio.setEnabled(true);
+  audio.unlock();
+  audio.play('collect');
+  assert.equal(voices.length, 0);
+  finish();
+  await Promise.resolve();
+  assert.equal(voices.length, 2);
+  device.state = 'suspended';
+  audio.play('battle');
+  audio.setEnabled(false);
+  finish();
+  await Promise.resolve();
+  assert.equal(voices.length, 2, 'Muted pending sounds must not play later');
+  audio.destroy();
+});

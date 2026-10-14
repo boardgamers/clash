@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clash · Sound preview</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #192e39; color: #edf4f4; font: 16px system-ui; }
+    main { max-width: 800px; margin: 60px auto; padding: 24px; }
+    h1 { font-weight: 500; }
+    p { color: #b6c9d1; line-height: 1.6; }
+    #sounds { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 28px; }
+    button { text-align: left; background: #254450; color: inherit; border: 1px solid #51717b; border-radius: 8px; padding: 20px; cursor: pointer; font: inherit; }
+    button:hover, button:focus-visible { background: #30616b; outline: 2px solid #c8b77f; }
+    button span { display: block; color: #b6c9d1; font-size: 13px; margin-top: 8px; }
+    #status { min-height: 24px; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sound preview</h1>
+    <p>Click a sound to hear it at the game’s current volume. These use the same audio as the game. Hover is softer than action sounds.</p>
+    <div id="sounds"></div>
+    <p id="status" role="status">Choose a sound to play.</p>
+  </main>
+  <script type="module" src="/src/sound-preview.ts"></script>
+</body>
+</html>

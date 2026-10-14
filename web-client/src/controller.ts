@@ -139,6 +139,7 @@ export class Controller {
   private destroyed = false;
   private playbackTimer: ReturnType<typeof setTimeout> | undefined;
   private effectTimer: ReturnType<typeof setTimeout> | undefined;
+  private battleSoundTimers: ReturnType<typeof setTimeout>[] = [];
   private battleTimer: ReturnType<typeof setTimeout> | undefined;
   private chatOff: () => void;
   constructor(
@@ -882,8 +883,26 @@ export class Controller {
   }
   private showBattles(battles: BattleCue[], animate = true) {
     clearTimeout(this.battleTimer);
+    const previous = get(this.session).battles?.[0];
+    if (!battles.length) this.clearBattleSounds();
+    else if (battles[0].key !== previous?.key) this.playBattleSounds(battles[0]);
     this.patch({ battles, battleAnimate: animate && !get(this.session).reducedMotion });
     this.scheduleBattle();
+  }
+  private clearBattleSounds() {
+    for (const timer of this.battleSoundTimers) clearTimeout(timer);
+    this.battleSoundTimers = [];
+  }
+  private playBattleSounds(battle: BattleCue) {
+    this.clearBattleSounds();
+    const cues: ('battle' | 'casualty' | 'sink')[] = [];
+    if (battle.roll) cues.push('battle');
+    if (battle.losses.some((loss) => !/ships?/i.test(loss.label))) cues.push('casualty');
+    if (battle.losses.some((loss) => /ships?/i.test(loss.label))) cues.push('sink');
+    cues.forEach((cue, index) => {
+      if (index === 0) this.audio.play(cue);
+      else this.battleSoundTimers.push(setTimeout(() => this.audio.play(cue), index * 450));
+    });
   }
   private scheduleBattle() {
     if (!get(this.session).battles?.length) return;
@@ -891,6 +910,7 @@ export class Controller {
       const s = get(this.session);
       if (s.playback && s.battles?.length === 1) return; // Keep the result readable when stepping manually.
       this.patch({ battles: s.battles?.slice(1) ?? [] });
+      if (s.battles?.[1]) this.playBattleSounds(s.battles[1]);
       this.scheduleBattle();
     }, BATTLE_DURATION);
   }
@@ -1929,6 +1949,7 @@ export class Controller {
     clearTimeout(this.timer);
     clearTimeout(this.refreshTimer);
     this.chatOff();
+    this.clearBattleSounds();
     this.audio.destroy();
   }
 }
