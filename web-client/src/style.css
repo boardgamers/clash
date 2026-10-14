@@ -6252,3 +6252,13 @@ small {
     max-width: calc(100% - clamp(118px, 35vw, 140px) - 22px);
   }
 }
+
+.toast.live-action {
+  max-width: min(560px, calc(100vw - 32px));
+  width: max-content;
+  bottom: 110px;
+  pointer-events: none;
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--line);
+}

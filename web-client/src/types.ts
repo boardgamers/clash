@@ -618,6 +618,7 @@ export interface Session {
   locale: string;
   selectedAdvance: string | null;
   toast: string;
+  liveAction?: string;
   homeAtBottom: boolean;
   topDown: boolean;
   strategyMap: boolean;

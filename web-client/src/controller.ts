@@ -1,3 +1,4 @@
+import { liveActionMessages } from './live-actions';
 import { eventNotices, liveEventNotices } from './event-notices';
 import { publicActions } from './replay-actions';
 import { boardingPlan, type BoardingGroup } from './boarding';
@@ -139,6 +140,8 @@ export class Controller {
   private destroyed = false;
   private playbackTimer: ReturnType<typeof setTimeout> | undefined;
   private effectTimer: ReturnType<typeof setTimeout> | undefined;
+  private liveActionQueue: string[] = [];
+  private liveActionTimer: ReturnType<typeof setTimeout> | undefined;
   private battleSoundTimers: ReturnType<typeof setTimeout>[] = [];
   private battleTimer: ReturnType<typeof setTimeout> | undefined;
   private chatOff: () => void;
@@ -696,6 +699,8 @@ export class Controller {
         return;
       }
     } else if (!old.game.board_history?.id || old.game.board_history?.id === game.board_history?.id) {
+      this.liveActionQueue.push(...liveActionMessages(old.game, game, s.seat, s.view));
+      this.showNextLiveAction();
       const before = battleCursor(old.game);
       const after = battleCursor(game);
       if (after < before) this.showBattles([]);
@@ -714,6 +719,15 @@ export class Controller {
     // Predicted positions are marked seen once the server confirms them.
     if (confirmed) this.markSeen();
   }
+  private showNextLiveAction() {
+    if (this.liveActionTimer || !this.liveActionQueue.length) return;
+    this.patch({ liveAction: this.liveActionQueue.shift() });
+    this.liveActionTimer = setTimeout(() => {
+      this.liveActionTimer = undefined;
+      this.patch({ liveAction: undefined });
+      this.showNextLiveAction();
+    }, 4500);
+  }
   replayLastTurn() {
     const s = get(this.session);
     if (!s.game || s.pending) return;
@@ -728,6 +742,10 @@ export class Controller {
   ) {
     const s = get(this.session);
     if (s.analysis || !s.game) return;
+    clearTimeout(this.liveActionTimer);
+    this.liveActionTimer = undefined;
+    this.liveActionQueue = [];
+    this.patch({ liveAction: undefined });
     clearTimeout(this.playbackTimer);
     const frames = s.game.board_history?.frames ?? [];
     const steps = playbackSteps(s.game, index, end ?? Math.max(0, frames.length - 1));
@@ -1950,6 +1968,7 @@ export class Controller {
     clearTimeout(this.refreshTimer);
     this.chatOff();
     this.clearBattleSounds();
+    clearTimeout(this.liveActionTimer);
     this.audio.destroy();
   }
 }

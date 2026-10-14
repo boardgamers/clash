@@ -1926,6 +1926,9 @@
       cards={$session.view?.cardCatalog ?? []}
       onClose={() => (effectsOpen = false)}
     />{/if}
+  {#if $session.liveAction && !$session.playback && !$session.toast}
+    <div class="toast live-action" role="status"><ResourceText text={$session.liveAction} /></div>
+  {/if}
   {#if $session.toast}<div class="toast" role="status"><Check size={16} />{$session.toast}</div>{/if}
   {#if $session.objectivesOpen && $session.seat !== undefined}
     <dialog
