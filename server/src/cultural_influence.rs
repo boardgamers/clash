@@ -237,6 +237,15 @@ fn roll_boost_paid(
     influence_culture(game, player_index, info);
 }
 
+fn influence_roll_label(info: &InfluenceCultureBoostInfo) -> String {
+    let bonus = info.attempt.roll_boost;
+    if bonus == 0 {
+        info.roll.to_string()
+    } else {
+        format!("{} (+{bonus} bonus = {})", info.roll - bonus, info.roll)
+    }
+}
+
 fn roll_boost_payment(
     game: &mut Game,
     p: &EventPlayer,
@@ -247,7 +256,7 @@ fn roll_boost_payment(
         return None;
     }
 
-    let roll = info.roll;
+    let roll = influence_roll_label(info);
     if !p.get(game).can_afford(cost) {
         p.log(
             game,
@@ -301,10 +310,11 @@ pub(crate) fn resolve_influence_roll(
     let p = a.player(player_index);
     let roll = info.roll;
     let success = roll >= INFLUENCE_MIN_ROLL;
+    let roll_label = influence_roll_label(info);
     if success {
         p.log(
             game,
-            &format!("Cultural influence succeeded (rolls {roll})"),
+            &format!("Cultural influence succeeded (rolls {roll_label})"),
         );
         a.info.execute(game);
         influence_culture(game, player_index, a);
@@ -312,7 +322,7 @@ pub(crate) fn resolve_influence_roll(
     }
 
     if (a.starting_city_position == a.position) || a.prevent_boost {
-        p.log(game, &format!("Cultural influence failed (rolls {roll})"));
+        p.log(game, &format!("Cultural influence failed (rolls {roll_label})"));
         a.info.execute(game);
         attempt_failed(game, player_index, a.position);
         return PaymentOptions::free();
