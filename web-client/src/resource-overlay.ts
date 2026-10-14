@@ -6,7 +6,7 @@ import { playerColor, type Session } from './types';
 import type { ResourceMarker } from './resource-playback';
 
 export class ResourceOverlay {
-  private nodes: { node: HTMLDivElement; at: THREE.Vector3; component: ReturnType<typeof mount> }[] = [];
+  private nodes: { node: HTMLDivElement; at: THREE.Vector3 | null; component: ReturnType<typeof mount> }[] = [];
   private timer: ReturnType<typeof setTimeout> | undefined;
   private host: HTMLDivElement;
   constructor(parent: HTMLElement) {
@@ -31,7 +31,7 @@ export class ResourceOverlay {
     for (const group of groups.values()) {
       const { player, position } = group[0];
       const node = document.createElement('div');
-      node.dataset.position = position;
+      if (position) node.dataset.position = position;
       Object.assign(node.style, { position: 'absolute', left: '0', top: '0', visibility: 'hidden' });
       node.style.setProperty('--gain-player', playerColor(player, s.colorBlind, s.playerColors));
       this.host.append(node);
@@ -44,13 +44,19 @@ export class ResourceOverlay {
           civilization: s.game?.players.find((p) => p.id === player)?.civilization ?? 'Player',
         },
       });
-      const [x, z] = positionXY(position);
-      this.nodes.push({ node, component, at: new THREE.Vector3(x, 1.3, z) });
+      const [x, z] = position ? positionXY(position) : [0, 0];
+      this.nodes.push({ node, component, at: position ? new THREE.Vector3(x, 1.3, z) : null });
     }
     if (!s.playback && markers.length) this.timer = setTimeout(() => this.clear(), 2300);
   }
   project(camera: THREE.Camera, width: number, height: number) {
+    let screenRow = 0;
     for (const { node, at } of this.nodes) {
+      if (!at) {
+        node.style.transform = `translate(${width / 2}px,${Math.min(height * 0.45, 240) + screenRow++ * 55}px)`;
+        node.style.visibility = 'visible';
+        continue;
+      }
       const p = at.clone().project(camera);
       node.style.transform = `translate(${((p.x + 1) * width) / 2}px,${((1 - p.y) * height) / 2}px)`;
       node.style.visibility = p.z < -1 || p.z > 1 ? 'hidden' : 'visible';

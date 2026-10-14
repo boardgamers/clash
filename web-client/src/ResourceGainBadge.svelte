@@ -22,11 +22,13 @@
 
 <div
   class="resource-gain-badge"
+  class:global-gain={!markers[0].position}
   class:rise={animate}
   class:transient
   role="img"
-  aria-label={`${civilization}: gained ${markers.map((m) => `${m.amount} ${resourceNames[m.resource].toLowerCase()}`).join(', ')} at ${markers[0].position}`}
+  aria-label={`${civilization}: gained ${markers.map((m) => `${m.amount} ${resourceNames[m.resource].toLowerCase()}`).join(', ')}${markers[0].position ? ` at ${markers[0].position}` : ''}`}
 >
+  {#if !markers[0].position}<span class="gain-civilization">{civilization}</span>{/if}
   {#each markers as marker}
     {@const Icon = icons[marker.resource]}
     <span class="gain {marker.resource}"

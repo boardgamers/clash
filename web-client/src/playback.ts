@@ -258,7 +258,7 @@ export function frameDetails(
       }
     }
     const resources = frameResources(game, before.cursor, frame);
-    for (const marker of resources.markers) positions.add(marker.position);
+    for (const marker of resources.markers) if (marker.position) positions.add(marker.position);
     for (const gain of resources.gains) {
       const player = frame.players.find((p) => p.id === gain.player)?.civilization;
       const gained = describeResources(gain.pile),

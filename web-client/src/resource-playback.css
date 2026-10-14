@@ -102,3 +102,13 @@
     animation: none;
   }
 }
+
+.resource-gain-badge.global-gain {
+  max-width: calc(100vw - 40px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.gain-civilization {
+  font-size: 12px;
+  color: var(--muted);
+}

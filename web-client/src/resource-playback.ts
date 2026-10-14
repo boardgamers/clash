@@ -3,7 +3,7 @@ import { resources, resourceNames, type BoardFrame, type Game, type Pile, type R
 
 export interface ResourceMarker {
   player: number;
-  position: string;
+  position?: string;
   resource: Resource;
   amount: number;
 }
@@ -65,14 +65,15 @@ export function frameResources(
       totals.set(gain.player, total);
       const pool = { ...gain.pile };
       const cities = frame.players.find((p) => p.id === gain.player)?.cities ?? [];
-      if (action.items?.some((item) => item.origin?.Incident !== undefined)) continue;
+
       const place = (position: string, resource: Resource, requested: number) => {
         const amount = Math.min(requested, pool[resource] ?? 0);
         if (amount <= 0 || !frame.tiles.some(([p]) => p === position)) return;
         markers.push({ player: gain.player, position, resource, amount });
         pool[resource] = pool[resource]! - amount;
       };
-      const ownRoot = rootPlayer === undefined || rootPlayer === gain.player ? root : null;
+      const eventReward = interrupted || action.items?.some((item) => item.origin?.Incident !== undefined);
+      const ownRoot = !eventReward && (rootPlayer === undefined || rootPlayer === gain.player) ? root : null;
       const custom = ownRoot?.Custom as { action?: string; city?: string } | undefined;
       const taxes =
         custom?.action === 'Taxes' ||
@@ -101,6 +102,10 @@ export function frameResources(
         (ownRoot?.Construct as { city_position?: string } | undefined)?.city_position;
       if (city && cities.some((c) => c.position === city))
         for (const r of resources) place(city, r, pool[r] ?? 0);
+      for (const resource of resources) {
+        const amount = pool[resource] ?? 0;
+        if (amount > 0) markers.push({ player: gain.player, resource, amount });
+      }
     }
     if (interrupted) root = null;
   }

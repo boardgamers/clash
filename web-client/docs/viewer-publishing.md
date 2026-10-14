@@ -351,3 +351,5 @@ Viewer 0.1.115 / engine 0.4.84 separates the natural influence die roll from adv
 Viewer 0.1.116 / engine 0.4.85 shortens influence roll bonuses to “rolls a 2 (+1)”.
 
 Viewer 0.1.117 makes hover more audible, sustains action sounds longer, and adds battle-roll, unit-loss and ship-sinking cues. Action sounds wait for browser audio to resume and respect mute cancellation. Adds a local-only sound tester. Engine remains 0.4.85.
+
+Viewer 0.1.118 shows floating resource icons for bartering, research rewards and other gains without a map origin. City and collection gains retain their map locations; other rewards identify the civilization without inventing a city. Storage waste is excluded. Engine remains 0.4.85.

@@ -192,7 +192,7 @@ test('a prior event trigger cannot anchor later event rewards to the initiating 
   ]);
   const result = frameResources(game, 1, game.board_history!.frames[2]);
   assert.equal(describeResources(result.gains[0].pile), '1 food');
-  assert.deepEqual(result.markers, []);
+  assert.deepEqual(result.markers, [{ player: 1, resource: 'food', amount: 1 }]);
 });
 
 test('exploration orientation and ship landing are one move; unrelated movement responses stay separate', () => {
@@ -300,4 +300,22 @@ test('phase confirmation and age bookkeeping without consequences do not offer r
   assert.deepEqual(playbackSteps(game, 0, 1), [0]);
   assert.equal(sinceLastTurn(game, 0), null);
   assert.equal(recapStart(game, 0), null);
+});
+
+
+test('bartering and research rewards show unanchored icons with actual gains, excluding payments and waste', () => {
+  const game = fixture([
+    { player: 1, action: { Playing: { Custom: { action: 'Bartering' } } }, items: [
+      { player: 1, Resources: { balance: 'Pay', resources: { food: 2 } } },
+      gain({ gold: 2 }, 'Bartering'),
+      { player: 1, origin: { Ability: 'Waste' }, Resources: { balance: 'Loss', resources: { gold: 1 } } },
+    ] },
+    { player: 1, action: { Playing: { Advance: { advance: 'Arts' } } }, items: [
+      gain({ mood_tokens: 1, ideas: 1 }, 'Advance'),
+    ] },
+  ] as LoggedAction[]);
+  assert.deepEqual(frameResources(game, 0, game.board_history!.frames[1]).markers,
+    [{ player: 1, resource: 'gold', amount: 1 }]);
+  assert.deepEqual(frameResources(game, 1, game.board_history!.frames[2]).markers,
+    [{ player: 1, resource: 'ideas', amount: 1 }, { player: 1, resource: 'mood_tokens', amount: 1 }]);
 });
