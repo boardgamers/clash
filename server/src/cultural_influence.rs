@@ -101,7 +101,7 @@ impl InfluenceCultureAttemptInfo {
 
     #[must_use]
     pub(crate) fn is_defender(&self, player: usize) -> bool {
-        self.target_player == player
+        self.target_player == player && self.info.player != player
     }
 }
 
@@ -451,12 +451,15 @@ pub fn influence_culture_boost_cost_from(
 
     info = Ok(info?);
 
-    game.player(target_player_index).trigger_event(
-        |e| &e.on_influence_culture_attempt,
-        &mut info,
-        target_city,
-        game,
-    );
+    // Reclaiming targets our own city: apply our attempt listeners only once.
+    if target_player_index != attacker.index {
+        game.player(target_player_index).trigger_event(
+            |e| &e.on_influence_culture_attempt,
+            &mut info,
+            target_city,
+            game,
+        );
+    }
 
     let i = info?;
     if i.prevent_boost && range_boost > 0 {

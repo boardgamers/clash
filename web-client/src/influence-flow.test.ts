@@ -204,3 +204,17 @@ test('reclaiming influence allows another city and boosting, but self-targeting 
   const restricted = view(g).influence!.find((t) => t.position === 'C1' && t.name === 'Temple')!;
   assert.ok(!restricted.origins!.some((o) => o.position === 'A1'), 'an influenced source cannot target another city');
 });
+
+test('Conversion adds exactly one to reclaim rolls and lowers the boost cost', () => {
+  const g = influenceFixture();
+  g.players[0].cities.push(g.players[1].cities.shift());
+  g.players[0].advances.push('Conversion');
+  const target = view(g).influence!.find(t => t.position === 'C1' && t.name === 'Temple')!;
+  const origin = target.origins!.find(o => o.position === 'A1')!;
+  assert.equal(origin.rollBonus, 1);
+  let state = move(g, origin.action);
+  if (view(state).influenceContext?.stage === 'range') state = move(state, { Response: { Payment: [origin.payment] } });
+  const context = view(state).influenceContext!;
+  assert.equal(context.rollBonus, 1);
+  assert.equal(view(state).decision!.fields[0].cost.culture_tokens, 3, 'raw 1 plus Conversion 1 needs three more');
+});

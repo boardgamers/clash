@@ -120,7 +120,7 @@ fn fantastic_years() -> Vec<Incident> {
                 "You gain 3 food",
                 IncidentBaseEffect::BarbariansSpawn,
             ),
-            2,
+            3,
             &GoodYearType::ActivePlayer,
         ),
     ]

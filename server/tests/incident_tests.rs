@@ -783,3 +783,23 @@ fn anarchy_explains_lost_man_god_abilities() {
     assert!(!log.contains("Losing Devotion"));
     assert!(!game.player(0).can_use_advance(Advance::AbsolutePower));
 }
+
+#[test]
+fn splendid_year_17_grants_three_food_to_active_player() {
+    let mut game = JSON.load_game("barbarians_spawn");
+    game.incidents_left = vec![17];
+    let before = game.player(0).resources.food;
+    let other = game.player(1).resources.food;
+    let game = server::game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
+        0,
+    );
+    let game = server::game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectUnitType(UnitType::Elephant)),
+        0,
+    );
+    assert_eq!(game.player(0).resources.food, before + 3);
+    assert_eq!(game.player(1).resources.food, other);
+}

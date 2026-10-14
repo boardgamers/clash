@@ -343,3 +343,5 @@ Viewer 0.1.111 replaces influence payment action text with a numeric action cost
 Viewer 0.1.112 adds Hand, Discarded actions and Discarded events tabs to Cards. Discards show engine pile order with the top card first, counts and expandable full rules including battle uses. Verified both piles in the local saved-game preview; Svelte and production build pass. Engine remains 0.4.81.
 
 Viewer 0.1.113 / engine 0.4.82 fixes embarked naval defenders rolling dice and being eligible as direct combat casualties. Sea battles now admit only ships as fighters; excess passengers still resolve separately after ship losses. Verified against the reported Joyful-kraken-3479 battle and all 20 combat integration tests, including ship-only dice and remaining transport capacity.
+
+Viewer 0.1.114 / engine 0.4.83 corrects E17 (A Splendid Year) to grant its stated 3 food instead of 2. Printed English card E17 confirms the 3-food reward. Also fixes Conversion when reclaiming an influenced building: the acting player is not treated as their own defender, and attempt listeners run once. Regression coverage checks the food reward and reclaim roll bonus.
