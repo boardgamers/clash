@@ -242,7 +242,7 @@ fn influence_roll_label(info: &InfluenceCultureBoostInfo) -> String {
     if bonus == 0 {
         info.roll.to_string()
     } else {
-        format!("{} (+{bonus} bonus = {})", info.roll - bonus, info.roll)
+        format!("{} (+{bonus})", info.roll - bonus)
     }
 }
 

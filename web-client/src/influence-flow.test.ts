@@ -216,6 +216,6 @@ test('Conversion adds exactly one to reclaim rolls and lowers the boost cost', (
   if (view(state).influenceContext?.stage === 'range') state = move(state, { Response: { Payment: [origin.payment] } });
   const context = view(state).influenceContext!;
   assert.equal(context.rollBonus, 1);
-  assert.match(JSON.stringify(state.log), /rolls a 1 \(\+1 bonus = 2\)/);
+  assert.match(JSON.stringify(state.log), /rolls a 1 \(\+1\)/);
   assert.equal(view(state).decision!.fields[0].cost.culture_tokens, 3, 'raw 1 plus Conversion 1 needs three more');
 });

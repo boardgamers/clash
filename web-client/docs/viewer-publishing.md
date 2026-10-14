@@ -347,3 +347,5 @@ Viewer 0.1.113 / engine 0.4.82 fixes embarked naval defenders rolling dice and b
 Viewer 0.1.114 / engine 0.4.83 corrects E17 (A Splendid Year) to grant its stated 3 food instead of 2. Printed English card E17 confirms the 3-food reward. Also fixes Conversion when reclaiming an influenced building: the acting player is not treated as their own defender, and attempt listeners run once. Regression coverage checks the food reward and reclaim roll bonus.
 
 Viewer 0.1.115 / engine 0.4.84 separates the natural influence die roll from advance bonuses in journal messages, for example “rolls a 2 (+1 bonus = 3)”, including success and failure outcomes.
+
+Viewer 0.1.116 / engine 0.4.85 shortens influence roll bonuses to “rolls a 2 (+1)”.
