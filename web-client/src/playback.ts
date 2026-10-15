@@ -119,7 +119,7 @@ export function frameDetails(
   let description = ['Explore Resolution', 'Finish ship exploration'].includes(frame.title)
     ? 'Explore'
     : frame.title;
-  const generic = ['Resolve choice', 'Pay for action', 'Action'].includes(
+  const generic = ['Resolve choice', 'Pay for action', 'Action', 'Select Objective Cards to Complete', 'Complete Objectives'].includes(
     frame.title,
   );
   const outcomes: string[] = [];
@@ -208,6 +208,13 @@ export function frameDetails(
     const readable = wonderName;
     for (const player of frame.players) {
       const own = items.filter((item) => item.player === player.id);
+      const completed = [...new Set(own.flatMap((item) => {
+        const to = item.HandCard?.to;
+        return to && typeof to === 'object' && 'CompleteObjective' in to && typeof to.CompleteObjective === 'string'
+          ? [to.CompleteObjective] : [];
+      }))];
+      if (completed.length)
+        details.push(`${player.id === frame.actor ? '' : player.civilization + ': '}Completed ${completed.join(', ')}`);
       const gained = [
         ...new Set(
           own.filter((item) => item.Advance?.balance === 'Gain').map((item) => item.Advance!.advance),
@@ -252,6 +259,11 @@ export function frameDetails(
       }
       // Public effect labels identify card types without exposing private cards.
       for (const effect of frame.effects ?? []) {
+        if (effect.kind === 'completed' && items.some(item => {
+          const to = item.HandCard?.to;
+          return item.player === effect.player && to && typeof to === 'object' &&
+            'CompleteObjective' in to && to.CompleteObjective === effect.label;
+        })) continue;
         const player = frame.players.find((p) => p.id === effect.player);
         const label = `${effect.player === frame.actor ? '' : (player?.civilization ?? 'Player') + ': '}${effect.label}`;
         if (!details.includes(label)) details.push(label);

@@ -465,3 +465,20 @@ test('recap names a publicly played action card, never a drawn card', () => {
   action.items = [{player:0,HandCard:{card:{ActionCard:2},to:{Hand:0}}}];
   assert.ok(!frameDetails(before,after,history,[],catalog).caption.includes('Good Ideas'));
 });
+
+
+test('objective completion recaps name the completed side, without repeating its effect', () => {
+  const { before, after, game } = choiceRecap([
+    { player: 0, HandCard: { card: { ObjectiveCard: 1 }, to: { CompleteObjective: 'Bold' } } },
+  ], [{ player: 0, kind: 'completed', label: 'Bold' }]);
+  before.players[0].civilization = 'Maya';
+  for (const title of ['Select Objective Cards to Complete', 'Complete Objectives', 'Resolve choice']) {
+    after.title = title;
+    assert.equal(frameDetails(before, after, game).caption, 'Maya · Completed Daring');
+  }
+  // A second public completion in the same frame is retained.
+  game.log![0].rounds[0].turns[0].actions![0].items!.push(
+    { player: 0, HandCard: { to: { CompleteObjective: 'Conqueror' } } },
+  );
+  assert.equal(frameDetails(before, after, game).caption, 'Maya · Completed Daring, Conqueror');
+});
