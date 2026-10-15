@@ -377,3 +377,5 @@ Viewer 0.1.128 / engine 0.4.92 prefers human-city trade routes over Barbarian ro
 Viewer 0.1.129 names publicly completed objectives in replay and live action captions, including existing recorded frames, without duplicating their completion effect.
 
 Viewer 0.1.130 / engine 0.4.93 preserves mixed mood/culture allocations for variable token payments such as Uprising, while ordinary costs still remove unnecessary resources.
+
+Viewer 0.1.131 / engine 0.4.94 allows New Colonies to disembark into adjacent unexplored regions using land exploration, including orientation choices, terrain effects and the reveal undo boundary.

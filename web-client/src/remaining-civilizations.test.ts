@@ -1474,3 +1474,51 @@ for (const [civ, leader, resource] of [['Greece', 'Leonidas', 'culture_tokens'],
     assert.equal(later.players[index].resources[resource], (recruited.players[index].resources[resource] ?? 0) - laterPaid + 1);
   });
 }
+
+
+for (const terrain of ['Mountain', 'Fertile', 'Mixed']) {
+  test(`New Colonies explores adjacent hidden land (${terrain}) without moving the fleet`, async () => {
+    const g = await setup('Vikings'), index = seat(g), p = g.players[index];
+    addAdvance(p, 'Tactics', 'Fishing');
+    for (const block of g.map.unexplored_blocks) block.block.terrain = terrain === 'Mixed' ? ['Water', 'Mountain', 'Forest', 'Fertile'] : [terrain, terrain, terrain, terrain];
+    let pending: any, destination: string | undefined, start: string | undefined;
+    for (const tile of g.map.tiles) {
+      if (tile[1] === 'Unexplored') continue;
+      const oldTerrain = tile[1];
+      tile[1] = 'Water';
+      p.units = [{id: 0, position: tile[0], unit_type: 'Ship', carried_units: [
+        {id: 1, unit_type: {Leader: 'Erik'}}, {id: 2, unit_type: 'Infantry'},
+      ]}];
+      p.next_unit_id = 3;
+      const action = view(g).specialActions.find((a: any) => a.id === 'NewColonies' || a.name === 'New Colonies')?.action;
+      if (action) {
+        pending = move(g, action);
+        destination = pending.events?.at(-1)?.handler?.request?.SelectPositions?.choices.find(
+          (pos: string) => g.map.tiles.some(([x, t]: string[]) => x === pos && t === 'Unexplored'));
+        if (destination) {start = tile[0]; break;}
+      }
+      tile[1] = oldTerrain;
+    }
+    assert.ok(destination, 'New Colonies offers adjacent unexplored spaces');
+    let after = move(pending, {Response: {SelectPositions: [destination]}});
+    assert.equal(view(after).canUndo, false, 'cannot undo the hidden region reveal');
+    const exploration = view(after).explorationDecision;
+    if (exploration) after = move(after, exploration.choices[0].action);
+    const landedTerrain = after.map.tiles.find(([pos]: string[]) => pos === destination)[1];
+    assert.ok(!['Water', 'Unexplored'].includes(landedTerrain));
+    if (terrain !== 'Mixed') assert.equal(landedTerrain, terrain);
+    assert.equal(after.actions_left, g.actions_left, 'exploration remains a free action');
+    const units = after.players[index].units;
+    assert.equal(units.find((u: any) => u.id === 0).position, start);
+    for (const id of [1, 2]) {
+      const unit = units.find((u: any) => u.id === id);
+      assert.equal(unit.position, destination);
+      assert.equal(unit.movement_restrictions?.includes('Mountain') ?? false, landedTerrain === 'Mountain');
+    }
+    if (view(after).canUndo) {
+      const undone = move(after, 'Undo');
+      assert.ok(view(undone).explorationDecision, 'undo only returns to the revealed orientation choice');
+      assert.equal(view(undone).canUndo, false);
+    }
+  });
+}

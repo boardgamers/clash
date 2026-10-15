@@ -383,11 +383,18 @@ fn new_colonies() -> LeaderAbility {
                         .map(|u| u.id)
                         .collect_vec();
 
+                    let start = leader_position(p);
                     let m = MoveUnits::new(units, to, None, ResourcePile::empty());
                     s.player()
                         .add_log_entry(game, ActionLogEntry::move_units(p, &m));
 
-                    move_with_possible_combat(game, s.player_index, &m);
+                    if game.map.get(to).is_some_and(Terrain::is_unexplored) {
+                        crate::explore::move_to_unexplored_tile(
+                            game, &s.player(), &m.units, start, to,
+                        );
+                    } else {
+                        move_with_possible_combat(game, s.player_index, &m);
+                    }
                 },
             )
         },
@@ -404,7 +411,7 @@ fn unload_positions(game: &Game, p: &Player) -> Vec<Position> {
     position
         .neighbors()
         .into_iter()
-        .filter(|n| game.map.is_land(*n))
+        .filter(|n| game.map.get(*n).is_some_and(|t| t.is_land() || t.is_unexplored()))
         .collect_vec()
 }
 
