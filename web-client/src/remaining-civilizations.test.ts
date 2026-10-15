@@ -1185,8 +1185,10 @@ test('Loyalty lets the Celtic player direct Barbarian Tactical Retreat', async (
   const celts = g.players[0],
     attacker = g.players[1],
     barb = g.players.find((p: any) => p.civilization === 'Barbarians');
-  celts.action_cards = [17];
+  celts.action_cards = [14, 17, 19, 24];
   celts.units[0].position = 'E7';
+  celts.units[0].id = 42; // Must not overlap the Barbarian army's IDs.
+  celts.next_unit_id = 43;
   for (const t of g.map.tiles) t[1] = 'Fertile';
   attacker.cities = [{ position: 'D1', mood_state: 'Happy' }];
   attacker.units = [{ id: 0, position: 'E8', unit_type: 'Infantry' }];
@@ -1204,7 +1206,7 @@ test('Loyalty lets the Celtic player direct Barbarian Tactical Retreat', async (
   after = move(after, query(after, { kind: 'decision', values: [target.value] }).action);
   assert.equal(after.players[barb.id].units[0].position, target.position);
   assert.equal(after.players[0].units[0].position, 'E7');
-  assert.equal(after.players[0].action_cards?.length ?? 0, 0);
+  assert.deepEqual(after.players[0].action_cards, [14, 19, 24]);
 });
 test('Nomads can reveal an actual unexplored block using the city alone', async () => {
   const g = await setup('Huns'),

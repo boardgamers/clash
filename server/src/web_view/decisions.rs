@@ -502,9 +502,20 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                         && let PersistentEventType::CombatRoundStart(round) = &game.current_event().event_type
                         && let HandCard::ActionCard(id) = card
                     {
-                        return crate::tactics_card::can_play_tactics_card(
-                            game, p.index, game.cache.get_action_card(*id), &round.combat,
-                        );
+                        // Loyalty supplies cards from the Celtic hand, but the
+                        // participating army and combat role belong to Barbarians.
+                        let combat_player = if matches!(&h.origin, EventOrigin::LeaderAbility(name) if name == "Loyalty") {
+                            round.combat.players().into_iter().find(|index| {
+                                game.player(*index).civilization.is_barbarian()
+                            })
+                        } else {
+                            Some(p.index)
+                        };
+                        return combat_player.is_some_and(|index| {
+                            crate::tactics_card::can_play_tactics_card(
+                                game, index, game.cache.get_action_card(*id), &round.combat,
+                            )
+                        });
                     }
                     true
                 })
