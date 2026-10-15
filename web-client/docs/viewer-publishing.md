@@ -363,3 +363,5 @@ Viewer 0.1.121 keeps civilization selection beside chat on screens at least 1100
 Viewer 0.1.122 / engine 0.4.86 fixes Bartering to allow an action, objective, or wonder card from hand, including when no action cards remain. Public cards in play are excluded. Updates advance wording and verifies all three discard types, resource reward, action cost, and once-per-turn restriction.
 
 Viewer 0.1.123 / engine 0.4.87 fixes Rapid Recruitment crashing when Vercingetorix is recruited alongside infantry. Leader placement prompts use the leader name. Existing pending recruitment choices can continue without replay or saved-data edits. Regression coverage checks keeping and deploying both newly recruited units.
+
+Viewer 0.1.124 / engine 0.4.88 corrects Rapid Recruitment timing: recruiting Vercingetorix does not trigger his own ability for him or accompanying units. A later Recruit action in his city, including in the same turn, remains eligible. Clarifies the ability text and tests both cases. Community timing discussion (not an official designer ruling): https://boardgamegeek.com/thread/2814396.

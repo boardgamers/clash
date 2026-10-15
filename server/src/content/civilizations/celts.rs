@@ -147,7 +147,11 @@ fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
             |e| &mut e.recruit,
             40 - i as i32,
             move |game, p, r| {
-                if r.city_position != leader_position(p.get(game)) {
+                // Recruitment places all units before these listeners run. A newly
+                // recruited leader did not occupy the city when the action began.
+                if r.units.leader == Some(Leader::Vercingetorix)
+                    || r.city_position != leader_position(p.get(game))
+                {
                     return None;
                 }
                 let first = p.get(game).next_unit_id - r.units.amount() as u32;
@@ -200,7 +204,7 @@ fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
 fn vercingetorix() -> LeaderInfo {
     LeaderInfo::new(Leader::Vercingetorix,"Vercingetorix",
         LeaderAbility::builder("Warrior People","Vercingetorix adds +1 combat value per friendly Settler within 2 spaces.").add_combat_strength_listener(116,|game,c,s,r|{if c.has_leader(r,game){let p=game.player(c.player(r));let n=p.units.iter().filter(|u|u.is_settler()&&u.position.distance(leader_position(p))<=2).count() as i8;s.extra_combat_value+=n;if n>0{s.roll_log.push(format!("Warrior People adds +{n} combat value"));}}}).build(),
-        rapid_recruitment(LeaderAbility::builder("Rapid Recruitment","When recruiting in Vercingetorix's city, each new land unit may be placed directly on adjacent revealed land without enemy units or cities.")).build())
+        rapid_recruitment(LeaderAbility::builder("Rapid Recruitment","When recruiting in a city Vercingetorix already occupied before this action, each new land unit may be placed directly on adjacent revealed land without enemy units or cities.")).build())
 }
 fn boudica() -> LeaderInfo {
     LeaderInfo::new(
