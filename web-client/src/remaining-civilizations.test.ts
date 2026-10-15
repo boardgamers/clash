@@ -1435,3 +1435,25 @@ test('Navigator remains unavailable when all ships in Hanno’s space already mo
   p.event_info={...p.event_info,'Carthage moved units':'[0]'};
   assert(!view(g).specialActions.some((a:any)=>a.name==='Navigator'));
 });
+
+for (const deployInfantry of [false, true]) {
+  test(`Rapid Recruitment handles newly recruited Vercingetorix after ${deployInfantry ? 'deploying' : 'keeping'} infantry`, async () => {
+    const g = await setup('Celts'), index = seat(g), city = g.players[index].cities[0].position;
+    const offer = query(g, { kind: 'recruit', city, units: { infantry: 1, leader: 'Vercingetorix' }, replaced: [] });
+    assert.ok(offer.action);
+    const recruited = move(g, offer.action);
+    const infantry = view(recruited).decision;
+    assert.match(infantry.description, /Deploy infantry/);
+    const target = infantry.options[0].position;
+    const afterInfantry = move(recruited, { Response: { SelectPositions: deployInfantry ? [target] : [] } });
+    assert.match(view(afterInfantry).decision.description, /Deploy Vercingetorix/);
+    for (const deployLeader of [false, true]) {
+      const leaderTarget = view(afterInfantry).decision.options[0].position;
+      const done = move(afterInfantry, { Response: { SelectPositions: deployLeader ? [leaderTarget] : [] } });
+      assert.ok(!view(done).decision);
+      assert.equal(done.players[index].units.find((u: any) => u.unit_type?.Leader === 'Vercingetorix').position, deployLeader ? leaderTarget : city);
+      assert.equal(done.players[index].units.find((u: any) => u.unit_type === 'Infantry').position, deployInfantry ? target : city);
+      assert.equal(done.actions_left, g.actions_left - 1);
+    }
+  });
+}

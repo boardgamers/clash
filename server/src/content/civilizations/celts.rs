@@ -173,7 +173,7 @@ fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
                     0..=1,
                     &format!(
                         "Rapid Recruitment · Deploy {} #{} beside the city",
-                        unit.unit_type.non_leader_name(),
+                        unit.unit_type.name(game),
                         unit.id + 1
                     ),
                 ))

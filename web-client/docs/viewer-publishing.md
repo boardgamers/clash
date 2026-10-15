@@ -361,3 +361,5 @@ Viewer 0.1.120 keeps chat accessible during civilization selection: a non-modal 
 Viewer 0.1.121 keeps civilization selection beside chat on screens at least 1100px wide, switching between panels on smaller screens. Verified both panels remain visible without overlap on desktop. Engine remains 0.4.85.
 
 Viewer 0.1.122 / engine 0.4.86 fixes Bartering to allow an action, objective, or wonder card from hand, including when no action cards remain. Public cards in play are excluded. Updates advance wording and verifies all three discard types, resource reward, action cost, and once-per-turn restriction.
+
+Viewer 0.1.123 / engine 0.4.87 fixes Rapid Recruitment crashing when Vercingetorix is recruited alongside infantry. Leader placement prompts use the leader name. Existing pending recruitment choices can continue without replay or saved-data edits. Regression coverage checks keeping and deploying both newly recruited units.
