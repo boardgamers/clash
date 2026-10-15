@@ -336,7 +336,7 @@ fn sun_tzu() -> LeaderInfo {
                 let c = s.player(player_index);
                 if s.is_winner(player_index)
                     && s.round == 1
-                    && s.is_battle()
+                    && s.opponent(player_index).fighters(s.battleground).amount() > 0
                     && s.battleground.is_land()
                     && c.survived_leader()
                 {

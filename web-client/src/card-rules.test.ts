@@ -204,3 +204,46 @@ test('old naval combat modifiers do not grant Steel Weapons in later rounds', ()
   assert.ok(rounds.length >= 2);
   for (const entry of rounds) assert.ok(![...entry.combat!.attacker.modifiers, ...entry.combat!.defender.modifiers].some((m: string) => /steel weapons/i.test(m)));
 });
+
+
+for (const target of ['empty city', 'settler', 'city with settler']) {
+  for (const civ of ['Rome', 'Egypt', 'China']) {
+    test(`${civ} battle rewards distinguish automatic victories from army combat: ${target}`, () => {
+      const g = fixture('objective_cards/instant/conqueror'), p = g.players[0], enemy = g.players[1];
+      p.civilization = civ;
+      p.advances = ['Farming', 'Mining', 'Tactics', 'Bartering', 'Myths', 'Rituals'];
+      p.resources = {culture_tokens: 4};
+      p.action_cards = [5];
+      p.objective_cards = [];
+      enemy.objective_cards = [];
+      enemy.action_cards = [];
+      enemy.cities[0].city_pieces = {};
+      enemy.units = target === 'empty city' ? [] : [{id: 0, position: 'C1', unit_type: 'Settler'}];
+      if (target === 'settler') enemy.cities = [];
+      if (civ === 'China') p.units[0].unit_type = {Leader: 'SunTzu'};
+      let after = attack(g);
+      if (view(after).stopMovement) after = move(after, {Movement: 'Stop'});
+      const resources = after.players[0].resources;
+      assert.equal(resources.gold ?? 0, (target === 'settler' ? 0 : 1) + (civ === 'Rome' ? 1 : 0));
+      assert.equal(resources.mood_tokens ?? 0, civ === 'Rome' ? 1 : 0);
+      assert.equal(resources.culture_tokens, civ === 'Egypt' ? 5 : 4);
+      assert.ok(view(after).actionCards.find((c: any) => c.id === 5)?.action, 'Heroic General recognizes a won land battle');
+      for (const unit of after.players[0].units.filter((u: any) => [0,1,2,3].includes(u.id)))
+        assert.ok(unit.movement_restrictions.includes('Battle'));
+    });
+  }
+}
+
+for (const moreWarfare of [false, true]) {
+  test(`Daring checks its extra condition after an undefended capture (more enemy Warfare=${moreWarfare})`, () => {
+    const g = fixture('objective_cards/instant/conqueror');
+    g.players[0].objective_cards = [16];
+    g.players[0].action_cards = [];
+    g.players[1].objective_cards = [];
+    g.players[1].units = [];
+    g.players[1].cities[0].city_pieces = {};
+    if (moreWarfare) g.players[1].advances.push('Draft');
+    const after = attack(g);
+    assert.equal(after.events?.some((e: any) => e.event_type?.SelectObjectives?.shown_objective === 'Bold') ?? false, moreWarfare);
+  });
+}

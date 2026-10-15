@@ -214,8 +214,11 @@ impl CombatStats {
 
     #[must_use]
     pub fn is_battle(&self) -> bool {
-        // defender can win with a fortress or great wall
-        self.defender.present.amount() > 0 || self.winner() == Some(CombatRole::Defender)
+        // The glossary includes undefended cities and lone Settlers: neither
+        // dice nor defending Army units are required for a battle.
+        self.battleground.is_city()
+            || self.defender.present.amount() > 0
+            || self.winner() == Some(CombatRole::Defender)
     }
 
     #[must_use]
