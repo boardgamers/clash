@@ -297,13 +297,15 @@ fn leonidas() -> LeaderInfo {
         "Leonidas I",
         LeaderAbility::builder(
             "That's Sparta",
-            "Gain 1 culture token when recruiting in the leader city.",
+            "Gain 1 culture token when recruiting in a city Leonidas already occupied before this action.",
         )
         .add_simple_persistent_event_listener(
             |event| &mut event.recruit,
             4,
             |game, p, r| {
-                if leader_position(p.get(game)) == r.city_position {
+                if r.units.leader != Some(Leader::Leonidas)
+                    && leader_position(p.get(game)) == r.city_position
+                {
                     p.gain_resources(game, ResourcePile::culture_tokens(1));
                 }
             },

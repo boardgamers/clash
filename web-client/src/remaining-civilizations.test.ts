@@ -1454,3 +1454,21 @@ for (const infantry of [0, 1]) {
     assert.equal(done.actions_left, g.actions_left - 2);
   });
 }
+
+for (const [civ, leader, resource] of [['Greece', 'Leonidas', 'culture_tokens'], ['Egypt', 'Imhotep', 'ideas']]) {
+  test(`${leader} city reward starts with the next action, not their own recruitment`, async () => {
+    const g = await setup(civ), index = seat(g), city = g.players[index].cities[0].position;
+    g.players[index].resources.ideas = 0;
+    const offer = query(g, { kind: 'recruit', city, units: { infantry: 1, leader }, replaced: [] });
+    assert.ok(offer.action);
+    const recruited = move(g, offer.action);
+    assert.ok(!view(recruited).decision);
+    const paid = offer.action.Playing.Recruit.payment[resource] ?? 0;
+    assert.equal(recruited.players[index].resources[resource] ?? 0, g.players[index].resources[resource] - paid);
+    const laterOffer = query(recruited, { kind: 'recruit', city, units: { infantry: 1 }, replaced: [] });
+    assert.ok(laterOffer.action);
+    const later = move(recruited, laterOffer.action);
+    const laterPaid = laterOffer.action.Playing.Recruit.payment[resource] ?? 0;
+    assert.equal(later.players[index].resources[resource], (recruited.players[index].resources[resource] ?? 0) - laterPaid + 1);
+  });
+}
