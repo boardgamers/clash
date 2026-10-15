@@ -357,3 +357,5 @@ Viewer 0.1.118 shows floating resource icons for bartering, research rewards and
 Viewer 0.1.119 queues brief public-action notices while watching other players live, naming their civilization and research, buildings, moves or rewards. Spectators see all players. Initial snapshots, own actions, repeated states and undo do not produce notices. Replay uses its existing captions. Engine remains 0.4.85.
 
 Viewer 0.1.120 keeps chat accessible during civilization selection: a non-modal picker includes a Chat shortcut and hides while table activity is open, preserving selection when returning. Verified opening chat and returning in a fresh draft. Engine remains 0.4.85.
+
+Viewer 0.1.121 keeps civilization selection beside chat on screens at least 1100px wide, switching between panels on smaller screens. Verified both panels remain visible without overlap on desktop. Engine remains 0.4.85.

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { MediaQuery } from 'svelte/reactivity';
   import { ArrowRight, Crown, GraduationCap, Check, Pencil, X, MessageCircle } from 'lucide-svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import ResourceText from './ResourceText.svelte';
@@ -11,10 +12,11 @@
   let editing = $state(false);
   let tab = $state<'advances' | 'leaders'>('advances');
   const civilization = $derived(civilizations.find((c) => c.name === selected) ?? civilizations[0]);
+  const wide = new MediaQuery('(min-width: 1100px)');
   let dialog: HTMLDialogElement;
   $effect(() => {
     if (!dialog) return;
-    if ($session.activityOpen) dialog.close();
+    if ($session.activityOpen && !wide.current) dialog.close();
     else if (!dialog.open) dialog.show();
   });
 </script>

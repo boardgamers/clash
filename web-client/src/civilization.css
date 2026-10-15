@@ -166,3 +166,23 @@
   gap: 6px;
   margin: 0 0 12px 12px;
 }
+
+@media (min-width: 1100px) {
+  .game-shell.civilization-setup.activity-open .civilization-picker[open] {
+    left: max(24px, calc((100vw - 1180px) / 2));
+    right: auto;
+    width: min(780px, calc(100vw - 440px));
+  }
+  .game-shell.civilization-setup.activity-open .activity.floating-panel {
+    position: fixed;
+    left: auto;
+    right: max(24px, calc((100vw - 1180px) / 2));
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    width: 360px;
+    height: min(560px, calc(100dvh - 140px));
+    max-height: none;
+    z-index: 26;
+  }
+}
