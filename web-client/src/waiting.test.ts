@@ -102,3 +102,11 @@ test('card decisions do not reveal another player’s hand in the waiting label'
   );
   waiting(state, { player, action: 'Choose a card', source: null });
 });
+
+test('Revolt waiting explains the free infantry city choice', async () => {
+  const game = JSON.parse(await capture());
+  const handler = game.events.at(-1).handler;
+  handler.origin = { LeaderAbility: 'Revolt' };
+  handler.request = { SelectPositions: { choices: ['B1', 'D2'], needed: { start: 1, end: 1 }, description: 'Choose a city for the free infantry' } };
+  waiting(JSON.stringify(game), { player: 1, action: 'Choose a city for the free infantry', source: 'Revolt' });
+});

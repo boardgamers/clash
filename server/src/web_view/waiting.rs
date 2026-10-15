@@ -29,6 +29,11 @@ pub(super) fn describe(game: &Game) -> Option<Value> {
             {
                 "Choose where the exploring fleet finishes"
             }
+            (Request::SelectPositions(_), EventOrigin::LeaderAbility(name))
+                if name == "Revolt" =>
+            {
+                "Choose a city for the free infantry"
+            }
             (Request::SelectPositions(_), EventOrigin::Advance(Advance::Fanaticism)) => {
                 "Place an infantry"
             }

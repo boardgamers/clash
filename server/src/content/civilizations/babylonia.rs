@@ -208,7 +208,7 @@ fn nabopolassar() -> LeaderInfo {
                 }
                 let choices = cities_that_can_add_units(p);
                 if choices.is_empty() { return None; }
-                Some(PositionRequest::new(choices, 1..=1, "Place the Revolt infantry"))
+                Some(PositionRequest::new(choices, 1..=1, "Choose a city for the free infantry"))
             },
             |game, selection, _| gain_unit(game, &selection.player(), selection.choice[0], UnitType::Infantry),
         )

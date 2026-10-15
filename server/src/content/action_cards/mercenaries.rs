@@ -48,7 +48,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
             Some(PositionRequest::new(
                 r,
                 1..=max,
-                "Select Barbarian armies to move",
+                "Select Barbarian army hexes to move (all units on one hex count as one army)",
             ))
         },
         |game, s, a| {
@@ -185,6 +185,7 @@ fn barbarian_army_positions_in_range2(
         .units
         .iter()
         .map(|u| u.position)
+        .unique()
         .filter(|&p| {
             my.iter().any(|my_pos| {
                 if my_pos.distance(p) > 2 {

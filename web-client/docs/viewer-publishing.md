@@ -369,3 +369,5 @@ Viewer 0.1.124 / engine 0.4.88 corrects Rapid Recruitment timing: recruiting Ver
 Viewer 0.1.125 / engine 0.4.89 extends the agreed leader-city timing to Leonidas: his own recruitment grants no culture, but subsequent recruitment in his city does. Regression tests also confirm Imhotep gains no idea from his own recruitment and does gain one on a subsequent recruitment. Recruitment listener audit found no other leader-specific post-recruit reward besides Leonidas and Vercingetorix; cost discounts and Imhotep activation already inspect the pre-recruit position.
 
 Viewer 0.1.126 / engine 0.4.90 fixes Loyalty tactics rendering using the Celtic controller as the combat participant. Eligibility now uses the Barbarian army and its combat role while cards remain from the Celtic hand. Regression uses disjoint unit IDs; existing pending choices need only a refresh.
+
+Viewer 0.1.127 / engine 0.4.91 counts Mercenaries targets by distinct Barbarian army hex, not individual units, so selection limits and payment are per army. The prompt explains the grouping. Revolt waiting text explicitly asks for a city for the free infantry.
