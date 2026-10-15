@@ -151,3 +151,18 @@
     font-size: 12px;
   }
 }
+
+.civilization-picker[open] {
+  inset: 12px 0;
+  margin: auto;
+  height: fit-content;
+  z-index: 25;
+  max-height: calc(100dvh - 110px);
+}
+.civilization-picker .draft-chat {
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px 12px;
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowRight, Crown, GraduationCap, Check, Pencil, X } from 'lucide-svelte';
+  import { ArrowRight, Crown, GraduationCap, Check, Pencil, X, MessageCircle } from 'lucide-svelte';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import ResourceText from './ResourceText.svelte';
   import type { Controller } from './controller';
@@ -11,17 +11,23 @@
   let editing = $state(false);
   let tab = $state<'advances' | 'leaders'>('advances');
   const civilization = $derived(civilizations.find((c) => c.name === selected) ?? civilizations[0]);
-  function show(node: HTMLDialogElement) {
-    node.showModal();
-  }
+  let dialog: HTMLDialogElement;
+  $effect(() => {
+    if (!dialog) return;
+    if ($session.activityOpen) dialog.close();
+    else if (!dialog.open) dialog.show();
+  });
 </script>
 
 <dialog
   class="field-guide civilization-picker"
   aria-labelledby="civilization-title"
-  use:show
+  bind:this={dialog}
   oncancel={(e) => e.preventDefault()}
 >
+  <button class="draft-chat" onclick={() => controller.setTab('chat')}>
+    <MessageCircle size={18} />Chat{#if $session.unread}<span class="unread">{$session.unread}</span>{/if}
+  </button>
   <h2 id="civilization-title">{draft ? 'Choose your civilization' : 'Choose civilization'}</h2>
   {#if draft}
     <p class="draft-intro">

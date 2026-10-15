@@ -355,3 +355,5 @@ Viewer 0.1.117 makes hover more audible, sustains action sounds longer, and adds
 Viewer 0.1.118 shows floating resource icons for bartering, research rewards and other gains without a map origin. City and collection gains retain their map locations; other rewards identify the civilization without inventing a city. Storage waste is excluded. Engine remains 0.4.85.
 
 Viewer 0.1.119 queues brief public-action notices while watching other players live, naming their civilization and research, buildings, moves or rewards. Spectators see all players. Initial snapshots, own actions, repeated states and undo do not produce notices. Replay uses its existing captions. Engine remains 0.4.85.
+
+Viewer 0.1.120 keeps chat accessible during civilization selection: a non-modal picker includes a Chat shortcut and hides while table activity is open, preserving selection when returning. Verified opening chat and returning in a fresh draft. Engine remains 0.4.85.
