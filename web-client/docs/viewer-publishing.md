@@ -359,3 +359,5 @@ Viewer 0.1.119 queues brief public-action notices while watching other players l
 Viewer 0.1.120 keeps chat accessible during civilization selection: a non-modal picker includes a Chat shortcut and hides while table activity is open, preserving selection when returning. Verified opening chat and returning in a fresh draft. Engine remains 0.4.85.
 
 Viewer 0.1.121 keeps civilization selection beside chat on screens at least 1100px wide, switching between panels on smaller screens. Verified both panels remain visible without overlap on desktop. Engine remains 0.4.85.
+
+Viewer 0.1.122 / engine 0.4.86 fixes Bartering to allow an action, objective, or wonder card from hand, including when no action cards remain. Public cards in play are excluded. Updates advance wording and verifies all three discard types, resource reward, action cost, and once-per-turn restriction.

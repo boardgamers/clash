@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::discard_action_card;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
-use crate::card::{HandCard, HandCardLocation, all_action_hand_cards};
+use crate::card::{HandCard, HandCardLocation, HandCardType, hand_cards, log_card_transfer};
 use crate::city_pieces::Building::Market;
 use crate::content::ability::{AbilityBuilder, building_event_origin};
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
@@ -12,6 +12,8 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::{Game, GameOptions};
+use crate::objective_card::discard_objective_card;
+use crate::utils::remove_element;
 use crate::log::add_start_turn_action_if_needed;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::{ResourceType, gain_resources};
@@ -41,14 +43,14 @@ fn bartering() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Bartering,
         "Bartering",
-        "Once per turn, discard an action card to gain 1 gold or 1 culture token without spending an action.",
+        "Once per turn, discard a card from your hand (action, objective, or wonder) to gain 1 gold or 1 culture token without spending an action.",
     )
     .with_advance_bonus(MoodToken)
     .add_custom_action(
         CustomActionType::Bartering,
         |c| c.once_per_turn().free_action().no_resources(),
         use_bartering,
-        |_game, p| !p.action_cards.is_empty(),
+        |game, p| !hand_cards(p, &HandCardType::get_all(), game).is_empty(),
     )
     .with_unlocked_building(Market)
 }
@@ -59,22 +61,26 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
         1,
         |game, p, _| {
             Some(HandCardsRequest::new(
-                all_action_hand_cards(p.get(game)),
+                hand_cards(p.get(game), &HandCardType::get_all(), game),
                 1..=1,
-                "Select an action card to discard",
+                "Select a card from your hand to discard",
             ))
         },
         |game, s, _e| {
-            let HandCard::ActionCard(card) = s.choice[0] else {
-                panic!("Invalid type");
-            };
-            discard_action_card(
-                game,
-                s.player_index,
-                card,
-                &s.origin,
-                HandCardLocation::DiscardPile,
-            );
+            match s.choice[0] {
+                HandCard::ActionCard(card) => discard_action_card(
+                    game, s.player_index, card, &s.origin, HandCardLocation::DiscardPile,
+                ),
+                HandCard::ObjectiveCard(card) => discard_objective_card(
+                    game, s.player_index, card, &s.origin, HandCardLocation::DiscardPile,
+                ),
+                HandCard::Wonder(wonder) => {
+                    remove_element(&mut game.player_mut(s.player_index).wonder_cards, &wonder)
+                        .expect("wonder card must be in hand");
+                    log_card_transfer(game, &HandCard::Wonder(wonder),
+                        HandCardLocation::Hand(s.player_index), HandCardLocation::DiscardPile, &s.origin);
+                }
+            }
         },
     )
     .add_resource_request(

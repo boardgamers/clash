@@ -115,7 +115,7 @@ const advances = {
   StateReligion: [Landmark, 'Once per turn, omit the food cost when you construct a Temple.'],
   Bartering: [
     Handshake,
-    'Once per turn, discard an action card to gain 1 gold or 1 culture token without using an action.',
+    'Once per turn, discard a card from your hand (action, objective, or wonder) to gain 1 gold or 1 culture token without using an action.',
   ],
   TradeRoutes: [
     Route,
