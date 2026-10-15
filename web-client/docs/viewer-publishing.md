@@ -375,3 +375,5 @@ Viewer 0.1.127 / engine 0.4.91 counts Mercenaries targets by distinct Barbarian 
 Viewer 0.1.128 / engine 0.4.92 prefers human-city trade routes over Barbarian routes for Celts with Currency, after maximizing route count. This preserves food/gold options in actual rewards and prevents false unavoidable-food-waste forecasts.
 
 Viewer 0.1.129 names publicly completed objectives in replay and live action captions, including existing recorded frames, without duplicating their completion effect.
+
+Viewer 0.1.130 / engine 0.4.93 preserves mixed mood/culture allocations for variable token payments such as Uprising, while ordinary costs still remove unnecessary resources.

@@ -12,6 +12,7 @@
     pending = false,
     optional = false,
     reward = false,
+    variableAmount = false,
     label = 'Payment',
   }: {
     options: { payment: Pile; disabled?: boolean }[];
@@ -21,6 +22,7 @@
     pending?: boolean;
     optional?: boolean;
     reward?: boolean;
+    variableAmount?: boolean;
     label?: string;
   } = $props();
   const icons = {
@@ -80,7 +82,7 @@
           resource,
           amount,
           reward ? 'food' : 'gold',
-          !reward,
+          !reward && !variableAmount,
         ),
       );
   }

@@ -726,6 +726,7 @@ export interface Decision {
     initial: Pile;
     cost: Pile;
     choices?: Pile[] | null;
+    variableAmount?: boolean;
   }[];
 }
 export const resourceNames: Record<Resource, string> = {

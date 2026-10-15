@@ -355,6 +355,7 @@
         pending={$session.pending}
         optional={field.optional}
         reward={decision.reward}
+        variableAmount={field.variableAmount}
         label={field.name}
       />
     {/if}
@@ -372,6 +373,7 @@
             pending={$session.pending}
             optional={field.optional}
             reward={decision.reward}
+            variableAmount={field.variableAmount}
             label={field.name}
           />
         {:else}

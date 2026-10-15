@@ -188,7 +188,8 @@ fn resource_field(
         .unique()
         .collect::<Vec<_>>();
     json!({"name":name,"optional":optional,"resources":types,"initial":if reward {cost.default_payment()} else {cost.first_valid_payment(available).unwrap_or_default()},"cost":cost.default_payment(),
-        "choices":payment_choices(cost, stock, reward, optional)})
+        "choices":payment_choices(cost, stock, reward, optional),
+        "variableAmount":cost.conversions.iter().any(|c| c.to.is_empty() && matches!(c.payment_conversion_type, crate::payment::PaymentConversionType::MayOverpay(_)))})
 }
 
 // Present complete, engine-validated payments. Large choice spaces use direct

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
+import { paymentWithAmount } from './payment-options.ts';
 import type { Pile, View } from './types.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
@@ -81,4 +82,24 @@ test('Uprising allows every affordable mood/culture mix totaling 1–4, never ze
     { gold: 2 },
   ])
     assert.throws(() => quote(rich, payment), /valid payment/);
+});
+
+
+test('Uprising UI keeps mixed token payments and adjusts only when exceeding four', () => {
+  const state = pending({ mood_tokens: 4, culture_tokens: 4 });
+  const field = view(state).decision!.fields[0];
+  assert.equal(field.variableAmount, true);
+  const choose = (current: Pile, resource: 'mood_tokens' | 'culture_tokens', amount: number) =>
+    paymentWithAmount(field.choices!, current, resource, amount, 'gold', !field.variableAmount);
+  let selected = choose({ mood_tokens: 2 }, 'culture_tokens', 2);
+  assert.equal(selected.mood_tokens, 2);
+  assert.equal(selected.culture_tokens, 2);
+  const after = engine.tryMove(state, JSON.stringify(quote(state, selected).action), 0);
+  assert.equal(view(after).players[0].score - view(state).players[0].score, 2);
+  selected = choose(selected, 'culture_tokens', 3);
+  assert.equal(selected.mood_tokens, 1);
+  assert.equal(selected.culture_tokens, 3);
+  selected = choose(selected, 'culture_tokens', 1);
+  assert.equal(selected.mood_tokens, 1);
+  assert.equal(selected.culture_tokens, 1);
 });
