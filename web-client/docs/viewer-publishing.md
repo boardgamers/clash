@@ -371,3 +371,5 @@ Viewer 0.1.125 / engine 0.4.89 extends the agreed leader-city timing to Leonidas
 Viewer 0.1.126 / engine 0.4.90 fixes Loyalty tactics rendering using the Celtic controller as the combat participant. Eligibility now uses the Barbarian army and its combat role while cards remain from the Celtic hand. Regression uses disjoint unit IDs; existing pending choices need only a refresh.
 
 Viewer 0.1.127 / engine 0.4.91 counts Mercenaries targets by distinct Barbarian army hex, not individual units, so selection limits and payment are per army. The prompt explains the grouping. Revolt waiting text explicitly asks for a city for the free infantry.
+
+Viewer 0.1.128 / engine 0.4.92 prefers human-city trade routes over Barbarian routes for Celts with Currency, after maximizing route count. This preserves food/gold options in actual rewards and prevents false unavoidable-food-waste forecasts.

@@ -205,6 +205,13 @@ pub fn find_trade_routes(game: &Game, player: &Player, only_ships: bool) -> Vec<
             .filter(|c| !c.pieces.buildings(Some(player.index)).is_empty())
             .map(|c| c.position)
             .collect()
+    } else if player.has_special_advance(SpecialAdvance::TribalTrade)
+        && player.can_use_advance(Advance::Currency)
+    {
+        // With equal route counts, human cities preserve the choice of gold.
+        // Barbarian trade only permits food, so choosing it can force waste.
+        game.players.iter().filter(|p| p.is_human())
+            .flat_map(|p| &p.cities).map(|c| c.position).collect()
     } else {
         vec![]
     };

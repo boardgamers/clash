@@ -217,3 +217,24 @@ test('trade-route guide is public, read-only and matches current eligible pairin
   g.players[1].advances = g.players[1].advances.filter((a: string) => a !== 'TradeRoutes');
   assert.equal(view(g).tradeRoutes!.find(p => p.player === 1)!.enabled, false);
 });
+
+test('Tribal Trade prefers a human city for gold without reducing route count', () => {
+  const g = trading(true), p = g.players[1];
+  p.civilization = 'Celts';
+  p.resources.gold = 0;
+  p.units = [{ position: 'C8', unit_type: 'Settler', id: 3 }];
+  g.players[0].cities = [{ position: 'C6', mood_state: 'Happy' }];
+  g.players.find((p: any) => p.civilization === 'Barbarians').cities = [{ position: 'B7', mood_state: 'Neutral' }];
+  for (const tile of g.map.tiles) tile[1] = 'Fertile';
+  const v = view(g);
+  assert.deepEqual(v.tradeRoutes!.find(p => p.player === 1)!.routes.map(r => r.to), ['C6']);
+  assert.equal(v.endTurnTradeWarning, null);
+  // The same route/reward rules must offer gold when the next turn actually starts.
+  g.current_player_index = 0;
+  const started = move(g, { Playing: 'EndTurn' });
+  const rewarded = move(started, { Response: { ResourceReward: { gold: 1 } } });
+  assert.equal(rewarded.players[1].resources.gold, 1);
+  g.current_player_index = 1;
+  g.players[0].cities[0].mood_state = 'Angry';
+  assert.deepEqual(view(g).endTurnTradeWarning, { routes: 1, waste: { food: 1 } });
+});
