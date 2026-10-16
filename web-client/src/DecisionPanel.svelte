@@ -2,7 +2,7 @@
   import { printedCardName } from './card-names';
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
-  import { Check, Sparkles, Layers, BookOpen, ChevronRight, Zap } from 'lucide-svelte';
+  import { Check, Sparkles, Layers, BookOpen, ChevronRight, Zap, Wheat } from 'lucide-svelte';
   import type { Controller } from './controller';
   import type { Decision, Move, Pile, UnitKind } from './types';
   import { unitInfo } from './city';
@@ -162,6 +162,9 @@
         typeof option.value === 'string'
           ? $session.view?.advances.find((a) => a.id === option.value)
           : undefined}
+      {@const foodRecipient = decision.description === 'Select a player to gain 1 food'
+        ? $session.game?.players.find((player) => player.id === option.value)
+        : undefined}
       {@const Icon = unit?.icon ?? (advance ? researchPresentation(advance).icon : null)}
       <button
         class="decision-option"
@@ -181,6 +184,11 @@
       >
         {#if option.terrain}<TerrainIcon terrain={option.terrain} />{:else if Icon}<Icon size={19} />{/if}
         <DecisionOptionContent option={presented} id={`${panelId}-option-${i}`} />
+        {#if foodRecipient}
+          <span class="recipient-food" aria-label="Food">
+            {foodRecipient.resources?.food ?? 0}/{foodRecipient.resource_limit?.food ?? 0}<Wheat size={15} />
+          </span>
+        {/if}
         <span class="decision-selection" aria-hidden="true"
           >{#if selected.includes(i)}<Check size={13} />{/if}</span
         >
@@ -476,4 +484,13 @@
   .decision-card-group { grid-column: 1 / -1; margin: 1rem 0 .25rem; font-size: .95rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
   .decision-card-group:first-child { margin-top: 0; }
   .decision-card-group small { font-weight: normal; color: var(--muted); }
+
+  .recipient-food {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
 </style>
