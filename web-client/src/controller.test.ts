@@ -2715,3 +2715,33 @@ test('Collect preselects all tiles only when their count equals capacity', async
     assert.equal(app.session().selection.length, city.capacity - 1, 'manual deselection remains available');
   } finally { app.close(); }
 });
+
+test('Rituals happiness lets the player choose repeated resources or a mixed payment', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const game = JSON.parse(fixture('advances/increase_happiness_voting'));
+    game.players[0].advances.push('Myths', 'Rituals');
+    game.players[0].resources = { food: 7, wood: 7, ore: 7, ideas: 7, gold: 7, mood_tokens: 7 };
+    const raw = JSON.stringify(game);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    c.openCities('C2', 'happiness');
+    c.setHappinessCity('C2', 2);
+    const base = happinessPreview(app.session(), (input) => c.query(input), undefined, undefined, undefined, true);
+    const total = Object.values(base.payment).reduce((sum, n) => sum + (n ?? 0), 0);
+    assert(total > 1);
+    assert(base.field?.resources.includes('food'));
+    for (const payment of [{ food: total }, { food: total - 1, ore: 1 }]) {
+      const quote = happinessPreview(app.session(), (input) => c.query(input), undefined, undefined, payment);
+      assert(quote.action, JSON.stringify(quote));
+      assert.deepEqual(quote.payment, payment);
+      const after = JSON.parse(engine.tryMove(raw, JSON.stringify(quote.action), 0));
+      assert.equal(after.players[0].resources.food, 7 - payment.food);
+      assert.equal(after.players[0].resources.ore, 7 - (payment.ore ?? 0));
+    }
+    const invalid = happinessPreview(app.session(), (input) => c.query(input), undefined, undefined, { food: 1 });
+    assert.equal(invalid.action, null, 'underpayment cannot be submitted');
+  } finally {
+    app.close();
+  }
+});

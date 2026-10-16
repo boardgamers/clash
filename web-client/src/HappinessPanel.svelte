@@ -3,6 +3,8 @@
   import { Smile, Meh, ArrowRight, Check, Zap, X } from 'lucide-svelte';
   import type { Controller } from './controller';
   import { happinessPreview, happinessTargets } from './happiness';
+  import PaymentPicker from './PaymentPicker.svelte';
+  import { resourceNames, type Pile } from './types';
   import ResourceAmount from './ResourceAmount.svelte';
   import CityFacts from './CityFacts.svelte';
   import ContextualCards from './ContextualCards.svelte';
@@ -21,7 +23,15 @@
   const targets = $derived(
     focused ? happinessTargets($session, (input) => controller.query(input), focused.position) : [],
   );
-  const preview = $derived(happinessPreview($session, (input) => controller.query(input)));
+  const basePreview = $derived(happinessPreview($session, (input) => controller.query(input), undefined, undefined, undefined, true));
+  const selectionKey = $derived(JSON.stringify([steps, $session.happinessLawgiver, variant, $session.game?.players.find((p) => p.id === $session.seat)?.resources]));
+  let chosen = $state<{ key: string; payment: Pile } | null>(null);
+  const payment = $derived(chosen?.key === selectionKey ? chosen.payment : basePreview.payment);
+  const preview = $derived(chosen?.key === selectionKey
+    ? happinessPreview($session, (input) => controller.query(input), steps, $session.happinessLawgiver, payment)
+    : basePreview);
+  const field = $derived(basePreview.field);
+  function choosePayment(payment: Pile) { chosen = { key: selectionKey, payment }; }
   const cityName = (position: string) =>
     cities.find((c) => c.position === position)?.capital
       ? 'Capital'
@@ -126,10 +136,29 @@
   {#if !cities.some((city) => city.mood !== 'Happy')}<p class="movement-hint">
       All your cities are already happy.
     </p>{/if}
+  {#if selected.length && field && field.resources.length > 1}
+    {#if field.choices}
+      <PaymentPicker options={field.choices.map((payment) => ({ payment }))} value={payment}
+        onChange={choosePayment} pending={!!$session.playback || $session.pending} />
+    {:else}
+      <div class="payment-amounts">
+        {#each field.resources as resource}
+          {@const available = $session.game?.players.find((p) => p.id === $session.seat)?.resources?.[resource] ?? 0}
+          <label><span>{resourceNames[resource]}</span>
+            <select aria-label={resourceNames[resource]} value={payment[resource] ?? 0}
+              disabled={!!$session.playback || $session.pending}
+              onchange={(event) => choosePayment({ ...payment, [resource]: Number(event.currentTarget.value) })}>
+              {#each Array.from({ length: available + 1 }, (_, n) => n) as n}<option value={n}>{n}</option>{/each}
+            </select>
+          </label>
+        {/each}
+      </div>
+    {/if}
+  {/if}
   {#if preview.reason}<p class="inline-error">{preview.reason}</p>{/if}
   <footer class="happiness-map-footer">
     <span class="happiness-total" aria-label="Total happiness cost">
-      {#if selected.length}<ResourceAmount pile={preview.payment} />{/if}
+      {#if selected.length}<ResourceAmount pile={payment} />{/if}
       <span title={variant?.free ? 'Free action' : 'Costs 1 action'}
         ><Zap size={13} />{variant?.free ? 0 : 1}</span
       >

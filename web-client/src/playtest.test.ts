@@ -197,6 +197,7 @@ test('Voting shows city costs separately and charges its fee once across the sel
   assert.ok(request([[pos, 1]]).action);
   assert.ok(request(both, regular.value).action);
   assert.deepEqual(request(both), {
+    field: null,
     payment: { mood_tokens: 5 },
     action: null,
     reason: 'Not enough resources',

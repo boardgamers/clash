@@ -155,7 +155,19 @@ pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Valu
         &kind,
         &origin,
     )?;
-    let affordable = cost.cost.first_valid_payment(&p.resources);
+    let field = input["includePayments"].as_bool().unwrap_or(false).then(|| {
+        super::decisions::resource_field(
+            &cost.cost, "Payment", false, &p.resources, false, &p.resources,
+        )
+    });
+    let affordable = if input["payment"].is_null() {
+        cost.cost.first_valid_payment(&p.resources)
+    } else {
+        let selected = serde_json::from_value(input["payment"].clone())
+            .map_err(|e| e.to_string())?;
+        (p.resources.has_at_least(&selected) && cost.cost.is_valid_payment(&selected))
+            .then_some(selected)
+    };
     let payment = affordable
         .clone()
         .unwrap_or_else(|| cost.cost.default_payment());
@@ -166,6 +178,7 @@ pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Valu
     });
     Ok(json!({
         "payment":payment,
+        "field":field,
         "reason":action.is_none().then_some("Not enough resources"),
         "action":action
     }))

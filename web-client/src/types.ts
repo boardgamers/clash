@@ -651,6 +651,7 @@ export interface ActionVariant {
   surcharge?: Pile;
 }
 export interface HappinessPreview {
+  field?: Decision['fields'][number] | null;
   action: Move | null;
   payment: Pile;
   reason: string | null;

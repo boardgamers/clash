@@ -1,4 +1,4 @@
-import type { HappinessPreview, Session } from './types';
+import type { HappinessPreview, Session, Pile } from './types';
 
 type Query = <T>(input: unknown) => T;
 
@@ -7,6 +7,8 @@ export function happinessPreview(
   query: Query,
   steps = session.happinessSteps ?? {},
   lawgiverCity = session.happinessLawgiver ?? null,
+  payment?: Pile,
+  includePayments = false,
 ): HappinessPreview {
   const cities = Object.entries(steps).filter(([, n]) => n > 0);
   const variant = session.view?.happinessActions?.[session.happinessVariant ?? 0];
@@ -14,6 +16,8 @@ export function happinessPreview(
   try {
     return query<HappinessPreview>({
       kind: 'happiness',
+      payment,
+      includePayments,
       cities,
       variant: variant.value,
       lawgiver: cities.some(([position]) => position === lawgiverCity),

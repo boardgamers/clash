@@ -164,7 +164,7 @@ fn great_seer_choice_description(game: &Game, handler: &PersistentEventHandler) 
     Some(format!("Choose {recipient}.{remaining}"))
 }
 
-fn resource_field(
+pub(super) fn resource_field(
     cost: &PaymentOptions,
     name: &str,
     optional: bool,

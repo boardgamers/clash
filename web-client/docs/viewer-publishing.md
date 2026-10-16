@@ -385,3 +385,5 @@ Viewer 0.1.132 / engine 0.4.95 treats undefended city captures as battles for Ca
 Viewer 0.1.133 shortens the Barbarian map guide and removes its two trailing caveats to leave more map visible on mobile.
 
 Viewer 0.1.134 lets the Barbarian, Pirate, Trade Routes and Regions guides collapse to a title bar while keeping their map overlays visible.
+
+Viewer 0.1.135 / engine 0.4.96 exposes Rituals happiness payment allocation and allows food-distribution events to target other players at their storage limit; excess food is wasted normally.
