@@ -485,12 +485,14 @@
   .decision-card-group:first-child { margin-top: 0; }
   .decision-card-group small { font-weight: normal; color: var(--muted); }
 
-  .recipient-food {
+  .decision-options .decision-option > .recipient-food {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    margin-left: auto;
+    margin-right: 0.5rem;
   }
 </style>

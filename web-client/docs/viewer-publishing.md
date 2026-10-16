@@ -389,3 +389,5 @@ Viewer 0.1.134 lets the Barbarian, Pirate, Trade Routes and Regions guides colla
 Viewer 0.1.135 / engine 0.4.96 exposes Rituals happiness payment allocation and allows food-distribution events to target other players at their storage limit; excess food is wasted normally.
 
 Viewer 0.1.136 shows current food / storage limit with the food icon beside each food-distribution recipient, without warning text or disabling full recipients.
+
+Viewer 0.1.137 aligns recipient food counts beside the selection checkbox rather than stretching the count across half the row.
