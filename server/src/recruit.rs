@@ -218,6 +218,8 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
                     set_unit_position(player_index, ship, city_position, game);
                 }
             }
+            // Recruitment bypasses the movement path, but the fleet still fought.
+            combat::apply_battle_movement_restriction(game, player_index, &ships);
             combat::initiate_combat(game, defender, port_position, player_index, ships, false);
         }
     }

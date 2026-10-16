@@ -531,7 +531,11 @@ fn move_to_enemy_player_tile(
     MoveResult::Move
 }
 
-fn apply_battle_movement_restriction(game: &mut Game, player_index: usize, unit_ids: &Vec<u32>) {
+pub(crate) fn apply_battle_movement_restriction(
+    game: &mut Game,
+    player_index: usize,
+    unit_ids: &Vec<u32>,
+) {
     let mut military = false;
     let can_ignore_battle_movement_restrictions_for_ships = game
         .player(player_index)

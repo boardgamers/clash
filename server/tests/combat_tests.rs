@@ -361,21 +361,8 @@ fn test_recruit_combat() {
                 ))),
             )
             .skip_json(),
-            TestAction::not_undoable(0, move_action(vec![12, 13], Position::from_offset("C4")))
+            TestAction::illegal(0, move_action(vec![12, 13], Position::from_offset("C4")))
                 .skip_json(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
-                    1,
-                ))),
-            )
-            .skip_json(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(38),
-                ])),
-            ),
         ],
     );
 }
