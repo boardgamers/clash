@@ -784,6 +784,81 @@ fn test_husbandry() {
     );
 }
 
+#[test]
+fn husbandry_requires_a_revealed_land_route() {
+    use server::cache::Cache;
+    use server::game::GameContext;
+    use server::game_data::GameData;
+    use server::map::Terrain;
+
+    for roads in [false, true] {
+        for intermediate in [
+            None,
+            Some(Terrain::Water),
+            Some(Terrain::Unexplored),
+            Some(Terrain::Barren),
+            Some(Terrain::Mountain),
+            Some(Terrain::Exhausted(Box::new(Terrain::Fertile))),
+        ] {
+            let mut data: serde_json::Value =
+                serde_json::from_str(include_str!("test_games/advances/husbandry.json")).unwrap();
+            if roads {
+                data["players"][0]["advances"]
+                    .as_array_mut()
+                    .unwrap()
+                    .push(serde_json::json!("Roads"));
+            }
+            let data: GameData = serde_json::from_value(data).unwrap();
+            let cache = Cache::new(&data.options);
+            let mut game = Game::from_data(data, cache, GameContext::Play);
+            let city = Position::from_offset("C2");
+            // This diagonal target has two possible intermediate hexes.
+            let target = Position::new(city.q + 1, city.r + 1);
+            let via: Vec<_> = city
+                .neighbors()
+                .into_iter()
+                .filter(|pos| pos.is_neighbor(target))
+                .collect();
+            assert_eq!(via.len(), 2);
+            game.map.tiles.insert(target, Terrain::Fertile);
+            for pos in &via {
+                game.map.tiles.insert(*pos, Terrain::Water);
+            }
+            if let Some(terrain) = &intermediate {
+                game.map.tiles.insert(via[1], terrain.clone());
+            } else {
+                game.map.tiles.remove(&via[1]);
+            }
+            let allowed = intermediate.as_ref().is_some_and(Terrain::is_land);
+            let options = possible_resource_collections(
+                &game,
+                city,
+                0,
+                &check_event_origin(),
+                CostTrigger::NoModifiers,
+            );
+            assert_eq!(
+                options.choices.contains_key(&target),
+                allowed,
+                "Roads={roads}, intermediate={intermediate:?}"
+            );
+            let collection = collect::get_total_collection(
+                &game,
+                0,
+                &check_event_origin(),
+                city,
+                &[PositionCollection::new(target, ResourcePile::food(1))],
+                CostTrigger::NoModifiers,
+            );
+            assert_eq!(
+                collection.is_ok(),
+                allowed,
+                "Server validation: Roads={roads}, intermediate={intermediate:?}"
+            );
+        }
+    }
+}
+
 fn has_husbandry_field(game: &Game) -> bool {
     let info = possible_resource_collections(
         game,

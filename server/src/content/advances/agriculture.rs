@@ -90,7 +90,14 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game, p: &E
     game.map
         .tiles
         .iter()
-        .filter(|(pos, t)| pos.distance(c.city_position) == 2 && t.is_land())
+        .filter(|(pos, t)| {
+            pos.distance(c.city_position) == 2
+                && t.is_land()
+                && c.city_position
+                    .neighbors()
+                    .iter()
+                    .any(|via| game.map.is_land(*via) && via.is_neighbor(**pos))
+        })
         .for_each(|(pos, t)| {
             let option = c.terrain_options.get(t);
             if option.is_none() {
