@@ -2281,7 +2281,7 @@
   "Recruit a leader": "招募領袖",
   "Recruit a leader and distinguish payments from action costs.": "招募領袖，分辨付款與行動費用。",
   "Recruit a leader for 1 mood token and 1 culture token. Recruitment costs 1 action and activates the city. You may have one leader in play. Each has two abilities and counts as an army unit, requiring Tactics to move. See all leaders in civilization details.": "用 1 心情及 1 文化標記招募領袖。招募花費一次行動並啟動城市。你可有一名領袖在場。每人有兩項能力，視為軍隊單位，移動需戰術。在文明詳情查看所有領袖。",
-  "Recruit cavalry and elephants here.": "在此招募騎兵與象。",
+  "Recruit cavalry and elephants. +1 gold when an opponent trades with your Markets (once per opponent’s turn).": "可招募騎兵和戰象。對手與你的市場貿易時獲得1金幣（每位對手每回合一次）。",
   "Recruit one infantry with Draft": "使用徵兵招募一個步兵",
   "Recruit ships at a Port for 2 wood each; they start on its sea tile. A fleet can cross connected sea tiles as one group. Exploration ends its move on a connected sea tile in the new region. Navigation allows travel around the map edge.": "在港口以每艘 2 木材招募船隻，從港口海洋地塊出發。艦隊可作為一組通過相連海洋地塊。探索於新區域內相連海洋地塊結束移動。航海允許沿地圖邊緣航行。",
   "Recruit units": "招募單位",

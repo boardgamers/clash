@@ -2281,7 +2281,7 @@
   "Recruit a leader": "지도자 모집",
   "Recruit a leader and distinguish payments from action costs.": "지도자를 모집하고 지불과 행동 비용을 구분하세요.",
   "Recruit a leader for 1 mood token and 1 culture token. Recruitment costs 1 action and activates the city. You may have one leader in play. Each has two abilities and counts as an army unit, requiring Tactics to move. See all leaders in civilization details.": "기분 토큰 1개와 문화 토큰 1개로 지도자를 모집합니다. 행동 1회가 들고 도시를 활성화합니다. 지도자는 하나만 둘 수 있습니다. 각각 능력 두 개가 있고 군대 유닛으로 이동에 전술이 필요합니다. 문명 상세 정보에서 모든 지도자를 보세요.",
-  "Recruit cavalry and elephants here.": "여기에서 기병과 코끼리를 모집하세요.",
+  "Recruit cavalry and elephants. +1 gold when an opponent trades with your Markets (once per opponent’s turn).": "기병과 코끼리를 모집합니다. 상대가 내 시장과 교역하면 금 +1 (상대 턴당 한 번).",
   "Recruit one infantry with Draft": "징병으로 보병 하나 모집",
   "Recruit ships at a Port for 2 wood each; they start on its sea tile. A fleet can cross connected sea tiles as one group. Exploration ends its move on a connected sea tile in the new region. Navigation allows travel around the map edge.": "항구에서 배마다 나무 2로 모집하며 그 바다 타일에 놓습니다. 함대는 연결된 바다 타일을 한 그룹으로 이동합니다. 탐험은 새 지역의 연결된 바다 타일에서 이동을 끝냅니다. 항해는 지도 가장자리 이동을 허용합니다.",
   "Recruit units": "유닛 모집",

@@ -16,7 +16,7 @@ import { resourceNames, type Pile, type RecruitSelection, type Resource, type Un
 import { actionReason } from './model';
 export const buildingInfo: Record<string, { icon: typeof Landmark; effect: string }> = {
   Academy: { icon: BookOpen, effect: 'Gain 2 ideas when built.' },
-  Market: { icon: Store, effect: 'Recruit cavalry and elephants here.' },
+  Market: { icon: Store, effect: 'Recruit cavalry and elephants. +1 gold when an opponent trades with your Markets (once per opponent’s turn).' },
   Obelisk: { icon: Landmark, effect: 'This building cannot be culturally influenced.' },
   Observatory: { icon: Telescope, effect: 'Draw an action card when built.' },
   Fortress: { icon: Castle, effect: 'Defending: +1 die and cancel 1 hit in round 1.' },

@@ -391,3 +391,5 @@ Viewer 0.1.135 / engine 0.4.96 exposes Rituals happiness payment allocation and 
 Viewer 0.1.136 shows current food / storage limit with the food icon beside each food-distribution recipient, without warning text or disabling full recipients.
 
 Viewer 0.1.137 aligns recipient food counts beside the selection checkbox rather than stretching the count across half the row.
+
+Viewer 0.1.140 adds the Market trade-income bonus and its per-opponent-turn limit to the compact building description in every supported language.

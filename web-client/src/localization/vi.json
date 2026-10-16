@@ -2281,7 +2281,7 @@
   "Recruit a leader": "Tuyển lãnh tụ",
   "Recruit a leader and distinguish payments from action costs.": "Tuyển lãnh tụ và phân biệt thanh toán với chi phí hành động.",
   "Recruit a leader for 1 mood token and 1 culture token. Recruitment costs 1 action and activates the city. You may have one leader in play. Each has two abilities and counts as an army unit, requiring Tactics to move. See all leaders in civilization details.": "Tuyển lãnh tụ bằng 1 token tâm trạng và 1 văn hóa. Tốn 1 hành động và kích hoạt thành phố. Chỉ có một lãnh tụ trong chơi. Mỗi người hai khả năng, tính là quân đội và cần Chiến thuật để đi. Xem mọi lãnh tụ ở chi tiết nền văn minh.",
-  "Recruit cavalry and elephants here.": "Tuyển kỵ binh và voi tại đây.",
+  "Recruit cavalry and elephants. +1 gold when an opponent trades with your Markets (once per opponent’s turn).": "Tuyển kỵ binh và voi. +1 vàng khi đối thủ giao thương với các Chợ của bạn (một lần mỗi lượt của đối thủ đó).",
   "Recruit one infantry with Draft": "Tuyển một bộ binh bằng Trưng binh",
   "Recruit ships at a Port for 2 wood each; they start on its sea tile. A fleet can cross connected sea tiles as one group. Exploration ends its move on a connected sea tile in the new region. Navigation allows travel around the map edge.": "Tuyển tàu ở Cảng với 2 gỗ mỗi tàu, bắt đầu tại ô biển cảng. Hạm đội qua ô biển nối liền thành một nhóm. Khám phá kết thúc di chuyển ở ô biển nối liền trong vùng mới. Hàng hải cho đi quanh rìa bản đồ.",
   "Recruit units": "Tuyển mộ đơn vị",
