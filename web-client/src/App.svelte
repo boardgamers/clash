@@ -6,6 +6,7 @@
   import UndoControl from './UndoControl.svelte';
   import CollectionBonusHints from './CollectionBonusHints.svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
+  import MapGuide from './MapGuide.svelte';
   import CitySiteIcon from './CitySiteIcon.svelte';
   import PlaybackPanel from './PlaybackPanel.svelte';
   import CardReferenceDialog from './CardReferenceDialog.svelte';
@@ -78,7 +79,7 @@
   import { chatPlayerColor, chatPlayerIndex } from './chat-presentation';
   import { World } from './board';
   import { militarySummary } from './strategy';
-  import { positionStrategyKey, positionMapGuide } from './strategy-key';
+  import { positionStrategyKey } from './strategy-key';
   import ResearchTree from './ResearchTree.svelte';
   import { researchDecision, mapDecisionOptions } from './decision-controls';
   import CityPanel from './CityPanel.svelte';
@@ -989,8 +990,7 @@
             {@const regionCivilization = $session.view?.players.find(player => player.index === regionPlayer)?.civilization}
             {@const allOccupied = ($session.view?.regions ?? []).filter(r=>cities.some(c=>r.tiles.includes(c.position)))}
             {@const occupied = ($session.view?.regions ?? []).filter(r=>r.homePlayer !== regionPlayer && cities.some(c=>r.tiles.includes(c.position)))}
-            <div class="map-tooltip pirate-spawn-key" role="status" use:positionMapGuide>
-              <strong>Regions</strong>
+            <MapGuide title="Regions">
               <label>Civilization<select aria-label="Region player" value={regionPlayer} onchange={event=>controller.patch({regionPlayer:Number(event.currentTarget.value)})}>
                 {#each $session.view?.players ?? [] as player}<option value={player.index}>{player.civilization}</option>{/each}
               </select></label>
@@ -1002,7 +1002,7 @@
                 <p class="region-city-count">Regions containing cities: <strong>{allOccupied.length}</strong></p>
                 <p>King of Persia: As an action, activate Cyrus’ city. Gain 1 mood or culture token per region containing your cities, up to the size of Cyrus’ city. Includes the starting region.</p>
               {/if}
-            </div>
+            </MapGuide>
           {/if}
         </div>
         <div class="sr-only" id="sea-route-help" aria-live="polite">
@@ -1049,8 +1049,7 @@
           ><Route size={18} /></button>
           {#if $session.tradeRoutes && $session.mode === 'overview' && !$session.playback && !$session.view?.decision && !choiceDecision && !objectiveDecision && !$session.view?.explorationDecision}
             {@const guide = $session.view?.tradeRoutes?.find(p => p.player === ($session.tradeRoutePlayer ?? $session.seat ?? $session.view?.activePlayer))}
-            <div class="map-tooltip pirate-spawn-key" role="status" use:positionMapGuide>
-              <strong>Trade Routes</strong>
+            <MapGuide title="Trade Routes">
               <label>Civilization
                 <select aria-label="Trade route player" value={$session.tradeRoutePlayer ?? $session.seat ?? $session.view?.activePlayer}
                   onchange={(event) => controller.patch({ tradeRoutePlayer: Number(event.currentTarget.value) })}>
@@ -1067,7 +1066,7 @@
                 {/each}
                 <p>Routes are recalculated at the start of your turn.</p>
               {/if}
-            </div>
+            </MapGuide>
           {/if}
         </div>
         <div class="map-control-help">
@@ -1110,12 +1109,7 @@
               )}><BarbarianIcon /></button
           >
           {#if $session.pirateSpawns && $session.mode === 'overview' && !$session.view?.decision && !$session.view?.choiceDecision && !$session.view?.objectiveDecision && !$session.view?.explorationDecision && !$session.abilitiesOpen && !$session.playback}
-            <div class="map-tooltip pirate-spawn-key" role="status" use:positionMapGuide>
-              <strong
-                >{$session.threatGuide === 'barbarians'
-                  ? 'Barbarians'
-                  : 'Pirate spawn positions'}</strong
-              >
+            <MapGuide title={$session.threatGuide === 'barbarians' ? 'Barbarians' : 'Pirate spawn positions'}>
               <label
                 >Incident player
                 <select
@@ -1150,7 +1144,7 @@
                   </p>{/if}
               {/if}
               {#if $session.threatGuide !== 'barbarians'}<small>Shows current positions. They may change before the event.</small>{/if}
-            </div>
+            </MapGuide>
           {/if}
         </div>
         <span></span>

@@ -383,3 +383,5 @@ Viewer 0.1.131 / engine 0.4.94 allows New Colonies to disembark into adjacent un
 Viewer 0.1.132 / engine 0.4.95 treats undefended city captures as battles for Captivi, Embalming, Heroic General and battle objectives. Fast War separately requires opposing Army units; defended-city and casualty objective requirements remain intact.
 
 Viewer 0.1.133 shortens the Barbarian map guide and removes its two trailing caveats to leave more map visible on mobile.
+
+Viewer 0.1.134 lets the Barbarian, Pirate, Trade Routes and Regions guides collapse to a title bar while keeping their map overlays visible.

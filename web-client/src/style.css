@@ -6262,3 +6262,20 @@ small {
   color: var(--ink);
   border-color: var(--line);
 }
+
+/* Collapse only the legend; its map overlay remains enabled. */
+.collapsible-map-guide > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  cursor: pointer;
+  list-style: none;
+}
+.collapsible-map-guide > summary::-webkit-details-marker { display: none; }
+.collapsible-map-guide > summary strong { margin: 0; }
+.collapsible-map-guide > summary svg { flex-shrink: 0; }
+.collapsible-map-guide:not([open]) > summary svg { transform: rotate(180deg); }
+.collapsible-map-guide[open] > summary { margin-bottom: 8px; }
+.collapsible-map-guide > summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
