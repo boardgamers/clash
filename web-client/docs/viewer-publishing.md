@@ -393,3 +393,5 @@ Viewer 0.1.136 shows current food / storage limit with the food icon beside each
 Viewer 0.1.137 aligns recipient food counts beside the selection checkbox rather than stretching the count across half the row.
 
 Viewer 0.1.140 adds the Market trade-income bonus and its per-opponent-turn limit to the compact building description in every supported language.
+
+Viewer 0.1.141 adds arrows from sea spaces to every adjacent unexplored hex in the sea-route guide, alongside existing Navigation perimeter routes.

@@ -46,3 +46,15 @@ export function seaEdgePoint(position: string, tiles: [string, Terrain][]): [num
   const length = Math.hypot(dx, dz) || 1;
   return [x + (dx / length) * 1.35, z + (dz / length) * 1.35];
 }
+
+
+// Adjacent exploration uses only visible terrain; never inspect a hidden region.
+export function seaExplorationConnections(tiles: [string, Terrain][]): [string, string][] {
+  const hidden = tiles.filter(([, terrain]) => terrain === 'Unexplored').map(([p]) => p);
+  return tiles.filter(([, terrain]) => terrain === 'Water').flatMap(([from]) =>
+    hidden.filter((to) => {
+      const a = positionXY(from), b = positionXY(to);
+      return Math.abs((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 - 3) < 0.001;
+    }).map((to): [string, string] => [from, to]),
+  );
+}

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { seaArea, seaConnections } from './sea-routes.ts';
+import { seaArea, seaConnections, seaExplorationConnections } from './sea-routes.ts';
 import { SeaOverlay } from './sea-overlay.ts';
 import * as THREE from 'three';
 
@@ -52,4 +52,23 @@ test('sea previews work before enabling the guide, hide unrelated routes and cle
   } finally {
     overlay.dispose();
   }
+});
+
+
+test('sea exploration includes every adjacent hidden hex without crossing hidden land', () => {
+  const tiles: [string, import('./types').Terrain][] = [
+    ['D2', 'Water'], ['C2', 'Unexplored'], ['D3', 'Unexplored'],
+    ['E2', 'Unexplored'], ['F2', 'Unexplored'], ['C1', 'Mountain'],
+  ];
+  assert.deepEqual(seaExplorationConnections(tiles).map(([, to]) => to).sort(), ['C2', 'D3', 'E2']);
+  const overlay = new SeaOverlay();
+  try {
+    overlay.update(tiles, []);
+    overlay.setFocus('D2');
+    assert.equal(overlay.group.children.filter((o) => o instanceof THREE.Mesh &&
+      o.geometry instanceof THREE.TubeGeometry &&
+      (o.material as THREE.MeshBasicMaterial).opacity > 0).length, 9);
+    overlay.setFocus('G8');
+    assert.equal(overlay.group.visible, false);
+  } finally { overlay.dispose(); }
 });

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { positionXY } from './model.ts';
-import { seaArea, seaConnections, seaEdgePoint } from './sea-routes.ts';
+import { seaArea, seaConnections, seaEdgePoint, seaExplorationConnections } from './sea-routes.ts';
 import type { Terrain } from './types';
 
 /** Read-only geography overlay. It never creates or submits game actions. */
@@ -44,6 +44,24 @@ export class SeaOverlay {
       const curve = new THREE.LineCurve3(point(from), point(to));
       const material = this.material([from, to], '#e5faf2', 0.8);
       this.group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 1, 0.032, 5, false), material));
+    }
+
+    for (const [from, to] of seaExplorationConnections(tiles)) {
+      const start = point(from), end = point(to);
+      const direction = end.clone().sub(start).normalize();
+      const material = this.material([from], '#725226', 0.9);
+      const tip = end.clone().addScaledVector(direction, -0.3);
+      const base = tip.clone().addScaledVector(direction, -0.32);
+      const side = new THREE.Vector3(-direction.z, 0, direction.x).multiplyScalar(0.18);
+      for (const [a, b] of [
+        [start.clone().addScaledVector(direction, 0.65), tip],
+        [base.clone().add(side), tip],
+        [base.clone().sub(side), tip],
+      ]) {
+        this.group.add(new THREE.Mesh(
+          new THREE.TubeGeometry(new THREE.LineCurve3(a, b), 1, 0.033, 5, false), material,
+        ));
+      }
     }
     const seen = new Set<string>();
     for (const path of paths) {
