@@ -4753,5 +4753,6 @@
   "No active effects.": "Δεν υπάρχουν ενεργά αποτελέσματα.",
   "action cards": "κάρτες ενέργειας",
   "Click the destination again to explore the highlighted region.": "Κάντε ξανά κλικ στον προορισμό για να εξερευνήσετε την επισημασμένη περιοχή.",
-  "No collection or Trade Routes on this sea tile.": "Δεν επιτρέπεται η συλλογή πόρων ή η χρήση Εμπορικών Οδών σε αυτή τη θαλάσσια θέση."
+  "No collection or Trade Routes on this sea tile.": "Δεν επιτρέπεται η συλλογή πόρων ή η χρήση Εμπορικών Οδών σε αυτή τη θαλάσσια θέση.",
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Κινούνται προς τις πόλεις του επιλεγμένου παίκτη. Αν κανένας στρατός δεν μπορεί να κινηθεί, μπορεί να εμφανιστεί μια πόλη."
 }

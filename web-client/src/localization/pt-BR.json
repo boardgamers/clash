@@ -4753,5 +4753,6 @@
   "No active effects.": "Nenhum efeito ativo.",
   "action cards": "cartas de ação",
   "Click the destination again to explore the highlighted region.": "Clique novamente no destino para explorar a região destacada.",
-  "No collection or Trade Routes on this sea tile.": "Não é possível coletar recursos nem usar Rotas Comerciais neste espaço de mar."
+  "No collection or Trade Routes on this sea tile.": "Não é possível coletar recursos nem usar Rotas Comerciais neste espaço de mar.",
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Move em direção às cidades do jogador selecionado. Se nenhum exército puder mover, uma cidade poderá surgir."
 }

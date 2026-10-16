@@ -4753,5 +4753,6 @@
   "No active effects.": "目前沒有生效中的效果。",
   "action cards": "行動牌",
   "Click the destination again to explore the highlighted region.": "再次點擊目的地以探索標示的區域。",
-  "No collection or Trade Routes on this sea tile.": "此海洋格無法採集資源或使用貿易路線。"
+  "No collection or Trade Routes on this sea tile.": "此海洋格無法採集資源或使用貿易路線。",
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "朝所選玩家的城市移動。若沒有軍隊可以移動，則可能改為生成一座城市。"
 }

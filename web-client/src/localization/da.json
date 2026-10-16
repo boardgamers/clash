@@ -4753,5 +4753,6 @@
   "No active effects.": "Ingen aktive effekter.",
   "action cards": "handlingskort",
   "Click the destination again to explore the highlighted region.": "Klik på destinationen igen for at udforske det fremhævede område.",
-  "No collection or Trade Routes on this sea tile.": "Ingen indsamling eller handelsruter på dette havfelt."
+  "No collection or Trade Routes on this sea tile.": "Ingen indsamling eller handelsruter på dette havfelt.",
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Bevæger sig mod den valgte spillers byer. Kan ingen hær flytte, kan en by opstå i stedet."
 }

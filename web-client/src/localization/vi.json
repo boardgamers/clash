@@ -4753,5 +4753,6 @@
   "No active effects.": "Không có hiệu ứng đang hoạt động.",
   "action cards": "thẻ hành động",
   "Click the destination again to explore the highlighted region.": "Nhấp lại vào điểm đến để khám phá vùng được tô sáng.",
-  "No collection or Trade Routes on this sea tile.": "Không thể thu thập tài nguyên hoặc sử dụng Tuyến Thương Mại trên ô biển này."
+  "No collection or Trade Routes on this sea tile.": "Không thể thu thập tài nguyên hoặc sử dụng Tuyến Thương Mại trên ô biển này.",
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Di chuyển về các thành phố của người chơi đã chọn. Nếu không đội quân nào có thể di chuyển, một thành phố có thể xuất hiện thay thế."
 }

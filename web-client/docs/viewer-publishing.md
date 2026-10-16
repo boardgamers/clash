@@ -381,3 +381,5 @@ Viewer 0.1.130 / engine 0.4.93 preserves mixed mood/culture allocations for vari
 Viewer 0.1.131 / engine 0.4.94 allows New Colonies to disembark into adjacent unexplored regions using land exploration, including orientation choices, terrain effects and the reveal undo boundary.
 
 Viewer 0.1.132 / engine 0.4.95 treats undefended city captures as battles for Captivi, Embalming, Heroic General and battle objectives. Fast War separately requires opposing Army units; defended-city and casualty objective requirements remain intact.
+
+Viewer 0.1.133 shortens the Barbarian map guide and removes its two trailing caveats to leave more map visible on mobile.

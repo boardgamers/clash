@@ -1113,7 +1113,7 @@
             <div class="map-tooltip pirate-spawn-key" role="status" use:positionMapGuide>
               <strong
                 >{$session.threatGuide === 'barbarians'
-                  ? 'Barbarian spawn and movement'
+                  ? 'Barbarians'
                   : 'Pirate spawn positions'}</strong
               >
               <label
@@ -1134,11 +1134,7 @@
                 <div><span class="barbarian-site-key"><CitySiteIcon /></span>New barbarian city</div>
                 <div><i class="barbarian-move" aria-hidden="true"></i>Army movement →</div>
                 <div><i class="barbarian-reinforce" aria-hidden="true"></i>Reinforcement city</div>
-                <p>
-                  Barbarians only move toward the cities of the player who triggered the event. If no army can
-                  move, a movement event tries to spawn a city instead.
-                </p>
-                <small>Current legal choices; earlier moves can change later ones.</small>
+                <p>Moves toward the selected player's cities. If no army can move, a city may spawn instead.</p>
               {:else}
                 <div><i class="pirate-first" aria-hidden="true"></i>First ship</div>
                 <div>
@@ -1153,7 +1149,7 @@
                     No eligible sea tiles right now.
                   </p>{/if}
               {/if}
-              <small>Shows current positions. They may change before the event.</small>
+              {#if $session.threatGuide !== 'barbarians'}<small>Shows current positions. They may change before the event.</small>{/if}
             </div>
           {/if}
         </div>

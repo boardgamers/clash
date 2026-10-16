@@ -4753,5 +4753,6 @@
   "No active effects.": "활성 효과가 없습니다.",
   "action cards": "행동 카드",
   "Click the destination again to explore the highlighted region.": "강조된 지역을 탐험하려면 목적지를 다시 클릭하세요.",
-  "No collection or Trade Routes on this sea tile.": "이 바다 칸에서는 자원을 수집하거나 교역로를 이용할 수 없습니다."
+  "No collection or Trade Routes on this sea tile.": "이 바다 칸에서는 자원을 수집하거나 교역로를 이용할 수 없습니다.",
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "선택한 플레이어의 도시를 향해 이동합니다. 이동할 수 있는 군대가 없으면 대신 도시가 생길 수 있습니다."
 }
