@@ -117,3 +117,35 @@ test('Great Engineer explains the cost of constructing and the consequence of sk
   const accepted = move(game, decision.choices[0].action);
   assert.ok(accepted.permanent_effects.some((e: any) => e.Construct === 'GreatEngineer'));
 });
+
+
+test('claiming and playing a Great Person moves one card between zones', () => {
+  let game = fixture('incidents/great_persons/great_engineer');
+  game = move(game, { Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } } });
+  assert((game.incidents_discarded ?? []).includes(26));
+  game = move(game, { Response: { Payment: [{ culture_tokens: 1 }] } });
+  assert(!(game.incidents_discarded ?? []).includes(26), 'claimed event leaves the event discard');
+  assert((game.players[0].action_cards ?? []).includes(126));
+  game = move(game, { Playing: { ActionCard: 126 } });
+  game = move(game, { Response: { SelectAdvance: 'Engineering' } });
+  game = move(game, view(game).choiceDecision.choices[1].action);
+  assert(!(game.players[0].action_cards ?? []).includes(126));
+  assert(!(game.incidents_discarded ?? []).includes(26));
+  assert.equal(game.action_cards_discarded.filter((id: number) => id === 126).length, 1);
+  const reshuffle = structuredClone(game);
+  reshuffle.players[0].incident_tokens = 1;
+  reshuffle.incidents_left = [];
+  const afterReshuffle = move(reshuffle, view(reshuffle).advances.find((a: any) => a.id === 'Math').action);
+  assert(!afterReshuffle.incidents_left.includes(26), 'event reshuffle cannot duplicate the discarded action card');
+  assert(!afterReshuffle.events.some((e: any) => e.event_type.Incident?.incident_id === 26));
+
+  game.players[0].cities[0].city_pieces ??= {};
+  game.players[0].cities[0].city_pieces.wonders = ['GreatMausoleum'];
+  game.players[0].incident_tokens = 3;
+  game = move(game, view(game).advances.find((a: any) => a.id === 'Writing').action);
+  assert.match(JSON.stringify(game.events), /Great Mausoleum/);
+  game = move(game, { Response: { Bool: true } });
+  assert((game.players[0].action_cards ?? []).includes(126), 'Mausoleum recovers the one discarded card');
+  assert(!(game.action_cards_discarded ?? []).includes(126));
+  assert(!(game.incidents_discarded ?? []).includes(26));
+});

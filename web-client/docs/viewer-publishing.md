@@ -395,3 +395,5 @@ Viewer 0.1.137 aligns recipient food counts beside the selection checkbox rather
 Viewer 0.1.140 adds the Market trade-income bonus and its per-opponent-turn limit to the compact building description in every supported language.
 
 Viewer 0.1.141 adds arrows from sea spaces to every adjacent unexplored hex in the sea-route guide, alongside existing Navigation perimeter routes.
+
+Viewer 0.1.142 / engine 0.4.99 removes claimed Great People from the Event discard and excludes Great People in the Action discard from Event reshuffles. Existing saved games are not migrated.

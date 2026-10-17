@@ -125,6 +125,8 @@ fn incident(
                     s.log(game, "Declined to gain the Action Card");
                     return;
                 }
+                // This is the event card itself, not a second physical card.
+                game.incidents_discarded.retain(|discarded| *discarded != id);
                 game.player_mut(s.player_index).action_cards.push(card_id);
                 log_card_transfer(
                     game,

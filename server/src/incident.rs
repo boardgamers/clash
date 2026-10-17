@@ -737,7 +737,11 @@ pub(crate) fn draw_and_discard_incident_card_from_pile(
         player,
         "Events",
         |g| &mut g.incidents_left,
-        |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
+        |g| {
+            g.cache.get_incidents().iter()
+                .filter(|i| !g.action_cards_discarded.contains(&(i.id + GREAT_PERSON_OFFSET)))
+                .map(|i| i.id).collect_vec()
+        },
         |p| {
             p.action_cards
                 .iter()
