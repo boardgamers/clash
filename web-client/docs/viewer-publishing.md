@@ -397,3 +397,5 @@ Viewer 0.1.140 adds the Market trade-income bonus and its per-opponent-turn limi
 Viewer 0.1.141 adds arrows from sea spaces to every adjacent unexplored hex in the sea-route guide, alongside existing Navigation perimeter routes.
 
 Viewer 0.1.142 / engine 0.4.99 removes claimed Great People from the Event discard and excludes Great People in the Action discard from Event reshuffles. Existing saved games are not migrated.
+
+Viewer 0.1.143 uses printed card names in waiting-status labels, matching event popups (for example Major Earthquake).

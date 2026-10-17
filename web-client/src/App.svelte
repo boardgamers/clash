@@ -1241,7 +1241,7 @@
         <div class="turn-copy">
           <strong>{actionTitle}</strong>
           {#if waiting}<span class="waiting-action"
-              >{waiting.action}{waiting.source ? ` · ${waiting.source}` : ''}</span
+              >{waiting.action}{waiting.source ? ` · ${printedCardName(waiting.source)}` : ''}</span
             >{/if}
         </div>
         {#if !$session.playback && !waiting && !objectiveDecision && !$session.view?.decision?.endOfAge && ($session.game?.round ?? 1) <= 3}<span
