@@ -350,7 +350,13 @@ pub fn possible_resource_collections(
         .events
         .transient
         .terrain_collect_options;
-    let modifiers = event.trigger_with_modifiers(&mut terrain_options, &(), &(), &mut (), trigger);
+    let modifiers = event.trigger_with_modifiers(
+        &mut terrain_options,
+        game.player(player_index).get_city(city_pos),
+        &(),
+        &mut (),
+        trigger,
+    );
 
     let collect_options = city_pos
         .neighbors()

@@ -64,7 +64,7 @@ pub(crate) struct TransientEvents {
 
     pub is_playing_action_available: Event<Result<(), String>, Game, PlayingActionType>,
 
-    pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
+    pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>, City>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
     pub collect_total: Event<CollectInfo, Game, Vec<PositionCollection>>,
 

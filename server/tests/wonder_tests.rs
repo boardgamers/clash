@@ -160,6 +160,127 @@ fn test_great_gardens() {
 }
 
 #[test]
+fn great_gardens_collection_is_scoped_to_its_city() {
+    use server::cache::Cache;
+    use server::collect::{
+        PositionCollection, get_total_collection, possible_resource_collections,
+    };
+    use server::events::{EventOrigin, check_event_origin};
+    use server::game::{Game, GameContext};
+    use server::game_data::GameData;
+    use server::player::CostTrigger;
+    use std::collections::HashSet;
+
+    // Both cities can collect the same Plains tile. Owning the wonder elsewhere
+    // must not change that city's choices or allow an invalid submitted action.
+    for wonder_city in [0, 1] {
+        let mut data: serde_json::Value =
+            serde_json::from_str(include_str!("test_games/wonders/great_gardens.json")).unwrap();
+        data["players"][0]["cities"][wonder_city]["city_pieces"] =
+            serde_json::json!({"wonders": ["GreatGardens"]});
+        let data: GameData = serde_json::from_value(data).unwrap();
+        let cache = Cache::new(&data.options);
+        let mut game = Game::from_data(data, cache, GameContext::Play);
+        game.map
+            .tiles
+            .insert(Position::from_offset("A2"), server::map::Terrain::Forest);
+        let plains = Position::from_offset("B1");
+        let resources = [
+            ResourcePile::food(1),
+            ResourcePile::wood(1),
+            ResourcePile::ore(1),
+            ResourcePile::ideas(1),
+            ResourcePile::gold(1),
+        ];
+        for (index, name) in ["A1", "C2"].iter().enumerate() {
+            let city = Position::from_offset(name);
+            let options = possible_resource_collections(
+                &game,
+                city,
+                0,
+                &check_event_origin(),
+                CostTrigger::WithModifiers,
+            );
+            let expected = if index == wonder_city {
+                resources.clone().into_iter().collect()
+            } else {
+                HashSet::from([ResourcePile::food(1)])
+            };
+            assert_eq!(options.choices[&plains], expected, "Collecting with {name}");
+            assert_eq!(
+                options
+                    .modifiers
+                    .contains(&EventOrigin::Wonder(Wonder::GreatGardens)),
+                index == wonder_city,
+            );
+            // Forest still provides only wood, even for the wonder's city.
+            assert_eq!(
+                options.choices[&Position::from_offset(if index == 0 { "A2" } else { "B2" })],
+                HashSet::from([ResourcePile::wood(1)])
+            );
+            for resource in &resources {
+                let result = get_total_collection(
+                    &game,
+                    0,
+                    &check_event_origin(),
+                    city,
+                    &[PositionCollection::new(plains, resource.clone())],
+                    CostTrigger::NoModifiers,
+                );
+                assert_eq!(
+                    result.is_ok(),
+                    index == wonder_city || *resource == ResourcePile::food(1),
+                    "{name}: {resource:?}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn great_gardens_applies_to_plains_reached_with_husbandry() {
+    use server::cache::Cache;
+    use server::collect::{PositionCollection, get_total_collection};
+    use server::events::check_event_origin;
+    use server::game::{Game, GameContext};
+    use server::game_data::GameData;
+    use server::map::Terrain;
+    use server::player::CostTrigger;
+
+    let mut data: serde_json::Value =
+        serde_json::from_str(include_str!("test_games/wonders/great_gardens.json")).unwrap();
+    data["players"][0]["cities"][0]["city_pieces"] =
+        serde_json::json!({"wonders": ["GreatGardens"]});
+    data["players"][0]["advances"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!("Husbandry"));
+    let data: GameData = serde_json::from_value(data).unwrap();
+    let cache = Cache::new(&data.options);
+    let mut game = Game::from_data(data, cache, GameContext::Play);
+    game.map
+        .tiles
+        .insert(Position::from_offset("A2"), Terrain::Forest);
+    game.map
+        .tiles
+        .insert(Position::from_offset("A3"), Terrain::Fertile);
+    assert!(
+        get_total_collection(
+            &game,
+            0,
+            &check_event_origin(),
+            Position::from_offset("A1"),
+            &[PositionCollection::new(
+                Position::from_offset("A3"),
+                ResourcePile::gold(1)
+            )],
+            CostTrigger::NoModifiers,
+        )
+        .is_ok()
+    );
+}
+
+#[test]
 fn test_great_mausoleum() {
     JSON.test(
         "great_mausoleum",

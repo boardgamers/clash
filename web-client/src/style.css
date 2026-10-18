@@ -6203,12 +6203,12 @@ small {
   font: bold 12px/1 sans-serif;
 }
 
-.game-shell.playing-back .activity.floating-panel {
+.game-shell.playing-back:not(.full-replay) .activity.floating-panel {
   bottom: 260px;
   height: min(470px, calc(100% - 280px));
 }
 @media (max-width: 600px) {
-  .game-shell.playing-back .activity.floating-panel {
+  .game-shell.playing-back:not(.full-replay) .activity.floating-panel {
     bottom: 285px;
     height: max(120px, calc(100% - 405px));
   }

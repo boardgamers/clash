@@ -309,7 +309,10 @@ fn great_gardens() -> WonderInfo {
     .add_transient_event_listener(
         |events| &mut events.terrain_collect_options,
         1,
-        |m, (), (), _| {
+        |m, city, (), _| {
+            if !city.pieces.wonders.contains(&Wonder::GreatGardens) {
+                return;
+            }
             m.insert(
                 Fertile,
                 HashSet::from([
