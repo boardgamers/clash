@@ -1,3 +1,4 @@
+import { frameHasContent } from './replay-actions.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { recapStart, sinceLastTurn, frameAt, frameEffects, frameDetails } from './playback.ts';
@@ -455,30 +456,141 @@ test('choice recaps use public decisions and happiness outcomes', () => {
 });
 
 test('recap names a publicly played action card, never a drawn card', () => {
-  const before = { cursor: 0, actor: 0, title: 'End turn', tiles: [], players: [{id:0,civilization:'Greece',units:[],cities:[]}] } as unknown as BoardFrame;
-  const after = {...before,cursor:1,title:'Play action card'};
-  const action = {player:0,action:{Playing:{ActionCard:2}},items:[]} as LoggedAction;
-  const history = {log_index:1,log:[{age:1,rounds:[{round:1,turns:[{actions:[action]}]}]}]} as Game;
-  const catalog = [{id:2,name:'Great Ideas',description:'Gain ideas.',free:true,tactics:null}];
-  assert.equal(frameDetails(before,after,history,[],catalog).caption,'Greece · Played Good Ideas');
-  action.action = {Response:{Bool:true}};
-  action.items = [{player:0,HandCard:{card:{ActionCard:2},to:{Hand:0}}}];
-  assert.ok(!frameDetails(before,after,history,[],catalog).caption.includes('Good Ideas'));
+  const before = {
+    cursor: 0,
+    actor: 0,
+    title: 'End turn',
+    tiles: [],
+    players: [{ id: 0, civilization: 'Greece', units: [], cities: [] }],
+  } as unknown as BoardFrame;
+  const after = { ...before, cursor: 1, title: 'Play action card' };
+  const action = { player: 0, action: { Playing: { ActionCard: 2 } }, items: [] } as LoggedAction;
+  const history = {
+    log_index: 1,
+    log: [{ age: 1, rounds: [{ round: 1, turns: [{ actions: [action] }] }] }],
+  } as Game;
+  const catalog = [{ id: 2, name: 'Great Ideas', description: 'Gain ideas.', free: true, tactics: null }];
+  assert.equal(frameDetails(before, after, history, [], catalog).caption, 'Greece · Played Good Ideas');
+  action.action = { Response: { Bool: true } };
+  action.items = [{ player: 0, HandCard: { card: { ActionCard: 2 }, to: { Hand: 0 } } }];
+  assert.ok(!frameDetails(before, after, history, [], catalog).caption.includes('Good Ideas'));
 });
 
-
 test('objective completion recaps name the completed side, without repeating its effect', () => {
-  const { before, after, game } = choiceRecap([
-    { player: 0, HandCard: { card: { ObjectiveCard: 1 }, to: { CompleteObjective: 'Bold' } } },
-  ], [{ player: 0, kind: 'completed', label: 'Bold' }]);
+  const { before, after, game } = choiceRecap(
+    [{ player: 0, HandCard: { card: { ObjectiveCard: 1 }, to: { CompleteObjective: 'Bold' } } }],
+    [{ player: 0, kind: 'completed', label: 'Bold' }],
+  );
   before.players[0].civilization = 'Maya';
   for (const title of ['Select Objective Cards to Complete', 'Complete Objectives', 'Resolve choice']) {
     after.title = title;
     assert.equal(frameDetails(before, after, game).caption, 'Maya · Completed Daring');
   }
   // A second public completion in the same frame is retained.
-  game.log![0].rounds[0].turns[0].actions![0].items!.push(
-    { player: 0, HandCard: { to: { CompleteObjective: 'Conqueror' } } },
-  );
+  game.log![0].rounds[0].turns[0].actions![0].items!.push({
+    player: 0,
+    HandCard: { to: { CompleteObjective: 'Conqueror' } },
+  });
   assert.equal(frameDetails(before, after, game).caption, 'Maya · Completed Daring, Conqueror');
+});
+
+function influenceFrames(messages: string[][]) {
+  const before: BoardFrame = {
+    cursor: 0,
+    actor: 0,
+    ended_turn: false,
+    title: 'Earlier position',
+    age: 1,
+    round: 1,
+    tiles: [],
+    players: [
+      { id: 0, civilization: 'Greece', cities: [] },
+      { id: 1, civilization: 'Rome', cities: [] },
+      {
+        id: 2,
+        civilization: 'Babylonia',
+        cities: [{ position: 'C2', mood_state: 'Happy', city_pieces: { fortress: 1 } }],
+      },
+    ],
+  };
+  const actions: LoggedAction[] = messages.map((lines) => ({
+    player: 0,
+    action: { Response: { Payment: [] } },
+    items: lines.map((Text) => ({ player: 0, Text })),
+  }));
+  actions[0].items!.unshift({
+    player: 0,
+    InfluenceCultureAttempt: {
+      position: 'C2',
+      starting_city_position: 'B1',
+      structure: { Building: 'Fortress' },
+      target_player: 2,
+    },
+  });
+  const game = {
+    log_index: actions.length,
+    log: [{ age: 1, rounds: [{ round: 1, turns: [{ actions }] }] }],
+  } as Game;
+  const after = { ...structuredClone(before), cursor: 1, title: 'Cultural influence' };
+  after.players[2].cities![0].city_pieces!.fortress = 0;
+  return { before, after, game };
+}
+
+test('influence recap names the building owner and result, not the coordinates or current owner', () => {
+  for (const result of ['succeeded', 'failed']) {
+    const { before, after, game } = influenceFrames([['Cultural influence ' + result + ' (rolls 5)']]);
+    const details = frameDetails(before, after, game);
+    assert.equal(details.caption, `Greece · Cultural influence ${result} against Rome’s Fortress`);
+    assert.deepEqual(new Set(details.positions), new Set(['C2', 'B1']));
+    assert.doesNotMatch(details.caption, /C2|B1|Babylonia/);
+  }
+});
+
+test('influence recap waits for the boost decision and resolves later payment frames', () => {
+  for (const [message, result] of [
+    ['pays to increase the dice roll', 'succeeded'],
+    ['Declined to pay to increase the dice roll', 'failed'],
+  ]) {
+    const { before, after, game } = influenceFrames([
+      [
+        'rolls a 2 and now has the option to pay 3 culture tokens to increase the dice roll and proceed with the cultural influence',
+      ],
+      [message],
+    ]);
+    const waiting = { ...before, cursor: 1, title: 'Cultural influence' };
+    assert.equal(
+      frameDetails(before, waiting, game).caption,
+      'Greece · Cultural influence against Rome’s Fortress · Awaiting boost',
+    );
+    after.cursor = 2;
+    after.title = 'Resolve choice';
+    assert.equal(
+      frameDetails(waiting, after, game).caption,
+      `Greece · Cultural influence ${result} against Rome’s Fortress`,
+    );
+  }
+});
+
+test('influence recap describes insufficient boost resources as failure and ignores unrelated later choices', () => {
+  const { before, after, game } = influenceFrames([
+    ['rolls a 2 and does not have enough resources to increase the roll'],
+    ['Decided to keep the current government'],
+  ]);
+  assert.equal(
+    frameDetails(before, after, game).caption,
+    'Greece · Cultural influence failed against Rome’s Fortress',
+  );
+  const next = { ...after, cursor: 2, title: 'Resolve choice' };
+  assert.doesNotMatch(frameDetails(after, next, game).caption, /Cultural influence/);
+});
+
+test('recap keeps a declined influence boost even when the board does not change', () => {
+  const { before, game } = influenceFrames([
+    ['rolls a 2 and now has the option to pay 3 culture tokens to increase the dice roll'],
+    ['Declined to pay to increase the dice roll'],
+  ]);
+  const pending = { ...before, cursor: 1, title: 'Cultural influence' };
+  const failed = { ...before, cursor: 2, title: 'Resolve choice' };
+  assert.equal(frameHasContent(game, pending, failed), true);
+  assert.match(frameDetails(pending, failed, game).caption, /failed against Rome’s Fortress/);
 });

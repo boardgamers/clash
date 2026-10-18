@@ -123,7 +123,13 @@ export interface LoggedAction {
       hits: number;
       combat_modifiers?: string[];
     };
-    InfluenceCultureAttempt?: { position: string; starting_city_position: string; structure: unknown };
+    InfluenceCultureAttempt?: {
+      position: string;
+      starting_city_position: string;
+      structure: unknown;
+      target_player?: number;
+      target_unit?: { player: number; unit: number };
+    };
     Action?: { balance: string; amount?: number };
     Structure?: { structure: unknown; balance: string; position: string };
     HandCard?: { card?: unknown; from?: unknown; to: unknown };
@@ -330,7 +336,11 @@ export interface View {
   units?: UnitView[];
   movementLeft?: number;
   nomadCities?: string[];
-  tradeRoutes?: { player: number; enabled: boolean; routes: { from: string; to: string; unit: number | null }[] }[];
+  tradeRoutes?: {
+    player: number;
+    enabled: boolean;
+    routes: { from: string; to: string; unit: number | null }[];
+  }[];
   regions?: { id: number; homePlayer: number | null; tiles: string[] }[];
   seaRoutes?: string[][];
   barbarianGuide?: {
@@ -531,7 +541,7 @@ export interface EventInfo {
 }
 export interface Session {
   eventNotices?: import('./event-notices').EventNotice[];
-  portPlacement?: {city: string; payment: Pile; choices: {position: string; action: Move}[]};
+  portPlacement?: { city: string; payment: Pile; choices: { position: string; action: Move }[] };
   landingTargets?: string[];
   disembarkCarriers?: number[];
   analysis?: boolean;

@@ -1,6 +1,7 @@
 import type { BoardFrame, Game, View, Pile } from './types.ts';
 import { frameResources, describeResources } from './resource-playback.ts';
 import { frameHasContent } from './replay-actions.ts';
+import { influenceRecap } from './influence-recap.ts';
 import { activeHistory } from './active-history.ts';
 import { officialWonderText, wonderName } from './wonder-names.ts';
 import { printedCardName, printedCardText } from './card-names.ts';
@@ -78,7 +79,7 @@ export function frameDetails(
   cards: NonNullable<View['cardCatalog']> = [],
 ) {
   if (!frame) return { caption: 'No recorded positions yet.', positions: [] as string[] };
-  const actor = frame.players.find((p) => p.id === frame.actor)?.civilization;
+  let actor = frame.players.find((p) => p.id === frame.actor)?.civilization;
   const positions = new Set<string>();
   const units = (f: BoardFrame | undefined) =>
     new Map(
@@ -119,9 +120,13 @@ export function frameDetails(
   let description = ['Explore Resolution', 'Finish ship exploration'].includes(frame.title)
     ? 'Explore'
     : frame.title;
-  const generic = ['Resolve choice', 'Pay for action', 'Action', 'Select Objective Cards to Complete', 'Complete Objectives'].includes(
-    frame.title,
-  );
+  let generic = [
+    'Resolve choice',
+    'Pay for action',
+    'Action',
+    'Select Objective Cards to Complete',
+    'Complete Objectives',
+  ].includes(frame.title);
   const outcomes: string[] = [];
   if (before && generic) {
     for (const player of frame.players) {
@@ -163,20 +168,34 @@ export function frameDetails(
   // Read only the public log interval for this frame, never the current player's hand
   // or later turns. This also enriches recordings made before detailed captions existed.
   if (before && game) {
-    const actions = activeHistory(game)
+    const history = activeHistory(game)
       .flatMap((age) => age.rounds.flatMap((round) => round.turns.flatMap((turn) => turn.actions ?? [])))
-      .slice(before.cursor, frame.cursor);
+      .slice(0, frame.cursor);
+    const actions = history.slice(before.cursor);
+    const influence = influenceRecap(history, before.cursor, before, frame);
+    if (influence) {
+      description = influence.description;
+      actor = influence.actor ?? actor;
+      generic = false;
+      influence.positions.forEach((position) => positions.add(position));
+    }
     const items = actions.flatMap((action) => action.items ?? []);
-    if (frame.title === 'Play action card') {
-      const played = actions.flatMap(action => {
+    if (frame.title === 'Play action card' && !influence) {
+      const played = actions.flatMap((action) => {
         const playing = typeof action.action === 'object' && action.action?.Playing;
-        return playing && typeof playing === 'object' && 'ActionCard' in playing && typeof playing.ActionCard === 'number'
-          ? [playing.ActionCard] : [];
+        return playing &&
+          typeof playing === 'object' &&
+          'ActionCard' in playing &&
+          typeof playing.ActionCard === 'number'
+          ? [playing.ActionCard]
+          : [];
       });
-      const names = [...new Set(played.map(id => cards.find(card => card.id === id)?.name).filter(Boolean))];
+      const names = [
+        ...new Set(played.map((id) => cards.find((card) => card.id === id)?.name).filter(Boolean)),
+      ];
       if (names.length) description = `Played ${names.join(' · ')}`;
     }
-    if (frame.title === 'Civilization ability') {
+    if (frame.title === 'Civilization ability' && !influence) {
       // Older frames kept a generic title. The public start entry already names
       // the advance or leader ability, including free actions with no cost item.
       for (const action of actions) {
@@ -204,17 +223,27 @@ export function frameDetails(
         }
       }
     }
-    const details: string[] = [...outcomes];
+    const details: string[] = influence ? [] : [...outcomes];
     const readable = wonderName;
     for (const player of frame.players) {
       const own = items.filter((item) => item.player === player.id);
-      const completed = [...new Set(own.flatMap((item) => {
-        const to = item.HandCard?.to;
-        return to && typeof to === 'object' && 'CompleteObjective' in to && typeof to.CompleteObjective === 'string'
-          ? [to.CompleteObjective] : [];
-      }))];
+      const completed = [
+        ...new Set(
+          own.flatMap((item) => {
+            const to = item.HandCard?.to;
+            return to &&
+              typeof to === 'object' &&
+              'CompleteObjective' in to &&
+              typeof to.CompleteObjective === 'string'
+              ? [to.CompleteObjective]
+              : [];
+          }),
+        ),
+      ];
       if (completed.length)
-        details.push(`${player.id === frame.actor ? '' : player.civilization + ': '}Completed ${completed.join(', ')}`);
+        details.push(
+          `${player.id === frame.actor ? '' : player.civilization + ': '}Completed ${completed.join(', ')}`,
+        );
       const gained = [
         ...new Set(
           own.filter((item) => item.Advance?.balance === 'Gain').map((item) => item.Advance!.advance),
@@ -259,11 +288,20 @@ export function frameDetails(
       }
       // Public effect labels identify card types without exposing private cards.
       for (const effect of frame.effects ?? []) {
-        if (effect.kind === 'completed' && items.some(item => {
-          const to = item.HandCard?.to;
-          return item.player === effect.player && to && typeof to === 'object' &&
-            'CompleteObjective' in to && to.CompleteObjective === effect.label;
-        })) continue;
+        if (
+          effect.kind === 'completed' &&
+          items.some((item) => {
+            const to = item.HandCard?.to;
+            return (
+              item.player === effect.player &&
+              to &&
+              typeof to === 'object' &&
+              'CompleteObjective' in to &&
+              to.CompleteObjective === effect.label
+            );
+          })
+        )
+          continue;
         const player = frame.players.find((p) => p.id === effect.player);
         const label = `${effect.player === frame.actor ? '' : (player?.civilization ?? 'Player') + ': '}${effect.label}`;
         if (!details.includes(label)) details.push(label);

@@ -1,3 +1,4 @@
+import { influenceResult } from './influence-recap.ts';
 import { activeHistory } from './active-history.ts';
 import type { BoardFrame, Game, LoggedAction } from './types.ts';
 
@@ -43,7 +44,15 @@ export function frameHasContent(game: Game, before: BoardFrame | undefined, fram
     )
   )
     return true;
-  if (actions.some((action) => action.combat_stats)) return true;
+  if (
+    actions.some(
+      (action) =>
+        action.combat_stats ||
+        action.items?.some((item) => influenceResult(item.Text ?? '') !== null) ||
+        action.log?.some((line) => influenceResult(line) !== null),
+    )
+  )
+    return true;
   if (frame.ended_turn || frame.title === 'End turn') return false;
   if (
     before &&

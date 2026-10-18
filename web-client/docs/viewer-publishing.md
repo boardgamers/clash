@@ -401,3 +401,5 @@ Viewer 0.1.142 / engine 0.4.99 removes claimed Great People from the Event disca
 Viewer 0.1.143 uses printed card names in waiting-status labels, matching event popups (for example Major Earthquake).
 
 Viewer 0.1.144 / engine 0.4.100 adds combat estimates to attack confirmation and selected tactics, Siegecraft and Steel Weapons choices. An isolated worker runs 2,048 battles with the real engine, an independent random stream, public information only, and explicit no-retreat / no-additional-tactics and casualty assumptions. Attack previews compare affordable Siegecraft options and declining Steel Weapons. Unsupported decisions show no estimate. Results are cached, selection changes cancel old workers, and simulations stop before capture rewards.
+
+Viewer 0.1.145 enriches cultural-influence recap captions with success/failure, target civilization and building (or unit), without coordinates. Pending rolls stay pending until the boost response resolves; existing public recordings are supported. No engine or saved-data changes.
