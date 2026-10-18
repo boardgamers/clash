@@ -380,7 +380,8 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                 json!({"amount":amount,"resources":resources})
             }).collect::<Vec<_>>();
         item.as_object_mut().unwrap().extend(json!({
-            "triggersEvent":action.is_some() && p.incident_tokens == 1 && research_uses_event_marker,
+            "triggersEvent":action.is_some() && p.incident_tokens == 1 && research_uses_event_marker
+                && !crate::content::incidents::trojan::anarchy_replaces_event_marker(game, seat, *advance),
             "owned":owned,"reason":reason,"payment":if advance_choice.is_some_and(|(_, mode)| mode != "paid") {ResourcePile::empty()} else {payment.unwrap_or_else(|| cost.default_payment())},"action":action,
             "costAmount":cost_amount,"costResources":resources,
             "costGroups":cost_groups,

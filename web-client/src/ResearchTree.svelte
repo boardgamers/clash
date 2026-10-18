@@ -187,7 +187,11 @@
       : { eligible: false, affordable: false },
   );
   const eventImminent = $derived(
-    !reference && (selected ? !!selected.triggersEvent : advances.some((a) => a.triggersEvent)),
+    !reference &&
+      (selected
+        ? !!selected.triggersEvent
+        : advances.some((a) => a.triggersEvent) &&
+          !advances.some((a) => a.action && !a.triggersEvent)),
   );
   function matches(advance: PublicAdvance) {
     return `${advance.name} ${advance.description} ${researchPresentation(advance).summary}`

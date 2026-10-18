@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::undo_unlock_special_advance;
+use crate::advance::{Advance, undo_unlock_special_advance};
 use crate::advance::{find_government_special_advance, remove_advance};
 use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
@@ -340,31 +340,40 @@ fn anarchy() -> Incident {
     .build()
 }
 
+pub(crate) fn anarchy_replaces_event_marker(game: &Game, player: usize, advance: Advance) -> bool {
+    advance.info(game).government.is_some()
+        && game.permanent_effects.iter().any(|effect| {
+            matches!(effect, PermanentEffect::Anarchy(a) if a.player == player && a.advances_lost > 0)
+        })
+}
+
 pub(crate) fn anarchy_advance() -> Ability {
     Ability::builder("Anarchy", "-")
         .add_simple_persistent_event_listener(
             |event| &mut event.advance,
             10,
             |game, p, i| {
-                if i.advance.info(game).government.is_none() {
+                if !anarchy_replaces_event_marker(game, p.index, i.advance) {
                     return;
                 }
 
                 if let Some(mut a) = remove_and_map_element_by(&mut game.permanent_effects, |e| {
-                    if let PermanentEffect::Anarchy(a) = e {
+                    if let PermanentEffect::Anarchy(a) = e
+                        && a.player == p.index
+                        && a.advances_lost > 0
+                    {
                         Some(a.clone())
                     } else {
                         None
                     }
-                }) && p.index == a.player
-                {
+                }) {
                     p.log(
                         game,
                         "Gain a government advance, taking a game event token \
                             instead of triggering a game event (and losing 1 victory point)",
                     );
                     let p = p.get_mut(game);
-                    p.incident_tokens += 1;
+                    i.take_incident_token = false;
                     p.gain_event_victory_points(-1_f32, &EventOrigin::Incident(44));
                     a.advances_lost -= 1;
                     if a.advances_lost > 0 {
