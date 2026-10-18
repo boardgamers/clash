@@ -71,6 +71,8 @@ test('the warning returns only after the last Anarchy cube has been used', () =>
 
 test('another player researching government neither uses nor removes your Anarchy cubes', () => {
   const game = afterAnarchy();
+  game.players[1].special_victory_points = [{ points: 2, origin: { Incident: 44 }, attribution: 'Events' }];
+  game.players[0].special_victory_points = [];
   game.permanent_effects = [{ Anarchy: { player: 1, advances_lost: 2 } }];
   assert.equal(view(game).advances.find((a) => a.id === 'Dogma')!.triggersEvent, true);
   game.players[0].incident_tokens = 2;
@@ -81,6 +83,7 @@ test('another player researching government neither uses nor removes your Anarch
 
 test('Anarchy uses only the researching player’s cube when multiple players are affected', () => {
   const game = afterAnarchy();
+  game.players[1].special_victory_points = [{ points: 2, origin: { Incident: 44 }, attribution: 'Events' }];
   const other = { Anarchy: { player: 1, advances_lost: 2 } };
   game.permanent_effects.unshift(other);
   const after = research(game, 'Dogma');
@@ -98,4 +101,51 @@ test('a card-granted government advance uses an Anarchy cube without adding an e
   game = research(game, 'Dogma');
   assert.equal(game.players[0].incident_tokens, 1);
   assert.deepEqual(game.permanent_effects ?? [], []);
+});
+
+test('a saved Anarchy point restores its missing cube for previews and actual research', () => {
+  const game = afterAnarchy();
+  delete game.permanent_effects;
+  assert.equal(view(game).advances.find((a) => a.id === 'Dogma')!.triggersEvent, false);
+  const after = research(game, 'Dogma');
+  assert.equal(after.players[0].incident_tokens, 1);
+  assert.deepEqual(after.incidents_left, game.incidents_left);
+  assert.equal(after.rng, game.rng);
+  assert.deepEqual(after.permanent_effects ?? [], []);
+  assert.deepEqual(after.players[0].special_victory_points ?? [], []);
+  assert.equal(view(after).advances.find((a) => a.id === 'Devotion')!.triggersEvent, true);
+
+  const undone = move(after, 'Undo');
+  assert.equal(undone.players[0].special_victory_points[0].points, 1);
+  assert.equal(view(undone).advances.find((a) => a.id === 'Dogma')!.triggersEvent, false);
+  const redone = move(undone, 'Redo');
+  assert.equal(redone.players[0].incident_tokens, 1);
+  assert.deepEqual(redone.permanent_effects ?? [], []);
+  assert.deepEqual(redone.players[0].special_victory_points ?? [], []);
+});
+
+test('restoring missing Anarchy cubes is per player and does not duplicate surviving cubes on reload', () => {
+  const game = afterAnarchy(3);
+  game.permanent_effects[0].Anarchy.advances_lost = 1;
+  game.players[1].special_victory_points = [{ points: 2, origin: { Incident: 44 }, attribution: 'Events' }];
+  game.permanent_effects.push({ Anarchy: { player: 1, advances_lost: 2 } }, 'TrojanHorse');
+  const loaded = JSON.parse(engine.stripSecret(JSON.stringify(game), 0));
+  const cubes = (g: any, seat: number) =>
+    g.permanent_effects.reduce(
+      (sum: number, e: any) => sum + (e.Anarchy?.player === seat ? e.Anarchy.advances_lost : 0),
+      0,
+    );
+  assert.equal(cubes(loaded, 0), 3);
+  assert.equal(cubes(loaded, 1), 2);
+  assert.ok(loaded.permanent_effects.includes('TrojanHorse'));
+  const reloaded = JSON.parse(engine.stripSecret(JSON.stringify(loaded), 0));
+  assert.deepEqual(reloaded.permanent_effects, loaded.permanent_effects);
+  assert.deepEqual(reloaded.players[0].special_victory_points, game.players[0].special_victory_points);
+});
+
+test('unrelated event points do not restore Anarchy cubes', () => {
+  const game = afterAnarchy();
+  delete game.permanent_effects;
+  game.players[0].special_victory_points[0].origin = { Incident: 42 };
+  assert.equal(view(game).advances.find((a) => a.id === 'Dogma')!.triggersEvent, true);
 });

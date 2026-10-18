@@ -7,6 +7,7 @@ use crate::content::ability;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::SpecialAction;
 use crate::content::effects::PermanentEffect;
+use crate::content::incidents::trojan::restore_missing_anarchy_cubes;
 use crate::content::persistent_events::PersistentEventState;
 use crate::game::{Game, GameContext, GameOptions, GameState, UIElement};
 use crate::leader::Leader;
@@ -157,6 +158,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
     for player_data in data.players {
         game.players.push(player_from_data(player_data, &game));
     }
+    restore_missing_anarchy_cubes(&mut game);
     let all = game.cache.get_abilities().clone();
     for player_index in 0..game.players.len() {
         initialize_player(player_index, &mut game, &all);

@@ -340,6 +340,38 @@ fn anarchy() -> Incident {
     .build()
 }
 
+pub(crate) fn restore_missing_anarchy_cubes(game: &mut Game) {
+    // Older engines could remove another player's Anarchy effect during research.
+    // Its victory points survived: each point still represents one unused cube.
+    for (player, p) in game.players.iter().enumerate() {
+        let points: f32 = p
+            .special_victory_points
+            .iter()
+            .filter(|v| v.origin == EventOrigin::Incident(44))
+            .map(|v| v.points)
+            .sum();
+        if !points.is_finite() || points < 1.0 || points.fract() != 0.0 {
+            continue;
+        }
+        let existing: usize = game
+            .permanent_effects
+            .iter()
+            .filter_map(|e| match e {
+                PermanentEffect::Anarchy(a) if a.player == player => Some(a.advances_lost),
+                _ => None,
+            })
+            .sum();
+        let missing = (points as usize).saturating_sub(existing);
+        if missing > 0 {
+            game.permanent_effects
+                .push(PermanentEffect::Anarchy(Anarchy {
+                    player,
+                    advances_lost: missing,
+                }));
+        }
+    }
+}
+
 pub(crate) fn anarchy_replaces_event_marker(game: &Game, player: usize, advance: Advance) -> bool {
     advance.info(game).government.is_some()
         && game.permanent_effects.iter().any(|effect| {
