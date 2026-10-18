@@ -399,3 +399,5 @@ Viewer 0.1.141 adds arrows from sea spaces to every adjacent unexplored hex in t
 Viewer 0.1.142 / engine 0.4.99 removes claimed Great People from the Event discard and excludes Great People in the Action discard from Event reshuffles. Existing saved games are not migrated.
 
 Viewer 0.1.143 uses printed card names in waiting-status labels, matching event popups (for example Major Earthquake).
+
+Viewer 0.1.144 / engine 0.4.100 adds combat estimates to attack confirmation and selected tactics, Siegecraft and Steel Weapons choices. An isolated worker runs 2,048 battles with the real engine, an independent random stream, public information only, and explicit no-retreat / no-additional-tactics and casualty assumptions. Attack previews compare affordable Siegecraft options and declining Steel Weapons. Unsupported decisions show no estimate. Results are cached, selection changes cancel old workers, and simulations stop before capture rewards.

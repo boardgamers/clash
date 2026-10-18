@@ -1,4 +1,5 @@
 <script lang="ts">
+  import CombatEstimate from './CombatEstimate.svelte';
   import { printedCardName } from './card-names';
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
@@ -356,7 +357,7 @@
         options={directPayments.map((choice) => ({ payment: choice.payment, disabled: !choice.action }))}
         value={payments[0]}
         onChange={(payment) => choosePayment(0, payment)}
-        onPay={(payment) => {
+        onPay={decision.name === 'Steel Weapons' ? undefined : (payment) => {
           const action = directPayments.find((choice) => samePayment(choice.payment, payment))?.action;
           if (action) controller.submit(action);
         }}
@@ -366,6 +367,10 @@
         variableAmount={field.variableAmount}
         label={field.name}
       />
+    {/if}
+    {#if decision.name === 'Steel Weapons' && preview.action}
+      <CombatEstimate {controller} action={preview.action} />
+      <button class="primary wide" disabled={$session.pending} onclick={() => preview.action && controller.submit(preview.action)}>Confirm<Check size={16} /></button>
     {/if}
   {:else}
     {#each decision.fields as field, i}
@@ -426,6 +431,9 @@
         />
         Keep all cities; skip this step in future ages
       </label>
+    {/if}
+    {#if (decision.tacticsSelection || decision.name === 'Siegecraft') && preview.action}
+      <CombatEstimate {controller} action={preview.action} />
     {/if}
     <div class="decision-footer" class:map-decision-footer={mapChoice}>
       {#if decision.tacticsSelection}

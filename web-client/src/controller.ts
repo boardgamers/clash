@@ -1623,6 +1623,11 @@ export class Controller {
       s.selectedUnits.length ? s.selectedUnits : position ? this.defaultMovementGroup(position) : [],
     );
   }
+  combatEstimateSnapshot() {
+    const s = get(this.session);
+    if (!this.engine?.stripSecret || s.seat === undefined) return null;
+    return { raw: this.engine.stripSecret(this.raw, s.seat), seat: s.seat };
+  }
   query<T>(input: unknown): T {
     const s = get(this.session);
     if (!this.engine || s.seat === undefined) throw new Error('Choose a player');

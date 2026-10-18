@@ -1,4 +1,5 @@
 <script lang="ts">
+  import CombatEstimate from './CombatEstimate.svelte';
   import { onDestroy } from 'svelte';
   import {
     Footprints,
@@ -47,6 +48,13 @@
   const destination = $derived(
     $session.moveDestination === null ? null : $session.moveDestinations[$session.moveDestination],
   );
+  const ownAdvances = $derived($session.view?.players.find(p => p.index === $session.seat)?.advances ?? []);
+  const defender = $derived($session.game?.players.find(p => p.id !== $session.seat && (
+    p.units?.some(u => u.position === destination?.position) || p.cities?.some(c => c.position === destination?.position)
+  )));
+  const canDeclineSteel = $derived(destination?.terrain !== 'Water' && ownAdvances.some(a => a.id === 'SteelWeapons') && (
+    !ownAdvances.some(a => a.id === 'Metallurgy') || !!$session.view?.players.find(p => p.index === defender?.id)?.advances.some(a => a.id === 'SteelWeapons')
+  ));
   const settler = $derived.by(() => {
     const here = $session.view?.settlers.filter((u) => u.position === origin) ?? [];
     return (
@@ -210,6 +218,9 @@
   {/if}
   {#if destination?.attack}
     <div class="movement-leader-info" aria-label="Attack preview">
+      <CombatEstimate {controller} action={destination.action}
+        siege={!!$session.view?.players.find(p => p.index === $session.seat)?.advances.some(a => a.id === 'Siegecraft') && !!$session.game?.players.some(p => p.cities?.some(c => c.position === destination.position && c.city_pieces?.fortress != null))}
+        steel={canDeclineSteel} />
       <h3><Swords size={16} />Defenders</h3>
       <TileUnits players={$session.game?.players ?? []} position={destination.position} />
       {#each $session.game?.players ?? [] as player}

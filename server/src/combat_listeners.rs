@@ -354,7 +354,9 @@ fn attacker_wins(game: &mut Game, mut c: Combat) {
         c.defender_position(),
         None,
     );
-    capture_position(game, &mut c.stats);
+    if game.context != crate::game::GameContext::CombatPreview {
+        capture_position(game, &mut c.stats);
+    }
     end_combat_and_store_stats(game, CombatEnd::new(CombatResult::AttackerWins, c));
 }
 
@@ -419,7 +421,9 @@ fn restrict_defenders_after_battle(game: &mut Game, s: &CombatStats) {
 
 pub(crate) fn end_combat(game: &mut Game, s: CombatStats) {
     current_action_log_mut(game).combat_stats = Some(s.clone());
-    on_end_combat(game, s);
+    if game.context != crate::game::GameContext::CombatPreview {
+        on_end_combat(game, s);
+    }
 }
 
 pub(crate) fn on_end_combat(game: &mut Game, stats: CombatStats) {

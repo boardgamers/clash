@@ -121,6 +121,7 @@ impl GameOptions {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum GameContext {
+    CombatPreview,
     Play,
     AI,
     Replay,

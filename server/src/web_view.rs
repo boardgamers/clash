@@ -23,6 +23,7 @@ use crate::victory_points::victory_points_parts;
 use crate::wonder::Wonder;
 use serde_json::{Value, json};
 mod actions;
+mod combat_estimate;
 mod collection_potential;
 mod decisions;
 mod effects;
@@ -36,6 +37,7 @@ pub fn query(game: &Game, seat: usize, input: Value) -> Result<Value, String> {
         return Err("Choose a player".into());
     }
     match input["kind"].as_str() {
+        Some("combatEstimate") => combat_estimate::estimate(game, seat, &input),
         Some("decision") => decisions::preview(game, seat, &input),
         Some("researchPlan") => research_plan(game, seat, &input),
         Some("movement") if input["city"].is_string() => actions::nomad_movement(
