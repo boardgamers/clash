@@ -1,0 +1,101 @@
+{
+  "errors": [],
+  "checks": [
+    {
+      "dark": false,
+      "diagnostics": {
+        "compatible": true,
+        "required": [
+          {
+            "capability": "core",
+            "completed": 3,
+            "total": 3,
+            "percent": 100,
+            "missing": []
+          },
+          {
+            "capability": "chat",
+            "completed": 7,
+            "total": 7,
+            "percent": 100,
+            "missing": []
+          },
+          {
+            "capability": "replay",
+            "completed": 3,
+            "total": 3,
+            "percent": 100,
+            "missing": []
+          }
+        ],
+        "recommended": {
+          "completed": 2,
+          "total": 2,
+          "percent": 100,
+          "missing": []
+        },
+        "optional": {
+          "completed": 1,
+          "total": 1,
+          "percent": 100,
+          "missing": []
+        }
+      }
+    },
+    {
+      "dark": false,
+      "mobile": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "dark": true,
+      "diagnostics": {
+        "compatible": true,
+        "required": [
+          {
+            "capability": "core",
+            "completed": 3,
+            "total": 3,
+            "percent": 100,
+            "missing": []
+          },
+          {
+            "capability": "chat",
+            "completed": 7,
+            "total": 7,
+            "percent": 100,
+            "missing": []
+          },
+          {
+            "capability": "replay",
+            "completed": 3,
+            "total": 3,
+            "percent": 100,
+            "missing": []
+          }
+        ],
+        "recommended": {
+          "completed": 2,
+          "total": 2,
+          "percent": 100,
+          "missing": []
+        },
+        "optional": {
+          "completed": 1,
+          "total": 1,
+          "percent": 100,
+          "missing": []
+        }
+      }
+    },
+    {
+      "dark": true,
+      "mobile": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    }
+  ]
+}

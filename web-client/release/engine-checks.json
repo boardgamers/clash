@@ -1,0 +1,41 @@
+{
+  "diagnostics": {
+    "compatible": true,
+    "required": {
+      "completed": 8,
+      "total": 8,
+      "percent": 100,
+      "missing": []
+    },
+    "optional": {
+      "completed": 14,
+      "total": 28,
+      "percent": 50,
+      "missing": [
+        "presenceChanged",
+        "phase",
+        "tableProgress",
+        "migrateTableProgress",
+        "advanceTime",
+        "nextWakeup",
+        "moveAI",
+        "cancelled",
+        "toSave",
+        "timeIncrements",
+        "stats",
+        "analysisUsesSimulation",
+        "analysisMove",
+        "analysisView"
+      ]
+    }
+  },
+  "scenarios": [
+    0,
+    1,
+    "spectator"
+  ],
+  "deterministicReplay": true,
+  "settingRevisions": 100,
+  "stableHistory": true,
+  "collectUndoCycles": 100
+}

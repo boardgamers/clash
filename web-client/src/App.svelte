@@ -945,7 +945,11 @@
                 >{/if}</span
             ><span class="player-info"
               ><strong>{player.civilization}</strong><small
-                >{player.index === $session.seat
+                >{#if $session.avatars[player.index]}<img
+                    class="player-avatar"
+                    src={$session.avatars[player.index]}
+                    alt=""
+                  />{/if}{player.index === $session.seat
                   ? 'You'
                   : player.name}{#if $session.playerBadges?.[player.index]}<img
                     class="supporter-badge"

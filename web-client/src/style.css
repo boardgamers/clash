@@ -5817,7 +5817,7 @@ small {
     height: 40px;
   }
   .strategy-player-forces {
-    grid-area: 3 / 1 / 4 / 4;
+    grid-area: 4 / 1 / 5 / 4;
     padding-top: 3px;
   }
 }
@@ -6279,3 +6279,13 @@ small {
 .collapsible-map-guide:not([open]) > summary svg { transform: rotate(180deg); }
 .collapsible-map-guide[open] > summary { margin-bottom: 8px; }
 .collapsible-map-guide > summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* Keep the civilization emblem while identifying the BGS player beside their name. */
+.player-info .player-avatar {
+  width: 12px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-inline-end: 3px;
+}
