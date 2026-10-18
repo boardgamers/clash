@@ -288,10 +288,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             move |e| event(&mut e.persistent),
             priority,
             move |game, _i, (), details, p| {
+                // Resume and ordering must use the same priority as registration.
+                let priority = priority + p.priority_delta;
                 if let Some(mut phase) = game.events.pop() {
                     if let Some(ref c) = phase.player.handler
                         && let Some(ref action) = c.response
-                        && c.priority == priority
+                        && (c.priority == priority || (c.priority == priority - p.priority_delta && c.origin == p.origin))
                     {
                         let mut current = phase.clone();
                         current
@@ -303,6 +305,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         let r = c.request.clone();
                         let a = action.clone();
                         phase.player.handler = None;
+                        phase.player.last_priority_used = Some(priority);
                         game.events.push(phase);
                         end_custom_phase.clone()(game, p, a, r, details);
                         return;
@@ -1067,7 +1070,9 @@ where
     let deinitialize_event = event.clone();
     let initializer = move |game: &mut Game, p: &EventPlayer, prio_delta: i32| {
         let e = event(&mut p.get_mut(game).events);
-        e.add_listener_mut(listener.clone(), priority + prio_delta, p.clone());
+        let mut player = p.clone();
+        player.priority_delta = prio_delta;
+        e.add_listener_mut(listener.clone(), priority + prio_delta, player);
     };
     let deinitializer = move |game: &mut Game, p: &EventPlayer| {
         let e = deinitialize_event(&mut p.get_mut(game).events);

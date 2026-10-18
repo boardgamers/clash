@@ -67,6 +67,7 @@ pub fn check_event_origin() -> EventOrigin {
 pub(crate) struct EventPlayer {
     pub index: usize,
     pub origin: EventOrigin,
+    pub priority_delta: i32,
 }
 
 impl EventPlayer {
@@ -75,6 +76,7 @@ impl EventPlayer {
         Self {
             index: player_index,
             origin,
+            priority_delta: 0,
         }
     }
 
@@ -113,6 +115,7 @@ impl EventPlayer {
         Self {
             index: self.index,
             origin,
+            priority_delta: self.priority_delta,
         }
     }
 

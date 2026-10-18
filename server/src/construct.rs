@@ -78,7 +78,7 @@ pub fn can_construct(
         player,
         !discounts.contains(&ConstructDiscount::NoCityActivation) && cost_info.activate_city,
     )?;
-    if city.effective_mood() == MoodState::Angry {
+    if city.mood_for_city_action(player) == MoodState::Angry {
         return Err("City is angry".to_string());
     }
     let can_afford = discounts.contains(&ConstructDiscount::NoResourceCost)

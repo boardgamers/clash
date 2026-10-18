@@ -16,25 +16,12 @@ pub(crate) fn sea_blockade() -> Objective {
         port location of another player",
     )
     .status_phase_progress(|game, player| {
-        let enemy_ports = game
-            .players
-            .iter()
-            .flat_map(|p| {
-                p.cities
-                    .iter()
-                    .filter_map(|c| if p.is_human() { c.port_position } else { None })
-            })
-            .collect_vec();
-
-        vec![ObjectiveProgress::new(
-            "Units at port locations",
-            player
-                .units
-                .iter()
-                .filter(|u| enemy_ports.contains(&u.position))
-                .count(),
-            2,
-        )]
+        let most_ships = game.players.iter()
+            .filter(|p| p.is_human() && p.index != player.index)
+            .flat_map(|p| p.cities.iter().filter_map(|c| c.port_position))
+            .map(|port| player.units.iter().filter(|u| u.is_ship() && u.position == port).count())
+            .max().unwrap_or(0);
+        vec![ObjectiveProgress::new("Ships at an opponent's port", most_ships, 2)]
     })
     .build()
 }
@@ -318,4 +305,30 @@ pub(crate) fn versatility() -> Objective {
         )]
     })
     .build()
+}
+
+#[cfg(test)]
+mod blockade_tests {
+    use super::*;
+    #[test]
+    fn only_ships_together_at_an_opponents_port_count() {
+        let data = serde_json::from_str::<crate::game_data::GameData>(include_str!("../../../tests/test_games/advances/forced_labor.json")).unwrap();
+        let cache = crate::cache::Cache::new(&data.options);
+        let mut game = crate::game::Game::from_data(data, cache, crate::game::GameContext::Play);
+        let port = game.players[0].cities[1].port_position.unwrap();
+        let check = sea_blockade().status_phase_check.unwrap();
+        for p in game.players.iter_mut().skip(1) { for c in &mut p.cities { c.port_position = None; } }
+        game.players[0].units.truncate(2);
+        for unit in &mut game.players[0].units { unit.position = port; unit.unit_type = UnitType::Ship; }
+        assert!(!check(&game, game.player(0)), "own port");
+        game.players[1].cities[0].port_position = Some(port);
+        assert!(check(&game, game.player(0)), "two ships at enemy port");
+        game.players[0].units[1].unit_type = UnitType::Infantry;
+        assert!(!check(&game, game.player(0)), "passengers do not count");
+        game.players[0].units[1].unit_type = UnitType::Ship;
+        let other = crate::position::Position::from_offset("D2");
+        game.players[1].cities[1].port_position = Some(other);
+        game.players[0].units[1].position = other;
+        assert!(!check(&game, game.player(0)), "split across ports");
+    }
 }

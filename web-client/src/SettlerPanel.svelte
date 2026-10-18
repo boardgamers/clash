@@ -196,7 +196,7 @@
             {:else if d.carrier != null}<Ship size={16} />Board ship
             {:else if d.attack}<Swords size={16} />{Object.values(d.payment).some(Boolean) ? 'Pay' : (d.label ?? 'Attack')}
             {:else if d.terrain === 'Water' && $session.moveDestinations.some(other => other.position === d.position && other.label === 'Attack pirates')}<Ship size={16} />Sail peacefully
-            {:else}<TerrainIcon terrain={d.terrain} />{terrainInfo(d.terrain).label}{/if}
+            {:else}<TerrainIcon terrain={d.terrain} />{d.label ?? terrainInfo(d.terrain).label}{/if}
             {#if Object.values(d.payment).some(Boolean)}<ResourceAmount pile={d.payment} />{/if}
           </button>
         {/if}{/each}
@@ -273,7 +273,7 @@
               ? 'Board ship'
               : disembarking
                 ? 'Disembark'
-                : 'Move here'}
+                : (destination.label ?? 'Move here')}
         {#if Object.values(destination.payment).some(Boolean)}<ResourceAmount pile={destination.payment} />{/if}
         {#if !$session.view?.stopMovement}<span class="settler-action-cost" aria-label="Costs 1 action"
             ><Zap size={13} />1</span

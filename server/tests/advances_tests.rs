@@ -1001,3 +1001,22 @@ fn arts_can_reserve_its_fee_from_great_arena_mood() {
     game.players[1].resources = ResourcePile::empty();
     assert!(influence_culture_boost_cost(&game, 1, &target, &kind, true, false, 0).is_err());
 }
+
+#[test]
+fn forced_labor_allows_construction_but_not_second_activation() {
+    use server::construct::can_construct;
+    use server::city_pieces::Building;
+    use server::player::CostTrigger;
+    let mut game = JSON.load_game("forced_labor");
+    game.players[0].advances.insert(server::advance::Advance::Writing);
+    let check = |g: &server::game::Game| {
+        let p = g.player(0);
+        can_construct(&p.cities[0], Building::Academy, p, g, CostTrigger::NoModifiers, &[])
+    };
+    assert!(check(&game).is_err());
+    game = server::game_api::execute(game, custom_action(CustomActionType::ForcedLabor), 0);
+    game = server::game_api::execute(game, payment_response(ResourcePile::mood_tokens(1)), 0);
+    assert!(check(&game).is_ok(), "{:?}", check(&game));
+    game.players[0].cities[0].angry_activation = true;
+    assert!(check(&game).is_err());
+}

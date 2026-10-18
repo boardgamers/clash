@@ -2745,3 +2745,26 @@ test('Rituals happiness lets the player choose repeated resources or a mixed pay
     app.close();
   }
 });
+
+test('Viking ship conversion takes priority over passenger-only landing', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const game = JSON.parse(fixture('civilizations/vikings/ship_construction'));
+    game.players[0].units = [
+      { id: 3, position: 'D2', unit_type: 'Ship' },
+      { id: 4, position: 'D2', unit_type: 'Infantry', carrier_id: 3 },
+      { id: 5, position: 'D2', unit_type: 'Infantry', carrier_id: 3 },
+    ];
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.openUnits([3]);
+    assert.ok(app.session().moveDestinations.some(d => d.position === 'C2'));
+    assert.ok(app.session().landingTargets?.includes('C2'));
+    c.selectTile('C2');
+    assert.equal(app.sent.length, 1);
+    const move = JSON.parse(app.sent[0]).Movement.Move;
+    assert.deepEqual(move.units, [3]);
+    assert.equal(move.destination, 'C2');
+    assert.equal(app.session().disembarkCarriers, undefined);
+  } finally { app.close(); }
+});

@@ -1102,7 +1102,8 @@ export class Controller {
       this.toggleHappinessCity(position);
       return;
     }
-    if (s.mode === 'settlers' && s.landingTargets?.includes(position)) {
+    if (s.mode === 'settlers' && s.landingTargets?.includes(position) &&
+      !s.moveDestinations.some((d) => d.position === position)) {
       const ships = s.selectedUnits.filter((id) => s.view?.units?.find((u) => u.id === id)?.type === 'Ship');
       const landing = passengerLandings(s.view, ships, (ids) => this.movementDestinations(ids)).find(
         (d) => d.position === position,

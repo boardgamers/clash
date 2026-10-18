@@ -116,6 +116,15 @@ impl City {
         }
     }
 
+    pub(crate) fn mood_for_city_action(&self, player: &Player) -> MoodState {
+        let mood = self.effective_mood();
+        if mood == Angry && player.played_once_per_turn_actions.contains(&SpecialAction::Custom(ForcedLabor)) {
+            Neutral
+        } else {
+            mood
+        }
+    }
+
     pub fn can_activate(&self) -> bool {
         !self.angry_activation
     }

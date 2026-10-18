@@ -161,7 +161,7 @@ pub(crate) fn convert_to_settler_range(
                 .count()
         })
         .sum::<usize>() as u8;
-    let standing = present.iter().filter(|u| u.is_army_unit()).count() as u8;
+    let standing = present.iter().filter(|u| u.is_army_unit() && !u.carrier_id.is_some_and(|id| units.iter().any(|ship| ship.id == id))).count() as u8;
     let max = units.len() as u8;
     (0..=max)
         .filter(|&i| can_add(p, carried + standing, i, max - i))

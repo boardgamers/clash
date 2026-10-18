@@ -343,3 +343,34 @@ fn fortress_without_army_cannot_use_tactical_retreat_even_from_a_saved_prompt() 
         .is_err()
     );
 }
+
+#[test]
+fn high_ground_is_not_skipped_after_attacker_flanking() {
+    let mut game = JSON.load_game("high_ground");
+    game.players[0].action_cards = vec![42];
+    game.players[1].action_cards = vec![40];
+    for (player, action) in [
+        (0, move_action(vec![0], Position::from_offset("C1"))),
+        (0, Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(42)]))),
+        (1, Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(40)]))),
+    ] {
+        game = server::game_api::execute(game, action, player);
+    }
+    let data = serde_json::to_value(game.data()).unwrap();
+    let text = data["log"].to_string();
+    assert!(text.contains("High Ground prevents opponent"));
+    assert!(text.contains("Flanking added 1 extra die"));
+    fn check(value: &serde_json::Value) {
+        if let Some(roll) = value.get("CombatRoll") {
+            if value["player"] == 0 {
+                assert!(roll["rolls"].as_array().unwrap().iter().all(|r| r["bonus"] == false));
+            }
+        }
+        match value {
+            serde_json::Value::Array(a) => a.iter().for_each(check),
+            serde_json::Value::Object(o) => o.values().for_each(check),
+            _ => (),
+        }
+    }
+    check(&data["log"]);
+}

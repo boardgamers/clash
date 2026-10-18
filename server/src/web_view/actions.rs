@@ -263,6 +263,12 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
                         ));
                 let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":if route.ignore_terrain_movement_restrictions { vec!["Roads: ignores Mountain and Forest penalties. These units can move again in a new Move action unless they fight a battle."] } else { terrain_notes(game,p,&units,route.destination) },"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),"breaksDiplomacy":breaks_diplomacy,
                     "action":Action::Movement(MovementAction::Move(MoveUnits::new(units.clone(),route.destination,carrier,payment)))});
+                let mut offer = offer;
+                if carrier.is_none() && units.iter().any(|id| p.get_unit(*id).is_ship()) && game.map.is_land(route.destination) {
+                    offer["label"] = json!("Convert & move ashore");
+                } else if carrier.is_none() && units.iter().all(|id| !p.get_unit(*id).is_ship()) && game.map.is_sea(route.destination) {
+                    offer["label"] = json!("Convert to ships");
+                }
                 if !destinations.contains(&offer) {
                     destinations.push(offer);
                 }
