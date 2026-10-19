@@ -1430,12 +1430,14 @@ export class Controller {
       index < 0 ? (direction > 0 ? 0 : water.length - 1) : (index + direction + water.length) % water.length;
     this.patch({ seaRouteStart: water[next] });
   }
-  beginCollect(position?: string, preferFree = false) {
+  beginCollect(position?: string, preferFree = position !== undefined) {
     const s = get(this.session);
     if (s.pending) return;
     const offers = s.view?.collectActions ?? [];
     const variant =
-      (preferFree ? offers.find((offer) => offer.free) : undefined)?.value ?? offers[0]?.value ?? 'Collect';
+      (preferFree ? offers.find((offer) => offer.free && (!position ||
+        this.query<CollectionPotential[]>({ kind: 'collectionPotential', variant: offer.value })
+          .some((city) => city.position === position && city.amount > 0))) : undefined)?.value ?? offers[0]?.value ?? 'Collect';
     const city =
       position ??
       defaultCity(
@@ -1469,10 +1471,17 @@ export class Controller {
     const s = get(this.session);
     const city = s.view?.cities.find(city => city.position === s.city);
     if (!s.view?.canPlay || s.playback || !city || city.reason || !city.capacity) return;
-    const tiles = new Map<string, Choice>();
-    for (const choice of city.choices) if (!tiles.has(choice.position)) tiles.set(choice.position, choice);
+    const tiles = new Map<string, Choice[]>();
+    for (const choice of city.choices) {
+      const options = tiles.get(choice.position) ?? [];
+      options.push(choice);
+      tiles.set(choice.position, options);
+    }
     if (tiles.size !== city.capacity) return;
-    const selection = [...tiles.values()].map(choice => ({ ...choice, times: 1 }));
+    const selection = [...tiles.values()]
+      .filter(options => options.length === 1)
+      .map(([choice]) => ({ ...choice, times: 1 }));
+    if (!selection.length) return;
     try {
       const preview = this.query<NonNullable<Session['preview']>>({
         kind: 'collect', city: s.city, selections: selection, variant: s.collectVariant, ballcourts: false,

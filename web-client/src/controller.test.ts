@@ -2786,3 +2786,56 @@ test('spectators and replay viewers can inspect hexes without sending game actio
     assert.equal(app.sent.length,0);
   } finally {app.close();}
 });
+
+test('city collection prefers eligible free actions, including Tributes only in the leader city', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    c.setPlayer(0);
+    const game = JSON.parse(fixture('advances/collect_free_economy'));
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.beginCollect('A1');
+    assert.equal(app.session().view!.collectActions!.find(a => JSON.stringify(a.value) === JSON.stringify(app.session().collectVariant))!.name, 'Free Economy');
+    game.players[0].advances = game.players[0].advances.filter((a: string) => a !== 'FreeEconomy');
+    game.players[0].civilization = 'Aztecs';
+    game.players[0].units[0].unit_type = { Leader: 'Acamapichtli' };
+    await c.load(engine.stripSecret(JSON.stringify(game), 0));
+    c.beginCollect('C2');
+    const tribute = app.session().view!.collectActions!.find(a => a.name === 'Tributes');
+    assert(tribute);
+    assert.deepEqual(app.session().collectVariant, tribute.value);
+    c.beginCollect('A1');
+    assert.equal(app.session().collectVariant, 'Collect');
+    assert.deepEqual(app.sent, []);
+  } finally { app.close(); }
+});
+
+test('forced collection preselects single-choice tiles while leaving Port resource choices open', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const raw = await engine.init(2, [], {}, 'collect-port-choices', {});
+    const game = JSON.parse(raw), seat = engine.currentPlayer(raw), player = game.players[seat];
+    player.advances.push('Fishing');
+    const city = player.cities[0];
+    city.mood_state = 'Happy';
+    city.city_pieces = { port: seat };
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(JSON.stringify(game), seat));
+    const initial = app.session().view!.cities[0];
+    const neighbors = [...new Set(initial.choices.filter(choice => choice.position !== city.position).map(choice => choice.position))];
+    const [other, forced] = neighbors;
+    for (const tile of game.map.tiles) tile[1] = tile[0] === city.position || tile[0] === forced ? 'Fertile' : tile[0] === other ? 'Water' : 'Barren';
+    city.port_position = other;
+    await c.load(engine.stripSecret(JSON.stringify(game), seat));
+    const options = app.session().view!.cities[0];
+    assert.equal(options.capacity, 3);
+    assert(options.choices.filter(choice => choice.position === other).length > 1);
+    c.beginCollect(city.position);
+    assert.deepEqual(app.session().selection.map(choice => choice.position).sort(), [city.position, forced].sort());
+    c.selectCollectionTile(other);
+    assert.equal(app.session().collectionTile, other);
+    c.toggleChoice(options.choices.find(choice => choice.position === other)!);
+    assert.equal(app.session().selection.length, 3);
+    assert(app.session().preview?.action);
+    assert.deepEqual(app.sent, []);
+  } finally { app.close(); }
+});
