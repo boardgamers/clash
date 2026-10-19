@@ -530,7 +530,7 @@ impl IncidentBuilder {
             .decrease_mood(target, mood_modifier, cities2)
     }
 
-    fn add_myths_payment(
+    pub(crate) fn add_myths_payment(
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,

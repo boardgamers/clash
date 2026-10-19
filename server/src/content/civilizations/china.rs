@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
-use crate::combat::Combat;
+use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatRoundEnd;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::AbilityBuilder;
@@ -144,6 +144,7 @@ fn fireworks() -> SpecialAdvanceInfo {
         ),
         ResourcePile::wood(1) + ResourcePile::ore(1),
         91,
+        false,
         |c, _r, _game| c.stats.round == 1,
     )
     .build()
@@ -153,6 +154,7 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
     b: B,
     pile: ResourcePile,
     priority: i32,
+    once_per_battle: bool,
     filter: impl Fn(&Combat, CombatRole, &Game) -> bool + Send + Sync + 'static + Clone,
 ) -> B {
     b.add_payment_request_listener(
@@ -162,7 +164,8 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
             let player_index = p.index;
             let player = p.get(game);
             let combat = &e.combat;
-            if !filter(combat, combat.role(player_index), game) {
+            if (once_per_battle && combat.modifiers.contains(&CombatModifier::TacticianUsed(player_index)))
+                || !filter(combat, combat.role(player_index), game) {
                 return None;
             }
 
@@ -184,6 +187,9 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
             if !s.choice[0].is_empty() {
                 s.log(game, "Ignore the first hit");
                 apply_ignore_hit(e, s.player_index, true);
+                if once_per_battle {
+                    e.combat.modifiers.push(CombatModifier::TacticianUsed(s.player_index));
+                }
             }
         },
     )
@@ -359,10 +365,11 @@ fn qin() -> LeaderInfo {
         ignore_hit_ability(
             LeaderAbility::builder(
                 "Tactician",
-                "Land battle with leader: You may pay 2 culture tokens to ignore a hit.",
+                "Land battle with leader: Once per battle, you may pay 2 culture tokens to ignore a hit.",
             ),
             ResourcePile::culture_tokens(2),
             92,
+            true,
             Combat::has_leader,
         )
         .build(),

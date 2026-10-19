@@ -37,6 +37,7 @@ pub enum CombatModifier {
     BladedTusksDefender,
     TrojanHorse,
     GreatWarlord,
+    TacticianUsed(usize),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]

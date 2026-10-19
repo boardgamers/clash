@@ -1044,8 +1044,11 @@ export class Controller {
     this.patch({mode:'port',portPlacement:{city:s.city,payment:{...payment},choices},tilePanel:false,seaRoutes:false,tradeRoutes:false,pirateSpawns:false,error:''});
   }
   selectTile(position: string, pick: MapPick = { kind: 'tile' }) {
-    if (get(this.session).playback) return;
     const s = get(this.session);
+    if (s.playback || s.seat == null) {
+      this.inspectTile(position);
+      return;
+    }
     if (s.mode === 'port') {
       if (s.pending) return;
       const choice = s.portPlacement?.choices.find(c => c.position === position);
@@ -1137,7 +1140,11 @@ export class Controller {
   }
   inspectTile(position: string) {
     const s = get(this.session);
-    if (s.pending || s.playback) return;
+    if (s.pending && !s.playback) return;
+    if (s.playback || s.seat == null) {
+      this.patch({ focus: position, tilePanel: true, mode: 'overview' });
+      return;
+    }
     if (s.view?.cities.some((c) => c.position === position)) this.selectCity(position);
     this.closeActivity();
     this.patch({ focus: position, tilePanel: true, mode: 'overview', abilitiesOpen: false, error: '' });

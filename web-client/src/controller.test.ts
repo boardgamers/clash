@@ -2768,3 +2768,21 @@ test('Viking ship conversion takes priority over passenger-only landing', async 
     assert.equal(app.session().disembarkCarriers, undefined);
   } finally { app.close(); }
 });
+
+test('spectators and replay viewers can inspect hexes without sending game actions', async () => {
+  const app=paymentController(),c=app.controller;
+  try {
+    const raw=await engine.init(2,[],{},'inspect-replay',{});
+    await c.load(engine.stripSecret(raw,-1));
+    c.patch({seat:undefined});
+    c.selectTile('C2');
+    assert.equal(app.session().focus,'C2');
+    assert.equal(app.session().tilePanel,true);
+    const frame={cursor:0,actor:0,ended_turn:false,title:'Before',age:1,round:1,tiles:[['C2','Water']],players:[]} as any;
+    c.patch({tilePanel:false,playback:{frame,index:0,total:1,start:0,end:0,range:'all',automatic:false,playing:false,animate:false}});
+    c.selectTile('C2');
+    assert.equal(app.session().tilePanel,true);
+    assert.equal(app.session().playback?.frame,frame);
+    assert.equal(app.sent.length,0);
+  } finally {app.close();}
+});

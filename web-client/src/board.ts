@@ -426,7 +426,7 @@ export class World {
     this.setHovered(null);
   };
   private canPick(position: string) {
-    return !this.pending && (this.selectable === null || this.selectable.has(position));
+    return this.replaying || (!this.pending && (this.selectable === null || this.selectable.has(position)));
   }
   private hitTile(x: number, y: number): string | null {
     return this.hitTarget(x, y)?.position ?? null;
@@ -1171,7 +1171,7 @@ export class World {
       position,
       overlay.get(position) ?? terrain,
     ]);
-    this.selectable = exploration
+    this.selectable = s.seat == null ? null : exploration
       ? new Set()
       : s.view?.decision
         ? new Set(decisionPositions)
@@ -1593,7 +1593,7 @@ export class World {
             const carried = surfaceUnits.reduce((sum, unit) => sum + (unit.carried_units?.length ?? 0), 0);
             const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
             const label = document.createElement('button');
-            label.className = 'unit-map-label';
+            label.className = `unit-map-label${carried ? ' has-passengers' : ''}`;
             label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
             label.setAttribute('aria-label', `Inspect ${description}`);
             this.unitBadges.push(
@@ -1601,6 +1601,7 @@ export class World {
                 target: label,
                 props: {
                   groups: [...counts.values()],
+                  hasPassengers: carried > 0,
                   symbol:
                     s.colorBlind && !['Pirates', 'Barbarians'].includes(player.civilization)
                       ? playerSymbol(player.id, s.playerSymbols)

@@ -362,6 +362,7 @@ pub(crate) fn execute_movement_action(
             return Err("No actions left".to_string());
         }
         pay_action(game, p);
+        reset_cartography(game, player_index);
         game.state = Movement(MoveState::new());
     }
 
@@ -856,4 +857,11 @@ fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
 #[must_use]
 pub fn move_event_origin() -> EventOrigin {
     EventOrigin::Ability("Move".to_string())
+}
+
+// A free Move action is distinct even when the action-point count is unchanged.
+pub(crate) fn reset_cartography(game: &mut Game, player: usize) {
+    for key in ["Cartography", "Cartography-navigation"] {
+        game.player_mut(player).event_info.remove(key);
+    }
 }

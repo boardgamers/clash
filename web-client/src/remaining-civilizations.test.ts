@@ -1522,3 +1522,38 @@ for (const terrain of ['Mountain', 'Fertile', 'Mixed']) {
     }
   });
 }
+
+test('Mercenaries Draft gold stays separate from a recruited leader and drafts only one unit', async () => {
+  const g=await carthageSea(), index=seat(g), p=g.players[index];
+  addAdvance(p,'Draft');
+  p.cities[0].city_pieces.temple=index;
+  for(const units of [{ships:1,leader:'Hanno'},{infantry:1,leader:'Hanno'}]) {
+    const payment={gold:1,mood_tokens:1,culture_tokens:1};
+    const offer=query(g,{kind:'recruit',city:'D2',units,replaced:[],payment});
+    assert(offer.payments.some((v:any)=>JSON.stringify(v)===JSON.stringify(offer.payment)));
+    const after=move(g,offer.action);
+    assert.equal(after.players[index].resources.gold,p.resources.gold-1);
+    assert.equal(after.players[index].resources.mood_tokens,p.resources.mood_tokens-1);
+    assert.throws(()=>query(g,{kind:'recruit',city:'D2',units,replaced:[],payment:{gold:2,culture_tokens:1}}));
+  }
+  assert.throws(()=>query(g,{kind:'recruit',city:'D2',units:{ships:1,infantry:1},replaced:[],payment:{gold:2}}),
+    'One ship and one Infantry cannot both be drafted');
+  addAdvance(p,'CivilLiberties');
+  assert(query(g,{kind:'recruit',city:'D2',units:{ships:1,leader:'Hanno'},replaced:[],payment:{gold:2,mood_tokens:1,culture_tokens:1}}));
+});
+
+test('Navigator grants Cartography again after a normal Move at the same action-point count', async () => {
+  const g=await carthageSea('Hanno'), index=seat(g),p=g.players[index];
+  g.players.find((p:any)=>p.civilization==='Pirates').units=[];
+  p.resources.ideas=0;
+  p.units.push({id:2,position:'D3',unit_type:'Ship'});
+  p.next_unit_id=3;
+  let after=move(g,query(g,{kind:'movement',units:[2]}).destinations.find((d:any)=>d.position==='D4').action);
+  assert.equal(after.players[index].resources.ideas,1);
+  if(after.state?.Movement) after=move(after,{Movement:'Stop'});
+  const actions=after.actions_left;
+  after=move(after,view(after).specialActions.find((a:any)=>a.name==='Navigator').action);
+  after=move(after,query(after,{kind:'movement',units:[0]}).destinations.find((d:any)=>d.position==='D4').action);
+  assert.equal(after.actions_left,actions);
+  assert.equal(after.players[index].resources.ideas,2);
+});

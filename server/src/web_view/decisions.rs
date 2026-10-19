@@ -246,7 +246,8 @@ pub(super) fn payment_choices(
     }
     // Keep choice cards for bounded exchanges such as Alphabet (one route can
     // yield two ideas). Validate every candidate against the real conversion rules.
-    let mut max_amount = u16::from(cost.default_payment().amount());
+    let mut max_amount = u16::from(std::iter::once(&cost.default)
+        .chain(cost.alternatives.iter()).map(ResourcePile::amount).max().unwrap_or(0));
     for conversion in &cost.conversions {
         let from = conversion
             .from

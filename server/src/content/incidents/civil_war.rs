@@ -58,49 +58,54 @@ fn civil_war(id: u8) -> Incident {
             select a city to decrease the mood.",
         IncidentBaseEffect::None,
     )
-    .add_decrease_mood(
+    .add_myths_payment(
         IncidentTarget::ActivePlayer,
         MoodModifier::Decrease,
-        |p, _game, _| {
-            if non_happy_cites_with_infantry(p).is_empty() {
-                DecreaseMood::new(city::non_angry_cites(p), 1)
+        |_game, p, _| {
+            let cities = non_happy_cites_with_infantry(p);
+            u8::from(if cities.is_empty() {
+                !city::non_angry_cites(p).is_empty()
             } else {
-                DecreaseMood::none()
-            }
+                cities.iter().any(|pos| p.get_city(*pos).mood_state != MoodState::Angry)
+            })
         },
     )
     .add_incident_position_request(
         IncidentTarget::ActivePlayer,
         0,
         |game, p, i| {
-            let p = p.get(game);
-            let suffix = if !city::non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
-                " and decrease the mood"
+            let player = p.get(game);
+            let cities = non_happy_cites_with_infantry(player);
+            if cities.is_empty() {
+                if i.player.myths_payment > 0 { return None; }
+                Some(PositionRequest::new(city::non_angry_cites(player), 1..=1,
+                    "Select a city to decrease its mood one step"))
             } else {
-                ""
-            };
-            let choices = non_happy_cites_with_infantry(p);
-            let needed = 1..=1;
-            let description =
-                &format!("Select a non-Happy city with an Infantry to kill the Infantry {suffix}");
-            Some(PositionRequest::new(choices, needed, description))
+                Some(PositionRequest::new(cities, 1..=1,
+                    if i.player.myths_payment > 0 {
+                        "Select a non-Happy city to lose one Infantry (mood protected by Myths)"
+                    } else {
+                        "Select a non-Happy city to lose one Infantry and decrease its mood one step"
+                    }))
+            }
         },
         |game, s, i| {
             let position = s.choice[0];
-            let mood = game.get_any_city(position).mood_state.clone();
-            if i.player.payment.is_empty() && !matches!(mood, MoodState::Angry) {
+            // Decide the branch before changing mood; a Happy city becoming
+            // Neutral must not enter the infantry-loss branch afterwards.
+            let lose_infantry = non_happy_cites_with_infantry(game.player(s.player_index))
+                .contains(&position);
+            if i.player.myths_payment == 0
+                && game.get_any_city(position).mood_state != MoodState::Angry {
                 decrease_mod_and_log(game, s, MoodModifier::Decrease);
             }
-            let unit = game
-                .player(s.player_index)
-                .get_units(position)
-                .iter()
-                .filter(|u| u.is_infantry())
-                .sorted_by_key(|u| u.movement_restrictions.len())
-                .next_back()
-                .expect("infantry should exist")
-                .id;
-            kill_units(game, &[unit], s.player_index, None, &s.origin);
+            if lose_infantry {
+                let unit = game.player(s.player_index).get_units(position).iter()
+                    .filter(|u| u.is_infantry())
+                    .max_by_key(|u| u.movement_restrictions.len())
+                    .expect("infantry should exist").id;
+                kill_units(game, &[unit], s.player_index, None, &s.origin);
+            }
         },
     )
     .build()

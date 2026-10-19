@@ -208,12 +208,31 @@ fn warbeasts() -> SpecialAdvanceInfo {
 fn mercenaries() -> SpecialAdvanceInfo {
     SpecialAdvanceInfo::builder(SpecialAdvance::Mercenaries,SpecialAdvanceRequirement::Advance(Advance::Draft),"Mercenaries","Use gold in place of mood tokens for Draft. A city with a Port may Draft a Ship instead of an Infantry.")
         .add_transient_event_listener(|e|&mut e.recruit_cost,-1,|cost,units,game,p|{
-            let draft=ResourcePile::mood_tokens(crate::content::advances::warfare::draft_cost(p.get(game)));
-            if units.ships>0 {
-                if let Some(c)=cost.cost.conversions.iter_mut().find(|c|c.from.contains(&UnitType::Infantry.cost())){c.from.push(UnitType::Ship.cost());}
-                else {cost.cost.conversions.insert(0,PaymentConversion::limited(UnitType::Ship.cost(),draft.clone(),1));}
+            let draft = crate::content::advances::warfare::draft_cost(p.get(game));
+            // Draft replaces exactly one unit's resource cost. Keep its tokens
+            // separate from a leader's mood cost, which Mercenaries cannot pay.
+            let infantry_draft = cost.cost.conversions.iter().any(|c|
+                c.from.contains(&UnitType::Infantry.cost()) && c.to == ResourcePile::mood_tokens(draft));
+            cost.cost.conversions.retain(|c| !c.from.contains(&UnitType::Infantry.cost())
+                || c.to != ResourcePile::mood_tokens(draft));
+            let bases = std::iter::once(cost.cost.default.clone())
+                .chain(cost.cost.alternatives.clone()).collect::<Vec<_>>();
+            for base in bases {
+                for (count, unit) in [(if infantry_draft { units.infantry } else { 0 }, UnitType::Infantry), (units.ships, UnitType::Ship)] {
+                    if count == 0 || !base.has_at_least(&unit.cost()) { continue; }
+                    for gold in 0..=draft {
+                        let mut alternative = base.clone();
+                        alternative -= unit.cost();
+                        alternative += ResourcePile::mood_tokens(draft - gold) + ResourcePile::gold(gold);
+                        if !cost.cost.alternatives.contains(&alternative) {
+                            cost.cost.alternatives.push(alternative);
+                        }
+                    }
+                }
             }
-            if units.ships>0||units.infantry>0 {cost.cost.conversions.push(PaymentConversion::limited(ResourcePile::mood_tokens(1),ResourcePile::gold(1),draft.amount()));cost.info.add_log(p,"Used Mercenaries for recruitment");}
+            if units.ships > 0 || units.infantry > 0 {
+                cost.info.add_log(p,"Used Mercenaries for recruitment");
+            }
         }).build()
 }
 fn pirate_allies() -> SpecialAdvanceInfo {
@@ -369,6 +388,7 @@ fn hanno() -> LeaderInfo {
     LeaderInfo::new(Leader::Hanno,"Hanno",
         LeaderAbility::builder("Navigator","Once per turn, move Hanno with a group of Ships as a free action. Those Ships must not have moved this turn and cannot move again afterwards. Hanno may have moved earlier this turn.")
             .add_custom_action(CustomActionType::Navigator,|c|c.once_per_turn().free_action().no_resources(),|b|b.add_simple_persistent_event_listener(|e|&mut e.custom_action,-1,|game,p,_|{
+                crate::movement::reset_cartography(game,p.index);
                 let allowed=navigator_ships(p.get(game));let mut state=MoveState::new();state.unit_only=true;state.movement_actions_left=1;state.moved_units=p.get(game).units.iter().filter(|u|!allowed.contains(&u.id)).map(|u|u.id).collect();game.state=GameState::Movement(state);p.get_mut(game).event_info.insert("Navigator active".into(),"yes".into());
             }),|_,p|p.units.iter().find(|u|u.unit_type==UnitType::Leader(Leader::Hanno)).is_some_and(|u|u.carrier_id.is_some()&&!navigator_ships(p).is_empty()))
             .add_transient_event_listener(|e|&mut e.after_action,29,|game,(),(),p|complete_navigator(game,p.index)).build(),

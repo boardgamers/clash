@@ -19,6 +19,7 @@
   import EventMarkers from './EventMarkers.svelte';
   import CivilizationPicker from './CivilizationPicker.svelte';
   import TilePanel from './TilePanel.svelte';
+  import TileInspection from './TileInspection.svelte';
   import { onMount } from 'svelte';
   import {
     Skull,
@@ -981,7 +982,9 @@
           <h2>Loading game…</h2>
         </div>{/if}
       {#if boardError}<div class="map-warning" role="alert">{boardError}</div>{/if}
-      {#if $session.tilePanel && !$session.seaRoutes && $session.mode === 'overview' && !$session.view?.decision && !choiceDecision && !objectiveDecision && !$session.view?.explorationDecision}
+      {#if $session.tilePanel && ($session.playback || $session.seat == null)}
+        <TileInspection {controller} />
+      {:else if $session.tilePanel && !$session.seaRoutes && $session.mode === 'overview' && !$session.view?.decision && !choiceDecision && !objectiveDecision && !$session.view?.explorationDecision}
         <TilePanel {controller} onHighlight={(p) => world?.highlightCoordinate(p)} />
       {/if}
       <div class="map-controls">

@@ -271,6 +271,9 @@ impl PaymentOptions {
     #[must_use]
     pub fn possible_resource_types(&self) -> Vec<ResourceType> {
         let mut vec = self.default.types();
+        for alternative in &self.alternatives {
+            vec.extend(alternative.types());
+        }
         for conversion in &self.conversions {
             vec.extend(conversion.to.types());
         }
