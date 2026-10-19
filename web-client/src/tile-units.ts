@@ -31,3 +31,19 @@ export function tileUnitStacks(players: Player[], position: string) {
     return groups.size ? [{ player, groups: [...groups.values()] }] : [];
   });
 }
+
+/** Public snapshots may nest passengers, flatten them, or include both. */
+export function boardUnits(player: Player): Unit[] {
+  const units = new Map((player.units ?? []).map((unit) => [unit.id, unit]));
+  for (const carrier of player.units ?? []) {
+    for (const passenger of carrier.carried_units ?? []) {
+      units.set(passenger.id, {
+        ...units.get(passenger.id),
+        ...passenger,
+        position: carrier.position,
+        carrier_id: carrier.id,
+      });
+    }
+  }
+  return [...units.values()];
+}

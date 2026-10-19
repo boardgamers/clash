@@ -3709,7 +3709,7 @@ small {
   gap: 3px;
 }
 
-.world-labels.hide-unit-badges .unit-map-label:not(.has-passengers) {
+.world-labels.hide-unit-badges .unit-map-label {
   display: none;
 }
 

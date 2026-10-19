@@ -1,3 +1,4 @@
+import { boardUnits } from './tile-units';
 import { RegionOverlay } from './region-overlay';
 import { movementWaypoints } from './movement-animation';
 import { boardContentSignature } from './board-content';
@@ -1284,9 +1285,15 @@ export class World {
         const harborDirections = new Map([...portSites.values()].map((port) => [port.water, port.rotation]));
         const unitStacks = new Map<string, number>();
         const unitsByTile = new Map<string, number>();
-        for (const player of s.game.players)
-          for (const unit of player.units ?? [])
+        const mixedShipTiles = new Set<string>();
+        const renderedUnits = new Map(s.game.players.map((player) => [player.id, boardUnits(player)]));
+        const shipTiles = new Set([...renderedUnits.values()].flat().filter((unit) => unit.unit_type === 'Ship').map((unit) => unit.position));
+        for (const units of renderedUnits.values()) {
+          for (const unit of units) {
             unitsByTile.set(unit.position, (unitsByTile.get(unit.position) ?? 0) + 1);
+            if (unit.unit_type !== 'Ship' && shipTiles.has(unit.position)) mixedShipTiles.add(unit.position);
+          }
+        }
         for (const player of s.game.players) {
           for (const city of player.cities ?? []) {
             const [x, z] = positionXY(city.position);
@@ -1497,7 +1504,7 @@ export class World {
               ),
             });
           }
-          for (const unit of player.units ?? []) {
+          for (const unit of renderedUnits.get(player.id)!) {
             const [x, z] = positionXY(unit.position);
             const pawn = models.unit(
               unit.unit_type,
@@ -1542,11 +1549,16 @@ export class World {
               ux = 0;
             }
             const ship = unit.unit_type === 'Ship';
-            if (ship && count > 1 && count <= 4) {
+            const mixed = mixedShipTiles.has(unit.position);
+            if (mixed && count === 2) {
+              ux = stackIndex ? 0.34 : -0.34;
+              uz = 0;
+            }
+            if (ship && !mixed && count > 1 && count <= 4) {
               ux = stackIndex % 2 ? 0.27 : -0.27;
               uz = stackIndex < 2 ? 0.36 : -0.36;
             }
-            const harborDirection = ship ? harborDirections.get(unit.position) : undefined;
+            const harborDirection = ship && !mixed ? harborDirections.get(unit.position) : undefined;
             const inHarbor = harborDirection !== undefined && count <= 4;
             if (inHarbor) {
               // Moor side by side facing away from the wharf, leaving its entrance clear.
@@ -1557,6 +1569,8 @@ export class World {
             pawn.scale.setScalar(
               count > positions.length
                 ? Math.min(0.65, 5.2 / count)
+                : mixed
+                  ? count <= 2 ? 0.75 : 0.6
                 : inHarbor
                   ? count === 1
                     ? 0.8
@@ -1593,7 +1607,7 @@ export class World {
             const carried = surfaceUnits.reduce((sum, unit) => sum + (unit.carried_units?.length ?? 0), 0);
             const description = `${player.civilization} · ${position}: ${[...counts].map(([name, group]) => `${group.count} ${name}`).join(', ')}${carried ? ` · ${carried} aboard ships` : ''}`;
             const label = document.createElement('button');
-            label.className = `unit-map-label${carried ? ' has-passengers' : ''}`;
+            label.className = 'unit-map-label';
             label.style.setProperty('--player-color', playerColor(player.id, s.colorBlind, s.playerColors));
             label.setAttribute('aria-label', `Inspect ${description}`);
             this.unitBadges.push(
@@ -1601,7 +1615,6 @@ export class World {
                 target: label,
                 props: {
                   groups: [...counts.values()],
-                  hasPassengers: carried > 0,
                   symbol:
                     s.colorBlind && !['Pirates', 'Barbarians'].includes(player.civilization)
                       ? playerSymbol(player.id, s.playerSymbols)

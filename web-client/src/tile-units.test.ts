@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tileUnitStacks } from './tile-units.ts';
+import { boardUnits, tileUnitStacks } from './tile-units.ts';
 import type { Player } from './types.ts';
 
 test('tile summaries group units by owner and type, including leaders without internal identifiers', () => {
@@ -97,4 +97,19 @@ test('pirate ships retain their identity without marking passengers as pirates',
     ],
   );
   assert.equal(stacks[1].groups[0].pirate, true);
+});
+
+test('3D pieces include nested passengers once at their carrier position', () => {
+  const player: Player = { id: 0, civilization: 'Rome', units: [
+    { id: 0, position: 'C3', unit_type: 'Ship', carried_units: [
+      { id: 1, unit_type: 'Infantry' }, { id: 2, unit_type: { Leader: 'Augustus' } },
+    ] },
+    { id: 1, position: 'B2', unit_type: 'Infantry', carrier_id: 0 },
+    { id: 3, position: 'D4', unit_type: 'Settler' },
+  ] };
+  const units = boardUnits(player);
+  assert.equal(units.length, 4);
+  assert.deepEqual(units.filter((unit) => unit.position === 'C3').map((unit) => unit.id).sort(), [0, 1, 2]);
+  assert.equal(units.find((unit) => unit.id === 2)?.carrier_id, 0);
+  assert.equal(player.units?.[1].position, 'B2');
 });
