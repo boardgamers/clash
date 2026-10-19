@@ -2839,3 +2839,34 @@ test('forced collection preselects single-choice tiles while leaving Port resour
     assert.deepEqual(app.sent, []);
   } finally { app.close(); }
 });
+
+test('an extra collection tile remains selected until the player resolves the capacity warning', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const raw = await engine.init(2, [], {}, 'collect-all-tiles', {});
+    const seat = engine.currentPlayer(raw);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    const city = app.session().view!.cities[0];
+    const choices = [...new Map(city.choices.map(choice => [choice.position, choice])).values()];
+    assert(choices.length > city.capacity);
+    c.beginCollect(city.position);
+    for (const choice of choices.slice(0, city.capacity)) c.toggleChoice(choice);
+    assert(app.session().preview?.action);
+    const extra = choices[city.capacity];
+    c.toggleChoice(extra);
+    assert(app.session().selection.some(choice => choice.position === extra.position));
+    assert.equal(app.session().selection.length, city.capacity + 1);
+    assert.equal(app.session().preview, null);
+    assert.match(app.session().error, /Remove a selection/);
+    c.collect();
+    assert.deepEqual(app.sent, []);
+    c.toggleChoice(choices[0]);
+    assert.equal(app.session().selection.length, city.capacity);
+    assert(app.session().selection.some(choice => choice.position === extra.position));
+    assert.equal(app.session().error, '');
+    assert(app.session().preview?.action);
+    c.collect();
+    assert.equal(app.sent.length, 1);
+  } finally { app.close(); }
+});

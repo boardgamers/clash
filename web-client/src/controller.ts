@@ -1782,11 +1782,15 @@ export class Controller {
     const city = s.view.cities.find((c) => c.position === s.city)!;
     const extraCapacity = Number(!!s.ballcourts && !!city.ballcourts);
     const capacity = city.capacity + extraCapacity;
-    const selection = nextCollectionSelection(choice, s.selection, city, extraCapacity);
+    const selection = nextCollectionSelection(choice, s.selection, city, extraCapacity, true);
     if (!selection) {
       this.patch({
         error: `Choose up to ${capacity} ${capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection first.`,
       });
+      return;
+    }
+    if (selection.reduce((sum, tile) => sum + tile.times, 0) > capacity) {
+      this.patch({ selection, preview: null, error: `Choose up to ${capacity} ${capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection to collect.` });
       return;
     }
     try {
@@ -1801,7 +1805,7 @@ export class Controller {
         : null;
       this.patch({ selection, preview, error: '' });
     } catch (error) {
-      this.patch({ error: String(error) });
+      this.patch({ selection, preview: null, error: String(error) });
     }
   }
   startInfluence(move: Move, actionPayment: Pile, rangePayment: Pile) {
