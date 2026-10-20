@@ -41,11 +41,14 @@
 [data-clash-locale='ko'] {
   --clash-locale-font: 'Clash Korean';
 }
+[data-clash-locale='zh-CN'] {
+  --clash-locale-font: 'Clash ChineseSimplified';
+}
 [data-clash-locale='zh-TW'] {
   --clash-locale-font: 'Clash Chinese';
 }
-[data-clash-locale]:is([lang='hi'], [lang='fa'], [lang='ko'], [lang='zh-TW']),
-[data-clash-locale]:is([lang='hi'], [lang='fa'], [lang='ko'], [lang='zh-TW'])
+[data-clash-locale]:is([lang='hi'], [lang='fa'], [lang='ko'], [lang='zh-TW'], [lang='zh-CN']),
+[data-clash-locale]:is([lang='hi'], [lang='fa'], [lang='ko'], [lang='zh-TW'], [lang='zh-CN'])
   :is(h1, h2, h3, h4, h5, h6, button, input, select, textarea) {
   font-family: 'DM Sans', var(--clash-locale-font), sans-serif;
 }

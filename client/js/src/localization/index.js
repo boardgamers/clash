@@ -14,6 +14,7 @@ import catalog12 from "./vi.json";
 import catalog13 from "./it.json";
 import catalog14 from "./nl.json";
 import catalog15 from "./fa.json";
+import catalog16 from "./zh-CN.json";
 export const catalogs = {
   en: catalog0,
   de: catalog1,
@@ -31,4 +32,5 @@ export const catalogs = {
   it: catalog13,
   nl: catalog14,
   fa: catalog15,
+  "zh-CN": catalog16,
 };

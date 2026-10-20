@@ -5,6 +5,9 @@ import { createTranslator, resolveLocale } from './localization/runtime.js';
 test('resolves regional BGS language preferences', () => {
   assert.equal(resolveLocale('pt-PT'), 'pt-BR');
   assert.equal(resolveLocale('zh-Hant-HK'), 'zh-TW');
+  assert.equal(resolveLocale('zh-Hans-SG'), 'zh-CN');
+  assert.equal(resolveLocale('zh'), 'zh-CN');
+  assert.equal(resolveLocale('ZH_cn'), 'zh-CN');
   assert.equal(resolveLocale('fr_CA'), 'fr');
   assert.equal(resolveLocale('unknown'), 'en');
 });

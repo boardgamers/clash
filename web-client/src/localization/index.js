@@ -3,11 +3,13 @@ import arabicFont from './fonts/Arabic.woff2?url&no-inline';
 import devanagariFont from './fonts/Devanagari.woff2?url&no-inline';
 import koreanFont from './fonts/Korean.woff2?url&no-inline';
 import chineseFont from './fonts/Chinese.woff2?url&no-inline';
+import chineseSimplifiedFont from './fonts/ChineseSimplified.woff2?url&no-inline';
 const fontFaces = [
   ['Arabic', arabicFont],
   ['Devanagari', devanagariFont],
   ['Korean', koreanFont],
   ['Chinese', chineseFont],
+  ['ChineseSimplified', chineseSimplifiedFont],
 ]
   .map(
     ([name, url]) =>

@@ -11,6 +11,7 @@ export const languages = {
   'pt-BR': 'Português (Brasil)',
   ko: '한국어',
   'zh-TW': '繁體中文',
+  'zh-CN': '简体中文',
   vi: 'Tiếng Việt',
   it: 'Italiano',
   nl: 'Nederlands',
@@ -32,6 +33,7 @@ export function resolveLocale(value) {
   if (/^zh-(?:tw|hk|mo|hant)(?:-|$)/.test(tag)) {
     return 'zh-TW';
   }
+  if (/^zh(?:-|$)/.test(tag)) return 'zh-CN';
   return Object.keys(languages).find((locale) => locale === tag.split('-')[0]) ?? 'en';
 }
 

@@ -28,12 +28,14 @@ export async function setLocale(value, assets) {
     next === "fa"
       ? "Arabic"
       : next === "hi"
-      ? "Devanagari"
-      : next === "ko"
-        ? "Korean"
-        : next === "zh-TW"
-          ? "Chinese"
-          : "SourceSans";
+        ? "Devanagari"
+        : next === "ko"
+          ? "Korean"
+          : next === "zh-CN"
+            ? "ChineseSimplified"
+            : next === "zh-TW"
+              ? "Chinese"
+              : "SourceSans";
   const file =
     font === "SourceSans"
       ? "SourceSans3-Regular.ttf"

@@ -6,6 +6,7 @@ from fontTools import subset
 from fontTools.ttLib import TTFont
 
 parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--locale', action='append', help='Only rebuild the specified locale (repeatable)')
 parser.add_argument('--catalog-dir', default='client/js/src/localization')
 parser.add_argument('--output-dir', default='client/assets/localization')
 parser.add_argument('--cjk-font', default='/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc')
@@ -15,7 +16,9 @@ args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
 output = root / args.output_dir
 output.mkdir(parents=True, exist_ok=True)
-for locale, name, index in [('ko', 'Korean', 1), ('zh-TW', 'Chinese', 3), ('hi', 'Devanagari', None), ('fa', 'Arabic', None)]:
+for locale, name, index in [('ko', 'Korean', 1), ('zh-TW', 'Chinese', 3), ('zh-CN', 'ChineseSimplified', 2), ('hi', 'Devanagari', None), ('fa', 'Arabic', None)]:
+    if args.locale and locale not in args.locale:
+        continue
     catalog = json.loads((root / args.catalog_dir / f'{locale}.json').read_text())
     text = ''.join(catalog.values()) + ''.join(chr(i) for i in range(32, 256))
     font = TTFont(args.cjk_font, fontNumber=index) if index is not None else TTFont(args.arabic_font if locale == "fa" else args.devanagari_font)

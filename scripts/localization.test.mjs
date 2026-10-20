@@ -27,7 +27,11 @@ test("regional language preferences select supported catalogues", () => {
   assert.equal(resolveLocale("nl-BE"), "nl");
   assert.equal(resolveLocale("pt-PT"), "pt-BR");
   assert.equal(resolveLocale("zh-Hant-TW"), "zh-TW");
-  assert.equal(resolveLocale("zh-CN"), "en");
+  assert.equal(resolveLocale("zh-CN"), "zh-CN");
+  assert.equal(resolveLocale("zh"), "zh-CN");
+  assert.equal(resolveLocale("zh-Hans-SG"), "zh-CN");
+  assert.equal(resolveLocale("ZH_cn"), "zh-CN");
+  assert.equal(resolveLocale("zh-HK"), "zh-TW");
   assert.equal(resolveLocale(undefined), "en");
 });
 test("dynamic values are reordered while player names stay unchanged", () => {
