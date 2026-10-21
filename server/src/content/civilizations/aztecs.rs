@@ -144,7 +144,7 @@ fn aztec_gold() -> SpecialAdvanceInfo {
 }
 pub(crate) fn tribute_city(game: &Game, p: &Player, from: Position, to: Position) -> bool {
     p.has_special_advance(SpecialAdvance::TributeEmpire)
-        && from.distance(to) <= 2
+        && game.map.within_revealed_distance(from, to, 2)
         && game
             .try_get_any_city(to)
             .is_some_and(|city| city.player_index != p.index)
@@ -234,7 +234,7 @@ fn ahuitzotl() -> LeaderInfo {
         LeaderAbility::builder("Expansionist","In a battle with Ahuitzotl, cancel 1 hit each round if no Aztec city is within 2 spaces of him.")
             .add_simple_persistent_event_listener(|e|&mut e.combat_round_end,35,|game,p,r|{
                 let role=r.combat.role(p.index);
-                if r.combat.has_leader(role,game)&&p.get(game).cities.iter().all(|c|c.position.distance(leader_position(p.get(game)))>2){r.update_hits(r.combat.opponent_role(p.index),true,|hits|hits.opponent_hit_cancels+=1);p.log(game,"Expansionist cancels 1 hit");}
+                if r.combat.has_leader(role,game)&&p.get(game).cities.iter().all(|c|!game.map.within_revealed_distance(c.position,leader_position(p.get(game)),2)){r.update_hits(r.combat.opponent_role(p.index),true,|hits|hits.opponent_hit_cancels+=1);p.log(game,"Expansionist cancels 1 hit");}
             }).build(),
         LeaderAbility::builder("Mass Sacrifice","Once per turn, sacrifice 2 captives to construct a building or wonder in Ahuitzotl's city as a free action, paying its normal cost.")
             .add_custom_action(CustomActionType::MassSacrifice,|c|c.once_per_turn().free_action().resources(ResourcePile::captives(2)),super::construction::purchase,|game,p|!super::construction::choices(game,p,&ResourcePile::captives(2)).is_empty()).build())

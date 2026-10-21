@@ -105,7 +105,7 @@ pub(crate) fn colony() -> Objective {
             player
                 .cities
                 .iter()
-                .map(|c| c.position.distance(home) as usize)
+                .filter_map(|c| game.map.revealed_distance(c.position, home).map(|distance| distance as usize))
                 .max()
                 .unwrap_or(0),
             5,
@@ -113,7 +113,7 @@ pub(crate) fn colony() -> Objective {
     })
     .status_phase_check(|game, player| {
         let home = capital_city_position(game, player);
-        if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
+        if player.cities.iter().any(|c| game.map.revealed_distance(c.position, home).is_some_and(|distance| distance >= 5)) {
             let city_founder_played = last_player_round(game, player.index).iter().any(|a| {
                 a.items.iter().any(|i| {
                     if let ActionLogEntry::HandCard {

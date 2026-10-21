@@ -43,7 +43,7 @@ pub(crate) fn city_founder() -> Objective {
         |event| &mut event.found_city,
         0,
         |game, player, p| {
-            if capital_city_position(game, player.get(game)).distance(*p) >= 5 {
+            if game.map.revealed_distance(capital_city_position(game, player.get(game)), *p).is_some_and(|distance| distance >= 5) {
                 objective_is_ready(player.get_mut(game), name);
             }
         },

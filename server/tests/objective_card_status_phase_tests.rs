@@ -112,3 +112,16 @@ fn test_standing_army() {
         ],
     )
 }
+
+#[test]
+fn colony_does_not_count_distance_through_unexplored_regions() {
+    let mut game = JSON.load_game("colony");
+    for pos in ["D4", "D5", "D6"] {
+        game.map.tiles.insert(server::position::Position::from_offset(pos), server::map::Terrain::Unexplored);
+    }
+    let game = server::game_api::execute(game, Action::Playing(PlayingAction::EndTurn), 0);
+    let event = serde_json::to_value(game.current_event()).unwrap();
+    let choices = event["handler"]["request"]["SelectHandCards"]["choices"].as_array().unwrap();
+    assert!(!choices.contains(&serde_json::json!({"ObjectiveCard": 17})));
+    assert!(choices.contains(&serde_json::json!({"ObjectiveCard": 32})));
+}

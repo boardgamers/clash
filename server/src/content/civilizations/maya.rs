@@ -264,7 +264,7 @@ fn wak() -> LeaderInfo {
     LeaderInfo::new(Leader::WakChanilAjaw, "Wak Chanil Ajaw",
         LeaderAbility::builder("New Dynasty", "Wak Chanil Ajaw adds 2 combat value within 2 spaces of one of your cities.")
             .add_combat_strength_listener(117, |game, c, s, role| {
-                if c.has_leader(role, game) && game.player(c.player(role)).cities.iter().any(|city| city.position.distance(c.defender_position()) <= 2) {
+                if c.has_leader(role, game) && game.player(c.player(role)).cities.iter().any(|city| game.map.within_revealed_distance(city.position, c.defender_position(), 2)) {
                     s.extra_combat_value += 2; s.roll_log.push("New Dynasty adds +2 combat value".into());
                 }
             }).build(),

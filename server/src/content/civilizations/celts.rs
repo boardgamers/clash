@@ -28,7 +28,7 @@ use crate::victory_points::{SpecialVictoryPoints, VictoryPointAttribution};
 pub(crate) fn celts() -> Civilization {
     Civilization::new("Celts",vec![
         SpecialAdvanceInfo::builder(SpecialAdvance::TribalWarfare,SpecialAdvanceRequirement::Advance(Advance::Tactics),"Tribal Warfare","Against another player's army, add +1 combat value per Barbarian city within 2 spaces of the battle, up to +4.")
-            .add_combat_strength_listener(115,|game,c,s,r|{if game.player(c.opponent(c.player(r))).is_human()&&c.is_land_battle(game){let bonus=get_barbarians_player(game).cities.iter().filter(|city|city.position.distance(c.defender_position())<=2).count().min(4) as i8;s.extra_combat_value+=bonus;if bonus>0{s.roll_log.push(format!("Tribal Warfare adds +{bonus} combat value"));}}}).build(),
+            .add_combat_strength_listener(115,|game,c,s,r|{if game.player(c.opponent(c.player(r))).is_human()&&c.is_land_battle(game){let bonus=get_barbarians_player(game).cities.iter().filter(|city|game.map.within_revealed_distance(city.position,c.defender_position(),2)).count().min(4) as i8;s.extra_combat_value+=bonus;if bonus>0{s.roll_log.push(format!("Tribal Warfare adds +{bonus} combat value"));}}}).build(),
         SpecialAdvanceInfo::builder(SpecialAdvance::TribalAllies,SpecialAdvanceRequirement::Advance(Advance::Draft),"Tribal Allies","Once per turn, as an action, spawn Barbarians as for an event's Barbarian spawn icon. When you trigger Barbarian movement, pay 1 food to stop any number of those armies.")
             .add_custom_action(CustomActionType::TribalAllies,|c|c.once_per_turn().action().no_resources(),spawn,|game,p|!possible_barbarians_spawns(game,p).is_empty()||!possible_barbarians_reinforcements(game).is_empty())
             .add_payment_request_listener(|e|&mut e.stop_barbarian_movement,5,|game,p,m|{
@@ -105,7 +105,7 @@ pub(crate) fn loyalty_controller(game: &Game, c: &Combat) -> Option<usize> {
         .find(|p| {
             p.index != c.opponent(barb)
                 && p.active_leader() == Some(Leader::Viriatus)
-                && leader_position(p).distance(c.defender_position()) <= 2
+                && game.map.within_revealed_distance(leader_position(p), c.defender_position(), 2)
         })
         .map(|p| p.index)
 }
@@ -203,7 +203,7 @@ fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
 }
 fn vercingetorix() -> LeaderInfo {
     LeaderInfo::new(Leader::Vercingetorix,"Vercingetorix",
-        LeaderAbility::builder("Warrior People","Vercingetorix adds +1 combat value per friendly Settler within 2 spaces.").add_combat_strength_listener(116,|game,c,s,r|{if c.has_leader(r,game){let p=game.player(c.player(r));let n=p.units.iter().filter(|u|u.is_settler()&&u.position.distance(leader_position(p))<=2).count() as i8;s.extra_combat_value+=n;if n>0{s.roll_log.push(format!("Warrior People adds +{n} combat value"));}}}).build(),
+        LeaderAbility::builder("Warrior People","Vercingetorix adds +1 combat value per friendly Settler within 2 spaces.").add_combat_strength_listener(116,|game,c,s,r|{if c.has_leader(r,game){let p=game.player(c.player(r));let n=p.units.iter().filter(|u|u.is_settler()&&game.map.within_revealed_distance(u.position,leader_position(p),2)).count() as i8;s.extra_combat_value+=n;if n>0{s.roll_log.push(format!("Warrior People adds +{n} combat value"));}}}).build(),
         rapid_recruitment(LeaderAbility::builder("Rapid Recruitment","When recruiting in a city Vercingetorix already occupied before this action, each new land unit may be placed directly on adjacent revealed land without enemy units or cities.")).build())
 }
 fn boudica() -> LeaderInfo {

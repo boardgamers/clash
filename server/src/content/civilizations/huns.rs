@@ -55,7 +55,7 @@ pub(crate) fn raided_settler(game: &Game, u: &Unit) -> bool {
             && enemy
                 .units
                 .iter()
-                .any(|army| army.is_army_unit() && army.position.distance(u.position) <= 2)
+                .any(|army| army.is_army_unit() && game.map.within_revealed_distance(army.position, u.position, 2))
     })
 }
 pub(crate) fn city_destinations(
@@ -209,7 +209,7 @@ fn bleda() -> LeaderInfo {
 fn rugila() -> LeaderInfo {
     LeaderInfo::new(Leader::Rugila,"Rugila",
         LeaderAbility::builder("Tribute","After Rugila captures a city, gain 2 gold if another enemy city, including a Barbarian city, is within 2 spaces.")
-            .add_simple_persistent_event_listener(|e|&mut e.combat_end,25,|game,p,c|{if c.player(p.index).survived_leader()&&c.captured_city(p.index).is_some()&&game.players.iter().filter(|enemy|enemy.index!=p.index).flat_map(|enemy|&enemy.cities).any(|city|city.position.distance(c.defender.position)<=2){p.gain_resources(game,ResourcePile::gold(2));}}).build(),
+            .add_simple_persistent_event_listener(|e|&mut e.combat_end,25,|game,p,c|{if c.player(p.index).survived_leader()&&c.captured_city(p.index).is_some()&&game.players.iter().filter(|enemy|enemy.index!=p.index).flat_map(|enemy|&enemy.cities).any(|city|game.map.within_revealed_distance(city.position,c.defender.position,2)){p.gain_resources(game,ResourcePile::gold(2));}}).build(),
         LeaderAbility::builder("Unifier","A Barbarian city captured by Rugila becomes Happy after resolving the capture.")
             .add_simple_persistent_event_listener(|e|&mut e.combat_end,-35,|game,p,c|{if c.player(p.index).survived_leader()&&c.captured_city(p.index).is_some()&&c.opponent_player(p.index,game).civilization.is_barbarian(){crate::city::set_city_mood(game,c.defender.position,&p.origin,MoodState::Happy);}}).build())
 }

@@ -119,7 +119,7 @@ pub(crate) fn players_in_range2(game: &Game, player: &Player) -> Vec<usize> {
             let other = player_positions(p);
             other
                 .iter()
-                .any(|pos| my.iter().any(|my_pos| my_pos.distance(*pos) <= 2))
+                .any(|pos| my.iter().any(|my_pos| game.map.within_revealed_distance(*my_pos, *pos, 2)))
         })
         .map(|p| p.index)
         .collect()
@@ -253,4 +253,31 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
     )
     .build()
+}
+
+#[cfg(test)]
+mod range_tests {
+    use super::*;
+    use crate::{cache::Cache, game::GameContext, game_data::GameData, map::{Map, Terrain}};
+    use std::collections::HashMap;
+
+    #[test]
+    fn technology_exchange_and_inspiration_need_a_revealed_route() {
+        let data: GameData = serde_json::from_str(include_str!("../../../tests/test_games/action_cards/inspiration.json")).unwrap();
+        let cache = Cache::new(&data.options);
+        let mut game = Game::from_data(data, cache, GameContext::Play);
+        let a = Position::new(0, 0);
+        let b = Position::new(2, 0);
+        for (index, player) in game.players.iter_mut().enumerate() {
+            for city in &mut player.cities { city.position = if index == 0 { a } else { b }; }
+            for unit in &mut player.units { unit.position = if index == 0 { a } else { b }; }
+        }
+        game.map = Map::new(HashMap::from([(a, Terrain::Fertile), (b, Terrain::Fertile), (Position::new(1, 0), Terrain::Unexplored)]));
+        assert!(players_in_range2(&game, game.player(0)).is_empty());
+        game.map.tiles.insert(Position::new(1, 0), Terrain::Water);
+        assert!(players_in_range2(&game, game.player(0)).contains(&1));
+        game.map.tiles.insert(Position::new(1, 0), Terrain::Unexplored);
+        game.map.tiles.extend([(Position::new(0, 1), Terrain::Forest), (Position::new(1, 1), Terrain::Mountain)]);
+        assert!(players_in_range2(&game, game.player(0)).is_empty());
+    }
 }

@@ -188,7 +188,7 @@ fn barbarian_army_positions_in_range2(
         .unique()
         .filter(|&p| {
             my.iter().any(|my_pos| {
-                if my_pos.distance(p) > 2 {
+                if !game.map.within_revealed_distance(*my_pos, p, 2) {
                     return false;
                 }
                 if owner_of_sulla_in_range(p, game)

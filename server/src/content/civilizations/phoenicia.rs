@@ -81,7 +81,7 @@ fn ithobaal() -> LeaderInfo {
             if c.has_leader(role, game)
                 && p.cities.iter().any(|city| {
                     city.pieces.temple.is_some()
-                        && city.position.distance(c.defender_position()) <= 2
+                        && game.map.within_revealed_distance(city.position, c.defender_position(), 2)
                 })
             {
                 s.extra_combat_value += 2;

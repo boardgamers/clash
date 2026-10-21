@@ -446,7 +446,11 @@ fn technology_trade_only_offers_partners_within_two_spaces() {
                 }
                 let data: GameData = serde_json::from_value(data).unwrap();
                 let cache = Cache::new(&data.options);
-                let game = Game::from_data(data, cache, GameContext::Play);
+                let mut game = Game::from_data(data, cache, GameContext::Play);
+                // The synthetic contacts must occupy real, revealed map spaces.
+                for pos in ["C1", "C2", "C3", "C4", "C5"] {
+                    game.map.tiles.insert(Position::from_offset(pos), server::map::Terrain::Fertile);
+                }
                 let game = server::game_api::execute(
                     game,
                     Action::Playing(PlayingAction::ActionCard(card)),

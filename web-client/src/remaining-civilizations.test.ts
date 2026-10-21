@@ -782,6 +782,13 @@ test('Tribute Empire offers enemy cities at range two without Husbandry and take
   barb.cities = [{ position: 'C4', mood_state: 'Angry' }];
   barb.units = [{ id: 0, position: 'C4', unit_type: 'Infantry' }];
   barb.next_unit_id = 1;
+  for (const position of ['C3', 'C4']) {
+    if (!g.map.tiles.some(([pos]: string[]) => pos === position)) g.map.tiles.push([position, 'Fertile']);
+  }
+  const middle = g.map.tiles.find(([pos]: string[]) => pos === 'C3');
+  middle[1] = 'Unexplored';
+  assert(!view(g).cities.find((city: any) => city.position === 'C2').choices.some((choice: any) => choice.position === 'C4'));
+  middle[1] = 'Fertile';
   const after = move(g, {
     Playing: {
       Collect: {

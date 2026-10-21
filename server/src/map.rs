@@ -53,6 +53,28 @@ impl Map {
         self.tiles.get(&pos)
     }
 
+    /// Count spaces through revealed land or sea, never through unexplored regions
+    /// or outside the board. Pieces and ownership do not block this distance.
+    #[must_use]
+    pub fn revealed_distance(&self, from: Position, to: Position) -> Option<u32> {
+        let revealed = |p| self.get(p).is_some_and(|terrain| !terrain.is_unexplored());
+        if !revealed(from) || !revealed(to) {
+            return None;
+        }
+        pathfinding::prelude::astar(
+            &from,
+            |p| p.neighbors().into_iter().filter(|p| revealed(*p)).map(|p| (p, 1_u32)),
+            |p| p.distance(to),
+            |p| *p == to,
+        ).map(|(_, distance)| distance)
+    }
+
+    #[must_use]
+    pub fn within_revealed_distance(&self, from: Position, to: Position, range: u32) -> bool {
+        from.distance(to) <= range
+            && self.revealed_distance(from, to).is_some_and(|distance| distance <= range)
+    }
+
     pub fn add_unexplored_blocks(&mut self, blocks: Vec<UnexploredBlock>) {
         self.unexplored_blocks.extend(blocks);
         self.unexplored_blocks
@@ -586,4 +608,31 @@ pub fn block_for_position(game: &Game, position: Position) -> (u8, BlockPosition
 
 fn human_players_including_dropped(game: &Game) -> usize {
     game.players.iter().filter(|p| p.is_human()).count()
+}
+
+#[cfg(test)]
+mod revealed_distance_tests {
+    use super::*;
+
+    #[test]
+    fn counts_revealed_detours_and_never_crosses_hidden_or_missing_spaces() {
+        let a = Position::new(0, 0);
+        let middle = Position::new(1, 0);
+        let b = Position::new(2, 0);
+        let mut map = Map::new(HashMap::from([
+            (a, Terrain::Fertile), (middle, Terrain::Unexplored), (b, Terrain::Forest),
+        ]));
+        assert_eq!(map.revealed_distance(a, b), None);
+        assert!(!map.within_revealed_distance(a, b, 2));
+        map.tiles.extend([(Position::new(0, 1), Terrain::Water), (Position::new(1, 1), Terrain::Mountain)]);
+        assert_eq!(map.revealed_distance(a, b), Some(3));
+        assert!(!map.within_revealed_distance(a, b, 2));
+        assert!(map.within_revealed_distance(a, b, 3));
+        map.tiles.insert(middle, Terrain::Water);
+        assert_eq!(map.revealed_distance(a, b), Some(2));
+        map.tiles.remove(&middle);
+        assert_eq!(map.revealed_distance(a, b), Some(3));
+        assert_eq!(map.revealed_distance(a, a), Some(0));
+        assert_eq!(map.revealed_distance(a, Position::new(10, 10)), None);
+    }
 }

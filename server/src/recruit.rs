@@ -477,5 +477,5 @@ fn recruit_cost_options_excluding(
 
 fn is_cavalry_province_city(player: &Player, city: Position, game: &Game) -> bool {
     player.has_special_advance(SpecialAdvance::Provinces)
-        && capital_city_position(game, player).distance(city) >= 3
+        && game.map.revealed_distance(capital_city_position(game, player), city).is_some_and(|distance| distance >= 3)
 }

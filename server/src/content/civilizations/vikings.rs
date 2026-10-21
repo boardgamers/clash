@@ -335,7 +335,7 @@ fn ruler_of_the_north() -> LeaderAbility {
         move |s, game, (), player| {
             let p = player.get(game);
             let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
-                leader_position(p).distance(capital_city_position(game, p)) as f32 / 2.0
+                game.map.revealed_distance(leader_position(p), capital_city_position(game, p)).unwrap_or(0) as f32 / 2.0
             } else {
                 0_f32
             };

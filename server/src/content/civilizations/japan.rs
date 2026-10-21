@@ -120,7 +120,7 @@ fn near_opponent(game: &Game, p: &Player, opponent: usize) -> bool {
                 .iter()
                 .map(|c| c.position)
                 .chain(enemy.units.iter().map(|u| u.position))
-                .any(|other| pos.distance(other) <= 2)
+                .any(|other| game.map.within_revealed_distance(pos, other, 2))
         })
 }
 pub(crate) fn japan() -> Civilization {
@@ -211,7 +211,7 @@ fn go_toba() -> LeaderInfo {
 fn jimmu() -> LeaderInfo {
     LeaderInfo::new(Leader::Jimmu,"Jimmu",
         LeaderAbility::builder("Fortified","Your Fortresses within 2 spaces of Jimmu add +2 combat value in every round, including against Siegecraft.")
-            .add_combat_strength_listener(110,|game,c,s,r|{if !r.is_attacker()&&c.defender_fortress(game)&&leader_position(game.player(c.player(r))).distance(c.defender_position())<=2{s.extra_combat_value+=2;s.roll_log.push("Fortified adds +2 combat value".into());}}).build(),
+            .add_combat_strength_listener(110,|game,c,s,r|{if !r.is_attacker()&&c.defender_fortress(game)&&game.map.within_revealed_distance(leader_position(game.player(c.player(r))),c.defender_position(),2){s.extra_combat_value+=2;s.roll_log.push("Fortified adds +2 combat value".into());}}).build(),
         LeaderAbility::builder("Mythical","After Jimmu survives a battle, you may pay 1 culture token to recover one tactics card you used in that battle.")
             .add_hand_card_request(|e|&mut e.combat_end,30,|game,p,c|{
                 let stats=c.player(p.index);if !stats.survived_leader()||p.get(game).resources.culture_tokens==0{return None;}
