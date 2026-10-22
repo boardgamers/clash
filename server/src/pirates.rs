@@ -43,9 +43,10 @@ pub(crate) fn pirates_bonus() -> Ability {
             |event| &mut event.combat_end,
             103,
             |game, p, i| {
-                if i.opponent_player(p.index, game).civilization.is_pirates() {
+                let destroyed = i.opponent(p.index).losses.get(&UnitType::Ship);
+                if i.opponent_player(p.index, game).civilization.is_pirates() && destroyed > 0 {
                     Some(ResourceRewardRequest::new(
-                        p.reward_options().tokens(1),
+                        p.reward_options().tokens(destroyed),
                         "Select a reward for fighting the Pirates".to_string(),
                     ))
                 } else {

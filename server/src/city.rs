@@ -348,6 +348,7 @@ pub(crate) fn activate_city_for_collection(
     game: &mut Game,
     origin: &EventOrigin,
 ) {
+    crate::content::civilizations::greece::record_city_states_activation(game, position);
     let city = game.get_any_city_mut(position);
     assert!(city.can_activate());
 

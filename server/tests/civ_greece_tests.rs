@@ -217,3 +217,62 @@ fn master() {
         ],
     );
 }
+
+#[test]
+fn city_states_uses_size_before_observatory_construction_after_reload() {
+    use server::cache::Cache;
+    use server::city::MoodState;
+    use server::construct::Construct;
+    use server::content::persistent_events::PersistentEventRequest;
+    use server::game::{Game, GameContext};
+    use server::game_api::execute;
+    use server::game_data::GameData;
+
+    let game = JSON.load_game("city_states");
+    let mut data = serde_json::to_value(game.cloned_data()).unwrap();
+    data["players"][0]["advances"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!("Math"));
+    let data: GameData = serde_json::from_value(data).unwrap();
+    let cache = Cache::new(&data.options);
+    let mut game = Game::from_data(data, cache, GameContext::Play);
+    let original = Position::from_offset("A1");
+    let substitute = Position::from_offset("B3");
+    game.player_mut(0).get_city_mut(substitute).activations = 0;
+    let cards_before = game.player(0).action_cards.len();
+    let game = execute(
+        game,
+        Action::Playing(PlayingAction::Construct(Construct::new(
+            original,
+            Building::Observatory,
+            ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+        ))),
+        0,
+    );
+    assert_eq!(game.player(0).get_city(original).size(), 3);
+    assert_eq!(game.player(0).action_cards.len(), cards_before + 1);
+    let data = game.cloned_data();
+    let cache = Cache::new(&data.options);
+    let game = Game::from_data(data, cache, GameContext::Play);
+    let PersistentEventRequest::SelectPositions(request) =
+        &game.current_event_handler().unwrap().request
+    else {
+        panic!("expected City States choice");
+    };
+    assert_eq!(request.choices, vec![substitute]);
+    let game = execute(
+        game,
+        Action::Response(EventResponse::SelectPositions(vec![substitute])),
+        0,
+    );
+    assert_eq!(
+        game.player(0).get_city(original).mood_state,
+        MoodState::Happy
+    );
+    assert_eq!(game.player(0).get_city(substitute).activations, 1);
+    assert_eq!(
+        game.player(0).get_city(substitute).mood_state,
+        MoodState::Happy
+    );
+}

@@ -123,6 +123,24 @@ fn hellenistic_culture() -> SpecialAdvanceInfo {
     .build()
 }
 
+// Keep the pre-action requirements across deferred construction rewards and reloads.
+// event_info is serialized and cleared at the end of the turn.
+pub(crate) fn record_city_states_activation(game: &mut Game, position: crate::position::Position) {
+    let city = game.get_any_city(position);
+    let player = city.player_index;
+    if city.is_activated()
+        && game
+            .player(player)
+            .has_special_advance(SpecialAdvance::CityStates)
+        && !game.player(player).event_info.contains_key("city_states")
+    {
+        let snapshot = serde_json::to_string(&(city.size(), city.mood_state.clone())).unwrap();
+        game.player_mut(player)
+            .event_info
+            .insert(format!("city_states_activation_{position}"), snapshot);
+    }
+}
+
 fn city_states() -> SpecialAdvanceInfo {
     SpecialAdvanceInfo::builder(
         SpecialAdvance::CityStates,
@@ -145,22 +163,28 @@ fn city_states() -> SpecialAdvanceInfo {
 
             let p = game.player(player_index);
             let city = p.get_city(*position);
+            let (size, mood) = p.event_info
+                .get(&format!("city_states_activation_{position}"))
+                .and_then(|value| serde_json::from_str::<(usize, crate::city::MoodState)>(value).ok())
+                // Existing pending saves have already lost one mood step.
+                .unwrap_or((city.size(), city.mood_state.clone() + 1));
 
             let cities = p
                 .cities
                 .iter()
-                .filter_map(
-                    // mood was already decreased
-                    |c| {
-                        (c.position != *position
-                            && c.mood_state > city.mood_state
-                            && c.size() >= city.size())
-                        .then_some(c.position)
-                    },
-                )
+                .filter_map(|c| {
+                    (c.position != *position
+                        && c.mood_state >= mood
+                        && c.size() >= size
+                        && c.can_activate())
+                    .then_some(c.position)
+                })
                 .collect_vec();
 
             if cities.is_empty() {
+                game.player_mut(player_index)
+                    .event_info
+                    .remove(&format!("city_states_activation_{position}"));
                 return None;
             }
 
@@ -171,12 +195,15 @@ fn city_states() -> SpecialAdvanceInfo {
             ))
         },
         |game, s, position| {
+            game.player_mut(s.player_index)
+                .event_info
+                .remove(&format!("city_states_activation_{position}"));
             if !s.choice.is_empty() {
-                activate_city(s.choice[0], game, &s.origin);
-                increase_mood_state(game, *position, 1, &s.origin);
                 game.player_mut(s.player_index)
                     .event_info
                     .insert("city_states".to_string(), "used".to_string());
+                activate_city(s.choice[0], game, &s.origin);
+                increase_mood_state(game, *position, 1, &s.origin);
             }
         },
     )

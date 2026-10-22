@@ -357,7 +357,7 @@ fn test_recruit_combat() {
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
-                    1,
+                    2,
                 ))),
             )
             .skip_json(),
@@ -478,4 +478,77 @@ fn naval_defenders_exclude_passengers_from_dice_and_combat_casualties() {
     let PersistentEventRequest::SelectUnits(req) = &event.player.handler.as_ref().unwrap().request else { panic!("expected excess passengers"); };
     assert_eq!(req.request.choices, vec![90, 91, 92, 93]);
     assert_eq!(req.request.needed, 2..=2);
+}
+#[test]
+fn pirate_rewards_scale_with_destroyed_ships_and_allow_mixed_tokens() {
+    let mut game = JSON.load_game("ship_combat");
+    let pirates = game
+        .players
+        .iter()
+        .position(|p| p.civilization.is_pirates())
+        .unwrap();
+    let mut ship = game.player(1).units[0].clone();
+    ship.id = 90;
+    ship.unit_type = UnitType::Ship;
+    ship.position = Position::from_offset("D2");
+    let mut second = ship.clone();
+    second.id = 91;
+    game.player_mut(pirates).units = vec![ship, second];
+    game.player_mut(1).units.clear();
+    game.player_mut(0).resources.gold = 0;
+    // Both fleets roll 6s: two pirate ships destroyed even in a drawn battle.
+    game.dice_roll_outcomes = vec![11; 4];
+    let mood = game.player(0).resources.mood_tokens;
+    let culture = game.player(0).resources.culture_tokens;
+    let game = execute(
+        game,
+        move_action(vec![7, 8], Position::from_offset("D2")),
+        0,
+    );
+    assert!(game.player(pirates).units.is_empty());
+    assert_eq!(game.player(0).resources.gold, 2);
+    let PersistentEventRequest::ResourceReward(request) =
+        &game.current_event_handler().unwrap().request
+    else {
+        panic!("expected pirate token reward");
+    };
+    let mixed = ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1);
+    assert!(request.reward.payment_options.is_valid_payment(&mixed));
+    assert!(
+        !request
+            .reward
+            .payment_options
+            .is_valid_payment(&ResourcePile::mood_tokens(1))
+    );
+    let game = execute(
+        game,
+        Action::Response(EventResponse::ResourceReward(mixed)),
+        0,
+    );
+    assert_eq!(game.player(0).resources.mood_tokens, mood + 1);
+    assert_eq!(game.player(0).resources.culture_tokens, culture + 1);
+}
+
+#[test]
+fn retreat_from_pirates_without_a_kill_grants_no_reward() {
+    let mut game = JSON.load_game("ship_combat");
+    let pirates = game
+        .players
+        .iter()
+        .position(|p| p.civilization.is_pirates())
+        .unwrap();
+    game.player_mut(pirates).units = game.player(1).units.clone();
+    game.player_mut(1).units.clear();
+    game.dice_roll_outcomes = vec![0; 4];
+    let before = game.player(0).resources.clone();
+    let game = execute(
+        game,
+        move_action(vec![7, 8], Position::from_offset("D2")),
+        0,
+    );
+    let game = execute(game, Action::Response(EventResponse::ResourceReward(ResourcePile::empty())), 0);
+    assert_retreat_round(&game, 1);
+    let game = execute(game, Action::Response(EventResponse::Bool(true)), 0);
+    assert!(game.events.is_empty());
+    assert_eq!(game.player(0).resources, before);
 }
