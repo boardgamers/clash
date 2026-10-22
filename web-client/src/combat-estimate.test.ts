@@ -134,3 +134,22 @@ test('unaffordable Siegecraft is unavailable, never presented as a free cancella
   assert.equal(estimate(raw, action).samples, 64);
   assert.throws(() => estimate(raw, action, { siege: 3 }), /Cannot afford/);
 });
+
+test('pirate battle estimates resolve round rewards, including zero gold, without changing the game', () => {
+  const game = JSON.parse(fixture('ship_combat'));
+  game.players[2].units = game.players[1].units;
+  game.players[1].units = [];
+  game.players[0].action_cards = [6];
+  const raw = JSON.stringify(game);
+  const action = attack(raw, [7, 8], 'D2');
+  const before = engine.tryMove(raw, JSON.stringify(action), 0);
+  // This batch includes no-hit rounds that previously failed on the empty reward.
+  const result = estimate(raw, action);
+  assert.equal(result.wins + result.draws + result.losses, 64);
+  assert.deepEqual(estimate(raw, action), result);
+  assert.equal(engine.tryMove(raw, JSON.stringify(action), 0), before);
+  const view = JSON.parse(engine.webView(before, 0));
+  assert.equal(view.decision.name, 'Tactics');
+  const fromTactics = estimate(before, { Response: { SelectHandCards: [] } });
+  assert.equal(fromTactics.wins + fromTactics.draws + fromTactics.losses, 64);
+});

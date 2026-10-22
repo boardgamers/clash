@@ -136,6 +136,11 @@ pub(super) fn estimate(game: &Game, seat: usize, input: &Value) -> Result<Value,
                     }
                     EventResponse::Payment(payments)
                 }
+                Request::ResourceReward(r) if name == "Pirate ship destroyed" => {
+                    // This round reward is fixed gold, including an empty reward
+                    // when no pirate was hit. Resolve it before the next round.
+                    EventResponse::ResourceReward(r.reward.payment_options.default_payment())
+                }
                 Request::SelectHandCards(r) if *r.needed.start() == 0 => {
                     EventResponse::SelectHandCards(vec![])
                 }
