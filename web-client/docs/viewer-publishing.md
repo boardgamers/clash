@@ -443,3 +443,9 @@ Viewer 0.1.158 / engine 0.4.108 checks City States against the original city's s
 Sources: official Monumental Edition rulebook, page 33 (City States explicitly allows size 2 growing to size 3 with a size-2 substitute) and page 27 (one gold and one mood/culture per pirate eliminated, regardless of winner). Verified with 32 Greek/combat Rust tests, 851 frontend/engine tests, 17 locales, type checking and production build. Regressions include Observatory card draw plus reload, both fleets wiped out, mixed token rewards, and zero-kill retreat.
 
 Viewer 0.1.159 defaults both city shortcuts and main action entry points to eligible free Collect and Increase Happiness variants, including Voting. Happiness defaults are validated against the selected city, costs and leader restrictions. Explicit paid selections remain available. Verified with 851 frontend/engine tests, locales, type checking and production build. Engine remains 0.4.108.
+
+### 0.1.160 — Translated action labels
+
+Shorten French toolbar labels and constrain translated labels to their own buttons,
+with ellipsis for overflow and full action names retained in tooltips. Verified the
+French preview, Svelte checks, all 17 locale catalogs, and the production build.

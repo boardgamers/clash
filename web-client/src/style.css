@@ -3169,6 +3169,16 @@ small {
   min-width: 0;
   white-space: nowrap;
 }
+/* Labels must stay inside their grid cell, regardless of translation length.
+   Full action names remain available through titles and accessible labels. */
+.board-toolbar .board-actions button > span:not(.action-inspect) {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .variant-picker {
   display: flex;
   flex-wrap: wrap;
