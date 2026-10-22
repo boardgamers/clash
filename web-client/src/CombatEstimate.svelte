@@ -86,16 +86,11 @@
 </script>
 
 <div class="combat-estimate" aria-label="Estimated combat outcome">
+  <div class="estimate-overview">
   {#if results[0] && results[0].samples >= 256}
     {@const odds = percentages(results[0])}
     <div class="estimate-summary">
       <strong>Win ≈{odds[0]}%</strong><span>Draw {odds[1]}%</span><span>Loss {odds[2]}%</span>
-    </div>
-    <div class="estimate-losses">No retreat or additional tactics</div>
-    <div class="estimate-losses">
-      Average losses: you {(results[0].ownLosses / results[0].samples).toFixed(1)} · enemy {(
-        results[0].enemyLosses / results[0].samples
-      ).toFixed(1)}
     </div>
   {:else if done}<span class="estimate-losses" title={errors[0]}
       >{errors[0] === 'No battle to estimate'
@@ -103,12 +98,20 @@
         : 'Estimate unavailable for this battle.'}</span
     >
   {:else}<span class="estimate-losses">Estimating battle…</span>{/if}
-  <button class="estimate-details" onclick={() => (expanded = !expanded)} aria-expanded={expanded}
-    >{expanded ? 'Hide' : 'Assumptions & options'}{!done && (results[0]?.samples ?? 0) >= 256
+  <button class="estimate-details" onclick={() => (expanded = !expanded)} aria-expanded={expanded} title="Assumptions & options"
+    >{expanded ? 'Hide' : 'Details'}{!done && (results[0]?.samples ?? 0) >= 256
       ? ' · refining…'
       : ''}</button
   >
+  </div>
   {#if expanded}
+    {#if results[0] && results[0].samples >= 256}
+    <div class="estimate-losses">
+      Average losses: you {(results[0].ownLosses / results[0].samples).toFixed(1)} · enemy {(
+        results[0].enemyLosses / results[0].samples
+      ).toFixed(1)}
+    </div>
+    {/if}
     {#if errors[0]}<p>{errors[0]}</p>{/if}
     <p>
       Selected option included. No retreat or additional tactics; hidden tactics ignored. Steel Weapons when
@@ -143,6 +146,13 @@
     padding-top: 0.6rem;
     margin-top: 0.6rem;
     font-size: 12px;
+  }
+  .estimate-overview {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+    flex-wrap: wrap;
   }
   .estimate-summary {
     display: flex;

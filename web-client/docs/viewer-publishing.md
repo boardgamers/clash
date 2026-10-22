@@ -449,3 +449,10 @@ Viewer 0.1.159 defaults both city shortcuts and main action entry points to elig
 Shorten French toolbar labels and constrain translated labels to their own buttons,
 with ellipsis for overflow and full action names retained in tooltips. Verified the
 French preview, Svelte checks, all 17 locale catalogs, and the production build.
+
+### 0.1.161 — Compact combat preview
+
+Keep battle odds and a Details expander on one row, with losses, assumptions and
+comparisons inside. Group defenders inline and remove duplicate leader/estimate
+dividers in movement confirmation. Verified collapsed/expanded combat preview,
+Svelte checks, locale checks, and production build.

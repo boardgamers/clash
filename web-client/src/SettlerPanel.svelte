@@ -218,11 +218,10 @@
   {/if}
   {#if destination?.attack}
     <div class="movement-leader-info" aria-label="Attack preview">
-      <CombatEstimate {controller} action={destination.action}
-        siege={!!$session.view?.players.find(p => p.index === $session.seat)?.advances.some(a => a.id === 'Siegecraft') && !!$session.game?.players.some(p => p.cities?.some(c => c.position === destination.position && c.city_pieces?.fortress != null))}
-        steel={canDeclineSteel} />
-      <h3><Swords size={16} />Defenders</h3>
-      <TileUnits players={$session.game?.players ?? []} position={destination.position} />
+      <div class="movement-defenders">
+        <span class="defenders-label"><Swords size={14} />Defenders</span>
+        <TileUnits players={$session.game?.players ?? []} position={destination.position} />
+      </div>
       {#each $session.game?.players ?? [] as player}
         {#each player.cities?.filter((city) => city.position === destination.position) ?? [] as city}
           <CityBuildings {city} owner={player.id} players={$session.game?.players ?? []} wonders={$session.view?.builtWonders} />
@@ -230,9 +229,12 @@
       {/each}
       {#each $session.view?.players ?? [] as player}
         {#each player.leaders?.filter((leader) => leader.position === destination.position) ?? [] as leader}
-          <LeaderDetails {leader} civilization={player.civilization} />
+          <LeaderDetails {leader} civilization={player.civilization} compact />
         {/each}
       {/each}
+      <CombatEstimate {controller} action={destination.action}
+        siege={!!$session.view?.players.find(p => p.index === $session.seat)?.advances.some(a => a.id === 'Siegecraft') && !!$session.game?.players.some(p => p.cities?.some(c => c.position === destination.position && c.city_pieces?.fortress != null))}
+        steel={canDeclineSteel} />
     </div>
   {/if}
   {#if destination?.terrain === 'Unexplored'}
@@ -290,7 +292,12 @@
   .settler-destinations button.active { border-color: var(--gold); background: var(--paper2); box-shadow: inset 0 0 0 1px var(--gold); }
   .route-label { grid-column: 1 / -1; color: var(--muted); font-size: 11px; }
   .movement-leader-info { border-top: 1px solid var(--line); padding-top: 0.6rem; }
-  .movement-leader-info h3 { display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.5rem; font: inherit; font-weight: 600; }
+  .movement-leader-info :global(.tile-leader) { border: 0; padding: 0; }
+  .movement-leader-info :global(.combat-estimate) { border: 0; margin-top: 0.4rem; padding-top: 0; }
+  .movement-defenders { display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem 0.75rem; }
+  .defenders-label { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 11px; color: var(--muted); }
+  .movement-defenders :global(.tile-unit-stack) { margin: 0; }
+
   .movement-terrain { font-size: 12px; }
   .movement-terrain summary { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
   .movement-terrain summary span { margin-left: auto; color: var(--muted); text-decoration: underline; }
