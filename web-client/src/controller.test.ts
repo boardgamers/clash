@@ -305,13 +305,13 @@ test('diplomatic attacks preview their cost before confirmation', async () => {
   }
 });
 
-test('action bar defaults to available free collection and happiness variants', async () => {
+test('action entry points default to available free collection and happiness variants', async () => {
   const app = paymentController(),
     c = app.controller;
   try {
     c.setPlayer(0);
     await c.load(engine.stripSecret(fixture('advances/collect_free_economy'), 0));
-    c.beginCollect(undefined, true);
+    c.beginCollect();
     const economy = app.session().view!.collectActions!.find((offer) => offer.name === 'Free Economy')!;
     assert.deepEqual(app.session().collectVariant, economy.value);
     c.patch({
@@ -320,18 +320,23 @@ test('action bar defaults to available free collection and happiness variants', 
         collectActions: app.session().view!.collectActions!.filter((offer) => !offer.free),
       },
     });
-    c.beginCollect(undefined, true);
+    c.beginCollect();
     assert.deepEqual(app.session().collectVariant, app.session().view!.collectActions![0].value);
     await c.load(engine.stripSecret(fixture('advances/increase_happiness_voting'), 0));
-    c.beginHappiness(undefined, true);
+    c.beginHappiness();
     assert.equal(app.session().view!.happinessActions![app.session().happinessVariant!].name, 'Voting');
+    const city = app.session().view!.cities.find((city) => city.mood !== 'Happy')!.position;
+    c.openCities(city, 'happiness');
+    assert.equal(app.session().view!.happinessActions![app.session().happinessVariant!].name, 'Voting');
+    c.switchHappinessVariant(0);
+    assert.equal(app.session().happinessVariant, 0, 'explicit paid selection is retained');
     c.patch({
       view: {
         ...app.session().view!,
         happinessActions: app.session().view!.happinessActions!.filter((offer) => !offer.free),
       },
     });
-    c.beginHappiness(undefined, true);
+    c.beginHappiness();
     assert.equal(app.session().happinessVariant, 0);
     assert.deepEqual(app.sent, [], 'opening an action never submits it');
   } finally {
@@ -345,7 +350,7 @@ test('map happiness selects multiple cities, preserves them across variants, and
     const raw = fixture('advances/increase_happiness_voting');
     c.setPlayer(0);
     await c.load(engine.stripSecret(raw, 0));
-    c.openCities('C2', 'happiness');
+    c.beginHappiness('C2', false);
     assert.equal(app.session().mode, 'happiness');
     assert.deepEqual(app.session().happinessSteps, { C2: 1 });
     assert(!happinessCities(app.session()).includes('A1'), 'happy cities are not targets');
@@ -402,7 +407,7 @@ test('map happiness keeps Lawgiver distinct and blocks unaffordable selections',
     p.resources = { mood_tokens: 1, culture_tokens: 1 };
     c.setPlayer(0);
     await c.load(engine.stripSecret(JSON.stringify(game), 0));
-    c.beginHappiness();
+    c.beginHappiness(undefined, false);
     c.selectTile('C2');
     assert.deepEqual(app.session().happinessSteps, { C2: 2 });
     assert.equal(app.session().happinessLawgiver, 'C2');
@@ -1224,7 +1229,7 @@ test('changing collection action keeps selected tiles and requotes the submitted
   try {
     c.setPlayer(0);
     await c.load(engine.stripSecret(fixture('advances/collect_free_economy'), 0));
-    c.beginCollect();
+    c.beginCollect(undefined, false);
     c.toggleChoice(
       app.session().view!.cities.find((city) => city.position === app.session().city)!.choices[0],
     );
@@ -2725,7 +2730,7 @@ test('Rituals happiness lets the player choose repeated resources or a mixed pay
     const raw = JSON.stringify(game);
     c.setPlayer(0);
     await c.load(engine.stripSecret(raw, 0));
-    c.openCities('C2', 'happiness');
+    c.beginHappiness('C2', false);
     c.setHappinessCity('C2', 2);
     const base = happinessPreview(app.session(), (input) => c.query(input), undefined, undefined, undefined, true);
     const total = Object.values(base.payment).reduce((sum, n) => sum + (n ?? 0), 0);

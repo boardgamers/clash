@@ -1430,14 +1430,14 @@ export class Controller {
       index < 0 ? (direction > 0 ? 0 : water.length - 1) : (index + direction + water.length) % water.length;
     this.patch({ seaRouteStart: water[next] });
   }
-  beginCollect(position?: string, preferFree = position !== undefined) {
+  beginCollect(position?: string, preferFree = true) {
     const s = get(this.session);
     if (s.pending) return;
     const offers = s.view?.collectActions ?? [];
     const variant =
-      (preferFree ? offers.find((offer) => offer.free && (!position ||
+      (preferFree ? offers.find((offer) => offer.free &&
         this.query<CollectionPotential[]>({ kind: 'collectionPotential', variant: offer.value })
-          .some((city) => city.position === position && city.amount > 0))) : undefined)?.value ?? offers[0]?.value ?? 'Collect';
+          .some((city) => (!position || city.position === position) && city.amount > 0)) : undefined)?.value ?? offers[0]?.value ?? 'Collect';
     const city =
       position ??
       defaultCity(
@@ -1559,7 +1559,7 @@ export class Controller {
       error: '',
     });
   }
-  beginHappiness(position?: string, preferFree = false) {
+  beginHappiness(position?: string, preferFree = true) {
     const s = get(this.session);
     if (s.pending || s.seat === undefined) return;
     this.closeActivity();
@@ -1574,7 +1574,10 @@ export class Controller {
       happinessSteps: {},
       happinessCity: null,
       happinessVariant: preferFree
-        ? Math.max(0, s.view?.happinessActions?.findIndex((offer) => offer.free) ?? -1)
+        ? Math.max(0, s.view?.happinessActions?.findIndex((offer, index) => offer.free &&
+            (position ? [position] : s.view?.cities.map((city) => city.position) ?? []).some((city) =>
+              happinessTargets({ ...s, happinessVariant: index, happinessSteps: {}, happinessLawgiver: null },
+                (input) => this.query(input), city).some((target) => target.action))) ?? -1)
         : 0,
       happinessLawgiver: null,
       error: '',
