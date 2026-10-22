@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { handCardDescription } from './card-text';
   import CombatEstimate from './CombatEstimate.svelte';
   import { printedCardName } from './card-names';
   import { onDestroy } from 'svelte';
@@ -36,6 +37,9 @@
       ? steelWeaponsBenefit($session.game, $session.view, $session.view?.activePlayer ?? $session.seat)
       : null,
   );
+  const cardOffer = $derived(decision.eventContext?.card && !decision.eventContext.card.later
+    && decision.fields.some((field) => field.name === 'Pay to gain the Action Card')
+    ? decision.eventContext.card : null);
   const description = $derived(
     combatBenefit ??
       (decision.tacticsSelection && decision.name === 'Tactics'
@@ -224,7 +228,7 @@
       <div class="decision-event-context" class:full-context={!!context.card}>
         {#if context.card}
           {@const card = context.card}
-          <div class="event-card-offer">
+          {#if !cardOffer}<div class="event-card-offer">
             <Layers size={16} />
             <span
               >{card.later
@@ -235,9 +239,10 @@
             >
             <ResourceAmount pile={card.cost} />
           </div>
+          {/if}
           <details class="event-rules">
             <summary aria-label={`${printedCardName(card.name)} event details`}
-              ><BookOpen size={13} />{printedCardName(card.name)}<ChevronRight size={13} /></summary
+              ><BookOpen size={13} />Event rules<ChevronRight size={13} /></summary
             >
             {#if context.placement}<p>{context.placement}</p>{/if}
             {#if context.raid}<p class="event-raid"><ResourceText text={context.raid} /></p>{/if}
@@ -248,11 +253,11 @@
                 pile={{ culture_tokens: 2 }}
               />.
             </p>
-            <p>
+            {#if !cardOffer}<p>
               <span class="event-card-use">Play <Zap size={13} />{card.free ? 0 : 1}</span><ResourceText
-                text={card.description}
+                text={handCardDescription(card.description)}
               />
-            </p>
+            </p>{/if}
           </details>
         {:else}
           <details class="event-rules">
@@ -267,7 +272,13 @@
       </div>
     {/if}
   </header>
-  {#if description && !$session.view?.influenceContext}<p class="decision-description">
+  {#if cardOffer}
+    <div class="great-person-effect">
+      <span class="event-card-use">{#if cardOffer.description.startsWith("You make place")}Active when taken{:else}Play <span aria-label={`${cardOffer.free ? 0 : 1} actions`}>{cardOffer.free ? 0 : 1} <Zap size={13} /></span>{/if}</span>
+      <ResourceText text={handCardDescription(cardOffer.description)} />
+    </div>
+  {/if}
+  {#if description && !cardOffer && !$session.view?.influenceContext}<p class="decision-description">
       <ResourceText
         text={description.replaceAll('Status Phase', 'End of age').replaceAll('status phase', 'end of age')}
       />
@@ -323,12 +334,23 @@
       !field.optional &&
       directPayments.length > 0 &&
       directPayments.every((choice) => !Object.values(choice.payment).some(Boolean))}
-    {#if field.name !== decision.name && !combatBenefit && !$session.view?.influenceContext}<p
+    {#if field.name !== decision.name && !cardOffer && !combatBenefit && !$session.view?.influenceContext}<p
         class="decision-description"
       >
         <ResourceText text={noResourceCost ? 'Free' : field.name} />
       </p>{/if}
-    {#if $session.view?.influenceContext}
+    {#if cardOffer}
+      <div class="great-person-actions">
+        {#each directPayments as choice}
+          {@const paid = Object.values(choice.payment).some(Boolean)}
+          <button class:primary={paid} class:secondary={!paid}
+            disabled={!choice.action || $session.pending}
+            onclick={() => choice.action && controller.submit(choice.action)}>
+            {#if paid}<Layers size={16} />Take card <ResourceAmount pile={choice.payment} />{:else}Pass{/if}
+          </button>
+        {/each}
+      </div>
+    {:else if $session.view?.influenceContext}
       {@const context = $session.view.influenceContext}
       <div class="influence-decisions">
         {#each directPayments as choice}

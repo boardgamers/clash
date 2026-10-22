@@ -1284,3 +1284,10 @@
   max-height: min(440px, 65%);
   overflow: hidden;
 }
+
+.great-person-effect { margin: 16px 0; line-height: 1.6; }
+.great-person-effect .event-card-use { font-size: 12px; color: var(--muted); }
+.great-person-effect .event-card-use > span { display: inline-flex; align-items: center; gap: 3px; }
+.great-person-actions { display: flex; gap: 8px; }
+.great-person-actions .primary { flex: 1; justify-content: flex-start; }
+.great-person-actions .resource-amount { margin-left: auto; }
