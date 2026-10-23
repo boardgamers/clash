@@ -211,7 +211,7 @@ impl PaymentOptions {
         .add_extra_options(player, origin)
     }
 
-    fn add_extra_options(mut self, player: &Player, _origin: EventOrigin) -> Self {
+    pub(crate) fn add_extra_options(mut self, player: &Player, _origin: EventOrigin) -> Self {
         let mut extra_conversions = Vec::new();
         player.trigger_event(
             |events| &events.general_payment_conversions,

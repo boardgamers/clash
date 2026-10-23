@@ -660,5 +660,11 @@ pub(crate) fn use_draw_replacement_wonder() -> Ability {
 }
 
 pub(crate) fn wonder_cost(game: &Game, player: &Player, w: Wonder) -> CostInfo {
-    CostInfo::new(player, w.info(game).cost.clone())
+    CostInfo::new(
+        player,
+        w.info(game)
+            .cost
+            .clone()
+            .add_extra_options(player, EventOrigin::Wonder(w)),
+    )
 }

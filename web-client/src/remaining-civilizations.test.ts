@@ -1564,3 +1564,28 @@ test('Navigator grants Cartography again after a normal Move at the same action-
   assert.equal(after.actions_left,actions);
   assert.equal(after.players[index].resources.ideas,2);
 });
+
+test('Human Sacrifice makes wonders directly buildable and pays their culture cost with captives', async () => {
+  const g = await setup('Aztecs'), index = seat(g), p = g.players[index];
+  addAdvance(p, 'Engineering', 'Priesthood');
+  p.wonder_cards = ['GreatMausoleum'];
+  g.wonders_left = g.wonders_left.filter((w: string) => w !== 'GreatMausoleum');
+  p.cities[0].mood_state = 'Happy';
+  p.cities.push({ position: g.map.tiles.find(([pos, t]: string[]) => pos !== p.cities[0].position && t === 'Forest')[0], mood_state: 'Happy' });
+  p.resources = { food: 6, ore: 2, gold: 6, culture_tokens: 3 };
+  heldCaptives(g, index, 2);
+  assert.equal(view(g).wonderCards[0].action, null, 'captives alone do not enable token payment');
+  addAdvance(p, 'Rituals');
+  const card = view(g).wonderCards[0];
+  assert.ok(card.action, card.reason);
+  let after = move(g, card.action);
+  if (view(after).decision.options.some((o: any) => o.value === p.cities[0].position))
+    after = move(after, { Response: { SelectPositions: [p.cities[0].position] } });
+  const payment = { food: 4, ore: 2, gold: 6, culture_tokens: 3, captives: 2 };
+  after = move(after, { Response: { Payment: [payment] } });
+  assert.ok(after.players[index].cities[0].city_pieces.wonders.includes('GreatMausoleum'));
+  assert.equal(after.players[index].captives?.length ?? 0, 0);
+  assert.equal(after.players[index].resources.captives ?? 0, 0);
+  assert.equal(after.players[index].resources.culture_tokens ?? 0, 0);
+  assert.equal(after.actions_left, g.actions_left - 1);
+});

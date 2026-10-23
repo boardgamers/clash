@@ -456,3 +456,11 @@ Keep battle odds and a Details expander on one row, with losses, assumptions and
 comparisons inside. Group defenders inline and remove duplicate leader/estimate
 dividers in movement confirmation. Verified collapsed/expanded combat preview,
 Svelte checks, locale checks, and production build.
+
+### 0.1.162 / engine 0.4.109 — Captives in wonder payments
+
+Apply civilization payment conversions to wonder costs before checking availability.
+Human Sacrifice can now pay wonder culture costs directly with captives, including
+through the normal wonder construction button. Verified a local copy of the reported
+Placid-estuary-1587 purchase, regression coverage for availability and spending,
+frontend/engine tests, locales, type checking and production build. No saved data edited.
