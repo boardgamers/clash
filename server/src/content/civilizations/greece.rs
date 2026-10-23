@@ -296,6 +296,10 @@ fn use_idol(b: AbilityBuilder) -> AbilityBuilder {
 }
 
 fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> Vec<HandCard> {
+    // Idol supplies the card's action; follow-up prerequisites must see that allowance.
+    let mut preview = game.clone();
+    preview.actions_left = preview.actions_left.max(1);
+    preview.events.clear(); // Evaluate the card after Idol finishes resolving.
     p.action_cards
         .iter()
         .filter_map(|&a| {
@@ -305,7 +309,7 @@ fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> Vec<HandCar
                 return None;
             }
 
-            if can_play_civil_card(game, p, a).is_err() {
+            if can_play_civil_card(&preview, p, a).is_err() {
                 // cannot play this card
                 return None;
             }

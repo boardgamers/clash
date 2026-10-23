@@ -163,12 +163,18 @@ pub(crate) fn great_person_card<F>(
 where
     F: Fn(&Game, &Player) -> bool + 'static + Sync + Send,
 {
+    let eligibility_groups = free_advance_groups.clone();
     ActionCard::builder(
         incident_id + GREAT_PERSON_OFFSET,
         name,
         &format!("{}{}", great_person_type.description(), description),
         cost,
-        move |game, player, _| can_play(game, player),
+        move |game, player, _| {
+            eligibility_groups.iter().any(|group| {
+                game.cache.get_advance_group(*group).advances.iter()
+                    .any(|a| player.can_advance_free(a.advance, game))
+            }) || can_play(game, player)
+        },
     )
     .public(great_person_type == GreatPersonType::Public)
     .add_advance_request(

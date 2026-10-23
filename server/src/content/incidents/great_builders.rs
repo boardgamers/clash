@@ -36,7 +36,15 @@ pub(crate) fn great_engineer() -> ActionCard {
     .add_bool_request(
         |e| &mut e.play_action_card,
         0,
-        |_, _, _| {
+        |game, p, _| {
+            // The card provides the construction action even when played for free at zero actions.
+            let mut preview = game.clone();
+            preview.actions_left = preview.actions_left.max(1);
+            preview.events.clear();
+            if !can_construct_any_building(&preview, p.get(game), &[ConstructDiscount::NoCityActivation]) {
+                p.log(game, "Great Engineer: No building available to construct.");
+                return None;
+            }
             Some(
                 "Construct in one of your cities at the normal resource cost, without an additional action or city activation?"
                     .to_string(),

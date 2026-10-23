@@ -1611,3 +1611,67 @@ test('Explorers records when its free settler is unavailable', async () => {
     }
   }
 });
+
+test('Great Engineer can grant its advance through Idol or Shogunate without a possible building', async () => {
+  for (const civ of ['Greece', 'Japan']) for (const actions of [0, 3]) {
+    const g = await setup(civ, civ === 'Greece' ? 'Alexander' : undefined), index = seat(g), p = g.players[index];
+    addAdvance(p, 'Nationalism');
+    p.action_cards = [126];
+    g.actions_left = actions;
+    let after;
+    if (civ === 'Greece') {
+      const idol = view(g).specialActions.find((a: any) => a.name === 'Idol');
+      assert.ok(idol?.action, 'Idol offers Great Engineer');
+      after = move(g, idol.action);
+      if (view(after).decision?.fields.length)
+        after = move(after, { Response: { Payment: [{ culture_tokens: 1 }] } });
+    } else {
+      const card = view(g).actionCards.find((c: any) => c.id === 126);
+      assert.ok(card?.action, card?.reason);
+      after = move(g, card.action);
+      if (view(after).choiceDecision?.name.includes('Shogunate'))
+        after = move(after, { Response: { Bool: true } });
+    }
+    // The only eligible card is selected automatically by Idol.
+    assert.equal(view(after).decision.advanceSelection, true);
+    after = move(after, { Response: { SelectAdvance: 'Engineering' } });
+    if (view(after).choiceDecision?.name.includes('Great Engineer'))
+      after = move(after, { Response: { Bool: false } });
+    assert.ok(after.players[index].advances.includes('Engineering'));
+    assert.equal(after.actions_left, actions);
+    assert.ok(!(after.players[index].action_cards ?? []).includes(126));
+    if (civ === 'Japan') assert.equal(after.players[index].event_info['Shogunate card'], 'used');
+    else {
+      assert.equal(after.players[index].resources.culture_tokens, p.resources.culture_tokens - 1);
+      assert.equal(after.players[index].cities[0].activations, 1);
+    }
+  }
+});
+
+test('Great Engineer construction works at zero actions through Idol and Shogunate', async () => {
+  for (const civ of ['Greece', 'Japan']) {
+    const g = await setup(civ, civ === 'Greece' ? 'Alexander' : undefined), index = seat(g), p = g.players[index];
+    addAdvance(p, 'Nationalism', 'Writing', 'Engineering', 'Sanitation', 'Roads');
+    p.cities.push({ position: g.map.tiles.find(([pos, t]: string[]) => pos !== p.cities[0].position && t === 'Forest')[0], mood_state: 'Happy' });
+    p.action_cards = [126];
+    g.actions_left = 0;
+    let after;
+    if (civ === 'Greece') {
+      const idol = view(g).specialActions.find((a: any) => a.name === 'Idol');
+      assert.ok(idol?.action, 'Idol allows construction follow-up at zero actions');
+      after = move(g, idol.action);
+      if (view(after).decision?.fields.length)
+        after = move(after, { Response: { Payment: [{ culture_tokens: 1 }] } });
+    } else {
+      after = move(g, { Playing: { ActionCard: 126 } });
+    }
+    assert.match(view(after).choiceDecision.name, /Construct in one of your cities/);
+    after = move(after, { Response: { Bool: true } });
+    assert.equal(after.actions_left, 1, 'one allowance for the follow-up construction');
+    const city = p.cities[1].position;
+    after = move(after, { Playing: { Construct: { city_position: city, city_piece: 'Academy', payment: { food: 1, wood: 1, ore: 1 } } } });
+    assert.equal(after.players[index].cities[1].city_pieces.academy, index);
+    assert.equal(after.players[index].cities[1].activations ?? 0, 0);
+    assert.equal(after.actions_left, 0);
+  }
+});

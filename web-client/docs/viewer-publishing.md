@@ -470,3 +470,13 @@ frontend/engine tests, locales, type checking and production build. No saved dat
 Explorers writes “No free settler gained: none left in supply.” to the journal when
 all four settlers are in play. Verified exhausted and available supply paths,
 frontend/engine tests, locale checks, type checking and production build.
+
+### 0.1.164 / engine 0.4.111 — Great People with Idol and Shogunate
+
+Great People remain playable for an available free advance even when their secondary
+effect cannot be used. Idol checks card prerequisites after its own event resolves
+and with the free action allowance; Great Engineer checks its optional construction
+against the same follow-up state. This includes Great Engineer through Alexander
+and Shogunate at zero actions. Verified both abilities, advance-only and construction
+paths, frontend/engine tests, locales, type checking and production build.
+Rules reference: https://wizkids.com/posters/repository/wizkids/Clash-of-Cultures---Rulebook---WEB---2021-02-05-compressed.pdf (p. 34).
