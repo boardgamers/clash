@@ -166,10 +166,11 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             |e| &mut e.play_action_card,
             0,
             |game, p, _| {
-                let p = p.get(game);
-                if p.available_units().settlers == 0 {
+                if p.get(game).available_units().settlers == 0 {
+                    p.log(game, "No free settler gained: none left in supply.");
                     return None;
                 }
+                let p = p.get(game);
                 Some(PositionRequest::new(
                     p.cities.iter().map(|c| c.position).collect(),
                     0..=1,

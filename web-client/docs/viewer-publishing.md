@@ -464,3 +464,9 @@ Human Sacrifice can now pay wonder culture costs directly with captives, includi
 through the normal wonder construction button. Verified a local copy of the reported
 Placid-estuary-1587 purchase, regression coverage for availability and spending,
 frontend/engine tests, locales, type checking and production build. No saved data edited.
+
+### 0.1.163 / engine 0.4.110 — Explorers supply explanation
+
+Explorers writes “No free settler gained: none left in supply.” to the journal when
+all four settlers are in play. Verified exhausted and available supply paths,
+frontend/engine tests, locale checks, type checking and production build.

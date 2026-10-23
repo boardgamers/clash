@@ -1589,3 +1589,25 @@ test('Human Sacrifice makes wonders directly buildable and pays their culture co
   assert.equal(after.players[index].resources.culture_tokens ?? 0, 0);
   assert.equal(after.actions_left, g.actions_left - 1);
 });
+
+test('Explorers records when its free settler is unavailable', async () => {
+  for (const count of [3, 4]) {
+    const g = await setup('Rome'), index = seat(g), p = g.players[index];
+    p.action_cards = [21];
+    p.units = Array.from({ length: count }, (_, id) => ({ id, position: p.cities[0].position, unit_type: 'Settler' }));
+    p.next_unit_id = count;
+    let after = move(g, { Playing: { ActionCard: 21 } });
+    after = move(after, { Response: { Payment: [{ culture_tokens: 1 }] } });
+    after = move(after, { Response: { SelectPositions: [] } });
+    const message = 'No free settler gained: none left in supply.';
+    assert.equal(JSON.stringify(after.log).includes(message), count === 4);
+    if (count === 3) {
+      assert.equal(view(after).decision.description, 'Gain a free settler');
+      after = move(after, { Response: { SelectPositions: [p.cities[0].position] } });
+      assert.equal(after.players[index].units.length, 4);
+    } else {
+      assert.equal(view(after).decision, null);
+      assert.equal(after.players[index].units.length, 4);
+    }
+  }
+});
