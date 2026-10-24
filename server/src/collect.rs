@@ -459,6 +459,20 @@ pub fn available_collect_actions_for_city(
 #[must_use]
 pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
     base_or_modified_available(game, player, &PlayingActionType::Collect)
+        .into_iter()
+        .filter(|action| {
+            *action
+                != crate::content::custom_actions::PlayingActionModifier::Tributes
+                    .playing_action_type()
+                || game.player(player).cities.iter().any(|city| {
+                    city.can_activate()
+                        && crate::content::civilizations::aztecs::tributes_city(
+                            game.player(player),
+                            city.position,
+                        )
+                })
+        })
+        .collect()
 }
 
 pub(crate) fn collect_event_origin(

@@ -44,6 +44,30 @@ async function fixture(name: string, civ: string, leader?: string) {
   return g;
 }
 
+test('Tributes only enables collection with an eligible city containing Acamapichtli', async () => {
+  const g = await setup('Aztecs', 'Acamapichtli');
+  const p = g.players[seat(g)], city = p.cities[0];
+  const leader = p.units.find((u: any) => u.unit_type?.Leader === 'Acamapichtli');
+  g.actions_left = 0;
+  const offers = () => view(g).collectActions;
+  assert.ok(offers().some((a: any) => a.name === 'Tributes'));
+  leader.position = g.map.tiles.find(([pos]: [string]) => !p.cities.some((c: any) => c.position === pos))[0];
+  assert.deepEqual(offers(), []);
+  assert.ok(view(g).cities.every((c: any) => c.reason), 'no city should enable the Collect toolbar button');
+  g.actions_left = 1;
+  assert.ok(offers().some((a: any) => a.value === 'Collect'));
+  assert.ok(!offers().some((a: any) => a.name === 'Tributes'));
+  g.actions_left = 0;
+  leader.position = city.position;
+  city.city_pieces = { academy: seat(g), fortress: seat(g), temple: seat(g) };
+  assert.deepEqual(offers(), []);
+  city.city_pieces = {};
+  city.angry_activation = true;
+  assert.deepEqual(offers(), []);
+  city.angry_activation = false;
+  assert.ok(offers().some((a: any) => a.name === 'Tributes'));
+});
+
 test('Egypt and Phoenicia offer four advances and three leaders', async () => {
   const g = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'remaining-picker', {});
   for (const name of ['Egypt', 'Phoenicia']) {

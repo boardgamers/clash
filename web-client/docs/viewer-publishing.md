@@ -480,3 +480,10 @@ against the same follow-up state. This includes Great Engineer through Alexander
 and Shogunate at zero actions. Verified both abilities, advance-only and construction
 paths, frontend/engine tests, locales, type checking and production build.
 Rules reference: https://wizkids.com/posters/repository/wizkids/Clash-of-Cultures---Rulebook---WEB---2021-02-05-compressed.pdf (p. 34).
+
+### 0.1.165 / engine 0.4.112 — Tributes collection availability
+
+Acamapichtli's Tributes only enables collection when he occupies an owned city
+of size 3 or less that can still activate. At zero actions, being outside a city
+no longer enables the Collect button. Verified eligible, oversized and exhausted
+cities, normal paid collection, all 856 tests, locales, type checking and build.
