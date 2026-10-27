@@ -4754,5 +4754,7 @@
   "action cards": "cărți de acțiune",
   "Click the destination again to explore the highlighted region.": "Apasă din nou pe destinație pentru a explora regiunea evidențiată.",
   "No collection or Trade Routes on this sea tile.": "Nu poți colecta resurse sau folosi Rute Comerciale pe acest spațiu de mare.",
-  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Se deplasează spre orașele jucătorului selectat. Dacă nicio armată nu se poate mișca, poate apărea un oraș."
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Se deplasează spre orașele jucătorului selectat. Dacă nicio armată nu se poate mișca, poate apărea un oraș.",
+  "End diplomatic relations": "Încheie relațiile diplomatice",
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Decartează Marele Diplomat și încheie acordul. Costă 1 acțiune."
 }

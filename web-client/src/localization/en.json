@@ -4754,5 +4754,7 @@
   "action cards": "action cards",
   "Click the destination again to explore the highlighted region.": "Click the destination again to explore the highlighted region.",
   "No collection or Trade Routes on this sea tile.": "No collection or Trade Routes on this sea tile.",
-  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Moves toward the selected player's cities. If no army can move, a city may spawn instead."
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Moves toward the selected player's cities. If no army can move, a city may spawn instead.",
+  "End diplomatic relations": "End diplomatic relations",
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Discard Great Diplomat and end its agreement. Costs 1 action."
 }

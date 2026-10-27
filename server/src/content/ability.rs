@@ -119,6 +119,7 @@ pub fn get_all_uncached() -> Vec<Ability> {
         use_great_warlord(),
         construct_only(),
         use_diplomatic_relations(),
+        crate::content::incidents::great_diplomat::end_diplomatic_relations_action(),
         // action card related
         collect_only(),
         use_cultural_takeover(),

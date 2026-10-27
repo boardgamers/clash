@@ -487,3 +487,13 @@ Acamapichtli's Tributes only enables collection when he occupies an owned city
 of size 3 or less that can still activate. At zero actions, being outside a city
 no longer enables the Collect button. Verified eligible, oversized and exhausted
 cities, normal paid collection, all 856 tests, locales, type checking and build.
+
+### 0.1.166 / engine 0.4.113 — Diplomacy, boarding, pirate raids and Epic length
+
+Great Diplomat leaves the playable hand and has a separate regular action to end
+its treaty, without Subterfuge or Shogunate. Historical card declarations remain
+replayable. Boarding across several ships cannot move a land unit twice in one
+Move action. Claiming a Great Person no longer skips pirate raids on later players.
+Epic now ends after 8 ages; setup labels, the age track and final-turn warnings agree.
+Verified regression tests, reported-game local reproductions, locale validation,
+Svelte checking, status-phase tests and the production build. No live saves edited.

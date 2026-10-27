@@ -4754,5 +4754,7 @@
   "action cards": "کارت‌های اقدام",
   "Click the destination again to explore the highlighted region.": "برای کاوش منطقهٔ مشخص‌شده، دوباره روی مقصد کلیک کنید.",
   "No collection or Trade Routes on this sea tile.": "در این خانهٔ دریایی نمی‌توان منابع جمع‌آوری کرد یا از مسیرهای تجاری استفاده کرد.",
-  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "به‌سوی شهرهای بازیکن انتخاب‌شده حرکت می‌کنند. اگر هیچ ارتشی نتواند حرکت کند، ممکن است به‌جای آن شهری ظاهر شود."
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "به‌سوی شهرهای بازیکن انتخاب‌شده حرکت می‌کنند. اگر هیچ ارتشی نتواند حرکت کند، ممکن است به‌جای آن شهری ظاهر شود.",
+  "End diplomatic relations": "پایان روابط دیپلماتیک",
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "دیپلمات بزرگ را دور بیندازید و توافق را پایان دهید. هزینه: ۱ اقدام."
 }

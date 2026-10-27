@@ -105,8 +105,12 @@ test('Great Seer explains the pirate raid and exposes the later card price befor
     if (!decision) break;
     const context = decision.eventContext!;
     assert.equal(context.name, 'Great Seer');
-    assert.deepEqual(context.card!.cost, { culture_tokens: seat === 0 ? 1 : 2 });
-    assert.match(context.card!.description, /Draw 1 objective card per player/);
+    if (!sawPurchase) {
+      assert.deepEqual(context.card!.cost, { culture_tokens: seat === 0 ? 1 : 2 });
+      assert.match(context.card!.description, /Draw 1 objective card per player/);
+    } else {
+      assert.equal(context.card, null, 'claimed cards are not offered to later raid victims');
+    }
     if (decision.options.length) {
       placements++;
       assert.equal(decision.name, 'Place pirates');
@@ -116,7 +120,7 @@ test('Great Seer explains the pirate raid and exposes the later card price befor
       assert.match(context.placement!, /Place 2 pirate ships/);
     } else if (decision.fields.some((f) => f.name.includes('bribe'))) {
       sawBribe = true;
-      assert.ok(context.card!.later);
+      if (!sawPurchase) assert.ok(context.card!.later);
       assert.equal(decision.name, 'Pirate raid');
       assert.match(decision.description, /Pay 1 resource or token total/);
       assert.equal(context.raid, null);

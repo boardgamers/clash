@@ -124,9 +124,9 @@ fn test_keep_government() {
 }
 
 #[test]
-fn epic_continues_after_six_ages_and_ends_after_ten() {
+fn epic_continues_after_six_ages_and_ends_after_eight() {
     use server::game::{GameLength, GameState};
-    for (age, finished) in [(6, false), (9, false), (10, true)] {
+    for (age, finished) in [(6, false), (7, false), (8, true), (9, true)] {
         let mut game = JSON.load_game("end_game");
         game.options.length = GameLength::Epic;
         game.age = age;
@@ -163,7 +163,7 @@ fn length_defaults_to_standard_and_survives_save_load() {
     let cache = server::cache::Cache::new(&data.options);
     let restored = server::game::Game::from_data(data, cache, server::game::GameContext::Play);
     assert!(restored.options.length == GameLength::Epic);
-    assert_eq!(restored.options.length.ages(), 10);
+    assert_eq!(restored.options.length.ages(), 8);
 }
 
 #[test]

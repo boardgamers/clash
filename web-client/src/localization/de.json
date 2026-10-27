@@ -4754,5 +4754,7 @@
   "action cards": "Aktionskarten",
   "Click the destination again to explore the highlighted region.": "Klicke erneut auf das Ziel, um die hervorgehobene Region zu erkunden.",
   "No collection or Trade Routes on this sea tile.": "Auf diesem Seefeld sind weder Sammeln noch Handelsrouten möglich.",
-  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Bewegt sich auf die Städte des gewählten Spielers zu. Kann keine Armee ziehen, kann stattdessen eine Stadt entstehen."
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Bewegt sich auf die Städte des gewählten Spielers zu. Kann keine Armee ziehen, kann stattdessen eine Stadt entstehen.",
+  "End diplomatic relations": "Diplomatische Beziehungen beenden",
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Lege den Großen Diplomaten ab und beende das Abkommen. Kostet 1 Aktion."
 }

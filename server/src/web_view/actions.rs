@@ -353,7 +353,7 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
 }
 
 pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
-    game.player(seat).action_cards.iter().filter(|id|**id!=0).map(|id| {
+    game.player(seat).action_cards.iter().filter(|id|**id!=0 && **id != crate::content::incidents::great_diplomat::DIPLOMAT_ID + crate::content::incidents::great_persons::GREAT_PERSON_OFFSET).map(|id| {
         let c = game.cache.get_action_card(*id);
         let reason = action_reason(game,seat,can_play,PlayingActionType::ActionCard(*id));
         json!({"id":id,"name":c.civil_card.name,"description":c.civil_card.description,"free":PlayingActionType::ActionCard(*id).cost(game,seat).free,
@@ -367,6 +367,12 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
 pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     use crate::content::custom_actions::{CustomAction, SpecialActionExecution};
     game.player(seat).special_actions.values().flat_map(|info| {
+        if info.action == crate::content::custom_actions::SpecialAction::Custom(
+            crate::content::custom_actions::CustomActionType::EndDiplomaticRelations
+        ) && !game.permanent_effects.iter().any(|effect| matches!(effect,
+            crate::content::effects::PermanentEffect::DiplomaticRelations(r) if r.active_player == seat)) {
+            return vec![];
+        }
         let SpecialActionExecution::Action(execution) = &info.execution else { return vec![]; };
         let mut reason = if seat != game.active_player() {
             Some("Wait for your turn".to_string())

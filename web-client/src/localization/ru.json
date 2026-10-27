@@ -4754,5 +4754,7 @@
   "action cards": "карты действий",
   "Click the destination again to explore the highlighted region.": "Нажмите на место назначения ещё раз, чтобы исследовать выделенную область.",
   "No collection or Trade Routes on this sea tile.": "На этой морской клетке нельзя собирать ресурсы или использовать торговые пути.",
-  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Движутся к городам выбранного игрока. Если ни одна армия не может двигаться, вместо этого может появиться город."
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Движутся к городам выбранного игрока. Если ни одна армия не может двигаться, вместо этого может появиться город.",
+  "End diplomatic relations": "Прекратить дипломатические отношения",
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Сбросьте Великого дипломата и прекратите соглашение. Стоимость: 1 действие."
 }

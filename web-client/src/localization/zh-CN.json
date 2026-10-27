@@ -4754,5 +4754,7 @@
   "action cards": "行动牌",
   "Click the destination again to explore the highlighted region.": "再次点击目的地，探索高亮区域。",
   "No collection or Trade Routes on this sea tile.": "此海洋板块不能采集或建立贸易路线。",
-  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "朝所选玩家的城市移动。若没有军队能移动，可能改为生成城市。"
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "朝所选玩家的城市移动。若没有军队能移动，可能改为生成城市。",
+  "End diplomatic relations": "结束外交关系",
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "弃掉伟大外交家并终止协议。花费1次行动。"
 }

@@ -155,3 +155,27 @@ pub(crate) fn diplomatic_relations_partner(game: &Game, p: usize) -> Option<usiz
         }
     })
 }
+
+/// Discarding an already active treaty is not playing an Action card.
+pub(crate) fn end_diplomatic_relations_action() -> Ability {
+    Ability::builder("End diplomatic relations", "Discard Great Diplomat and end its agreement. Costs 1 action.")
+        .add_custom_action(
+            crate::content::custom_actions::CustomActionType::EndDiplomaticRelations,
+            |c| c.any_times().action().no_resources(),
+            |b| b.add_simple_persistent_event_listener(
+                |e| &mut e.custom_action, 0, |game, p, _| {
+                    remove_element_by(&mut game.permanent_effects, |e| {
+                        matches!(e, PermanentEffect::DiplomaticRelations(r) if r.active_player == p.index)
+                    });
+                    let card = DIPLOMAT_ID + GREAT_PERSON_OFFSET;
+                    if p.get(game).action_cards.contains(&card) {
+                        discard_action_card(game, p.index, card, &p.origin, HandCardLocation::DiscardPile);
+                    }
+                    p.log(game, "Ended diplomatic relations.");
+                },
+            ),
+            |game, p| game.permanent_effects.iter().any(|e| {
+                matches!(e, PermanentEffect::DiplomaticRelations(r) if r.active_player == p.index)
+            }),
+        ).build()
+}

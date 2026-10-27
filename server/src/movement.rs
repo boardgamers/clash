@@ -687,6 +687,12 @@ fn move_route_result(
 
     is_valid_movement_type(game, units, carrier_position, dest)?;
 
+    // Embarking is still a land unit's move, even when several ships share
+    // one group allocation. Only a continuing fleet may move the same units.
+    if embark_carrier_id.is_some() && unit_ids.iter().any(|id| moved_units.contains(id)) {
+        return Err("some units already moved".to_string());
+    }
+
     if matches!(current_move, CurrentMove::None)
         || *current_move != get_current_move(game, unit_ids, start, dest, embark_carrier_id)
     {

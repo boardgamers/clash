@@ -5,6 +5,6 @@
   "default": "Standard",
   "items": [
     { "name": "Standard", "label": "Standard — 6 ages" },
-    { "name": "Epic", "label": "Epic — 10 ages" }
+    { "name": "Epic", "label": "Epic — 8 ages" }
   ]
 }

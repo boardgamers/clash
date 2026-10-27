@@ -120,8 +120,18 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         if item.action == Action::StartTurn {
             continue;
         }
+        // Older saves recorded ending Great Diplomat as a card play, including
+        // Subterfuge responses. Preserve those historical declarations only.
+        let context = game.context.clone();
+        if matches!(item.action, Action::Playing(crate::playing_actions::PlayingAction::ActionCard(id))
+            if id == crate::content::incidents::great_diplomat::DIPLOMAT_ID
+                + crate::content::incidents::great_persons::GREAT_PERSON_OFFSET)
+        {
+            game.context = crate::game::GameContext::Replay;
+        }
         game = try_execute_action(game, item.action.clone(), item.player)
             .map_err(|e| format!("Failed to replay move {}: {e}", i + 1))?;
+        game.context = context;
     }
     if log_length(&game) != to {
         return Err(format!(

@@ -78,7 +78,7 @@ test('no warning without usable routes, with an expired borrowed advance, or aft
   assert.ok(view(borrowedCurrency).endTurnTradeWarning, 'Borrowed Currency expires before the next turn');
   for (const [length, age] of [
     ['Standard', 6],
-    ['Epic', 10],
+    ['Epic', 8],
   ] as const) {
     const last = trading();
     last.options = { ...last.options, length };

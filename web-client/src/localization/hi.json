@@ -4754,5 +4754,7 @@
   "action cards": "ऐक्शन कार्ड",
   "Click the destination again to explore the highlighted region.": "हाइलाइट किए गए क्षेत्र की खोज करने के लिए गंतव्य पर फिर से क्लिक करें।",
   "No collection or Trade Routes on this sea tile.": "इस समुद्री खाने पर संसाधन एकत्र नहीं कर सकते और व्यापार मार्गों का उपयोग नहीं कर सकते।",
-  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "चुने हुए खिलाड़ी के शहरों की ओर बढ़ते हैं। यदि कोई सेना नहीं चल सकती, तो उसकी जगह एक शहर आ सकता है।"
+  "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "चुने हुए खिलाड़ी के शहरों की ओर बढ़ते हैं। यदि कोई सेना नहीं चल सकती, तो उसकी जगह एक शहर आ सकता है।",
+  "End diplomatic relations": "राजनयिक संबंध समाप्त करें",
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "महान राजनयिक को त्यागकर समझौता समाप्त करें। लागत: 1 कार्रवाई।"
 }

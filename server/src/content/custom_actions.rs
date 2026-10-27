@@ -220,6 +220,7 @@ impl PlayingActionModifier {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum CustomActionType {
+    EndDiplomaticRelations,
     // Advances
     AbsolutePower,
     ForcedLabor,

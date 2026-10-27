@@ -11,12 +11,9 @@ test('held Elder Statesman shows its playable effect and ordinary cards retain a
   const elder = cards.find((card: { name: string }) => card.name === 'Elder Statesman');
   assert.ok(elder);
   const diplomat = cards.find((card: { name: string }) => card.name === 'Great Diplomat');
-  assert.ok(diplomat);
-  assert.equal(handCardDescription(diplomat.description),
-    'Choose another player. You cannot attack each other, unless you pay 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.');
+  assert.equal(diplomat, undefined, 'the public treaty is not a playable hand card');
   for (const card of cards) {
     const [prefix, effect] = card.description.split('Action card: ');
-    if (card === diplomat) continue;
     if (!effect) {
       assert.equal(handCardDescription(card.description), card.description);
       continue;

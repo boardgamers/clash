@@ -71,7 +71,7 @@ impl GameLength {
     pub fn ages(&self) -> u32 {
         match self {
             Self::Standard => crate::consts::AGES,
-            Self::Epic => 10,
+            Self::Epic => 8,
         }
     }
 

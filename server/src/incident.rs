@@ -789,6 +789,20 @@ pub fn is_active(
     role: IncidentTarget,
     player: usize,
 ) -> bool {
+    // Claiming a Great Person ends the card offer, not the icon's effects on
+    // later players. A sacrificed/replaced event still cancels its icon too.
+    let mut base_info;
+    let i = if priority >= BASE_EFFECT_PRIORITY
+        && i.consumed
+        && i.selected_player.is_some()
+        && !i.replaced_by_sacrifice
+    {
+        base_info = i.clone();
+        base_info.consumed = false;
+        &base_info
+    } else {
+        i
+    };
     if !i.is_active_ignoring_protection(role, player) {
         return false;
     }
