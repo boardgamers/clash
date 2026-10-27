@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "Na tym polu morskim nie można zbierać zasobów ani korzystać ze szlaków handlowych.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Ruch w stronę miast wybranego gracza. Jeśli żadna armia nie może się ruszyć, zamiast tego może powstać miasto.",
   "End diplomatic relations": "Zakończ stosunki dyplomatyczne",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Odrzuć Wielkiego Dyplomatę i zakończ porozumienie. Koszt: 1 akcja."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Odrzuć Wielkiego Dyplomatę i zakończ porozumienie. Koszt: 1 akcja.",
+  "Planning ahead": "Planowanie",
+  "Wait for choice": "Czekaj na wybór",
+  "{p0} queued": "{p0} w kolejce",
+  "End turn queued": "Koniec tury w kolejce",
+  "Choosing an advance": "Wybiera postęp",
+  "Placing a settler": "Umieszcza osadnika",
+  "Discard queue": "Wyczyść kolejkę",
+  "Queue stopped · {p0} remaining": "Kolejka zatrzymana · pozostało {p0}",
+  "{p0} · Choosing an advance": "{p0} · Wybiera postęp",
+  "{p0} · Placing a settler": "{p0} · Umieszcza osadnika",
+  "{p0} queued · End turn queued": "{p0} w kolejce · Koniec tury w kolejce"
 }

@@ -405,6 +405,8 @@ export interface CollectionPreview {
   moodWillDecrease: boolean;
 }
 export interface Bridge {
+  webPlanning?: (state: string, seat: number) => string;
+  currentPlayer?: (state: string) => number;
   webQuery: (state: string, seat: number, query: string) => string;
   webView: (state: string, seat?: number) => string;
   webCollectPreview: (state: string, seat: number, city: string, choices: string) => string;
@@ -541,6 +543,8 @@ export interface EventInfo {
   targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
+  failedPlan?: {key: string; actions: Move[]; error: string};
+  planning?: { queued: number; ended: boolean; waiting: boolean; other: string; label: string; pendingPlayer: number };
   earlyRaze?: { key: string; positions: string[]; selected: string | null };
   eventNotices?: import('./event-notices').EventNotice[];
   portPlacement?: { city: string; payment: Pile; choices: { position: string; action: Move }[] };

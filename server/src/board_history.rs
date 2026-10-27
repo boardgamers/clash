@@ -158,7 +158,7 @@ fn title(action: &Action) -> String {
 }
 
 pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String> {
-    if matches!(action, Action::QueueChoice { .. }) {
+    if matches!(action, Action::QueueChoice { .. } | Action::QueueMoves { .. }) {
         return try_execute_action(game, action, player);
     }
     let undo = matches!(action, Action::Undo);
@@ -188,7 +188,7 @@ pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String
             player,
         )?;
     }
-    Ok(game)
+    Ok(crate::action_queue::resume(game))
 }
 
 fn auto_keep_government(game: &Game) -> bool {

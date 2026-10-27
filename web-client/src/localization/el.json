@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "Δεν επιτρέπεται η συλλογή πόρων ή η χρήση Εμπορικών Οδών σε αυτή τη θαλάσσια θέση.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Κινούνται προς τις πόλεις του επιλεγμένου παίκτη. Αν κανένας στρατός δεν μπορεί να κινηθεί, μπορεί να εμφανιστεί μια πόλη.",
   "End diplomatic relations": "Τερματισμός διπλωματικών σχέσεων",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Απόρριψε τον Μεγάλο Διπλωμάτη και τερμάτισε τη συμφωνία. Κόστος: 1 ενέργεια."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Απόρριψε τον Μεγάλο Διπλωμάτη και τερμάτισε τη συμφωνία. Κόστος: 1 ενέργεια.",
+  "Planning ahead": "Προγραμματισμός",
+  "Wait for choice": "Αναμονή επιλογής",
+  "{p0} queued": "{p0} στην ουρά",
+  "End turn queued": "Τέλος γύρου στην ουρά",
+  "Choosing an advance": "Επιλέγει πρόοδο",
+  "Placing a settler": "Τοποθετεί άποικο",
+  "Discard queue": "Εκκαθάριση ουράς",
+  "Queue stopped · {p0} remaining": "Η ουρά σταμάτησε · απομένουν {p0}",
+  "{p0} · Choosing an advance": "{p0} · Επιλέγει πρόοδο",
+  "{p0} · Placing a settler": "{p0} · Τοποθετεί άποικο",
+  "{p0} queued · End turn queued": "{p0} στην ουρά · Τέλος γύρου στην ουρά"
 }

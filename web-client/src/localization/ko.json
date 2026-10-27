@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "이 바다 칸에서는 자원을 수집하거나 교역로를 이용할 수 없습니다.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "선택한 플레이어의 도시를 향해 이동합니다. 이동할 수 있는 군대가 없으면 대신 도시가 생길 수 있습니다.",
   "End diplomatic relations": "외교 관계 종료",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "위대한 외교관을 버리고 협정을 종료합니다. 행동 1회를 소모합니다."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "위대한 외교관을 버리고 협정을 종료합니다. 행동 1회를 소모합니다.",
+  "Planning ahead": "미리 계획",
+  "Wait for choice": "선택 기다리기",
+  "{p0} queued": "{p0}개 대기 중",
+  "End turn queued": "턴 종료 대기 중",
+  "Choosing an advance": "발전 선택 중",
+  "Placing a settler": "개척자 배치 중",
+  "Discard queue": "대기열 비우기",
+  "Queue stopped · {p0} remaining": "대기열 중단 · {p0}개 남음",
+  "{p0} · Choosing an advance": "{p0} · 발전 선택 중",
+  "{p0} · Placing a settler": "{p0} · 개척자 배치 중",
+  "{p0} queued · End turn queued": "{p0}개 대기 중 · 턴 종료 대기 중"
 }

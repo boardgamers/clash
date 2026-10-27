@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "No collection or Trade Routes on this sea tile.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Moves toward the selected player's cities. If no army can move, a city may spawn instead.",
   "End diplomatic relations": "End diplomatic relations",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Discard Great Diplomat and end its agreement. Costs 1 action."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Discard Great Diplomat and end its agreement. Costs 1 action.",
+  "Planning ahead": "Planning ahead",
+  "Wait for choice": "Wait for choice",
+  "{p0} queued": "{p0} queued",
+  "End turn queued": "End turn queued",
+  "Choosing an advance": "Choosing an advance",
+  "Placing a settler": "Placing a settler",
+  "Discard queue": "Discard queue",
+  "Queue stopped · {p0} remaining": "Queue stopped · {p0} remaining",
+  "{p0} · Choosing an advance": "{p0} · Choosing an advance",
+  "{p0} · Placing a settler": "{p0} · Placing a settler",
+  "{p0} queued · End turn queued": "{p0} queued · End turn queued"
 }

@@ -136,6 +136,7 @@ pub struct Game {
     pub events: Vec<PersistentEventState>,
     pub early_choices: Vec<crate::early_choices::SavedChoice>,
     pub early_choice_update: bool,
+    pub action_plan: Option<crate::action_queue::Plan>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,

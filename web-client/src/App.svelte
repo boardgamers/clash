@@ -127,9 +127,12 @@
   import { sinceLastTurn } from './playback';
   import { ageCount, ageLabel } from './game-length';
   import { roundProgress, personalRoundLabel } from './round-progress';
-  let { controller, concurrentPreview }: { controller: Controller; concurrentPreview?: { pending: boolean; waiting: boolean; seat: number; other: string; queued: number; ended: boolean; onUndo: () => void; onWait: () => void } } = $props();
+  let { controller, concurrentPreview }: { controller: Controller; concurrentPreview?: { pending: boolean; waiting: boolean; seat: number; other: string; label?: string; pendingPlayer?: number; queued: number; ended: boolean; onUndo: () => void; onWait: () => void } } = $props();
   const session = $derived(controller.session);
-  const planningQueue = $derived(!!concurrentPreview?.pending && concurrentPreview.seat === 0);
+  const queueControls = $derived(concurrentPreview ?? ($session.planning ? {
+    ...$session.planning,pending:true,seat:0,onUndo:()=>controller.undoQueuedAction(),onWait:()=>controller.waitForChoice(),
+  } : undefined));
+  const planningQueue = $derived(!!queueControls?.pending && queueControls.seat === 0);
   let earlyPanel = $state<'cities' | 'abilities' | 'first' | null>(null);
   const earlyOffers = $derived(!$session.playback ? $session.view?.earlyChoices ?? [] : []);
   const earlyAdvance = $derived(earlyOffers.find(o => o.key.endsWith('/advance')));
@@ -266,7 +269,7 @@
   const activePlayers = $derived(
     $session.game?.state === 'Finished' || $session.playback
       ? []
-      : concurrentPreview?.pending ? (concurrentPreview.waiting ? [1] : [0, 1]) : ($session.view?.activePlayers ?? ($session.view ? [$session.view.activePlayer] : [])),
+      : queueControls?.pending ? (queueControls.waiting ? [queueControls.pendingPlayer ?? 1] : [$session.seat ?? 0, queueControls.pendingPlayer ?? 1]) : ($session.view?.activePlayers ?? ($session.view ? [$session.view.activePlayer] : [])),
   );
   const choosingPlayer = $derived(
     !!$session.view?.civilizationDraft || !!$session.game?.events?.length || ($session.game?.round ?? 0) > 3,
@@ -938,7 +941,7 @@
       <div class="player-list" aria-label="Civilizations in turn order">
         {#each playerTurns as { player, order, status }}
           {@const turnLabel = activePlayers.includes(player.index)
-            ? (concurrentPreview?.pending ? player.index === 1 : choosingPlayer)
+            ? (queueControls?.pending ? player.index === (queueControls.pendingPlayer ?? 1) : choosingPlayer)
               ? 'Choosing'
               : player.index === $session.seat
                 ? 'Your turn'
@@ -1293,7 +1296,7 @@
             class="turn-light"
           ></span>{/if}
         <div class="turn-copy">
-          <strong>{concurrentPreview?.pending && concurrentPreview.seat === 0 && !concurrentPreview.waiting ? 'Planning ahead' : actionTitle}</strong>
+          <strong>{queueControls?.pending && queueControls.seat === 0 && !queueControls.waiting ? 'Planning ahead' : actionTitle}</strong>
           {#if waiting}<span class="waiting-action"
               >{waiting.action}{waiting.source ? ` · ${printedCardName(waiting.source)}` : ''}</span
             >{/if}
@@ -1464,9 +1467,9 @@
               aria-hidden="true"
             />{/if}</button
         >
-        <UndoControl canUndo={planningQueue ? !!concurrentPreview?.queued : !!$session.view?.canUndo || !!activeInfluence($session)} canRedo={!planningQueue && !!$session.view?.canRedo}
+        <UndoControl canUndo={planningQueue ? !!queueControls?.queued : !!$session.view?.canUndo || !!activeInfluence($session)} canRedo={!planningQueue && !!$session.view?.canRedo}
           blocked={!!$session.playback || $session.pending} submit={action => {
-            if (planningQueue && action === 'Undo') concurrentPreview!.onUndo();
+            if (planningQueue && action === 'Undo') queueControls!.onUndo();
             else controller.submit(action);
           }}/>
         <button
@@ -1484,11 +1487,14 @@
           }}><Flag size={19} /><span>End turn</span></button
         >
       </nav>
-      {#if concurrentPreview?.pending && !concurrentPreview.waiting && concurrentPreview.seat === 0}
+      {#if queueControls?.pending && !queueControls.waiting && queueControls.seat === 0}
         <div class="concurrent-choice-row">
-          <span>{concurrentPreview.other} · Placing a settler{#if concurrentPreview.queued}<br /><strong>{concurrentPreview.queued} queued{concurrentPreview.ended ? ' · End turn queued' : ''}</strong>{/if}</span>
-          <button onclick={concurrentPreview.onWait}><Hourglass size={14} />Wait for choice</button>
+          <span>{queueControls.other} · {queueControls.label ?? 'Placing a settler'}{#if queueControls.queued}<br /><strong>{queueControls.queued} queued{queueControls.ended ? ' · End turn queued' : ''}</strong>{/if}</span>
+          <button onclick={queueControls.onWait}><Hourglass size={14} />Wait for choice</button>
         </div>
+      {/if}
+      {#if $session.failedPlan && !$session.playback}
+        <div class="concurrent-choice-row"><span>Queue stopped · {$session.failedPlan.actions.length} remaining</span><button disabled={$session.pending} onclick={()=>controller.discardFailedQueue()}>Discard queue</button></div>
       {/if}
       {#if !$session.playback}<ContextualCards {controller} context="after-battle" />{/if}
     </div>
@@ -1677,7 +1683,10 @@
                     />{/if}{#if !variant.free}<Zap size={12} />1{/if}</button
                 >{/each}
             </div>{/if}
-          {#if !$session.playback}<ContextualCards {controller} context="collect" />{/if}
+          {#if $session.failedPlan && !$session.playback}
+        <div class="concurrent-choice-row"><span>Queue stopped · {$session.failedPlan.actions.length} remaining</span><button disabled={$session.pending} onclick={()=>controller.discardFailedQueue()}>Discard queue</button></div>
+      {/if}
+      {#if !$session.playback}<ContextualCards {controller} context="collect" />{/if}
           {#if city && !city.reason}<CollectionBonusHints {city} selection={$session.selection} />{/if}
           {#if city?.ballcourts}<label class="ballcourts-toggle"
               ><input

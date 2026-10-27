@@ -146,6 +146,7 @@ pub fn civilizations(game: Game) -> Vec<String> {
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    if game.action_plan.as_ref().is_some_and(|p| Some(p.player) != player_index) {game.action_plan=None;}
     game.early_choices.retain(|c| Some(c.player) == player_index);
     if let Some(draft) = &mut game.civilization_draft {
         for i in 0..draft.offers.len() {

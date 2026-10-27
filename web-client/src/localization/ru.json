@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "На этой морской клетке нельзя собирать ресурсы или использовать торговые пути.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Движутся к городам выбранного игрока. Если ни одна армия не может двигаться, вместо этого может появиться город.",
   "End diplomatic relations": "Прекратить дипломатические отношения",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Сбросьте Великого дипломата и прекратите соглашение. Стоимость: 1 действие."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Сбросьте Великого дипломата и прекратите соглашение. Стоимость: 1 действие.",
+  "Planning ahead": "Планирование",
+  "Wait for choice": "Ждать выбора",
+  "{p0} queued": "В очереди: {p0}",
+  "End turn queued": "Конец хода в очереди",
+  "Choosing an advance": "Выбирает достижение",
+  "Placing a settler": "Размещает поселенца",
+  "Discard queue": "Очистить очередь",
+  "Queue stopped · {p0} remaining": "Очередь остановлена · осталось {p0}",
+  "{p0} · Choosing an advance": "{p0} · Выбирает достижение",
+  "{p0} · Placing a settler": "{p0} · Размещает поселенца",
+  "{p0} queued · End turn queued": "В очереди: {p0} · Конец хода в очереди"
 }

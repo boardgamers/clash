@@ -17,11 +17,13 @@ Open http://127.0.0.1:8643. The preview binds to loopback and saves its disposab
 
 The local preview does not modify production games, catalog records, or chat rooms.
 
-## Action-queue prototype
+## Off-turn action queues
 
-Open `/async-preview.html` on the local dev server. This isolated replacement-settler scenario uses the real board and controls: Maya plans actions while Rome chooses a city. Switch seats with the preview toolbar. The queue reuses `predictMove`, revalidates actions after Rome responds, and stops on an invalid action. End turn can be queued last; the normal Undo button removes a queued action and its payment responses together.
+After an opponent captures your city, its owner can plan while you place the replacement settler. Technology Trade also lets its owner plan while the recipient chooses their advance. Normal controls show the projected board; Undo removes the latest queued action with its payment responses. Wait for choice pauses planning. End turn may be queued last.
 
-This is a local, in-memory prototype, not production concurrency. Reloading resets it. It neither saves a server-side queue nor enables planning around other live-game reactions. The production viewer entry point does not import the prototype.
+Queues are private, stored in the game, and validated by the server. After the earlier response and any nested choices finish, valid queued actions execute in order even if the planning player is offline. Hidden draws, dice, battles and actions requiring another player cannot be queued. An invalid replay stops and reports an error.
+
+Open `/async-preview.html` on the local dev server to test both scenarios with the production controller and engine, switching seats in the test toolbar. Reloading this isolated fixture resets it.
 
 ## Implemented controls
 

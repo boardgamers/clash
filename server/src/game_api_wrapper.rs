@@ -179,6 +179,12 @@ pub fn current_player(game: String) -> JsValue {
 pub fn can_move_out_of_turn(data: String, move_data: JsValue, player: usize) -> bool {
     let game = get_game(data);
     if let Some(raw) = move_data.as_string()
+        && let Ok(crate::action::Action::QueueMoves { key, .. }) = serde_json::from_str(&raw)
+    {
+        return crate::action_queue::offer(&game, player).is_some_and(|(current,_)| current == key)
+            || game.action_plan.as_ref().is_some_and(|p|p.player==player && p.key==key && p.error.is_some());
+    }
+    if let Some(raw) = move_data.as_string()
         && let Ok(crate::action::Action::QueueChoice { key, response }) = serde_json::from_str(&raw)
     {
         return crate::early_choices::can_save(&game, player, &key, response.as_ref());
@@ -357,4 +363,20 @@ pub fn web_query(data: String, player: usize, query: String) -> Result<String, J
     let result = with_view_game(data, |game| crate::web_view::query(game, player, query))
         .map_err(|e| JsValue::from_str(&e))?;
     serde_json::to_string(&result).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+#[wasm_bindgen(js_name = "webPlanning")]
+pub fn web_planning(data: String, player: usize) -> Result<String, JsValue> {
+    with_view_game(data, |game| -> Result<String,String> {
+        let Some((key,label))=crate::action_queue::offer(game,player) else {return Ok("null".into());};
+        let plan=game.action_plan.as_ref().filter(|p|p.player==player && p.key==key);
+        let actions=plan.map(|p|p.actions.clone()).unwrap_or_default();
+        let waiting=plan.is_some_and(|p|p.waiting);
+        let base=crate::action_queue::project(game,player,&[])?;
+        let projected=crate::action_queue::project(game,player,&actions)?;
+        serde_json::to_string(&serde_json::json!({"key":key,"label":label,"other":game.player(game.active_player()).civilization.name,
+            "pendingPlayer":game.active_player(),"actions":actions,"waiting":waiting,
+            "base":from_game(crate::game_api::strip_secret(base,Some(player))),
+            "projected":from_game(crate::game_api::strip_secret(projected,Some(player)))})).map_err(|e|e.to_string())
+    }).map_err(|e|JsValue::from_str(&e))
 }

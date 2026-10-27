@@ -48,6 +48,8 @@ pub struct GameData {
     early_choices: Vec<crate::early_choices::SavedChoice>,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     early_choice_update: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    action_plan: Option<crate::action_queue::Plan>,
     players: Vec<PlayerData>,
     map: MapData,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -117,6 +119,7 @@ pub struct GameData {
 #[must_use]
 pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
     let mut game = Game {
+        action_plan: data.action_plan,
         early_choices: data.early_choices,
         early_choice_update: data.early_choice_update,
         context,
@@ -179,6 +182,7 @@ pub fn data(game: Game) -> GameData {
         version: game.version,
         state: game.state,
         events: game.events,
+        action_plan: game.action_plan,
         early_choices: game.early_choices,
         early_choice_update: game.early_choice_update,
         players: game.players.into_iter().map(player_data).collect(),
@@ -218,6 +222,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         version: game.version,
         state: game.state.clone(),
         events: game.events.clone(),
+        action_plan: game.action_plan.clone(),
         early_choices: game.early_choices.clone(),
         early_choice_update: game.early_choice_update,
         players: game.players.iter().map(cloned_player_data).collect(),

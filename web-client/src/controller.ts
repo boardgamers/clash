@@ -1,3 +1,4 @@
+import { ActionQueue } from './action-queue';
 import { liveActionMessages } from './live-actions';
 import { eventNotices, liveEventNotices } from './event-notices';
 import { publicActions } from './replay-actions';
@@ -117,6 +118,8 @@ export class Controller {
   private raw = '';
   /** The latest state received from the host. */
   private confirmedRaw = '';
+  private planningInfo: {key: string; base: string; projected: string; actions: Move[]; waiting: boolean; other: string; label: string; pendingPlayer: number} | null = null;
+  private planningQueue: ActionQueue | null = null;
   private confirmedPrint: string | null = null;
   /**
    * Moves awaiting the server, oldest first. Only the head has been sent; the
@@ -367,6 +370,20 @@ export class Controller {
       this.cardContinuation = null;
     }
     const old = get(this.session);
+    const failedPlan=(JSON.parse(raw) as {action_plan?: {key: string; actions: Move[]; error: string}}).action_plan;
+    const queuedFailure=failedPlan?.error;
+    this.patch({failedPlan:queuedFailure ? failedPlan : undefined});
+    this.planningInfo = old.seat !== undefined && !old.playback && this.engine.webPlanning
+      ? JSON.parse(this.engine.webPlanning(raw, old.seat)) : null;
+    this.planningQueue = null;
+    if (this.planningInfo && old.seat !== undefined && this.engine.tryMove && this.engine.stripSecret && this.engine.currentPlayer) {
+      const info=this.planningInfo;
+      const queue=new ActionQueue({tryMove:this.engine.tryMove,stripSecret:this.engine.stripSecret,currentPlayer:this.engine.currentPlayer},old.seat,info.base);
+      for(const action of info.actions) { const added=queue.append(action); if(!added.ok) break; }
+      this.planningQueue=queue;
+      this.patch({planning:{queued:queue.count,ended:queue.ended,waiting:info.waiting,other:info.other,label:info.label,pendingPlayer:info.pendingPlayer}});
+      if(!info.waiting) raw=info.projected;
+    } else this.patch({planning:undefined});
     const game = JSON.parse(raw) as Game;
     if (game.board_history) game.board_history = { ...game.board_history, frames: groupPlaybackFrames(game) };
     const changed = raw !== this.raw;
@@ -504,7 +521,7 @@ export class Controller {
       focus: old.focus ?? city,
       pending: false,
       automaticPayment: !!automaticPayment,
-      error: '',
+      error: queuedFailure ? `Queued actions stopped: ${queuedFailure}` : '',
       selection: [],
       preview: null,
       recruits: {},
@@ -1849,6 +1866,18 @@ export class Controller {
   submit(move: Move, quotedPayment?: Pile) {
     if (move === 'Undo' && this.backInfluence()) return;
     const s = get(this.session);
+    if(this.planningInfo && this.planningQueue && !s.playback) {
+      if(s.pending) return;
+      if(move==='Undo') {this.undoQueuedAction();return;}
+      if(this.planningInfo.waiting) return;
+      try {
+        const result=this.planningQueue.append(move);
+        if(!result.ok) {this.patch({error:result.reason});return;}
+        this.quotedActionPayment=quotedPayment ?? null;
+        this.sendPlan(false);
+      } catch(error) {this.patch({error:String(error)});}
+      return;
+    }
     if (
       s.pending ||
       s.playback ||
@@ -1877,6 +1906,25 @@ export class Controller {
     // Show the result immediately. Queries and follow-up moves use the predicted
     // state; the host still validates every move and its state stays authoritative.
     if (predicted) this.apply(predicted.raw, { predicted: true });
+  }
+  discardFailedQueue() {
+    const s=get(this.session);
+    if(!s.failedPlan || s.pending) return;
+    const move={QueueMoves:{key:s.failedPlan.key,actions:[],waiting:false}};
+    this.patch({pending:true,error:''});this.outbox.push({move,print:null,announced:false});
+    if(this.outbox.length===1) this.sendHead();
+  }
+  waitForChoice() { this.sendPlan(true); }
+  undoQueuedAction() {
+    if(!this.planningQueue || get(this.session).pending) return;
+    this.planningQueue.undo();this.sendPlan(this.planningInfo?.waiting ?? false);
+  }
+  private sendPlan(waiting: boolean) {
+    if(!this.planningInfo || !this.planningQueue || get(this.session).pending) return;
+    const move={QueueMoves:{key:this.planningInfo.key,actions:this.planningQueue.entries.map(e=>e.move),waiting}};
+    this.patch({pending:true,error:''});
+    this.outbox.push({move,print:null,announced:false});
+    if(this.outbox.length===1) this.sendHead();
   }
   /** The visible result of `move`, when it does not depend on hidden information. */
   private predict(move: Move, s: Session): { raw: string; print: string } | null {

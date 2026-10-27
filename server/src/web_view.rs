@@ -837,7 +837,7 @@ mod tests {
             .map
             .tiles
             .keys()
-            .find(|pos| pos.distance(site) == 2)
+            .find(|pos| pos.distance(site) == 2 && game.map.within_revealed_distance(**pos, site, 2))
             .expect("tile 2 spaces away");
         game.players[seat]
             .units

@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "Nu poți colecta resurse sau folosi Rute Comerciale pe acest spațiu de mare.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Se deplasează spre orașele jucătorului selectat. Dacă nicio armată nu se poate mișca, poate apărea un oraș.",
   "End diplomatic relations": "Încheie relațiile diplomatice",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Decartează Marele Diplomat și încheie acordul. Costă 1 acțiune."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Decartează Marele Diplomat și încheie acordul. Costă 1 acțiune.",
+  "Planning ahead": "Planificare",
+  "Wait for choice": "Așteaptă alegerea",
+  "{p0} queued": "{p0} în așteptare",
+  "End turn queued": "Sfârșit de tură în așteptare",
+  "Choosing an advance": "Alege un progres",
+  "Placing a settler": "Plasează un colonist",
+  "Discard queue": "Golește coada",
+  "Queue stopped · {p0} remaining": "Coadă oprită · {p0} rămase",
+  "{p0} · Choosing an advance": "{p0} · Alege un progres",
+  "{p0} · Placing a settler": "{p0} · Plasează un colonist",
+  "{p0} queued · End turn queued": "{p0} în așteptare · Sfârșit de tură în așteptare"
 }

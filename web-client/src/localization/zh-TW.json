@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "此海洋格無法採集資源或使用貿易路線。",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "朝所選玩家的城市移動。若沒有軍隊可以移動，則可能改為生成一座城市。",
   "End diplomatic relations": "結束外交關係",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "棄掉偉大外交家並終止協議。花費1次行動。"
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "棄掉偉大外交家並終止協議。花費1次行動。",
+  "Planning ahead": "提前規劃",
+  "Wait for choice": "等待選擇",
+  "{p0} queued": "{p0} 項待執行",
+  "End turn queued": "結束回合待執行",
+  "Choosing an advance": "正在選擇進步",
+  "Placing a settler": "正在放置移民",
+  "Discard queue": "清空佇列",
+  "Queue stopped · {p0} remaining": "佇列已停止 · 剩餘 {p0} 項",
+  "{p0} · Choosing an advance": "{p0} · 正在選擇進步",
+  "{p0} · Placing a settler": "{p0} · 正在放置移民",
+  "{p0} queued · End turn queued": "{p0} 項待執行 · 結束回合待執行"
 }

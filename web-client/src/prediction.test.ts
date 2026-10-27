@@ -608,3 +608,34 @@ test('canonical state comparisons preserve nested keys, arrays and special prope
   assert.equal(canonicalJson(source), old);
   assert.deepEqual(JSON.parse(canonicalJson(source)), source);
 });
+
+test('Technology Trade plans use persisted queue commands, restore on reconnect, and support Undo and Wait', async () => {
+  const app=harness();
+  let raw=readFileSync(new URL('../scripts/tech-queue-fixture.json',import.meta.url),'utf8');
+  try {
+    app.controller.setPlayer(0);await app.controller.load(strip(raw));
+    assert.equal(app.session().planning?.label,'Choosing an advance');
+    assert.equal(app.session().view?.canPlay,true);
+    app.controller.submit({Playing:'EndTurn'});
+    const queued=JSON.parse(app.sent.at(-1)!);
+    assert.deepEqual(queued.QueueMoves.actions,[{Playing:'EndTurn'}]);
+    raw=engine.tryMove(raw,app.sent.at(-1)!,0);
+    assert.equal(engine.isLiveUpdate(raw),true);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().planning?.ended,true);
+    const other=harness();
+    try {
+      other.controller.setPlayer(0);await other.controller.load(strip(raw));
+      assert.equal(other.session().planning?.queued,1,'queue survives a new browser/controller');
+    } finally {other.close();}
+    app.controller.undoQueuedAction();raw=engine.tryMove(raw,app.sent.at(-1)!,0);await app.controller.load(strip(raw));
+    assert.equal(app.session().planning?.queued,0);
+    app.controller.waitForChoice();raw=engine.tryMove(raw,app.sent.at(-1)!,0);await app.controller.load(strip(raw));
+    assert.equal(app.session().planning?.waiting,true);
+    assert.equal(app.session().view?.canPlay,false);
+    raw=engine.tryMove(raw,JSON.stringify({Response:{SelectAdvance:'Fishing'}}),1);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().planning,undefined);
+    assert.equal(app.session().view?.canPlay,true);
+  } finally {app.close();}
+});

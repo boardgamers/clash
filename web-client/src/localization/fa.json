@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "در این خانهٔ دریایی نمی‌توان منابع جمع‌آوری کرد یا از مسیرهای تجاری استفاده کرد.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "به‌سوی شهرهای بازیکن انتخاب‌شده حرکت می‌کنند. اگر هیچ ارتشی نتواند حرکت کند، ممکن است به‌جای آن شهری ظاهر شود.",
   "End diplomatic relations": "پایان روابط دیپلماتیک",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "دیپلمات بزرگ را دور بیندازید و توافق را پایان دهید. هزینه: ۱ اقدام."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "دیپلمات بزرگ را دور بیندازید و توافق را پایان دهید. هزینه: ۱ اقدام.",
+  "Planning ahead": "برنامه‌ریزی پیشاپیش",
+  "Wait for choice": "انتظار برای انتخاب",
+  "{p0} queued": "{p0} در صف",
+  "End turn queued": "پایان نوبت در صف",
+  "Choosing an advance": "در حال انتخاب پیشرفت",
+  "Placing a settler": "در حال قرار دادن مهاجر",
+  "Discard queue": "پاک کردن صف",
+  "Queue stopped · {p0} remaining": "صف متوقف شد · {p0} باقی‌مانده",
+  "{p0} · Choosing an advance": "{p0} · در حال انتخاب پیشرفت",
+  "{p0} · Placing a settler": "{p0} · در حال قرار دادن مهاجر",
+  "{p0} queued · End turn queued": "{p0} در صف · پایان نوبت در صف"
 }

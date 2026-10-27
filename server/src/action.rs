@@ -37,6 +37,7 @@ pub enum Action {
     Playing(PlayingAction),
     Movement(MovementAction),
     Response(EventResponse),
+    QueueMoves { key: String, actions: Vec<Action>, waiting: bool },
     QueueChoice { key: String, response: Option<EventResponse> },
     Undo,
     Redo,
@@ -75,6 +76,10 @@ pub fn try_execute_action(
     player_index: usize,
 ) -> Result<Game, String> {
     game.early_choice_update = false;
+    if let Action::QueueMoves { key, actions, waiting } = &action {
+        crate::action_queue::save(&mut game, player_index, key, actions.clone(), *waiting)?;
+        return Ok(game);
+    }
     if let Action::QueueChoice { key, response } = &action {
         crate::early_choices::save(&mut game, player_index, key, response.clone())?;
         return Ok(game);

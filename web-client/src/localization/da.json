@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "Ingen indsamling eller handelsruter på dette havfelt.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Bevæger sig mod den valgte spillers byer. Kan ingen hær flytte, kan en by opstå i stedet.",
   "End diplomatic relations": "Afslut diplomatiske forbindelser",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Kassér Den store diplomat og afslut aftalen. Koster 1 handling."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Kassér Den store diplomat og afslut aftalen. Koster 1 handling.",
+  "Planning ahead": "Planlæg fremad",
+  "Wait for choice": "Afvent valg",
+  "{p0} queued": "{p0} i kø",
+  "End turn queued": "Turafslutning i kø",
+  "Choosing an advance": "Vælger et fremskridt",
+  "Placing a settler": "Placerer en nybygger",
+  "Discard queue": "Ryd kø",
+  "Queue stopped · {p0} remaining": "Kø stoppet · {p0} tilbage",
+  "{p0} · Choosing an advance": "{p0} · Vælger et fremskridt",
+  "{p0} · Placing a settler": "{p0} · Placerer en nybygger",
+  "{p0} queued · End turn queued": "{p0} i kø · Turafslutning i kø"
 }

@@ -497,3 +497,22 @@ Move action. Claiming a Great Person no longer skips pirate raids on later playe
 Epic now ends after 8 ages; setup labels, the age track and final-turn warnings agree.
 Verified regression tests, reported-game local reproductions, locale validation,
 Svelte checking, status-phase tests and the production build. No live saves edited.
+
+### 0.1.168 / engine 0.4.115 — Persisted action queues
+
+The current turn owner can plan while another player places a replacement settler
+or makes Technology Trade's final advance choice. The real decision stays pending;
+normal controls display a projected board, the action-bar Undo edits the queue,
+and Wait for choice pauses planning. Private queues are stored in the game and
+revalidated/executed by the server after all earlier reactions finish, including
+when the planner is offline. End turn is a terminal intent. Battles, random draws,
+exploration and actions requiring another player stop planning. Failed replay
+retains the suffix and reports an error, with an explicit discard control.
+
+The local `/async-preview.html` tests both cases through the production controller
+and engine. The research chooser no longer repeats its advance-selection hint.
+Validated 886 web tests, 48 engine unit tests, 21 action-card tests, 6 queue tests,
+17 locales, Svelte checks, build, and engine protocol/replay/undo checks. The broad
+Rust suite still has an unrelated cultural-influence log snapshot mismatch, also
+reproduced on the pre-release main revision. The Raiders UI test now selects a
+revealed two-space path, matching the existing revealed-distance rule.

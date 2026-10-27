@@ -4756,5 +4756,16 @@
   "No collection or Trade Routes on this sea tile.": "Aucune collecte ni route commerciale sur cette case de mer.",
   "Moves toward the selected player's cities. If no army can move, a city may spawn instead.": "Avance vers les villes du joueur choisi. Si aucune armée ne peut bouger, une ville peut apparaître à la place.",
   "End diplomatic relations": "Rompre les relations diplomatiques",
-  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Défaussez Grand Diplomate pour mettre fin à son accord. Coûte 1 action."
+  "Discard Great Diplomat and end its agreement. Costs 1 action.": "Défaussez Grand Diplomate pour mettre fin à son accord. Coûte 1 action.",
+  "Planning ahead": "Planification",
+  "Wait for choice": "Attendre le choix",
+  "{p0} queued": "{p0} en attente",
+  "End turn queued": "Fin de tour en attente",
+  "Choosing an advance": "Choisit une avancée",
+  "Placing a settler": "Place un colon",
+  "Discard queue": "Vider la file",
+  "Queue stopped · {p0} remaining": "File interrompue · {p0} restants",
+  "{p0} · Choosing an advance": "{p0} · Choisit une avancée",
+  "{p0} · Placing a settler": "{p0} · Place un colon",
+  "{p0} queued · End turn queued": "{p0} en attente · Fin de tour en attente"
 }
