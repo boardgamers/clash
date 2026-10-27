@@ -158,11 +158,27 @@ fn title(action: &Action) -> String {
 }
 
 pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String> {
+    if matches!(action, Action::QueueChoice { .. }) {
+        return try_execute_action(game, action, player);
+    }
     let undo = matches!(action, Action::Undo);
     let mut game = execute_one(game, action, player)?;
+    crate::early_choices::prune_objectives(&mut game);
     // Save automatic responses as ordinary actions. Replay then reproduces them
     // without needing past settings; undo never immediately replays a skipped choice.
-    while !undo && game.context == crate::game::GameContext::Play && auto_keep_cities(&game) {
+    while !undo && game.context == crate::game::GameContext::Play {
+        if let Some(response) = crate::early_choices::take_ready(&mut game) {
+            let player = game.active_player();
+            game = execute_one(game, Action::Response(response), player)?;
+            crate::early_choices::prune_objectives(&mut game);
+            continue;
+        }
+        if auto_keep_government(&game) {
+            let player = game.active_player();
+            game = execute_one(game, Action::Response(crate::content::persistent_events::EventResponse::Payment(vec![crate::resource_pile::ResourcePile::empty()])), player)?;
+            continue;
+        }
+        if !auto_keep_cities(&game) { break; }
         let player = game.active_player();
         game = execute_one(
             game,
@@ -173,6 +189,16 @@ pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String
         )?;
     }
     Ok(game)
+}
+
+fn auto_keep_government(game: &Game) -> bool {
+    use crate::content::persistent_events::{PersistentEventRequest, PersistentEventType};
+    game.player(game.active_player()).settings.keep_government == Some(true)
+        && game.events.last().is_some_and(|event| {
+            matches!(event.event_type, PersistentEventType::StatusPhase(crate::status_phase::StatusPhaseState::ChangeGovernmentType(_)))
+                && event.player.handler.as_ref().is_some_and(|h| matches!(&h.request,
+                    PersistentEventRequest::Payment(rs) if rs.len() == 1 && rs[0].optional && rs[0].name == "Pay to change government"))
+        })
 }
 
 fn auto_keep_cities(game: &Game) -> bool {

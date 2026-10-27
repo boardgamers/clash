@@ -1,6 +1,7 @@
 <script lang="ts">
   import { printedCardName, printedCardText } from './card-names';
-  import { X, Layers, Zap, Swords, Archive, ScrollText, ChevronDown } from 'lucide-svelte';
+  import { X, Layers, Zap, Swords, Archive, ScrollText, ChevronDown, BookOpen } from 'lucide-svelte';
+  import GreatPersonEffect from './GreatPersonEffect.svelte';
   import ResourceText from './ResourceText.svelte';
   import ResourceAmount from './ResourceAmount.svelte';
   import type { Controller } from './controller';
@@ -8,6 +9,7 @@
   import { handCardDescription } from './card-text';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
+  const offers = $derived(!$session.playback ? $session.view?.earlyChoices?.filter(o => o.key.endsWith('/offer')) ?? [] : []);
   let tab = $state<'hand' | 'actions' | 'events'>('hand');
   const actions = $derived([...($session.game?.action_cards_discarded ?? [])].reverse().map(id => ({ id, card: $session.view?.cardCatalog?.find(card => card.id === id) })));
   const events = $derived([...($session.game?.incidents_discarded ?? [])].reverse().map(id => ({ id, card: $session.view?.eventCatalog?.find(card => card.id === id) })));
@@ -40,6 +42,35 @@
     <button class:chosen={tab === 'events'} aria-pressed={tab === 'events'} onclick={() => tab = 'events'}><ScrollText size={16} />Discarded events <span>{events.length}</span></button>
   </nav>
   {#if tab === 'hand'}
+  {#each offers as offer (offer.key)}
+    {@const card = $session.view?.cardCatalog?.find(c => c.name === offer.title)}
+    {@const event = $session.view?.eventCatalog?.find(c => c.name === offer.title)}
+    <article class="play-card" aria-label={`Offer: ${printedCardName(offer.title)}`}>
+      <header class="play-card-header"><h3>{printedCardName(offer.title)}</h3></header>
+      {#if card}<GreatPersonEffect {card} />{/if}
+      <details class="event-rules">
+        <summary><BookOpen size={13} /> Event rules</summary>
+        {#if event?.baseEffect}<p><ResourceText text={event.baseEffect} /></p>{/if}
+        <p>The player who triggered the event may take the card for <ResourceAmount pile={{culture_tokens:1}} />. If they pass, other players may take it in turn order for <ResourceAmount pile={{culture_tokens:2}} />.</p>
+      </details>
+      <div class="queued-person-actions">
+        {#each offer.options as option}
+          {@const payment = (option.response as {Payment: Record<string, number>[]}).Payment[0]}
+          {@const take = Object.values(payment).some(Boolean)}
+          <button class={take ? 'primary' : 'secondary'} disabled={$session.pending}
+            onclick={() => controller.submit({QueueChoice:{key:offer.key,response:option.response}})}>
+            {take ? 'Queue take if offered' : 'Queue pass'}{#if take}<ResourceAmount pile={payment} />{/if}
+          </button>
+        {/each}
+      </div>
+      {#if offer.selected}
+        <div class="queued-person-status">
+          <span>Queued: {Object.values((offer.selected as {Payment: Record<string, number>[]}).Payment[0]).some(Boolean) ? 'take if offered' : 'pass'}</span>
+          <button disabled={$session.pending} onclick={() => controller.submit({QueueChoice:{key:offer.key,response:null}})}>Cancel queued choice</button>
+        </div>
+      {/if}
+    </article>
+  {/each}
   {#if $session.view?.actionCards?.some((card) => card.tactics)}
     <p class="card-use-rule">
       Choose one use, then discard. Battle uses require Tactics: one card per combat round.
@@ -76,7 +107,7 @@
           <p><ResourceText text={card.tactics.description} /></p>
         </section>{/if}
     </article>
-  {:else}<p>No action cards in hand.</p>{/each}
+  {:else}{#if !offers.length}<p>No action cards in hand.</p>{/if}{/each}
   {:else}
     <p class="pile-hint">Top of the pile first. Select a card to read its rules.</p>
     <div class="discard-list">
@@ -133,4 +164,9 @@
   .discard-id { color: var(--muted); font-size: 11px; }
   .discard-rules .card-battle-use { margin-bottom: 0; }
   @media (max-width: 600px) { .card-tabs { gap: 0.15rem; } .card-tabs button { padding: 0.5rem 0.35rem; font-size: 11px; gap: 0.25rem; } }
+
+  .queued-person-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .queued-person-actions button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 4px; }
+  .queued-person-status { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: .8rem; color: var(--muted); }
+  .queued-person-status button { border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px; }
 </style>

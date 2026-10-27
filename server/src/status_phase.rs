@@ -505,7 +505,7 @@ pub(crate) fn determine_first_player() -> Ability {
         .build()
 }
 
-fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
+pub(crate) fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
     players
         .iter()
         .find(|p| p.wonders_owned.contains(Wonder::GreatLighthouse))

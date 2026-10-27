@@ -323,6 +323,11 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             "shogunateDraft":p.has_special_advance(crate::special_advance::SpecialAdvance::Shogunate)&&p.can_use_advance(Advance::Draft)&&!p.event_info.contains_key("Shogunate Draft"),
             "canActivate":city.can_activate(), "activationMood":after_activation.mood_state,"activationCapacity":after_activation.mood_modified_size(p)})
     }).collect::<Vec<_>>();
+    let early_offers = if seat != active || game.events.is_empty() { crate::early_choices::offers(game, seat) } else { vec![] };
+    let early_advance = early_offers.iter().find(|o| o.key.ends_with("/advance"));
+    let early_advance_choices: Vec<_> = early_advance.into_iter().flat_map(|o| &o.options).filter_map(|o| {
+        if let EventResponse::SelectAdvance(a) = o.response { Some(a) } else { None }
+    }).collect();
     let advance_choice = if seat == active {
         game.current_event_handler()
             .and_then(|handler| match &handler.request {
@@ -331,10 +336,12 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
                 }
                 _ => None,
             })
+    } else if early_advance.is_some() {
+        Some((&early_advance_choices, "free"))
     } else {
         None
     };
-    let research_uses_event_marker = advance_choice.is_none()
+    let research_uses_event_marker = early_advance.is_some() || advance_choice.is_none()
         || game
             .current_event_handler()
             .is_some_and(|handler| decisions::advance_uses_event_marker(game, handler));
@@ -357,6 +364,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         else if !p.can_advance_free(*advance, game) { Some("Conflicts with your current advances".to_string()) }
         else if payment.is_none() { Some("Not enough resources".to_string()) } else { None };
         let action = if reason.is_some() { None }
+            else if let Some(offer) = early_advance { Some(Action::QueueChoice { key: offer.key.clone(), response: Some(EventResponse::SelectAdvance(*advance)) }) }
             else if advance_choice.is_some() { Some(Action::Response(EventResponse::SelectAdvance(*advance))) }
             else { payment.clone().map(|payment| Action::Playing(PlayingAction::Advance(AdvanceAction::new(*advance, payment)))) };
         let mut item = advance_description(game, *advance);
@@ -414,6 +422,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     result["regions"] = json!(regions);
     result["unavailableSpecialActions"] = json!(special_actions.iter().filter(|a| !a["reason"].is_null()).collect::<Vec<_>>());
     result["activeEffects"] = json!(active_effects);
+    result["earlyChoices"] = json!(early_offers);
     result
 }
 

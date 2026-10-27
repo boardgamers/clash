@@ -87,6 +87,7 @@ export class Controller {
     replayAutoplay: true,
     availableOnly: false,
     skipRazeCity: false,
+    keepGovernment: false,
   });
   readonly chat = new ChatController();
   readonly audio = new GameAudio();
@@ -193,7 +194,7 @@ export class Controller {
   }
   setSettings(settings: Record<string, unknown> | null) {
     this.playerSettings = settings;
-    this.patch({ skipRazeCity: settings?.skipRazeCity === true });
+    this.patch({ skipRazeCity: settings?.skipRazeCity === true, keepGovernment: settings?.keepGovernment === true });
     const request = this.keepCitiesRequest;
     this.keepCitiesRequest = null;
     const s = get(this.session);
@@ -239,6 +240,11 @@ export class Controller {
     // saved game settings arrive. An explicit false always wins.
     this.migratedSkipRaze = true;
     this.commands.updateSetting('skipRazeCity', true);
+  }
+  setKeepGovernment(enabled: boolean) {
+    const s = get(this.session);
+    if (s.analysis || s.playback || s.pending || s.seat === undefined) return;
+    if (!this.commands.updateSetting('keepGovernment', enabled)) this.patch({error: 'Could not save the government setting. Please try again.'});
   }
   setSkipRazeCity(enabled: boolean) {
     const s = get(this.session);
@@ -948,7 +954,7 @@ export class Controller {
     if (get(this.session).seat !== undefined) this.playerSettings = null;
     this.migratedSkipRaze = false;
     this.keepCitiesRequest = null;
-    this.patch({ skipRazeCity: this.playerSettings?.skipRazeCity === true });
+    this.patch({ skipRazeCity: this.playerSettings?.skipRazeCity === true, keepGovernment: this.playerSettings?.keepGovernment === true });
     this.cardContinuation = null;
     this.endPlayback();
     this.dismissEffects(true);
@@ -1047,6 +1053,11 @@ export class Controller {
     const s = get(this.session);
     if (s.playback || s.seat == null) {
       this.inspectTile(position);
+      return;
+    }
+    if (s.earlyRaze && s.mode === 'overview' && s.view?.earlyChoices?.some(o => o.key === s.earlyRaze!.key)) {
+      if (!s.pending && s.earlyRaze.positions.includes(position))
+        this.patch({earlyRaze: {...s.earlyRaze, selected: s.earlyRaze.selected === position ? null : position}});
       return;
     }
     if (s.mode === 'port') {
@@ -1843,6 +1854,10 @@ export class Controller {
       s.playback ||
       s.seat === undefined ||
       (!(s.view?.activePlayers ?? [s.view?.activePlayer]).includes(s.seat) &&
+        !(
+          typeof move === 'object' && 'QueueChoice' in move &&
+          s.view?.earlyChoices?.some((c) => c.key === (move.QueueChoice as { key?: string })?.key)
+        ) &&
         !(
           s.view?.civilizationDraft &&
           typeof move === 'object' &&

@@ -1,6 +1,7 @@
 const frame = document.querySelector('iframe')!;
 if (new URLSearchParams(location.search).has('built')) frame.src = '/built-viewer.html';
 const seatSelect = document.querySelector<HTMLSelectElement>('#seat')!;
+seatSelect.value = sessionStorage.getItem('clash-preview-seat') ?? 'auto';
 let revision = -1;
 let seat: number | undefined;
 let ready = false;
@@ -31,6 +32,7 @@ try {
     'availableOnly',
     'replayAutoplay',
     'skipRazeCity',
+    'keepGovernment',
   ])
     if (typeof saved[key] === 'boolean') preferences[key] = saved[key];
   if (['2d', 'strategy'].includes(saved.mapView)) preferences.mapView = 'strategy';
@@ -171,11 +173,16 @@ addEventListener('message', async (event) => {
       `Player ${payload.index + 1} · ${payload.index === 0 ? 'Leif' : 'Aurelia'}`;
 });
 seatSelect.onchange = () => {
+  sessionStorage.setItem('clash-preview-seat', seatSelect.value);
   lastMessages = '';
   void refresh(true);
 };
 document.querySelector('#reset')!.addEventListener('click', async () => {
   await post('/api/reset', {});
+  sessionStorage.removeItem('clash-preview-scenario');
+  scenarioSelect.value = '';
+  scenarioNote.style.display = 'none';
+  restartScenario.disabled = true;
   lastMessages = '';
   showError('');
   await refresh(true);
@@ -187,3 +194,33 @@ document.querySelector('#theme')!.addEventListener('click', () => {
 setInterval(() => {
   if (ready) void refresh();
 }, 2000);
+
+const scenarioSelect = document.querySelector<HTMLSelectElement>('#scenario')!;
+const restartScenario = document.querySelector<HTMLButtonElement>('#restart-scenario')!;
+const scenarioNote = document.querySelector<HTMLElement>('#scenario-note')!;
+let scenarios: {id: string; label: string; note: string}[] = [];
+fetch('/api/scenarios').then(r => r.json()).then(data => {
+  scenarios = data;
+  for (const item of scenarios) scenarioSelect.add(new Option(item.label, item.id));
+  const remembered = sessionStorage.getItem('clash-preview-scenario');
+  const scenario = scenarios.find(s => s.id === remembered);
+  if (scenario) { scenarioSelect.value = scenario.id; restartScenario.disabled = false; scenarioNote.textContent = scenario.note; scenarioNote.style.display = 'block'; }
+});
+async function loadScenario() {
+  if (!scenarioSelect.value) return;
+  try {
+    restartScenario.disabled = true;
+    showError('');
+    const result = await post('/api/scenarios', {id: scenarioSelect.value});
+    seatSelect.value = String(result.seat);
+    sessionStorage.setItem('clash-preview-seat', seatSelect.value);
+    sessionStorage.setItem('clash-preview-scenario', scenarioSelect.value);
+    lastMessages = '';
+    scenarioNote.textContent = scenarios.find(s => s.id === scenarioSelect.value)?.note ?? '';
+    scenarioNote.style.display = 'block';
+    frame.src = frame.src;
+  } catch (error) { showError(String(error)); }
+  finally { restartScenario.disabled = false; }
+}
+scenarioSelect.onchange = () => { void loadScenario(); };
+restartScenario.onclick = () => { void loadScenario(); };

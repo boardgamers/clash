@@ -1047,7 +1047,8 @@ export class World {
       };
     }
     if (!s.game) return;
-    const mapChoices = mapDecisionOptions(s.view?.decision);
+    const earlyRaze = s.mode === 'overview' && s.earlyRaze && s.view?.earlyChoices?.some(o => o.key === s.earlyRaze!.key) ? s.earlyRaze : undefined;
+    const mapChoices = earlyRaze ? earlyRaze.positions.map(position => ({position, name: position, description: '', value: position, mapTarget: undefined})) : mapDecisionOptions(s.view?.decision);
     this.tileTooltip.update(s);
     const decisionPositions = [...new Set(mapChoices.map((o) => o.position!))];
     const pieceDecision = mapChoices.some((o) => o.mapTarget);
@@ -1103,13 +1104,13 @@ export class World {
                   : [];
     this.labelHost.classList.toggle('collecting', s.mode === 'collect');
     this.labelHost.classList.toggle('choosing-happiness', s.mode === 'happiness');
-    const decisionSelected = s.decisionSelection.flatMap((i) => mapChoices[i]?.position ?? []);
+    const decisionSelected = earlyRaze ? (earlyRaze.selected ? [earlyRaze.selected] : []) : s.decisionSelection.flatMap((i) => mapChoices[i]?.position ?? []);
     const interacting =
       s.mode === 'collect' ||
       s.mode === 'happiness' ||
       s.mode === 'settlers' ||
       s.tilePanel ||
-      mapChoices.length > 0 ||
+      (mapChoices.length > 0 && !earlyRaze) ||
       choosingCity ||
       !!exploration ||
       !!s.view?.decision?.tacticsSelection;
@@ -2178,7 +2179,8 @@ export class World {
     if (interactionSignature !== this.interactionSignature) {
       this.interactionSignature = interactionSignature;
       this.updateViewport();
-      this.centerInteraction();
+      // Queued choices highlight the existing view without moving the player’s camera.
+      if (!earlyRaze) this.centerInteraction();
       if (exploration) this.locateExploration();
     }
     this.updateStructureMarkers(s, influence);

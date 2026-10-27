@@ -6317,3 +6317,54 @@ small {
     white-space: nowrap;
   }
 }
+
+.board-toolbar .board-actions button.early-available {
+  background: var(--paper2);
+  box-shadow: inset 0 -2px var(--gold, #b59255);
+  color: var(--ink);
+}
+
+@media (min-width: 761px) and (min-height: 501px) {
+  .play-layout .action-panel.floating-panel.early-choices {
+    top: var(--action-bar-bottom, 154px);
+    max-height: calc(100% - var(--action-bar-bottom, 154px) - 20px);
+  }
+}
+
+/* Both immediate and queued razing use the same desktop map prompt. */
+@media (min-width: 761px) and (min-height: 501px) {
+  .game-shell .play-layout .action-panel.floating-panel.raze-prompt {
+    left: auto;
+    right: 20px;
+    top: var(--action-bar-bottom, 154px);
+    bottom: auto;
+    width: 354px;
+    max-height: calc(100% - var(--action-bar-bottom, 154px) - 20px);
+    padding: 16px;
+    gap: 8px;
+  }
+  .game-shell .raze-prompt h2 { font-size: 24px; margin: 0; }
+}
+
+.objective-queue-action { display: flex; justify-content: flex-end; margin: 8px 0 12px; }
+.objective-queue-action button { display: flex; gap: 6px; align-items: center; padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px; }
+
+.header-actions .cards-button.queue-available > svg,
+.header-actions .objectives-button.queue-available > svg {
+  color: #b87523;
+}
+.header-actions .cards-button.queue-saved > svg,
+.header-actions .objectives-button.queue-saved > svg {
+  color: var(--green);
+}
+
+@media (min-width: 761px) and (min-height: 501px) {
+  .header-actions .text-button {
+    padding-block: 10px;
+    margin-block: -10px;
+    border-radius: 6px;
+  }
+}
+
+.queue-first-player { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 5px; background: var(--paper); color: var(--ink); font-size: 11px; }
+.queue-first-player.saved { color: var(--green); }

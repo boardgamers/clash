@@ -4,5 +4,11 @@
     "label": "Skip end-of-age razing (keep all cities)",
     "type": "checkbox",
     "default": false
+  },
+  {
+    "name": "keepGovernment",
+    "label": "Always keep current government",
+    "type": "checkbox",
+    "default": false
   }
 ]

@@ -134,6 +134,8 @@ pub struct Game {
     pub version: u16, // JSON schema version
     pub state: GameState,
     pub events: Vec<PersistentEventState>,
+    pub early_choices: Vec<crate::early_choices::SavedChoice>,
+    pub early_choice_update: bool,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
     pub map: Map,

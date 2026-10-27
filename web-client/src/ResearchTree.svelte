@@ -57,7 +57,8 @@
   } = $props();
   const session = $derived(controller.session);
   const view = $derived(reference?.view ?? $session.view);
-  const choice = $derived(!reference && !$session.playback && researchDecision(view) ? view!.decision : null);
+  const early = $derived(!reference && !$session.playback ? view?.earlyChoices?.find((o) => o.key.endsWith('/advance')) : undefined);
+  const choice = $derived(early ? { name: 'Free advance', description: '', advanceMode: 'free', endOfAge: true } : !reference && !$session.playback && researchDecision(view) ? view!.decision : null);
   const freeResearch = $derived(!!choice && choice.advanceMode === 'free');
   const borrowing = $derived(choice?.advanceMode === 'borrow');
   let query = $state('');
@@ -266,12 +267,12 @@
         {#if reference && player}<span>· {player.civilization}</span>{/if}
         {#if player}<EventMarkers remaining={player.eventTokens} />{/if}
       </h2>
-      <p>
+      {#if !early}<p>
         {choice
           ? choice.description
           : 'Each advance scores ½ point. Branches unlock from their first advance.'}
       </p>
-      {#if choice}<p class="research-choice-hint">Choose a highlighted advance.</p>{/if}
+      {#if choice}<p class="research-choice-hint">Choose a highlighted advance.</p>{/if}{/if}
       {#if eventImminent}<p
           class="research-event-notice"
           id="research-event-notice"
@@ -332,6 +333,7 @@
             >
           {:else if lockedGovernment}<LockKeyhole size={13} aria-label="Government unavailable" />{/if}
         </h3>
+        {#if group === currentGovernment && !reference && !$session.playback}<label class="keep-government"><input type="checkbox" checked={$session.keepGovernment} disabled={$session.pending} onchange={e => controller.setKeepGovernment(e.currentTarget.checked)} />Always keep this government</label>{/if}
         {#each (view?.actionCards ?? []).filter(card => card.name === 'Synergies' && advances.some(a => a.group === group && cardHints(a).includes(card))) as card}
           <div class="research-card-hint">
             <button class="research-advance-link" disabled={$session.pending}
@@ -343,11 +345,10 @@
         {/each}
         {#if governmentGroups.includes(group)}<p class="government-rule">
             {#if lockedGovernment}
-              <span>Only one government at a time.</span>
               <span class="government-switch"
                 >Switch at end of age · <ResourceAmount pile={{ mood_tokens: 1, culture_tokens: 1 }} /></span
               >
-            {:else if !currentGovernment}Only one government at a time. You can switch at the end of an age.{/if}
+            {:else if !currentGovernment}You can switch at the end of an age.{/if}
           </p>{/if}
         {#if lockedGovernment && statusFilter === 'available'}<button
             class="show-all-options"
@@ -416,8 +417,8 @@
                   +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
                 </span>{/each}
             </div>
-            {#if !advance.owned && (!choice || advance.action)}<div class="research-node-cost">
-                <span
+            {#if !advance.owned && (!choice || advance.action) && (!early || warnsEvent)}<div class="research-node-cost">
+                {#if !early}<span
                   class="research-flexible-cost"
                   title={borrowing
                     ? 'Borrow until end of turn'
@@ -440,14 +441,14 @@
                       {#if group.resources.length > 1}<span>any mix</span>{/if}
                     {/each}
                   {/if}
-                </span><span class="research-availability"
+                </span>{/if}<span class="research-availability"
                   >{#if researchAvailable(advance)}
                     {#if warnsEvent}<span
                         id={`research-${advance.id}-event`}
                         class="research-event-warning"
                         title="Uses your last event marker. The event resolves after research bonuses and choices."
                         ><ScrollText size={12} aria-hidden="true" />Triggers an event</span
-                      >{:else}Available{/if}
+                      >{:else if !early}Available{/if}
                   {:else if !choice && parent && !parent.owned}
                     <button
                       class="research-advance-link"
@@ -541,7 +542,10 @@
         {#if unavailableReason(selected) && !selected.owned}<small>{unavailableReason(selected)}</small>{/if}
         {#if $session.error && !reference}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
-      {#if !reference && !$session.playback}<div class="research-payment">
+      {#if !reference && !$session.playback}<div class="research-payment" class:early-payment={!!early}>
+          {#if early?.selected}
+            <button class="clear-choice" disabled={$session.pending} onclick={() => { controller.submit({QueueChoice: {key: early!.key, response: null}}); controller.patch({mode: 'overview'}); }}>Clear</button>
+          {/if}
           {#if !choice && !selected.owned && selected.payments.length > 1}
             <PaymentPicker
               options={selected.payments.map((option) => ({
@@ -591,14 +595,14 @@
               selectedAction &&
               (!choice
                 ? controller.submitResearch(selectedAction, buyFreeEducation)
-                : controller.submit(selectedAction))}
+                : (controller.submit(selectedAction), early && controller.patch({ mode: 'overview' })))}
           >
             {$session.pending
               ? 'Confirming…'
               : selected.owned
                 ? 'Researched'
-                : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
-            {#if !selected.owned}<span
+                : early ? 'Queue choice' : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
+            {#if !selected.owned && !early}<span
                 >{#if eventImminent}<ScrollText size={13} aria-hidden="true" />{/if}{#if borrowing}Until end
                   of turn{:else if freeResearch}Free{:else if choice}{selected.costAmount === 0
                     ? 'Free'
@@ -613,9 +617,9 @@
               >{/if}
           </button>
         </div>{/if}
-      <button class="icon-button" aria-label="Close research details" onclick={() => selectAdvance(null)}
+      {#if !early}<button class="icon-button" aria-label="Close research details" onclick={() => selectAdvance(null)}
         ><X size={18} /></button
-      >
+      >{/if}
     </section>
   {:else}<div class="research-legend">
       <span><Check size={14} /> Researched</span><span class="available-key">Available</span><span

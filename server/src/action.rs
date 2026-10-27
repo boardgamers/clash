@@ -37,6 +37,7 @@ pub enum Action {
     Playing(PlayingAction),
     Movement(MovementAction),
     Response(EventResponse),
+    QueueChoice { key: String, response: Option<EventResponse> },
     Undo,
     Redo,
     #[serde(alias = "Setup")]
@@ -73,6 +74,11 @@ pub fn try_execute_action(
     action: Action,
     player_index: usize,
 ) -> Result<Game, String> {
+    game.early_choice_update = false;
+    if let Action::QueueChoice { key, response } = &action {
+        crate::early_choices::save(&mut game, player_index, key, response.clone())?;
+        return Ok(game);
+    }
     if game.civilization_draft.is_some() {
         crate::game_setup::execute_draft_choice(&mut game, player_index, &action)?;
         return Ok(game);

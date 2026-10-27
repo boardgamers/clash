@@ -186,6 +186,8 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         .shuffled(&mut rng);
     let all = &cache.get_abilities().clone();
     let mut game = Game {
+        early_choices: vec![],
+        early_choice_update: false,
         seed: setup.seed.clone(),
         context: GameContext::Play,
         version: JSON_SCHEMA_VERSION,

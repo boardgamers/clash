@@ -452,6 +452,7 @@ where
             (params.next_player)(&mut value);
         }
     }
+    crate::early_choices::expire_current_event(game);
     game.events.pop();
 
     present_instant_objective_cards(game);

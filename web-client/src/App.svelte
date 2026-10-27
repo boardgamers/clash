@@ -102,6 +102,8 @@
   import CollectionCapacity from './CollectionCapacity.svelte';
   import ContextualCards from './ContextualCards.svelte';
   import DecisionPanel from './DecisionPanel.svelte';
+  import EarlyChoices from './EarlyChoices.svelte';
+  import EarlyChoiceBadge from './EarlyChoiceBadge.svelte';
   import CombatJournal from './CombatJournal.svelte';
   import { combatJournal } from './combat-journal';
   import ActionCardsDialog from './ActionCardsDialog.svelte';
@@ -127,6 +129,26 @@
   import { roundProgress, personalRoundLabel } from './round-progress';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
+  let earlyPanel = $state<'cities' | 'abilities' | 'first' | null>(null);
+  const earlyOffers = $derived(!$session.playback ? $session.view?.earlyChoices ?? [] : []);
+  const earlyAdvance = $derived(earlyOffers.find(o => o.key.endsWith('/advance')));
+  const earlyFirst = $derived(earlyOffers.filter(o => o.key.endsWith(':first')));
+  const earlyCities = $derived(earlyOffers.filter(o => o.key.endsWith('/raze')));
+  const earlyObjectives = $derived(earlyOffers.filter(o => o.key.includes(':objective:')));
+  const earlyPeople = $derived(earlyOffers.filter(o => o.key.endsWith('/offer')));
+  const earlyAbilities = $derived(earlyOffers.filter(o => !o.key.endsWith('/advance') && !o.key.endsWith('/raze') && !o.key.includes(':objective:') && !o.key.endsWith('/offer') && !o.key.endsWith('/government') && !o.key.endsWith(':first')));
+  const panelOffers = $derived(earlyPanel === 'cities' ? earlyCities : earlyPanel === 'abilities' ? earlyAbilities : earlyPanel === 'first' ? earlyFirst : []);
+  function openEarly(panel: 'cities' | 'abilities' | 'first') {
+    earlyPanel = earlyPanel === panel ? null : panel;
+    controller.closeActivity();
+    const offer = earlyPanel === 'cities' ? earlyCities[0] : undefined;
+    controller.patch({ mode: 'overview', tilePanel: false, abilitiesOpen: false, earlyRaze: offer ? {
+      key: offer.key,
+      positions: offer.options.flatMap(o => (o.response as {SelectPositions?: string[]}).SelectPositions ?? []),
+      selected: (offer.selected as {SelectPositions?: string[]} | null)?.SelectPositions?.[0] ?? null,
+    } : undefined });
+  }
+
   // Preserve reference boundaries: opening panels or changing a selection does
   // not require parsing the whole journal or recalculating recap history.
   const game = $derived($session.game);
@@ -494,6 +516,14 @@
       },
     };
   }
+  function measureActionBar(node: HTMLElement) {
+    const layout = node.parentElement!;
+    const update = () => layout.style.setProperty('--action-bar-bottom', `${node.offsetTop + node.offsetHeight + 12}px`);
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    update();
+    return { destroy: () => observer.disconnect() };
+  }
   function showDialog(node: HTMLDialogElement) {
     node.showModal();
     return { destroy: () => node.close() };
@@ -502,8 +532,10 @@
     controller.patch({ help: false });
   }
   function closeAction() {
+    earlyPanel = null;
     confirmEnd = false;
     controller.patch({
+      earlyRaze: undefined,
       mode: 'overview',
       tilePanel: false,
       collectionTile: null,
@@ -522,12 +554,15 @@
     closeAction();
   }
   function openResearch() {
+    earlyPanel = null;
+    controller.patch({earlyRaze: undefined});
     confirmEnd = false;
     controller.closeActivity();
     controller.patch({
       mode: 'research',
       tilePanel: false,
-      selectedAdvance: null,
+      selectedAdvance: (earlyAdvance?.selected as {SelectAdvance?: string} | null)?.SelectAdvance ?? null,
+      availableOnly: !!earlyAdvance,
       error: '',
       abilitiesOpen: false,
     });
@@ -833,6 +868,9 @@
       {#if $session.seat !== undefined}
         <button
           class="text-button cards-button"
+          class:queue-available={earlyPeople.length > 0}
+          class:queue-saved={earlyPeople.some(o => o.selected != null)}
+          title={earlyPeople.length ? 'Great Person offer · Choose ahead' : 'Cards'}
           data-tutorial="cards"
           aria-label={`Action cards: ${$session.view?.actionCards?.length ?? 0}`}
           onclick={() => controller.patch({ cardsOpen: true })}
@@ -849,6 +887,9 @@
         >
         <button
           class="text-button objectives-button"
+          class:queue-available={earlyObjectives.length > 0}
+          class:queue-saved={earlyObjectives.some(o => o.selected != null)}
+          title={earlyObjectives.some(o => o.selected != null) ? 'Objective queued · Click to edit' : earlyObjectives.length ? 'Objective available to queue' : 'Objectives'}
           aria-label={`Objectives: ${$session.view?.objectiveCards?.length ?? 0} ${$session.view?.objectiveCards?.length === 1 ? 'card' : 'cards'}`}
           onclick={() => controller.patch({ objectivesOpen: true })}
           ><Target size={17} /> Objectives
@@ -975,7 +1016,12 @@
                   ><Swords size={13} />{forces.army}<Ship size={13} />{forces.ships}</span
                 >{/if}</span
             ><span class="player-score">{formatPoints(player.score)}<Trophy size={10} /></span>
-          </button>{/each}
+          </button>
+          {#if player.index === $session.seat && earlyFirst.length}
+            <button class="queue-first-player" class:saved={earlyFirst[0].selected != null} onclick={() => openEarly('first')}>
+              <EarlyChoiceBadge saved={earlyFirst[0].selected != null} inline />Choose first player
+            </button>
+          {/if}{/each}
       </div>
       {#if !$session.game}<div class="map-loading">
           <Compass size={30} />
@@ -1233,7 +1279,7 @@
           >{/each}
       </div>
     </section>
-    <div class="board-toolbar" aria-label="Game controls">
+    <div class="board-toolbar" aria-label="Game controls" use:measureActionBar>
       <div
         class="turn-banner"
         class:waiting={!!waiting}
@@ -1296,12 +1342,13 @@
         <button
           class:active={$session.mode === 'research'}
           class:inspect-only={!researchAvailable}
-          title={researchAvailable ? 'Research tree' : 'View research · Browse advances and costs'}
+          class:early-available={!!earlyAdvance}
+          title={earlyAdvance ? (earlyAdvance.selected ? 'Free advance saved · Click to edit' : 'Choose your free advance ahead of your turn') : researchAvailable ? 'Research tree' : 'View research · Browse advances and costs'}
           data-tutorial="research"
           aria-label="Research tree"
           disabled={$session.seat === undefined}
           onclick={openResearch}
-          ><GraduationCap size={21} /><span>Research</span>{#if !researchAvailable}<Eye
+          ><GraduationCap size={21} /><span>Research</span>{#if earlyAdvance}<EarlyChoiceBadge saved={earlyAdvance.selected != null} />{:else if !researchAvailable}<Eye
               class="action-inspect"
               size={10}
               aria-hidden="true"
@@ -1309,17 +1356,20 @@
         >
         <button
           class:active={$session.mode === 'city' && $session.cityTab === 'build'}
-          class:inspect-only={!cityActionsAvailable}
+          class:inspect-only={!cityActionsAvailable && !earlyCities.length}
+          class:early-available={!!earlyCities.length}
           aria-label="Manage cities"
-          title={cityActionsAvailable
+          title={earlyCities.length ? 'Choose city razing ahead of your turn' : cityActionsAvailable
             ? 'Build, recruit and improve happiness'
             : 'View cities · Browse buildings, units and costs'}
-          disabled={!city}
+          disabled={!city && !earlyCities.length}
           onclick={() => {
+            if (earlyCities.length) { openEarly('cities'); return; }
+            earlyPanel = null;
             confirmEnd = false;
             controller.openCities();
           }}
-          ><Hammer size={21} /><span>Cities</span>{#if !cityActionsAvailable}<Eye
+          ><Hammer size={21} /><span>Cities</span>{#if earlyCities.length}<EarlyChoiceBadge saved={earlyCities.every(o => o.selected != null)} />{:else if !cityActionsAvailable}<Eye
               class="action-inspect"
               size={10}
               aria-hidden="true"
@@ -1393,18 +1443,21 @@
         ><Drama size={21} /><span>Influence</span></button>
 
         <button
-          title={abilitiesAvailable
+          title={earlyAbilities.length ? 'Choose ahead · Events and objectives' : abilitiesAvailable
             ? 'Abilities'
             : 'No abilities available'}
           aria-label="Abilities"
           class:active={$session.abilitiesOpen && !$session.influenceMode}
-          class:inspect-only={!abilitiesAvailable}
+          class:inspect-only={!abilitiesAvailable && !earlyAbilities.length}
+          class:early-available={!!earlyAbilities.length}
           disabled={!$session.view}
           onclick={() => {
+            if (earlyAbilities.length) { openEarly('abilities'); return; }
+            earlyPanel = null;
             controller.closeActivity();
             controller.patch({ mode: 'overview', tilePanel: false, abilitiesOpen: !$session.abilitiesOpen });
           }}
-          ><Sparkles size={21} /><span>Abilities</span>{#if !abilitiesAvailable}<Eye
+          ><Sparkles size={21} /><span>Abilities</span>{#if earlyAbilities.length}<EarlyChoiceBadge saved={earlyAbilities.every(o => o.selected != null)} />{:else if !abilitiesAvailable}<Eye
               class="action-inspect"
               size={10}
               aria-hidden="true"
@@ -1480,6 +1533,9 @@
         <p>Choose a highlighted sea space on the map.</p>
         <ResourceAmount pile={$session.portPlacement.payment} />
       </section>
+    {/if}
+    {#if panelOffers.length && $session.mode === 'overview' && !$session.abilitiesOpen}
+      <EarlyChoices {controller} offers={panelOffers} onclose={() => { earlyPanel = null; controller.patch({earlyRaze: undefined}); }} />
     {/if}
     {#if choiceDecision || objectiveDecision || (!$session.playback && $session.game && !$session.view?.supportedPhase && $session.seat === $session.view?.activePlayer) || $session.mode === 'collect' || confirmEnd || ($session.error && $session.mode === 'overview')}
       <section
@@ -1953,6 +2009,18 @@
           {#each card.objectives as objective, index}
             {#if index > 0}<div class="objective-divider">or</div>{/if}
             <ObjectiveCondition {objective} />
+            {@const offer = earlyObjectives.find(o => o.title === objective.name)}
+            {@const response = { SelectHandCards: [{ ObjectiveCard: card.id }] }}
+            {@const canQueue = offer?.options.some(o => JSON.stringify(o.response) === JSON.stringify(response))}
+            {@const queued = offer && JSON.stringify(offer.selected) === JSON.stringify(response)}
+            {#if canQueue && offer}
+              <div class="objective-queue-action">
+                <button class={queued ? 'secondary' : 'primary'} disabled={$session.pending}
+                  onclick={() => controller.submit({QueueChoice:{key:offer.key,response:queued ? null : response}})}>
+                  {#if queued}<Check size={15} />Cancel queued choice{:else}Queue choice{/if}
+                </button>
+              </div>
+            {/if}
           {/each}
         </article>
       {:else}

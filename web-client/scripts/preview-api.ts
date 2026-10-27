@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
+import { createPreviewScenario, previewScenarios } from './preview-scenarios';
 const require = createRequire(import.meta.url);
 export function previewApi(): Plugin {
   return {
@@ -93,10 +94,19 @@ export function previewApi(): Plugin {
             }
             body = JSON.parse(text || '{}');
           }
+          if (url.pathname === '/api/scenarios') {
+            if (req.method !== 'POST') { res.end(JSON.stringify(previewScenarios)); return; }
+            const scenario = await createPreviewScenario(engine, body.id);
+            state = scenario.state;
+            revision++;
+            messages = []; readAt = {};
+            persist();
+            res.end(JSON.stringify({ seat: scenario.seat })); return;
+          }
           if (url.pathname === '/api/reset' && req.method === 'POST') await reset();
           if (url.pathname === '/api/settings' && req.method === 'POST') {
             if (body.seat !== 0 && body.seat !== 1) throw Error('Choose a player.');
-            if (body.name !== 'skipRazeCity' || typeof body.value !== 'boolean')
+            if (!['skipRazeCity', 'keepGovernment'].includes(body.name) || typeof body.value !== 'boolean')
               throw Error('Invalid setting.');
             state = engine.setPlayerSettings(state, body.seat, { [body.name]: body.value });
             persist();
@@ -105,7 +115,10 @@ export function previewApi(): Plugin {
           }
           if (url.pathname === '/api/move' && req.method === 'POST') {
             if (body.revision !== revision) throw Error('The game changed. Please choose your action again.');
-            if (!Number.isInteger(body.seat) || body.seat !== engine.currentPlayer(state))
+            const move = typeof body.move === 'string' ? body.move : JSON.stringify(body.move);
+            const current = engine.currentPlayer(state);
+            const active = Array.isArray(current) ? current.includes(body.seat) : current === body.seat;
+            if (!Number.isInteger(body.seat) || (!active && !engine.canMoveOutOfTurn(state, move, body.seat)))
               throw Error('It is not your turn.');
             state = engine.tryMove(
               state,

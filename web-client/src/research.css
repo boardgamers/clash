@@ -645,3 +645,19 @@
 .score-dialog .civilization-advances {
   margin: 20px 0;
 }
+
+.research-payment.early-payment {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.early-payment .clear-choice {
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+}
+.early-payment .primary { flex: 1; width: auto; }
+
+
+.keep-government { display:flex; gap:8px; align-items:center; font-size:12px; margin:0 0 12px; color:var(--muted); cursor:pointer; }

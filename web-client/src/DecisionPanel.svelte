@@ -1,5 +1,7 @@
 <script lang="ts">
   import { handCardDescription } from './card-text';
+  import GreatPersonEffect from './GreatPersonEffect.svelte';
+  import RazeActions from './RazeActions.svelte';
   import CombatEstimate from './CombatEstimate.svelte';
   import { printedCardName } from './card-names';
   import { onDestroy } from 'svelte';
@@ -31,6 +33,8 @@
   const session = $derived(controller.session);
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
+  const razeChoice = $derived(decision.name === 'Raze city');
+  const firstPlayerChoice = $derived(decision.name === 'Determine First Player');
   const mapChoice = $derived(mapDecisionOptions(decision).length > 0);
   const combatBenefit = $derived(
     decision.name === 'Steel Weapons'
@@ -41,7 +45,7 @@
     && decision.fields.some((field) => field.name === 'Pay to gain the Action Card')
     ? decision.eventContext.card : null);
   const description = $derived(
-    combatBenefit ??
+    razeChoice ? 'Select a highlighted city on the map.' : combatBenefit ??
       (decision.tacticsSelection && decision.name === 'Tactics'
         ? 'Play one battle effect or skip.'
         : decision.name === 'Place Settler'
@@ -185,7 +189,7 @@
         onmouseleave={() => onHighlight(null)}
         onfocus={() => onHighlight(option.position)}
         onblur={() => onHighlight(null)}
-        onclick={() => toggle(i)}
+        onclick={() => { if (!firstPlayerChoice || !selected.includes(i)) toggle(i); }}
       >
         {#if option.terrain}<TerrainIcon terrain={option.terrain} />{:else if Icon}<Icon size={19} />{/if}
         <DecisionOptionContent option={presented} id={`${panelId}-option-${i}`} />
@@ -194,9 +198,10 @@
             {foodRecipient.resources?.food ?? 0}/{foodRecipient.resource_limit?.food ?? 0}<Wheat size={15} />
           </span>
         {/if}
-        <span class="decision-selection" aria-hidden="true"
-          >{#if selected.includes(i)}<Check size={13} />{/if}</span
-        >
+        {#if firstPlayerChoice}
+          {#if selected.includes(i)}<Check size={18} aria-hidden="true" />{/if}
+        {:else}<span class="decision-selection" aria-hidden="true"
+          >{#if selected.includes(i)}<Check size={13} />{/if}</span>{/if}
       </button>
       {/each}
     {/each}
@@ -206,6 +211,7 @@
 <section
   class="action-panel floating-panel decision-panel"
   data-tutorial="decision"
+  class:raze-prompt={razeChoice}
   class:board-decision={mapChoice}
   class:selection-tray={mapChoice}
   class:unit-decision={unitChoice}
@@ -213,7 +219,7 @@
   class:tactics-decision={decision.tacticsSelection}
   aria-label={printedCardName(decision.name)}
 >
-  {#if decision.endOfAge}<span class="tiny-label">END OF AGE</span>{/if}
+  {#if decision.endOfAge && !razeChoice}<span class="tiny-label">END OF AGE</span>{/if}
   <header class="decision-heading">
     {#if canCancelAbility($session.game, $session.view)}
       <button disabled={$session.pending} onclick={() => controller.submit('Undo')}>Cancel</button>
@@ -273,10 +279,7 @@
     {/if}
   </header>
   {#if cardOffer}
-    <div class="great-person-effect">
-      <span class="event-card-use">{#if cardOffer.description.startsWith("You make place")}Active when taken{:else}Play <span aria-label={`${cardOffer.free ? 0 : 1} actions`}>{cardOffer.free ? 0 : 1} <Zap size={13} /></span>{/if}</span>
-      <ResourceText text={handCardDescription(cardOffer.description)} />
-    </div>
+    <GreatPersonEffect card={cardOffer} />
   {/if}
   {#if description && !cardOffer && !$session.view?.influenceContext}<p class="decision-description">
       <ResourceText
@@ -451,14 +454,18 @@
           disabled={$session.pending}
           onchange={(event) => controller.setSkipRazeCity(event.currentTarget.checked)}
         />
-        Keep all cities; skip this step in future ages
+        Always keep cities in future ages
       </label>
     {/if}
     {#if (decision.tacticsSelection || decision.name === 'Siegecraft') && preview.action}
       <CombatEstimate {controller} action={preview.action} />
     {/if}
     <div class="decision-footer" class:map-decision-footer={mapChoice}>
-      {#if decision.tacticsSelection}
+      {#if razeChoice}
+        <RazeActions selected={selected.length ? decision.options[selected[0]].position : null} pending={$session.pending}
+          onkeep={() => { const response = controller.query<{action: Move}>({kind:'decision', values:[], payments:[]}); controller.submit(response.action); }}
+          onraze={() => preview.action && controller.submit(preview.action)} />
+      {:else if decision.tacticsSelection}
         {#if selected.length}<small class="tactics-discard">Discards the selected card</small>{/if}
         <button
           class="secondary"
@@ -479,10 +486,10 @@
             >Play tactics<Check size={16} /></button
           >{/if}
       {:else}
-        {#if decision.options.length && !mapChoice}<div class="decision-count">
+        {#if decision.options.length && !mapChoice && !firstPlayerChoice}<div class="decision-count">
             {count}<span>{selected.length}/{decision.max}</span>
           </div>{/if}
-        {#if mapChoice && !unitChoice}<span
+        {#if mapChoice && !unitChoice && decision.max > 1}<span
             class="map-selection-count"
             aria-label={`${selected.length} of ${decision.max} selected`}
             >{selected.length}/{decision.max}</span
@@ -490,7 +497,7 @@
         <button
           class="primary"
           class:wide={!mapChoice}
-          aria-label={mapChoice && selected.length
+          aria-label={mapChoice && decision.max > 1 && selected.length
             ? `Confirm · ${selected.length}/${decision.max}`
             : undefined}
           disabled={!preview.action || $session.pending}

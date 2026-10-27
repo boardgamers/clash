@@ -44,6 +44,10 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     events: Vec<PersistentEventState>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    early_choices: Vec<crate::early_choices::SavedChoice>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    early_choice_update: bool,
     players: Vec<PlayerData>,
     map: MapData,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -113,6 +117,8 @@ pub struct GameData {
 #[must_use]
 pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
     let mut game = Game {
+        early_choices: data.early_choices,
+        early_choice_update: data.early_choice_update,
         context,
         cache,
         options: data.options,
@@ -173,6 +179,8 @@ pub fn data(game: Game) -> GameData {
         version: game.version,
         state: game.state,
         events: game.events,
+        early_choices: game.early_choices,
+        early_choice_update: game.early_choice_update,
         players: game.players.into_iter().map(player_data).collect(),
         map: game.map.data(),
         civilization_draft: game.civilization_draft,
@@ -210,6 +218,8 @@ pub fn cloned_data(game: &Game) -> GameData {
         version: game.version,
         state: game.state.clone(),
         events: game.events.clone(),
+        early_choices: game.early_choices.clone(),
+        early_choice_update: game.early_choice_update,
         players: game.players.iter().map(cloned_player_data).collect(),
         map: game.map.cloned_data(),
         civilization_draft: game.civilization_draft.clone(),

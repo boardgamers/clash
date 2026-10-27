@@ -150,7 +150,20 @@ test('free research exposes exactly the legal choices without paid actions or re
   assert.equal(next.players[seat].resources.food ?? 0, 0);
   assert.equal(next.players[seat].resources.gold ?? 0, 0);
   assert.ok(!researchDecision(view(state, 1 - seat)));
-  assert.ok(view(state, 1 - seat).advances.every((a) => !a.action));
+  const waiting = view(state, 1 - seat);
+  const queuedAdvances = waiting.advances.filter((a) => a.action);
+  assert.ok(queuedAdvances.length > 0);
+  for (const advance of queuedAdvances) {
+    assert.ok('QueueChoice' in (advance.action as object));
+    assert.equal(advance.costAmount, 0);
+    assert.deepEqual(advance.payments, []);
+  }
+  const queued = JSON.parse(engine.tryMove(state, JSON.stringify(queuedAdvances[0].action), 1 - seat));
+  for (let player = 0; player < raw.players.length; player++) {
+    assert.deepEqual(queued.players[player].advances, raw.players[player].advances);
+    assert.deepEqual(queued.players[player].resources ?? {}, raw.players[player].resources ?? {});
+  }
+  assert.equal(engine.currentPlayer(JSON.stringify(queued)), seat);
   assert.ok(!researchDecision(JSON.parse(engine.webView(engine.stripSecret(state)))));
 });
 

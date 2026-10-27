@@ -49,11 +49,13 @@ pub struct PlayerSettings {
     // None distinguishes an old save from an explicit opt-out.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub skip_raze_city: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keep_government: Option<bool>,
 }
 
 impl PlayerSettings {
     pub fn is_empty(&self) -> bool {
-        self.skip_raze_city.is_none()
+        self.skip_raze_city.is_none() && self.keep_government.is_none()
     }
 }
 

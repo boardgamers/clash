@@ -62,6 +62,7 @@ pub fn set_player_settings(
     if settings.skip_raze_city.is_some() {
         p.settings.skip_raze_city = settings.skip_raze_city;
     }
+    if settings.keep_government.is_some() { p.settings.keep_government = settings.keep_government; }
     Ok(from_game(game))
 }
 
@@ -177,6 +178,11 @@ pub fn current_player(game: String) -> JsValue {
 #[wasm_bindgen(js_name = "canMoveOutOfTurn")]
 pub fn can_move_out_of_turn(data: String, move_data: JsValue, player: usize) -> bool {
     let game = get_game(data);
+    if let Some(raw) = move_data.as_string()
+        && let Ok(crate::action::Action::QueueChoice { key, response }) = serde_json::from_str(&raw)
+    {
+        return crate::early_choices::can_save(&game, player, &key, response.as_ref());
+    }
     let Some(draft) = &game.civilization_draft else {
         return false;
     };
@@ -195,7 +201,8 @@ pub fn can_move_out_of_turn(data: String, move_data: JsValue, player: usize) -> 
 
 #[wasm_bindgen(js_name = "isLiveUpdate")]
 pub fn is_live_update(data: String) -> bool {
-    get_game(data)
+    let game = get_game(data);
+    game.early_choice_update || game
         .civilization_draft
         .is_some_and(|draft| draft.live_update)
 }

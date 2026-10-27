@@ -18,7 +18,7 @@ export interface City {
 }
 export interface Player {
   id: number;
-  settings?: { skipRazeCity?: boolean };
+  settings?: { skipRazeCity?: boolean; keepGovernment?: boolean };
   name?: string;
   civilization: string;
   resources?: Pile;
@@ -279,6 +279,7 @@ export interface ActiveEffect {
   rules: string[];
 }
 export interface View {
+  earlyChoices?: { key: string; title: string; options: { label: string; description: string; response: unknown }[]; selected: unknown | null }[];
   activeEffects?: ActiveEffect[];
   cardCatalog?: Pick<ActionCard, 'id' | 'name' | 'description' | 'free' | 'tactics'>[];
   influenceContext?: InfluenceContext | null;
@@ -540,6 +541,7 @@ export interface EventInfo {
   targets: ('all' | 'active' | 'selected')[];
 }
 export interface Session {
+  earlyRaze?: { key: string; positions: string[]; selected: string | null };
   eventNotices?: import('./event-notices').EventNotice[];
   portPlacement?: { city: string; payment: Pile; choices: { position: string; action: Move }[] };
   landingTargets?: string[];
@@ -636,6 +638,7 @@ export interface Session {
   replayAutoplay: boolean;
   availableOnly: boolean;
   skipRazeCity: boolean;
+  keepGovernment: boolean;
 }
 export interface MapPick {
   kind: 'tile' | 'city' | 'unit' | 'units' | 'decision';
