@@ -17,6 +17,12 @@ Open http://127.0.0.1:8643. The preview binds to loopback and saves its disposab
 
 The local preview does not modify production games, catalog records, or chat rooms.
 
+## Action-queue prototype
+
+Open `/async-preview.html` on the local dev server. This isolated replacement-settler scenario uses the real board and controls: Maya plans actions while Rome chooses a city. Switch seats with the preview toolbar. The queue reuses `predictMove`, revalidates actions after Rome responds, and stops on an invalid action. End turn can be queued last; the normal Undo button removes a queued action and its payment responses together.
+
+This is a local, in-memory prototype, not production concurrency. Reloading resets it. It neither saves a server-side queue nor enables planning around other live-game reactions. The production viewer entry point does not import the prototype.
+
 ## Implemented controls
 
 - Procedural 3D terrain, cities, settlers, tile selection, orbit/zoom, and a top-down view.

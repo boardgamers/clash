@@ -6368,3 +6368,29 @@ small {
 
 .queue-first-player { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 5px; background: var(--paper); color: var(--ink); font-size: 11px; }
 .queue-first-player.saved { color: var(--green); }
+
+.concurrent-choice-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.concurrent-choice-row > span { flex: 1; min-width: 0; color: var(--muted); }
+.concurrent-choice-row > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 9px 12px;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper2);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+.concurrent-choice-row > button:hover { border-color: var(--green); }

@@ -127,8 +127,9 @@
   import { sinceLastTurn } from './playback';
   import { ageCount, ageLabel } from './game-length';
   import { roundProgress, personalRoundLabel } from './round-progress';
-  let { controller }: { controller: Controller } = $props();
+  let { controller, concurrentPreview }: { controller: Controller; concurrentPreview?: { pending: boolean; waiting: boolean; seat: number; other: string; queued: number; ended: boolean; onUndo: () => void; onWait: () => void } } = $props();
   const session = $derived(controller.session);
+  const planningQueue = $derived(!!concurrentPreview?.pending && concurrentPreview.seat === 0);
   let earlyPanel = $state<'cities' | 'abilities' | 'first' | null>(null);
   const earlyOffers = $derived(!$session.playback ? $session.view?.earlyChoices ?? [] : []);
   const earlyAdvance = $derived(earlyOffers.find(o => o.key.endsWith('/advance')));
@@ -265,7 +266,7 @@
   const activePlayers = $derived(
     $session.game?.state === 'Finished' || $session.playback
       ? []
-      : ($session.view?.activePlayers ?? ($session.view ? [$session.view.activePlayer] : [])),
+      : concurrentPreview?.pending ? (concurrentPreview.waiting ? [1] : [0, 1]) : ($session.view?.activePlayers ?? ($session.view ? [$session.view.activePlayer] : [])),
   );
   const choosingPlayer = $derived(
     !!$session.view?.civilizationDraft || !!$session.game?.events?.length || ($session.game?.round ?? 0) > 3,
@@ -937,7 +938,7 @@
       <div class="player-list" aria-label="Civilizations in turn order">
         {#each playerTurns as { player, order, status }}
           {@const turnLabel = activePlayers.includes(player.index)
-            ? choosingPlayer
+            ? (concurrentPreview?.pending ? player.index === 1 : choosingPlayer)
               ? 'Choosing'
               : player.index === $session.seat
                 ? 'Your turn'
@@ -1292,7 +1293,7 @@
             class="turn-light"
           ></span>{/if}
         <div class="turn-copy">
-          <strong>{actionTitle}</strong>
+          <strong>{concurrentPreview?.pending && concurrentPreview.seat === 0 && !concurrentPreview.waiting ? 'Planning ahead' : actionTitle}</strong>
           {#if waiting}<span class="waiting-action"
               >{waiting.action}{waiting.source ? ` · ${printedCardName(waiting.source)}` : ''}</span
             >{/if}
@@ -1463,8 +1464,11 @@
               aria-hidden="true"
             />{/if}</button
         >
-        <UndoControl canUndo={!!$session.view?.canUndo || !!activeInfluence($session)} canRedo={!!$session.view?.canRedo}
-          blocked={!!$session.playback || $session.pending} submit={action => controller.submit(action)}/>
+        <UndoControl canUndo={planningQueue ? !!concurrentPreview?.queued : !!$session.view?.canUndo || !!activeInfluence($session)} canRedo={!planningQueue && !!$session.view?.canRedo}
+          blocked={!!$session.playback || $session.pending} submit={action => {
+            if (planningQueue && action === 'Undo') concurrentPreview!.onUndo();
+            else controller.submit(action);
+          }}/>
         <button
           class:active={confirmEnd}
           class:end-turn-ready={readyToEnd}
@@ -1480,6 +1484,12 @@
           }}><Flag size={19} /><span>End turn</span></button
         >
       </nav>
+      {#if concurrentPreview?.pending && !concurrentPreview.waiting && concurrentPreview.seat === 0}
+        <div class="concurrent-choice-row">
+          <span>{concurrentPreview.other} · Placing a settler{#if concurrentPreview.queued}<br /><strong>{concurrentPreview.queued} queued{concurrentPreview.ended ? ' · End turn queued' : ''}</strong>{/if}</span>
+          <button onclick={concurrentPreview.onWait}><Hourglass size={14} />Wait for choice</button>
+        </div>
+      {/if}
       {#if !$session.playback}<ContextualCards {controller} context="after-battle" />{/if}
     </div>
     <nav class="table-tools" aria-label="Table controls">

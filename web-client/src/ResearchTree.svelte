@@ -272,7 +272,7 @@
           ? choice.description
           : 'Each advance scores ½ point. Branches unlock from their first advance.'}
       </p>
-      {#if choice}<p class="research-choice-hint">Choose a highlighted advance.</p>{/if}{/if}
+      {/if}
       {#if eventImminent}<p
           class="research-event-notice"
           id="research-event-notice"
