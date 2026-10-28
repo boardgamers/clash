@@ -1490,7 +1490,7 @@
       </nav>
       {#if queueControls?.pending && !queueControls.waiting && queueControls.seat === 0}
         <div class="concurrent-choice-row">
-          <span class="concurrent-choice-copy"><strong>{queueControls.other}</strong><span>{queueControls.label ?? 'Placing a settler'}</span>{#if queueControls.queued}<strong>{queueControls.queued} queued{queueControls.ended ? ' · End turn queued' : ''}</strong>{/if}</span>
+          <span class="concurrent-choice-copy"><span><strong>{queueControls.other}</strong> · <span>{queueControls.label ?? 'Placing a settler'}</span></span>{#if queueControls.queued}<strong>{queueControls.queued} queued{queueControls.ended ? ' · End turn queued' : ''}</strong>{/if}</span>
           <button disabled={$session.pending} onclick={queueControls.onWait}><Hourglass size={14} />Wait for choice</button>
         </div>
       {/if}

@@ -530,3 +530,10 @@ On mobile, Finish Move has its own row; the waiting civilization, choice and que
 count share the full panel width above the Wait button. Verified with 888 web tests,
 17 locale catalogs, Svelte checks, production build and a phone-sized reconstruction
 of Gemmed-swan-9447's public board position. Engine remains 0.4.115; live saves are unchanged.
+
+### 0.1.170 — Compact pending-choice label
+
+Show the waiting civilization and its pending choice together, separated by a dot,
+wrapping naturally when space is limited. The queued count remains below, and the
+Wait button keeps its own row on mobile. Verified Svelte checks, production build
+and the mobile preview. Engine remains 0.4.115.
