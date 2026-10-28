@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Imediatamente após construir a primeira Maravilha da partida, ou na fase de status se você foi o único jogador a construir Maravilhas na última rodada.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Você venceu uma batalha como defensor e eliminou pelo menos 2 unidades inimigas.",
   "# Arguments": "# Argumentos",
   "# Errors": "# Erros",
   "# Panics": "# Pânicos",

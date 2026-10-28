@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "建造本局首座奇迹后立即完成；或在状态阶段完成，条件是上一轮只有你建造过奇迹。",
+  "You won a battle as defender and killed at least 2 enemy units.": "你作为防守方在战斗中获胜，并消灭了至少2个敌方单位。",
   "_blank": "_blank",
   "_tokens": "_tokens",
   "- all options are": "- 所有选项均为",

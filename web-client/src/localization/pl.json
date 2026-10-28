@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Natychmiast po zbudowaniu pierwszego cudu w grze lub w fazie statusu, jeśli tylko ty zbudowałeś cuda w ostatniej rundzie.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Wygrałeś bitwę jako obrońca i zniszczyłeś co najmniej 2 wrogie jednostki.",
   "# Arguments": "# Argumenty",
   "# Errors": "# Błędy",
   "# Panics": "# Paniki",

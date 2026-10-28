@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Ngay sau khi xây Kỳ quan đầu tiên của ván chơi, hoặc trong giai đoạn trạng thái nếu bạn là người duy nhất xây Kỳ quan trong vòng vừa qua.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Bạn thắng trận với vai trò phòng thủ và tiêu diệt ít nhất 2 đơn vị địch.",
   "# Arguments": "# Đối số",
   "# Errors": "# Lỗi",
   "# Panics": "# Hoảng loạn",

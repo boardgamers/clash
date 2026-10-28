@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Αμέσως μετά την κατασκευή του πρώτου Θαύματος στο παιχνίδι, ή στη Φάση Κατάστασης αν ήσουν ο μόνος παίκτης που κατασκεύασε Θαύματα στον τελευταίο γύρο.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Κέρδισες μάχη ως αμυνόμενος και εξόντωσες τουλάχιστον 2 εχθρικές μονάδες.",
   "# Arguments": "# Ορίσματα",
   "# Errors": "# Σφάλματα",
   "# Panics": "# Πανικοί",

@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Direct na het bouwen van het eerste wereldwonder in het spel, of in de statusfase als jij de enige speler was die in de laatste ronde wereldwonderen bouwde.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Je won een gevecht als verdediger en doodde minstens 2 vijandelijke eenheden.",
   "# Arguments": "# Argumenten",
   "# Errors": "# Fouten",
   "# Panics": "# Panieks",

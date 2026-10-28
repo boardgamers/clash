@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Subito dopo aver costruito la prima Meraviglia della partita, oppure nella fase di stato se sei stato l'unico giocatore a costruire Meraviglie nell'ultimo round.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Hai vinto una battaglia come difensore ed eliminato almeno 2 unità nemiche.",
   "# Arguments": "# Argomenti",
   "# Errors": "# Errori",
   "# Panics": "# Panici",

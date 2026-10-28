@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "建造本局首座奇觀後立即完成；或在狀態階段完成，條件是上一輪只有你建造過奇觀。",
+  "You won a battle as defender and killed at least 2 enemy units.": "你作為防守方在戰鬥中獲勝，並消滅了至少2個敵方單位。",
   "# Arguments": "# 參數",
   "# Errors": "# 錯誤",
   "# Panics": "# 恐慌",

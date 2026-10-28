@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "게임의 첫 불가사의를 건설한 직후, 또는 지난 라운드에 불가사의를 건설한 유일한 플레이어라면 상태 단계에 달성합니다.",
+  "You won a battle as defender and killed at least 2 enemy units.": "방어자로서 전투에서 승리하고 적 유닛을 최소 2개 제거했습니다.",
   "# Arguments": "# 인수",
   "# Errors": "# 오류",
   "# Panics": "# 패닉",

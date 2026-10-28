@@ -43,7 +43,11 @@ pub(crate) fn city_founder() -> Objective {
         |event| &mut event.found_city,
         0,
         |game, player, p| {
-            if game.map.revealed_distance(capital_city_position(game, player.get(game)), *p).is_some_and(|distance| distance >= 5) {
+            if game
+                .map
+                .revealed_distance(capital_city_position(game, player.get(game)), *p)
+                .is_some_and(|distance| distance >= 5)
+            {
                 objective_is_ready(player.get_mut(game), name);
             }
         },
@@ -72,31 +76,45 @@ pub(crate) fn magnificent_culture() -> Objective {
     let name = "Magnificent Culture";
     Objective::builder(
         name,
-        "You just built a wonder OR \
-        you built the only Wonder built during the last round.",
+        "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.",
     )
     .status_phase_check(|game, player| {
-        last_round(game).iter().any(|p| {
-            p.actions.iter().any(|a| {
-                a.items.iter().any(|i| {
-                    matches!(&i.entry, ActionLogEntry::HandCard {
-                        card: HandCard::Wonder(_),
-                        from: HandCardLocation::Hand(p) ,
-                        to: HandCardLocation::PlayToKeep,
-                    } if *p == player.index)
-                })
-            })
-        })
+        let builders = wonder_builders(last_round(game).into_iter().flat_map(|turn| &turn.actions));
+        !builders.is_empty() && builders.iter().all(|p| *p == player.index)
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.play_wonder_card,
         0,
         |game, player, _| {
-            objective_is_ready(player.get_mut(game), name);
+            let builders = wonder_builders(
+                crate::log::linear_action_entries(game).into_iter(),
+            );
+            if builders == [player.index] {
+                objective_is_ready(player.get_mut(game), name);
+            }
         },
     )
     .build()
 }
+
+// Construction history remains valid even after a Wonder is captured or destroyed.
+fn wonder_builders<'a>(actions: impl Iterator<Item = &'a ActionLogAction>) -> Vec<usize> {
+    actions
+        .flat_map(|action| &action.items)
+        .filter_map(|item| match &item.entry {
+            ActionLogEntry::HandCard {
+                card: HandCard::Wonder(_),
+                from: HandCardLocation::Hand(player),
+                to: HandCardLocation::PlayToKeep,
+            } => Some(*player),
+            _ => None,
+        })
+        .collect()
+}
+
+#[cfg(test)]
+#[path = "wonder_objective_tests.rs"]
+mod wonder_objective_tests;
 
 pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogAction> {
     last_round(game)

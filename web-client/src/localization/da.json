@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Straks efter at have bygget spillets første vidunder, eller i statusfasen hvis du var den eneste spiller, der byggede vidundere i sidste runde.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Du vandt et slag som forsvarer og dræbte mindst 2 fjendtlige enheder.",
   "# Arguments": "# Argumenter",
   "# Errors": "# Fejl",
   "# Panics": "# Panikker",

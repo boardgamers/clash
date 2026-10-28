@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Сразу после постройки первого чуда в игре или в фазе статуса, если только вы строили чудеса в последнем раунде.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Вы выиграли битву, в качестве защитника, и уничтожили не менее 2 вражеских отрядов.",
   "# Arguments": "# Аргументы",
   "# Errors": "# Ошибки",
   "# Panics": "# Паники",

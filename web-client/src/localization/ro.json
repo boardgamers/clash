@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Imediat după construirea primei Minuni din joc sau în faza de statut dacă ai fost singurul jucător care a construit Minuni în ultima rundă.",
+  "You won a battle as defender and killed at least 2 enemy units.": "Ai câștigat o bătălie ca apărător și ai eliminat cel puțin 2 unități inamice.",
   "# Arguments": "# Argumente",
   "# Errors": "# Erori",
   "# Panics": "# Panici",

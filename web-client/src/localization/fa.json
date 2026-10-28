@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "بلافاصله پس از ساخت نخستین شگفتی بازی، یا در مرحله وضعیت اگر تنها بازیکنی بودید که در دور گذشته شگفتی ساخته است.",
+  "You won a battle as defender and killed at least 2 enemy units.": "در یک نبرد به‌عنوان مدافع پیروز شدید و دست‌کم ۲ واحد دشمن را از بین بردید.",
   "# Arguments": "# Arguments",
   "# Errors": "# Errors",
   "# Panics": "# Panics",

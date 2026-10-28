@@ -318,7 +318,7 @@ pub(crate) fn resistance() -> Objective {
     let name = "Resistance";
     Objective::builder(
         name,
-        "You won a battle against Barbarians in a city and killed at least 2 of their units.",
+        "You won a battle as defender and killed at least 2 enemy units.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -326,8 +326,7 @@ pub(crate) fn resistance() -> Objective {
         |game, p, s| {
             let player = p.index;
             if s.is_winner(player)
-                && !s.opponent_is_human(player, game)
-                && s.battleground.is_city()
+                && s.defender.player == player
                 && s.opponent(player).losses.amount() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
@@ -449,3 +448,7 @@ pub(crate) fn sea_cleansing() -> Objective {
         )
         .build()
 }
+
+#[cfg(test)]
+#[path = "resistance_tests.rs"]
+mod resistance_tests;

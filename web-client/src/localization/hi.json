@@ -1,4 +1,6 @@
 {
+  "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "खेल का पहला अजूबा बनाने के तुरंत बाद, या स्थिति चरण में यदि पिछले दौर में केवल आपने अजूबे बनाए थे।",
+  "You won a battle as defender and killed at least 2 enemy units.": "आपने रक्षक के रूप में लड़ाई जीती और कम से कम 2 शत्रु इकाइयाँ नष्ट कीं।",
   "# Arguments": "# तर्क",
   "# Errors": "# त्रुटियाँ",
   "# Panics": "# घबराहटें",
