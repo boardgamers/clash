@@ -1286,6 +1286,7 @@
     <div class="board-toolbar" aria-label="Game controls" use:measureActionBar>
       <div
         class="turn-banner"
+        class:movement-active={!!$session.view?.stopMovement && !$session.playback}
         class:waiting={!!waiting}
         class:confirming={$session.pending}
         role="status"
@@ -1489,8 +1490,8 @@
       </nav>
       {#if queueControls?.pending && !queueControls.waiting && queueControls.seat === 0}
         <div class="concurrent-choice-row">
-          <span>{queueControls.other} · {queueControls.label ?? 'Placing a settler'}{#if queueControls.queued}<br /><strong>{queueControls.queued} queued{queueControls.ended ? ' · End turn queued' : ''}</strong>{/if}</span>
-          <button onclick={queueControls.onWait}><Hourglass size={14} />Wait for choice</button>
+          <span class="concurrent-choice-copy"><strong>{queueControls.other}</strong><span>{queueControls.label ?? 'Placing a settler'}</span>{#if queueControls.queued}<strong>{queueControls.queued} queued{queueControls.ended ? ' · End turn queued' : ''}</strong>{/if}</span>
+          <button disabled={$session.pending} onclick={queueControls.onWait}><Hourglass size={14} />Wait for choice</button>
         </div>
       {/if}
       {#if $session.failedPlan && !$session.playback}

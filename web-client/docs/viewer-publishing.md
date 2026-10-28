@@ -516,3 +516,17 @@ Validated 886 web tests, 48 engine unit tests, 21 action-card tests, 6 queue tes
 Rust suite still has an unrelated cultural-influence log snapshot mismatch, also
 reproduced on the pre-release main revision. The Raiders UI test now selects a
 revealed two-space path, matching the existing revealed-distance rule.
+
+### 0.1.169 — Continue queued movement after capture
+
+Keep movement queries on the projected planning board when the server confirms
+a predicted undefended-city capture. Previously the confirmation restored the
+pending settler response as the query state while the UI still showed planning,
+so other groups lost their destinations. Regression coverage checks the complete
+capture/confirmation/queue/settler-response sequence, including remaining group
+moves at zero actions. The local async preview now retains the in-progress Move.
+
+On mobile, Finish Move has its own row; the waiting civilization, choice and queue
+count share the full panel width above the Wait button. Verified with 888 web tests,
+17 locale catalogs, Svelte checks, production build and a phone-sized reconstruction
+of Gemmed-swan-9447's public board position. Engine remains 0.4.115; live saves are unchanged.

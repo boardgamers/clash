@@ -639,3 +639,74 @@ test('Technology Trade plans use persisted queue commands, restore on reconnect,
     assert.equal(app.session().view?.canPlay,true);
   } finally {app.close();}
 });
+
+test('replacement settler planning keeps remaining movement groups available', async () => {
+  const app = harness();
+  let raw = readFileSync(new URL('../scripts/async-preview-fixture.json', import.meta.url), 'utf8');
+  try {
+    app.controller.setPlayer(0);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().planning?.label, 'Placing a settler');
+    assert.equal(app.session().view?.movementLeft, 2);
+    app.controller.openSettlers();
+    app.controller.focusUnitPosition('B3', 3);
+    const destination = app.session().moveDestinations.find(d => d.position === 'A3');
+    assert.ok(destination, 'the other settler group can still move');
+    app.controller.submit(destination.action);
+    assert.ok(app.sent.length, app.session().error);
+    raw = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().view?.movementLeft, 1);
+    app.controller.focusUnitPosition('C2', 0);
+    assert.ok(app.session().moveDestinations.some(d => d.position === 'D1'));
+    app.controller.submit(app.session().view!.stopMovement!);
+    raw = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().view?.canPlay, true);
+  } finally { app.close(); }
+});
+
+test('acknowledging a predicted city capture keeps movement queries on the planning board', async () => {
+  const app = harness();
+  const game = JSON.parse(readFileSync(new URL('../scripts/async-preview-fixture.json', import.meta.url), 'utf8'));
+  game.events = [];
+  game.state = 'Playing';
+  game.actions_left = 1;
+  game.board_history = { id: 'city-capture-queue', frames: [] };
+  game.players[0].cities.find((c: any) => c.position === 'B1').city_pieces = {};
+  game.players[1].cities.push(game.players[0].cities.find((c: any) => c.position === 'B1'));
+  game.players[0].cities = game.players[0].cities.filter((c: any) => c.position !== 'B1');
+  const infantry = game.players[0].units.find((u: any) => u.id === 10);
+  infantry.position = 'A1';
+  delete infantry.movement_restrictions;
+  const raw = JSON.stringify(game);
+  try {
+    app.controller.setPlayer(0);
+    await app.controller.load(strip(raw));
+    const attack = { Movement: { Move: { units: [10], destination: 'B1' } } };
+    app.controller.submit(attack);
+    assert.equal(app.session().planning?.label, 'Placing a settler', 'capture is predicted');
+    const confirmed = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await app.controller.load(strip(confirmed));
+    assert.equal(app.session().planning?.label, 'Placing a settler');
+    app.controller.focusUnitPosition('B3', 3);
+    assert.ok(app.session().moveDestinations.some(d => d.position === 'A3'), 'another group remains movable after confirmation');
+    app.controller.focusUnitPosition('C3', 7);
+    const sail = app.session().moveDestinations.find(d => d.position === 'C4');
+    assert.ok(sail, 'ships remain movable after confirmation');
+    app.controller.submit(sail.action);
+    const queued = JSON.parse(app.sent.at(-1)!);
+    assert.deepEqual(queued.QueueMoves.actions, [sail.action]);
+    const saved = engine.tryMove(confirmed, app.sent.at(-1)!, 0);
+    assert.equal(JSON.parse(saved).players[0].units.find((u: any) => u.id === 7).position, 'C3');
+    await app.controller.load(strip(saved));
+    assert.equal(app.session().view?.movementLeft, 1);
+    assert.equal(app.session().view?.units?.find(u => u.id === 7)?.position, 'C4');
+    const resumed = move(saved, { Response: { SelectPositions: ['B2'] } }, 1);
+    assert.equal(JSON.parse(resumed).players[0].units.find((u: any) => u.id === 7).position, 'C4');
+    assert.equal(JSON.parse(resumed).action_plan, undefined);
+    await app.controller.load(strip(resumed));
+    assert.equal(app.session().planning, undefined);
+    assert.equal(app.session().view?.movementLeft, 1);
+  } finally { app.close(); }
+});

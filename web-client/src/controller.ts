@@ -337,7 +337,12 @@ export class Controller {
       this.outbox.shift();
       if (this.outbox.length) this.sendHead();
       else {
-        this.raw = raw;
+        // A predicted capture can already be showing the planning board while
+        // the confirmed game still waits for the defender's replacement settler.
+        // Keep queries on that same projection after acknowledging the capture.
+        this.raw = this.planningInfo && !this.planningInfo.waiting
+          ? this.planningInfo.projected
+          : raw;
         this.markSeen();
         if (get(this.session).error === WAITING) this.patch({ error: '' });
       }

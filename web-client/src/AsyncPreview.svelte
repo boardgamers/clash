@@ -20,7 +20,7 @@
   }
   async function restart(next=scenario){
     scenario=next;game=structuredClone(next==='settler'?settlerFixture:tradeFixture);
-    game.state='Playing';game.actions_left=3;game.board_history??={id:'async-queue-preview',frames:[]};
+    game.board_history??={id:'async-queue-preview',frames:[]};
     for(const c of game.players[0].cities){c.activations=0;c.mood_state='Happy';}
     game.players[0].resources.food=1;seat=0;error='';await refresh();ready=true;
   }
