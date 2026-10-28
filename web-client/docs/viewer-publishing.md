@@ -537,3 +537,13 @@ Show the waiting civilization and its pending choice together, separated by a do
 wrapping naturally when space is limited. The queued count remains below, and the
 Wait button keeps its own row on mobile. Verified Svelte checks, production build
 and the mobile preview. Engine remains 0.4.115.
+
+### 0.1.171 / engine 0.4.116 — Wonder and Defiance objectives
+
+Wonder qualifies immediately only after the game's first Wonder construction, or
+at status phase when its owner was the only player to construct Wonders in the
+last round. Construction history survives captures and destruction. Defiance
+requires winning as defender and eliminating at least two enemy units; it is no
+longer restricted to barbarians or city battles. Updated descriptions in all 17
+locales. Verified 31 objective/wonder tests, 888 frontend tests, localization
+validation, Svelte checks, production build and engine compatibility checks.

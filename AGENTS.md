@@ -2,6 +2,9 @@
 
 ## BGS publication and Git delivery
 
+When the user asks to “push”, publish the changes to BGS as well as pushing the
+matching source to the release branch.
+
 Whenever changes are published to BGS, commit the corresponding source, tests,
 dependency/lockfile changes and version bumps, then push them to this repository's
 `main` or `master` release branch in the same task. A BGS upload or a push only to
