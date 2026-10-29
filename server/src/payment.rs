@@ -506,7 +506,12 @@ fn find_conversion(
             return can;
         }
     }
-    None
+    // A usable conversion can still lead to an unaffordable payment. Try the
+    // remaining alternatives against the original cost before giving up.
+    find_conversion(
+        available, current, conversions, skip_from + 1,
+        discount_left, may_overpay, exact,
+    )
 }
 
 pub(crate) fn payment_options_sum(

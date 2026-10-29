@@ -1,4 +1,6 @@
 {
+  "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "بازیکن دیگری انتخاب کنید. مگر با پرداخت ۲ نشان فرهنگ از مهاجم به مدافع، به هم حمله نمی‌کنید. اگر یکی حمله کرد، این کارت را دور بیندازید. می‌توانید با اقدام عادی هم کارت را دور بیندازید.",
+  "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} بازیکن دیگری انتخاب کنید. مگر با پرداخت ۲ نشان فرهنگ از مهاجم به مدافع، به هم حمله نمی‌کنید. اگر یکی حمله کرد، این کارت را دور بیندازید. می‌توانید با اقدام عادی هم کارت را دور بیندازید.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "بلافاصله پس از ساخت نخستین شگفتی بازی، یا در مرحله وضعیت اگر تنها بازیکنی بودید که در دور گذشته شگفتی ساخته است.",
   "You won a battle as defender and killed at least 2 enemy units.": "در یک نبرد به‌عنوان مدافع پیروز شدید و دست‌کم ۲ واحد دشمن را از بین بردید.",
   "# Arguments": "# Arguments",

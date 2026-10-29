@@ -421,7 +421,11 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
 
     let (dest, result) = destinations
         .iter()
-        .find(|(route, _)| route.destination == m.destination)
+        .find(|(route, result)| {
+            route.destination == m.destination
+                && result.is_ok()
+                && route.cost.is_valid_payment(&m.payment)
+        })
         .map_or_else(
             || {
                 Err(format!(

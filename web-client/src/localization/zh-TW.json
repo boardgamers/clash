@@ -1,4 +1,6 @@
 {
+  "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "選擇另一位玩家。除非攻擊方向防守方支付2個文化標記，否則你們不能互相攻擊。若任一方攻擊另一方，棄掉此卡。你可以將棄掉此卡作為一個常規行動。",
+  "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} 選擇另一位玩家。除非攻擊方向防守方支付2個文化標記，否則你們不能互相攻擊。若任一方攻擊另一方，棄掉此卡。你可以將棄掉此卡作為一個常規行動。",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "建造本局首座奇觀後立即完成；或在狀態階段完成，條件是上一輪只有你建造過奇觀。",
   "You won a battle as defender and killed at least 2 enemy units.": "你作為防守方在戰鬥中獲勝，並消滅了至少2個敵方單位。",
   "# Arguments": "# 參數",

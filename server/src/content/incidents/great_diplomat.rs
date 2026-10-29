@@ -21,7 +21,7 @@ pub(crate) fn great_diplomat() -> ActionCard {
         GreatPersonType::Public,
         "Great Diplomat",
         "Choose another player. \
-        You cannot attack each other, unless you pay 2 culture tokens. \
+        You cannot attack each other, unless the attacker pays the defender 2 culture tokens. \
         Discard this card if either player attacks the other. \
         You may discard the card as a regular action.",
         // action for ending diplomatic relations
@@ -122,6 +122,12 @@ pub(crate) fn end_diplomatic_relations_on_attack(
     let player = EventPlayer::new(
         attacker,
         EventOrigin::Ability("Diplomatic Relations".into()),
+    );
+    crate::resource::gain_resources(
+        game,
+        defender,
+        crate::resource_pile::ResourcePile::culture_tokens(2),
+        player.origin.clone(),
     );
     player.log(
         game,

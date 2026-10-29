@@ -1,4 +1,6 @@
 {
+  "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Vælg en anden spiller. I kan ikke angribe hinanden, medmindre angriberen betaler forsvareren 2 kulturpoletter. Kassér dette kort, hvis en af spillerne angriber den anden. Du kan kassere kortet som en almindelig handling.",
+  "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Vælg en anden spiller. I kan ikke angribe hinanden, medmindre angriberen betaler forsvareren 2 kulturpoletter. Kassér dette kort, hvis en af spillerne angriber den anden. Du kan kassere kortet som en almindelig handling.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Straks efter at have bygget spillets første vidunder, eller i statusfasen hvis du var den eneste spiller, der byggede vidundere i sidste runde.",
   "You won a battle as defender and killed at least 2 enemy units.": "Du vandt et slag som forsvarer og dræbte mindst 2 fjendtlige enheder.",
   "# Arguments": "# Argumenter",

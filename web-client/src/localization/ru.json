@@ -1,4 +1,6 @@
 {
+  "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Выберите другого игрока. Вы не можете атаковать друг друга, если атакующий не заплатит защитнику 2 жетона культуры. Сбросьте эту карту, если один из игроков атакует другого. Вы можете сбросить карту как обычное действие.",
+  "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Выберите другого игрока. Вы не можете атаковать друг друга, если атакующий не заплатит защитнику 2 жетона культуры. Сбросьте эту карту, если один из игроков атакует другого. Вы можете сбросить карту как обычное действие.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Сразу после постройки первого чуда в игре или в фазе статуса, если только вы строили чудеса в последнем раунде.",
   "You won a battle as defender and killed at least 2 enemy units.": "Вы выиграли битву, в качестве защитника, и уничтожили не менее 2 вражеских отрядов.",
   "# Arguments": "# Аргументы",

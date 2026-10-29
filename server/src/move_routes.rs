@@ -135,6 +135,7 @@ fn reachable_with_roads(
                 .flat_map(|middle| {
                     next_road_step(player, game, middle, stack_size, moving_xerxes, |_| true)
                 })
+                .chain(next_road_step(player, game, start, stack_size, moving_xerxes, |_| true))
                 .unique()
                 .filter_map(|destination| {
                     road_route(
@@ -218,8 +219,8 @@ fn road_route(
     ignore_city_to_city: bool,
     modifiers: Vec<EventOrigin>,
 ) -> Option<MoveRoute> {
-    if destination.distance(start) <= 1 {
-        // can go directly without using roads
+    if destination == start {
+        // A Roads move must actually change spaces.
         return None;
     }
 

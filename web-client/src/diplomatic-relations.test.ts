@@ -41,6 +41,7 @@ for (const owner of [0, 1]) {
       assert.deepEqual(attack.payment, { culture_tokens: 2 });
       const after = move(game, attack.action);
       assert.equal(after.players[0].resources.culture_tokens, game.players[0].resources.culture_tokens - 2);
+      assert.equal(after.players[1].resources.culture_tokens, game.players[1].resources.culture_tokens + 2);
       assert.ok(!after.permanent_effects?.some((e: any) => e.DiplomaticRelations));
       assert.ok(!after.players[owner].action_cards?.includes(157));
       assert.equal(after.action_cards_discarded.filter((id: number) => id === 157).length, 1);

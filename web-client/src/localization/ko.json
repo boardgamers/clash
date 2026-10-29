@@ -1,4 +1,6 @@
 {
+  "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "다른 플레이어를 선택하세요. 공격자가 방어자에게 문화 토큰 2개를 지불하지 않으면 서로 공격할 수 없습니다. 어느 플레이어가 다른 플레이어를 공격하면 이 카드를 버립니다. 일반 행동으로 카드를 버릴 수 있습니다.",
+  "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} 다른 플레이어를 선택하세요. 공격자가 방어자에게 문화 토큰 2개를 지불하지 않으면 서로 공격할 수 없습니다. 어느 플레이어가 다른 플레이어를 공격하면 이 카드를 버립니다. 일반 행동으로 카드를 버릴 수 있습니다.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "게임의 첫 불가사의를 건설한 직후, 또는 지난 라운드에 불가사의를 건설한 유일한 플레이어라면 상태 단계에 달성합니다.",
   "You won a battle as defender and killed at least 2 enemy units.": "방어자로서 전투에서 승리하고 적 유닛을 최소 2개 제거했습니다.",
   "# Arguments": "# 인수",

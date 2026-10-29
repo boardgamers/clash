@@ -1,4 +1,6 @@
 {
+  "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "选择另一位玩家。除非攻击方向防守方支付2枚文化标记，否则你们不能互相攻击。任一玩家攻击另一方时弃置此卡。你也可以用一次常规行动弃置此卡。",
+  "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} 选择另一位玩家。除非攻击方向防守方支付2枚文化标记，否则你们不能互相攻击。任一玩家攻击另一方时弃置此卡。你也可以用一次常规行动弃置此卡。",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "建造本局首座奇迹后立即完成；或在状态阶段完成，条件是上一轮只有你建造过奇迹。",
   "You won a battle as defender and killed at least 2 enemy units.": "你作为防守方在战斗中获胜，并消灭了至少2个敌方单位。",
   "_blank": "_blank",

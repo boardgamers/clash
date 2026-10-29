@@ -161,3 +161,28 @@ test('paid Roads ignore both crossed and destination terrain, then allow a new M
     assert.ok(destinations(next).some((d: any) => !Object.values(d.payment).some(Boolean)), 'can move again without paying for Roads again');
   }
 });
+
+test('one-space Roads entry into a mountain city permits regrouping in a new Move action', () => {
+  const g = fixture('Mountain');
+  g.actions_left = 3;
+  g.players[0].advances.push('Roads');
+  g.players[0].resources = { food: 3, ore: 3 };
+  g.players[0].cities.push({ position: 'C1', mood_state: 'Happy' });
+  g.players[0].units.push({ id: 99, position: 'C1', unit_type: 'Infantry' });
+  const routes = (raw: string, units: number[]) => JSON.parse(engine.webQuery(
+    engine.stripSecret(raw, 0), 0, JSON.stringify({ kind: 'movement', units }))).destinations;
+  const raw = JSON.stringify(g);
+  const choices = routes(raw, [0]).filter((d: any) => d.position === 'C1');
+  const free = choices.find((d: any) => !Object.keys(d.payment).length);
+  const paid = choices.find((d: any) => d.payment.food === 1 && d.payment.ore === 1);
+  assert.ok(free && paid, 'both ordinary and Roads entry must be offered');
+  const normal = JSON.parse(engine.tryMove(raw, JSON.stringify(free.action), 0));
+  assert.ok(normal.players[0].units.find((u: any) => u.id === 0).movement_restrictions.includes('Mountain'));
+  let moved = engine.tryMove(raw, JSON.stringify(paid.action), 0);
+  assert.ok(!JSON.parse(moved).players[0].units.find((u: any) => u.id === 0).movement_restrictions?.includes('Mountain'));
+  const view = JSON.parse(engine.webView(engine.stripSecret(moved, 0), 0));
+  if (view.stopMovement) moved = engine.tryMove(moved, JSON.stringify(view.stopMovement), 0);
+  const group = routes(moved, [0, 99]).find((d: any) => d.position === 'B1' && !Object.keys(d.payment).length);
+  assert.ok(group, 'can regroup and move without a second Roads payment');
+  assert.doesNotThrow(() => engine.tryMove(moved, JSON.stringify(group.action), 0));
+});

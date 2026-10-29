@@ -547,3 +547,16 @@ requires winning as defender and eliminating at least two enemy units; it is no
 longer restricted to barbarians or city battles. Updated descriptions in all 17
 locales. Verified 31 objective/wonder tests, 888 frontend tests, localization
 validation, Svelte checks, production build and engine compatibility checks.
+
+### 0.1.172 / engine 0.4.117 — Pakal, diplomatic payments and Roads
+
+Payment search now tries every resource-conversion alternative, allowing Pakal to
+construct with one culture and one remaining resource in his city. Breaking Great
+Diplomat transfers two culture to the defender, including undefended captures,
+and records the gain. Roads offers paid one-space moves to or from owned cities;
+route execution honors the chosen payment and terrain exception, allowing units
+to regroup in a later Move action. Updated diplomat text in all 17 locales.
+Verified 890 frontend tests, targeted payment, Roads, Rome and Great Person Rust
+tests, Svelte checks, locales, production build and engine compatibility checks.
+The broader advances suite retains its known unrelated cultural-influence log
+snapshot mismatch. Existing game history is not repaired.

@@ -83,3 +83,32 @@ test('recruiting and undoing Pakal restores resources, recruitment and construct
   );
   assert.equal(view(JSON.stringify(retired)).players[seat].leaders.length, 0);
 });
+
+test('Pakal can build with culture replacing any pair of resources, only in his city', async () => {
+  let raw = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'pakal-cost', {});
+  for (const civilization of ['Maya', 'Carthage'])
+    raw = engine.tryMove(raw, JSON.stringify({ ChooseCivilization: civilization }), engine.currentPlayer(raw));
+  const base = JSON.parse(raw), seat = base.players.findIndex((p: any) => p.civilization === 'Maya');
+  base.current_player_index = seat;
+  const player = base.players[seat], city = player.cities[0];
+  const other = structuredClone(city); other.position = 'C2';
+  player.cities.push(other);
+  player.units = [{ id: 0, position: city.position, unit_type: { Leader: 'Pakal' } }];
+  player.recruited_leaders = ['Pakal'];
+  player.advances.push('Tactics');
+  city.mood_state = 'Happy';
+  for (const resource of ['food', 'wood', 'ore', 'gold']) {
+    const game = structuredClone(base);
+    game.players[seat].resources = { [resource]: 1, culture_tokens: 1 };
+    const state = JSON.stringify(game);
+    const cities = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat)).cityActions;
+    const fortress = cities.find((c: any) => c.position === city.position).buildings.find((b: any) => b.name === 'Fortress');
+    assert.equal(fortress.reason, null, resource);
+    assert.deepEqual(fortress.payment, { [resource]: 1, culture_tokens: 1 });
+    const after = JSON.parse(engine.tryMove(state, JSON.stringify(fortress.choices[0].action), seat));
+    assert.equal(after.players[seat].cities[0].city_pieces.fortress, seat);
+    assert.equal(after.players[seat].resources?.culture_tokens ?? 0, 0);
+    const elsewhere = cities.find((c: any) => c.position === other.position).buildings.find((b: any) => b.name === 'Fortress');
+    assert.equal(elsewhere.reason, 'Not enough resources');
+  }
+});

@@ -1,4 +1,6 @@
 {
+  "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Wybierz innego gracza. Nie możecie się atakować, chyba że atakujący zapłaci obrońcy 2 żetony kultury. Odrzuć tę kartę, jeśli którykolwiek gracz zaatakuje drugiego. Możesz odrzucić kartę jako zwykłą akcję.",
+  "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Wybierz innego gracza. Nie możecie się atakować, chyba że atakujący zapłaci obrońcy 2 żetony kultury. Odrzuć tę kartę, jeśli którykolwiek gracz zaatakuje drugiego. Możesz odrzucić kartę jako zwykłą akcję.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Natychmiast po zbudowaniu pierwszego cudu w grze lub w fazie statusu, jeśli tylko ty zbudowałeś cuda w ostatniej rundzie.",
   "You won a battle as defender and killed at least 2 enemy units.": "Wygrałeś bitwę jako obrońca i zniszczyłeś co najmniej 2 wrogie jednostki.",
   "# Arguments": "# Argumenty",
