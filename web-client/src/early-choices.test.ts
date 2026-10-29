@@ -120,7 +120,7 @@ test('early objective choices stay private and complete only when that player is
   const offer = view(raw, 1).earlyChoices.find((o: any) => o.title === 'Wood Supplies');
   assert.ok(offer, 'other player can queue a qualifying status objective');
   const pick = offer.options.find((o: any) => o.response.SelectHandCards.length);
-  for (const other of view(raw, 1).earlyChoices) {
+  for (const other of view(raw, 1).earlyChoices.filter((o: any) => o.key.includes(':objective:'))) {
     raw = queue(raw, 1, other.key, other.key === offer.key ? pick.response : { SelectHandCards: [] });
   }
   assert.ok(!JSON.parse(raw).players[1].completed_objectives?.length);
@@ -230,4 +230,57 @@ test('disabling keep-government restores the normal payment prompt', () => {
   state = apply(state,{Response:{Payment:[{}]}});
   assert.equal(engine.currentPlayer(state),1);
   assert.equal(JSON.parse(state).events.at(-1).handler.request.Payment[0].name,'Pay to change government');
+});
+
+test('free research can be queued after round three and survives entry into status phase', () => {
+  const before = fixture('status_phase/free_advance');
+  // Player 1 went first and has finished; player 0 is taking the last turn.
+  assert.equal(JSON.parse(before).starting_player_index, 1);
+  assert.equal(engine.currentPlayer(before), 0);
+  const offer = view(before, 1).earlyChoices.find((o: any) => o.key.endsWith('/advance'));
+  assert.ok(offer);
+  assert.ok(!view(before, 0).earlyChoices.some((o: any) => o.key.endsWith('/advance')));
+  const response = { SelectAdvance: 'Storage' };
+  assert.ok(offer.options.some((o: any) => o.response.SelectAdvance === 'Storage'));
+  const queued = queue(before, 1, offer.key, response);
+  assert.deepEqual(JSON.parse(queued).players, JSON.parse(before).players);
+  assert.deepEqual(view(queued, 1).earlyChoices.find((o: any) => o.key === offer.key).selected, response);
+  assert.equal(JSON.parse(engine.stripSecret(queued, 0)).early_choices, undefined);
+  const after = apply(queued, { Playing: 'EndTurn' }, 0);
+  assert.ok(JSON.parse(after).players[1].advances.includes('Storage'));
+  assert.equal(engine.currentPlayer(after), 0);
+  assert.equal(JSON.parse(after).early_choices, undefined);
+});
+
+test('round-three research is absent before finishing, in earlier rounds and in the final age', () => {
+  for (const changes of [{ round: 2 }, { age: 6 }, { current_player_index: 1 }]) {
+    const game = { ...JSON.parse(fixture('status_phase/free_advance')), ...changes };
+    assert.ok(!view(JSON.stringify(game), 1).earlyChoices.some((o: any) => o.key.endsWith('/advance')));
+  }
+});
+
+test('an invalid pre-status research choice asks again instead of granting another advance', () => {
+  let raw = fixture('status_phase/free_advance');
+  const offer = view(raw, 1).earlyChoices.find((o: any) => o.key.endsWith('/advance'));
+  raw = queue(raw, 1, offer.key, { SelectAdvance: 'Storage' });
+  const changed = JSON.parse(raw);
+  changed.players[1].advances.push('Storage');
+  const after = apply(JSON.stringify(changed), { Playing: 'EndTurn' }, 0);
+  assert.equal(engine.currentPlayer(after), 1);
+  assert.equal(JSON.parse(after).early_choices, undefined);
+  assert.equal(JSON.parse(after).players[1].advances.filter((a: string) => a === 'Storage').length, 1);
+});
+
+test('previously saved status-phase research keys still resolve', () => {
+  const raw = research(), game = JSON.parse(raw);
+  game.early_choices = [{
+    player: 0, key: `${game.age}:${game.round}:0:status:FreeAdvance/advance`,
+    response: { SelectAdvance: 'Philosophy' },
+  }];
+  const restored = JSON.stringify(game);
+  assert.deepEqual(view(restored, 0).earlyChoices.find((o: any) => o.key.endsWith('/advance')).selected,
+    { SelectAdvance: 'Philosophy' });
+  const after = apply(restored, { Response: { SelectAdvance: 'Storage' } }, 1);
+  assert.ok(JSON.parse(after).players[0].advances.includes('Philosophy'));
+  assert.equal(JSON.parse(after).early_choices, undefined);
 });

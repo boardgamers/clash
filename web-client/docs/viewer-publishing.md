@@ -560,3 +560,13 @@ Verified 890 frontend tests, targeted payment, Roads, Rome and Great Person Rust
 tests, Svelte checks, locales, production build and engine compatibility checks.
 The broader advances suite retains its known unrelated cultural-influence log
 snapshot mismatch. Existing game history is not repaired.
+
+### 0.1.173 / engine 0.4.118 — Queue free research after turn three
+
+The Research menu offers the next free advance as soon as a player has finished
+round three, while later players finish their turns. The private, editable choice
+survives entry into status phase and resolves only when that player's real research
+request is reached. Invalid choices ask again; earlier rounds and the final age do
+not offer this queue. Previously saved status-phase choices remain compatible.
+Verified 894 frontend/engine tests, locales, Svelte checks, production build and
+engine compatibility checks.
