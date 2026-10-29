@@ -459,6 +459,10 @@ small {
   display: block;
 }
 .player-info small {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  white-space: nowrap;
   font-size: 9px;
   color: #858779;
 }
@@ -6416,4 +6420,15 @@ small {
     padding: 8px;
   }
   .concurrent-choice-row > button { padding: 6px 8px; min-height: 32px; }
+}
+
+.player-info .player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-info .player-avatar,
+.player-info .supporter-badge {
+  flex-shrink: 0;
 }

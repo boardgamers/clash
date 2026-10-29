@@ -587,3 +587,9 @@ without crashing End turn. Loading does not grant the advance's one-time bonus.
 Verified a reload/payment/end-turn regression and the reported Gemmed-swan save
 locally. The existing Great Gardens error-message assertion also fails on the
 unchanged baseline. No live game data repair is included.
+
+## Viewer 0.1.176
+
+Keep player avatars, names and supporter badges on one line. Long names use an
+ellipsis instead of wrapping below the avatar; the card tooltip retains the full
+name. Verified desktop and mobile layouts and Svelte checks. Engine stays 0.4.119.

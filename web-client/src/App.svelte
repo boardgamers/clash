@@ -994,9 +994,9 @@
                     class="player-avatar"
                     src={$session.avatars[player.index]}
                     alt=""
-                  />{/if}{player.index === $session.seat
+                  />{/if}<span class="player-name">{player.index === $session.seat
                   ? 'You'
-                  : player.name}{#if $session.playerBadges?.[player.index]}<img
+                  : player.name}</span>{#if $session.playerBadges?.[player.index]}<img
                     class="supporter-badge"
                     src={$session.playerBadges[player.index]!.url}
                     alt={$session.playerBadges[player.index]!.label}
