@@ -593,3 +593,10 @@ unchanged baseline. No live game data repair is included.
 Keep player avatars, names and supporter badges on one line. Long names use an
 ellipsis instead of wrapping below the avatar; the card tooltip retains the full
 name. Verified desktop and mobile layouts and Svelte checks. Engine stays 0.4.119.
+
+## Viewer 0.1.177 / engine 0.4.120
+
+Exhausted-land placement now excludes spaces containing any player's units,
+including the active player's own units. When no eligible empty space remains,
+the placement is skipped. Regression coverage includes friendly and enemy
+infantry and settlers; all 39 incident tests pass.

@@ -836,7 +836,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                 .flat_map(|c| c.position.neighbors())
                 .filter(|pos| {
                     game.try_get_any_city(*pos).is_none()
-                        && !enemy_units_present(game, *pos, p.index)
+                        && !units_present(game, *pos)
                         && game.map.get(*pos).is_some_and(is_valid_city_terrain)
                 })
                 .collect_vec();
@@ -880,8 +880,8 @@ pub(crate) fn decrease_mod_and_log(
     }
 }
 
-fn enemy_units_present(game: &Game, pos: Position, player: usize) -> bool {
+fn units_present(game: &Game, pos: Position) -> bool {
     game.players
         .iter()
-        .any(|p| player != p.index && p.units.iter().any(|u| u.position == pos))
+        .any(|p| p.units.iter().any(|u| u.position == pos))
 }

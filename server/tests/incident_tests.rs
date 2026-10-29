@@ -132,6 +132,38 @@ fn test_exhausted_land() {
     );
 }
 
+#[test]
+fn exhausted_land_skips_when_all_eligible_spaces_have_units() {
+    use server::map::Terrain;
+    use server::unit::Unit;
+
+    for owner in [0, 1] {
+        for unit_type in [UnitType::Infantry, UnitType::Settler] {
+            let mut game = JSON.load_game("exhausted_land");
+            let positions: Vec<_> = game.player(0).cities.iter()
+                .flat_map(|city| city.position.neighbors())
+                .filter(|pos| game.try_get_any_city(*pos).is_none()
+                    && matches!(game.map.get(*pos), Some(Terrain::Fertile | Terrain::Forest | Terrain::Mountain)))
+                .collect();
+            assert!(!positions.is_empty());
+            for (index, position) in positions.iter().enumerate() {
+                game.player_mut(owner).units.push(Unit::new(
+                    owner, *position, unit_type, 1000 + index as u32,
+                ));
+            }
+            let before = game.map.tiles.clone();
+            let game = server::game_api::execute(game,
+                Action::Response(EventResponse::SelectAdvance(Advance::Storage)), 0);
+            assert_eq!(game.map.tiles, before, "Occupied terrain must not be exhausted");
+            if let Some(handler) = game.current_event_handler() {
+                assert!(!matches!(handler.request,
+                    server::content::persistent_events::PersistentEventRequest::SelectPositions(_)),
+                    "No exhausted-land placement should remain pending");
+            }
+        }
+    }
+}
+
 const FAMINE: JsonTest = JsonTest::child("incidents", "famine");
 
 #[test]
