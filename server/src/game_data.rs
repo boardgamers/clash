@@ -349,6 +349,7 @@ pub struct PlayerData {
 fn initialize_player(player_index: usize, game: &mut Game, builtin_abilities: &[Ability]) {
     ability::init_player(game, player_index, builtin_abilities);
     advance::init_player(game, player_index);
+    advance::init_great_library(game, player_index);
 
     if let Some(leader) = game.player(player_index).active_leader() {
         Player::with_leader(leader, game, player_index, |game, leader| {

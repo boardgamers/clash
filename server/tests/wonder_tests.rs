@@ -85,6 +85,32 @@ fn test_library() {
 }
 
 #[test]
+fn test_library_borrowed_effect_survives_reload() {
+    let mut game = JSON.load_game("library");
+    game.player_mut(0).resources.mood_tokens = 0;
+    let game = server::game_api::execute(game, custom_action(CustomActionType::GreatLibrary), 0);
+    let game = server::game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectAdvance(Advance::FreeEducation)),
+        0,
+    );
+    // Clone rebuilds runtime listeners from saved data, just like a new request.
+    let game = game.clone();
+    assert_eq!(game.player(0).resources.mood_tokens, 0);
+    let game = server::game_api::execute(
+        game,
+        advance_action(Advance::Storage, ResourcePile::ideas(2)),
+        0,
+    );
+    assert!(game.current_event_handler().is_some());
+    let game = server::game_api::execute(game.clone(), payment_response(ResourcePile::ideas(1)), 0);
+    assert_eq!(game.player(0).resources.mood_tokens, 2);
+    let game = server::game_api::execute(game.clone(), Action::Playing(PlayingAction::EndTurn), 0);
+    assert_eq!(game.player(0).great_library_advance, None);
+    assert_ne!(game.current_player_index, 0);
+}
+
+#[test]
 fn test_lighthouse() {
     let game = JSON.load_game("lighthouse");
     let game = server::game_api::execute(

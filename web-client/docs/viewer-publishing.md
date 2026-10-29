@@ -578,3 +578,12 @@ research previously forced Available, while ordinary research forced All. Both
 entry points now honor the player's saved preference, including after refresh.
 Verified preference persistence tests, Svelte checks and production build.
 Engine remains 0.4.118.
+
+## Viewer 0.1.175 / engine 0.4.119
+
+Restore Great Library's borrowed advance listeners when loading saved games.
+Borrowed effects such as Free Education remain usable across requests and expire
+without crashing End turn. Loading does not grant the advance's one-time bonus.
+Verified a reload/payment/end-turn regression and the reported Gemmed-swan save
+locally. The existing Great Gardens error-message assertion also fails on the
+unchanged baseline. No live game data repair is included.
