@@ -570,3 +570,11 @@ request is reached. Invalid choices ask again; earlier rounds and the final age 
 not offer this queue. Previously saved status-phase choices remain compatible.
 Verified 894 frontend/engine tests, locales, Svelte checks, production build and
 engine compatibility checks.
+
+### 0.1.174 — Preserve the research availability filter
+
+Opening research no longer overrides the saved availability filter. Queued free
+research previously forced Available, while ordinary research forced All. Both
+entry points now honor the player's saved preference, including after refresh.
+Verified preference persistence tests, Svelte checks and production build.
+Engine remains 0.4.118.

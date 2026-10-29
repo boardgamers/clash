@@ -566,7 +566,6 @@
       mode: 'research',
       tilePanel: false,
       selectedAdvance: (earlyAdvance?.selected as {SelectAdvance?: string} | null)?.SelectAdvance ?? null,
-      availableOnly: !!earlyAdvance,
       error: '',
       abilitiesOpen: false,
     });

@@ -154,9 +154,13 @@ test('map view, orientation and unit badges round-trip through BGS preferences a
   viewer.updatePreference('homeAtBottom', true);
   assert.equal(current.homeAtBottom, true);
   assert.equal(writes, 3);
+  viewer.updatePreference('availableOnly', true);
+  viewer.updatePreference('availableOnly', false);
+  assert.equal(current.availableOnly, false);
   viewer.destroy();
   const reopened = createViewer(options);
   reopened.emitter.receive('preferences', saved);
+  assert.equal(current.availableOnly, false, 'show-all survives reopening the viewer');
   assert.equal(current.homeAtBottom, true);
   assert.equal(current.topDown, true);
   assert.equal(current.unitBadges, false);
@@ -173,7 +177,7 @@ test('opponent recap defaults to autoplay and restores the player’s manual pre
   assert.equal(readPreferences({ replayAutoplay: true }).replayAutoplay, true);
 });
 
-test('availability filtering defaults on and restores the player’s show-all preference', () => {
+test('availability filtering defaults off and restores the player’s show-all preference', () => {
   assert.equal(readPreferences({}).availableOnly, false);
   assert.equal(readPreferences({ availableOnly: true }).availableOnly, true);
   assert.equal(readPreferences({ availableOnly: false }).availableOnly, false);

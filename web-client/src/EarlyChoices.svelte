@@ -25,7 +25,7 @@
         {#if !raze && !first}<label for={'early-' + offer.key}>{offer.title}</label>{/if}
         {#if offer.key.endsWith('/advance')}
           <div class="choice-row">
-            <button class="primary" disabled={$session.pending} onclick={() => controller.patch({mode: 'research', selectedAdvance: (offer.selected as {SelectAdvance?: string} | null)?.SelectAdvance ?? null, availableOnly: true})}>
+            <button class="primary" disabled={$session.pending} onclick={() => controller.patch({mode: 'research', selectedAdvance: (offer.selected as {SelectAdvance?: string} | null)?.SelectAdvance ?? null})}>
               {saved >= 0 ? offer.options[saved].label : 'Choose an advance'}
             </button>
             {#if saved >= 0}<button disabled={$session.pending} onclick={() => controller.submit({QueueChoice:{key:offer.key,response:null}})}>Clear</button>{/if}
