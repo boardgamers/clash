@@ -600,3 +600,10 @@ Exhausted-land placement now excludes spaces containing any player's units,
 including the active player's own units. When no eligible empty space remains,
 the placement is skipped. Regression coverage includes friendly and enemy
 infantry and settlers; all 39 incident tests pass.
+
+## Viewer 0.1.178 / engine 0.4.121
+
+Negotiations now protects the partner's cities even when no units occupy them,
+including cities defended only by a fortress. Regression tests verify that both
+fortified and unfortified cities are reachable before Negotiations but blocked
+on the opponent's turn while the effect is active.

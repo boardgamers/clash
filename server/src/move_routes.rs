@@ -97,7 +97,10 @@ fn add_diplomatic_relations(player: &Player, game: &Game, base: &mut Vec<MoveRou
 fn add_negotiations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
     if let Some(partner) = negotiations_partner(game, player.index) {
         let partner = game.player(partner);
-        base.retain(|r| partner.get_units(r.destination).is_empty());
+        base.retain(|r| {
+            partner.get_units(r.destination).is_empty()
+                && !partner.cities.iter().any(|city| city.position == r.destination)
+        });
     }
 }
 
