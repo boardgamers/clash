@@ -607,3 +607,10 @@ Negotiations now protects the partner's cities even when no units occupy them,
 including cities defended only by a fortress. Regression tests verify that both
 fortified and unfortified cities are reachable before Negotiations but blocked
 on the opponent's turn while the effect is active.
+
+## Viewer 0.1.179
+
+Generic resource gains appear above the civilization's oldest remaining city in
+the displayed board state. Tile-specific gains keep their existing positions;
+players without cities retain the screen-position fallback. Replay uses its
+historical cities. All 14 resource tests and UI checks pass. Engine stays 0.4.121.

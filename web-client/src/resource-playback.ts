@@ -1,5 +1,5 @@
 import { publicActions, playingAction } from './replay-actions.ts';
-import { resources, resourceNames, type BoardFrame, type Game, type Pile, type Resource } from './types.ts';
+import { resources, resourceNames, type BoardFrame, type Game, type Pile, type Player, type Resource } from './types.ts';
 
 export interface ResourceMarker {
   player: number;
@@ -7,6 +7,11 @@ export interface ResourceMarker {
   resource: Resource;
   amount: number;
 }
+/** Generic gains follow the oldest remaining city in the displayed board state. */
+export function resourceMarkerPosition(marker: ResourceMarker, players: Player[]): string | undefined {
+  return marker.position ?? players.find((player) => player.id === marker.player)?.cities?.[0]?.position;
+}
+
 export interface ResourceGain {
   player: number;
   pile: Pile;

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { frameResources, describeResources } from './resource-playback.ts';
+import { frameResources, describeResources, resourceMarkerPosition } from './resource-playback.ts';
 import { groupPlaybackFrames, playbackSteps } from './replay-actions.ts';
 import { frameDetails, frameEffects, sinceLastTurn, recapStart } from './playback.ts';
 import type { Game, LoggedAction } from './types.ts';
@@ -318,4 +318,17 @@ test('bartering and research rewards show unanchored icons with actual gains, ex
     [{ player: 1, resource: 'gold', amount: 1 }]);
   assert.deepEqual(frameResources(game, 1, game.board_history!.frames[2]).markers,
     [{ player: 1, resource: 'ideas', amount: 1 }, { player: 1, resource: 'mood_tokens', amount: 1 }]);
+});
+
+test('generic resource markers follow the displayed player main city, preserving specific locations', () => {
+  const marker = { player: 1, resource: 'gold' as const, amount: 2 };
+  const players = [{ id: 1, civilization: 'Rome', cities: [
+    { position: 'B1', mood_state: 'Happy' }, { position: 'C2', mood_state: 'Neutral' },
+  ] }];
+  assert.equal(resourceMarkerPosition(marker, players), 'B1');
+  assert.equal(resourceMarkerPosition({ ...marker, position: 'D3' }, players), 'D3');
+  players[0].cities.shift();
+  assert.equal(resourceMarkerPosition(marker, players), 'C2');
+  assert.equal(resourceMarkerPosition(marker, []), undefined);
+  assert.equal(resourceMarkerPosition(marker, [{ ...players[0], cities: [] }]), undefined);
 });

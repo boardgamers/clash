@@ -3,7 +3,7 @@ import { mount, unmount } from 'svelte';
 import ResourceGainBadge from './ResourceGainBadge.svelte';
 import { positionXY } from './model';
 import { playerColor, type Session } from './types';
-import type { ResourceMarker } from './resource-playback';
+import { resourceMarkerPosition, type ResourceMarker } from './resource-playback';
 
 export class ResourceOverlay {
   private nodes: { node: HTMLDivElement; at: THREE.Vector3 | null; component: ReturnType<typeof mount> }[] = [];
@@ -29,7 +29,9 @@ export class ResourceOverlay {
       groups.set(key, [...(groups.get(key) ?? []), marker]);
     }
     for (const group of groups.values()) {
-      const { player, position } = group[0];
+      const { player } = group[0];
+      const players = s.playback?.frame?.players ?? s.game?.players ?? [];
+      const position = resourceMarkerPosition(group[0], players);
       const node = document.createElement('div');
       if (position) node.dataset.position = position;
       Object.assign(node.style, { position: 'absolute', left: '0', top: '0', visibility: 'hidden' });
@@ -41,7 +43,7 @@ export class ResourceOverlay {
           markers: group,
           animate,
           transient: !s.playback,
-          civilization: s.game?.players.find((p) => p.id === player)?.civilization ?? 'Player',
+          civilization: players.find((p) => p.id === player)?.civilization ?? 'Player',
         },
       });
       const [x, z] = position ? positionXY(position) : [0, 0];
