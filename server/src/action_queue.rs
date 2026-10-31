@@ -43,8 +43,42 @@ pub fn offer(game: &Game, player: usize) -> Option<(String, String)> {
         {
             "Choosing an advance"
         }
+        (PersistentEventType::Incident(i), EventOrigin::Incident(id),
+            PersistentEventRequest::SelectPositions(request))
+            if i.active_player == player && *id == i.incident_id
+                && [27, 28, 34, 35].contains(id) && handler.priority == 11
+                && i.selected_player == Some(game.active_player())
+                && request.choices.iter().all(|position|
+                    game.player(game.active_player()).cities.iter().any(|city| city.position == *position)) =>
+        {
+            "Placing a settler"
+        }
+        (PersistentEventType::Incident(i), EventOrigin::Incident(id),
+            PersistentEventRequest::Payment(requests))
+            if i.active_player == player && *id == i.incident_id
+                && !i.consumed && !i.replaced_by_sacrifice && i.selected_player.is_none()
+                && game.cache.get_incident(*id).action_card.is_some()
+                && handler.priority == 10
+                && requests.iter().any(|request| request.name == "Pay to gain the Action Card") =>
+        {
+            game.cache.get_incident(*id).name.as_str()
+        }
+        (PersistentEventType::Incident(i), EventOrigin::Incident(id),
+            PersistentEventRequest::SelectPlayer(_))
+            if i.active_player == player && *id == 57 && i.incident_id == *id
+                && handler.priority == 1 && i.selected_player == Some(game.active_player()) =>
+        {
+            "Choose a player"
+        }
         _ => return None,
     };
+    // Passing a Great Person to another recipient (or choosing a Diplomat
+    // partner) continues the same unresolved reaction. Preserve queued actions
+    // and the explicit Wait preference while that reaction progresses.
+    if let Some(plan) = game.action_plan.as_ref().filter(|plan|
+        plan.player == player && plan.error.is_none()) {
+        return Some((plan.key.clone(), label.into()));
+    }
     let key = format!(
         "{:x}",
         Sha256::digest(

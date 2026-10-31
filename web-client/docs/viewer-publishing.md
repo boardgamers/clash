@@ -614,3 +614,12 @@ Generic resource gains appear above the civilization's oldest remaining city in
 the displayed board state. Tile-specific gains keep their existing positions;
 players without cities retain the screen-position fallback. Replay uses its
 historical cities. All 14 resource tests and UI checks pass. Engine stays 0.4.121.
+
+## Viewer 0.1.180 / engine 0.4.122
+
+Allow the turn owner to queue safe actions while another player considers a
+passed Great Person, chooses a Great Diplomat partner, or places a settler from
+Population Boom or Migration. The existing Wait for choice control remains
+available. Preserve queued actions and the Wait preference as the unresolved
+Great Person offer passes between players. Verified 10 engine queue tests and
+3 browser-controller tests covering queueing, Undo, Wait and resumed execution.

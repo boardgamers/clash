@@ -710,3 +710,30 @@ test('acknowledging a predicted city capture keeps movement queries on the plann
     assert.equal(app.session().view?.movementLeft, 1);
   } finally { app.close(); }
 });
+
+test('Great Person offers expose the normal queue and Wait controls', async () => {
+  const app = harness();
+  let raw = readFileSync(new URL('../../server/tests/test_games/incidents/great_persons/great_artist.outcome.json', import.meta.url), 'utf8');
+  try {
+    app.controller.setPlayer(0);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().planning?.label, 'Great Artist');
+    assert.equal(app.session().view?.canPlay, true);
+    app.controller.submit({Playing: 'EndTurn'});
+    assert.deepEqual(JSON.parse(app.sent.at(-1)!).QueueMoves.actions, [{Playing: 'EndTurn'}]);
+    raw = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await app.controller.load(strip(raw));
+    app.controller.undoQueuedAction();
+    raw = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await app.controller.load(strip(raw));
+    app.controller.waitForChoice();
+    raw = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().planning?.waiting, true);
+    assert.equal(app.session().view?.canPlay, false);
+    raw = engine.tryMove(raw, JSON.stringify({Response: {Payment: [{}]}}), 1);
+    await app.controller.load(strip(raw));
+    assert.equal(app.session().planning, undefined);
+    assert.equal(app.session().view?.canPlay, true);
+  } finally { app.close(); }
+});
