@@ -22,7 +22,7 @@ pub(super) fn boolean_choice_labels(
     origin: &EventOrigin,
 ) -> (&'static str, &'static str) {
     match origin.name(game).as_str() {
-        "Guillotine" => ("Choose a new leader", "Gain 2 victory points"),
+        "Revolution: “Et tu, Brute?”" => ("Choose a new leader", "Gain 2 victory points"),
         "Metallurgy" => ("Convert 1 ore to 1 gold", "Keep the ore"),
         "Great Athlete" => ("Culture → mood tokens", "Mood → culture tokens"),
         "Retreat" => ("Retreat", "Continue battle"),
@@ -47,8 +47,8 @@ pub(super) fn boolean_choice_consequences(
     origin: &EventOrigin,
 ) -> Option<(&'static str, &'static str)> {
     Some(match origin.name(game).as_str() {
-        "Guillotine" => (
-            "Place one remaining leader. All other unused leaders become unavailable for the rest of the game.",
+        "Revolution: “Et tu, Brute?”" => (
+            "Place one remaining leader in one of your cities or armies. Other unused leaders remain available.",
             "All remaining leaders become unavailable. You cannot recruit leaders for the rest of the game.",
         ),
         "Great Athlete" => (

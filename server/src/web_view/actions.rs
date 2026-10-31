@@ -30,8 +30,8 @@ pub(super) fn leader_unavailable_reason(
     if p.recruited_leaders.contains(&leader) {
         return Some("Killed or replaced · Cannot recruit again".into());
     }
-    // Guillotine removes the remaining unplayed leaders from the supply.
-    (!p.available_leaders.contains(&leader)).then(|| "Unavailable after Guillotine".into())
+    // Taking Revolution’s victory points removes the remaining unplayed leaders.
+    (!p.available_leaders.contains(&leader)).then(|| "Unavailable after Revolution".into())
 }
 
 fn recruit_cost_options(game: &Game, cost: &crate::player_events::CostInfo) -> Vec<String> {

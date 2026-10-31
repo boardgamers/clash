@@ -139,11 +139,12 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
 fn guillotine() -> Incident {
     Incident::builder(
         43,
-        "Guillotine",
+        "Revolution: “Et tu, Brute?”",
         "Kill your leader if you have one. \
-        Then, choose one of the following: Choose a new leader in one of your cities or armies. \
-        Alternatively, Gain 2 victory points. \
-        You cannot play leaders for the remainder of the game.",
+        If you have no leaders left, this card has no further effect. \
+        Otherwise, choose a new leader in one of your cities or armies. \
+        Alternatively, gain 2 victory points, but you cannot play leaders \
+        for the remainder of the game.",
         IncidentBaseEffect::BarbariansSpawn,
     )
     .add_bool_request(
@@ -165,6 +166,7 @@ fn guillotine() -> Incident {
                 );
                 game.player_mut(s.player_index)
                     .gain_event_victory_points(2_f32, &s.origin);
+                game.player_mut(s.player_index).available_leaders.clear();
             }
         },
     )
@@ -208,19 +210,6 @@ fn guillotine() -> Incident {
             gain_unit(game, &s.player(), pos, s.choice);
         },
     )
-    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _i| {
-        let available_leaders = &p.get(game).available_leaders;
-        if !available_leaders.is_empty() {
-            p.log(
-                game,
-                &format!(
-                    "Lose leaders due to the Guillotine: {}",
-                    available_leaders.iter().map(|l| l.name(game)).join(", ")
-                ),
-            );
-            p.get_mut(game).available_leaders = vec![];
-        }
-    })
     .build()
 }
 
@@ -228,14 +217,18 @@ fn should_choose_new_leader(game: &mut Game, player: &EventPlayer) -> Option<Str
     kill_leader(game, player);
 
     let p = player.get(game);
-    if p.available_leaders.is_empty() || new_leader_positions(p).is_empty() {
+    if p.available_leaders.is_empty() {
+        return None;
+    }
+    if new_leader_positions(p).is_empty() {
         player.log(
             game,
-            "Has no leaders left to choose from after the Guillotine - gained 2 victory points",
+            "Has no place for a new leader after Revolution - gained 2 victory points",
         );
         player
             .get_mut(game)
             .gain_event_victory_points(2_f32, &player.origin);
+        player.get_mut(game).available_leaders.clear();
         None
     } else {
         Some("Do you want to choose a new leader instead of 2 victory points?".to_string())

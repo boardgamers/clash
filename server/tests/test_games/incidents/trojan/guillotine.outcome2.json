@@ -63,6 +63,9 @@
         }
       ],
       "civilization": "Rome",
+      "available_leaders": [
+        "Sulla"
+      ],
       "recruited_leaders": [
         "Augustus"
       ],
@@ -291,7 +294,7 @@
                     },
                     {
                       "player": 0,
-                      "Text": "triggers the event Guillotine",
+                      "Text": "triggers the event Revolution: “Et tu, Brute?”",
                       "origin": {
                         "Advance": "Storage"
                       }
@@ -376,13 +379,6 @@
                         "balance": "Gain",
                         "position": "A1"
                       },
-                      "origin": {
-                        "Incident": 43
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Text": "Lose leaders due to the Guillotine: Sulla",
                       "origin": {
                         "Incident": 43
                       }

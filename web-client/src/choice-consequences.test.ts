@@ -23,14 +23,14 @@ function guillotine() {
   return move(game, { Playing: { Advance: { advance: 'Storage', payment: { gold: 2 } } } });
 }
 
-test('Guillotine explains the permanent leader loss before either response', () => {
+test('Revolution explains that only the victory point choice prevents future leaders', () => {
   const decision = view(guillotine()).choiceDecision;
   assert.equal(decision.binary, true);
   assert.deepEqual(
     decision.choices.map((c: any) => c.name),
     ['Choose a new leader', 'Gain 2 victory points'],
   );
-  assert.match(decision.choices[0].description, /All other unused leaders become unavailable/);
+  assert.match(decision.choices[0].description, /Other unused leaders remain available/);
   assert.match(decision.choices[1].description, /cannot recruit leaders for the rest of the game/);
   assert.deepEqual(
     decision.choices.map((c: any) => c.action),
@@ -39,25 +39,43 @@ test('Guillotine explains the permanent leader loss before either response', () 
 });
 
 for (const takeLeader of [false, true]) {
-  test(`Guillotine's ${takeLeader ? 'new leader' : 'victory points'} choice retains every leader with the correct reason`, () => {
+  test(`Revolution's ${takeLeader ? 'new leader' : 'victory points'} choice retains every leader with the correct reason`, () => {
     let game = guillotine();
     const choice = view(game).choiceDecision.choices[takeLeader ? 0 : 1];
     game = move(game, choice.action);
     if (takeLeader) game = move(game, { Response: { SelectUnitType: { Leader: 'Augustus' } } });
-    assert.deepEqual(game.players[0].available_leaders ?? [], []);
+    assert.deepEqual(game.players[0].available_leaders ?? [], takeLeader ? ['Sulla'] : []);
     const reasons = Object.fromEntries(view(game).cityActions[0].leaders.map((l: any) => [l.id, l.reason]));
     assert.deepEqual(reasons, {
-      Augustus: takeLeader ? 'Already on board at A1' : 'Unavailable after Guillotine',
+      Augustus: takeLeader ? 'Already on board at A1' : 'Unavailable after Revolution',
       Caesar: 'Killed or replaced · Cannot recruit again',
-      Sulla: 'Unavailable after Guillotine',
+      Sulla: takeLeader ? null : 'Unavailable after Revolution',
     });
     // Permanent availability is also visible when inspecting another civilization.
     const publicLeaders = view(game, 1).players[0].civilizationLeaders;
     assert.deepEqual(Object.fromEntries(publicLeaders.map((l: any) => [l.id, l.reason])), reasons);
     const selected = game.players[0].units.find((u: any) => u.unit_type?.Leader === 'Augustus');
     assert.equal(!!selected, takeLeader);
+    if (takeLeader) {
+      // Reproduce the report after the replacement leader is lost and the game reloads.
+      game.players[0].units = game.players[0].units.filter((u: any) => u !== selected);
+      const reloaded = JSON.parse(JSON.stringify(game));
+      const remaining = view(reloaded).cityActions[0].leaders.find((l: any) => l.id === 'Sulla');
+      assert.equal(remaining.reason, null);
+    }
   });
 }
+
+
+test('Revolution has no further effect when no unused leaders remain', () => {
+  const game = fixture('incidents/trojan/guillotine');
+  game.players[0].available_leaders = [];
+  const beforePoints = game.players[0].special_victory_points ?? [];
+  const after = move(game, { Playing: { Advance: { advance: 'Storage', payment: { gold: 2 } } } });
+  assert.deepEqual(after.players[0].special_victory_points ?? [], beforePoints);
+  assert(!after.players[0].units.some((u: any) => u.unit_type?.Leader));
+  assert(!(after.events ?? []).some((e: any) => e.event_type.Incident?.incident_id === 43));
+});
 
 test('recruitment distinguishes a leader on the board, a previously used leader and an unused leader', () => {
   const game = fixture('incidents/trojan/guillotine');

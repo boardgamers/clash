@@ -623,3 +623,11 @@ Population Boom or Migration. The existing Wait for choice control remains
 available. Preserve queued actions and the Wait preference as the unresolved
 Great Person offer passes between players. Verified 10 engine queue tests and
 3 browser-controller tests covering queueing, Undo, Wait and resumed execution.
+
+## Viewer 0.1.181 / engine 0.4.123
+
+Correct Revolution: “Et tu, Brute?” (formerly Guillotine). Choosing a replacement
+leader preserves other unused leaders; only taking 2 VP prevents future leaders.
+With no unused leaders remaining, the event grants no VP. Update the card name
+and choice explanations. Verified the incident regression and eight bridge tests,
+including recruitment availability after replacement death and reload.
