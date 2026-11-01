@@ -33,6 +33,7 @@
   const session = $derived(controller.session);
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
+  const tribalStopChoice = $derived(decision.name === 'Tribal Allies' && decision.description === 'Select armies to stop · 1 food total');
   const razeChoice = $derived(decision.name === 'Raze city');
   const firstPlayerChoice = $derived(decision.name === 'Determine First Player');
   const mapChoice = $derived(mapDecisionOptions(decision).length > 0);
@@ -504,7 +505,7 @@
           title={preview.error || 'Confirm selection'}
           onclick={() => preview.action && controller.submit(preview.action)}
         >
-          {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : 'Confirm'}<Check
+          {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : tribalStopChoice ? 'Continue' : 'Confirm'}{#if tribalStopChoice && selected.length}<ResourceAmount pile={{ food: 1 }} compact />{/if}<Check
             size={16}
           />
         </button>

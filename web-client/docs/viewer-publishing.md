@@ -631,3 +631,11 @@ leader preserves other unused leaders; only taking 2 VP prevents future leaders.
 With no unused leaders remaining, the event grants no VP. Update the card name
 and choice explanations. Verified the incident regression and eight bridge tests,
 including recruitment availability after replacement death and reload.
+
+## Viewer 0.1.182 / engine 0.4.124
+
+Tribal Allies selects barbarian armies on the map before offering payment.
+The selection shows the total one-food cost; skipping or declining payment costs
+nothing. Food and gold substitution remain supported. Previously pending payments
+continue into an army selection. Includes a restartable local preview and six
+regressions covering selection, payment, cancellation, and old pending payments.

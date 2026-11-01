@@ -1,0 +1,712 @@
+{
+  "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "StatusPhase": "FreeAdvance"
+      },
+      "player": 0,
+      "last_priority_used": 0
+    },
+    {
+      "event_type": {
+        "Incident": {
+          "incident_id": 28,
+          "cause": {
+            "Advance": "Storage"
+          },
+          "active_player": 0,
+          "barbarians": {
+            "move_units": true
+          }
+        }
+      },
+      "player": 0,
+      "last_priority_used": 199
+    },
+    {
+      "event_type": {
+        "StopBarbarianMovement": [
+          "A3",
+          "B3"
+        ]
+      },
+      "player": 0,
+      "last_priority_used": 6,
+      "handler": {
+        "priority": 6,
+        "request": {
+          "SelectPositions": {
+            "choices": [
+              "A3",
+              "B3"
+            ],
+            "needed": {
+              "start": 0,
+              "end": 2
+            },
+            "description": "Select armies to stop · 1 food total"
+          }
+        },
+        "origin": {
+          "SpecialAdvance": "TribalAllies"
+        }
+      }
+    }
+  ],
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 1,
+        "wood": 6,
+        "ore": 6,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 8,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Happy",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "Celts",
+      "advances": [
+        "Draft",
+        "Farming",
+        "Mining",
+        "Storage",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
+      "civilization": "Carthage",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Neutral",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 4
+        }
+      ],
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 5
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "log": [
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              },
+              "actions": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Storage"
+                    }
+                  },
+                  "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "incident_token": {
+                          "Take": 0
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Free Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "triggers the event Population Boom",
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "Base effect: Barbarians move",
+                      "origin": {
+                        "Incident": 28
+                      }
+                    }
+                  ],
+                  "active_events": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "board_history": {
+    "id": "9e86bec6ee4c0d9c03010087d8e68152087f3a9a657884a24c13cfb57b1baa33",
+    "frames": [
+      {
+        "cursor": 0,
+        "actor": null,
+        "ended_turn": false,
+        "title": "Earlier position",
+        "age": 1,
+        "round": 1,
+        "tiles": [
+          [
+            "A1",
+            "Fertile"
+          ],
+          [
+            "A2",
+            "Water"
+          ],
+          [
+            "A3",
+            "Mountain"
+          ],
+          [
+            "B1",
+            "Mountain"
+          ],
+          [
+            "B2",
+            "Forest"
+          ],
+          [
+            "B3",
+            "Fertile"
+          ],
+          [
+            "C1",
+            "Barren"
+          ],
+          [
+            "C2",
+            "Forest"
+          ],
+          [
+            "C3",
+            "Water"
+          ],
+          [
+            "D2",
+            "Water"
+          ]
+        ],
+        "players": [
+          {
+            "id": 0,
+            "civilization": "Celts",
+            "cities": [
+              {
+                "mood_state": "Happy",
+                "position": "A1"
+              },
+              {
+                "city_pieces": {
+                  "fortress": 1
+                },
+                "mood_state": "Angry",
+                "position": "C2"
+              }
+            ],
+            "units": [
+              {
+                "position": "C2",
+                "unit_type": "Infantry",
+                "id": 0
+              },
+              {
+                "position": "C2",
+                "unit_type": "Cavalry",
+                "id": 1
+              },
+              {
+                "position": "C2",
+                "unit_type": "Infantry",
+                "id": 2
+              },
+              {
+                "position": "C2",
+                "unit_type": "Elephant",
+                "id": 3
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 4
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 5
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 6
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 7
+              }
+            ]
+          },
+          {
+            "id": 1,
+            "civilization": "Carthage",
+            "cities": [
+              {
+                "mood_state": "Angry",
+                "position": "C1"
+              }
+            ],
+            "units": [
+              {
+                "position": "C1",
+                "unit_type": "Infantry",
+                "id": 1
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "civilization": "Barbarians",
+            "cities": [
+              {
+                "mood_state": "Neutral",
+                "position": "B3"
+              }
+            ],
+            "units": [
+              {
+                "position": "B3",
+                "unit_type": "Infantry",
+                "id": 0
+              },
+              {
+                "position": "A3",
+                "unit_type": "Elephant",
+                "id": 1
+              },
+              {
+                "position": "B3",
+                "unit_type": "Infantry",
+                "id": 2
+              },
+              {
+                "position": "A3",
+                "unit_type": "Infantry",
+                "id": 4
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "civilization": "Pirates",
+            "cities": [],
+            "units": []
+          }
+        ]
+      },
+      {
+        "cursor": 1,
+        "actor": 0,
+        "ended_turn": false,
+        "title": "Free Advance",
+        "age": 1,
+        "round": 1,
+        "tiles": [
+          [
+            "A1",
+            "Fertile"
+          ],
+          [
+            "A2",
+            "Water"
+          ],
+          [
+            "A3",
+            "Mountain"
+          ],
+          [
+            "B1",
+            "Mountain"
+          ],
+          [
+            "B2",
+            "Forest"
+          ],
+          [
+            "B3",
+            "Fertile"
+          ],
+          [
+            "C1",
+            "Barren"
+          ],
+          [
+            "C2",
+            "Forest"
+          ],
+          [
+            "C3",
+            "Water"
+          ],
+          [
+            "D2",
+            "Water"
+          ]
+        ],
+        "players": [
+          {
+            "id": 0,
+            "civilization": "Celts",
+            "cities": [
+              {
+                "mood_state": "Happy",
+                "position": "A1"
+              },
+              {
+                "city_pieces": {
+                  "fortress": 1
+                },
+                "mood_state": "Angry",
+                "position": "C2"
+              }
+            ],
+            "units": [
+              {
+                "position": "C2",
+                "unit_type": "Infantry",
+                "id": 0
+              },
+              {
+                "position": "C2",
+                "unit_type": "Cavalry",
+                "id": 1
+              },
+              {
+                "position": "C2",
+                "unit_type": "Infantry",
+                "id": 2
+              },
+              {
+                "position": "C2",
+                "unit_type": "Elephant",
+                "id": 3
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 4
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 5
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 6
+              },
+              {
+                "position": "C2",
+                "unit_type": "Settler",
+                "id": 7
+              }
+            ]
+          },
+          {
+            "id": 1,
+            "civilization": "Carthage",
+            "cities": [
+              {
+                "mood_state": "Angry",
+                "position": "C1"
+              }
+            ],
+            "units": [
+              {
+                "position": "C1",
+                "unit_type": "Infantry",
+                "id": 1
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "civilization": "Barbarians",
+            "cities": [
+              {
+                "mood_state": "Neutral",
+                "position": "B3"
+              }
+            ],
+            "units": [
+              {
+                "position": "B3",
+                "unit_type": "Infantry",
+                "id": 0
+              },
+              {
+                "position": "A3",
+                "unit_type": "Elephant",
+                "id": 1
+              },
+              {
+                "position": "B3",
+                "unit_type": "Infantry",
+                "id": 2
+              },
+              {
+                "position": "A3",
+                "unit_type": "Infantry",
+                "id": 4
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "civilization": "Pirates",
+            "cities": [],
+            "units": []
+          }
+        ]
+      }
+    ]
+  },
+  "log_index": 1,
+  "undo_limit": 1,
+  "actions_left": 3,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10
+  ],
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "incidents_discarded": [
+    28
+  ]
+}

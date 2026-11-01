@@ -6,20 +6,21 @@
   import { mountLocalization } from './localization';
   import settlerFixture from '../scripts/async-preview-fixture.json';
   import tradeFixture from '../scripts/tech-queue-fixture.json';
+  import tribalFixture from '../scripts/tribal-preview-fixture.json';
   import './style.css';
-  let scenario=$state<'settler'|'trade'>('trade');
+  let scenario=$state<'settler'|'trade'|'tribal'>(new URLSearchParams(location.search).get('scenario') === 'tribal' ? 'tribal' : 'trade');
   let seat=$state(0), ready=$state(false), error=$state('');
   let engine: Awaited<ReturnType<typeof loadTutorialEngine>>;
   let game:any;
   let controller=$state<Controller>();
-  let names=$derived((scenario==='settler'?settlerFixture:tradeFixture).players.slice(0,2).map(p=>p.civilization));
+  let names=$derived((scenario==='tribal'?tribalFixture:scenario==='settler'?settlerFixture:tradeFixture).players.slice(0,2).map(p=>p.civilization));
   async function refresh(){controller!.setPlayer(seat);await controller!.load(engine.stripSecret(JSON.stringify(game),seat));}
   async function move(raw:string){
     try{game=JSON.parse(engine.tryMove(JSON.stringify(game),raw,seat));error='';await refresh();}
     catch(e){error=String(e);controller!.moveResult({ok:false,error});}
   }
   async function restart(next=scenario){
-    scenario=next;game=structuredClone(next==='settler'?settlerFixture:tradeFixture);
+    scenario=next;game=structuredClone(next==='tribal'?tribalFixture:next==='settler'?settlerFixture:tradeFixture);
     game.board_history??={id:'async-queue-preview',frames:[]};
     for(const c of game.players[0].cities){c.activations=0;c.mood_state='Happy';}
     game.players[0].resources.food=1;seat=0;error='';await refresh();ready=true;
@@ -38,8 +39,8 @@
 </script>
 
 <div class="prototype-tools">
-  <span>Local test · Live queue implementation</span>
-  <div><button class:chosen={scenario==='settler'} onclick={()=>restart('settler')}>Replacement settler</button><button class:chosen={scenario==='trade'} onclick={()=>restart('trade')}>Technology Trade</button></div>
+  <span>Local test</span>
+  <div><button class:chosen={scenario==='tribal'} onclick={()=>restart('tribal')}>Tribal Allies</button><button class:chosen={scenario==='settler'} onclick={()=>restart('settler')}>Replacement settler</button><button class:chosen={scenario==='trade'} onclick={()=>restart('trade')}>Technology Trade</button></div>
   <div><button class:chosen={seat===0} onclick={()=>switchSeat(0)}>Play as {names[0]}</button><button class:chosen={seat===1} onclick={()=>switchSeat(1)}>Play as {names[1]}</button><button onclick={()=>restart()}>Restart</button></div>
 </div>
 {#if error}<div class="prototype-error">{error}<button onclick={()=>error=''}>×</button></div>{/if}

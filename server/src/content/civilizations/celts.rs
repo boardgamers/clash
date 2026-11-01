@@ -31,11 +31,68 @@ pub(crate) fn celts() -> Civilization {
             .add_combat_strength_listener(115,|game,c,s,r|{if game.player(c.opponent(c.player(r))).is_human()&&c.is_land_battle(game){let bonus=get_barbarians_player(game).cities.iter().filter(|city|game.map.within_revealed_distance(city.position,c.defender_position(),2)).count().min(4) as i8;s.extra_combat_value+=bonus;if bonus>0{s.roll_log.push(format!("Tribal Warfare adds +{bonus} combat value"));}}}).build(),
         SpecialAdvanceInfo::builder(SpecialAdvance::TribalAllies,SpecialAdvanceRequirement::Advance(Advance::Draft),"Tribal Allies","Once per turn, as an action, spawn Barbarians as for an event's Barbarian spawn icon. When you trigger Barbarian movement, pay 1 food to stop any number of those armies.")
             .add_custom_action(CustomActionType::TribalAllies,|c|c.once_per_turn().action().no_resources(),spawn,|game,p|!possible_barbarians_spawns(game,p).is_empty()||!possible_barbarians_reinforcements(game).is_empty())
-            .add_payment_request_listener(|e|&mut e.stop_barbarian_movement,5,|game,p,m|{
-                let own=game.events.iter().any(|e|matches!(&e.event_type,crate::content::persistent_events::PersistentEventType::Incident(i) if i.active_player==p.index));
-                (own&&!m.is_empty()).then(||vec![PaymentRequest::optional(p.payment_options().resources(p.get(game),ResourcePile::food(1)),"Tribal Allies · Stop Barbarian armies")])
-            },|game,s,_|{if !s.choice[0].is_empty(){s.player().get_mut(game).event_info.insert("Tribal Allies stop".into(),"paid".into());}})
-            .add_position_request(|e|&mut e.stop_barbarian_movement,4,|game,p,m|p.get_mut(game).event_info.remove("Tribal Allies stop").map(|_|PositionRequest::new(m.clone(),0..=m.len() as u8,"Tribal Allies · Select armies that will not move")),|game,s,m|{m.retain(|pos|!s.choice.contains(pos));s.log(game,&format!("Stopped {} Barbarian armies",s.choice.len()));}).build(),
+            .add_position_request(
+                |e| &mut e.stop_barbarian_movement,
+                6,
+                |game, p, movable| {
+                    let own = game.events.iter().any(|e| matches!(
+                        &e.event_type,
+                        crate::content::persistent_events::PersistentEventType::Incident(i)
+                            if i.active_player == p.index
+                    ));
+                    let cost = p.payment_options().resources(p.get(game), ResourcePile::food(1));
+                    (own && !movable.is_empty() && p.get(game).can_afford(&cost)).then(|| {
+                        PositionRequest::new(movable.clone(), 0..=movable.len() as u8,
+                            "Select armies to stop · 1 food total")
+                    })
+                },
+                |game, s, _| {
+                    if !s.choice.is_empty() {
+                        s.player().get_mut(game).event_info.insert(
+                            "Tribal Allies armies".into(),
+                            serde_json::to_string(&s.choice).expect("positions serialize"),
+                        );
+                    }
+                },
+            )
+            .add_payment_request_listener(
+                |e| &mut e.stop_barbarian_movement,
+                5,
+                |game, p, _| {
+                    p.get(game).event_info.contains_key("Tribal Allies armies").then(|| vec![
+                        PaymentRequest::optional(
+                            p.payment_options().resources(p.get(game), ResourcePile::food(1)),
+                            "Stop selected armies",
+                        )
+                    ])
+                },
+                |game, s, movable| {
+                    let armies = s.player().get_mut(game).event_info.remove("Tribal Allies armies");
+                    if s.choice[0].is_empty() {
+                        return;
+                    }
+                    if let Some(armies) = armies {
+                        let armies: Vec<Position> = serde_json::from_str(&armies).expect("saved positions");
+                        movable.retain(|pos| !armies.contains(pos));
+                        s.log(game, &format!("Stopped {} Barbarian armies", armies.len()));
+                    } else {
+                        // Finish a payment already pending in saves from the previous flow.
+                        s.player().get_mut(game).event_info.insert("Tribal Allies stop".into(), "paid".into());
+                    }
+                },
+            )
+            .add_position_request(
+                |e| &mut e.stop_barbarian_movement,
+                4,
+                |game, p, movable| p.get_mut(game).event_info.remove("Tribal Allies stop").map(|_| {
+                    PositionRequest::new(movable.clone(), 1..=movable.len() as u8,
+                        "Select armies to stop")
+                }),
+                |game, s, movable| {
+                    movable.retain(|pos| !s.choice.contains(pos));
+                    s.log(game, &format!("Stopped {} Barbarian armies", s.choice.len()));
+                },
+            ).build(),
         SpecialAdvanceInfo::builder(SpecialAdvance::DruidicInfluence,SpecialAdvanceRequirement::Advance(Advance::Priesthood),"Druidic Influence","Influence a Barbarian settlement to place your culture marker there, worth 1 objective point. It remains Barbarian. Each settlement holds at most one marker; capturing or converting it removes the marker.")
             .add_transient_event_listener(|e|&mut e.dynamic_victory_points,6,|points,game,(),p|{let count=get_barbarians_player(game).cities.iter().filter(|c|c.influence_marker==Some(p.index)).count();points.push(SpecialVictoryPoints::new(count as f32,p.origin.clone(),VictoryPointAttribution::Objectives));}).build(),
         SpecialAdvanceInfo::builder(SpecialAdvance::TribalTrade,SpecialAdvanceRequirement::Advance(Advance::TradeRoutes),"Tribal Trade","Your units may trade with non-Angry Barbarian cities. Each such route gives food, including when you have Currency.").build(),
