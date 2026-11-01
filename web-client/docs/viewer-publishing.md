@@ -646,3 +646,12 @@ Disable End turn and remove its ready highlight once End turn is queued while
 waiting for another player's choice. Close any end-turn confirmation in that
 state. Undo remains available to remove the queued End turn and enable it again.
 No engine update required.
+
+## Viewer 0.1.184
+
+Highlight Autocracy abilities granted by Man God in the research tree with an
+“Ability active · Man God” badge. Explain that these abilities are not researched
+advances and grant no extra advance or victory points. Preserve research locks,
+ownership and availability. Includes dark-mode styling, all supported translations,
+and regression coverage for partial grants, removed grants and Great Library loans.
+No engine update required.

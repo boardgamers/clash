@@ -204,7 +204,29 @@
   border: 2px solid var(--gold);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 22%, transparent);
 }
-.research-node.choice-unavailable:not(.selected) {
+.research-node.ability-granted {
+  border: 2px solid #648eaa;
+  background: #e7f0f5;
+}
+.government-locked .ability-granted .research-pick {
+  opacity: 1;
+}
+.research-granted-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 5px 0;
+  color: #315f7c;
+  font-size: 12px;
+  font-weight: 700;
+}
+.dark .research-node.ability-granted {
+  background: #293e4c;
+}
+.dark .research-granted-badge {
+  color: #aed6ef;
+}
+.research-node.choice-unavailable:not(.selected):not(.ability-granted) {
   opacity: 0.55;
 }
 .research-node.selected {

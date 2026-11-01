@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { researchReferences, researchTextParts, researchOwners } from './research-links.ts';
+import { manGodAbility, researchReferences, researchTextParts, researchOwners } from './research-links.ts';
 import type { View } from './types.ts';
 
 const advances = ['Irrigation', 'Education', 'Public Education', 'Mining'].map((name) => ({
@@ -76,4 +76,15 @@ test('research ownership badges use public permanent advances and exclude the vi
     [0, 1],
   );
   assert.deepEqual(researchOwners(view, 'Mining', 0), []);
+});
+
+test('Man God indicator distinguishes granted abilities from research and Great Library loans', () => {
+  const advance = { id: 'Nationalism', owned: false };
+  const abilities = [{ ...advances[0], id: 'Nationalism', borrowed: true, borrowedSource: 'Man God', description: '', group: 'Autocracy', order: 0 }];
+  assert.equal(manGodAbility(advance, abilities), true);
+  assert.equal(manGodAbility({ ...advance, owned: true }, abilities), false);
+  assert.equal(manGodAbility(advance), false);
+  assert.equal(manGodAbility({ id: 'Totalitarianism', owned: false }, abilities), false);
+  assert.equal(manGodAbility(advance, [{ ...abilities[0], borrowedSource: 'Great Library' }]), false);
+  assert.equal(manGodAbility(advance, [{ ...abilities[0], borrowed: false }]), false);
 });

@@ -42,7 +42,7 @@
     type View,
   } from './types';
   import { buildingInfo } from './city';
-  import { researchOwners, researchFreeHints, aqueductResearch, researchCardHints, type ResearchReference } from './research-links';
+  import { manGodAbility, researchOwners, researchFreeHints, aqueductResearch, researchCardHints, type ResearchReference } from './research-links';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   import { researchDecision } from './decision-controls';
@@ -359,11 +359,13 @@
             (a) => a.id === advance.required,
           )}
           {@const warnsEvent = !reference && !!advance.action && !!advance.triggersEvent}
+          {@const granted = manGodAbility(advance, player?.advances)}
           <article
             id={`research-${advance.id}`}
             class="research-node"
             class:child={statusFilter === 'all' && index > 0}
             class:owned={advance.owned}
+            class:ability-granted={granted}
             class:available={researchAvailable(advance)}
             class:choice-available={!!choice && !!advance.action}
             class:choice-unavailable={!!choice && !advance.action && !advance.owned}
@@ -374,7 +376,7 @@
               class="research-pick"
               aria-label={`${advance.name}: ${presentation.summary}`}
               aria-pressed={selected?.id === advance.id}
-              aria-describedby={warnsEvent ? `research-${advance.id}-event` : undefined}
+              aria-describedby={[warnsEvent ? `research-${advance.id}-event` : '', granted ? `research-${advance.id}-granted` : ''].filter(Boolean).join(' ') || undefined}
               title={advance.description}
               onclick={() => selectAdvance(advance.id)}
             >
@@ -392,6 +394,9 @@
                         : actionReason(advance.reason)}
                   />{/if}</span
               >
+              {#if granted}<span class="research-granted-badge" id={`research-${advance.id}-granted`}
+                title="Ability only: not researched, no extra advance or victory points."
+                ><Link size={13} aria-hidden="true" />Ability active · Man God</span>{/if}
               <span class="research-summary"><ResourceText text={presentation.summary} /></span>
               {#if researchOwners(view, advance.id, player?.index).length}
                 <span class="research-other-owners" aria-label="Other civilizations with this advance">
@@ -535,6 +540,10 @@
             ? 'Ships sail through connected sea tiles. Navigation adds a clockwise or counterclockwise shortcut around the edge to the next sea area. Unexplored regions must be explored before sailing farther.'
             : selected.description}
         </p>
+        {#if manGodAbility(selected, player?.advances)}<p class="research-granted-explanation">
+          <strong>Ability active · Man God</strong><br />
+          Ability only: not researched, no extra advance or victory points.
+        </p>{/if}
         {#if selected.unlocks && buildingInfo[selected.unlocks]}<p>
             <strong>{selected.unlocks}:</strong>
             {buildingInfo[selected.unlocks].effect}

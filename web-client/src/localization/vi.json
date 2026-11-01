@@ -4771,5 +4771,7 @@
   "Queue stopped · {p0} remaining": "Hàng đợi dừng · còn {p0}",
   "{p0} · Choosing an advance": "{p0} · Đang chọn tiến bộ",
   "{p0} · Placing a settler": "{p0} · Đang đặt người định cư",
-  "{p0} queued · End turn queued": "{p0} đang chờ · Kết thúc lượt đang chờ"
+  "{p0} queued · End turn queued": "{p0} đang chờ · Kết thúc lượt đang chờ",
+  "Ability active · Man God": "Năng lực đang có hiệu lực · Thần nhân",
+  "Ability only: not researched, no extra advance or victory points.": "Chỉ có năng lực: chưa nghiên cứu, không thêm tiến bộ hay điểm chiến thắng."
 }

@@ -1,4 +1,11 @@
-import type { AdvanceView, View } from './types.ts';
+import type { AdvanceView, PublicAdvance, View } from './types.ts';
+
+/** Ability access is not ownership and must never affect research eligibility. */
+export function manGodAbility(advance: Pick<AdvanceView, 'id' | 'owned'>, abilities: PublicAdvance[] = []): boolean {
+  return !advance.owned && abilities.some(
+    (a) => a.id === advance.id && a.borrowed && a.borrowedSource === 'Man God',
+  );
+}
 
 export interface ResearchReference {
   id: string;

@@ -4771,5 +4771,7 @@
   "Queue stopped · {p0} remaining": "Fila interrompida · {p0} restantes",
   "{p0} · Choosing an advance": "{p0} · Escolhendo um avanço",
   "{p0} · Placing a settler": "{p0} · Posicionando um colono",
-  "{p0} queued · End turn queued": "{p0} na fila · Fim do turno na fila"
+  "{p0} queued · End turn queued": "{p0} na fila · Fim do turno na fila",
+  "Ability active · Man God": "Habilidade ativa · Homem-Deus",
+  "Ability only: not researched, no extra advance or victory points.": "Apenas a habilidade: não pesquisado, sem avanço ou pontos de vitória extras."
 }

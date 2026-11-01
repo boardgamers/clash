@@ -4771,5 +4771,7 @@
   "Queue stopped · {p0} remaining": "Plan angehalten · {p0} übrig",
   "{p0} · Choosing an advance": "{p0} · Wählt einen Fortschritt",
   "{p0} · Placing a settler": "{p0} · Platziert einen Siedler",
-  "{p0} queued · End turn queued": "{p0} vorgemerkt · Zugende vorgemerkt"
+  "{p0} queued · End turn queued": "{p0} vorgemerkt · Zugende vorgemerkt",
+  "Ability active · Man God": "Fähigkeit aktiv · Menschengott",
+  "Ability only: not researched, no extra advance or victory points.": "Nur die Fähigkeit: nicht erforscht, kein zusätzlicher Fortschritt und keine Siegpunkte."
 }

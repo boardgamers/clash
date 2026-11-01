@@ -4771,5 +4771,7 @@
   "Queue stopped · {p0} remaining": "कतार रुकी · {p0} शेष",
   "{p0} · Choosing an advance": "{p0} · उन्नति चुन रहा है",
   "{p0} · Placing a settler": "{p0} · बसने वाला रख रहा है",
-  "{p0} queued · End turn queued": "कतार में {p0} · बारी समाप्ति कतार में"
+  "{p0} queued · End turn queued": "कतार में {p0} · बारी समाप्ति कतार में",
+  "Ability active · Man God": "क्षमता सक्रिय · मानव देवता",
+  "Ability only: not researched, no extra advance or victory points.": "केवल क्षमता: शोध नहीं किया गया, कोई अतिरिक्त उन्नति या विजय अंक नहीं।"
 }

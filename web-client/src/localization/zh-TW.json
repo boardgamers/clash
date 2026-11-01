@@ -4771,5 +4771,7 @@
   "Queue stopped · {p0} remaining": "佇列已停止 · 剩餘 {p0} 項",
   "{p0} · Choosing an advance": "{p0} · 正在選擇進步",
   "{p0} · Placing a settler": "{p0} · 正在放置移民",
-  "{p0} queued · End turn queued": "{p0} 項待執行 · 結束回合待執行"
+  "{p0} queued · End turn queued": "{p0} 項待執行 · 結束回合待執行",
+  "Ability active · Man God": "能力生效 · 人神",
+  "Ability only: not researched, no extra advance or victory points.": "僅獲得能力：未研究，不增加進步或勝利點數。"
 }

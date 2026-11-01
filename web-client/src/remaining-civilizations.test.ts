@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { frameDetails } from './playback.ts';
 import { journal } from './journal.ts';
+import { manGodAbility } from './research-links.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const serialize = (g: any) => (typeof g === 'string' ? g : JSON.stringify(g));
 const seat = (g: any) => engine.currentPlayer(serialize(g));
@@ -97,6 +98,35 @@ test('Man God grants abilities without adding government advances', async () => 
   const after = move(g, { Playing: 'EndTurn' });
   assert.ok(!after.players[seat(g)].advances.includes('AbsolutePower'));
 });
+test('research marks only currently granted Man God abilities, without ownership or actions', async () => {
+  const g = await setup('Egypt');
+  const index = seat(g), p = g.players[index];
+  addAdvance(p, 'Myths', 'Priesthood');
+  const pairs = [
+    ['Dogma', 'Nationalism'], ['Devotion', 'Totalitarianism'],
+    ['Conversion', 'AbsolutePower'], ['Fanaticism', 'ForcedLabor'],
+  ];
+  const marked = () => {
+    const v = view(g);
+    const abilities = v.players.find((player: any) => player.index === index).advances;
+    return v.advances.filter((a: any) => manGodAbility(a, abilities)).map((a: any) => a.id).sort();
+  };
+  assert.deepEqual(marked(), []);
+  for (const [source, granted] of pairs) {
+    addAdvance(p, source);
+    const v = view(g), advance = v.advances.find((a: any) => a.id === granted);
+    assert.ok(marked().includes(granted));
+    assert.equal(advance.owned, false);
+    assert.equal(advance.action, null);
+    assert.ok(!p.advances.includes(granted));
+  }
+  assert.deepEqual(marked(), pairs.map(([, id]) => id).sort());
+  p.advances = p.advances.filter((id: string) => id !== 'Conversion');
+  assert.deepEqual(marked(), ['ForcedLabor', 'Nationalism', 'Totalitarianism']);
+  p.advances = p.advances.filter((id: string) => !pairs.some(([source]) => source === id));
+  assert.deepEqual(marked(), []);
+});
+
 test('Beloved charges once and records protected city tokens', async () => {
   const g = await setup('Egypt', 'Cleopatra'),
     index = seat(g),

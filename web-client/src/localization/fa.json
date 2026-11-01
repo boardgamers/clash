@@ -4771,5 +4771,7 @@
   "Queue stopped · {p0} remaining": "صف متوقف شد · {p0} باقی‌مانده",
   "{p0} · Choosing an advance": "{p0} · در حال انتخاب پیشرفت",
   "{p0} · Placing a settler": "{p0} · در حال قرار دادن مهاجر",
-  "{p0} queued · End turn queued": "{p0} در صف · پایان نوبت در صف"
+  "{p0} queued · End turn queued": "{p0} در صف · پایان نوبت در صف",
+  "Ability active · Man God": "توانایی فعال · انسان‌خدا",
+  "Ability only: not researched, no extra advance or victory points.": "فقط توانایی: پژوهش نشده، بدون پیشرفت یا امتیاز پیروزی اضافی."
 }

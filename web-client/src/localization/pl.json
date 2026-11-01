@@ -4771,5 +4771,7 @@
   "Queue stopped · {p0} remaining": "Kolejka zatrzymana · pozostało {p0}",
   "{p0} · Choosing an advance": "{p0} · Wybiera postęp",
   "{p0} · Placing a settler": "{p0} · Umieszcza osadnika",
-  "{p0} queued · End turn queued": "{p0} w kolejce · Koniec tury w kolejce"
+  "{p0} queued · End turn queued": "{p0} w kolejce · Koniec tury w kolejce",
+  "Ability active · Man God": "Zdolność aktywna · Człowiek-bóg",
+  "Ability only: not researched, no extra advance or victory points.": "Tylko zdolność: niezbadana, bez dodatkowego postępu ani punktów zwycięstwa."
 }
