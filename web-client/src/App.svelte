@@ -306,10 +306,11 @@
   };
   let mapPositions = $derived(new Set($session.game?.map.tiles.map(([position]) => position) ?? []));
   let totalActions = $derived($session.game?.actions_left ?? 0);
-  let readyToEnd = $derived(!!$session.view?.canEndTurn && totalActions === 0);
+  const canEndTurn = $derived(!!$session.view?.canEndTurn && !(planningQueue && queueControls?.ended));
+  let readyToEnd = $derived(canEndTurn && totalActions === 0);
   const tradeWarning = $derived($session.view?.endTurnTradeWarning);
   $effect(() => {
-    if (!$session.view?.canEndTurn) confirmEnd = false;
+    if (!canEndTurn) confirmEnd = false;
   });
   let collectAvailable = $derived($session.view?.cities.some((c) => !c.reason && c.choices.length > 0));
   let researchAvailable = $derived($session.view?.advances.some((a) => !!a.action));
@@ -1478,7 +1479,7 @@
           title="End turn"
           data-tutorial="end"
           aria-label="End turn"
-          disabled={!!$session.playback || !$session.view?.canEndTurn || $session.pending}
+          disabled={!!$session.playback || !canEndTurn || $session.pending}
           onclick={() => {
             controller.closeActivity();
             controller.patch({ mode: 'overview', tilePanel: false });
@@ -1874,7 +1875,7 @@
           <div class="end-confirm">
             <button class="secondary" onclick={() => (confirmEnd = false)}>Keep playing</button><button
               class="primary"
-              disabled={$session.pending || !$session.view?.canEndTurn}
+              disabled={$session.pending || !canEndTurn}
               onclick={() => {
                 confirmEnd = false;
                 controller.submit({ Playing: 'EndTurn' });

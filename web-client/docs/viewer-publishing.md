@@ -639,3 +639,10 @@ The selection shows the total one-food cost; skipping or declining payment costs
 nothing. Food and gold substitution remain supported. Previously pending payments
 continue into an army selection. Includes a restartable local preview and six
 regressions covering selection, payment, cancellation, and old pending payments.
+
+## Viewer 0.1.183
+
+Disable End turn and remove its ready highlight once End turn is queued while
+waiting for another player's choice. Close any end-turn confirmation in that
+state. Undo remains available to remove the queued End turn and enable it again.
+No engine update required.
