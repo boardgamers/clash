@@ -655,3 +655,11 @@ advances and grant no extra advance or victory points. Preserve research locks,
 ownership and availability. Includes dark-mode styling, all supported translations,
 and regression coverage for partial grants, removed grants and Great Library loans.
 No engine update required.
+
+## Viewer 0.1.185
+
+Enforce collection capacity for map and resource-choice interactions, preserving
+the valid selection and preview when an extra tile is rejected. Selected
+dual-resource tiles can be deselected from the map; resource replacement remains
+available through the resource list. Add regressions for the four-tile limit,
+dual-resource choices, deselection and Ballcourts capacity. No engine update required.

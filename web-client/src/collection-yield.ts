@@ -59,7 +59,6 @@ export function nextCollectionSelection(
   selection: Selection[],
   city: CityView,
   extraCapacity = 0,
-  allowOverCapacity = false,
 ) {
   const selected = selection.find((c) => sameCollection(c, choice));
   const sameTile = selection.find((c) => c.position === choice.position);
@@ -76,7 +75,7 @@ export function nextCollectionSelection(
       ? selection.map((c) => (c === sameTile ? { ...choice, times: 1 } : c))
       : [...selection, { ...choice, times: 1 }];
   const nextIsValid =
-    (allowOverCapacity || next.reduce((sum, c) => sum + c.times, 0) <= capacity) &&
+    next.reduce((sum, c) => sum + c.times, 0) <= capacity &&
     next.filter((c) => c.position === choice.position).reduce((sum, c) => sum + c.times, 0) <=
       city.maxPerTile;
   return nextIsValid ? next : null;

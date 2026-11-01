@@ -183,3 +183,18 @@ test('storage markers show prospective waste and only the overflowing part of th
   const wood = { position: 'X1', pile: { wood: 1 }, times: 1 };
   assert.deepEqual(waste(wood, selected.slice(0, 2)), {}, 'Other resources do not inherit food warnings');
 });
+
+test('full collection rejects new choices but permits same-tile replacement and deselection', () => {
+  const city = { capacity: 4, maxPerTile: 1 } as View['cities'][number];
+  const selection: Selection[] = ['A1', 'A2', 'A3', 'A4'].map(position => ({ position, pile: { food: 1 }, times: 1 }));
+  for (const pile of [{ food: 1 }, { gold: 1 }])
+    assert.equal(nextCollectionSelection({ position: 'A5', pile }, selection, city), null);
+  const replacement = { position: 'A4', pile: { gold: 1 } };
+  const replaced = nextCollectionSelection(replacement, selection, city)!;
+  assert.equal(replaced.length, 4);
+  assert.deepEqual(replaced[3], { ...replacement, times: 1 });
+  assert.deepEqual(nextCollectionSelection(replacement, replaced, city), selection.slice(0, 3));
+  assert.equal(nextCollectionSelection({ position: 'A5', pile: { gold: 1 } }, selection, city, 1)?.length, 5,
+    'Ballcourts capacity remains available');
+  assert.equal(selection.length, 4, 'selection helpers do not mutate the draft');
+});

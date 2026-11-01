@@ -1394,10 +1394,20 @@ export class Controller {
   selectCollectionTile(position: string) {
     const s = get(this.session);
     if (s.pending) return;
-    const choices =
-      s.view?.cities.find((c) => c.position === s.city)?.choices.filter((c) => c.position === position) ?? [];
-    this.patch({ collectionTile: choices.length > 1 ? position : null });
-    if (choices.length === 1) this.toggleChoice(choices[0]);
+    const city = s.view?.cities.find((c) => c.position === s.city);
+    const choices = city?.choices.filter((c) => c.position === position) ?? [];
+    const selected = s.selection.find((c) => c.position === position);
+    this.patch({ collectionTile: null });
+    // Map clicks toggle the current yield, just like single-choice tiles. The
+    // resource list still allows replacing it with another yield on this tile.
+    if (selected) this.toggleChoice(selected);
+    else if (choices.length === 1) this.toggleChoice(choices[0]);
+    else if (city && choices.length > 1) {
+      const extraCapacity = Number(!!s.ballcourts && !!city.ballcourts);
+      if (choices.some((choice) => nextCollectionSelection(choice, s.selection, city, extraCapacity)))
+        this.patch({ collectionTile: position });
+      else this.toggleChoice(choices[0]); // Report the same capacity warning as the list.
+    }
   }
   collectFromTile(city: string, tile: string) {
     this.beginCollect(city);
@@ -1818,15 +1828,11 @@ export class Controller {
     const city = s.view.cities.find((c) => c.position === s.city)!;
     const extraCapacity = Number(!!s.ballcourts && !!city.ballcourts);
     const capacity = city.capacity + extraCapacity;
-    const selection = nextCollectionSelection(choice, s.selection, city, extraCapacity, true);
+    const selection = nextCollectionSelection(choice, s.selection, city, extraCapacity);
     if (!selection) {
       this.patch({
         error: `Choose up to ${capacity} ${capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection first.`,
       });
-      return;
-    }
-    if (selection.reduce((sum, tile) => sum + tile.times, 0) > capacity) {
-      this.patch({ selection, preview: null, error: `Choose up to ${capacity} ${capacity === 1 ? 'tile' : 'tiles'} total. Remove a selection to collect.` });
       return;
     }
     try {

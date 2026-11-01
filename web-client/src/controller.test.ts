@@ -2845,7 +2845,7 @@ test('forced collection preselects single-choice tiles while leaving Port resour
   } finally { app.close(); }
 });
 
-test('an extra collection tile remains selected until the player resolves the capacity warning', async () => {
+test('ordinary collection choices reject extra tiles without losing the valid preview', async () => {
   const app = paymentController(), c = app.controller;
   try {
     const raw = await engine.init(2, [], {}, 'collect-all-tiles', {});
@@ -2859,19 +2859,73 @@ test('an extra collection tile remains selected until the player resolves the ca
     for (const choice of choices.slice(0, city.capacity)) c.toggleChoice(choice);
     assert(app.session().preview?.action);
     const extra = choices[city.capacity];
+    const preview = app.session().preview;
     c.toggleChoice(extra);
-    assert(app.session().selection.some(choice => choice.position === extra.position));
-    assert.equal(app.session().selection.length, city.capacity + 1);
-    assert.equal(app.session().preview, null);
+    c.selectCollectionTile(extra.position);
+    c.selectTile(extra.position);
+    assert(!app.session().selection.some(choice => choice.position === extra.position));
+    assert.equal(app.session().selection.length, city.capacity);
+    assert.equal(app.session().preview, preview);
     assert.match(app.session().error, /Remove a selection/);
-    c.collect();
     assert.deepEqual(app.sent, []);
-    c.toggleChoice(choices[0]);
+    c.selectTile(choices[0].position);
+    assert.equal(app.session().selection.length, city.capacity - 1);
+    c.selectTile(extra.position);
     assert.equal(app.session().selection.length, city.capacity);
     assert(app.session().selection.some(choice => choice.position === extra.position));
     assert.equal(app.session().error, '');
     assert(app.session().preview?.action);
     c.collect();
     assert.equal(app.sent.length, 1);
+  } finally { app.close(); }
+});
+
+test('full collection blocks a dual-choice tile but allows replacement and map deselection', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const raw = await engine.init(2, [], {}, 'collect-port-choices', {});
+    const game = JSON.parse(raw), seat = engine.currentPlayer(raw), player = game.players[seat];
+    player.advances.push('Fishing');
+    const city = player.cities[0];
+    city.mood_state = 'Happy';
+    city.city_pieces = { port: seat, academy: seat };
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(JSON.stringify(game), seat));
+    const other = app.session().view!.cities[0].choices.find(choice => choice.position !== city.position)!.position;
+    for (const tile of game.map.tiles) tile[1] = tile[0] === other ? 'Water' : 'Fertile';
+    city.port_position = other;
+    await c.load(engine.stripSecret(JSON.stringify(game), seat));
+    const options = app.session().view!.cities[0];
+    assert.equal(options.capacity, 4);
+    const dual = options.choices.filter(choice => choice.position === other);
+    assert(dual.length > 1);
+    const ordinary = options.choices.filter(choice => choice.position !== other);
+    assert(ordinary.length >= 4);
+    c.beginCollect(city.position);
+    for (const choice of ordinary.slice(0, 4)) c.toggleChoice(choice);
+    const selection = app.session().selection, preview = app.session().preview;
+    assert.equal(selection.length, 4);
+    assert(preview?.action);
+    c.selectTile(other);
+    assert.equal(app.session().collectionTile, null, 'a full collection must not open a new tile chooser');
+    for (const choice of dual) c.toggleChoice(choice); // List or an already-open chooser.
+    assert.equal(app.session().selection, selection);
+    assert.equal(app.session().preview, preview);
+    assert.match(app.session().error, /Choose up to 4/);
+    c.selectTile(ordinary[0].position);
+    c.selectTile(other);
+    assert.equal(app.session().collectionTile, other);
+    c.toggleChoice(dual[0]);
+    assert.equal(app.session().selection.length, 4);
+    c.toggleChoice(dual[1]); // The list can still change resources at capacity.
+    assert.deepEqual(app.session().selection.find(choice => choice.position === other)?.pile, dual[1].pile);
+    assert.equal(app.session().selection.length, 4);
+    c.selectTile(other);
+    assert.equal(app.session().collectionTile, null);
+    assert.equal(app.session().selection.length, 3);
+    assert(!app.session().selection.some(choice => choice.position === other));
+    assert.equal(app.session().error, '');
+    assert(app.session().preview?.action);
+    assert.deepEqual(app.sent, []);
   } finally { app.close(); }
 });
