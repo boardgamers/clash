@@ -533,10 +533,150 @@ pub fn status_phase_type(p: &StatusPhaseState) -> StatusPhaseStateType {
 
 #[cfg(test)]
 mod tests {
+    use super::{ChangeGovernment, change_government_type};
+    use crate::advance::{Advance, do_advance, find_special_advance};
+    use crate::city_pieces::Building;
     use crate::civilization::Civilization;
-
-    use crate::player::Player;
+    use crate::events::{EventOrigin, EventPlayer};
+    use crate::game::{Game, GameContext};
+    use crate::game_setup::{GameSetupBuilder, setup_game};
+    use crate::player::{CostTrigger, Player};
     use crate::resource_pile::ResourcePile;
+    use crate::special_advance::SpecialAdvance;
+
+    fn babylonia_before_dogma() -> (Game, EventPlayer) {
+        let mut game = setup_game(
+            &GameSetupBuilder::new(2)
+                .seed("ziggurats-government-regression".into())
+                .assigned_civilizations(vec!["Babylonia".into(), "Rome".into()])
+                .build(),
+        );
+        let player = EventPlayer::new(0, EventOrigin::Ability("Change Government".into()));
+        crate::log::add_start_turn_action_if_needed(&mut game, player.index);
+        for advance in [
+            Advance::Myths,
+            Advance::StateReligion,
+            Advance::Writing,
+            Advance::Philosophy,
+        ] {
+            assert!(player.get(&game).can_advance_free(advance, &game));
+            do_advance(&mut game, advance, &player, false);
+        }
+        player.get_mut(&mut game).resources.ideas = 5;
+        assert!(player.get(&game).can_advance_free(Advance::Dogma, &game));
+        (game, player)
+    }
+
+    fn assert_ziggurats(game: &Game, active: bool) {
+        let player = game.player(0);
+        assert_eq!(
+            player.special_advances.contains(SpecialAdvance::Ziggurats),
+            active
+        );
+        assert_eq!(player.resource_limit.ideas, 7);
+        assert_eq!(
+            player.resources.ideas, 5,
+            "Dogma must not discard Babylonia's ideas"
+        );
+        assert_eq!(player.wasted_resources.ideas, 0);
+
+        // Exercise the live building-cost listeners and payment conversion, not
+        // just the special-advance flag. State Religion waives the Temple's food.
+        let temple = player.building_cost(game, Building::Temple, CostTrigger::NoModifiers);
+        assert!(
+            temple
+                .cost
+                .is_valid_payment(&(ResourcePile::wood(1) + ResourcePile::ore(1)))
+        );
+        assert_eq!(
+            temple.cost.is_valid_payment(&ResourcePile::ideas(2)),
+            active
+        );
+        assert_eq!(
+            temple
+                .cost
+                .is_valid_payment(&(ResourcePile::wood(1) + ResourcePile::ideas(1))),
+            active
+        );
+        let fortress = player.building_cost(game, Building::Fortress, CostTrigger::NoModifiers);
+        assert!(!fortress.cost.is_valid_payment(&ResourcePile::ideas(3)));
+    }
+
+    #[test]
+    fn ziggurats_and_any_government_special_advance_mapping() {
+        use SpecialAdvance::*;
+
+        for (civilization, expected) in [
+            ("Aztecs", [Some(TributeEmpire); 3]),
+            ("China", [Some(ImperialArmy); 3]),
+            ("Greece", [Some(CityStates); 3]),
+            ("Huns", [Some(HunnicTribes); 3]),
+            ("Japan", [Some(Shogunate); 3]),
+            ("Rome", [Some(Provinces); 3]),
+            ("Babylonia", [None, None, Some(Ziggurats)]),
+        ] {
+            let game = setup_game(
+                &GameSetupBuilder::new(2)
+                    .seed("government-special-mapping-regression".into())
+                    .assigned_civilizations(vec![civilization.into(), "Rome".into()])
+                    .build(),
+            );
+            for (advance, special) in [Advance::Voting, Advance::Nationalism, Advance::Dogma]
+                .into_iter()
+                .zip(expected)
+            {
+                assert_eq!(
+                    find_special_advance(advance, &game, 0),
+                    special,
+                    "{civilization}: {advance:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn ziggurats_activates_immediately_on_dogma() {
+        let (mut game, player) = babylonia_before_dogma();
+        assert_ziggurats(&game, false);
+        do_advance(&mut game, Advance::Dogma, &player, false);
+        assert_ziggurats(&game, true);
+
+        // Loading a save reconstructs specials from prerequisites. It must not
+        // be required to initialize the ability that the live purchase grants.
+        let reloaded = Game::from_data(game.cloned_data(), game.cache.clone(), GameContext::Play);
+        assert_eq!(
+            game.player(0).special_advances,
+            reloaded.player(0).special_advances
+        );
+        assert_ziggurats(&reloaded, true);
+    }
+
+    #[test]
+    fn ziggurats_live_government_cycle() {
+        let (mut game, player) = babylonia_before_dogma();
+        do_advance(&mut game, Advance::Dogma, &player, false);
+
+        // Deliberately reach removal without a reload (or an acquisition
+        // assertion, covered above): this used to panic removing a listener
+        // that the live Dogma purchase had never registered.
+        change_government_type(
+            &mut game,
+            &player,
+            &ChangeGovernment::new("Democracy".into(), vec![]),
+        );
+        assert!(player.get(&game).has_advance(Advance::Voting));
+        assert!(!player.get(&game).has_advance(Advance::Dogma));
+        assert_ziggurats(&game, false);
+
+        change_government_type(
+            &mut game,
+            &player,
+            &ChangeGovernment::new("Theocracy".into(), vec![]),
+        );
+        assert!(player.get(&game).has_advance(Advance::Dogma));
+        assert!(!player.get(&game).has_advance(Advance::Voting));
+        assert_ziggurats(&game, true);
+    }
 
     fn assert_next_player(
         name: &str,

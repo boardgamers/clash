@@ -805,3 +805,19 @@ research-source eligibility and explicit purchases, plus English/French desktop
 and mobile browser flows. Existing Great Person localization, Synergies/Aqueduct,
 French objective/retry and Chinese locale-switching browser checks are retained.
 No live game moves or historical game-state repairs are part of this release.
+
+## Viewer 0.1.194 / engine 0.4.129
+
+Civilization advances tied to a specific government advance now unlock immediately
+when that advance is acquired. In particular, Babylonia's Dogma installs Ziggurats
+without needing a save/reload, so changing away from Theocracy no longer tries to
+remove a missing listener. Reacquiring Dogma restores the Temple payment benefit.
+The generic any-government unlock path remains available for other civilizations.
+Publish the matching engine and viewer together; existing saves and history are
+not rewritten.
+
+The accompanying CI repair handles private queue actions in the native log
+renderer, applies the pinned Rust formatter, refreshes stale test expectations,
+and keeps snapshot checking read-only to avoid races between parallel fixture
+readers and writers. Native regression coverage exercises the live government
+change and reacquisition sequence rather than relying on reload to repair it.

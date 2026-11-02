@@ -330,11 +330,15 @@ pub fn find_special_advance(
     game: &Game,
     player_index: usize,
 ) -> Option<SpecialAdvance> {
-    if advance.info(game).leading_government {
-        find_government_special_advance(game, player_index)
-    } else {
-        find_non_government_special_advance(advance, game.player(player_index))
-    }
+    // A leading government advance can itself be an explicit prerequisite
+    // (Dogma unlocks Ziggurats); do not skip it for the generic government path.
+    find_non_government_special_advance(advance, game.player(player_index)).or_else(|| {
+        if advance.info(game).leading_government {
+            find_government_special_advance(game, player_index)
+        } else {
+            None
+        }
+    })
 }
 
 #[must_use]
