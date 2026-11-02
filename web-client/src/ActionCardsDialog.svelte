@@ -32,7 +32,7 @@
     if (e.key === 'Escape') close();
   }}
 >
-  <button class="close-guide icon-button" aria-label="Close action cards" onclick={close}
+  <button class="close-guide icon-button" data-panel-close aria-label="Close action cards" onclick={close}
     ><X size={20} /></button
   >
   <h2 id="action-cards-title"><Layers size={23} />Cards</h2>

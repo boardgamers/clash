@@ -148,7 +148,7 @@
     if (e.key === 'Escape') onClose();
   }}
 >
-  <button class="close-guide icon-button" aria-label="Close field guide" onclick={onClose}
+  <button class="close-guide icon-button" data-panel-close aria-label="Close field guide" onclick={onClose}
     ><X size={20} /></button
   >
   <h2 id="how-to-play-title">How to play</h2>

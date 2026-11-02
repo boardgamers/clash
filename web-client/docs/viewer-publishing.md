@@ -718,3 +718,18 @@ the activity close button in the top-right corner with a 44px touch target, rese
 space for it in the tabs, and separate the mobile minimize control from it.
 Includes desktop/mobile browser layout regression checks with empty, short and
 long chat histories. No engine or bundled rules bridge changes.
+
+## Viewer 0.1.190 / engine unchanged (0.4.126)
+
+Refresh all 17 localization catalogs with 455 current messages per catalog and
+translate 18 existing user-facing errors. Include complete objective restrictions,
+updated rules, queue controls, combat estimates and dynamic captions. Repair Rust
+continued-string extraction, add a read-only source drift gate, and test shipped
+catalogs against current rules. Bound generic template matching to avoid partial
+prose translation, retain player names, and fix nested tooltip translation.
+
+Show an accessible retry notice when a language download fails. Use stable close
+control markers instead of translated labels for mobile panel layout. Verified
+938 frontend tests, 3 extraction tests, catalog/placeholder and source checks,
+type checks, production build, and desktop/mobile French objective, retry and
+Chinese language-switching browser checks. No engine update required.

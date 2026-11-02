@@ -101,7 +101,7 @@
       if (e.key === 'Escape') close();
     }}
   >
-    <button class="close-guide icon-button" aria-label="Close civilization details" onclick={close}
+    <button class="close-guide icon-button" data-panel-close aria-label="Close civilization details" onclick={close}
       ><X size={20} /></button
     >
     <header class="civilization-hero">

@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { rustStrings, rustTemplate } from './localization-source.mjs';
 import path from 'node:path';
 import ts from 'typescript';
 import { parse } from 'svelte/compiler';
@@ -13,8 +14,18 @@ function add(value, file) {
   if (
     !/[A-Za-z]/.test(text) ||
     text.length < 2 ||
-    /^[-a-z0-9:/]+$/.test(text) ||
+    /\{p\d+\}\{p\d+\}/.test(text) ||
+    /^[-a-z0-9_:/]+$/.test(text) ||
+    /[a-z]_[a-z]/.test(text) ||
+    /^[a-z]+(?:[A-Z][a-z0-9]*)+$/.test(text) ||
+    /^(?:[a-z]+-)+[a-z]+(?:\s+[a-z-]+)*$/.test(text) ||
+    /^(?:[a-z]+-)+.*\{p\d+\}/.test(text) ||
+    /^(?:crate::|three\/|position:|Building:|Wonder:|pending:|objective:|person:|status:)/.test(text) ||
+    /\{p\d+\}[:|](?:\{p\d+\}|[a-zA-Z])/.test(text) ||
+    /^\$\d/.test(text) ||
+    /^(?:Arrow(?:Up|Down|Left|Right)|F\d+|[A-Z][a-z]+(?:[A-Z][a-z]+)+)$/.test(text) ||
     /^[#.:\[]/.test(text) ||
+    /^[a-z][a-z0-9-]*\[[a-z-]+(?:[=\]^$*~|]|\])/.test(text) ||
     /^<[a-z]/.test(text) ||
     /[A-Za-z]__[A-Za-z]/.test(text) ||
     /=>|\\[bpdw]|\.\/(?:src|assets)|https?:|\.svg|\.wasm|rgba?\(|gradient\(|var\(|\d(?:px|rem)\b/.test(text)
@@ -25,13 +36,16 @@ function add(value, file) {
   locations.get(text).push(file);
 }
 function javascript(node, file) {
-  if (ts.isStringLiteral(node)) add(node.text, file);
+  if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) return;
+  if ((ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) && !(ts.isPropertyAssignment(node.parent) && node.parent.name === node)) add(node.text, file);
   if (ts.isTemplateExpression(node))
     add(node.head.text + node.templateSpans.map((span, i) => `{p${i}}${span.literal.text}`).join(''), file);
   ts.forEachChild(node, (child) => javascript(child, file));
 }
 function svelte(node, file) {
   if (!node || typeof node !== 'object') return;
+  // Only human-facing attributes; class names, event handlers and IDs are not messages.
+  if (node.type === 'Attribute' && !['title', 'aria-label', 'placeholder', 'alt', 'label'].includes(node.name)) return;
   if (
     node.type === 'Fragment' &&
     node.nodes?.some((n) => n.type === 'ExpressionTag') &&
@@ -84,18 +98,14 @@ function rust(directory) {
   for (const item of fs.readdirSync(directory, { withFileTypes: true })) {
     const file = path.join(directory, item.name);
     if (item.isDirectory()) rust(file);
-    else if (item.name.endsWith('.rs')) {
+    else if (item.name.endsWith('.rs') && !/(?:^|_)tests?\.rs$/.test(item.name) && item.name !== 'timing.rs') {
       const content = fs.readFileSync(file, 'utf8');
-      for (const match of content.matchAll(/"((?:[^"\\]|\\.)*)"/g)) {
-        let value;
-        try {
-          value = JSON.parse(`"${match[1]}"`);
-        } catch {
-          continue;
-        }
-        let index = 0;
-        value = value.replace(/\{(?:[a-zA-Z_][a-zA-Z_0-9]*|(?::[^}]*)?)\}/g, () => `{p${index++}}`);
-        add(value, path.relative(root, file));
+      for (const { value, start } of rustStrings(content)) {
+        // Ignore test modules and diagnostics: these are not player-facing rules.
+        if (/#\[cfg\(test\)\]/.test(content.slice(0, start))) continue;
+        const context = content.slice(Math.max(0, start - 120), start);
+        if (/(?:panic!|assert(?:_eq|_ne)?!|debug_assert(?:_eq|_ne)?!|expect)\s*\([^;]*$/.test(context)) continue;
+        add(rustTemplate(value), path.relative(root, file));
       }
     }
   }
@@ -111,7 +121,15 @@ const sorted = Object.fromEntries(Object.entries(source).sort(([a], [b]) => a.lo
 const sourceOutput =
   process.argv.find((arg) => arg.startsWith('--source-output='))?.slice('--source-output='.length) ??
   path.join(root, 'src/localization/en.json');
-fs.writeFileSync(sourceOutput, JSON.stringify(sorted, null, 2) + '\n');
+if (process.argv.includes('--check')) {
+  const current = JSON.parse(fs.readFileSync(existingSource, 'utf8'));
+  const missing = [...locations.keys()].filter((key) => !Object.hasOwn(current, key));
+  for (const key of missing) console.error(`${locations.get(key).join(', ')}: ${key}`);
+  if (missing.length) {
+    console.error(`${missing.length} player-facing source strings missing from en.json`);
+    process.exitCode = 1;
+  } else console.log('Current UI/engine inventory is present in en.json');
+} else fs.writeFileSync(sourceOutput, JSON.stringify(sorted, null, 2) + '\n');
 const out = process.argv.find((arg) => arg.startsWith('--locations='))?.slice('--locations='.length);
-if (out) fs.writeFileSync(out, JSON.stringify(Object.fromEntries(locations), null, 2) + '\n');
+if (out && !process.argv.includes('--check')) fs.writeFileSync(out, JSON.stringify(Object.fromEntries(locations), null, 2) + '\n');
 console.log(`${Object.keys(source).length} source strings extracted`);

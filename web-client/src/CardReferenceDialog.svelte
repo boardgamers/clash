@@ -22,7 +22,7 @@
     if (e.key === 'Escape') onDismiss();
   }}
 >
-  <button class="close-guide icon-button" aria-label="Close card rules" onclick={onDismiss}
+  <button class="close-guide icon-button" data-panel-close aria-label="Close card rules" onclick={onDismiss}
     ><X size={20} /></button
   >
   <h2><Layers size={23} />{printedCardName(card.name)}</h2>

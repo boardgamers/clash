@@ -19,6 +19,7 @@ const fontFaces = [
 import { writable } from 'svelte/store';
 export const currentLocale = writable('en');
 import { createCatalogLoader } from './loader.js';
+import { createLocaleSelection } from './load-status.js';
 import { createTranslator, mountLocalization as mount, resolveLocale } from './runtime.js';
 export { languages, resolveLocale } from './runtime.js';
 
@@ -44,26 +45,11 @@ export function mountLocalization(target, locale) {
   style.textContent = localeCss + fontFaces;
   target.ownerDocument.head.append(style);
   const localization = mount(target, catalogs, 'en');
-  let revision = 0;
-  let ready = Promise.resolve(true);
-  function setLocale(value) {
-    const attempt = ++revision;
-    ready = loadLocale(value)
-      .then((loaded) => {
-        if (attempt !== revision) return false;
-        localization.setLocale(loaded);
-        currentLocale.set(loaded);
-        return true;
-      })
-      .catch((error) => {
-        console.warn('Could not load game language', error);
-        if (attempt !== revision) return false;
-        localization.setLocale('en');
-        currentLocale.set('en');
-        return true;
-      });
-    return ready;
-  }
+  const selection = createLocaleSelection(target, loadLocale, (loaded) => {
+    localization.setLocale(loaded);
+    currentLocale.set(loaded);
+  });
+  const { setLocale } = selection;
   setLocale(locale ?? target.ownerDocument.documentElement.lang ?? 'en');
   return {
     ...localization,
@@ -72,10 +58,10 @@ export function mountLocalization(target, locale) {
       return localization.locale;
     },
     get ready() {
-      return ready;
+      return selection.ready;
     },
     destroy() {
-      revision++;
+      selection.destroy();
       localization.destroy();
       style.remove();
     },

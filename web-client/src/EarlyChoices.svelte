@@ -15,7 +15,7 @@
 <section class="action-panel floating-panel early-choices" class:raze-prompt={raze} aria-label={raze ? 'Raze city' : first ? 'Choose first player' : 'Choose ahead'}>
   <header>
     <h2>{#if raze}<Sparkles size={21} />Raze city{:else}<Clock size={18} />{first ? 'Choose first player' : 'Choose ahead'}{/if}</h2>
-    <button class="icon-button" aria-label="Close early choices" onclick={onclose}><X size={18} /></button>
+    <button class="icon-button" data-panel-close aria-label="Close early choices" onclick={onclose}><X size={18} /></button>
   </header>
     {#each offers as offer (offer.key)}
       {@const saved = offer.options.findIndex((o) => same(o.response, offer.selected))}

@@ -73,19 +73,27 @@ export function createTranslator(catalogs, initialLocale = 'en') {
     if (translated === undefined && text === text.toLocaleUpperCase()) {
       translated = upperCase.get(text);
     }
-    if (translated === undefined && cache.has(text)) {
+    if (translated === undefined && depth === 0 && cache.has(text)) {
       translated = cache.get(text);
     }
     // Tutorial headings contain a progress prefix. Translate the complete title
     // before broad patterns such as "{p0} {p1} to {p2}" can split its grammar.
     if (translated === undefined) {
       const prefix = /^(\d+\s*\/\s*\d+\s*·\s*)(.+)$/u.exec(text);
-      if (prefix && depth < 2) {
+      if (prefix && depth < 6) {
         translated = prefix[1] + translate(prefix[2], depth + 1);
       }
     }
-    if (translated === undefined && depth < 2 && text.length <= 2500) {
+    if (translated === undefined && depth < 6 && text.length <= 2500) {
       for (const { source, pieces } of patterns) {
+        // A broad capture (e.g. "{p0} army{p1}") must not consume an
+        // entire multi-part tooltip. Match complete captions first, then
+        // translate independently composed segments below.
+        if (
+          text.includes(' · ') &&
+          (!source.includes(' · ') || !/[A-Za-z]/.test(source.replace(/\{p\d+\}/g, '')))
+        )
+          continue;
         if (!text.startsWith(pieces[0])) {
           continue;
         }
@@ -110,11 +118,37 @@ export function createTranslator(catalogs, initialLocale = 'en') {
         if (!matches || offset !== text.length) {
           continue;
         }
+        // Connector-only captions are not sentence templates. Without this
+        // bound, "{p0} at {p1}" (or even "{p0}. {p1}") can translate a
+        // fragment of arbitrary missing prose and hide the coverage gap.
+        // Known catalog phrases and registered player names remain atomic,
+        // regardless of their length; unfamiliar short labels still work.
+        const literal = source.replace(/\{p\d+\}/g, '').trim();
+        const broad =
+          /^\{p\d+\}/.test(source) &&
+          /\{p\d+\}$/.test(source) &&
+          (literal.length <= 12 || !/[A-Za-z]/.test(literal));
+        if (
+          broad &&
+          Object.values(parameters).some((part) => {
+            const caption = normalize(part);
+            if (names.has(caption) || Object.prototype.hasOwnProperty.call(catalog, caption)) return false;
+            return caption.length > 64 || caption.split(' ').length > 5 || /[.!?;\n]/.test(caption);
+          })
+        )
+          continue;
         translated = catalog[source].replace(/\{p\d+\}/g, (key) =>
           translate(parameters[key] ?? key, depth + 1),
         );
         break;
       }
+    }
+    if (translated === undefined && depth < 6 && text.includes(' · ')) {
+      const segments = text
+        .split(' · ')
+        .map((part) => translate(part, depth + 1))
+        .join(' · ');
+      if (segments !== text) translated = segments;
     }
     if (translated === undefined) {
       const match = /^(.*?)(\s*[:.!?—–·→←↑↓↗↙↘↖↻↺✓✗]\s*|\s+\d+(?:\s*\/\s*\d+)?\+?\s*)$/u.exec(text);
@@ -140,7 +174,7 @@ export function createTranslator(catalogs, initialLocale = 'en') {
     if (cache.size > 5000) {
       cache.clear();
     }
-    cache.set(text, translated);
+    if (depth === 0) cache.set(text, translated);
     return (
       value.slice(0, value.indexOf(value.trimStart())) + translated + value.slice(value.trimEnd().length)
     );
@@ -148,6 +182,15 @@ export function createTranslator(catalogs, initialLocale = 'en') {
   prepare();
   return {
     translate,
+    // Opt-in development/CI coverage check: pass authored source keys, not
+    // rendered game text. This never observes DOM values, records player names,
+    // or logs anything. Exact presence deliberately ignores broad templates.
+    getMissingKeys(keys) {
+      const catalog = catalogs[locale] ?? {};
+      return [...new Set(keys)].filter(
+        (key) => typeof key === 'string' && !Object.prototype.hasOwnProperty.call(catalog, normalize(key)),
+      );
+    },
     get locale() {
       return locale;
     },

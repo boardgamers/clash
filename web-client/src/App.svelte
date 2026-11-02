@@ -1567,7 +1567,7 @@
       >
         {#if !choiceDecision && !objectiveDecision && ($session.playback || $session.view?.supportedPhase)}<button
             class="icon-button close-action"
-            aria-label="Close action"
+            data-panel-close aria-label="Close action"
             onclick={closeAction}><X size={18} /></button
           >{/if}
         {#if choiceDecision}
@@ -1938,7 +1938,7 @@
             >{/if}</button
         ><button
           class="icon-button close-activity"
-          aria-label="Close table activity"
+          data-panel-close aria-label="Close table activity"
           onclick={() => controller.closeActivity()}><X size={17} /></button
         >
       </div>
@@ -2016,7 +2016,7 @@
         if (e.key === 'Escape') closeObjectives();
       }}
     >
-      <button class="close-guide icon-button" aria-label="Close objectives" onclick={closeObjectives}
+      <button class="close-guide icon-button" data-panel-close aria-label="Close objectives" onclick={closeObjectives}
         ><X size={20} /></button
       >
       <h2 id="objectives-title">Objectives</h2>

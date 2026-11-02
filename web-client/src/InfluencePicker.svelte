@@ -58,7 +58,7 @@
   <h2><Drama size={18} />Cultural influence</h2>
   <button
     class="icon-button close-movement"
-    aria-label="Close abilities"
+    data-panel-close aria-label="Close abilities"
     onclick={() => controller.patch({ abilitiesOpen: false })}><X size={18} /></button
   >
 </header>

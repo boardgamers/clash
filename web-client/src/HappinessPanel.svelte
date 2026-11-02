@@ -60,7 +60,7 @@
     </div>
     <button
       class="icon-button close-movement"
-      aria-label="Close happiness controls"
+      data-panel-close aria-label="Close happiness controls"
       onclick={() => controller.patch({ mode: 'overview', error: '' })}><X size={18} /></button
     >
   </header>

@@ -54,9 +54,9 @@ export function strategyDescription(tile: StrategyTile) {
     ...tile.occupants.map((o) =>
       [
         o.player.civilization,
-        o.city ? `city size ${o.size}${o.city.city_pieces?.fortress != null ? ', Fortress' : ''}` : '',
+        o.city ? (o.city.city_pieces?.fortress != null ? `city size ${o.size}, Fortress` : `city size ${o.size}`) : '',
         o.city?.mood_state ?? '',
-        o.army ? `${o.army} army${o.aboard ? ` (${o.aboard} aboard)` : ''}` : '',
+        o.army ? (o.aboard ? `${o.army} army (${o.aboard} aboard)` : `${o.army} army`) : '',
         o.ships ? `${o.ships} ships` : '',
         o.settlers ? `${o.settlers} settlers` : '',
       ]

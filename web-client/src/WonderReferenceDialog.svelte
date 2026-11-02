@@ -21,7 +21,7 @@
     if (e.key === 'Escape') onClose();
   }}
 >
-  <button class="close-guide icon-button" aria-label="Close card rules" onclick={onClose}
+  <button class="close-guide icon-button" data-panel-close aria-label="Close card rules" onclick={onClose}
     ><X size={20} /></button
   >
   <WonderCard {card} />

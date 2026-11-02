@@ -96,7 +96,8 @@ export function mobilePanels(
       };
       const heading = panel.querySelector<HTMLElement>(':scope > header');
       if (heading) {
-        const close = heading.querySelector<HTMLElement>('button[aria-label^="Close"]');
+        // Accessible labels are translated; layout hooks must be locale-independent.
+        const close = heading.querySelector<HTMLElement>('button[data-panel-close]');
         if (close) close.before(button);
         else {
           const title = heading.querySelector('h2');
@@ -108,7 +109,7 @@ export function mobilePanels(
         panel.classList.add('mobile-minimize-positioned');
         panel.classList.toggle(
           'mobile-minimize-has-close',
-          !!panel.querySelector(':scope > button[aria-label^="Close"]'),
+          !!panel.querySelector(':scope > button[data-panel-close]'),
         );
       }
       panel.classList.add('mobile-minimizable');

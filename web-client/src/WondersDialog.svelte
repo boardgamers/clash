@@ -27,7 +27,7 @@
     if (e.key === 'Escape') close();
   }}
 >
-  <button class="close-guide icon-button" aria-label="Close wonders" onclick={close}><X size={20} /></button>
+  <button class="close-guide icon-button" data-panel-close aria-label="Close wonders" onclick={close}><X size={20} /></button>
   <h2 id="wonders-title">Wonders</h2>
   <nav class="civilization-tabs" aria-label="Wonder views">
     <button class:active={tab === 'hand'} aria-pressed={tab === 'hand'} onclick={() => (tab = 'hand')}

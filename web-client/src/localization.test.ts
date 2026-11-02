@@ -138,3 +138,86 @@ test('translates resource quantities within payment labels', () => {
   assert.equal(translator.translate('Pay 1 mood'), 'Payer 1 humeur');
   assert.equal(translator.translate('1–3 mood'), '1–3 humeur');
 });
+
+// Exercise shipped catalogs, not only small synthetic examples: broad historical
+// templates must not swallow current complete rules or optional UI suffixes.
+test('real catalogs translate current rules and optional caption variants in every language', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { languages } = await import('./localization/runtime.js');
+  const { rustStrings, rustTemplate } = await import('../scripts/localization-source.mjs');
+  const rules = [];
+  for (const [file, prefix] of [
+    ['content/action_cards/spy.rs', "Look at another player's hand"],
+    ['content/objectives/unit_objectives.rs', 'At least 4 of your cities each contain'],
+    ['content/objectives/unit_objectives.rs', 'You own a city at least 5 spaces'],
+    ['content/objectives/unit_objectives.rs', 'You could form at least 3 trade routes.'],
+    ['content/objectives/unit_objectives.rs', 'You could form at least 2 trade routes using your ships.'],
+    ['content/action_cards/mercenaries.rs', 'You may move any number of Barbarian armies'],
+    ['leader_ability.rs', 'A: When drawing a wonder:'],
+  ]) {
+    const source = await readFile(new URL(`../../server/src/${file}`, import.meta.url), 'utf8');
+    const rule = rustStrings(source).find(({ value }: { value: string }) => value.startsWith(prefix));
+    assert.ok(rule, file);
+    rules.push(rustTemplate(rule.value).replace(/\s+/g, ' ').trim());
+  }
+  const examples: [string, string[]][] = [
+    ['Build {p0}', ['Temple']],
+    ['Build {p0} at {p1}', ['Temple', 'C2']],
+    ['Continue to payment at {p0}', ['C2']],
+    ['Free with {p0}', ['Engineering']],
+    ['Free with {p0} · once per turn', ['Engineering']],
+    ['city size {p0}', ['3']],
+    ['city size {p0}, Fortress', ['3']],
+    ['{p0} army ({p1} aboard)', ['2', '1']],
+    ['Recruit {p0} unit', ['1']],
+    ['Recruit {p0} units & action card', ['2']],
+    ['{p0}: gained {p1} at {p2}', ['Alice', '2', 'C2']],
+  ];
+  for (const locale of Object.keys(languages)) {
+    const catalog = JSON.parse(await readFile(new URL(`./localization/${locale}.json`, import.meta.url), 'utf8'));
+    const translator = createTranslator({ [locale]: catalog }, locale);
+    for (const key of [
+      'Clash expects a serialized game state.', 'Missing building: market', 'Illegal Nomads move',
+      'Unknown preview', 'Invalid player', 'Analysis requires a seed and a valid requesting seat',
+      'Too many unexplored map blocks', 'Known cards exceed hand size',
+      'Visible card counts exceed the card catalogue', 'Invalid replay history cursor',
+      'Invalid replay player count', 'Invalid replay player indices',
+      'Replay target {p0} is outside the action history', 'Replay history is missing a setup civilization',
+      'Replay history is missing a draft civilization', 'Replay target {p0} is not a complete action boundary',
+      'Invalid replay options: {p0}', 'Public map does not match the standard tile catalogue',
+    ]) {
+      assert.ok(Object.hasOwn(catalog, key), `${locale}: missing error ${key}`);
+      if (locale !== 'en') assert.notEqual(catalog[key], key, `${locale}: untranslated error ${key}`);
+    }
+    translator.setNames(['Alice']);
+    const format = (text: string, values: string[]) => text.replace(/\{p(\d+)\}/g, (_, i) => values[Number(i)]);
+    for (const rule of rules) {
+      assert.ok(Object.hasOwn(catalog, rule), `${locale}: missing current engine rule ${rule}`);
+      const values = ['Great Library', 'Great Library', 'Great Library'];
+      const rendered = format(rule, values);
+      assert.equal(translator.translate(rendered), format(catalog[rule], values.map((value) => translator.translate(value))), `${locale}: ${rendered}`);
+      if (locale !== 'en') assert.notEqual(catalog[rule], rule, `${locale}: untranslated rule`);
+    }
+    for (const [key, values] of examples) {
+      assert.ok(Object.hasOwn(catalog, key), `${locale}: missing ${key}`);
+      assert.equal(translator.translate(format(key, values)), format(catalog[key], values.map((value) => translator.translate(value))), `${locale}: ${key}`);
+    }
+    const segments = ['Forest', 'Rome', 'city size 3, Fortress', 'Happy', '2 army (1 aboard)', '1 ships'];
+    assert.equal(translator.translate(segments.join(' · ')), segments.map((segment) => translator.translate(segment)).join(' · '), `${locale}: composed strategy tooltip`);
+  }
+});
+
+test('ambiguous adjacent parameters are not guessed, and nested caches do not poison later translations', () => {
+  const t = createTranslator({ fr: {
+    'Build {p0}{p1}': 'incorrect {p0}{p1}',
+    'Build {p0} at {p1}': 'Construire {p0} à {p1}',
+    Temple: 'Temple',
+    '{p0} army{p1}': '{p0} armée{p1}',
+    Forest: 'Forêt',
+    'city size {p0}, Fortress': 'ville de taille {p0}, Forteresse',
+    '{p0} army ({p1} aboard)': '{p0} armée ({p1} à bord)',
+  } }, 'fr');
+  assert.equal(t.translate('Build Temple at C2'), 'Construire Temple à C2');
+  assert.equal(t.translate('Forest · city size 3, Fortress · 2 army (1 aboard)'), 'Forêt · ville de taille 3, Forteresse · 2 armée (1 à bord)');
+  assert.equal(t.translate('city size 3, Fortress'), 'ville de taille 3, Forteresse');
+});

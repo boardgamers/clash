@@ -8,6 +8,7 @@
     transient,
     civilization,
   }: { markers: ResourceMarker[]; animate: boolean; transient: boolean; civilization: string } = $props();
+  const resources = $derived(markers.map((m) => `${m.amount} ${resourceNames[m.resource].toLowerCase()}`).join(', '));
   const icons = {
     food: Wheat,
     wood: Trees,
@@ -26,7 +27,9 @@
   class:rise={animate}
   class:transient
   role="img"
-  aria-label={`${civilization}: gained ${markers.map((m) => `${m.amount} ${resourceNames[m.resource].toLowerCase()}`).join(', ')}${markers[0].position ? ` at ${markers[0].position}` : ''}`}
+  aria-label={markers[0].position
+    ? `${civilization}: gained ${resources} at ${markers[0].position}`
+    : `${civilization}: gained ${resources}`}
 >
   {#if !markers[0].position}<span class="gain-civilization">{civilization}</span>{/if}
   {#each markers as marker}

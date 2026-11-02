@@ -169,7 +169,7 @@
           showZero
         />
       </div>{/if}
-    <button class="icon-button" aria-label="Close city management" onclick={close}><X /></button>
+    <button class="icon-button" data-panel-close aria-label="Close city management" onclick={close}><X /></button>
   </header>
   {#if tab !== 'happiness' && ($session.view?.cities.length ?? 0) > 1}<nav
       class="city-picker"
@@ -431,7 +431,9 @@
           ? 'Confirming…'
           : $session.draftCard && !count
             ? 'Draft action card'
-            : `Recruit ${count || ''} ${count === 1 ? 'unit' : 'units'}${$session.draftCard ? ' & action card' : ''}`}</button
+            : ($session.draftCard
+              ? (count === 1 ? `Recruit ${count} unit & action card` : `Recruit ${count} units & action card`)
+              : (count === 1 ? `Recruit ${count} unit` : `Recruit ${count} units`))}</button
       >
     </footer>{/if}
   {#if $session.error}<p class="city-error" role="alert">{cityReason($session.error, city?.size)}</p>{/if}

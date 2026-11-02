@@ -46,7 +46,7 @@
       <h2><Sparkles size={18} />{active.offer.name}</h2>
       <button
         class="icon-button close-movement"
-        aria-label="Close abilities"
+        data-panel-close aria-label="Close abilities"
         onclick={() => controller.patch({ abilitiesOpen: false })}><X size={18} /></button
       >
     </header>
@@ -81,7 +81,7 @@
   {:else}
     <button
       class="icon-button close-action"
-      aria-label="Close abilities"
+      data-panel-close aria-label="Close abilities"
       onclick={() => controller.patch({ abilitiesOpen: false })}><X size={18} /></button
     >
     <h2><Sparkles size={21} />Abilities</h2>

@@ -104,7 +104,7 @@
       >{/if}
     <button
       class="icon-button close-movement"
-      aria-label="Close movement controls"
+      data-panel-close aria-label="Close movement controls"
       onclick={() =>
         controller.patch({
           mode: 'overview',

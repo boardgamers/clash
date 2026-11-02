@@ -38,7 +38,7 @@
     if (e.key === 'Escape') onClose();
   }}
 >
-  <button class="close-guide icon-button" aria-label="Close active effects" onclick={onClose}
+  <button class="close-guide icon-button" data-panel-close aria-label="Close active effects" onclick={onClose}
     ><X size={20} /></button
   >
   <h2><Sparkles size={23} /> Active effects</h2>

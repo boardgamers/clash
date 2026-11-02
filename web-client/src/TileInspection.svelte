@@ -26,7 +26,7 @@
       <small class="tile-coordinate">{position}</small>
       <button
         class="icon-button"
-        aria-label="Close tile details"
+        data-panel-close aria-label="Close tile details"
         onclick={() => controller.patch({ tilePanel: false })}><X size={18} /></button
       >
     </header>

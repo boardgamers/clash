@@ -282,7 +282,7 @@
         </p>{/if}
     </div>
     <!-- The dialog focuses its first control; avoid opening the mobile keyboard. -->
-    <button class="icon-button" aria-label="Close research" onclick={close}><X size={21} /></button>
+    <button class="icon-button" data-panel-close aria-label="Close research" onclick={close}><X size={21} /></button>
     <label class="research-search"
       ><Search size={17} /><input
         aria-label="Search research"
@@ -469,7 +469,7 @@
                         class="research-advance-link"
                         title="No resource cost; the research action and prerequisites still apply."
                         onclick={() => showAdvance(source.id)}
-                        >Free with {source.name}{source.oncePerTurn ? ' · once per turn' : ''}</button
+                        >{source.oncePerTurn ? `Free with ${source.name} · once per turn` : `Free with ${source.name}`} </button
                       >
                     </span>
                   {/each}
