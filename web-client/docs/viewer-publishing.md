@@ -708,3 +708,13 @@ rather than submitting a normal Construct action. Regression coverage includes
 neutral and angry activated cities, zero actions, declining, payment, and opponent
 views. These presentation changes ship in the viewer's bundled rules bridge;
 the deployed game engine remains unchanged.
+
+## Viewer 0.1.189 / engine unchanged (0.4.126)
+
+Anchor the chat composer and Send button at the bottom of the activity panel,
+letting the message list fill and scroll within the remaining space. Browsers
+without `::details-content` retain the protocol's bounded message list. Position
+the activity close button in the top-right corner with a 44px touch target, reserve
+space for it in the tabs, and separate the mobile minimize control from it.
+Includes desktop/mobile browser layout regression checks with empty, short and
+long chat histories. No engine or bundled rules bridge changes.

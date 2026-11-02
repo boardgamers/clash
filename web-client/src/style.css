@@ -1417,6 +1417,27 @@ small {
   padding: 12px;
   font-size: 13px;
 }
+.chat-panel .bgs-game-chat {
+  height: 100%;
+  box-sizing: border-box;
+}
+/* Keep the protocol's bounded message list on older details implementations. */
+@supports selector(::details-content) {
+  .chat-panel .bgs-game-chat::details-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+  .chat-panel .bgs-game-chat .chat-messages {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+  }
+  .chat-panel .bgs-game-chat .chat-composer {
+    flex-shrink: 0;
+  }
+}
 .chat-panel details {
   border: 0 !important;
   background: transparent !important;
@@ -2396,7 +2417,15 @@ small {
   margin-left: auto;
 }
 .activity-tabs button.close-activity {
-  width: 26px;
+  position: absolute;
+  top: 0;
+  right: 4px;
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+}
+.activity-tabs {
+  padding-right: 56px;
 }
 .end-confirm {
   display: flex;
@@ -5212,7 +5241,8 @@ small {
     background: var(--paper);
   }
   .game-shell .mobile-minimize-positioned.mobile-minimize-has-close > .mobile-panel-minimize {
-    right: 44px;
+    /* Leave a gap beside the close control's 44px mobile touch target. */
+    right: 56px;
   }
   .mobile-minimize-positioned > h2 {
     padding-right: 40px;
