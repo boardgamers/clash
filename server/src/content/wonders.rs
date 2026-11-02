@@ -60,8 +60,8 @@ fn great_wall() -> WonderInfo {
                 && c.defender_city(game)
                     .is_some_and(|c| c.mood_state == MoodState::Happy)
             {
-                s.defender_strength.extra_combat_value -= 2;
-                s.defender_strength
+                s.attacker_strength.extra_combat_value -= 2;
+                s.attacker_strength
                     .roll_log
                     .push("Great Wall gives -2 combat value in the first round".to_string());
             }

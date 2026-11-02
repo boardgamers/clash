@@ -339,8 +339,11 @@
                             "bonus": true
                           }
                         ],
-                        "combat_value": 14,
-                        "hits": 2
+                        "combat_value": 12,
+                        "hits": 2,
+                        "combat_modifiers": [
+                          "Great Wall gives -2 combat value in the first round"
+                        ]
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -361,11 +364,8 @@
                             "bonus": false
                           }
                         ],
-                        "combat_value": 11,
-                        "hits": 2,
-                        "combat_modifiers": [
-                          "Great Wall gives -2 combat value in the first round"
-                        ]
+                        "combat_value": 13,
+                        "hits": 2
                       },
                       "origin": {
                         "Ability": "Combat"

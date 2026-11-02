@@ -449,19 +449,24 @@ fn recruit_cost_options_excluding(
     {
         return Err("Too many units".to_string());
     }
+    let city_stack_limit = if units.leader == Some(crate::leader::Leader::Xerxes) {
+        5
+    } else {
+        crate::content::civilizations::persia::stack_limit(player, city_position)
+    };
+    let deployment_capacity = crate::content::civilizations::celts::rapid_recruitment_capacity(
+        game,
+        player,
+        units,
+        city_position,
+    );
     if player
         .get_units(city_position)
         .iter()
         .filter(|unit| unit.is_army_unit())
-        .count() as u8
-        + units.amount()
-        - units.settlers
-        - units.ships
-        > if units.leader == Some(crate::leader::Leader::Xerxes) {
-            5
-        } else {
-            crate::content::civilizations::persia::stack_limit(player, city_position) as u8
-        }
+        .count()
+        + usize::from(units.amount() - units.settlers - units.ships)
+        > city_stack_limit + deployment_capacity
     {
         return Err("Too many units in stack".to_string());
     }
@@ -477,5 +482,8 @@ fn recruit_cost_options_excluding(
 
 fn is_cavalry_province_city(player: &Player, city: Position, game: &Game) -> bool {
     player.has_special_advance(SpecialAdvance::Provinces)
-        && game.map.revealed_distance(capital_city_position(game, player), city).is_some_and(|distance| distance >= 3)
+        && game
+            .map
+            .revealed_distance(capital_city_position(game, player), city)
+            .is_some_and(|distance| distance >= 3)
 }

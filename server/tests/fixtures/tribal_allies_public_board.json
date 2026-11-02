@@ -1,0 +1,447 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "civilization": "Celts",
+      "cities": [
+        {
+          "city_pieces": {
+            "temple": 0
+          },
+          "mood_state": "Happy",
+          "position": "D2"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "activations": 1,
+          "position": "C4"
+        },
+        {
+          "mood_state": "Angry",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C4",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Forest"
+          ],
+          "id": 1
+        },
+        {
+          "position": "C4",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Forest"
+          ],
+          "id": 2
+        },
+        {
+          "position": "C4",
+          "unit_type": {
+            "Leader": "Vercingetorix"
+          },
+          "id": 3
+        },
+        {
+          "position": "C4",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C4",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "D5",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Mountain"
+          ],
+          "id": 6
+        },
+        {
+          "position": "C4",
+          "unit_type": "Settler",
+          "id": 7
+        },
+        {
+          "position": "D5",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Mountain"
+          ],
+          "id": 8
+        },
+        {
+          "position": "C4",
+          "unit_type": "Settler",
+          "id": 10
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle",
+            "Fertile"
+          ],
+          "id": 11
+        },
+        {
+          "position": "C4",
+          "unit_type": "Infantry",
+          "id": 12
+        }
+      ],
+      "next_unit_id": 13,
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics",
+        "Draft"
+      ],
+      "resources": {
+        "food": 7,
+        "ideas": 7
+      },
+      "resource_limit": {
+        "food": 7,
+        "ideas": 7
+      },
+      "incident_tokens": 1
+    },
+    {
+      "id": 1,
+      "civilization": "Maya",
+      "cities": [
+        {
+          "city_pieces": {
+            "academy": 1,
+            "market": 1
+          },
+          "mood_state": "Happy",
+          "position": "D7"
+        },
+        {
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Happy",
+          "position": "C6"
+        },
+        {
+          "city_pieces": {
+            "academy": 1
+          },
+          "mood_state": "Happy",
+          "position": "E6"
+        }
+      ],
+      "units": [
+        {
+          "position": "C6",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "C6",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "C6",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "C6",
+          "unit_type": "Infantry",
+          "id": 5
+        }
+      ],
+      "next_unit_id": 6,
+      "advances": [
+        "Farming",
+        "Mining"
+      ]
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "cities": [
+        {
+          "mood_state": "Neutral",
+          "position": "D3"
+        },
+        {
+          "mood_state": "Neutral",
+          "position": "B7"
+        },
+        {
+          "mood_state": "Neutral",
+          "position": "A5"
+        }
+      ],
+      "units": [
+        {
+          "position": "D3",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "D3",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "C8",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "C8",
+          "unit_type": "Cavalry",
+          "id": 4
+        },
+        {
+          "position": "B5",
+          "unit_type": "Infantry",
+          "id": 5
+        },
+        {
+          "position": "C8",
+          "unit_type": "Elephant",
+          "id": 6
+        },
+        {
+          "position": "B7",
+          "unit_type": "Infantry",
+          "id": 7
+        },
+        {
+          "position": "A5",
+          "unit_type": "Infantry",
+          "id": 8
+        }
+      ],
+      "next_unit_id": 9
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "cities": [],
+      "units": [
+        {
+          "position": "D4",
+          "unit_type": "Ship",
+          "id": 0
+        },
+        {
+          "position": "B6",
+          "unit_type": "Ship",
+          "id": 1
+        }
+      ],
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Water"
+      ],
+      [
+        "A5",
+        "Fertile"
+      ],
+      [
+        "A7",
+        "Barren"
+      ],
+      [
+        "B2",
+        "Water"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Forest"
+      ],
+      [
+        "B6",
+        "Water"
+      ],
+      [
+        "B7",
+        "Fertile"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Mountain"
+      ],
+      [
+        "C4",
+        "Forest"
+      ],
+      [
+        "C5",
+        "Fertile"
+      ],
+      [
+        "C6",
+        "Fertile"
+      ],
+      [
+        "C7",
+        "Forest"
+      ],
+      [
+        "C8",
+        "Mountain"
+      ],
+      [
+        "D1",
+        "Barren"
+      ],
+      [
+        "D2",
+        "Fertile"
+      ],
+      [
+        "D3",
+        "Forest"
+      ],
+      [
+        "D4",
+        "Water"
+      ],
+      [
+        "D5",
+        "Mountain"
+      ],
+      [
+        "D6",
+        "Forest"
+      ],
+      [
+        "D7",
+        "Fertile"
+      ],
+      [
+        "D8",
+        "Mountain"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Unexplored"
+      ],
+      [
+        "E4",
+        "Water"
+      ],
+      [
+        "E5",
+        "Unexplored"
+      ],
+      [
+        "E6",
+        "Mountain"
+      ],
+      [
+        "E7",
+        "Fertile"
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        "Unexplored"
+      ],
+      [
+        "F3",
+        "Unexplored"
+      ],
+      [
+        "F4",
+        "Unexplored"
+      ],
+      [
+        "F5",
+        "Unexplored"
+      ],
+      [
+        "F6",
+        "Barren"
+      ],
+      [
+        "F7",
+        "Fertile"
+      ],
+      [
+        "G3",
+        "Unexplored"
+      ],
+      [
+        "G5",
+        "Unexplored"
+      ],
+      [
+        "G7",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "log": [
+    {
+      "age": 4,
+      "rounds": [
+        {
+          "round": 3,
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "log_index": 0,
+  "undo_limit": 0,
+  "actions_left": 1,
+  "round": 3,
+  "age": 4,
+  "messages": [],
+  "incidents_left": [
+    10
+  ]
+}

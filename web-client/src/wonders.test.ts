@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 import { printedCardName } from './card-names.ts';
 import { officialWonderText, wonderName } from './wonder-names.ts';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
@@ -45,6 +46,44 @@ test('built wonder effects are public for both players and spectators; private c
       view.wonderCards.map((w: any) => w.id),
       seat === undefined ? [] : seat === 0 ? ['GreatLibrary'] : ['GreatStatue'],
     );
+  }
+});
+
+test('Great Wall reduces the attacking roll and logs the modifier for the attacker only', async () => {
+  const npcs = JSON.parse(await engine.init(2, [], {}, 'great-wall-regression', {})).players.slice(2);
+  for (const mood of ['Happy', 'Neutral', 'Angry']) {
+    const game = JSON.parse(readFileSync(
+      new URL('../../server/tests/test_games/wonders/great_wall.json', import.meta.url), 'utf8',
+    ));
+    for (const npc of npcs)
+      if (!game.players.some((p: any) => p.civilization === npc.civilization))
+        game.players.push({ ...npc, id: game.players.length });
+    for (const player of game.players.slice(0, 2)) {
+      player.action_cards = [];
+      for (const unit of player.units) unit.unit_type = 'Infantry';
+    }
+    game.players[0].cities[0].mood_state = mood;
+    game.dice_roll_outcomes = [4, 4, 4, 4]; // Two 3/Elephant faces, no Infantry bonus.
+    const after = JSON.parse(engine.tryMove(JSON.stringify(game), JSON.stringify({
+      Movement: { Move: { units: [0, 1], destination: 'A1', payment: {} } },
+    }), 1));
+    const rolls: any[] = [];
+    function collect(value: any) {
+      if (!value || typeof value !== 'object') return;
+      if (value.CombatRoll) rolls.push(value);
+      for (const child of Object.values(value)) collect(child);
+    }
+    collect(after.log);
+    assert.equal(rolls.length, 2);
+    for (const { player, CombatRoll: roll } of rolls) {
+      const penalized = mood === 'Happy' && player === 1;
+      assert.equal(roll.combat_value, penalized ? 4 : 6);
+      assert.deepEqual(roll.combat_modifiers ?? [], penalized
+        ? ['Great Wall gives -2 combat value in the first round'] : []);
+    }
+    assert.equal(after.players[0].units.filter((u: any) => u.position === 'A1').length,
+      mood === 'Happy' ? 2 : 1);
+    assert.equal(after.players[1].units.length, 1, 'the defending army keeps its full combat value');
   }
 });
 

@@ -763,6 +763,47 @@ test('Rapid Recruitment offers direct deployment of each new land unit', async (
   );
 });
 
+test('Rapid Recruitment recruits city capacity from a full stack and places without movement penalties', async () => {
+  const g = await setup('Celts', 'Vercingetorix'), index = seat(g), p = g.players[index];
+  const city = p.cities[0].position;
+  addAdvance(p, 'Tactics');
+  p.cities[0].city_pieces = { academy: index, fortress: index, temple: index };
+  p.cities[0].mood_state = 'Neutral';
+  for (const tile of g.map.tiles) tile[1] = 'Fertile';
+  // Read the real placement choices before filling the recruiting city's stack.
+  const probe = move(g, query(g, { kind: 'recruit', city, units: { infantry: 1 }, replaced: [] }).action);
+  const [mountain, forest] = view(probe).decision.options.map((o: any) => o.position);
+  assert.ok(mountain && forest);
+  g.map.tiles.find(([pos]: string[]) => pos === mountain)[1] = 'Mountain';
+  g.map.tiles.find(([pos]: string[]) => pos === forest)[1] = 'Forest';
+  for (let i = 0; i < 3; i++) p.units.push({ id: p.next_unit_id++, position: city, unit_type: 'Infantry' });
+  const first = p.next_unit_id;
+  assert.equal(view(g).cityActions.find((c: any) => c.position === city)
+    .recruits.find((r: any) => r.type === 'Infantry').reason, null);
+  assert.throws(() => query(g, { kind: 'recruit', city, units: { infantry: 5 }, replaced: [] }), /Too many units/);
+  let after = move(g, query(g, { kind: 'recruit', city, units: { infantry: 4 }, replaced: [] }).action);
+  for (const target of [mountain, forest, mountain, forest]) {
+    const d = view(after).decision;
+    assert.equal(d.min, 1);
+    assert.ok(d.options.some((o: any) => o.position === target));
+    assert.throws(() => query(after, { kind: 'decision', values: [] }));
+    after = move(after, query(after, { kind: 'decision', values: [target] }).action);
+  }
+  assert.ok(!view(after).decision);
+  assert.equal(after.state, 'Playing');
+  assert.equal(after.actions_left, g.actions_left - 1);
+  assert.equal(after.players[index].units.filter((u: any) => u.position === city && u.unit_type !== 'Settler').length, 4);
+  for (const id of [first, first + 1, first + 2, first + 3]) {
+    assert.deepEqual(after.players[index].units.find((u: any) => u.id === id).movement_restrictions ?? [], []);
+    assert.ok(query(after, { kind: 'movement', units: [id] }).destinations.length,
+      'a recruit deployed on Mountain/Forest can still move normally');
+  }
+  const route = query(after, { kind: 'movement', units: [first] }).destinations[0];
+  const moved = move(after, route.action);
+  assert.equal(moved.players[index].units.find((u: any) => u.id === first).position, route.position);
+  assert.equal(moved.actions_left, g.actions_left - 2);
+});
+
 function heldCaptives(g: any, index: number, n: number) {
   const p = g.players[index],
     owner = 1 - index;

@@ -25,6 +25,10 @@ use serde::{Deserialize, Serialize};
 #[path = "barbarians_tests.rs"]
 mod tests;
 
+#[cfg(test)]
+#[path = "barbarians_spawn_tests.rs"]
+mod spawn_tests;
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct BarbariansMoveRequest {
     pub from: Position,
@@ -619,7 +623,9 @@ fn is_base_barbarian_spawn_pos(game: &Game, pos: Position, player: &Player) -> b
     game.map.get(pos).is_some_and(|t| {
         t.is_land() && !matches!(t, Terrain::Barren) && !matches!(t, Terrain::Exhausted(_))
     }) && !anything_present(game, pos)
-        && cities_in_land_range(game, |p| p.index != player.index, pos, 1).is_empty()
+        // "Other players' cities" excludes game-controlled Barbarian settlements.
+        && cities_in_land_range(game, |p| p.is_human() && p.index != player.index, pos, 1)
+            .is_empty()
 }
 
 fn anything_present(game: &Game, pos: Position) -> bool {

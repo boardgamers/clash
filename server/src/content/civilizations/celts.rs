@@ -18,11 +18,11 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, LeaderAbilityBuilder};
-use crate::player::gain_unit;
+use crate::player::{Player, can_add_army_unit, gain_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{UnitType, set_unit_position};
+use crate::unit::{UnitType, Units, set_unit_position};
 use crate::victory_points::{SpecialVictoryPoints, VictoryPointAttribution};
 
 pub(crate) fn celts() -> Civilization {
@@ -224,6 +224,42 @@ fn viriatus() -> LeaderInfo {
                 }
             }).build())
 }
+fn rapid_recruitment_neighbors(game: &Game, player: usize, city: Position) -> Vec<Position> {
+    city.neighbors()
+        .into_iter()
+        .filter(|pos| game.map.is_land(*pos) && game.enemy_player(player, *pos).is_none())
+        .collect()
+}
+
+/// Extra placement capacity, not a larger stack in the recruiting city. The
+/// printed card allows direct deployment, so only the final stacks must fit.
+/// A newly recruited/replacement leader cannot provide the post-recruit ability.
+pub(crate) fn rapid_recruitment_capacity(
+    game: &Game,
+    player: &Player,
+    units: &Units,
+    city: Position,
+) -> usize {
+    if units.leader.is_some()
+        || player.active_leader() != Some(Leader::Vercingetorix)
+        || leader_position(player) != city
+    {
+        return 0;
+    }
+    rapid_recruitment_neighbors(game, player.index, city)
+        .into_iter()
+        .map(|pos| {
+            crate::content::civilizations::persia::stack_limit(player, pos).saturating_sub(
+                player
+                    .get_units(pos)
+                    .iter()
+                    .filter(|u| u.is_army_unit())
+                    .count(),
+            )
+        })
+        .sum()
+}
+
 fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
     for i in 0..8u32 {
         b = b.add_position_request(
@@ -244,20 +280,35 @@ fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
                     .iter()
                     .filter(|u| u.id >= first && !u.is_ship())
                     .nth(i as usize)?;
-                let choices = r
-                    .city_position
-                    .neighbors()
+                let player = p.get(game);
+                let choices = rapid_recruitment_neighbors(game, p.index, r.city_position)
                     .into_iter()
-                    .filter(|pos| {
-                        game.map.is_land(*pos)
-                            && game.enemy_player(p.index, *pos).is_none()
-                            && (!unit.is_army_unit()
-                                || crate::player::can_add_army_unit(p.get(game), *pos))
-                    })
+                    .filter(|pos| !unit.is_army_unit() || can_add_army_unit(player, *pos))
                     .collect();
+                // New units are staged in the city while placement is pending.
+                // Keeping this one is legal only if the remaining recruits can
+                // still remove all overflow; previously kept units stay put.
+                let remaining_army = player
+                    .units
+                    .iter()
+                    .filter(|u| u.id >= first && !u.is_ship())
+                    .skip(i as usize + 1)
+                    .filter(|u| u.is_army_unit())
+                    .count();
+                let city_army = player
+                    .get_units(r.city_position)
+                    .iter()
+                    .filter(|u| u.is_army_unit())
+                    .count();
+                let must_deploy = unit.is_army_unit()
+                    && city_army
+                        > crate::content::civilizations::persia::stack_limit(
+                            player,
+                            r.city_position,
+                        ) + remaining_army;
                 Some(PositionRequest::new(
                     choices,
-                    0..=1,
+                    u8::from(must_deploy)..=1,
                     &format!(
                         "Rapid Recruitment · Deploy {} #{} beside the city",
                         unit.unit_type.name(game),
@@ -276,6 +327,8 @@ fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
                         .nth(i as usize)
                         .unwrap()
                         .id;
+                    // Placement is not movement: do not apply terrain entry
+                    // restrictions, movement costs, or mark this unit as moved.
                     set_unit_position(s.player_index, id, *pos, game);
                     s.log(game, &format!("Deployed unit #{} at {pos}", id + 1));
                 }

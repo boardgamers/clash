@@ -733,3 +733,25 @@ control markers instead of translated labels for mobile panel layout. Verified
 938 frontend tests, 3 extraction tests, catalog/placeholder and source checks,
 type checks, production build, and desktop/mobile French objective, retry and
 Chinese language-switching browser checks. No engine update required.
+
+## Viewer 0.1.191 / engine 0.4.127
+
+Great Wall now applies its first-round -2 combat value to the attacker, not the
+owner's defending army, and attributes the modifier to the correct combat log.
+Preserve the happy-city condition and automatic defense against Barbarians.
+
+Vercingetorix's Rapid Recruitment accounts for available adjacent deployment
+capacity when recruiting from a full city stack. Require enough placements to
+leave legal final stacks without changing normal recruitment limits, costs or
+leader timing. Direct placement remains distinct from movement, with no terrain
+entry restrictions or movement use; newly placed units may subsequently move.
+
+Barbarian spawning excludes adjacency to other human players' cities, not other
+Barbarian settlements. The sanitized Celts/Maya board regression now offers B4,
+C2, C3 and E2 while correctly excluding C5 beside the Maya city. Preserve normal
+distance-two priority, adjacent fallback and terrain/occupancy restrictions for
+both Tribal Allies and incident spawning. No live game moves or history edits.
+
+Verified 941 frontend tests, 224 targeted Rust tests, extraction/catalog checks,
+type checks and matching engine/viewer builds. Existing unrelated Great Gardens
+error-text and Builder Epic-length test expectations remain unchanged.
