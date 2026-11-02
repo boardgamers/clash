@@ -821,3 +821,18 @@ renderer, applies the pinned Rust formatter, refreshes stale test expectations,
 and keeps snapshot checking read-only to avoid races between parallel fixture
 readers and writers. Native regression coverage exercises the live government
 change and reacquisition sequence rather than relying on reload to repair it.
+
+## Viewer 0.1.195 / engine 0.4.130
+
+Spy's player picker shows Action, Objective, and Wonder card counts beside each
+eligible target, including zero counts. Counts describe the cards Spy can inspect
+and exchange: private Great Person cards count as Action cards, while public
+Great Person cards remain excluded. Only counts are exposed before choosing a
+target; card identities and rules stay hidden until the existing reveal step.
+
+The compact count rows reuse existing localized labels, wrap on narrow screens,
+and are included in each target button's accessible description. Selecting a
+player still requires the existing Confirm step. Regression coverage includes
+both Spy copies, three- and four-player games, redaction and spectator privacy,
+public-card exclusions, and English/French desktop and mobile layouts. Publish
+the matching engine and viewer together; rules and game history are unchanged.

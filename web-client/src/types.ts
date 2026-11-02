@@ -744,6 +744,8 @@ export interface Decision {
       | { kind: 'structure'; structure: string | { Building: string } | { Wonder: string } };
     terrain?: Terrain;
     owner?: { player: number; civilization: string; you: boolean };
+    /** Public counts of the hand categories Spy can inspect, never card identities. */
+    handCounts?: { action: number; objective: number; wonder: number };
     card?:
       | { kind: 'objective'; objectives: View['objectiveCards'][number]['objectives'] }
       | { kind: 'action'; name: string; description: string; tactics: ActionCard['tactics'] }

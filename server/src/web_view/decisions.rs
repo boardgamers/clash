@@ -1,7 +1,7 @@
 //! UI descriptions of the engine's pending requests. Selections are validated here;
 //! previews never execute a response or advance the random stream.
 use crate::action::Action;
-use crate::card::{HandCard, validate_card_selection};
+use crate::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use crate::consts::MAX_HUMAN_PLAYERS;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::*;
@@ -429,9 +429,23 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
         }
         PersistentEventRequest::SelectPlayer(r) => {
             description.clone_from(&r.description);
+            let spy = h.origin.name(game) == "Spy";
             r.choices
                 .iter()
-                .map(|i| option(i, &game.player(*i).civilization.name, "", None))
+                .map(|i| {
+                    let player = game.player(*i);
+                    let mut choice = option(i, &player.civilization.name, "", None);
+                    if spy {
+                        // Counts survive redaction; identities stay hidden until selection.
+                        // Use Spy's hand categories, excluding public Great Person cards.
+                        choice["handCounts"] = json!({
+                            "action": hand_cards(player, &[HandCardType::Action], game).len(),
+                            "objective": hand_cards(player, &[HandCardType::Objective], game).len(),
+                            "wonder": hand_cards(player, &[HandCardType::Wonder], game).len(),
+                        });
+                    }
+                    choice
+                })
                 .collect()
         }
         PersistentEventRequest::SelectUnitType(r) => {

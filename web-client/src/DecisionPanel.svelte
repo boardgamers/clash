@@ -183,11 +183,11 @@
       {@const Icon = unit?.icon ?? (advance ? researchPresentation(advance).icon : null)}
       <button
         class="decision-option"
-        class:has-description={!!presented.description}
+        class:has-description={!!presented.description || !!option.handCounts}
         class:card-option={!!option.card}
         class:selected={selected.includes(i)}
         aria-label={presented.name}
-        aria-describedby={presented.description ? `${panelId}-option-${i}` : undefined}
+        aria-describedby={presented.description || option.handCounts ? `${panelId}-option-${i}` : undefined}
         aria-pressed={selected.includes(i)}
         disabled={$session.pending ||
           (!selected.includes(i) && decision.max > 1 && selected.length >= decision.max)}

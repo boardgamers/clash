@@ -1,6 +1,6 @@
 <script lang="ts">
   import { printedCardName } from './card-names';
-  import { Hourglass, Zap, Layers, Swords } from 'lucide-svelte';
+  import { Hourglass, Zap, Layers, Swords, Target, Landmark } from 'lucide-svelte';
   import type { Decision } from './types';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import ObjectiveArt from './ObjectiveArt.svelte';
@@ -51,6 +51,19 @@
     {/if}
   {:else}
     <span class="decision-option-name">{option.name}</span>
+    {#if option.handCounts}
+      <span class="decision-hand-counts" role="group">
+        <span class="decision-hand-count" data-card-kind="action" title="Action cards">
+          <Layers size={12} aria-hidden="true" /><span>Action</span> <b>{option.handCounts.action}</b>
+        </span>
+        <span class="decision-hand-count" data-card-kind="objective" title="Objective cards">
+          <Target size={12} aria-hidden="true" /><span>Objectives</span> <b>{option.handCounts.objective}</b>
+        </span>
+        <span class="decision-hand-count" data-card-kind="wonder" title="Wonders">
+          <Landmark size={12} aria-hidden="true" /><span>Wonders</span> <b>{option.handCounts.wonder}</b>
+        </span>
+      </span>
+    {/if}
     {#if option.description}
       <span class="decision-rule"><ResourceText text={option.description} /></span>
     {/if}
@@ -60,4 +73,7 @@
 <style>
   .decision-card-owner { display:flex; align-items:center; gap:.4rem; padding-bottom:.5rem; margin-bottom:.6rem; border-bottom:1px solid var(--line); color:var(--muted); font-size:.8rem; }
   .objective-progress { display:block; }
+  .decision-hand-counts { display:flex; flex-wrap:wrap; gap:.35rem .75rem; color:var(--muted); font-size:.7rem; line-height:1.4; }
+  .decision-hand-count { display:inline-flex; align-items:center; gap:.25rem; white-space:nowrap; }
+  .decision-hand-count b { color:var(--ink); font-variant-numeric:tabular-nums; }
 </style>
