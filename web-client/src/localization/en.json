@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Recruit {p0} unit",
   "Recruit {p0} units": "Recruit {p0} units",
   "Recruit {p0} unit & action card": "Recruit {p0} unit & action card",
-  "Recruit {p0} units & action card": "Recruit {p0} units & action card"
+  "Recruit {p0} units & action card": "Recruit {p0} units & action card",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.",
+  "Event effects": "Event effects",
+  "Card acquisition": "Card acquisition",
+  "Civil effect": "Civil effect",
+  "Keep on top": "Keep on top",
+  "Put at the bottom": "Put at the bottom",
+  "Preview only. This event has not been triggered.": "Preview only. This event has not been triggered."
 }

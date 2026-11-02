@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Recrutar {p0} unidade",
   "Recruit {p0} units": "Recrutar {p0} unidades",
   "Recruit {p0} unit & action card": "Recrutar {p0} unidade e carta de ação",
-  "Recruit {p0} units & action card": "Recrutar {p0} unidades e carta de ação"
+  "Recruit {p0} units & action card": "Recrutar {p0} unidades e carta de ação",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "O jogador que desencadeou o evento pode pegar a carta por 1 ficha de cultura. Se ele recusar, os outros jogadores podem pegá-la, na ordem dos turnos, por 2 fichas de cultura.",
+  "Event effects": "Efeitos do evento",
+  "Card acquisition": "Obtenção da carta",
+  "Civil effect": "Efeito civil",
+  "Keep on top": "Manter no topo",
+  "Put at the bottom": "Colocar no fundo",
+  "Preview only. This event has not been triggered.": "Apenas uma prévia. Este evento ainda não foi desencadeado."
 }

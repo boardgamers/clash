@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "استخدام {p0} واحد",
   "Recruit {p0} units": "استخدام {p0} واحد",
   "Recruit {p0} unit & action card": "استخدام {p0} واحد و دریافت کارت کنش",
-  "Recruit {p0} units & action card": "استخدام {p0} واحد و دریافت کارت کنش"
+  "Recruit {p0} units & action card": "استخدام {p0} واحد و دریافت کارت کنش",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "بازیکنی که رویداد را فعال کرده است می‌تواند کارت را با پرداخت 1 نشان فرهنگ بگیرد. اگر صرف‌نظر کند، بازیکنان دیگر می‌توانند به‌ترتیب نوبت با پرداخت 2 نشان فرهنگ کارت را بگیرند.",
+  "Event effects": "اثرهای رویداد",
+  "Card acquisition": "دریافت کارت",
+  "Civil effect": "اثر غیرنظامی",
+  "Keep on top": "بالای دسته نگه دار",
+  "Put at the bottom": "زیر دسته قرار بده",
+  "Preview only. This event has not been triggered.": "فقط پیش‌نمایش است. این رویداد هنوز فعال نشده است."
 }

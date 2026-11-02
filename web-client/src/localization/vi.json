@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Chiêu mộ {p0} đơn vị",
   "Recruit {p0} units": "Chiêu mộ {p0} đơn vị",
   "Recruit {p0} unit & action card": "Chiêu mộ {p0} đơn vị và nhận bài hành động",
-  "Recruit {p0} units & action card": "Chiêu mộ {p0} đơn vị và nhận bài hành động"
+  "Recruit {p0} units & action card": "Chiêu mộ {p0} đơn vị và nhận bài hành động",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Người kích hoạt sự kiện có thể lấy lá bài với giá 1 token văn hóa. Nếu người đó từ chối, các người chơi khác có thể lấy lá bài theo thứ tự lượt với giá 2 thẻ văn hóa.",
+  "Event effects": "Hiệu ứng sự kiện",
+  "Card acquisition": "Nhận lá bài",
+  "Civil effect": "Hiệu ứng dân sự",
+  "Keep on top": "Giữ trên cùng chồng bài",
+  "Put at the bottom": "Đặt xuống dưới cùng chồng bài",
+  "Preview only. This event has not been triggered.": "Chỉ là xem trước. Sự kiện này chưa được kích hoạt."
 }

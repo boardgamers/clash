@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "招募{p0}个单位",
   "Recruit {p0} units": "招募{p0}个单位",
   "Recruit {p0} unit & action card": "招募{p0}个单位并获得行动牌",
-  "Recruit {p0} units & action card": "招募{p0}个单位并获得行动牌"
+  "Recruit {p0} units & action card": "招募{p0}个单位并获得行动牌",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "触发事件的玩家可以支付 1 文化标记取得此牌。若其放弃，其他玩家可以按回合顺序支付 2个文化标记取得此牌。",
+  "Event effects": "事件效果",
+  "Card acquisition": "获取卡牌",
+  "Civil effect": "内政效果",
+  "Keep on top": "保留在牌堆顶",
+  "Put at the bottom": "放到牌堆底",
+  "Preview only. This event has not been triggered.": "仅供预览。此事件尚未触发。"
 }

@@ -4803,7 +4803,7 @@
   "% win": "% de victoire",
   "+ to succeed": "+ pour réussir",
   "≈{p0}% win": "≈{p0} % de victoire",
-  "2 culture tokens": "2 jetons Culture",
+  "2 culture tokens": "2 jetons de culture",
   "Abilities blocked by": "Capacités bloquées par",
   "Abilities blocked by {p0}": "Capacités bloquées par {p0}",
   "Ability blocked by {p0}": "Capacité bloquée par {p0}",
@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Recruter {p0} unité",
   "Recruit {p0} units": "Recruter {p0} unités",
   "Recruit {p0} unit & action card": "Recruter {p0} unité et une carte Action",
-  "Recruit {p0} units & action card": "Recruter {p0} unités et une carte Action"
+  "Recruit {p0} units & action card": "Recruter {p0} unités et une carte Action",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Le joueur qui a déclenché l'événement peut prendre la carte pour 1 jeton de culture. S'il renonce, les autres joueurs peuvent la prendre, dans l'ordre du tour, pour 2 jetons de culture.",
+  "Event effects": "Effets de l'événement",
+  "Card acquisition": "Prise de la carte",
+  "Civil effect": "Effet civil",
+  "Keep on top": "Garder au-dessus du paquet",
+  "Put at the bottom": "Placer sous le paquet",
+  "Preview only. This event has not been triggered.": "Aperçu uniquement : cet événement n'est pas encore déclenché."
 }

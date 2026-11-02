@@ -1,3 +1,61 @@
+// Keep selector/key heuristics for strings in code, but a Svelte Text node is
+// already known to be visible. Leading punctuation can be ordinary prose there.
+export function sourceMessage(value, { visibleText = false } = {}) {
+  const text = value.replace(/\s+/g, ' ').trim();
+  if (
+    !/[A-Za-z]/.test(text) ||
+    text.length < 2 ||
+    /\{p\d+\}\{p\d+\}/.test(text) ||
+    /^[-a-z0-9_:/]+$/.test(text) ||
+    /[a-z]_[a-z]/.test(text) ||
+    /^[a-z]+(?:[A-Z][a-z0-9]*)+$/.test(text) ||
+    /^(?:[a-z]+-)+[a-z]+(?:\s+[a-z-]+)*$/.test(text) ||
+    /^(?:[a-z]+-)+.*\{p\d+\}/.test(text) ||
+    /^(?:crate::|three\/|position:|Building:|Wonder:|pending:|objective:|person:|status:)/.test(text) ||
+    /\{p\d+\}[:|](?:\{p\d+\}|[a-zA-Z])/.test(text) ||
+    /^\$\d/.test(text) ||
+    /^(?:Arrow(?:Up|Down|Left|Right)|F\d+|[A-Z][a-z]+(?:[A-Z][a-z]+)+)$/.test(text) ||
+    (!visibleText && /^[#.:\[]/.test(text)) ||
+    /^[a-z][a-z0-9-]*\[[a-z-]+(?:[=\]^$*~|]|\])/.test(text) ||
+    /^<[a-z]/.test(text) ||
+    /[A-Za-z]__[A-Za-z]/.test(text) ||
+    /=>|\\[bpdw]|\.\/(?:src|assets)|https?:|\.svg|\.wasm|rgba?\(|gradient\(|var\(|\d(?:px|rem)\b/.test(text)
+  ) return null;
+  return text;
+}
+
+// Preserve whether a candidate came from visible markup rather than a string
+// literal (which may be a selector or another technical value in a script).
+export function* svelteStrings(node) {
+  if (!node || typeof node !== 'object') return;
+  // Only human-facing attributes; class names, event handlers and IDs are not messages.
+  if (node.type === 'Attribute' && !['title', 'aria-label', 'placeholder', 'alt', 'label'].includes(node.name)) return;
+  if (
+    node.type === 'Fragment' &&
+    node.nodes?.some((n) => n.type === 'ExpressionTag') &&
+    node.nodes.every((n) => ['Text', 'ExpressionTag', 'Comment'].includes(n.type))
+  ) {
+    let index = 0;
+    yield {
+      value: node.nodes
+        .map((n) => (n.type === 'Text' ? n.data : n.type === 'ExpressionTag' ? `{p${index++}}` : ''))
+        .join(''),
+      visibleText: true,
+    };
+  }
+  if (node.type === 'Text') yield { value: node.data, visibleText: true };
+  if (node.type === 'Literal' && typeof node.value === 'string') yield { value: node.value };
+  if (node.type === 'TemplateLiteral') yield {
+    value: node.quasis.map((q, i) => q.value.cooked + (i < node.expressions.length ? `{p${i}}` : '')).join(''),
+  };
+  for (const [key, value] of Object.entries(node)) {
+    if (['css', 'start', 'end', 'loc'].includes(key)) continue;
+    if (Array.isArray(value)) {
+      for (const child of value) yield* svelteStrings(child);
+    } else if (value && typeof value === 'object') yield* svelteStrings(value);
+  }
+}
+
 // Rust strings are not JSON strings: escaped newlines consume the following
 // whitespace, and Rust also supports raw strings, \0, \xNN and \u{NNNN}.
 export function decodeRustString(body) {

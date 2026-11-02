@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "유닛 {p0}개 모집",
   "Recruit {p0} units": "유닛 {p0}개 모집",
   "Recruit {p0} unit & action card": "유닛 {p0}개 모집 및 행동 카드",
-  "Recruit {p0} units & action card": "유닛 {p0}개 모집 및 행동 카드"
+  "Recruit {p0} units & action card": "유닛 {p0}개 모집 및 행동 카드",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "이벤트를 발생시킨 플레이어는 1 문화 토큰을 지불하고 카드를 가져올 수 있습니다. 그 플레이어가 거절하면 다른 플레이어들이 턴 순서대로 문화 토큰 2개를 지불하고 카드를 가져올 수 있습니다.",
+  "Event effects": "이벤트 효과",
+  "Card acquisition": "카드 획득",
+  "Civil effect": "민간 효과",
+  "Keep on top": "덱 맨 위에 유지",
+  "Put at the bottom": "덱 맨 아래로 보내기",
+  "Preview only. This event has not been triggered.": "미리보기입니다. 이 이벤트는 아직 발생하지 않았습니다."
 }

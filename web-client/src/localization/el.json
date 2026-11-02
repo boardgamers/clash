@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Στρατολόγηση {p0} μονάδας",
   "Recruit {p0} units": "Στρατολόγηση {p0} μονάδων",
   "Recruit {p0} unit & action card": "Στρατολόγηση {p0} μονάδας και κάρτα ενέργειας",
-  "Recruit {p0} units & action card": "Στρατολόγηση {p0} μονάδων και κάρτα ενέργειας"
+  "Recruit {p0} units & action card": "Στρατολόγηση {p0} μονάδων και κάρτα ενέργειας",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Ο παίκτης που προκάλεσε το γεγονός μπορεί να πάρει την κάρτα (κόστος: 1 δείκτης πολιτισμού). Αν αρνηθεί, οι υπόλοιποι παίκτες μπορούν να την πάρουν με τη σειρά τους, πληρώνοντας 2 δείκτες πολιτισμού.",
+  "Event effects": "Επιδράσεις γεγονότος",
+  "Card acquisition": "Απόκτηση κάρτας",
+  "Civil effect": "Πολιτική επίδραση",
+  "Keep on top": "Διατήρηση στην κορυφή",
+  "Put at the bottom": "Τοποθέτηση στο κάτω μέρος",
+  "Preview only. This event has not been triggered.": "Μόνο προεπισκόπηση. Αυτό το γεγονός δεν έχει ακόμη ενεργοποιηθεί."
 }

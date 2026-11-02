@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "{p0} Einheit rekrutieren",
   "Recruit {p0} units": "{p0} Einheiten rekrutieren",
   "Recruit {p0} unit & action card": "{p0} Einheit und Aktionskarte rekrutieren",
-  "Recruit {p0} units & action card": "{p0} Einheiten und Aktionskarte rekrutieren"
+  "Recruit {p0} units & action card": "{p0} Einheiten und Aktionskarte rekrutieren",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Der Spieler, der das Ereignis ausgelöst hat, darf die Karte für 1 Kulturmarker nehmen. Verzichtet er, dürfen die anderen Spieler sie in Zugreihenfolge für 2 Kulturmarker nehmen.",
+  "Event effects": "Ereigniseffekte",
+  "Card acquisition": "Karte erhalten",
+  "Civil effect": "Ziviler Effekt",
+  "Keep on top": "Oben auf dem Stapel lassen",
+  "Put at the bottom": "Unter den Stapel legen",
+  "Preview only. This event has not been triggered.": "Nur eine Vorschau. Dieses Ereignis wurde noch nicht ausgelöst."
 }

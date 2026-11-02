@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "{p0} इकाई भर्ती करें",
   "Recruit {p0} units": "{p0} इकाइयाँ भर्ती करें",
   "Recruit {p0} unit & action card": "{p0} इकाई भर्ती करें और कार्रवाई कार्ड लें",
-  "Recruit {p0} units & action card": "{p0} इकाइयाँ भर्ती करें और कार्रवाई कार्ड लें"
+  "Recruit {p0} units & action card": "{p0} इकाइयाँ भर्ती करें और कार्रवाई कार्ड लें",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "घटना शुरू करने वाला खिलाड़ी 1 संस्कृति टोकन देकर कार्ड ले सकता है। यदि वह मना करता है, तो अन्य खिलाड़ी बारी के क्रम में 2 संस्कृति टोकन देकर इसे ले सकते हैं।",
+  "Event effects": "घटना के प्रभाव",
+  "Card acquisition": "कार्ड प्राप्त करना",
+  "Civil effect": "नागरिक प्रभाव",
+  "Keep on top": "ऊपर रखें",
+  "Put at the bottom": "सबसे नीचे रखें",
+  "Preview only. This event has not been triggered.": "यह केवल पूर्वावलोकन है। यह घटना अभी शुरू नहीं हुई है।"
 }

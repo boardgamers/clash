@@ -59,6 +59,39 @@ pub(super) fn decision_context(game: &Game, seat: usize) -> Option<Value> {
     )
 }
 
+/// Calendar's deck has already been shuffled by `strip_secret`, even for its
+/// owner. Structure only the event named in the owner's existing payment request;
+/// never infer the preview from the (private) next card in the deck.
+pub(super) fn calendar_preview(game: &Game, seat: usize) -> Option<Value> {
+    use crate::content::custom_actions::CustomActionType;
+    use crate::content::persistent_events::{PersistentEventRequest, PersistentEventType};
+    let event = game.events.last()?;
+    if event.player.index != seat
+        || !matches!(&event.event_type, PersistentEventType::CustomAction(action)
+            if action.action.action == CustomActionType::Calendar)
+    {
+        return None;
+    }
+    let PersistentEventRequest::Payment(requests) = &game.current_event_handler()?.request else {
+        return None;
+    };
+    let request = requests.first()?;
+    let incident = game.cache.get_incidents().iter().find(|incident| {
+        request
+            .name
+            .strip_prefix(&incident.name)
+            .is_some_and(|rest| rest.starts_with(" · "))
+    })?;
+    // Only Great Persons need the acquisition/civil-effect layout. Ordinary
+    // events retain their existing Calendar presentation and payment controls.
+    let card = incident.action_card.as_ref()?;
+    let mut rules = incident.description(game);
+    rules.retain(|rule| rule != &card.civil_card.description);
+    Some(json!({"name":incident.name,"rules":rules,
+        "card":{"description":card.civil_card.description,
+            "free":card.civil_card.action_type.free}}))
+}
+
 pub(super) fn catalog(game: &Game) -> Vec<Value> {
     game.cache.get_incidents().iter().map(|incident| json!({
         "id": incident.id,

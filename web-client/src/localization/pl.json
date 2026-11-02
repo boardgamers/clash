@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Zrekrutuj {p0} jednostkę",
   "Recruit {p0} units": "Zrekrutuj {p0} jednostek",
   "Recruit {p0} unit & action card": "Zrekrutuj {p0} jednostkę i kartę akcji",
-  "Recruit {p0} units & action card": "Zrekrutuj {p0} jednostek i kartę akcji"
+  "Recruit {p0} units & action card": "Zrekrutuj {p0} jednostek i kartę akcji",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Gracz, który wywołał wydarzenie, może wziąć kartę za 1 żeton kultury. Jeśli spasuje, pozostali gracze mogą ją wziąć w kolejności tur za 2 żetony kultury.",
+  "Event effects": "Efekty wydarzenia",
+  "Card acquisition": "Zdobycie karty",
+  "Civil effect": "Efekt cywilny",
+  "Keep on top": "Zostaw na wierzchu",
+  "Put at the bottom": "Przełóż na spód",
+  "Preview only. This event has not been triggered.": "To tylko podgląd. Wydarzenie nie zostało jeszcze wywołane."
 }

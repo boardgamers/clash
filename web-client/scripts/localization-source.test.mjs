@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { decodeRustString, rustStrings, rustTemplate } from './localization-source.mjs';
+import { parse } from 'svelte/compiler';
+import { sourceMessage, svelteStrings, decodeRustString, rustStrings, rustTemplate } from './localization-source.mjs';
 
 const root = new URL('../', import.meta.url);
 test('Rust continuation escapes match Rust whitespace and Unicode semantics', () => {
@@ -22,6 +23,39 @@ let continued = "First \\
   assert.deepEqual(rustStrings(input).map(({ value }) => value), [
     'A rule', 'An unescaped "quote" and \\n', 'First second',
   ]);
+});
+test('visible Svelte punctuation-prefixed prose is inventoried without admitting selectors', () => {
+  const fixture = `
+    <script>
+      const selectors = ['.panel button', '#game button', ':scope > button', '[data-action]'];
+    </script>
+    <p class="Ignore class text">
+      . If they pass, other players may take it in turn order for <strong>2</strong>.
+    </p>
+    <p>: Player {name}</p>
+    <p># Round summary</p>
+    <p title="[Optional] Help">[Optional] Choose a card</p>
+    <style>.panel button { --caption: "Ignore CSS text"; }</style>
+  `;
+  // Use fresh parsed markup, not the seeded English catalog: these candidates
+  // must reach the same inventory that --check compares against en.json.
+  const candidates = [...svelteStrings(parse(fixture, { modern: true }))]
+    .map(({ value, visibleText }) => sourceMessage(value, { visibleText }))
+    .filter((text) => text !== null);
+  assert.deepEqual(new Set(candidates), new Set([
+    '. If they pass, other players may take it in turn order for',
+    ': Player {p0}',
+    ': Player',
+    '# Round summary',
+    '[Optional] Help',
+    '[Optional] Choose a card',
+  ]));
+  // Other sources still use technical filtering, and unrelated heuristics stay
+  // intact even when a candidate comes from visible markup.
+  for (const value of ['.panel button', '#game button', ':scope > button', '[data-action]'])
+    assert.equal(sourceMessage(value), null, value);
+  for (const value of ['button[data-panel-close]', 'action-panel floating-panel', 'Build {p0}{p1}'])
+    assert.equal(sourceMessage(value, { visibleText: true }), null, value);
 });
 test('extracts current continued engine rules and omits test/technical noise', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'clash-locales-'));

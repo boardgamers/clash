@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Нанять {p0} отряд",
   "Recruit {p0} units": "Нанять отряды: {p0}",
   "Recruit {p0} unit & action card": "Нанять {p0} отряд и получить карту действия",
-  "Recruit {p0} units & action card": "Нанять отряды: {p0} и получить карту действия"
+  "Recruit {p0} units & action card": "Нанять отряды: {p0} и получить карту действия",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Игрок, вызвавший событие, может взять карту за 1 жетон культуры. Если он откажется, остальные игроки могут взять её в порядке хода за 2 жетона культуры.",
+  "Event effects": "Эффекты события",
+  "Card acquisition": "Получение карты",
+  "Civil effect": "Мирный эффект",
+  "Keep on top": "Оставить сверху колоды",
+  "Put at the bottom": "Положить под колоду",
+  "Preview only. This event has not been triggered.": "Только предварительный просмотр. Это событие ещё не произошло."
 }

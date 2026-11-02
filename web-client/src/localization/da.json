@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Rekruttér {p0} enhed",
   "Recruit {p0} units": "Rekruttér {p0} enheder",
   "Recruit {p0} unit & action card": "Rekruttér {p0} enhed og handlingskort",
-  "Recruit {p0} units & action card": "Rekruttér {p0} enheder og handlingskort"
+  "Recruit {p0} units & action card": "Rekruttér {p0} enheder og handlingskort",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Spilleren, der udløste begivenheden, må tage kortet for 1 kulturpolet. Hvis spilleren afstår, må de andre spillere tage det i turrækkefølge for 2 kulturbrikker.",
+  "Event effects": "Begivenhedens effekter",
+  "Card acquisition": "Sådan får du kortet",
+  "Civil effect": "Civil effekt",
+  "Keep on top": "Behold øverst i bunken",
+  "Put at the bottom": "Læg nederst i bunken",
+  "Preview only. This event has not been triggered.": "Kun en forhåndsvisning. Denne begivenhed er endnu ikke udløst."
 }

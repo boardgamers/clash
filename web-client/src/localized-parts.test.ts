@@ -1,6 +1,29 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { localizedParts } from './localized-parts.ts';
+import { readFileSync } from 'node:fs';
+import { createTranslator, languages } from './localization/runtime.js';
+import { journalParts } from './model.ts';
+
+test('Great Person acquisition translates both sentences and preserves culture costs', () => {
+  const source = 'The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.';
+  for (const locale of Object.keys(languages)) {
+    const catalog = JSON.parse(readFileSync(new URL(`./localization/${locale}.json`, import.meta.url), 'utf8'));
+    const translator = createTranslator({ [locale]: catalog }, locale);
+    assert.ok(Object.hasOwn(catalog, source), `${locale}: complete acquisition rule`);
+    if (locale !== 'en') assert.notEqual(catalog[source], source);
+    const parts = localizedParts(source, journalParts(source), translator.translate);
+    assert.equal(parts.map(p => p.text).join(''), catalog[source]);
+    const resources = parts.filter(p => 'resource' in p);
+    assert.equal(resources.length, 2, `${locale}: both resource icons survive translation`);
+    assert.ok(resources.every(p => 'resource' in p && p.resource === 'culture_tokens'));
+    if (locale === 'fr') {
+      assert.equal(parts.map(p => p.text).join(''),
+        "Le joueur qui a déclenché l'événement peut prendre la carte pour 1 jeton de culture. S'il renonce, les autres joueurs peuvent la prendre, dans l'ordre du tour, pour 2 jetons de culture.");
+      assert.deepEqual(resources.map(p => p.text), ['1 jeton de culture', '2 jetons de culture']);
+    }
+  }
+});
 
 test('translates the whole sentence and keeps reordered references and IDs', () => {
   const catalog: Record<string, string> = {

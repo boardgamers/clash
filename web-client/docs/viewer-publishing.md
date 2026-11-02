@@ -755,3 +755,24 @@ both Tribal Allies and incident spawning. No live game moves or history edits.
 Verified 941 frontend tests, 224 targeted Rust tests, extraction/catalog checks,
 type checks and matching engine/viewer builds. Existing unrelated Great Gardens
 error-text and Builder Epic-length test expectations remain unchanged.
+
+## Viewer 0.1.192 / engine unchanged (0.4.127)
+
+Translate the complete Great Person acquisition rule as one message, preserving
+both culture-cost icons in all 17 catalogs. Share the rule between active event
+decisions, off-turn card offers and Calendar previews. Fix source extraction so
+punctuation-prefixed visible Svelte prose is no longer mistaken for a selector.
+
+Calendar's Great Person preview now separates the name, civil effect, event
+effects and card acquisition. Put the civil effect first for mobile readability,
+and use explicit keep-on-top / put-at-bottom controls with the actual payment.
+Ordinary Calendar events retain their previous presentation. Preview metadata
+comes only from the inspecting player's already-visible request, never the
+private shuffled deck; opponent and spectator views remain redacted.
+
+The Rust changes are presentation metadata in the viewer's rebuilt WASM bridge;
+no game rules or deployed engine update is required. Regression coverage includes
+947 frontend tests, 4 source-extraction tests, all-locale resource preservation,
+private previews, free/paid keep-bury responses, zero-culture cases, public/free
+Great Persons, and desktop/mobile browser checks in English and French. Retain
+French objective/retry and Chinese locale-switching browser regressions too.

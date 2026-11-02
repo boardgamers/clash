@@ -2,6 +2,7 @@
   import { printedCardName, printedCardText } from './card-names';
   import { X, Layers, Zap, Swords, Archive, ScrollText, ChevronDown, BookOpen } from 'lucide-svelte';
   import GreatPersonEffect from './GreatPersonEffect.svelte';
+  import GreatPersonAcquisition from './GreatPersonAcquisition.svelte';
   import ResourceText from './ResourceText.svelte';
   import ResourceAmount from './ResourceAmount.svelte';
   import type { Controller } from './controller';
@@ -51,7 +52,7 @@
       <details class="event-rules">
         <summary><BookOpen size={13} /> Event rules</summary>
         {#if event?.baseEffect}<p><ResourceText text={event.baseEffect} /></p>{/if}
-        <p>The player who triggered the event may take the card for <ResourceAmount pile={{culture_tokens:1}} />. If they pass, other players may take it in turn order for <ResourceAmount pile={{culture_tokens:2}} />.</p>
+        <GreatPersonAcquisition />
       </details>
       <div class="queued-person-actions">
         {#each offer.options as option}

@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { rustStrings, rustTemplate } from './localization-source.mjs';
+import { sourceMessage, svelteStrings, rustStrings, rustTemplate } from './localization-source.mjs';
 import path from 'node:path';
 import ts from 'typescript';
 import { parse } from 'svelte/compiler';
@@ -9,28 +9,9 @@ const source = JSON.parse(fs.readFileSync(path.join(root, '../client/js/src/loca
 const existingSource = path.join(root, 'src/localization/en.json');
 if (fs.existsSync(existingSource)) Object.assign(source, JSON.parse(fs.readFileSync(existingSource, 'utf8')));
 const locations = new Map();
-function add(value, file) {
-  const text = value.replace(/\s+/g, ' ').trim();
-  if (
-    !/[A-Za-z]/.test(text) ||
-    text.length < 2 ||
-    /\{p\d+\}\{p\d+\}/.test(text) ||
-    /^[-a-z0-9_:/]+$/.test(text) ||
-    /[a-z]_[a-z]/.test(text) ||
-    /^[a-z]+(?:[A-Z][a-z0-9]*)+$/.test(text) ||
-    /^(?:[a-z]+-)+[a-z]+(?:\s+[a-z-]+)*$/.test(text) ||
-    /^(?:[a-z]+-)+.*\{p\d+\}/.test(text) ||
-    /^(?:crate::|three\/|position:|Building:|Wonder:|pending:|objective:|person:|status:)/.test(text) ||
-    /\{p\d+\}[:|](?:\{p\d+\}|[a-zA-Z])/.test(text) ||
-    /^\$\d/.test(text) ||
-    /^(?:Arrow(?:Up|Down|Left|Right)|F\d+|[A-Z][a-z]+(?:[A-Z][a-z]+)+)$/.test(text) ||
-    /^[#.:\[]/.test(text) ||
-    /^[a-z][a-z0-9-]*\[[a-z-]+(?:[=\]^$*~|]|\])/.test(text) ||
-    /^<[a-z]/.test(text) ||
-    /[A-Za-z]__[A-Za-z]/.test(text) ||
-    /=>|\\[bpdw]|\.\/(?:src|assets)|https?:|\.svg|\.wasm|rgba?\(|gradient\(|var\(|\d(?:px|rem)\b/.test(text)
-  )
-    return;
+function add(value, file, options) {
+  const text = sourceMessage(value, options);
+  if (text === null) return;
   source[text] = text;
   if (!locations.has(text)) locations.set(text, []);
   locations.get(text).push(file);
@@ -41,36 +22,6 @@ function javascript(node, file) {
   if (ts.isTemplateExpression(node))
     add(node.head.text + node.templateSpans.map((span, i) => `{p${i}}${span.literal.text}`).join(''), file);
   ts.forEachChild(node, (child) => javascript(child, file));
-}
-function svelte(node, file) {
-  if (!node || typeof node !== 'object') return;
-  // Only human-facing attributes; class names, event handlers and IDs are not messages.
-  if (node.type === 'Attribute' && !['title', 'aria-label', 'placeholder', 'alt', 'label'].includes(node.name)) return;
-  if (
-    node.type === 'Fragment' &&
-    node.nodes?.some((n) => n.type === 'ExpressionTag') &&
-    node.nodes.every((n) => ['Text', 'ExpressionTag', 'Comment'].includes(n.type))
-  ) {
-    let index = 0;
-    add(
-      node.nodes
-        .map((n) => (n.type === 'Text' ? n.data : n.type === 'ExpressionTag' ? `{p${index++}}` : ''))
-        .join(''),
-      file,
-    );
-  }
-  if (node.type === 'Text') add(node.data, file);
-  if (node.type === 'Literal' && typeof node.value === 'string') add(node.value, file);
-  if (node.type === 'TemplateLiteral')
-    add(
-      node.quasis.map((q, i) => q.value.cooked + (i < node.expressions.length ? `{p${i}}` : '')).join(''),
-      file,
-    );
-  for (const [key, value] of Object.entries(node)) {
-    if (['css', 'start', 'end', 'loc'].includes(key)) continue;
-    if (Array.isArray(value)) value.forEach((v) => svelte(v, file));
-    else if (value && typeof value === 'object') svelte(value, file);
-  }
 }
 function frontend(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -85,7 +36,10 @@ function frontend(directory) {
     const file = path.relative(root, absolute);
     if (name.endsWith('.ts'))
       javascript(ts.createSourceFile(name, content, ts.ScriptTarget.Latest, true), file);
-    else svelte(parse(content, { modern: true }), file);
+    else {
+      for (const { value, visibleText } of svelteStrings(parse(content, { modern: true })))
+        add(value, file, { visibleText });
+    }
   }
 }
 frontend(path.join(root, 'src'));

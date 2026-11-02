@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Recrutează {p0} unitate",
   "Recruit {p0} units": "Recrutează {p0} unități",
   "Recruit {p0} unit & action card": "Recrutează {p0} unitate și carte de acțiune",
-  "Recruit {p0} units & action card": "Recrutează {p0} unități și carte de acțiune"
+  "Recruit {p0} units & action card": "Recrutează {p0} unități și carte de acțiune",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Jucătorul care a declanșat evenimentul poate lua cartea pentru 1 jeton de cultură. Dacă refuză, ceilalți jucători o pot lua, în ordinea turelor, pentru 2 jetoane de cultură.",
+  "Event effects": "Efectele evenimentului",
+  "Card acquisition": "Obținerea cărții",
+  "Civil effect": "Efect civil",
+  "Keep on top": "Păstrează deasupra teancului",
+  "Put at the bottom": "Pune sub teanc",
+  "Preview only. This event has not been triggered.": "Doar previzualizare. Acest eveniment nu a fost încă declanșat."
 }

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { handCardDescription } from './card-text';
   import GreatPersonEffect from './GreatPersonEffect.svelte';
+  import CalendarEventPreview from './CalendarEventPreview.svelte';
+  import GreatPersonAcquisition from './GreatPersonAcquisition.svelte';
   import RazeActions from './RazeActions.svelte';
   import CombatEstimate from './CombatEstimate.svelte';
   import { printedCardName } from './card-names';
@@ -222,6 +224,7 @@
   class:card-decision={decision.options.some((option) => option.card)}
   class:tactics-decision={decision.tacticsSelection}
   class:resource-decision={resourceChoice}
+  class:calendar-decision={!!decision.calendarPreview}
   aria-label={title}
 >
   {#if decision.endOfAge && !razeChoice}<span class="tiny-label">END OF AGE</span>{/if}
@@ -234,7 +237,7 @@
     {#if $session.view?.influenceContext}
       <InfluenceFlow context={$session.view.influenceContext} />
     {:else}<h2><Sparkles size={resourceChoice ? 18 : 21} />{title}</h2>{/if}
-    {#if decision.eventContext}
+    {#if decision.eventContext && !decision.calendarPreview}
       {@const context = decision.eventContext}
       <div class="decision-event-context" class:full-context={!!context.card}>
         {#if context.card}
@@ -257,13 +260,7 @@
             >
             {#if context.placement}<p>{context.placement}</p>{/if}
             {#if context.raid}<p class="event-raid"><ResourceText text={context.raid} /></p>{/if}
-            <p>
-              The player who triggered the event may take the card for <ResourceAmount
-                pile={{ culture_tokens: 1 }}
-              />. If they pass, other players may take it in turn order for <ResourceAmount
-                pile={{ culture_tokens: 2 }}
-              />.
-            </p>
+            <GreatPersonAcquisition />
             {#if !cardOffer}<p>
               <span class="event-card-use">Play <Zap size={13} />{card.free ? 0 : 1}</span><ResourceText
                 text={handCardDescription(card.description)}
@@ -286,7 +283,7 @@
   {#if cardOffer}
     <GreatPersonEffect card={cardOffer} />
   {/if}
-  {#if description && !cardOffer && !$session.view?.influenceContext}<p class="decision-description">
+  {#if description && !cardOffer && !decision.calendarPreview && !$session.view?.influenceContext}<p class="decision-description">
       <ResourceText
         text={description.replaceAll('Status Phase', 'End of age').replaceAll('status phase', 'end of age')}
       />
@@ -345,12 +342,19 @@
       !field.optional &&
       directPayments.length > 0 &&
       directPayments.every((choice) => !Object.values(choice.payment).some(Boolean))}
-    {#if field.name !== decision.name && !cardOffer && !combatBenefit && !$session.view?.influenceContext}<p
+    {#if field.name !== decision.name && !cardOffer && !decision.calendarPreview && !combatBenefit && !$session.view?.influenceContext}<p
         class="decision-description"
       >
         <ResourceText text={noResourceCost ? 'Free' : field.name} />
       </p>{/if}
-    {#if cardOffer}
+    {#if decision.calendarPreview}
+      <CalendarEventPreview
+        preview={decision.calendarPreview}
+        choices={directPayments}
+        pending={$session.pending}
+        onSubmit={(action) => controller.submit(action)}
+      />
+    {:else if cardOffer}
       <div class="great-person-actions">
         {#each directPayments as choice}
           {@const paid = Object.values(choice.payment).some(Boolean)}
@@ -526,6 +530,12 @@
 </section>
 
 <style>
+  @media (min-width: 761px) {
+    :global(.play-layout) .action-panel.floating-panel.calendar-decision {
+      width: min(460px, calc(100% - 40px));
+    }
+  }
+
   :global(.game-shell) .resource-decision .decision-heading h2 {
     min-width: 0;
     font-size: 20px;

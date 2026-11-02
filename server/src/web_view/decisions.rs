@@ -644,6 +644,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
     }
     let mut decision = json!({"origin":h.origin,"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
         "eventContext":event_context,
+        "calendarPreview":super::journal::calendar_preview(game, seat),
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
         "tacticsSelection":tactics_selection,
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),

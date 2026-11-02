@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "Recluta {p0} unità",
   "Recruit {p0} units": "Recluta {p0} unità",
   "Recruit {p0} unit & action card": "Recluta {p0} unità e carta azione",
-  "Recruit {p0} units & action card": "Recluta {p0} unità e carta azione"
+  "Recruit {p0} units & action card": "Recluta {p0} unità e carta azione",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "Il giocatore che ha innescato l'evento può prendere la carta pagando 1 segnalino cultura. Se rinuncia, gli altri giocatori possono prenderla, in ordine di turno, pagando 2 segnalini cultura.",
+  "Event effects": "Effetti dell'evento",
+  "Card acquisition": "Ottenere la carta",
+  "Civil effect": "Effetto civile",
+  "Keep on top": "Lascia in cima al mazzo",
+  "Put at the bottom": "Metti in fondo al mazzo",
+  "Preview only. This event has not been triggered.": "Solo un'anteprima. Questo evento non è ancora stato attivato."
 }

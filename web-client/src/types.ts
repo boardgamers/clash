@@ -699,6 +699,12 @@ export interface ActionCard {
 }
 export interface Decision {
   origin?: Record<string, unknown>;
+  /** Private Calendar preview, structured from the owner's visible payment request. */
+  calendarPreview?: {
+    name: string;
+    rules: string[];
+    card: { description: string; free: boolean } | null;
+  } | null;
   eventContext?: {
     name: string;
     rules: string[];

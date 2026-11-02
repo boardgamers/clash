@@ -5231,5 +5231,12 @@
   "Recruit {p0} unit": "{p0} eenheid rekruteren",
   "Recruit {p0} units": "{p0} eenheden rekruteren",
   "Recruit {p0} unit & action card": "{p0} eenheid en actiekaart rekruteren",
-  "Recruit {p0} units & action card": "{p0} eenheden en actiekaart rekruteren"
+  "Recruit {p0} units & action card": "{p0} eenheden en actiekaart rekruteren",
+  "The player who triggered the event may take the card for 1 culture token. If they pass, other players may take it in turn order for 2 culture tokens.": "De speler die de gebeurtenis veroorzaakte mag de kaart nemen voor 1 cultuurfiche. Als die speler past, mogen de andere spelers de kaart in beurtvolgorde nemen voor 2 cultuurfiches.",
+  "Event effects": "Gebeurteniseffecten",
+  "Card acquisition": "De kaart verkrijgen",
+  "Civil effect": "Civiel effect",
+  "Keep on top": "Boven op de stapel laten",
+  "Put at the bottom": "Onder op de stapel leggen",
+  "Preview only. This event has not been triggered.": "Alleen een voorbeeld. Deze gebeurtenis is nog niet geactiveerd."
 }
