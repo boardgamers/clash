@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · Alege un progres",
   "{p0} · Placing a settler": "{p0} · Plasează un colonist",
   "{p0} queued · End turn queued": "{p0} în așteptare · Sfârșit de tură în așteptare",
+  "Opponent played a face-down tactics card.": "Adversarul a jucat o carte de tactici cu fața în jos.",
+  "Opponent has not chosen tactics yet.": "Adversarul nu și-a ales încă tactica.",
+  "Opponent is not playing a tactics card.": "Adversarul nu joacă nicio carte de tactici.",
   "Ability active · Man God": "Abilitate activă · Om-zeu",
   "Ability only: not researched, no extra advance or victory points.": "Doar abilitatea: necercetată, fără progres sau puncte de victorie suplimentare."
 }

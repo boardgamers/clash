@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · Đang chọn tiến bộ",
   "{p0} · Placing a settler": "{p0} · Đang đặt người định cư",
   "{p0} queued · End turn queued": "{p0} đang chờ · Kết thúc lượt đang chờ",
+  "Opponent played a face-down tactics card.": "Đối thủ đã chơi một thẻ chiến thuật úp.",
+  "Opponent has not chosen tactics yet.": "Đối thủ chưa chọn chiến thuật.",
+  "Opponent is not playing a tactics card.": "Đối thủ không chơi thẻ chiến thuật.",
   "Ability active · Man God": "Năng lực đang có hiệu lực · Thần nhân",
   "Ability only: not researched, no extra advance or victory points.": "Chỉ có năng lực: chưa nghiên cứu, không thêm tiến bộ hay điểm chiến thắng."
 }

@@ -22,7 +22,7 @@
   import UnitPicker, { type UnitChoice } from './UnitPicker.svelte';
   import StructurePicker, { type StructureChoice } from './StructurePicker.svelte';
   import { researchPresentation } from './research';
-  import { canCancelAbility, mapDecisionOptions } from './decision-controls';
+  import { canCancelAbility, mapDecisionOptions, opponentTacticsLabel } from './decision-controls';
   import { steelWeaponsBenefit } from './active-combat';
   let {
     controller,
@@ -33,6 +33,7 @@
   const session = $derived(controller.session);
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
+  const opponentTactics = $derived(opponentTacticsLabel(decision));
   const tribalStopChoice = $derived(decision.name === 'Tribal Allies' && decision.description === 'Select armies to stop · 1 food total');
   const razeChoice = $derived(decision.name === 'Raze city');
   const firstPlayerChoice = $derived(decision.name === 'Determine First Player');
@@ -287,6 +288,9 @@
         text={description.replaceAll('Status Phase', 'End of age').replaceAll('status phase', 'end of age')}
       />
     </p>{/if}
+  {#if opponentTactics}<p class="tactics-opponent-status" role="status">
+    <Layers size={16} aria-hidden="true" /><span>{opponentTactics}</span>
+  </p>{/if}
   {#if decision.options.length}
     {#if decision.tacticsSelection}
       <div class="decision-options tactics-options">
@@ -519,6 +523,18 @@
 </section>
 
 <style>
+  .tactics-opponent-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    margin: 0 0 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+  .tactics-opponent-status :global(svg) { flex: 0 0 auto; }
+
   .decision-card-group { grid-column: 1 / -1; margin: 1rem 0 .25rem; font-size: .95rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
   .decision-card-group:first-child { margin-top: 0; }
   .decision-card-group small { font-weight: normal; color: var(--muted); }

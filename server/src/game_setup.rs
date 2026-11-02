@@ -210,6 +210,8 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         current_player_index: starting_player,
         log: Vec::new(),
         board_history: Default::default(),
+        time_increments: vec![],
+        timing_revealed: false,
         log_index: 0,
         undo_limit: 0,
         actions_left: ACTIONS,

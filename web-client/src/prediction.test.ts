@@ -550,6 +550,27 @@ test('prediction fingerprints ignore nested map field order but preserve values 
   assert.notEqual(fingerprint('{"choices":[1,2]}'), fingerprint('{"choices":[2,1]}'));
 });
 
+test('collection fingerprints normalize only resource-option sets, never actual selections or outcomes', () => {
+  const raw = {
+    events: [{ event_type: { Collect: { choices: { C2: [{ food: 1 }, { wood: 1 }] }, total: { food: 1 } } } }],
+    log: [{ selections: [{ food: 1 }, { wood: 1 }] }],
+  };
+  const swapped = structuredClone(raw);
+  swapped.events[0].event_type.Collect.choices.C2.reverse();
+  const print = fingerprint(JSON.stringify(raw));
+  assert.equal(fingerprint(JSON.stringify(swapped)), print, 'Rust HashSet iteration order is not information');
+  for (const change of [
+    (g: typeof raw) => { g.events[0].event_type.Collect.choices.C2[0] = { food: 2 }; },
+    (g: typeof raw) => { g.events[0].event_type.Collect.choices.C2.pop(); },
+    (g: typeof raw) => { g.events[0].event_type.Collect.total.food = 2; },
+    (g: typeof raw) => { g.log[0].selections.reverse(); },
+  ]) {
+    const changed = structuredClone(raw);
+    change(changed);
+    assert.notEqual(fingerprint(JSON.stringify(changed)), print);
+  }
+});
+
 test('Theaters opens its direction choice and completes locally before any server acknowledgement', async () => {
   const g = JSON.parse(fixture('advances/sanitation_and_draft', { Playing: 'EndTurn' }));
   g.players[0].advances.push('Arts', 'Theaters');
@@ -708,6 +729,53 @@ test('acknowledging a predicted city capture keeps movement queries on the plann
     await app.controller.load(strip(resumed));
     assert.equal(app.session().planning, undefined);
     assert.equal(app.session().view?.movementLeft, 1);
+  } finally { app.close(); }
+});
+
+test('D2 collection selection submits a persisted plan and opens Metallurgy while the opponent places a settler', async () => {
+  const app = harness();
+  let raw = readFileSync(new URL('../scripts/egypt-collect-queue-fixture.json', import.meta.url), 'utf8');
+  const c = app.controller;
+  const confirmPlan = async () => {
+    raw = engine.tryMove(raw, app.sent.at(-1)!, 0);
+    await c.load(strip(raw));
+  };
+  try {
+    c.setPlayer(0);
+    await c.load(strip(raw));
+    assert.equal(app.session().planning?.label, 'Placing a settler');
+    c.submit(app.session().view!.stopMovement!);
+    await confirmPlan();
+    c.beginCollect('D2');
+    assert.equal(app.session().selection.length, 0);
+    const city = app.session().view!.cities.find(city => city.position === 'D2')!;
+    for (const [position, resource] of [
+      ['D2', 'food'], ['B3', 'ore'], ['E2', 'ore'], ['C2', 'wood'], ['D1', 'wood'],
+    ]) {
+      const choice = city.choices.find(choice => choice.position === position && (choice.pile as Record<string, number>)[resource] === 1)!;
+      assert.ok(choice);
+      c.toggleChoice(choice);
+    }
+    assert.equal(app.session().selection.length, 5);
+    assert.deepEqual(app.session().preview!.total, { food: 1, ideas: 1, ore: 2, wood: 2 });
+    c.collect();
+    assert.equal(app.sent.length, 2, app.session().error);
+    assert.ok(JSON.parse(app.sent.at(-1)!).QueueMoves.actions[1].Playing.Collect);
+    await confirmPlan();
+    assert.equal(app.session().planning?.queued, 2);
+    const keepOre = app.session().view!.choiceDecision!.choices.find(choice => choice.name === 'Keep the ore')!;
+    assert.ok(keepOre, 'the deterministic Metallurgy choice is immediately available for planning');
+    c.submit(keepOre.action);
+    await confirmPlan();
+    assert.equal(app.session().planning?.queued, 2);
+    assert.equal(app.session().error, '');
+    const before = JSON.parse(raw).players[0].resources;
+    assert.deepEqual(before, { food: 4, ideas: 1, gold: 3, mood_tokens: 1, culture_tokens: 3 }, 'no collection happens on the real board before the settler choice');
+    raw = move(raw, { Response: { SelectPositions: ['B6'] } }, 1);
+    await c.load(strip(raw));
+    assert.equal(app.session().planning, undefined);
+    assert.deepEqual(app.session().game!.players[0].resources, { food: 5, wood: 2, ore: 2, ideas: 2, gold: 3, mood_tokens: 1, culture_tokens: 3 });
+    assert.equal(app.session().error, '');
   } finally { app.close(); }
 });
 

@@ -7,7 +7,15 @@ const diagnostics=inspectEngine(engine);assert(diagnostics.compatible);
 let raw=await engine.init(2,[],{},'release-check-2026-10-18',{});
 const seat=engine.currentPlayer(raw);
 assert.equal(typeof seat,'number');
-for(let i=0;i<2;i++) raw=engine.move(raw,JSON.stringify({Playing:'EndTurn'}),engine.currentPlayer(raw));
+assert.equal(typeof engine.timeIncrements,'function');
+assert(Array.isArray(engine.timeIncrements(raw)),'Clock hook must return a JS array');
+assert.deepEqual(engine.timeIncrements(raw),[0,0]);
+for(let i=0;i<2;i++) {
+ const actor=engine.currentPlayer(raw), expected=engine.timeIncrements(raw);
+ expected[actor]++;
+ raw=engine.move(raw,JSON.stringify({Playing:'EndTurn'}),actor);
+ assert.deepEqual(engine.timeIncrements(raw),expected,'A control handoff earns exactly one credit');
+}
 assert.equal(engine.replay(raw,{}),engine.replay(raw,{}),'Replay must be deterministic');
 const scenarios=[];
 for(const player of [0,1,undefined]) {
@@ -23,16 +31,21 @@ for(const player of [0,1,undefined]) {
  }
 }
 // Account setting revisions do not append game history or award another turn.
-const before=engine.logLength(raw);
+const before=engine.logLength(raw), clockBeforeSettings=engine.timeIncrements(raw);
 for(let n=0;n<100;n++)raw=engine.setPlayerSettings(raw,0,{skipRazeCity:n%2===0});
 assert.equal(engine.logLength(raw),before);
+assert.deepEqual(engine.timeIncrements(raw),clockBeforeSettings);
 let loop=await engine.init(2,[],{},'release-undo-check',{});
 const loopSeat=engine.currentPlayer(loop), city=JSON.parse(loop).players[loopSeat].cities[0].position;
 const collect=JSON.stringify({Playing:{Collect:{city_position:city,collections:[{position:city,pile:{food:1},times:1}],action_type:'Collect'}}});
 let firstSize;
 for(let n=0;n<100;n++) {
  loop=engine.move(loop,collect,loopSeat);
+ assert.deepEqual(engine.timeIncrements(loop),[0,0],'Deterministic collection earns no clock time');
  loop=engine.move(loop,JSON.stringify('Undo'),loopSeat);
+ loop=engine.move(loop,JSON.stringify('Redo'),loopSeat);
+ loop=engine.move(loop,JSON.stringify('Undo'),loopSeat);
+ assert.deepEqual(engine.timeIncrements(loop),[0,0],'Undo/Redo cannot farm clock time');
  if(n===0)firstSize=loop.length;
  assert.equal(loop.length,firstSize,'Collect/undo must not grow the save');
 }

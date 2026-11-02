@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · 正在选择进步",
   "{p0} · Placing a settler": "{p0} · 正在放置移民",
   "{p0} queued · End turn queued": "{p0} 项待执行 · 结束回合待执行",
+  "Opponent played a face-down tactics card.": "对手已打出一张面朝下的战术卡。",
+  "Opponent has not chosen tactics yet.": "对手尚未选择战术。",
+  "Opponent is not playing a tactics card.": "对手不出战术卡。",
   "Ability active · Man God": "能力生效 · 人神",
   "Ability only: not researched, no extra advance or victory points.": "仅获得能力：未研究，不增加进步或胜利点数。"
 }

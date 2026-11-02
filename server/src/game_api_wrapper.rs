@@ -62,7 +62,9 @@ pub fn set_player_settings(
     if settings.skip_raze_city.is_some() {
         p.settings.skip_raze_city = settings.skip_raze_city;
     }
-    if settings.keep_government.is_some() { p.settings.keep_government = settings.keep_government; }
+    if settings.keep_government.is_some() {
+        p.settings.keep_government = settings.keep_government;
+    }
     Ok(from_game(game))
 }
 
@@ -181,8 +183,12 @@ pub fn can_move_out_of_turn(data: String, move_data: JsValue, player: usize) -> 
     if let Some(raw) = move_data.as_string()
         && let Ok(crate::action::Action::QueueMoves { key, .. }) = serde_json::from_str(&raw)
     {
-        return crate::action_queue::offer(&game, player).is_some_and(|(current,_)| current == key)
-            || game.action_plan.as_ref().is_some_and(|p|p.player==player && p.key==key && p.error.is_some());
+        return crate::action_queue::offer(&game, player)
+            .is_some_and(|(current, _)| current == key)
+            || game
+                .action_plan
+                .as_ref()
+                .is_some_and(|p| p.player == player && p.key == key && p.error.is_some());
     }
     if let Some(raw) = move_data.as_string()
         && let Ok(crate::action::Action::QueueChoice { key, response }) = serde_json::from_str(&raw)
@@ -208,9 +214,19 @@ pub fn can_move_out_of_turn(data: String, move_data: JsValue, player: usize) -> 
 #[wasm_bindgen(js_name = "isLiveUpdate")]
 pub fn is_live_update(data: String) -> bool {
     let game = get_game(data);
-    game.early_choice_update || game
-        .civilization_draft
-        .is_some_and(|draft| draft.live_update)
+    game.early_choice_update
+        || game
+            .civilization_draft
+            .is_some_and(|draft| draft.live_update)
+}
+
+/// Protocol clock hook: a JS array of cumulative human-seat credits, not JSON.
+#[wasm_bindgen(js_name = "timeIncrements")]
+pub fn time_increments(data: String) -> JsValue {
+    with_view_game(data, |game| {
+        serde_wasm_bindgen::to_value(&crate::timing::time_increments(game))
+            .expect("time increments should serialize")
+    })
 }
 
 #[wasm_bindgen(js_name = "logLength")]

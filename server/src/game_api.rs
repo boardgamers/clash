@@ -1,6 +1,7 @@
 use super::player::Player;
 use crate::action::execute_action;
 use crate::card::{HandCard, HandCardLocation};
+use crate::combat_listeners::CombatEventPhase;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
@@ -146,8 +147,15 @@ pub fn civilizations(game: Game) -> Vec<String> {
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
-    if game.action_plan.as_ref().is_some_and(|p| Some(p.player) != player_index) {game.action_plan=None;}
-    game.early_choices.retain(|c| Some(c.player) == player_index);
+    if game
+        .action_plan
+        .as_ref()
+        .is_some_and(|p| Some(p.player) != player_index)
+    {
+        game.action_plan = None;
+    }
+    game.early_choices
+        .retain(|c| Some(c.player) == player_index);
     if let Some(draft) = &mut game.civilization_draft {
         for i in 0..draft.offers.len() {
             if player_index != Some(i) {
@@ -210,7 +218,7 @@ fn strip_action(action: &mut ActionLogAction, player_index: Option<usize>) {
 
     for item in &mut action.items {
         if let ActionLogEntry::HandCard { card, from, to } = &mut item.entry
-            && is_visible_card_info(player_index, from, to)
+            && !is_visible_card_info(player_index, from, to)
         {
             match &card {
                 HandCard::ActionCard(_) => *card = HandCard::ActionCard(0),
@@ -226,13 +234,13 @@ fn is_visible_card_info(
     from: &HandCardLocation,
     to: &HandCardLocation,
 ) -> bool {
-    from.player() == player_index
-        || to.player() == player_index
+    player_index.is_some_and(|player| from.player() == Some(player) || to.player() == Some(player))
         || from.is_public()
         || to.is_public()
 }
 
 fn strip_events(game: &mut Game, player_index: Option<usize>) {
+    let mut pending_tactics = Vec::new();
     for s in &mut game.events {
         match &mut s.event_type {
             PersistentEventType::CustomAction(a)
@@ -248,11 +256,29 @@ fn strip_events(game: &mut Game, player_index: Option<usize>) {
                     }
                 }
             }
-            PersistentEventType::CombatRoundStart(r) => {
-                if r.attacker_strength.tactics_card.is_some() {
-                    // defender shouldn't see attacker's tactics card
-                    r.attacker_strength.tactics_card = Some(0);
+            PersistentEventType::CombatRoundStart(r)
+                if matches!(
+                    r.phase,
+                    CombatEventPhase::AllowTacticsCard
+                        | CombatEventPhase::Loyalty
+                        | CombatEventPhase::Default
+                ) =>
+            {
+                // Committing immediately adds the card to the discard pile. Save
+                // the real IDs before replacing them with the presence sentinel.
+                for (card, participant) in [
+                    (r.attacker_strength.tactics_card, r.combat.attacker()),
+                    (r.defender_strength.tactics_card, r.combat.defender()),
+                ] {
+                    if let Some(card) = card.filter(|id| *id != 0) {
+                        pending_tactics.push((card, participant));
+                    }
                 }
+                // Either side may commit first (Loyalty can supply the defender).
+                // Keep presence for eligibility/status, but never disclose the ID
+                // before reveal. Owners still see their own card in the transfer log.
+                r.attacker_strength.tactics_card = r.attacker_strength.tactics_card.map(|_| 0);
+                r.defender_strength.tactics_card = r.defender_strength.tactics_card.map(|_| 0);
             }
             PersistentEventType::SelectObjectives(o) if Some(s.player.index) != player_index => {
                 // player shouldn't see other player's objectives
@@ -277,6 +303,26 @@ fn strip_events(game: &mut Game, player_index: Option<usize>) {
                 // player shouldn't see other player's hand cards
                 c.clear();
             }
+        }
+    }
+    pending_tactics.sort_unstable();
+    pending_tactics.dedup();
+    for (card, participant) in pending_tactics {
+        // The hand owner may be the Loyalty controller, not the combatant.
+        // Match discard_card's insertion end and mask only this commitment:
+        // an earlier, publicly discarded copy of the same ID can remain here.
+        let owner = crate::content::civilizations::celts::delegated_player(game, participant);
+        let discarded = &mut game.action_cards_discarded;
+        let position = if game.players[owner]
+            .wonders_owned
+            .contains(Wonder::GreatMausoleum)
+        {
+            discarded.iter().position(|id| *id == card)
+        } else {
+            discarded.iter().rposition(|id| *id == card)
+        };
+        if let Some(position) = position {
+            discarded[position] = 0;
         }
     }
 }

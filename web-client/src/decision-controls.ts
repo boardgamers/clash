@@ -2,6 +2,17 @@ import type { Decision, Game, MapPick, View } from './types.ts';
 
 export const researchDecision = (view: View | null | undefined) => !!view?.decision?.advanceSelection;
 
+/** Only the public commitment status is shown, never a hidden card's identity. */
+export function opponentTacticsLabel(decision: Pick<Decision, 'tacticsSelection' | 'opponentTactics'>): string | null {
+  if (!decision.tacticsSelection) return null;
+  switch (decision.opponentTactics) {
+    case 'played': return 'Opponent played a face-down tactics card.';
+    case 'pending': return 'Opponent has not chosen tactics yet.';
+    case 'none': return 'Opponent is not playing a tactics card.';
+    default: return null;
+  }
+}
+
 export function mapDecisionOptions(decision?: Decision | null) {
   if (!decision?.options.length || decision.fields.length) return [];
   const options = decision.options;

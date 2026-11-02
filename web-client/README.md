@@ -19,7 +19,7 @@ The local preview does not modify production games, catalog records, or chat roo
 
 ## Off-turn action queues
 
-After an opponent captures your city, its owner can plan while you place the replacement settler. Technology Trade also lets its owner plan while the recipient chooses their advance. Normal controls show the projected board; Undo removes the latest queued action with its payment responses. Wait for choice pauses planning. End turn may be queued last.
+After an opponent captures your city, its owner can plan while you place the replacement settler. Technology Trade also lets its owner plan while the recipient chooses their advance. Era of Stability permits planning while opponents choose their mood/culture token rewards, after the owner's own reward and exhausted-land choice have resolved. Queues persist across opponents' reward choices; they do not bypass mood-loss events. Normal controls show the projected board; Undo removes the latest queued action with its payment responses. Wait for choice pauses planning. End turn may be queued last.
 
 Queues are private, stored in the game, and validated by the server. After the earlier response and any nested choices finish, valid queued actions execute in order even if the planning player is offline. Hidden draws, dice, battles and actions requiring another player cannot be queued. An invalid replay stops and reports an error.
 

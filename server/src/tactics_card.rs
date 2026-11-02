@@ -3,10 +3,10 @@ use crate::ability_initializer::{
 };
 use crate::action_card;
 use crate::action_card::ActionCard;
-use crate::advance::AdvanceBuilder;
+use crate::advance::{Advance, AdvanceBuilder};
 use crate::card::{HandCard, HandCardLocation};
 use crate::combat::{Combat, CombatModifier, get_combat_strength, update_combat_strength};
-use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
+use crate::combat_listeners::{CombatEventPhase, CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::content::persistent_events::HandCardsRequest;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
@@ -102,7 +102,58 @@ impl CombatRole {
     }
 }
 
-type TacticsChecker = Arc<dyn Fn(usize, &Game, &Combat) -> bool + Sync + Send>;
+#[derive(Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub(crate) enum OpponentTacticsStatus {
+    Played,
+    Pending,
+    None,
+}
+
+pub(crate) fn opponent_tactics_status(
+    game: &Game,
+    player: usize,
+    round: &CombatRoundStart,
+) -> OpponentTacticsStatus {
+    let combat = &round.combat;
+    let opponent = combat.opponent(player);
+    // Only the presence of a face-down card is public. Some(0) in a
+    // filtered view counts too; never inspect its identity or the hand.
+    if get_combat_strength(opponent, round).tactics_card.is_some() {
+        return OpponentTacticsStatus::Played;
+    }
+    if !game.player(opponent).is_human() {
+        // Ordinary Barbarians/Pirates cannot play tactics. A card supplied
+        // by Viriatus's earlier Loyalty phase is handled above.
+        return OpponentTacticsStatus::None;
+    }
+    if get_combat_strength(opponent, round).deny_tactics_card
+        || !game.player(opponent).can_use_advance(Advance::Tactics)
+        || (opponent == combat.defender()
+            && combat.first_round()
+            && combat.modifiers.contains(&CombatModifier::TrojanHorse))
+    {
+        return OpponentTacticsStatus::None;
+    }
+    let pending = match round.phase {
+        // Loyalty happens before either participant's normal choice, even
+        // when the Barbarians receiving Scouts are the defender.
+        CombatEventPhase::AllowTacticsCard | CombatEventPhase::Loyalty => true,
+        // The attacker chooses first, face down. The defender may still
+        // play a card, but a defending Scout cannot target a passed attacker.
+        CombatEventPhase::Default => combat.role(player) == CombatRole::Attacker,
+        _ => false,
+    };
+    if pending {
+        OpponentTacticsStatus::Pending
+    } else {
+        OpponentTacticsStatus::None
+    }
+}
+
+// Check the live round supplied by the event listener, not game.current_event():
+// its saved snapshot can predate a choice just made by the other participant.
+type TacticsChecker = Arc<dyn Fn(usize, &Game, &CombatRoundStart) -> bool + Sync + Send>;
 
 #[derive(Clone)]
 pub struct TacticsCard {
@@ -181,7 +232,7 @@ impl TacticsCardBuilder {
 
     pub(crate) fn checker(
         mut self,
-        checker: impl Fn(usize, &Game, &Combat) -> bool + Clone + 'static + Sync + Send,
+        checker: impl Fn(usize, &Game, &CombatRoundStart) -> bool + Clone + 'static + Sync + Send,
     ) -> Self {
         self.checker = Some(Arc::new(checker));
         self
@@ -320,7 +371,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                 return None;
             }
 
-            let cards = available_tactics_cards(game, p, &s.combat);
+            let cards = available_tactics_cards(game, p, s);
             if cards.is_empty() {
                 return None;
             }
@@ -349,12 +400,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                     panic!("Expected ActionCard, got {:?}", s.choice[0]);
                 };
                 assert!(
-                    can_play_tactics_card(
-                        game,
-                        player,
-                        game.cache.get_action_card(card),
-                        &r.combat
-                    ),
+                    can_play_tactics_card(game, player, game.cache.get_action_card(card), r),
                     "Tactics card requirements are not met"
                 );
                 update_combat_strength(game, player, r, move |_game, _c, s, _role| {
@@ -372,12 +418,12 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
     )
 }
 
-fn available_tactics_cards(game: &Game, player: usize, combat: &Combat) -> Vec<HandCard> {
+fn available_tactics_cards(game: &Game, player: usize, round: &CombatRoundStart) -> Vec<HandCard> {
     game.players[player]
         .action_cards
         .iter()
         .map(|id| game.cache.get_action_card(*id))
-        .filter(|a| can_play_tactics_card(game, player, a, combat))
+        .filter(|a| can_play_tactics_card(game, player, a, round))
         .map(|a| HandCard::ActionCard(a.id))
         .collect()
 }
@@ -386,8 +432,9 @@ pub(crate) fn can_play_tactics_card(
     game: &Game,
     player: usize,
     card: &ActionCard,
-    combat: &Combat,
+    round: &CombatRoundStart,
 ) -> bool {
+    let combat = &round.combat;
     match &card.tactics_card {
         Some(card) => {
             let position_met = card
@@ -417,10 +464,7 @@ pub(crate) fn can_play_tactics_card(
                 CombatLocation::Land => combat.is_land_battle(game),
             });
 
-            let checker_met = card
-                .checker
-                .as_ref()
-                .is_none_or(|c| c(player, game, combat));
+            let checker_met = card.checker.as_ref().is_none_or(|c| c(player, game, round));
 
             position_met && fighter_met && location_met && checker_met
         }

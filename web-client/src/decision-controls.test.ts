@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import {
   canCancelAbility,
+  opponentTacticsLabel,
   researchDecision,
   mapDecisionOptions,
   mapDecisionIndex,
@@ -11,6 +12,19 @@ import {
   toggleDecisionSelection,
 } from './decision-controls.ts';
 import type { View } from './types.ts';
+
+test('tactics status distinguishes a hidden commitment, pending choice and no card', () => {
+  for (const [status, label] of [
+    ['played', 'Opponent played a face-down tactics card.'],
+    ['pending', 'Opponent has not chosen tactics yet.'],
+    ['none', 'Opponent is not playing a tactics card.'],
+  ] as const) {
+    assert.equal(opponentTacticsLabel({ tacticsSelection: true, opponentTactics: status }), label);
+    assert.equal(opponentTacticsLabel({ tacticsSelection: false, opponentTactics: status }), null);
+  }
+  assert.equal(opponentTacticsLabel({ tacticsSelection: true }), null);
+  assert.equal(opponentTacticsLabel({ tacticsSelection: true, opponentTactics: null }), null);
+});
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 const fixture = (name: string) =>
@@ -81,6 +95,36 @@ test('Spy card choices expose action and battle uses separately', () => {
     assert.ok(option.card.description);
     assert.ok(option.card.tactics?.description);
     assert.equal(option.name, `${option.card.name}/${option.card.tactics?.name}`);
+  }
+});
+
+test('tactics panel receives only public opponent commitment status and filters Scouts after a pass', () => {
+  const game = JSON.parse(fixture('tactics_cards/scout'));
+  game.players[0].action_cards = [1, 23];
+  game.players[1].action_cards = [4, 23];
+  const state = engine.tryMove(
+    JSON.stringify(game),
+    JSON.stringify({ Movement: { Move: { units: [0], destination: 'C1', payment: {} } } }),
+    0,
+  );
+  const attacking = view(state, 0).decision!;
+  assert.equal(attacking.opponentTactics, 'pending');
+  assert.ok(attacking.options.some((o) => (o.value as { ActionCard?: number }).ActionCard === 23));
+  for (const played of [true, false]) {
+    const committed = engine.tryMove(
+      state,
+      JSON.stringify({ Response: { SelectHandCards: played ? [{ ActionCard: 1 }] : [] } }),
+      0,
+    );
+    const defending = view(committed, 1).decision!;
+    assert.equal(defending.opponentTactics, played ? 'played' : 'none');
+    assert.equal(
+      defending.options.some((o) => (o.value as { ActionCard?: number }).ActionCard === 23),
+      played,
+    );
+    assert.equal(opponentTacticsLabel(defending), played
+      ? 'Opponent played a face-down tactics card.'
+      : 'Opponent is not playing a tactics card.');
   }
 });
 

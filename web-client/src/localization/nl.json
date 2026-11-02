@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · Kiest een ontwikkeling",
   "{p0} · Placing a settler": "{p0} · Plaatst een kolonist",
   "{p0} queued · End turn queued": "{p0} in wachtrij · Beurteinde in wachtrij",
+  "Opponent played a face-down tactics card.": "De tegenstander heeft een tactiekkaart gedekt gespeeld.",
+  "Opponent has not chosen tactics yet.": "De tegenstander heeft nog geen tactiek gekozen.",
+  "Opponent is not playing a tactics card.": "De tegenstander speelt geen tactiekkaart.",
   "Ability active · Man God": "Vaardigheid actief · Mensgod",
   "Ability only: not researched, no extra advance or victory points.": "Alleen de vaardigheid: niet onderzocht, geen extra vooruitgang of overwinningspunten."
 }

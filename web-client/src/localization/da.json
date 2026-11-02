@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · Vælger et fremskridt",
   "{p0} · Placing a settler": "{p0} · Placerer en nybygger",
   "{p0} queued · End turn queued": "{p0} i kø · Turafslutning i kø",
+  "Opponent played a face-down tactics card.": "Modstanderen spillede et taktikkort med billedsiden nedad.",
+  "Opponent has not chosen tactics yet.": "Modstanderen har endnu ikke valgt taktik.",
+  "Opponent is not playing a tactics card.": "Modstanderen spiller ikke et taktikkort.",
   "Ability active · Man God": "Evne aktiv · Menneskegud",
   "Ability only: not researched, no extra advance or victory points.": "Kun evnen: ikke forsket, ingen ekstra fremskridt eller sejrspoint."
 }

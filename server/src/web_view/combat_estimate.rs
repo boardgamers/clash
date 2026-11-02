@@ -79,6 +79,40 @@ pub(super) fn estimate(game: &Game, seat: usize, input: &Value) -> Result<Value,
                 }
             }
         }
+        // Removing hidden tactics can invalidate a card that requires an enemy
+        // commitment (Scouts). Fail closed rather than executing an invalid
+        // response or substituting a guessed hidden card in the simulation.
+        if let Action::Response(EventResponse::SelectHandCards(cards)) = &action
+            && let Some(event) = sim.events.last()
+            && let PersistentEventType::CombatRoundStart(round) = &event.event_type
+        {
+            let combat_player = if round.combat.players().contains(&seat) {
+                seat
+            } else {
+                round
+                    .combat
+                    .players()
+                    .into_iter()
+                    .find(|player| sim.player(*player).civilization.is_barbarian())
+                    .ok_or("Unsupported combat choice")?
+            };
+            for card in cards {
+                if let crate::card::HandCard::ActionCard(id) = card {
+                    let card = sim.cache.get_action_card(*id);
+                    if !crate::tactics_card::can_play_tactics_card(&sim, combat_player, card, round)
+                    {
+                        return Err(format!(
+                            "Estimate unavailable for {}",
+                            card.tactics_card
+                                .as_ref()
+                                .map_or(card.civil_card.name.as_str(), |tactics| tactics
+                                    .name
+                                    .as_str())
+                        ));
+                    }
+                }
+            }
+        }
         let start = sim.log_index;
         execute_without_undo(&mut sim, action.clone(), seat)?;
         let mut result = None;

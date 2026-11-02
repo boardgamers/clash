@@ -8,9 +8,9 @@
       "missing": []
     },
     "optional": {
-      "completed": 14,
+      "completed": 15,
       "total": 28,
-      "percent": 50,
+      "percent": 54,
       "missing": [
         "presenceChanged",
         "phase",
@@ -21,7 +21,6 @@
         "moveAI",
         "cancelled",
         "toSave",
-        "timeIncrements",
         "stats",
         "analysisUsesSimulation",
         "analysisMove",

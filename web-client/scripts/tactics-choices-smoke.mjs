@@ -76,6 +76,7 @@ try {
       );
       const panel = page.getByRole('region', { name: 'Tactics', exact: true });
       await panel.waitFor();
+      assert.equal(await panel.getByRole('status').innerText(), 'Opponent is not playing a tactics card.');
       const peltasts = panel.getByRole('button', { name: 'Select Peltasts', exact: true });
       await peltasts.waitFor();
       assert.match(await peltasts.innerText(), /Roll a die for each of your Army units/);

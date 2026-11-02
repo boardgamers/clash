@@ -663,3 +663,28 @@ the valid selection and preview when an extra tile is rejected. Selected
 dual-resource tiles can be deselected from the map; resource replacement remains
 available through the resource list. Add regressions for the four-tile limit,
 dual-resource choices, deselection and Ballcourts capacity. No engine update required.
+
+## Viewer 0.1.186 / engine 0.4.125
+
+Filter Scouts when the opponent cannot play tactics or the attacker has passed,
+while preserving attacking Scouts and Viriatus's Loyalty. Show the opponent's
+public tactics commitment without exposing the card identity. Correct private
+card-log filtering and hide pending tactics in both combat state and discard piles.
+
+Allow action planning during opponents' Era of Stability token rewards, but not
+its exhausted-land choice or mood-loss events. Preserve queued actions across
+recipients. Normalize unordered collection-resource alternatives so Egypt's Flood
+Plains collection and Metallurgy choices can be queued while waiting for a settler.
+
+Export cumulative BGS time increments: credit genuine information reveals and
+player handoffs, not deterministic sub-actions, queue edits, Undo or Redo. Existing
+saves start from zero counters; credits survive history navigation and reload.
+
+Prune impossible wonder-payment conversion branches without limiting legal
+payments. Architecture payment views that took seconds now take roughly 9–10 ms
+in the local WASM benchmark. Publish the matching viewer and engine together.
+
+Verified 913 frontend tests, 199 targeted Rust tests, locale and type checks,
+engine protocol/timing checks, wonder-payment benchmarks, and desktop/mobile
+tactics browser checks. Broader Rust suites retain unrelated influence-log and
+Great Gardens error-text snapshot mismatches; those fixtures were not changed.

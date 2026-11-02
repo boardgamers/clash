@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · Επιλέγει πρόοδο",
   "{p0} · Placing a settler": "{p0} · Τοποθετεί άποικο",
   "{p0} queued · End turn queued": "{p0} στην ουρά · Τέλος γύρου στην ουρά",
+  "Opponent played a face-down tactics card.": "Ο αντίπαλος έπαιξε μια κάρτα τακτικής με την όψη προς τα κάτω.",
+  "Opponent has not chosen tactics yet.": "Ο αντίπαλος δεν έχει επιλέξει ακόμα τακτική.",
+  "Opponent is not playing a tactics card.": "Ο αντίπαλος δεν παίζει κάρτα τακτικής.",
   "Ability active · Man God": "Ενεργή ικανότητα · Άνθρωπος θεός",
   "Ability only: not researched, no extra advance or victory points.": "Μόνο ικανότητα: δεν έχει ερευνηθεί, χωρίς επιπλέον πρόοδο ή πόντους νίκης."
 }

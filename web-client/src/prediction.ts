@@ -25,6 +25,19 @@ export function fingerprint(raw: string): string {
   const game = JSON.parse(raw) as Json;
   // Hidden pile order is reshuffled by every stripSecret; only sizes are public.
   for (const pile of HIDDEN_PILES) if (Array.isArray(game[pile])) game[pile] = game[pile].length;
+  // CollectInfo.choices is a map of Rust HashSets, not ordered selections.
+  // A follow-up such as Metallurgy keeps it in the event: Egypt's Flood Plains
+  // can serialize [food, wood] or [wood, food] on otherwise identical runs.
+  // Normalize only these sets; event order, selected collections, logs, etc.
+  // remain significant, as do the resource amounts and options themselves.
+  for (const event of game.events ?? []) {
+    const choices = event.event_type?.Collect?.choices;
+    for (const [position, options] of Object.entries(choices ?? {})) {
+      if (Array.isArray(options)) {
+        choices[position] = options.map(canonicalJson).sort().map(value => JSON.parse(value));
+      }
+    }
+  }
   delete game.rng;
   delete game.seed;
   delete game.messages;

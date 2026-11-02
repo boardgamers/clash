@@ -64,6 +64,12 @@ pub struct GameData {
         skip_serializing_if = "crate::board_history::BoardHistory::is_empty"
     )]
     board_history: crate::board_history::BoardHistory,
+    #[serde(
+        default,
+        skip_serializing_if = "Vec::is_empty",
+        deserialize_with = "crate::timing::deserialize_counters"
+    )]
+    time_increments: Vec<u64>,
     log_index: usize,
     undo_limit: usize,
     actions_left: u32,
@@ -136,6 +142,8 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         successful_cultural_influence: data.successful_cultural_influence,
         log: data.log,
         board_history: data.board_history,
+        time_increments: data.time_increments,
+        timing_revealed: false,
         log_index: data.log_index,
         undo_limit: data.undo_limit,
         round: data.round,
@@ -161,7 +169,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
     if game.options.legacy_undo.take().as_deref() == Some("SamePlayer") {
         game.undo_limit = game.log_index;
         if !game.log.is_empty() {
-            game.information_revealed();
+            game.lock_undo();
         }
     }
     for player_data in data.players {
@@ -192,6 +200,7 @@ pub fn data(game: Game) -> GameData {
         current_player_index: game.current_player_index,
         log: game.log,
         board_history: game.board_history,
+        time_increments: game.time_increments,
         log_index: game.log_index,
         undo_limit: game.undo_limit,
         actions_left: game.actions_left,
@@ -232,6 +241,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         current_player_index: game.current_player_index,
         log: game.log.clone(),
         board_history: game.board_history.clone(),
+        time_increments: game.time_increments.clone(),
         log_index: game.log_index,
         undo_limit: game.undo_limit,
         actions_left: game.actions_left,

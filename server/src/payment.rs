@@ -427,11 +427,132 @@ pub fn can_convert(
     )
 }
 
+// Bounds describe only directions, not amounts: if no remaining conversion can
+// decrease a resource, an excess can never become affordable. For an exact
+// payment, a missing resource must likewise still be producible. The total is
+// included to reject under/overpayment of one-for-one exchanges immediately.
+// These are necessary conditions only; the ordinary search still proves every
+// accepted payment, including chained exchanges, discounts and alternatives.
+#[derive(Clone, Copy, Default)]
+struct ConversionBounds {
+    decreases: u16,
+    increases: u16,
+}
+
+fn payment_amounts(pile: &ResourcePile) -> [u16; 9] {
+    let amounts = [
+        pile.food,
+        pile.wood,
+        pile.ore,
+        pile.ideas,
+        pile.gold,
+        pile.mood_tokens,
+        pile.culture_tokens,
+        pile.captives,
+    ]
+    .map(u16::from);
+    [
+        amounts[0],
+        amounts[1],
+        amounts[2],
+        amounts[3],
+        amounts[4],
+        amounts[5],
+        amounts[6],
+        amounts[7],
+        amounts.into_iter().sum(),
+    ]
+}
+
+impl ConversionBounds {
+    fn include(&mut self, from: &ResourcePile, to: &ResourcePile) {
+        for (i, (from, to)) in payment_amounts(from)
+            .into_iter()
+            .zip(payment_amounts(to))
+            .enumerate()
+        {
+            if from > to {
+                self.decreases |= 1 << i;
+            }
+            if from < to {
+                self.increases |= 1 << i;
+            }
+        }
+    }
+
+    fn allows(&self, current: &ResourcePile, available: &[u16; 9], exact: bool) -> bool {
+        payment_amounts(current)
+            .into_iter()
+            .zip(available)
+            .enumerate()
+            .all(|(i, (current, &available))| {
+                (current <= available || self.decreases & (1 << i) != 0)
+                    && (!exact || current >= available || self.increases & (1 << i) != 0)
+            })
+    }
+}
+
+struct ConversionStep<'a> {
+    from: &'a ResourcePile,
+    to: &'a ResourcePile,
+    upper_limit: u8,
+    bounds: ConversionBounds,
+}
+
 fn find_conversion(
     available: &ResourcePile,
     current: &ResourcePile,
     conversions: &[&PaymentConversion],
     skip_from: usize,
+    discount_left: u8,
+    may_overpay: bool,
+    exact: bool,
+) -> Option<ResourcePile> {
+    // Flatten in exactly the old traversal order. Bounds for each suffix are
+    // built once, instead of rescanning conversions at every search node.
+    let mut steps: Vec<_> = conversions
+        .iter()
+        .enumerate()
+        .flat_map(|(i, conversion)| {
+            let upper_limit = match conversion.payment_conversion_type {
+                PaymentConversionType::Unlimited => u8::MAX,
+                PaymentConversionType::MayOverpay(i) | PaymentConversionType::MayNotOverpay(i) => i,
+            };
+            conversion
+                .from
+                .iter()
+                .skip(if i == 0 { skip_from } else { 0 })
+                .map(move |from| ConversionStep {
+                    from,
+                    to: &conversion.to,
+                    upper_limit,
+                    bounds: ConversionBounds::default(),
+                })
+        })
+        .collect();
+    let mut bounds = ConversionBounds::default();
+    for step in steps.iter_mut().rev() {
+        if step.upper_limit > 0 {
+            bounds.include(step.from, step.to);
+        }
+        step.bounds = bounds;
+    }
+    find_payment_steps(
+        available,
+        &payment_amounts(available),
+        current,
+        &steps,
+        discount_left,
+        may_overpay,
+        exact,
+    )
+}
+
+fn find_payment_steps(
+    available: &ResourcePile,
+    available_amounts: &[u16; 9],
+    current: &ResourcePile,
+    steps: &[ConversionStep<'_>],
     discount_left: u8,
     may_overpay: bool,
     exact: bool,
@@ -444,73 +565,49 @@ fn find_conversion(
     {
         return Some(current.clone());
     }
-
-    if conversions.is_empty() {
+    let (step, rest) = steps.split_first()?;
+    if !step.bounds.allows(current, available_amounts, exact) {
         return None;
     }
-    let conversion = &conversions[0];
-    if skip_from >= conversion.from.len() {
-        return find_conversion(
-            available,
-            current,
-            &conversions[1..],
-            0,
-            discount_left,
-            may_overpay,
-            exact,
-        );
-    }
-    let from = &conversion.from[skip_from];
 
-    let upper_limit = match conversion.payment_conversion_type {
-        PaymentConversionType::Unlimited => u8::MAX,
-        PaymentConversionType::MayOverpay(i) | PaymentConversionType::MayNotOverpay(i) => i,
-    };
-
-    for amount in 1..=upper_limit {
-        if !current.has_at_least_times(from, amount)
-            || (conversion.to.is_empty() && amount > discount_left)
+    for amount in 1..=step.upper_limit {
+        if !current.has_at_least_times(step.from, amount)
+            || (step.to.is_empty() && amount > discount_left)
         {
-            return find_conversion(
-                available,
-                current,
-                conversions,
-                skip_from + 1,
-                discount_left,
-                may_overpay,
-                exact,
-            );
+            break;
         }
-
-        let mut current = current.clone();
+        let mut next = current.clone();
         for _ in 0..amount {
-            current -= from.clone();
-            current += conversion.to.clone();
+            next -= step.from.clone();
+            next += step.to.clone();
         }
-        let new_discount_left = if conversion.to.is_empty() {
+        let new_discount_left = if step.to.is_empty() {
             discount_left - amount
         } else {
             discount_left
         };
-
-        let can = find_conversion(
+        if let Some(payment) = find_payment_steps(
             available,
-            &current,
-            conversions,
-            skip_from + 1,
+            available_amounts,
+            &next,
+            rest,
             new_discount_left,
             may_overpay,
             exact,
-        );
-        if can.is_some() {
-            return can;
+        ) {
+            return Some(payment);
         }
     }
-    // A usable conversion can still lead to an unaffordable payment. Try the
-    // remaining alternatives against the original cost before giving up.
-    find_conversion(
-        available, current, conversions, skip_from + 1,
-        discount_left, may_overpay, exact,
+    // A usable conversion can still lead to an unaffordable payment. Keep the
+    // original cost available to the remaining conversions as well.
+    find_payment_steps(
+        available,
+        available_amounts,
+        current,
+        rest,
+        discount_left,
+        may_overpay,
+        exact,
     )
 }
 
@@ -953,3 +1050,7 @@ impl CustomCost {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "payment_search_tests.rs"]
+mod search_tests;

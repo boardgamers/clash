@@ -1,0 +1,749 @@
+{
+  "version": 2,
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        10
+      ]
+    }
+  },
+  "events": [
+    {
+      "event_type": {
+        "CombatEnd": {
+          "round": 1,
+          "battleground": "City",
+          "attacker": {
+            "position": "D6",
+            "player": 0,
+            "present": {
+              "elephants": 1
+            }
+          },
+          "defender": {
+            "position": "D7",
+            "player": 1
+          },
+          "result": "AttackerWins",
+          "city_mood": "Happy"
+        }
+      },
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 102,
+      "handler": {
+        "priority": 102,
+        "request": {
+          "SelectPositions": {
+            "choices": [
+              "B6",
+              "D4"
+            ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
+            "description": "Select a city to place the free Settler Unit"
+          }
+        },
+        "origin": {
+          "Ability": "Place Settler"
+        }
+      }
+    }
+  ],
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 4,
+        "ideas": 1,
+        "gold": 3,
+        "mood_tokens": 1,
+        "culture_tokens": 3
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 2,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "academy": 0,
+            "temple": 0,
+            "wonders": [
+              "GreatMausoleum"
+            ]
+          },
+          "mood_state": "Happy",
+          "position": "D2"
+        },
+        {
+          "city_pieces": {
+            "market": 0,
+            "wonders": [
+              "Pyramids"
+            ]
+          },
+          "mood_state": "Happy",
+          "position": "E3"
+        },
+        {
+          "city_pieces": {
+            "academy": 0
+          },
+          "mood_state": "Angry",
+          "position": "D7"
+        }
+      ],
+      "destroyed_structures": {
+        "obelisk": 1,
+        "observatory": 1,
+        "temple": 1,
+        "cities": 3
+      },
+      "units": [
+        {
+          "position": "C4",
+          "unit_type": {
+            "Leader": "Imhotep"
+          },
+          "id": 1
+        },
+        {
+          "position": "D7",
+          "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Fertile",
+            "Battle",
+            "Fertile"
+          ],
+          "id": 10
+        },
+        {
+          "position": "E3",
+          "unit_type": "Settler",
+          "id": 11
+        }
+      ],
+      "civilization": "Egypt",
+      "available_leaders": [
+        "Cleopatra",
+        "Ramses"
+      ],
+      "recruited_leaders": [
+        "Imhotep"
+      ],
+      "advances": [
+        "Arts",
+        "Astronomy",
+        "Bartering",
+        "Conversion",
+        "Devotion",
+        "Dogma",
+        "Draft",
+        "Engineering",
+        "Fanaticism",
+        "Farming",
+        "Fishing",
+        "FreeEducation",
+        "Husbandry",
+        "Irrigation",
+        "Math",
+        "Medicine",
+        "Metallurgy",
+        "Mining",
+        "Monuments",
+        "Myths",
+        "Navigation",
+        "Philosophy",
+        "Priesthood",
+        "PublicEducation",
+        "Rituals",
+        "Roads",
+        "Sanitation",
+        "Sports",
+        "StateReligion",
+        "SteelWeapons",
+        "Storage",
+        "Tactics",
+        "Theaters",
+        "Writing"
+      ],
+      "wonders_built": [
+        "GreatMausoleum",
+        "Pyramids"
+      ],
+      "incident_tokens": 3,
+      "completed_objectives": [
+        {
+          "card": 24,
+          "name": "Barbarian Conquest"
+        },
+        {
+          "card": 36,
+          "name": "Legacy"
+        },
+        {
+          "card": 15,
+          "name": "Architecture"
+        },
+        {
+          "card": 18,
+          "name": "Culture Focus"
+        }
+      ],
+      "special_victory_points": [
+        {
+          "points": 2,
+          "origin": {
+            "Incident": 30
+          },
+          "attribution": "Events"
+        },
+        {
+          "points": 10,
+          "origin": {
+            "Incident": 31
+          },
+          "attribution": "Events"
+        }
+      ],
+      "action_cards": [
+        0,
+        0
+      ],
+      "objective_cards": [
+        0,
+        0,
+        0
+      ],
+      "next_unit_id": 12
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 4,
+        "wood": 2,
+        "ore": 2,
+        "ideas": 3,
+        "gold": 4,
+        "mood_tokens": 3,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "academy": 1,
+            "market": 1,
+            "port": 1
+          },
+          "mood_state": "Happy",
+          "position": "B6",
+          "port_position": "A7"
+        },
+        {
+          "mood_state": "Angry",
+          "position": "D4"
+        }
+      ],
+      "destroyed_structures": {
+        "cities": 2
+      },
+      "units": [
+        {
+          "position": "E5",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "D4",
+          "unit_type": {
+            "Leader": "Leonidas"
+          },
+          "id": 6
+        },
+        {
+          "position": "D4",
+          "unit_type": "Infantry",
+          "id": 8
+        },
+        {
+          "position": "C5",
+          "unit_type": "Ship",
+          "id": 9
+        },
+        {
+          "position": "C5",
+          "unit_type": "Ship",
+          "id": 10
+        }
+      ],
+      "civilization": "Greece",
+      "available_leaders": [
+        "Alexander",
+        "Pericles"
+      ],
+      "recruited_leaders": [
+        "Leonidas"
+      ],
+      "advances": [
+        "AbsolutePower",
+        "Astronomy",
+        "Bartering",
+        "Currency",
+        "Draft",
+        "Farming",
+        "Fishing",
+        "ForcedLabor",
+        "Irrigation",
+        "Math",
+        "Medicine",
+        "Mining",
+        "Nationalism",
+        "Navigation",
+        "PublicEducation",
+        "Sanitation",
+        "SteelWeapons",
+        "Storage",
+        "Tactics",
+        "Taxes",
+        "Totalitarianism",
+        "TradeRoutes",
+        "Writing"
+      ],
+      "incident_tokens": 1,
+      "completed_objectives": [
+        {
+          "card": 26,
+          "name": "Expansionist"
+        },
+        {
+          "card": 21,
+          "name": "Trade Focus"
+        }
+      ],
+      "special_victory_points": [
+        {
+          "points": 4,
+          "origin": {
+            "Incident": 31
+          },
+          "attribution": "Events"
+        }
+      ],
+      "action_cards": [
+        0,
+        0,
+        0
+      ],
+      "objective_cards": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "next_unit_id": 11
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 9
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Water"
+      ],
+      [
+        "A5",
+        "Forest"
+      ],
+      [
+        "A7",
+        "Water"
+      ],
+      [
+        "B2",
+        "Fertile"
+      ],
+      [
+        "B3",
+        "Mountain"
+      ],
+      [
+        "B4",
+        "Forest"
+      ],
+      [
+        "B5",
+        "Water"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
+        "B7",
+        "Water"
+      ],
+      [
+        "C2",
+        "Barren"
+      ],
+      [
+        "C3",
+        "Barren"
+      ],
+      [
+        "C4",
+        "Fertile"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "C6",
+        "Mountain"
+      ],
+      [
+        "C7",
+        "Forest"
+      ],
+      [
+        "C8",
+        "Mountain"
+      ],
+      [
+        "D1",
+        "Barren"
+      ],
+      [
+        "D2",
+        "Fertile"
+      ],
+      [
+        "D3",
+        "Fertile"
+      ],
+      [
+        "D4",
+        "Forest"
+      ],
+      [
+        "D5",
+        "Fertile"
+      ],
+      [
+        "D6",
+        "Fertile"
+      ],
+      [
+        "D7",
+        "Fertile"
+      ],
+      [
+        "D8",
+        "Barren"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Fertile"
+      ],
+      [
+        "E4",
+        "Fertile"
+      ],
+      [
+        "E5",
+        "Barren"
+      ],
+      [
+        "E6",
+        "Forest"
+      ],
+      [
+        "E7",
+        "Fertile"
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        {
+          "Exhausted": "Mountain"
+        }
+      ],
+      [
+        "F3",
+        "Mountain"
+      ],
+      [
+        "F4",
+        "Water"
+      ],
+      [
+        "F5",
+        {
+          "Exhausted": "Fertile"
+        }
+      ],
+      [
+        "F6",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "F7",
+        "Forest"
+      ],
+      [
+        "G3",
+        "Water"
+      ],
+      [
+        "G5",
+        "Forest"
+      ],
+      [
+        "G7",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 0,
+  "log": [
+    {
+      "age": 6,
+      "rounds": [
+        {
+          "round": 3,
+          "turns": [
+            {
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "board_history": {
+    "id": "egypt-collect-queue",
+    "frames": []
+  },
+  "log_index": 0,
+  "undo_limit": 0,
+  "actions_left": 1,
+  "round": 3,
+  "age": 6,
+  "messages": [],
+  "dice_roll_log": [
+    6,
+    4,
+    8,
+    2,
+    6,
+    3,
+    9,
+    5,
+    6,
+    5,
+    6,
+    7,
+    9,
+    2,
+    5,
+    6,
+    2,
+    10,
+    7,
+    10,
+    6,
+    1,
+    3,
+    9,
+    9,
+    11,
+    2,
+    9,
+    4,
+    1,
+    8,
+    2,
+    0,
+    4,
+    6,
+    0,
+    11,
+    3,
+    5,
+    8
+  ],
+  "wonders_left": [
+    "GreatLighthouse",
+    "GreatStatue",
+    "GreatLibrary",
+    "GreatWall",
+    "GreatGardens",
+    "Colosseum"
+  ],
+  "action_cards_left": [
+    19,
+    9,
+    22,
+    42,
+    2,
+    12,
+    20,
+    40,
+    16,
+    33,
+    38,
+    27,
+    18,
+    6,
+    25,
+    1,
+    13,
+    31,
+    36,
+    34,
+    32,
+    28,
+    10,
+    30,
+    29,
+    17,
+    37,
+    5
+  ],
+  "action_cards_discarded": [
+    3,
+    7,
+    26,
+    121,
+    8,
+    4,
+    41,
+    39,
+    35,
+    11
+  ],
+  "objective_cards_left": [
+    23,
+    20,
+    11,
+    3,
+    29,
+    37,
+    5,
+    31,
+    1,
+    6,
+    4,
+    38,
+    30,
+    2,
+    33,
+    7,
+    12,
+    13,
+    16,
+    9,
+    27,
+    34,
+    22,
+    8
+  ],
+  "incidents_left": [
+    16,
+    5,
+    55,
+    42,
+    12,
+    54,
+    10,
+    23,
+    4,
+    19,
+    22,
+    33,
+    32,
+    28,
+    7,
+    24,
+    50,
+    48,
+    43,
+    18,
+    37,
+    34,
+    29,
+    56,
+    46,
+    45,
+    26,
+    58,
+    51,
+    40,
+    41,
+    1,
+    25,
+    49,
+    8,
+    3,
+    2,
+    39,
+    44,
+    20,
+    6,
+    57,
+    53,
+    15,
+    13
+  ],
+  "incidents_discarded": [
+    27,
+    11,
+    35,
+    38,
+    36,
+    52,
+    30,
+    14,
+    17,
+    9
+  ]
+}

@@ -158,15 +158,23 @@ fn title(action: &Action) -> String {
 }
 
 pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String> {
-    if matches!(action, Action::QueueChoice { .. } | Action::QueueMoves { .. }) {
+    if matches!(
+        action,
+        Action::QueueChoice { .. } | Action::QueueMoves { .. }
+    ) {
         return try_execute_action(game, action, player);
     }
-    let undo = matches!(action, Action::Undo);
+    let history_navigation = matches!(action, Action::Undo | Action::Redo);
     let mut game = execute_one(game, action, player)?;
     crate::early_choices::prune_objectives(&mut game);
+    // Navigating history must not start fresh automatic actions or resume plans:
+    // those could otherwise award credits (and make Undo immediately redo itself).
+    if history_navigation {
+        return Ok(game);
+    }
     // Save automatic responses as ordinary actions. Replay then reproduces them
     // without needing past settings; undo never immediately replays a skipped choice.
-    while !undo && game.context == crate::game::GameContext::Play {
+    while game.context == crate::game::GameContext::Play {
         if let Some(response) = crate::early_choices::take_ready(&mut game) {
             let player = game.active_player();
             game = execute_one(game, Action::Response(response), player)?;
@@ -175,10 +183,18 @@ pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String
         }
         if auto_keep_government(&game) {
             let player = game.active_player();
-            game = execute_one(game, Action::Response(crate::content::persistent_events::EventResponse::Payment(vec![crate::resource_pile::ResourcePile::empty()])), player)?;
+            game = execute_one(
+                game,
+                Action::Response(crate::content::persistent_events::EventResponse::Payment(
+                    vec![crate::resource_pile::ResourcePile::empty()],
+                )),
+                player,
+            )?;
             continue;
         }
-        if !auto_keep_cities(&game) { break; }
+        if !auto_keep_cities(&game) {
+            break;
+        }
         let player = game.active_player();
         game = execute_one(
             game,
@@ -271,7 +287,7 @@ fn execute_one(mut game: Game, action: Action, player: usize) -> Result<Game, St
     } else {
         title(recorded)
     };
-    let mut next = try_execute_action(game, action, player)?;
+    let mut next = crate::timing::execute(game, action, player)?;
     // Simultaneous setup belongs to everyone, regardless of who locked in last.
     let mut after = if choosing_civilization {
         snapshot(&next, None, "Game setup".to_owned(), false)

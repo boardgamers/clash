@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · 발전 선택 중",
   "{p0} · Placing a settler": "{p0} · 개척자 배치 중",
   "{p0} queued · End turn queued": "{p0}개 대기 중 · 턴 종료 대기 중",
+  "Opponent played a face-down tactics card.": "상대방이 전술 카드를 뒷면으로 냈습니다.",
+  "Opponent has not chosen tactics yet.": "상대방이 아직 전술을 선택하지 않았습니다.",
+  "Opponent is not playing a tactics card.": "상대방은 전술 카드를 사용하지 않습니다.",
   "Ability active · Man God": "능력 활성 · 인간 신",
   "Ability only: not researched, no extra advance or victory points.": "능력만 적용: 연구한 것이 아니며 추가 발전이나 승점은 없습니다."
 }

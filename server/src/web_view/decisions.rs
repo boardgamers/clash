@@ -246,8 +246,13 @@ pub(super) fn payment_choices(
     }
     // Keep choice cards for bounded exchanges such as Alphabet (one route can
     // yield two ideas). Validate every candidate against the real conversion rules.
-    let mut max_amount = u16::from(std::iter::once(&cost.default)
-        .chain(cost.alternatives.iter()).map(ResourcePile::amount).max().unwrap_or(0));
+    let mut max_amount = u16::from(
+        std::iter::once(&cost.default)
+            .chain(cost.alternatives.iter())
+            .map(ResourcePile::amount)
+            .max()
+            .unwrap_or(0),
+    );
     for conversion in &cost.conversions {
         let from = conversion
             .from
@@ -307,12 +312,35 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             &h.origin,
             EventOrigin::Advance(crate::advance::Advance::Tactics)
         ) || matches!(&h.origin, EventOrigin::LeaderAbility(name) if name == "Loyalty"));
+    let tactics_context = if tactics_selection
+        && let PersistentEventType::CombatRoundStart(round) = &game.current_event().event_type
+    {
+        // Loyalty supplies the hand, but the Barbarian army is the combatant.
+        let player = if matches!(&h.origin, EventOrigin::LeaderAbility(name) if name == "Loyalty") {
+            round
+                .combat
+                .players()
+                .into_iter()
+                .find(|index| game.player(*index).civilization.is_barbarian())
+        } else {
+            Some(p.index)
+        };
+        player.map(|player| (player, round))
+    } else {
+        None
+    };
     let options = match &h.request {
         PersistentEventRequest::ExploreResolution => return None,
         PersistentEventRequest::BoolRequest(_) => return None,
         PersistentEventRequest::ResourceReward(r)
             if r.reward.payment_options.default.amount() == 1
-                && payment_choices(&r.reward.payment_options, &ResourcePile::empty(), true, false).is_some() =>
+                && payment_choices(
+                    &r.reward.payment_options,
+                    &ResourcePile::empty(),
+                    true,
+                    false,
+                )
+                .is_some() =>
         {
             return None;
         }
@@ -500,24 +528,12 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             r.choices
                 .iter()
                 .filter(|card| {
-                    if tactics_selection
-                        && let PersistentEventType::CombatRoundStart(round) = &game.current_event().event_type
+                    if let Some((player, round)) = tactics_context
                         && let HandCard::ActionCard(id) = card
                     {
-                        // Loyalty supplies cards from the Celtic hand, but the
-                        // participating army and combat role belong to Barbarians.
-                        let combat_player = if matches!(&h.origin, EventOrigin::LeaderAbility(name) if name == "Loyalty") {
-                            round.combat.players().into_iter().find(|index| {
-                                game.player(*index).civilization.is_barbarian()
-                            })
-                        } else {
-                            Some(p.index)
-                        };
-                        return combat_player.is_some_and(|index| {
-                            crate::tactics_card::can_play_tactics_card(
-                                game, index, game.cache.get_action_card(*id), &round.combat,
-                            )
-                        });
+                        return crate::tactics_card::can_play_tactics_card(
+                            game, player, game.cache.get_action_card(*id), round,
+                        );
                     }
                     true
                 })
@@ -626,15 +642,19 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
             _ => {}
         }
     }
-    Some(
-        json!({"origin":h.origin,"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
+    let mut decision = json!({"origin":h.origin,"name":title,"description":description,"min":min,"max":max,"options":options,"fields":fields,
         "eventContext":event_context,
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
         "tacticsSelection":tactics_selection,
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),
         "advanceMode":matches!(h.request,PersistentEventRequest::SelectAdvance(_)).then(|| advance_mode(game, h)),
-        "endOfAge":crate::status_phase::get_status_phase(game).is_some()}),
-    )
+        "endOfAge":crate::status_phase::get_status_phase(game).is_some()});
+    if let Some((player, round)) = tactics_context {
+        decision["opponentTactics"] = json!(crate::tactics_card::opponent_tactics_status(
+            game, player, round,
+        ));
+    }
+    Some(decision)
 }
 
 fn government_choices(game: &Game, seat: usize) -> Vec<ChangeGovernment> {

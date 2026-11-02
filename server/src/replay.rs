@@ -17,6 +17,12 @@ pub struct ReplayGameData {
     players: Vec<ReplayPlayerData>,
     #[serde(default)]
     dropped_players: Vec<usize>,
+    #[serde(
+        default,
+        skip_serializing_if = "Vec::is_empty",
+        deserialize_with = "crate::timing::deserialize_counters"
+    )]
+    time_increments: Vec<u64>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
@@ -142,6 +148,9 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         game.players[player.id].settings = player.settings;
     }
     game.dropped_players = data.dropped_players;
+    // Clock totals belong to the live session, not the historical position.
+    // Reconstructing any cursor must neither earn nor revoke existing credits.
+    game.time_increments = data.time_increments;
     if full_replay {
         game.finish_after_drop();
     }

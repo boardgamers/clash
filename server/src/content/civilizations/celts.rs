@@ -162,7 +162,9 @@ pub(crate) fn loyalty_controller(game: &Game, c: &Combat) -> Option<usize> {
         .find(|p| {
             p.index != c.opponent(barb)
                 && p.active_leader() == Some(Leader::Viriatus)
-                && game.map.within_revealed_distance(leader_position(p), c.defender_position(), 2)
+                && game
+                    .map
+                    .within_revealed_distance(leader_position(p), c.defender_position(), 2)
         })
         .map(|p| p.index)
 }
@@ -194,9 +196,33 @@ fn viriatus() -> LeaderInfo {
             .add_hand_card_request(|e|&mut e.loyalty,0,|game,p,r|{
                 let barb=r.combat.players().into_iter().find(|id|game.player(*id).civilization.is_barbarian())?;
                 if get_combat_strength(barb,r).deny_tactics_card{return None;}
-                let cards=p.get(game).action_cards.iter().filter(|id|crate::tactics_card::can_play_tactics_card(game,barb,game.cache.get_action_card(**id),&r.combat)).map(|id|HandCard::ActionCard(*id)).collect();
+                let cards=p.get(game).action_cards.iter().filter(|id|crate::tactics_card::can_play_tactics_card(game,barb,game.cache.get_action_card(**id),r)).map(|id|HandCard::ActionCard(*id)).collect();
                 Some(HandCardsRequest::new(cards,0..=1,"Loyalty · Play a tactics card for the Barbarians"))
-            },|game,s,r|{if let Some(HandCard::ActionCard(id))=s.choice.first(){let barb=r.combat.players().into_iter().find(|id|game.player(*id).civilization.is_barbarian()).unwrap();game.player_mut(barb).custom_data.insert("Loyalty controller".into(),crate::player::Data::Number(s.player_index as u32));update_combat_strength(game,barb,r,|_,_,strength,_|strength.tactics_card=Some(*id));crate::action_card::discard_action_card(game,s.player_index,*id,&s.origin,HandCardLocation::PlayToDiscardFaceDown);}}).build())
+            }, |game, s, r| {
+                if let Some(HandCard::ActionCard(id)) = s.choice.first() {
+                    let barb = r.combat.players().into_iter()
+                        .find(|id| game.player(*id).civilization.is_barbarian())
+                        .expect("Loyalty requires a Barbarian combatant");
+                    assert!(
+                        !get_combat_strength(barb, r).deny_tactics_card
+                            && crate::tactics_card::can_play_tactics_card(
+                                game, barb, game.cache.get_action_card(*id), r,
+                            ),
+                        "Tactics card requirements are not met"
+                    );
+                    game.player_mut(barb).custom_data.insert(
+                        "Loyalty controller".into(),
+                        crate::player::Data::Number(s.player_index as u32),
+                    );
+                    update_combat_strength(game, barb, r, |_, _, strength, _| {
+                        strength.tactics_card = Some(*id);
+                    });
+                    crate::action_card::discard_action_card(
+                        game, s.player_index, *id, &s.origin,
+                        HandCardLocation::PlayToDiscardFaceDown,
+                    );
+                }
+            }).build())
 }
 fn rapid_recruitment(mut b: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
     for i in 0..8u32 {

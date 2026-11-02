@@ -4772,6 +4772,9 @@
   "{p0} · Choosing an advance": "{p0} · Choisit une avancée",
   "{p0} · Placing a settler": "{p0} · Place un colon",
   "{p0} queued · End turn queued": "{p0} en attente · Fin de tour en attente",
+  "Opponent played a face-down tactics card.": "L'adversaire a joué une carte de tactique face cachée.",
+  "Opponent has not chosen tactics yet.": "L'adversaire n'a pas encore choisi sa tactique.",
+  "Opponent is not playing a tactics card.": "L'adversaire ne joue pas de carte de tactique.",
   "Ability active · Man God": "Capacité active · Homme-dieu",
   "Ability only: not researched, no extra advance or victory points.": "Capacité uniquement : non recherchée, sans progrès ni points de victoire supplémentaires."
 }

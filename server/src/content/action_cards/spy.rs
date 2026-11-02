@@ -70,7 +70,12 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             ))
         },
         |game, s, a| {
-            game.information_revealed(); // can't undo swap - the other player saw your card
+            if s.choice.is_empty() {
+                // Keep the existing undo boundary, but declining reveals no card.
+                game.lock_undo();
+            } else {
+                game.information_revealed(); // the other player saw your card
+            }
 
             let _ = swap_spy_cards(
                 game,

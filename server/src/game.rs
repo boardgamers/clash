@@ -145,6 +145,10 @@ pub struct Game {
     pub current_player_index: usize,
     pub log: Vec<ActionLogAge>,
     pub board_history: crate::board_history::BoardHistory,
+    /// Monotonic platform credits; deliberately outside the undoable position.
+    pub(crate) time_increments: Vec<u64>,
+    /// Transient signal for one saved atomic action, not a persisted undo cursor.
+    pub(crate) timing_revealed: bool,
     // index for the next action log
     pub log_index: usize,
     pub undo_limit: usize,
@@ -247,6 +251,7 @@ impl Game {
     }
 
     pub(crate) fn information_revealed(&mut self) {
+        self.timing_revealed = true;
         self.lock_undo();
     }
 
@@ -254,7 +259,7 @@ impl Game {
         self.lock_undo();
     }
 
-    fn lock_undo(&mut self) {
+    pub(crate) fn lock_undo(&mut self) {
         if self.context != GameContext::AI {
             self.undo_limit = self.log_index;
             current_turn_log_mut(self).clear_undo();

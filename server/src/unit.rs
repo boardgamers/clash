@@ -761,7 +761,7 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
         return;
     }
 
-    game.information_revealed(); // strange bug when redoing this
+    game.lock_undo(); // redo workaround, not a hidden-information reveal
 
     let mut embark = vec![];
 

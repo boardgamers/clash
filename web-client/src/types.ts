@@ -715,6 +715,7 @@ export interface Decision {
   } | null;
   advanceSelection?: boolean;
   tacticsSelection?: boolean;
+  opponentTactics?: 'played' | 'pending' | 'none' | null;
   advanceMode?: 'free' | 'paid' | 'borrow' | null;
   name: string;
   description: string;

@@ -8,7 +8,8 @@ use crate::game::Game;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{
-    CombatLocation, CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget,
+    CombatLocation, CombatRole, FighterRequirement, OpponentTacticsStatus, TacticsCard,
+    TacticsCardTarget, opponent_tactics_status,
 };
 use crate::unit::set_unit_position;
 use crate::utils::a_or_an;
@@ -131,7 +132,8 @@ pub(crate) fn high_ground(id: u8) -> TacticsCard {
         "Unless you attack a city: Your opponent can't use dice-symbol abilities this round.",
     )
     .location_requirement(CombatLocation::Land)
-    .checker(|player, game, combat| {
+    .checker(|player, game, round| {
+        let combat = &round.combat;
         combat.role(player) == CombatRole::Defender || combat.defender_city(game).is_none()
     })
     .target(TacticsCardTarget::Opponent)
@@ -253,7 +255,7 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
     )
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Defender)
-    .checker(|_, game, c| !tactical_retreat_targets(c, game).is_empty())
+    .checker(|_, game, round| !tactical_retreat_targets(&round.combat, game).is_empty())
     .add_position_request(
         |event| &mut event.combat_round_start_tactics,
         0,
@@ -311,6 +313,9 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
         "Scout",
         "Ignore the enemy tactics card and take it to your hand.",
     )
+    .checker(|player, game, round| {
+        opponent_tactics_status(game, player, round) != OpponentTacticsStatus::None
+    })
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_round_start_reveal_tactics,
         0,
