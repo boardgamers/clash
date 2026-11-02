@@ -377,6 +377,10 @@ fn draw_action(drawer: &mut RichTextDrawer, body: &ActionLogBody) {
             }
         },
         Action::Response(r) => draw_response_action(drawer, r),
+        // Private queue revisions are live updates, never committed log entries.
+        Action::QueueMoves { .. } | Action::QueueChoice { .. } => {
+            panic!("Unexpected queued action in log");
+        }
         Action::Undo => panic!("Unexpected undo in log"),
         Action::Redo => panic!("Unexpected redo in log"),
         Action::StartTurn => panic!("Unexpected start turn in log"),

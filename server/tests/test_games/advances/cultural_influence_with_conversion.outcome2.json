@@ -308,7 +308,7 @@
                     },
                     {
                       "player": 1,
-                      "Text": "rolls a 2 and now has the option to pay 3 culture tokens to increase the dice roll and proceed with the cultural influence",
+                      "Text": "rolls a 1 (+1) and now has the option to pay 3 culture tokens to increase the dice roll and proceed with the cultural influence",
                       "origin": {
                         "Ability": "Influence Culture"
                       }

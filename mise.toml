@@ -43,7 +43,9 @@ run = [
     "cargo nextest run",
     "git diff --exit-code || exit 1", # Check if there are any uncommitted changes updating JSON files
 ]
-env = { UPDATE_EXPECTED = "true", RUSTFLAGS = '' }
+# CI compares snapshots; rewriting shared fixtures races with parallel readers.
+# Keep snapshot updates opt-in through the update-tests task above.
+env = { UPDATE_EXPECTED = "false", RUSTFLAGS = '' }
 
 [tasks.profile]
 description = "Run AI client with profiling"

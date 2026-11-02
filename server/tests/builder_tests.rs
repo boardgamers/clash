@@ -241,7 +241,8 @@ fn builder_combines_with_epic_and_civilization_draft_and_survives_save_load() {
     let cache = Cache::new(&data.options);
     let game = Game::from_data(data, cache, GameContext::Play);
     assert!(game.options.variant == GameVariant::Builder);
-    assert_eq!(game.options.length.ages(), 10);
+    assert!(game.options.length == GameLength::Epic);
+    assert_eq!(game.options.length.ages(), 8);
     assert!(game.civilization_draft.is_none());
     assert!(!game.map.tiles.is_empty());
     assert_eq!(game.cache.get_objective_card(20).name(), "Science Focus");

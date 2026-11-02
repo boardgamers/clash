@@ -171,15 +171,47 @@ fn test_great_gardens() {
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)).skip_json(),
             TestAction::undoable(1, move_action(vec![0, 1], Position::from_offset("B1")))
                 .with_post_assert(|mut game| {
-                    let result = execute_without_undo(
-                        &mut game,
-                        move_action(vec![0, 1], Position::from_offset("A1")),
+                    use server::movement::{MovementRestriction, possible_move_routes};
+
+                    let start = Position::from_offset("B1");
+                    let destination = Position::from_offset("A1");
+                    let can_attack = |game: &server::game::Game| {
+                        possible_move_routes(game.player(1), game, &[0, 1], start, None)
+                            .unwrap()
+                            .iter()
+                            .any(|route| route.destination == destination)
+                    };
+                    assert!(
+                        !can_attack(&game),
+                        "Great Gardens must not be a legal target"
+                    );
+                    let error = execute_without_undo(
+                        &mut game.clone(),
+                        move_action(vec![0, 1], destination),
                         1,
-                    );
-                    assert_eq!(
-                        result.err(),
-                        Some("fertile movement attack great gardens restriction".to_string())
-                    );
+                    )
+                    .unwrap_err();
+                    // Route selection now wraps the specific rejection with
+                    // destination/payment diagnostics. Keep checking the rule.
+                    assert!(error.contains("fertile movement attack great gardens restriction"));
+
+                    // Positive control: remove only the Grassland restriction,
+                    // leaving the same units, target, route and payment.
+                    for id in [0, 1] {
+                        let unit = game.player_mut(1).get_unit_mut(id);
+                        assert!(
+                            unit.movement_restrictions
+                                .contains(&MovementRestriction::Fertile)
+                        );
+                        unit.movement_restrictions
+                            .retain(|restriction| *restriction != MovementRestriction::Fertile);
+                    }
+                    assert!(can_attack(&game));
+                    execute_without_undo(&mut game, move_action(vec![0, 1], destination), 1)
+                        .unwrap();
+                    for id in [0, 1] {
+                        assert_eq!(game.player(1).get_unit(id).position, destination);
+                    }
                 }),
         ],
     );
