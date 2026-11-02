@@ -273,18 +273,35 @@ fn negotiations_protects_cities_without_units() {
     for fortress in [false, true] {
         let mut game = JSON.load_game("negotiations");
         game.player_mut(0).units.clear();
-        game.player_mut(1).advances.insert(advance::Advance::Tactics);
+        game.player_mut(1)
+            .advances
+            .insert(advance::Advance::Tactics);
         game.player_mut(0).cities[0].pieces.fortress = fortress.then_some(0);
         let destination = Position::from_offset("C2");
         let can_enter = |game: &server::game::Game| {
-            possible_move_routes(game.player(1), game, &[0], Position::from_offset("B1"), None)
-                .iter().any(|routes| routes.iter().any(|route| route.destination == destination))
+            possible_move_routes(
+                game.player(1),
+                game,
+                &[0],
+                Position::from_offset("B1"),
+                None,
+            )
+            .iter()
+            .any(|routes| routes.iter().any(|route| route.destination == destination))
         };
-        assert!(can_enter(&game), "The city is reachable before Negotiations");
-        let game = server::game_api::execute(game, Action::Playing(PlayingAction::ActionCard(23)), 0);
-        let game = server::game_api::execute(game, payment_response(ResourcePile::culture_tokens(1)), 0);
+        assert!(
+            can_enter(&game),
+            "The city is reachable before Negotiations"
+        );
+        let game =
+            server::game_api::execute(game, Action::Playing(PlayingAction::ActionCard(23)), 0);
+        let game =
+            server::game_api::execute(game, payment_response(ResourcePile::culture_tokens(1)), 0);
         let game = server::game_api::execute(game, Action::Playing(PlayingAction::EndTurn), 0);
-        assert!(!can_enter(&game), "Negotiations must protect a city even without units");
+        assert!(
+            !can_enter(&game),
+            "Negotiations must protect a city even without units"
+        );
     }
 }
 
@@ -469,7 +486,9 @@ fn technology_trade_only_offers_partners_within_two_spaces() {
                 let mut game = Game::from_data(data, cache, GameContext::Play);
                 // The synthetic contacts must occupy real, revealed map spaces.
                 for pos in ["C1", "C2", "C3", "C4", "C5"] {
-                    game.map.tiles.insert(Position::from_offset(pos), server::map::Terrain::Fertile);
+                    game.map
+                        .tiles
+                        .insert(Position::from_offset(pos), server::map::Terrain::Fertile);
                 }
                 let game = server::game_api::execute(
                     game,

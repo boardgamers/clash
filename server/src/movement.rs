@@ -205,7 +205,11 @@ fn move_units_with_terrain(
         unit.carrier_id = embark_carrier_id;
 
         if let Some(terrain) = terrain_movement_restriction(&game.map, to, unit) {
-            if !(ignore_terrain && matches!(terrain, MovementRestriction::Mountain | MovementRestriction::Forest))
+            if !(ignore_terrain
+                && matches!(
+                    terrain,
+                    MovementRestriction::Mountain | MovementRestriction::Forest
+                ))
                 && !(hannibal && terrain == MovementRestriction::Mountain)
                 && !(terracing
                     && terrain == MovementRestriction::Mountain
@@ -520,7 +524,14 @@ fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> 
     } else if ignore_terrain && game.enemy_player(player.index, m.destination).is_none() {
         // Roads ignore the arrival penalty too, not only existing restrictions
         // while validating the route. Battles still impose their own stop.
-        move_units_with_terrain(game, player.index, &m.units, m.destination, m.embark_carrier_id, true);
+        move_units_with_terrain(
+            game,
+            player.index,
+            &m.units,
+            m.destination,
+            m.embark_carrier_id,
+            true,
+        );
     } else {
         move_with_possible_combat(game, player.index, m);
     }

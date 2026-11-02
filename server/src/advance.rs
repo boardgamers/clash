@@ -299,7 +299,9 @@ pub(crate) fn do_advance(
             ActionLogBalance::Gain,
             if take_incident_token
                 && !crate::content::incidents::trojan::anarchy_replaces_event_marker(
-                    game, player_index, advance,
+                    game,
+                    player_index,
+                    advance,
                 )
             {
                 ActionLogIncidentToken::Take(t - 1)

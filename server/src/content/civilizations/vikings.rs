@@ -161,7 +161,15 @@ pub(crate) fn convert_to_settler_range(
                 .count()
         })
         .sum::<usize>() as u8;
-    let standing = present.iter().filter(|u| u.is_army_unit() && !u.carrier_id.is_some_and(|id| units.iter().any(|ship| ship.id == id))).count() as u8;
+    let standing = present
+        .iter()
+        .filter(|u| {
+            u.is_army_unit()
+                && !u
+                    .carrier_id
+                    .is_some_and(|id| units.iter().any(|ship| ship.id == id))
+        })
+        .count() as u8;
     let max = units.len() as u8;
     (0..=max)
         .filter(|&i| can_add(p, carried + standing, i, max - i))
@@ -335,7 +343,10 @@ fn ruler_of_the_north() -> LeaderAbility {
         move |s, game, (), player| {
             let p = player.get(game);
             let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
-                game.map.revealed_distance(leader_position(p), capital_city_position(game, p)).unwrap_or(0) as f32 / 2.0
+                game.map
+                    .revealed_distance(leader_position(p), capital_city_position(game, p))
+                    .unwrap_or(0) as f32
+                    / 2.0
             } else {
                 0_f32
             };
@@ -390,7 +401,11 @@ fn new_colonies() -> LeaderAbility {
 
                     if game.map.get(to).is_some_and(Terrain::is_unexplored) {
                         crate::explore::move_to_unexplored_tile(
-                            game, &s.player(), &m.units, start, to,
+                            game,
+                            &s.player(),
+                            &m.units,
+                            start,
+                            to,
                         );
                     } else {
                         move_with_possible_combat(game, s.player_index, &m);
@@ -411,7 +426,11 @@ fn unload_positions(game: &Game, p: &Player) -> Vec<Position> {
     position
         .neighbors()
         .into_iter()
-        .filter(|n| game.map.get(*n).is_some_and(|t| t.is_land() || t.is_unexplored()))
+        .filter(|n| {
+            game.map
+                .get(*n)
+                .is_some_and(|t| t.is_land() || t.is_unexplored())
+        })
         .collect_vec()
 }
 

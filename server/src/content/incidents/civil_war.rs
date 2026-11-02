@@ -158,7 +158,11 @@ fn revolution() -> Incident {
         b,
         |event| &mut event.incident,
         ChangeGovernmentOption::FreeAndMandatory,
-        |i, p, game| i.active_player == p && i.player.sacrifice & 2 == 0 && can_change_government_for_free(game.player(p), game),
+        |i, p, game| {
+            i.active_player == p
+                && i.player.sacrifice & 2 == 0
+                && can_change_government_for_free(game.player(p), game)
+        },
         |_, _| {}, // don't need to pay
         |_| true,
     );

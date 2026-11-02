@@ -23,8 +23,8 @@ use crate::victory_points::victory_points_parts;
 use crate::wonder::Wonder;
 use serde_json::{Value, json};
 mod actions;
-mod combat_estimate;
 mod collection_potential;
+mod combat_estimate;
 mod decisions;
 mod effects;
 mod journal;
@@ -159,14 +159,22 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         }
     });
     let setup = crate::map::get_map_setup(game.players.iter().filter(|p| p.is_human()).count());
-    let regions: Vec<Value> = setup.home_positions.iter().enumerate()
+    let regions: Vec<Value> = setup
+        .home_positions
+        .iter()
+        .enumerate()
         .map(|(player, home)| (Some(player), &home.position))
         .chain(setup.free_positions.iter().map(|position| (None, position)))
-        .enumerate().map(|(index, (home, position))| {
-            let tiles: Vec<_> = crate::map::block_tiles(position).into_iter()
-                .filter(|tile| game.map.is_inside(*tile)).collect();
+        .enumerate()
+        .map(|(index, (home, position))| {
+            let tiles: Vec<_> = crate::map::block_tiles(position)
+                .into_iter()
+                .filter(|tile| game.map.is_inside(*tile))
+                .collect();
             json!({"id":index + 1,"homePlayer":home,"tiles":tiles})
-        }).filter(|region| !region["tiles"].as_array().unwrap().is_empty()).collect();
+        })
+        .filter(|region| !region["tiles"].as_array().unwrap().is_empty())
+        .collect();
     // A map-reading aid, not legal move offers. Use visible terrain only, including for spectators.
     let mut sea_routes = game
         .map
@@ -182,14 +190,23 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         .filter(|p| p.is_human())
         .map(|p| crate::barbarians::map_guide(game, p.index))
         .collect::<Vec<_>>();
-    let trade_routes = game.players.iter().filter(|p| p.civilization.is_human()).map(|p| {
-        let enabled = p.can_use_advance(Advance::TradeRoutes);
-        let routes = if enabled {
-            crate::content::advances::trade_routes::find_trade_routes(game, p, false)
-                .iter().map(|r| json!({"from":r.from,"to":r.to,"unit":r.unit_id})).collect::<Vec<_>>()
-        } else { vec![] };
-        json!({"player":p.index,"enabled":enabled,"routes":routes})
-    }).collect::<Vec<_>>();
+    let trade_routes = game
+        .players
+        .iter()
+        .filter(|p| p.civilization.is_human())
+        .map(|p| {
+            let enabled = p.can_use_advance(Advance::TradeRoutes);
+            let routes = if enabled {
+                crate::content::advances::trade_routes::find_trade_routes(game, p, false)
+                    .iter()
+                    .map(|r| json!({"from":r.from,"to":r.to,"unit":r.unit_id}))
+                    .collect::<Vec<_>>()
+            } else {
+                vec![]
+            };
+            json!({"player":p.index,"enabled":enabled,"routes":routes})
+        })
+        .collect::<Vec<_>>();
     let pirate_spawns = game
         .players
         .iter()
@@ -253,7 +270,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     let Some(seat) = seat else {
         let mut result = json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"activeEffects":active_effects,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
         result["tradeRoutes"] = json!(trade_routes);
-    result["regions"] = json!(regions);
+        result["regions"] = json!(regions);
         return result;
     };
     let p = game.player(seat);
@@ -324,11 +341,23 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             "shogunateDraft":p.has_special_advance(crate::special_advance::SpecialAdvance::Shogunate)&&p.can_use_advance(Advance::Draft)&&!p.event_info.contains_key("Shogunate Draft"),
             "canActivate":city.can_activate(), "activationMood":after_activation.mood_state,"activationCapacity":after_activation.mood_modified_size(p)})
     }).collect::<Vec<_>>();
-    let early_offers = if seat != active || game.events.is_empty() { crate::early_choices::offers(game, seat) } else { vec![] };
+    let early_offers = if seat != active || game.events.is_empty() {
+        crate::early_choices::offers(game, seat)
+    } else {
+        vec![]
+    };
     let early_advance = early_offers.iter().find(|o| o.key.ends_with("/advance"));
-    let early_advance_choices: Vec<_> = early_advance.into_iter().flat_map(|o| &o.options).filter_map(|o| {
-        if let EventResponse::SelectAdvance(a) = o.response { Some(a) } else { None }
-    }).collect();
+    let early_advance_choices: Vec<_> = early_advance
+        .into_iter()
+        .flat_map(|o| &o.options)
+        .filter_map(|o| {
+            if let EventResponse::SelectAdvance(a) = o.response {
+                Some(a)
+            } else {
+                None
+            }
+        })
+        .collect();
     let advance_choice = if seat == active {
         game.current_event_handler()
             .and_then(|handler| match &handler.request {
@@ -342,7 +371,8 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     } else {
         None
     };
-    let research_uses_event_marker = early_advance.is_some() || advance_choice.is_none()
+    let research_uses_event_marker = early_advance.is_some()
+        || advance_choice.is_none()
         || game
             .current_event_handler()
             .is_some_and(|handler| decisions::advance_uses_event_marker(game, handler));
@@ -421,7 +451,12 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "canUndo":seat == active && game.can_undo(),"canRedo":seat == active && game.can_redo(),"canEndTurn":can_play && PlayingActionType::EndTurn.is_available(game, seat).is_ok()});
     result["tradeRoutes"] = json!(trade_routes);
     result["regions"] = json!(regions);
-    result["unavailableSpecialActions"] = json!(special_actions.iter().filter(|a| !a["reason"].is_null()).collect::<Vec<_>>());
+    result["unavailableSpecialActions"] = json!(
+        special_actions
+            .iter()
+            .filter(|a| !a["reason"].is_null())
+            .collect::<Vec<_>>()
+    );
     result["activeEffects"] = json!(active_effects);
     result["earlyChoices"] = json!(early_offers);
     result
@@ -838,7 +873,9 @@ mod tests {
             .map
             .tiles
             .keys()
-            .find(|pos| pos.distance(site) == 2 && game.map.within_revealed_distance(**pos, site, 2))
+            .find(|pos| {
+                pos.distance(site) == 2 && game.map.within_revealed_distance(**pos, site, 2)
+            })
             .expect("tile 2 spaces away");
         game.players[seat]
             .units
@@ -877,7 +914,9 @@ fn research_plan(game: &Game, seat: usize, input: &Value) -> Result<Value, Strin
     };
     let p = game.player(seat);
     let eligible = p.can_use_advance(Advance::FreeEducation)
-        && !p.event_info.contains_key(&crate::events::EventOrigin::Advance(Advance::FreeEducation).id())
+        && !p
+            .event_info
+            .contains_key(&crate::events::EventOrigin::Advance(Advance::FreeEducation).id())
         && a.advance != Advance::FreeEducation
         && (a.payment.ideas > 0 || a.payment.gold > 0);
     if !eligible {

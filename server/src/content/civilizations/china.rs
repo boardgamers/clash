@@ -164,8 +164,12 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
             let player_index = p.index;
             let player = p.get(game);
             let combat = &e.combat;
-            if (once_per_battle && combat.modifiers.contains(&CombatModifier::TacticianUsed(player_index)))
-                || !filter(combat, combat.role(player_index), game) {
+            if (once_per_battle
+                && combat
+                    .modifiers
+                    .contains(&CombatModifier::TacticianUsed(player_index)))
+                || !filter(combat, combat.role(player_index), game)
+            {
                 return None;
             }
 
@@ -188,7 +192,9 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
                 s.log(game, "Ignore the first hit");
                 apply_ignore_hit(e, s.player_index, true);
                 if once_per_battle {
-                    e.combat.modifiers.push(CombatModifier::TacticianUsed(s.player_index));
+                    e.combat
+                        .modifiers
+                        .push(CombatModifier::TacticianUsed(s.player_index));
                 }
             }
         },

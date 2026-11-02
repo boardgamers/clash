@@ -12,13 +12,13 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::{Game, GameOptions};
-use crate::objective_card::discard_objective_card;
-use crate::utils::remove_element;
 use crate::log::add_start_turn_action_if_needed;
+use crate::objective_card::discard_objective_card;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::{ResourceType, gain_resources};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
+use crate::utils::remove_element;
 use itertools::Itertools;
 
 pub(crate) fn economy(options: &GameOptions) -> AdvanceGroupInfo {
@@ -66,20 +66,31 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
                 "Select a card from your hand to discard",
             ))
         },
-        |game, s, _e| {
-            match s.choice[0] {
-                HandCard::ActionCard(card) => discard_action_card(
-                    game, s.player_index, card, &s.origin, HandCardLocation::DiscardPile,
-                ),
-                HandCard::ObjectiveCard(card) => discard_objective_card(
-                    game, s.player_index, card, &s.origin, HandCardLocation::DiscardPile,
-                ),
-                HandCard::Wonder(wonder) => {
-                    remove_element(&mut game.player_mut(s.player_index).wonder_cards, &wonder)
-                        .expect("wonder card must be in hand");
-                    log_card_transfer(game, &HandCard::Wonder(wonder),
-                        HandCardLocation::Hand(s.player_index), HandCardLocation::DiscardPile, &s.origin);
-                }
+        |game, s, _e| match s.choice[0] {
+            HandCard::ActionCard(card) => discard_action_card(
+                game,
+                s.player_index,
+                card,
+                &s.origin,
+                HandCardLocation::DiscardPile,
+            ),
+            HandCard::ObjectiveCard(card) => discard_objective_card(
+                game,
+                s.player_index,
+                card,
+                &s.origin,
+                HandCardLocation::DiscardPile,
+            ),
+            HandCard::Wonder(wonder) => {
+                remove_element(&mut game.player_mut(s.player_index).wonder_cards, &wonder)
+                    .expect("wonder card must be in hand");
+                log_card_transfer(
+                    game,
+                    &HandCard::Wonder(wonder),
+                    HandCardLocation::Hand(s.player_index),
+                    HandCardLocation::DiscardPile,
+                    &s.origin,
+                );
             }
         },
     )

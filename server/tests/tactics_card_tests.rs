@@ -351,8 +351,18 @@ fn high_ground_is_not_skipped_after_attacker_flanking() {
     game.players[1].action_cards = vec![40];
     for (player, action) in [
         (0, move_action(vec![0], Position::from_offset("C1"))),
-        (0, Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(42)]))),
-        (1, Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(40)]))),
+        (
+            0,
+            Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                42,
+            )])),
+        ),
+        (
+            1,
+            Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+                40,
+            )])),
+        ),
     ] {
         game = server::game_api::execute(game, action, player);
     }
@@ -363,7 +373,13 @@ fn high_ground_is_not_skipped_after_attacker_flanking() {
     fn check(value: &serde_json::Value) {
         if let Some(roll) = value.get("CombatRoll") {
             if value["player"] == 0 {
-                assert!(roll["rolls"].as_array().unwrap().iter().all(|r| r["bonus"] == false));
+                assert!(
+                    roll["rolls"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .all(|r| r["bonus"] == false)
+                );
             }
         }
         match value {

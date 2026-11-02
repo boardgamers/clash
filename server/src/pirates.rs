@@ -176,9 +176,16 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         IncidentTarget::ActivePlayer,
         priority,
         move |game, p, _i| {
-            if get_pirates_player(game).available_units().get(&UnitType::Ship) == 0 {
+            if get_pirates_player(game)
+                .available_units()
+                .get(&UnitType::Ship)
+                == 0
+            {
                 if blockade {
-                    p.log(game, "Pirate event has no effect: Carthage controls all four Pirate Ships");
+                    p.log(
+                        game,
+                        "Pirate event has no effect: Carthage controls all four Pirate Ships",
+                    );
                 }
                 return None;
             }

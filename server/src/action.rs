@@ -37,8 +37,15 @@ pub enum Action {
     Playing(PlayingAction),
     Movement(MovementAction),
     Response(EventResponse),
-    QueueMoves { key: String, actions: Vec<Action>, waiting: bool },
-    QueueChoice { key: String, response: Option<EventResponse> },
+    QueueMoves {
+        key: String,
+        actions: Vec<Action>,
+        waiting: bool,
+    },
+    QueueChoice {
+        key: String,
+        response: Option<EventResponse>,
+    },
     Undo,
     Redo,
     #[serde(alias = "Setup")]

@@ -63,16 +63,24 @@ impl Map {
         }
         pathfinding::prelude::astar(
             &from,
-            |p| p.neighbors().into_iter().filter(|p| revealed(*p)).map(|p| (p, 1_u32)),
+            |p| {
+                p.neighbors()
+                    .into_iter()
+                    .filter(|p| revealed(*p))
+                    .map(|p| (p, 1_u32))
+            },
             |p| p.distance(to),
             |p| *p == to,
-        ).map(|(_, distance)| distance)
+        )
+        .map(|(_, distance)| distance)
     }
 
     #[must_use]
     pub fn within_revealed_distance(&self, from: Position, to: Position, range: u32) -> bool {
         from.distance(to) <= range
-            && self.revealed_distance(from, to).is_some_and(|distance| distance <= range)
+            && self
+                .revealed_distance(from, to)
+                .is_some_and(|distance| distance <= range)
     }
 
     pub fn add_unexplored_blocks(&mut self, blocks: Vec<UnexploredBlock>) {
@@ -620,11 +628,16 @@ mod revealed_distance_tests {
         let middle = Position::new(1, 0);
         let b = Position::new(2, 0);
         let mut map = Map::new(HashMap::from([
-            (a, Terrain::Fertile), (middle, Terrain::Unexplored), (b, Terrain::Forest),
+            (a, Terrain::Fertile),
+            (middle, Terrain::Unexplored),
+            (b, Terrain::Forest),
         ]));
         assert_eq!(map.revealed_distance(a, b), None);
         assert!(!map.within_revealed_distance(a, b, 2));
-        map.tiles.extend([(Position::new(0, 1), Terrain::Water), (Position::new(1, 1), Terrain::Mountain)]);
+        map.tiles.extend([
+            (Position::new(0, 1), Terrain::Water),
+            (Position::new(1, 1), Terrain::Mountain),
+        ]);
         assert_eq!(map.revealed_distance(a, b), Some(3));
         assert!(!map.within_revealed_distance(a, b, 2));
         assert!(map.within_revealed_distance(a, b, 3));

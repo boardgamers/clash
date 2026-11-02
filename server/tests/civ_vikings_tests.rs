@@ -122,13 +122,32 @@ fn converting_ship_carries_army_passengers_in_one_group_move() {
     game.players[0].units[0].unit_type = UnitType::Ship;
     for u in &mut game.players[0].units {
         u.position = sea;
-        if u.id != 3 { u.unit_type = UnitType::Infantry; u.carrier_id = Some(3); }
+        if u.id != 3 {
+            u.unit_type = UnitType::Infantry;
+            u.carrier_id = Some(3);
+        }
     }
     game = server::game_api::execute(game, move_action(vec![3], land), 0);
-    game = server::game_api::execute(game, Action::Response(EventResponse::SelectUnits(vec![])), 0);
-    assert!(game.players[0].units.iter().all(|u| u.position == land && u.carrier_id.is_none()));
-    assert!(game.players[0].units.iter().all(|u| u.unit_type == UnitType::Infantry));
+    game = server::game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectUnits(vec![])),
+        0,
+    );
+    assert!(
+        game.players[0]
+            .units
+            .iter()
+            .all(|u| u.position == land && u.carrier_id.is_none())
+    );
+    assert!(
+        game.players[0]
+            .units
+            .iter()
+            .all(|u| u.unit_type == UnitType::Infantry)
+    );
     if let server::game::GameState::Movement(m) = &game.state {
         assert_eq!(m.movement_actions_left, 2);
-    } else { panic!("expected movement"); }
+    } else {
+        panic!("expected movement");
+    }
 }

@@ -33,10 +33,16 @@ pub(crate) fn get_all_uncached() -> Vec<ActionCard> {
 }
 
 // Reuse each card's actual eligibility rules for read-only research reminders.
-pub(crate) fn research_choices(game: &crate::game::Game, player: &crate::player::Player, name: &str) -> Vec<crate::advance::Advance> {
+pub(crate) fn research_choices(
+    game: &crate::game::Game,
+    player: &crate::player::Player,
+    name: &str,
+) -> Vec<crate::advance::Advance> {
     let mut choices = match name {
         "Quick Advance" => inspiration::possible_advances(player, game),
-        "Inspiration" | "Technology Trade" => inspiration::possible_inspiration_advances(game, player),
+        "Inspiration" | "Technology Trade" => {
+            inspiration::possible_inspiration_advances(game, player)
+        }
         "Synergies" => synergies::categories_with_2_affordable_advances(player, game),
         "New Ideas" => synergies::advances_that_can_be_gained(player, game),
         _ => vec![],

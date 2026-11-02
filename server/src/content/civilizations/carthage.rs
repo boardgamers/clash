@@ -404,16 +404,29 @@ fn hannibal() -> LeaderInfo {
 // Transport capacity is shared within a sea space. Navigator may carry Hanno
 // with any eligible ships there, regardless of his internal save-file carrier.
 pub(crate) fn navigator_can_move_with(p: &Player, ids: &[u32]) -> bool {
-    p.units.iter().find(|u| u.unit_type == UnitType::Leader(Leader::Hanno))
-        .is_some_and(|h| h.carrier_id.is_some() && !ids.is_empty() && ids.iter().all(|id|
-            p.try_get_unit(*id).is_some_and(|u| u.is_ship() && u.position == h.position)))
+    p.units
+        .iter()
+        .find(|u| u.unit_type == UnitType::Leader(Leader::Hanno))
+        .is_some_and(|h| {
+            h.carrier_id.is_some()
+                && !ids.is_empty()
+                && ids.iter().all(|id| {
+                    p.try_get_unit(*id)
+                        .is_some_and(|u| u.is_ship() && u.position == h.position)
+                })
+        })
 }
 
 pub(crate) fn prepare_move(game: &mut Game, p: usize, m: &mut MoveUnits) -> Result<(), String> {
     if game.player(p).event_info.contains_key("Navigator active")
         && navigator_can_move_with(game.player(p), &m.units)
     {
-        let hanno = game.player(p).units.iter().find(|u| u.unit_type == UnitType::Leader(Leader::Hanno)).unwrap();
+        let hanno = game
+            .player(p)
+            .units
+            .iter()
+            .find(|u| u.unit_type == UnitType::Leader(Leader::Hanno))
+            .unwrap();
         let id = hanno.id;
         let old = hanno.carrier_id.unwrap();
         if !m.units.contains(&old) {

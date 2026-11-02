@@ -322,7 +322,10 @@ pub(crate) fn resolve_influence_roll(
     }
 
     if (a.starting_city_position == a.position) || a.prevent_boost {
-        p.log(game, &format!("Cultural influence failed (rolls {roll_label})"));
+        p.log(
+            game,
+            &format!("Cultural influence failed (rolls {roll_label})"),
+        );
         a.info.execute(game);
         attempt_failed(game, player_index, a.position);
         return PaymentOptions::free();

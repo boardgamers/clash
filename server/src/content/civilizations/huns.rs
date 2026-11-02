@@ -52,10 +52,12 @@ pub(crate) fn raided_settler(game: &Game, u: &Unit) -> bool {
     game.players.iter().any(|enemy| {
         enemy.index != p.index
             && enemy.has_special_advance(SpecialAdvance::Raiders)
-            && enemy
-                .units
-                .iter()
-                .any(|army| army.is_army_unit() && game.map.within_revealed_distance(army.position, u.position, 2))
+            && enemy.units.iter().any(|army| {
+                army.is_army_unit()
+                    && game
+                        .map
+                        .within_revealed_distance(army.position, u.position, 2)
+            })
     })
 }
 pub(crate) fn city_destinations(

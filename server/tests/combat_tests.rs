@@ -456,26 +456,55 @@ fn naval_defenders_exclude_passengers_from_dice_and_combat_casualties() {
         passenger.carrier_id = Some(if id < 92 { 1 } else { 2 });
         game.player_mut(1).units.push(passenger);
     }
-    assert_eq!(server::combat_stats::active_defenders(&game, 1, Position::from_offset("D2")), vec![1, 2]);
+    assert_eq!(
+        server::combat_stats::active_defenders(&game, 1, Position::from_offset("D2")),
+        vec![1, 2]
+    );
     // Two dice per side; 3 on each die yields one hit per side.
     game.dice_roll_outcomes = vec![4; 20];
     let before = game.dice_roll_log.len();
-    let mut game = execute(game, move_action(vec![7, 8], Position::from_offset("D2")), 0);
+    let mut game = execute(
+        game,
+        move_action(vec![7, 8], Position::from_offset("D2")),
+        0,
+    );
     assert_eq!(game.dice_roll_log.len() - before, 4, "only ships roll");
     // Resolve the attacker's ship loss and any excess passengers first.
     for _ in 0..4 {
         let event = game.current_event();
-        if event.player.index == 1 { break; }
-        let PersistentEventRequest::SelectUnits(req) = &event.player.handler.as_ref().unwrap().request else { panic!("expected casualties"); };
-        let ids = req.request.choices.iter().take(*req.request.needed.start() as usize).copied().collect();
+        if event.player.index == 1 {
+            break;
+        }
+        let PersistentEventRequest::SelectUnits(req) =
+            &event.player.handler.as_ref().unwrap().request
+        else {
+            panic!("expected casualties");
+        };
+        let ids = req
+            .request
+            .choices
+            .iter()
+            .take(*req.request.needed.start() as usize)
+            .copied()
+            .collect();
         game = execute(game, Action::Response(EventResponse::SelectUnits(ids)), 0);
     }
     // Identical ships are removed automatically; the remaining prompt is only
     // for passengers exceeding the surviving ship's two transport spaces.
-    assert_eq!(game.player(1).get_units(Position::from_offset("D2")).iter().filter(|u| u.is_ship()).count(), 1);
+    assert_eq!(
+        game.player(1)
+            .get_units(Position::from_offset("D2"))
+            .iter()
+            .filter(|u| u.is_ship())
+            .count(),
+        1
+    );
     let event = game.current_event();
     assert_eq!(event.player.index, 1);
-    let PersistentEventRequest::SelectUnits(req) = &event.player.handler.as_ref().unwrap().request else { panic!("expected excess passengers"); };
+    let PersistentEventRequest::SelectUnits(req) = &event.player.handler.as_ref().unwrap().request
+    else {
+        panic!("expected excess passengers");
+    };
     assert_eq!(req.request.choices, vec![90, 91, 92, 93]);
     assert_eq!(req.request.needed, 2..=2);
 }
@@ -546,7 +575,11 @@ fn retreat_from_pirates_without_a_kill_grants_no_reward() {
         move_action(vec![7, 8], Position::from_offset("D2")),
         0,
     );
-    let game = execute(game, Action::Response(EventResponse::ResourceReward(ResourcePile::empty())), 0);
+    let game = execute(
+        game,
+        Action::Response(EventResponse::ResourceReward(ResourcePile::empty())),
+        0,
+    );
     assert_retreat_round(&game, 1);
     let game = execute(game, Action::Response(EventResponse::Bool(true)), 0);
     assert!(game.events.is_empty());

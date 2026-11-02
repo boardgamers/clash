@@ -990,7 +990,11 @@ fn proselytism_counts_settlers_in_a_wonder_city() {
 #[test]
 fn arts_can_reserve_its_fee_from_great_arena_mood() {
     use server::cultural_influence::influence_culture_boost_cost;
-    let mut game = execute_action(load_culture(), advance_action(Advance::Arts, ResourcePile::ideas(2)), 1);
+    let mut game = execute_action(
+        load_culture(),
+        advance_action(Advance::Arts, ResourcePile::ideas(2)),
+        1,
+    );
     game.players[1].wonders_owned.insert(Wonder::Colosseum);
     game.players[1].resources = ResourcePile::mood_tokens(7);
     let kind = PlayingActionType::Special(SpecialAction::Modifier(
@@ -1004,14 +1008,23 @@ fn arts_can_reserve_its_fee_from_great_arena_mood() {
 
 #[test]
 fn forced_labor_allows_construction_but_not_second_activation() {
-    use server::construct::can_construct;
     use server::city_pieces::Building;
+    use server::construct::can_construct;
     use server::player::CostTrigger;
     let mut game = JSON.load_game("forced_labor");
-    game.players[0].advances.insert(server::advance::Advance::Writing);
+    game.players[0]
+        .advances
+        .insert(server::advance::Advance::Writing);
     let check = |g: &server::game::Game| {
         let p = g.player(0);
-        can_construct(&p.cities[0], Building::Academy, p, g, CostTrigger::NoModifiers, &[])
+        can_construct(
+            &p.cities[0],
+            Building::Academy,
+            p,
+            g,
+            CostTrigger::NoModifiers,
+            &[],
+        )
     };
     assert!(check(&game).is_err());
     game = server::game_api::execute(game, custom_action(CustomActionType::ForcedLabor), 0);

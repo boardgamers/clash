@@ -293,7 +293,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 if let Some(mut phase) = game.events.pop() {
                     if let Some(ref c) = phase.player.handler
                         && let Some(ref action) = c.response
-                        && (c.priority == priority || (c.priority == priority - p.priority_delta && c.origin == p.origin))
+                        && (c.priority == priority
+                            || (c.priority == priority - p.priority_delta && c.origin == p.origin))
                     {
                         let mut current = phase.clone();
                         current

@@ -99,7 +99,10 @@ fn add_negotiations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
         let partner = game.player(partner);
         base.retain(|r| {
             partner.get_units(r.destination).is_empty()
-                && !partner.cities.iter().any(|city| city.position == r.destination)
+                && !partner
+                    .cities
+                    .iter()
+                    .any(|city| city.position == r.destination)
         });
     }
 }
@@ -138,7 +141,14 @@ fn reachable_with_roads(
                 .flat_map(|middle| {
                     next_road_step(player, game, middle, stack_size, moving_xerxes, |_| true)
                 })
-                .chain(next_road_step(player, game, start, stack_size, moving_xerxes, |_| true))
+                .chain(next_road_step(
+                    player,
+                    game,
+                    start,
+                    stack_size,
+                    moving_xerxes,
+                    |_| true,
+                ))
                 .unique()
                 .filter_map(|destination| {
                     road_route(

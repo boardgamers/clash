@@ -100,14 +100,10 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
             apply_earthquake(game, s, i, &s.origin);
         },
     )
-    .add_decrease_mood(
-        target,
-        MoodModifier::Decrease,
-        move |_p, _game, i| {
-            let c = &i.player.must_reduce_mood;
-            DecreaseMood::new(c.clone(), c.len() as u8)
-        },
-    )
+    .add_decrease_mood(target, MoodModifier::Decrease, move |_p, _game, i| {
+        let c = &i.player.must_reduce_mood;
+        DecreaseMood::new(c.clone(), c.len() as u8)
+    })
     .build()
 }
 

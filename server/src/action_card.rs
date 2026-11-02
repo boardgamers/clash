@@ -432,8 +432,9 @@ pub(crate) fn can_play_civil_card(game: &Game, p: &Player, id: u8) -> Result<(),
         return Err("Action card not available".to_string());
     }
 
-    if id == crate::content::incidents::great_diplomat::DIPLOMAT_ID
-        + crate::content::incidents::great_persons::GREAT_PERSON_OFFSET
+    if id
+        == crate::content::incidents::great_diplomat::DIPLOMAT_ID
+            + crate::content::incidents::great_persons::GREAT_PERSON_OFFSET
         && game.context != crate::game::GameContext::Replay
     {
         return Err("Custom action cannot be played".into());

@@ -210,8 +210,12 @@ pub fn find_trade_routes(game: &Game, player: &Player, only_ships: bool) -> Vec<
     {
         // With equal route counts, human cities preserve the choice of gold.
         // Barbarian trade only permits food, so choosing it can force waste.
-        game.players.iter().filter(|p| p.is_human())
-            .flat_map(|p| &p.cities).map(|c| c.position).collect()
+        game.players
+            .iter()
+            .filter(|p| p.is_human())
+            .flat_map(|p| &p.cities)
+            .map(|c| c.position)
+            .collect()
     } else {
         vec![]
     };

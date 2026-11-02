@@ -1,7 +1,9 @@
 //! Private, editable commitments. They never change resolution order or reserve a
 //! shared card. Only an ordinary, currently legal response can consume a plan.
 use crate::card::HandCard;
-use crate::content::persistent_events::{EventResponse, PersistentEventRequest, PersistentEventType};
+use crate::content::persistent_events::{
+    EventResponse, PersistentEventRequest, PersistentEventType,
+};
 use crate::game::Game;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::StatusPhaseState;
@@ -39,7 +41,11 @@ fn scope(game: &Game, index: usize) -> Option<String> {
 }
 
 fn option(label: impl Into<String>, response: EventResponse) -> OptionChoice {
-    OptionChoice { label: label.into(), description: String::new(), response }
+    OptionChoice {
+        label: label.into(),
+        description: String::new(),
+        response,
+    }
 }
 
 fn objective_key(game: &Game, name: &str) -> String {
@@ -48,29 +54,67 @@ fn objective_key(game: &Game, name: &str) -> String {
 
 fn objective_offers(game: &Game, player: usize) -> Vec<Offer> {
     let p = game.player(player);
-    let mut names: Vec<_> = p.objective_cards.iter().filter(|id| **id != 0).flat_map(|id|
-        crate::objective_card::status_phase_completable(game, p, *id)).collect();
-    names.sort(); names.dedup();
-    names.into_iter().map(|name| {
-        let key = objective_key(game, &name);
-        let mut options = vec![option("Skip", EventResponse::SelectHandCards(vec![]))];
-        options.extend(p.objective_cards.iter().filter(|id| **id != 0).filter(|id|
-            crate::objective_card::status_phase_completable(game, p, **id).contains(&name))
-            .map(|id| option(game.cache.get_objective_card(*id).name(),
-                EventResponse::SelectHandCards(vec![HandCard::ObjectiveCard(*id)]))));
-        let selected = game.early_choices.iter().find(|c| c.player == player && c.key == key).map(|c| c.response.clone());
-        Offer {key, title: name, options, selected}
-    }).collect()
+    let mut names: Vec<_> = p
+        .objective_cards
+        .iter()
+        .filter(|id| **id != 0)
+        .flat_map(|id| crate::objective_card::status_phase_completable(game, p, *id))
+        .collect();
+    names.sort();
+    names.dedup();
+    names
+        .into_iter()
+        .map(|name| {
+            let key = objective_key(game, &name);
+            let mut options = vec![option("Skip", EventResponse::SelectHandCards(vec![]))];
+            options.extend(
+                p.objective_cards
+                    .iter()
+                    .filter(|id| **id != 0)
+                    .filter(|id| {
+                        crate::objective_card::status_phase_completable(game, p, **id)
+                            .contains(&name)
+                    })
+                    .map(|id| {
+                        option(
+                            game.cache.get_objective_card(*id).name(),
+                            EventResponse::SelectHandCards(vec![HandCard::ObjectiveCard(*id)]),
+                        )
+                    }),
+            );
+            let selected = game
+                .early_choices
+                .iter()
+                .find(|c| c.player == player && c.key == key)
+                .map(|c| c.response.clone());
+            Offer {
+                key,
+                title: name,
+                options,
+                selected,
+            }
+        })
+        .collect()
 }
 
 pub fn prune_objectives(game: &mut Game) {
-    let invalid: Vec<_> = game.early_choices.iter().enumerate().filter_map(|(index, choice)| {
-        if !choice.key.contains(":objective:") { return None; }
-        let valid = objective_offers(game, choice.player).iter().any(|o| o.key == choice.key
-            && o.options.iter().any(|v| v.response == choice.response));
-        (!valid).then_some(index)
-    }).collect();
-    for index in invalid.into_iter().rev() { game.early_choices.remove(index); }
+    let invalid: Vec<_> = game
+        .early_choices
+        .iter()
+        .enumerate()
+        .filter_map(|(index, choice)| {
+            if !choice.key.contains(":objective:") {
+                return None;
+            }
+            let valid = objective_offers(game, choice.player).iter().any(|o| {
+                o.key == choice.key && o.options.iter().any(|v| v.response == choice.response)
+            });
+            (!valid).then_some(index)
+        })
+        .collect();
+    for index in invalid.into_iter().rev() {
+        game.early_choices.remove(index);
+    }
 }
 
 fn advance_key(game: &Game) -> String {
@@ -78,94 +122,204 @@ fn advance_key(game: &Game) -> String {
 }
 
 fn advance_offer(game: &Game, player: usize) -> Option<Offer> {
-    if game.age >= game.options.length.ages() { return None; }
-    let status = game.events.iter().find_map(|event| match &event.event_type {
-        PersistentEventType::StatusPhase(phase) => Some((phase, event)),
-        _ => None,
-    });
+    if game.age >= game.options.length.ages() {
+        return None;
+    }
+    let status = game
+        .events
+        .iter()
+        .find_map(|event| match &event.event_type {
+            PersistentEventType::StatusPhase(phase) => Some((phase, event)),
+            _ => None,
+        });
     let eligible = match status {
         Some((StatusPhaseState::CompleteObjectives, _)) => true,
         Some((StatusPhaseState::FreeAdvance, event)) => !event.players_used.contains(&player),
         Some(_) => false,
         None => {
             let order = game.human_players_sorted(game.starting_player_index);
-            game.round == 3 && order.iter().position(|p| *p == player)
-                .zip(order.iter().position(|p| *p == game.current_player_index))
-                .is_some_and(|(own, current)| own < current)
+            game.round == 3
+                && order
+                    .iter()
+                    .position(|p| *p == player)
+                    .zip(order.iter().position(|p| *p == game.current_player_index))
+                    .is_some_and(|(own, current)| own < current)
         }
     };
-    if !eligible { return None; }
+    if !eligible {
+        return None;
+    }
     let p = game.player(player);
-    let mut options: Vec<_> = game.cache.get_advances().values()
+    let mut options: Vec<_> = game
+        .cache
+        .get_advances()
+        .values()
         .filter(|a| p.can_advance_free(a.advance, game))
-        .map(|a| OptionChoice { label: a.name.clone(), description: a.description.clone(),
-            response: EventResponse::SelectAdvance(a.advance) }).collect();
+        .map(|a| OptionChoice {
+            label: a.name.clone(),
+            description: a.description.clone(),
+            response: EventResponse::SelectAdvance(a.advance),
+        })
+        .collect();
     options.sort_by(|a, b| a.label.cmp(&b.label));
-    if options.is_empty() { return None; }
+    if options.is_empty() {
+        return None;
+    }
     let key = advance_key(game);
-    let selected = game.early_choices.iter().find(|c| c.player == player &&
-        (c.key == key || c.key.starts_with(&format!("{}:", game.age)) && c.key.ends_with(":FreeAdvance/advance")))
+    let selected = game
+        .early_choices
+        .iter()
+        .find(|c| {
+            c.player == player
+                && (c.key == key
+                    || c.key.starts_with(&format!("{}:", game.age))
+                        && c.key.ends_with(":FreeAdvance/advance"))
+        })
         .map(|c| c.response.clone());
-    Some(Offer { key, title: "Free Advance".into(), options, selected })
+    Some(Offer {
+        key,
+        title: "Free Advance".into(),
+        options,
+        selected,
+    })
 }
 
 pub fn offers(game: &Game, player: usize) -> Vec<Offer> {
-    if player >= game.players.len() || !game.player(player).is_human()
-        || game.dropped_players.contains(&player) || game.civilization_draft.is_some()
-        || matches!(game.state, crate::game::GameState::Finished) { return vec![]; }
+    if player >= game.players.len()
+        || !game.player(player).is_human()
+        || game.dropped_players.contains(&player)
+        || game.civilization_draft.is_some()
+        || matches!(game.state, crate::game::GameState::Finished)
+    {
+        return vec![];
+    }
     let mut result = current_offers(game, player);
-    if let Some(offer) = advance_offer(game, player) { result.push(offer); }
+    if let Some(offer) = advance_offer(game, player) {
+        result.push(offer);
+    }
     result
 }
 
 /// Expose only the current step, never future cards, random results, or another
 /// player's hand. Earlier players may still change the available options.
 fn current_offers(game: &Game, player: usize) -> Vec<Offer> {
-    if player >= game.players.len() || !game.player(player).is_human()
-        || game.dropped_players.contains(&player) || game.civilization_draft.is_some() || matches!(game.state, crate::game::GameState::Finished) {
+    if player >= game.players.len()
+        || !game.player(player).is_human()
+        || game.dropped_players.contains(&player)
+        || game.civilization_draft.is_some()
+        || matches!(game.state, crate::game::GameState::Finished)
+    {
         return vec![];
     }
-    if game.events.is_empty() { return objective_offers(game, player); }
-    let Some(index) = game.events.iter().rposition(|e| matches!(e.event_type,
-        PersistentEventType::StatusPhase(_) | PersistentEventType::Incident(_))) else { return vec![]; };
+    if game.events.is_empty() {
+        return objective_offers(game, player);
+    }
+    let Some(index) = game.events.iter().rposition(|e| {
+        matches!(
+            e.event_type,
+            PersistentEventType::StatusPhase(_) | PersistentEventType::Incident(_)
+        )
+    }) else {
+        return vec![];
+    };
     let event = &game.events[index];
-    let first = if matches!(event.event_type, PersistentEventType::StatusPhase(StatusPhaseState::ChangeGovernmentType(_))) {
-        let players: Vec<_> = game.human_players_sorted(game.starting_player_index).iter().map(|i| game.player(*i)).collect();
+    let first = if matches!(
+        event.event_type,
+        PersistentEventType::StatusPhase(StatusPhaseState::ChangeGovernmentType(_))
+    ) {
+        let players: Vec<_> = game
+            .human_players_sorted(game.starting_player_index)
+            .iter()
+            .map(|i| game.player(*i))
+            .collect();
         if crate::status_phase::player_that_chooses_next_first_player(&players) == player {
             let key = format!("{}:first", game.age);
-            vec![Offer { selected: game.early_choices.iter().find(|c| c.player == player && c.key == key).map(|c| c.response.clone()), key,
-                title: "Choose first player".into(), options: game.human_players_sorted(game.starting_player_index).iter().map(|i| option(game.player(*i).civilization.name.clone(), EventResponse::SelectPlayer(*i))).collect() }]
-        } else { vec![] }
-    } else { vec![] };
-    if event.players_used.contains(&player) { return first; }
+            vec![Offer {
+                selected: game
+                    .early_choices
+                    .iter()
+                    .find(|c| c.player == player && c.key == key)
+                    .map(|c| c.response.clone()),
+                key,
+                title: "Choose first player".into(),
+                options: game
+                    .human_players_sorted(game.starting_player_index)
+                    .iter()
+                    .map(|i| {
+                        option(
+                            game.player(*i).civilization.name.clone(),
+                            EventResponse::SelectPlayer(*i),
+                        )
+                    })
+                    .collect(),
+            }]
+        } else {
+            vec![]
+        }
+    } else {
+        vec![]
+    };
+    if event.players_used.contains(&player) {
+        return first;
+    }
     // Nested research/event reactions must finish before early status choices are
     // offered. Objective selection is the only supported nested request.
-    if game.events[index+1..].iter().any(|e| !matches!(e.event_type, PersistentEventType::SelectObjectives(_))) {
+    if game.events[index + 1..]
+        .iter()
+        .any(|e| !matches!(e.event_type, PersistentEventType::SelectObjectives(_)))
+    {
         return vec![];
     }
     let prefix = scope(game, index).expect("supported event");
     let p = game.player(player);
     let mut result: Vec<Offer> = first;
     let mut add = |suffix: &str, title: String, options: Vec<OptionChoice>| {
-        if options.is_empty() { return; }
+        if options.is_empty() {
+            return;
+        }
         let key = format!("{prefix}{suffix}");
-        let selected = game.early_choices.iter().find(|c| c.player == player && c.key == key).map(|c| c.response.clone());
-        result.push(Offer { key, title, options, selected });
+        let selected = game
+            .early_choices
+            .iter()
+            .find(|c| c.player == player && c.key == key)
+            .map(|c| c.response.clone());
+        result.push(Offer {
+            key,
+            title,
+            options,
+            selected,
+        });
     };
     match &event.event_type {
         PersistentEventType::StatusPhase(StatusPhaseState::RazeSize1City) => {
-            let mut options: Vec<_> = p.cities.iter().filter(|c| c.size() == 1)
-                .map(|c| option(c.position.to_string(), EventResponse::SelectPositions(vec![c.position]))).collect();
+            let mut options: Vec<_> = p
+                .cities
+                .iter()
+                .filter(|c| c.size() == 1)
+                .map(|c| {
+                    option(
+                        c.position.to_string(),
+                        EventResponse::SelectPositions(vec![c.position]),
+                    )
+                })
+                .collect();
             if !options.is_empty() {
-                options.insert(0, option("Keep all cities", EventResponse::SelectPositions(vec![])));
+                options.insert(
+                    0,
+                    option("Keep all cities", EventResponse::SelectPositions(vec![])),
+                );
                 add("raze", "Raze city".into(), options);
             }
         }
         PersistentEventType::StatusPhase(StatusPhaseState::CompleteObjectives) => {
             return objective_offers(game, player);
         }
-        PersistentEventType::Incident(i) if !i.consumed && !i.replaced_by_sacrifice && i.selected_player.is_none()
-            && game.cache.get_incident(i.incident_id).action_card.is_some() => {
+        PersistentEventType::Incident(i)
+            if !i.consumed
+                && !i.replaced_by_sacrifice
+                && i.selected_player.is_none()
+                && game.cache.get_incident(i.incident_id).action_card.is_some() =>
+        {
             // Do not ask before event cancellation, placement or other base
             // effects. Once an offer is visible, later players may precommit.
             if !event.player.handler.as_ref().is_some_and(|h| matches!(&h.request,
@@ -173,13 +327,23 @@ fn current_offers(game: &Game, player: usize) -> Vec<Offer> {
                 return vec![];
             }
             let cost = if player == i.active_player { 1 } else { 2 };
-            let mut options = vec![option("Pass", EventResponse::Payment(vec![ResourcePile::empty()]))];
+            let mut options = vec![option(
+                "Pass",
+                EventResponse::Payment(vec![ResourcePile::empty()]),
+            )];
             // No inferred gold/captive conversion: a queued purchase spends
             // precisely the displayed culture payment, or asks again.
             if p.resources.culture_tokens >= cost {
-                options.push(option(format!("Take if offered · {cost} culture"), EventResponse::Payment(vec![ResourcePile::culture_tokens(cost)])));
+                options.push(option(
+                    format!("Take if offered · {cost} culture"),
+                    EventResponse::Payment(vec![ResourcePile::culture_tokens(cost)]),
+                ));
             }
-            add("offer", game.cache.get_incident(i.incident_id).name.clone(), options);
+            add(
+                "offer",
+                game.cache.get_incident(i.incident_id).name.clone(),
+                options,
+            );
         }
         _ => {}
     }
@@ -187,35 +351,67 @@ fn current_offers(game: &Game, player: usize) -> Vec<Offer> {
 }
 
 pub fn can_save(game: &Game, player: usize, key: &str, response: Option<&EventResponse>) -> bool {
-    (player != game.active_player() || (game.events.is_empty() && key.contains(":objective:"))) && offers(game, player).iter().any(|offer| offer.key == key
-        && response.is_none_or(|r| offer.options.iter().any(|o| &o.response == r)))
+    (player != game.active_player() || (game.events.is_empty() && key.contains(":objective:")))
+        && offers(game, player).iter().any(|offer| {
+            offer.key == key
+                && response.is_none_or(|r| offer.options.iter().any(|o| &o.response == r))
+        })
 }
 
-pub fn save(game: &mut Game, player: usize, key: &str, response: Option<EventResponse>) -> Result<(), String> {
-    if !can_save(game, player, key, response.as_ref()) { return Err("This early choice is no longer available".into()); }
+pub fn save(
+    game: &mut Game,
+    player: usize,
+    key: &str,
+    response: Option<EventResponse>,
+) -> Result<(), String> {
+    if !can_save(game, player, key, response.as_ref()) {
+        return Err("This early choice is no longer available".into());
+    }
     if key == advance_key(game) {
-        game.early_choices.retain(|c| c.player != player || !c.key.ends_with(":FreeAdvance/advance"));
+        game.early_choices
+            .retain(|c| c.player != player || !c.key.ends_with(":FreeAdvance/advance"));
     }
     game.early_choices.retain(|c| c.player != player || (c.key != key && !matches!((&c.response, &response),
         (EventResponse::SelectHandCards(a), Some(EventResponse::SelectHandCards(b))) if !a.is_empty() && a == b && key.contains(":objective:"))));
-    if let Some(response) = response { game.early_choices.push(SavedChoice { player, key: key.into(), response }); }
+    if let Some(response) = response {
+        game.early_choices.push(SavedChoice {
+            player,
+            key: key.into(),
+            response,
+        });
+    }
     // Metadata-only platform update; not a turn, journal entry or undo boundary.
     game.early_choice_update = true;
     Ok(())
 }
 
 pub fn expire_current_event(game: &mut Game) {
-    if game.events.last().is_some_and(|e| matches!(e.event_type,
-        PersistentEventType::StatusPhase(StatusPhaseState::FreeAdvance))) {
+    if game.events.last().is_some_and(|e| {
+        matches!(
+            e.event_type,
+            PersistentEventType::StatusPhase(StatusPhaseState::FreeAdvance)
+        )
+    }) {
         let key = advance_key(game);
         game.early_choices.retain(|c| c.key != key);
     }
-    if game.events.last().is_some_and(|e| matches!(e.event_type, PersistentEventType::StatusPhase(StatusPhaseState::CompleteObjectives))) {
+    if game.events.last().is_some_and(|e| {
+        matches!(
+            e.event_type,
+            PersistentEventType::StatusPhase(StatusPhaseState::CompleteObjectives)
+        )
+    }) {
         let prefix = format!("{}:objective:", game.age);
         game.early_choices.retain(|c| !c.key.starts_with(&prefix));
     }
-    if game.events.last().is_some_and(|e| matches!(e.event_type, PersistentEventType::StatusPhase(StatusPhaseState::DetermineFirstPlayer(_)))) {
-        game.early_choices.retain(|c| c.key != format!("{}:first", game.age));
+    if game.events.last().is_some_and(|e| {
+        matches!(
+            e.event_type,
+            PersistentEventType::StatusPhase(StatusPhaseState::DetermineFirstPlayer(_))
+        )
+    }) {
+        game.early_choices
+            .retain(|c| c.key != format!("{}:first", game.age));
     }
     if let Some(prefix) = scope(game, game.events.len().saturating_sub(1)) {
         game.early_choices.retain(|c| !c.key.starts_with(&prefix));
@@ -229,32 +425,65 @@ pub fn take_ready(game: &mut Game) -> Option<EventResponse> {
     let event = game.events.last()?;
     let handler = event.player.handler.as_ref()?;
     let (index, suffix) = match &event.event_type {
-        PersistentEventType::StatusPhase(StatusPhaseState::DetermineFirstPlayer(_)) => (game.events.len()-1, "first".into()),
-        PersistentEventType::StatusPhase(StatusPhaseState::FreeAdvance) => (game.events.len()-1, "advance".into()),
-        PersistentEventType::StatusPhase(StatusPhaseState::RazeSize1City) => (game.events.len()-1, "raze".into()),
+        PersistentEventType::StatusPhase(StatusPhaseState::DetermineFirstPlayer(_)) => {
+            (game.events.len() - 1, "first".into())
+        }
+        PersistentEventType::StatusPhase(StatusPhaseState::FreeAdvance) => {
+            (game.events.len() - 1, "advance".into())
+        }
+        PersistentEventType::StatusPhase(StatusPhaseState::RazeSize1City) => {
+            (game.events.len() - 1, "raze".into())
+        }
         PersistentEventType::SelectObjectives(i) => {
-            let index = game.events.iter().rposition(|e| matches!(e.event_type, PersistentEventType::StatusPhase(StatusPhaseState::CompleteObjectives)))?;
+            let index = game.events.iter().rposition(|e| {
+                matches!(
+                    e.event_type,
+                    PersistentEventType::StatusPhase(StatusPhaseState::CompleteObjectives)
+                )
+            })?;
             (index, format!("objective:{}", i.shown_objective.as_ref()?))
         }
-        PersistentEventType::Incident(_) if matches!(&handler.request, PersistentEventRequest::Payment(rs)
-            if rs.iter().any(|r| r.name == "Pay to gain the Action Card")) => (game.events.len()-1, "offer".into()),
+        PersistentEventType::Incident(_)
+            if matches!(&handler.request, PersistentEventRequest::Payment(rs)
+            if rs.iter().any(|r| r.name == "Pay to gain the Action Card")) =>
+        {
+            (game.events.len() - 1, "offer".into())
+        }
         _ => return None,
     };
-    let key = if suffix == "advance" { advance_key(game) } else if suffix == "first" { format!("{}:first", game.age) } else if let Some(name) = suffix.strip_prefix("objective:") {
+    let key = if suffix == "advance" {
+        advance_key(game)
+    } else if suffix == "first" {
+        format!("{}:first", game.age)
+    } else if let Some(name) = suffix.strip_prefix("objective:") {
         objective_key(game, name)
-    } else { format!("{}{suffix}", scope(game, index)?) };
+    } else {
+        format!("{}{suffix}", scope(game, index)?)
+    };
     let legacy_key = format!("{}{suffix}", scope(game, index)?);
-    let at = game.early_choices.iter().position(|c| c.player == player &&
-        (c.key == key || suffix == "advance" && c.key == legacy_key))?;
+    let at = game.early_choices.iter().position(|c| {
+        c.player == player && (c.key == key || suffix == "advance" && c.key == legacy_key)
+    })?;
     let response = &game.early_choices[at].response;
     let valid = match (&handler.request, response) {
-        (PersistentEventRequest::SelectPlayer(r), EventResponse::SelectPlayer(p)) => r.choices.contains(p),
-        (PersistentEventRequest::SelectAdvance(r), EventResponse::SelectAdvance(a)) => r.choices.contains(a),
-        (PersistentEventRequest::SelectPositions(r), EventResponse::SelectPositions(v)) => r.needed.contains(&(v.len() as u8)) && v.iter().all(|p| r.choices.contains(p)),
-        (PersistentEventRequest::SelectHandCards(r), EventResponse::SelectHandCards(v)) => r.needed.contains(&(v.len() as u8)) && v.iter().all(|c| r.choices.contains(c)),
-        (PersistentEventRequest::Payment(rs), EventResponse::Payment(v)) => rs.len() == 1 && v.len() == 1
-            && game.player(player).resources.has_at_least(&v[0])
-            && ((rs[0].optional && v[0].is_empty()) || rs[0].cost.is_valid_payment(&v[0])),
+        (PersistentEventRequest::SelectPlayer(r), EventResponse::SelectPlayer(p)) => {
+            r.choices.contains(p)
+        }
+        (PersistentEventRequest::SelectAdvance(r), EventResponse::SelectAdvance(a)) => {
+            r.choices.contains(a)
+        }
+        (PersistentEventRequest::SelectPositions(r), EventResponse::SelectPositions(v)) => {
+            r.needed.contains(&(v.len() as u8)) && v.iter().all(|p| r.choices.contains(p))
+        }
+        (PersistentEventRequest::SelectHandCards(r), EventResponse::SelectHandCards(v)) => {
+            r.needed.contains(&(v.len() as u8)) && v.iter().all(|c| r.choices.contains(c))
+        }
+        (PersistentEventRequest::Payment(rs), EventResponse::Payment(v)) => {
+            rs.len() == 1
+                && v.len() == 1
+                && game.player(player).resources.has_at_least(&v[0])
+                && ((rs[0].optional && v[0].is_empty()) || rs[0].cost.is_valid_payment(&v[0]))
+        }
         _ => false,
     };
     let choice = game.early_choices.remove(at);

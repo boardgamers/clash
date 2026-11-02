@@ -126,7 +126,8 @@ fn incident(
                     return;
                 }
                 // This is the event card itself, not a second physical card.
-                game.incidents_discarded.retain(|discarded| *discarded != id);
+                game.incidents_discarded
+                    .retain(|discarded| *discarded != id);
                 game.player_mut(s.player_index).action_cards.push(card_id);
                 log_card_transfer(
                     game,
@@ -171,7 +172,10 @@ where
         cost,
         move |game, player, _| {
             eligibility_groups.iter().any(|group| {
-                game.cache.get_advance_group(*group).advances.iter()
+                game.cache
+                    .get_advance_group(*group)
+                    .advances
+                    .iter()
                     .any(|a| player.can_advance_free(a.advance, game))
             }) || can_play(game, player)
         },
