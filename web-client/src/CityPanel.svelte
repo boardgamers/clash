@@ -40,8 +40,9 @@
     content?.scrollTo(0, 0);
   });
   function submitBuild(action: Move) {
-    const chosen = structuredClone(action) as { Playing: { Construct: { payment: Pile } } };
-    if (buildPayment) chosen.Playing.Construct.payment = buildPayment;
+    // Card-request builds select the city first; their payment decision follows.
+    const chosen = structuredClone(action) as { Playing?: { Construct: { payment: Pile } } };
+    if (buildPayment && chosen.Playing) chosen.Playing.Construct.payment = buildPayment;
     controller.submit(chosen);
   }
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
@@ -397,7 +398,9 @@
             class="primary"
             disabled={!!$session.playback || $session.pending}
             onclick={() => submitBuild(choice.action)}
-            >Build {selected.name}{choice.position ? ` at ${choice.position}` : ''}</button
+            >{typeof choice.action === 'object' && 'Response' in choice.action
+              ? (choice.position ? `Continue to payment at ${choice.position}` : 'Continue to payment')
+              : (choice.position ? `Build ${selected.name} at ${choice.position}` : `Build ${selected.name}`)}</button
           >{/each}{/if}
       </div>
     </footer>{/if}

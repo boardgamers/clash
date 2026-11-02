@@ -697,3 +697,14 @@ Temples neither require an impossible food discount nor consume its once-per-tur
 use. Preserve normal construction, Great Engineer, Architecture substitutions,
 Temple rewards and Dogma follow-ups. Regression coverage includes both card copies,
 Egypt/Greece, and used/unused State Religion. Publish the matching engine and viewer.
+
+## Viewer 0.1.188 / engine unchanged (0.4.126)
+
+Resource reward choices use a compact Gain resources heading and accessible icon
+controls for Back and Cancel. Great Prophet exposes eligible Temple choices in
+Cities even after the final action, without normal construction activation or
+mood-loss warnings. Choosing the city continues to the card's optional payment
+rather than submitting a normal Construct action. Regression coverage includes
+neutral and angry activated cities, zero actions, declining, payment, and opponent
+views. These presentation changes ship in the viewer's bundled rules bridge;
+the deployed game engine remains unchanged.

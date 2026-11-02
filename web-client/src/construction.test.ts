@@ -101,7 +101,11 @@ test('ordinary construction still spends one action, resources and a city activa
   assert.equal(game.players[0].cities.find((c: any) => c.position === 'C2').mood_state, 'Angry');
 });
 
-for (const [civilization, architecture] of [['Greece', false], ['Egypt', false], ['Egypt', true]] as const) {
+for (const [civilization, architecture] of [
+  ['Greece', false],
+  ['Egypt', false],
+  ['Egypt', true],
+] as const) {
   for (const used of [false, true]) {
     for (const card of [17, 18]) {
       test(`${civilization} City Development ${card} Temple: State Religion ${used ? 'used' : 'unused'}, Architecture ${architecture}`, () => {
@@ -145,3 +149,50 @@ for (const [civilization, architecture] of [['Greece', false], ['Egypt', false],
     }
   }
 }
+
+for (const mood of ['Neutral', 'Angry'])
+  test(`Great Prophet exposes its Temple city choice at zero actions without activating a ${mood} city`, () => {
+    let game = fixture('incidents/great_persons/great_prophet');
+    game = move(game, { Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } } });
+    game = move(game, { Response: { Payment: [{ culture_tokens: 1 }] } });
+    game.actions_left = 1;
+    const target = game.players[0].cities.find((c: any) => c.position === 'C1');
+    target.mood_state = mood;
+    target.activations = 1;
+    const cityBefore = structuredClone(game.players[0].cities.find((c: any) => c.position === 'C1'));
+    game = move(game, { Playing: { ActionCard: 120 } });
+    assert.equal(game.actions_left, 0);
+    const building = offer(game, 'C1', 'Temple');
+    assert.equal(building.reason, null);
+    assert.equal(building.source, 'Great Prophet');
+    assert.equal(building.free, true);
+    assert.equal(building.activateCity, false);
+    assert.equal(building.moodWillDecrease, false);
+    assert.ok(building.choices.length, 'Cities action bar must have an available building');
+    assert.ok(
+      view(game).cityActions.every((c) => c.buildings.every((b) => b.name === 'Temple' || !b.choices.length)),
+    );
+    assert.ok(view(game, 1).cityActions.every((c) => c.buildings.every((b) => !b.choices.length)));
+    assert.deepEqual(building.choices[0].action, { Response: { SelectPositions: ['C1'] } });
+    assert.equal(offer(game, 'C2', 'Temple').choices.length, 0, 'An existing Temple cannot be built again');
+    const declined = move(game, { Response: { SelectPositions: [] } });
+    assert.equal(declined.actions_left, 0);
+    assert.ok(
+      view(declined).cityActions.every((c) =>
+        c.buildings.every((b) => b.source !== 'Great Prophet' && !b.choices.length),
+      ),
+    );
+    const before = { ...game.players[0].resources };
+    game = move(game, building.choices[0].action);
+    assert.deepEqual(game.players[0].resources, before, 'Choosing a city does not commit the payment');
+    assert.ok(view(game).decision?.fields.length, 'The normal optional payment decision follows');
+    game = move(game, { Response: { Payment: [building.payment] } });
+    const cityAfter = game.players[0].cities.find((c: any) => c.position === 'C1');
+    assert.equal(cityAfter.city_pieces.temple, 0);
+    assert.equal(cityAfter.activations ?? 0, cityBefore.activations ?? 0);
+    assert.equal(cityAfter.mood_state, cityBefore.mood_state);
+    assert.equal(game.actions_left, 0);
+    for (const [resource, amount] of Object.entries(building.payment))
+      assert.equal(game.players[0].resources[resource] ?? 0, (before[resource] ?? 0) - amount);
+    assert.ok(view(game).cityActions.every((c) => c.buildings.every((b) => b.source !== 'Great Prophet')));
+  });

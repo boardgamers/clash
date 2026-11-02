@@ -155,16 +155,24 @@ pub fn happiness_preview(game: &Game, seat: usize, input: &Value) -> Result<Valu
         &kind,
         &origin,
     )?;
-    let field = input["includePayments"].as_bool().unwrap_or(false).then(|| {
-        super::decisions::resource_field(
-            &cost.cost, "Payment", false, &p.resources, false, &p.resources,
-        )
-    });
+    let field = input["includePayments"]
+        .as_bool()
+        .unwrap_or(false)
+        .then(|| {
+            super::decisions::resource_field(
+                &cost.cost,
+                "Payment",
+                false,
+                &p.resources,
+                false,
+                &p.resources,
+            )
+        });
     let affordable = if input["payment"].is_null() {
         cost.cost.first_valid_payment(&p.resources)
     } else {
-        let selected = serde_json::from_value(input["payment"].clone())
-            .map_err(|e| e.to_string())?;
+        let selected =
+            serde_json::from_value(input["payment"].clone()).map_err(|e| e.to_string())?;
         (p.resources.has_at_least(&selected) && cost.cost.is_valid_payment(&selected))
             .then_some(selected)
     };
@@ -251,8 +259,15 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
     let mut destinations = vec![];
     for carrier in carriers {
         for route in possible_move_routes(p, game, &units, start, carrier).unwrap_or_default() {
-            let payments = super::decisions::payment_choices(&route.cost, &p.resources, false, false)
-                .unwrap_or_else(|| route.cost.first_valid_payment(&p.resources).into_iter().collect());
+            let payments =
+                super::decisions::payment_choices(&route.cost, &p.resources, false, false)
+                    .unwrap_or_else(|| {
+                        route
+                            .cost
+                            .first_valid_payment(&p.resources)
+                            .into_iter()
+                            .collect()
+                    });
             for payment in payments {
                 let breaks_diplomacy =
                     route
@@ -264,9 +279,15 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
                 let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":if route.ignore_terrain_movement_restrictions { vec!["Roads: ignores Mountain and Forest penalties. These units can move again in a new Move action unless they fight a battle."] } else { terrain_notes(game,p,&units,route.destination) },"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),"breaksDiplomacy":breaks_diplomacy,
                     "action":Action::Movement(MovementAction::Move(MoveUnits::new(units.clone(),route.destination,carrier,payment)))});
                 let mut offer = offer;
-                if carrier.is_none() && units.iter().any(|id| p.get_unit(*id).is_ship()) && game.map.is_land(route.destination) {
+                if carrier.is_none()
+                    && units.iter().any(|id| p.get_unit(*id).is_ship())
+                    && game.map.is_land(route.destination)
+                {
                     offer["label"] = json!("Convert & move ashore");
-                } else if carrier.is_none() && units.iter().all(|id| !p.get_unit(*id).is_ship()) && game.map.is_sea(route.destination) {
+                } else if carrier.is_none()
+                    && units.iter().all(|id| !p.get_unit(*id).is_ship())
+                    && game.map.is_sea(route.destination)
+                {
                     offer["label"] = json!("Convert to ships");
                 }
                 if !destinations.contains(&offer) {
@@ -475,6 +496,22 @@ fn action_reason(
 
 pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     let p = game.player(seat);
+    // Great Prophet builds through its pending card request, not a Construct
+    // action. Expose that same choice in Cities, including after the last action.
+    let prophet_cities = game.current_event_handler().and_then(|handler| {
+        if seat != game.active_player()
+            || handler.response.is_some()
+            || handler.origin != crate::events::EventOrigin::CivilCard(120)
+        {
+            return None;
+        }
+        match &handler.request {
+            crate::content::persistent_events::PersistentEventRequest::SelectPositions(request) => {
+                Some(&request.choices)
+            }
+            _ => None,
+        }
+    });
     // These cards grant an action to offset the following Construct command.
     // Present the extra build's net cost, not that internal action debit.
     let construction_source = (seat == game.active_player())
@@ -496,6 +533,21 @@ pub fn cities(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
         construction_source.is_some() || PlayingActionType::Construct.cost(game, seat).free;
     p.cities.iter().map(|city| {
         let buildings = BUILDINGS.into_iter().map(|building| {
+            if building == crate::city_pieces::Building::Temple
+                && let Some(eligible) = prophet_cities
+            {
+                // Match the card's payment exactly; it does not use the normal
+                // city activation, mood, size or Construct-action restrictions.
+                let cost = p.building_cost(game, building, CostTrigger::NoModifiers).cost;
+                let payment = cost.first_valid_payment(&p.resources).unwrap_or_else(|| cost.default_payment());
+                let available = eligible.contains(&city.position);
+                return json!({"name":"Temple", "owned":!city.pieces.can_add_building(building),
+                    "required":game.cache.get_building_advance(building).name(game), "payment":payment,
+                    "reason":if available { None } else { Some("Not eligible for Great Prophet") },
+                    "choices":if available { vec![json!({"position":null,
+                        "action":Action::Response(crate::content::persistent_events::EventResponse::SelectPositions(vec![city.position]))})] } else { vec![] },
+                    "free":true,"activateCity":false,"source":"Great Prophet","moodWillDecrease":false});
+            }
             let cost = p.building_cost_in_city(game, building, city.position, CostTrigger::NoModifiers);
             let payment = cost.cost.first_valid_payment(&p.resources).unwrap_or_else(|| cost.cost.default_payment());
             let positions = new_building_positions(game, building, city);

@@ -6,7 +6,7 @@
   import { printedCardName } from './card-names';
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
-  import { Check, Sparkles, Layers, BookOpen, ChevronRight, Zap, Wheat } from 'lucide-svelte';
+  import { Check, Sparkles, Layers, BookOpen, ChevronRight, ArrowLeft, X, Zap, Wheat } from 'lucide-svelte';
   import type { Controller } from './controller';
   import type { Decision, Move, Pile, UnitKind } from './types';
   import { unitInfo } from './city';
@@ -34,6 +34,8 @@
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
   const opponentTactics = $derived(opponentTacticsLabel(decision));
+  const resourceChoice = $derived(decision.reward && decision.name === 'Select a resource to gain');
+  const title = $derived(resourceChoice ? 'Gain resources' : printedCardName(decision.name));
   const tribalStopChoice = $derived(decision.name === 'Tribal Allies' && decision.description === 'Select armies to stop · 1 food total');
   const razeChoice = $derived(decision.name === 'Raze city');
   const firstPlayerChoice = $derived(decision.name === 'Determine First Player');
@@ -219,18 +221,19 @@
   class:unit-decision={unitChoice}
   class:card-decision={decision.options.some((option) => option.card)}
   class:tactics-decision={decision.tacticsSelection}
-  aria-label={printedCardName(decision.name)}
+  class:resource-decision={resourceChoice}
+  aria-label={title}
 >
   {#if decision.endOfAge && !razeChoice}<span class="tiny-label">END OF AGE</span>{/if}
   <header class="decision-heading">
     {#if canCancelAbility($session.game, $session.view)}
-      <button disabled={$session.pending} onclick={() => controller.submit('Undo')}>Cancel</button>
+      <button class="icon-button" aria-label="Cancel ability" title="Cancel ability" disabled={$session.pending} onclick={() => controller.submit('Undo')}><X size={18} /></button>
     {:else if $session.view?.canUndo && $session.game?.events?.some((event) => typeof event.event_type === 'object' && event.event_type !== null && 'CustomAction' in event.event_type)}
-      <button disabled={$session.pending} onclick={() => controller.submit('Undo')}>Back</button>
+      <button class="icon-button" aria-label="Back" title="Back" disabled={$session.pending} onclick={() => controller.submit('Undo')}><ArrowLeft size={17} /></button>
     {/if}
     {#if $session.view?.influenceContext}
       <InfluenceFlow context={$session.view.influenceContext} />
-    {:else}<h2><Sparkles size={21} />{printedCardName(decision.name)}</h2>{/if}
+    {:else}<h2><Sparkles size={resourceChoice ? 18 : 21} />{title}</h2>{/if}
     {#if decision.eventContext}
       {@const context = decision.eventContext}
       <div class="decision-event-context" class:full-context={!!context.card}>
@@ -523,6 +526,16 @@
 </section>
 
 <style>
+  :global(.game-shell) .resource-decision .decision-heading h2 {
+    min-width: 0;
+    font-size: 20px;
+    line-height: 1.25;
+  }
+  .resource-decision .decision-heading h2 :global(svg),
+  .decision-heading > .icon-button {
+    flex-shrink: 0;
+  }
+
   .tactics-opponent-status {
     display: flex;
     align-items: center;
