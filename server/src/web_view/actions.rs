@@ -379,7 +379,8 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
         let reason = action_reason(game,seat,can_play,PlayingActionType::ActionCard(*id));
         json!({"id":id,"name":c.civil_card.name,"description":c.civil_card.description,"free":PlayingActionType::ActionCard(*id).cost(game,seat).free,
             "cost":PlayingActionType::ActionCard(*id).payment_options(game,seat).default,
-            "researchAdvances":if reason.is_none() {crate::content::action_cards::research_choices(game, game.player(seat), &c.civil_card.name)} else {vec![]},
+            "researchAdvances":if reason.is_none() {super::research::card_choices(game, seat, *id)} else {vec![]},
+            "freeResearch":super::research::card_is_free_research(*id),
             "tactics":c.tactics_card.as_ref().map(|t|json!({"name":t.name,"description":t.description})),
             "reason":reason,"action":reason.is_none().then(||Action::Playing(PlayingAction::ActionCard(*id)))})
     }).collect()
@@ -412,6 +413,8 @@ pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
         cities.into_iter().map(|city|json!({"name":info.event_origin.name(game),"description":execution.ability.description,"position":city,"reason":reason,
             "cost":info.cost.cost.payment_options(game.player(seat),info.event_origin.clone()).default_payment(),
             "free":info.cost.cost.free,
+            "researchAdvances":if reason.is_none() {super::research::ability_choices(game, seat, info.custom_action_type())} else {vec![]},
+            "freeResearch":super::research::ability_is_free_research(info.custom_action_type()),
             "activatesCity":(info.custom_action_type() == crate::content::custom_actions::CustomActionType::GoldenAge)
                 .then(|| crate::leader::leader_position(game.player(seat))),
             "action":Action::Playing(PlayingAction::Custom(CustomAction::new(info.custom_action_type(),city)))})).collect::<Vec<_>>()

@@ -302,6 +302,9 @@ export interface View {
   actionCards?: ActionCard[];
   unavailableSpecialActions?: View['specialActions'];
   specialActions?: {
+    /** Legal permanent research targets for this source, supplied by the engine. */
+    researchAdvances?: string[];
+    freeResearch?: boolean;
     reason?: string | null;
     name: string;
     description: string;
@@ -688,6 +691,8 @@ export interface MoveDestination {
 }
 export interface ActionCard {
   researchAdvances?: string[];
+  /** No research resource cost; the card's own action/token cost still applies. */
+  freeResearch?: boolean;
   id: number;
   name: string;
   description: string;

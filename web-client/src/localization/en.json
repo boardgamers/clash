@@ -5238,5 +5238,11 @@
   "Civil effect": "Civil effect",
   "Keep on top": "Keep on top",
   "Put at the bottom": "Put at the bottom",
-  "Preview only. This event has not been triggered.": "Preview only. This event has not been triggered."
+  "Preview only. This event has not been triggered.": "Preview only. This event has not been triggered.",
+  "Invalid Calendar preview": "Invalid Calendar preview",
+  "Invalid Calendar payment": "Invalid Calendar payment",
+  "Calendar is waiting for a response": "Calendar is waiting for a response",
+  "Alternative research available": "Alternative research available",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Use a card or ability below instead of normal research. Its own costs and effects still apply.",
+  "No research resource cost": "No research resource cost"
 }

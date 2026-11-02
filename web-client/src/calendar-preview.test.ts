@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { handCardDescription } from './card-text.ts';
+import { canCancelAbility } from './decision-controls.ts';
+import { journal } from './model.ts';
 import type { View } from './types.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
@@ -23,7 +25,7 @@ async function calendar(event = 'Great Merchant', culture = 2) {
   game.incidents_left = [eventId, ...game.incidents_left.filter((id: number) => id !== eventId)];
   state = JSON.stringify(game);
   const action = view(state, seat).specialActions!.find((action) => action.name === 'Calendar')!.action;
-  return { state: move(state, action), seat, eventId, actionsLeft: game.actions_left };
+  return { state: move(state, action), before: state, action, seat, eventId, actionsLeft: game.actions_left };
 }
 
 function choose(state: string, seat: number, payment: object) {
@@ -32,6 +34,79 @@ function choose(state: string, seat: number, payment: object) {
   assert.deepEqual(action, { Response: { Payment: [payment] } });
   return move(state, action, seat);
 }
+
+test('Calendar look-only previews can be cancelled or kept without growing logs, board history or clocks', async () => {
+  const { before, action, seat } = await calendar();
+  const original = JSON.parse(before);
+  const length = engine.logLength(before);
+  const clock = engine.timeIncrements(before);
+  const entries = journal(original);
+  let state = before;
+  for (let i = 0; i < 50; i++) {
+    state = move(state, action, seat);
+    assert.equal(engine.isLiveUpdate(state), true);
+    assert.equal(engine.logLength(state), length);
+    assert.equal(view(state, seat).canUndo, true);
+    assert.equal(canCancelAbility(JSON.parse(engine.stripSecret(state, seat)), view(state, seat)), true);
+    assert.equal(canCancelAbility(JSON.parse(engine.stripSecret(state, 1 - seat)), view(state, 1 - seat)), false);
+    assert.deepEqual(engine.logSlice(state, { start: length, player: seat }), []);
+    assert.deepEqual(journal(JSON.parse(state)), entries, 'unvalidated Calendar does not appear in the journal');
+    // Both the existing keep button and the generic Cancel/Undo close the preview.
+    state = i % 2 ? move(state, 'Undo', seat) : choose(state, seat, {});
+    const closed = JSON.parse(state);
+    assert.equal(engine.isLiveUpdate(state), true);
+    assert.equal(engine.logLength(state), length);
+    assert.ok(!view(state, seat).decision);
+    assert.deepEqual(closed.log, original.log, 'raw saved actions do not grow either');
+    assert.deepEqual(closed.board_history, original.board_history);
+    assert.deepEqual(closed.incidents_left, original.incidents_left);
+    assert.equal(closed.rng, original.rng);
+    assert.equal(closed.actions_left, original.actions_left);
+    assert.deepEqual(closed.players[seat].resources, original.players[seat].resources);
+    assert.deepEqual(engine.timeIncrements(state), clock);
+    assert.deepEqual(engine.logSlice(state, { start: length, player: seat }), []);
+  }
+});
+
+test('Calendar cancellation works for ordinary events and with no culture, while invalid responses cannot close it', async () => {
+  for (const event of ['Great Scientist', 'Famine']) {
+    const { state, seat, before } = await calendar(event, 0);
+    const game = JSON.parse(engine.stripSecret(state, seat));
+    assert.equal(canCancelAbility(game, view(state, seat)), true);
+    assert.throws(() => move(state, 'Undo', 1 - seat));
+    for (const payments of [[], [{ culture_tokens: 1 }], [{ food: 1 }], [{}, {}]]) {
+      assert.throws(() => move(state, { Response: { Payment: payments } }, seat));
+    }
+    const closed = move(state, 'Undo', seat);
+    assert.equal(engine.logLength(closed), engine.logLength(before));
+    assert.ok(!view(closed, seat).decision);
+    assert.deepEqual(engine.timeIncrements(closed), engine.timeIncrements(before));
+  }
+});
+
+test('Calendar paid burial is recorded, undoable, and sealed by a subsequent preview', async () => {
+  const { before, state, action, seat } = await calendar();
+  const original = JSON.parse(before);
+  const buried = choose(state, seat, { culture_tokens: 1 });
+  assert.equal(engine.isLiveUpdate(buried), false);
+  assert.equal(engine.logLength(buried), engine.logLength(before) + 2);
+  assert.equal(engine.logSlice(buried, { start: engine.logLength(before), player: seat }).length, 2);
+  assert.equal(view(buried, seat).canUndo, true);
+  const restored = move(buried, 'Undo', seat);
+  assert.deepEqual(JSON.parse(restored).incidents_left, original.incidents_left);
+  assert.deepEqual(JSON.parse(restored).players[seat].resources, original.players[seat].resources);
+  assert.equal(view(restored, seat).canRedo, true);
+  const redone = move(restored, 'Redo', seat);
+  assert.deepEqual(JSON.parse(redone).incidents_left, JSON.parse(buried).incidents_left);
+  assert.deepEqual(engine.timeIncrements(redone), engine.timeIncrements(buried));
+  const peekedAgain = move(buried, action, seat);
+  const closed = move(peekedAgain, 'Undo', seat);
+  assert.equal(engine.logLength(closed), engine.logLength(buried));
+  assert.deepEqual(JSON.parse(closed).incidents_left, JSON.parse(buried).incidents_left);
+  assert.deepEqual(JSON.parse(closed).players[seat].resources, JSON.parse(buried).players[seat].resources);
+  assert.equal(view(closed, seat).canUndo, false, 'learning the new top cannot refund the previous burial');
+  assert.throws(() => move(closed, 'Undo', seat));
+});
 
 test('Calendar structures Great Merchant event, acquisition and civil effect without triggering the event', async () => {
   const { state, seat } = await calendar();

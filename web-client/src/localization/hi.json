@@ -5238,5 +5238,11 @@
   "Civil effect": "नागरिक प्रभाव",
   "Keep on top": "ऊपर रखें",
   "Put at the bottom": "सबसे नीचे रखें",
-  "Preview only. This event has not been triggered.": "यह केवल पूर्वावलोकन है। यह घटना अभी शुरू नहीं हुई है।"
+  "Preview only. This event has not been triggered.": "यह केवल पूर्वावलोकन है। यह घटना अभी शुरू नहीं हुई है।",
+  "Invalid Calendar preview": "कैलेंडर का अमान्य पूर्वावलोकन",
+  "Invalid Calendar payment": "कैलेंडर का अमान्य भुगतान",
+  "Calendar is waiting for a response": "कैलेंडर उत्तर की प्रतीक्षा कर रहा है",
+  "Alternative research available": "शोध का वैकल्पिक तरीका उपलब्ध है",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "सामान्य शोध के बजाय नीचे दिया गया कार्ड या क्षमता इस्तेमाल करें। उसके अपने खर्च और प्रभाव फिर भी लागू होंगे।",
+  "No research resource cost": "शोध के लिए संसाधन खर्च नहीं"
 }

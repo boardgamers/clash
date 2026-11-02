@@ -5238,5 +5238,11 @@
   "Civil effect": "內政效果",
   "Keep on top": "保留在牌堆頂",
   "Put at the bottom": "放到牌堆底",
-  "Preview only. This event has not been triggered.": "僅供預覽。此事件尚未觸發。"
+  "Preview only. This event has not been triggered.": "僅供預覽。此事件尚未觸發。",
+  "Invalid Calendar preview": "無效的曆法預覽",
+  "Invalid Calendar payment": "無效的曆法支付",
+  "Calendar is waiting for a response": "曆法正在等待回應",
+  "Alternative research available": "有其他研究方式可用",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "可以使用下方的卡牌或能力代替一般研究。該卡牌或能力本身的費用與效果仍然適用。",
+  "No research resource cost": "研究無需支付資源"
 }

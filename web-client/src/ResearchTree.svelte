@@ -42,7 +42,7 @@
     type View,
   } from './types';
   import { buildingInfo } from './city';
-  import { manGodAbility, researchOwners, researchFreeHints, aqueductResearch, researchCardHints, type ResearchReference } from './research-links';
+  import { manGodAbility, researchOwners, researchFreeHints, aqueductResearch, researchCardHints, researchAbilityHints, type ResearchReference } from './research-links';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
   import { researchDecision } from './decision-controls';
@@ -122,12 +122,17 @@
   function cardHints(advance: AdvanceView) {
     return !reference && !choice && !$session.playback ? researchCardHints(view, advance) : [];
   }
+  function abilityHints(advance: AdvanceView) {
+    // Aqueduct already has its own two-option payment explanation below.
+    return !reference && !choice && !$session.playback
+      ? researchAbilityHints(view, advance).filter((offer) => offer !== aqueduct(advance)) : [];
+  }
   function aqueduct(advance: AdvanceView | undefined) {
     return !reference && !choice ? aqueductResearch(view, advance) : undefined;
   }
   function researchAvailable(advance: AdvanceView) {
     const alternative = aqueduct(advance);
-    return !!advance.action || !!(alternative && !alternative.reason) || cardHints(advance).length > 0;
+    return !!advance.action || !!(alternative && !alternative.reason) || cardHints(advance).length > 0 || abilityHints(advance).length > 0;
   }
   function unavailableReason(advance: AdvanceView) {
     if (researchAvailable(advance)) return "";
@@ -338,7 +343,7 @@
           <div class="research-card-hint">
             <button class="research-advance-link" disabled={$session.pending}
               onclick={() => controller.playContextualCard(card.id, 'research')}>
-              <Layers size={13} />Use {printedCardName(card.name)} · 2 advances · normal resource costs
+              <Layers size={13} /><span>Use {printedCardName(card.name)} <span>· 2 advances · normal resource costs</span></span>
             </button>
             <button class="icon-button" aria-label={`Details of ${printedCardName(card.name)}`} onclick={() => cardReference = card}><Info size={15} /></button>
           </div>
@@ -480,10 +485,19 @@
                 <button class="research-advance-link" disabled={$session.pending}
                   title={card.description}
                   onclick={() => controller.playContextualCard(card.id, 'research')}>
-                  <Layers size={13} />Use {printedCardName(card.name)}{card.name === 'Synergies' ? ' · 2 advances in this category' : ''}
+                  <Layers size={13} /><span>Use {printedCardName(card.name)}{#if card.name === 'Synergies'}<small>· 2 advances in this category</small>{/if}{#if card.freeResearch}<small>No research resource cost</small>{/if}</span>
                 </button>
                 <button class="icon-button" aria-label={`Details of ${printedCardName(card.name)}`}
                   onclick={() => (cardReference = card)}><Info size={14} /></button>
+              </div>
+            {/each}
+            {#each abilityHints(advance) as ability}
+              <div class="research-card-hint">
+                <button class="research-advance-link" disabled={$session.pending}
+                  title={ability.description}
+                  onclick={() => controller.submit(ability.action, ability.cost)}>
+                  <Lightbulb size={13} /><span>Use {ability.name}{#if ability.freeResearch}<small>No research resource cost</small>{/if}</span>
+                </button>
               </div>
             {/each}
             {#each advances.filter((a) => a.required === advance.id && a.group !== advance.group) as unlocked}
@@ -493,7 +507,7 @@
                 onclick={() => showAdvance(unlocked.id)}
                 title={`${unlocked.group} · ${unlocked.name}`}
               >
-                <UnlockIcon size={14} />Unlocks {unlocked.name}<ArrowRight size={12} />
+                <UnlockIcon size={14} /><span>Unlocks</span><span>{unlocked.name}</span><ArrowRight size={12} />
               </button>
             {/each}
             {#each civilizationAdvances.filter( (a) => a.prerequisites.some((p) => p.id === advance.id) ) as special}
@@ -503,8 +517,8 @@
                 title={`${special.active ? 'Unlocked' : 'Unlocks automatically'}: ${special.name}`}
               >
                 <CivilizationEmblem civilization={player!.civilization} size={14} />
-                {special.active ? 'Unlocked' : 'Unlocks'}
-                {special.name}<ArrowRight size={12} />
+                <span>{special.active ? 'Unlocked' : 'Unlocks'}</span>
+                <span>{special.name}</span><ArrowRight size={12} />
               </button>
             {/each}
           </article>
@@ -549,6 +563,38 @@
             {buildingInfo[selected.unlocks].effect}
           </p>{/if}
         {#if unavailableReason(selected) && !selected.owned}<small>{unavailableReason(selected)}</small>{/if}
+        {#if cardHints(selected).length || abilityHints(selected).length}
+          <section class="research-alternatives" aria-label="Alternative research available">
+            <strong>Alternative research available</strong>
+            <p>Use a card or ability below instead of normal research. Its own costs and effects still apply.</p>
+            {#each cardHints(selected) as card}
+              <div class="research-source-row">
+                <button class="secondary research-source" disabled={$session.pending}
+                  title={card.description} onclick={() => controller.playContextualCard(card.id, 'research')}>
+                  <span><Layers size={15} />Use {printedCardName(card.name)}{#if card.name === 'Synergies'}<span>· 2 advances in this category</span>{/if}</span>
+                  <span class="research-source-cost">
+                    {card.freeResearch ? 'No research resource cost' : 'Pay research cost next'}
+                    {#if Object.values(card.cost).some(Boolean)}<ResourceAmount pile={card.cost} compact />{/if}
+                    · {card.free ? 'Free action' : '1 action'}
+                  </span>
+                </button>
+                <button class="icon-button" aria-label={`Details of ${printedCardName(card.name)}`}
+                  onclick={() => cardReference = card}><Info size={16} /></button>
+              </div>
+            {/each}
+            {#each abilityHints(selected) as ability}
+              <button class="secondary research-source" disabled={$session.pending}
+                title={ability.description} onclick={() => controller.submit(ability.action, ability.cost)}>
+                <span><Lightbulb size={15} />Use {ability.name}</span>
+                <span class="research-source-cost">
+                  {ability.freeResearch ? 'No research resource cost' : 'Pay research cost next'}
+                  {#if ability.cost && Object.values(ability.cost).some(Boolean)}<ResourceAmount pile={ability.cost} compact />{/if}
+                  · {ability.free ? 'Free action' : '1 action'}
+                </span>
+              </button>
+            {/each}
+          </section>
+        {/if}
         {#if $session.error && !reference}<p class="inline-error" role="alert">{$session.error}</p>{/if}
       </div>
       {#if !reference && !$session.playback}<div class="research-payment" class:early-payment={!!early}>
@@ -647,4 +693,13 @@
   .research-card-hint { display: flex; align-items: center; gap: .4rem; padding: .35rem .6rem; border-top: 1px solid var(--border); }
   .research-card-hint .research-advance-link { display: flex; align-items: center; gap: .35rem; text-align: left; font-size: .8rem; }
   .research-card-hint .icon-button { flex-shrink: 0; }
+  .research-card-hint small { display: block; color: var(--muted); font-size: .7rem; }
+  .research-alternatives { margin-top: .7rem; padding: .65rem; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 5px; background: var(--paper); }
+  .research-alternatives > strong { font-size: .85rem; }
+  .research-alternatives > p { margin: .25rem 0 .5rem; }
+  .research-source-row { display: flex; align-items: center; gap: .35rem; }
+  .research-source-row .icon-button { flex-shrink: 0; }
+  .research-source { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: .3rem; margin-top: .3rem; min-width: 0; width: 100%; text-align: left; white-space: normal; }
+  .research-source > span { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; }
+  .research-source .research-source-cost { font-size: .72rem; font-weight: normal; }
 </style>

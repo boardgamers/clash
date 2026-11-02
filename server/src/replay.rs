@@ -14,6 +14,9 @@ pub struct ReplayGameData {
     seed: String,
     log: Vec<ActionLogAge>,
     log_index: usize,
+    // Look-only information boundaries are intentionally absent from the log.
+    #[serde(default)]
+    undo_limit: Option<usize>,
     players: Vec<ReplayPlayerData>,
     #[serde(default)]
     dropped_players: Vec<usize>,
@@ -152,6 +155,19 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
     // Reconstructing any cursor must neither earn nor revoke existing credits.
     game.time_increments = data.time_increments;
     if full_replay {
+        // Reconstructing a playable current save must not reopen actions sealed
+        // by an unrecorded Calendar look. Historical cursors keep their own limits.
+        if let Some(limit) = data.undo_limit {
+            game.undo_limit = game.undo_limit.max(limit.min(game.log_index));
+            let limit = game.undo_limit;
+            for action in crate::log::current_turn_log_mut(&mut game)
+                .actions
+                .iter_mut()
+                .take(limit)
+            {
+                action.undo.clear();
+            }
+        }
         game.finish_after_drop();
     }
     Ok(game)

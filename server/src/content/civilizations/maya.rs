@@ -102,6 +102,43 @@ fn calendar() -> SpecialAdvanceInfo {
                 } else { p.log(game, "Kept the next event on top of the deck"); }
             }), |_, _| true).build()
 }
+/// Validate before the listener (which assumes a well-formed payment) runs.
+/// This also covers recorded Calendar prompts restored by Undo or older saves.
+pub(crate) fn validate_calendar_response(
+    game: &Game,
+    response: &EventResponse,
+    player: usize,
+) -> Result<(), String> {
+    let (EventResponse::Payment(payments), Some(handler)) =
+        (response, game.current_event_handler())
+    else {
+        return Err("Invalid Calendar payment".into());
+    };
+    let PersistentEventRequest::Payment(requests) = &handler.request else {
+        return Err("Invalid Calendar payment".into());
+    };
+    let ([payment], [request]) = (payments.as_slice(), requests.as_slice()) else {
+        return Err("Invalid Calendar payment".into());
+    };
+    if request.optional && payment.is_empty() {
+        return Ok(());
+    }
+    if !request.cost.is_valid_payment(payment)
+        || !game.player(player).resources.has_at_least(payment)
+    {
+        return Err("Invalid Calendar payment".into());
+    }
+    Ok(())
+}
+
+pub(crate) fn is_calendar_event(game: &Game) -> bool {
+    game.events.last().is_some_and(|event| {
+        matches!(&event.event_type,
+            crate::content::persistent_events::PersistentEventType::CustomAction(a)
+                if a.action.action == CustomActionType::Calendar)
+    })
+}
+
 fn art_cost(c: &mut CostInfo, p: &EventPlayer) {
     let resources = base_resources();
     let mut pairs = vec![];

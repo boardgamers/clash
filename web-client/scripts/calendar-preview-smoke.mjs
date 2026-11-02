@@ -114,6 +114,20 @@ try {
       const result = JSON.parse(move(merchant, response));
       assert.equal(result.players[seat].resources.culture_tokens, width === 1400 ? 1 : 2);
       assert.equal(result.events?.length ?? 0, 0);
+      await emit(JSON.stringify(result));
+      await preview.waitFor({ state: 'detached' });
+      await emit(merchant);
+      await preview.waitFor();
+      const cancel = page.locator('.decision-heading').getByRole('button', { name: t('Cancel ability'), exact: true });
+      await cancel.click();
+      await page.waitForFunction(() => sent.length === 1);
+      assert.equal(JSON.parse(await page.evaluate(() => sent[0])), 'Undo');
+      const closed = move(merchant, 'Undo');
+      assert.equal(engine.isLiveUpdate(closed), true);
+      assert.equal(engine.logLength(closed), engine.logLength(merchant));
+      assert.deepEqual(engine.timeIncrements(closed), engine.timeIncrements(merchant));
+      await emit(closed);
+      await preview.waitFor({ state: 'detached' });
       await emit(fixture('Great Merchant', 0));
       await preview.waitFor();
       assert.equal(await actions.getByRole('button').count(), 1);
@@ -124,6 +138,7 @@ try {
       await emit(fixture('Famine'));
       await page.locator('.decision-panel .payment-choices').waitFor();
       assert.equal(await preview.count(), 0, 'ordinary event UI remains unchanged');
+      assert.ok(await cancel.isEnabled(), 'ordinary Calendar previews can also be cancelled');
       await emit(merchant, 1 - seat);
       await preview.waitFor({ state: 'detached' });
       assert.equal(await page.locator('.decision-panel').count(), 0, 'opponent cannot see or act on this preview');

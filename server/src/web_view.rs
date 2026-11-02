@@ -28,6 +28,7 @@ mod collection_potential;
 mod decisions;
 mod effects;
 mod journal;
+mod research;
 mod turn;
 mod waiting;
 pub use actions::recruit_preview;

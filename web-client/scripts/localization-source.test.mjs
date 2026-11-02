@@ -71,7 +71,7 @@ test('extracts current continued engine rules and omits test/technical noise', (
       'A: When drawing a wonder: Take {p0} from anywhere in the game',
     ]) assert.ok(Object.keys(inventory).some((key) => key.startsWith(prefix)), prefix);
     for (const key of ['Build {p0} at {p1}', 'Free with {p0} · once per turn', 'city size {p0}, Fortress', 'Recruit {p0} units & action card']) assert.ok(inventory[key], key);
-    for (const key of ['action-panel floating-panel early-choices', 'current={p0}, available={p1}, conversions={p2}, exact={p3}, skip={p4}', 'crate::timing::deserialize_counters', 'button[data-panel-close]', 'Build {p0}{p1}']) assert.equal(inventory[key], undefined, key);
+    for (const key of ['action-panel floating-panel early-choices', 'current={p0}, available={p1}, conversions={p2}, exact={p3}, skip={p4}', 'crate::timing::deserialize_counters', 'button[data-panel-close]', 'Build {p0}{p1}', 'validated Calendar event']) assert.equal(inventory[key], undefined, key);
     assert.ok(Object.values(inventory).flat().every((file) => !/\.test\.ts|_tests\.rs/.test(file)));
     // Check mode must not write even if output flags are accidentally supplied.
     const before = fs.readFileSync(output, 'utf8');

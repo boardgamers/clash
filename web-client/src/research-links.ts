@@ -94,6 +94,12 @@ export function aqueductResearch(view: View | null | undefined, advance: Advance
 }
 
 export function researchCardHints(view: View | null | undefined, advance: AdvanceView) {
-  if (advance.owned) return [];
-  return (view?.actionCards ?? []).filter((card) => card.action && card.researchAdvances?.includes(advance.id));
+  if (!view?.canPlay || advance.owned) return [];
+  return (view.actionCards ?? []).filter((card) => !card.reason && card.action && card.researchAdvances?.includes(advance.id));
+}
+
+/** These offers belong only to the viewing seat, never to public opponent leaders. */
+export function researchAbilityHints(view: View | null | undefined, advance: AdvanceView) {
+  if (!view?.canPlay || advance.owned) return [];
+  return (view.specialActions ?? []).filter((offer) => !offer.reason && offer.action && offer.researchAdvances?.includes(advance.id));
 }

@@ -5238,5 +5238,11 @@
   "Civil effect": "Πολιτική επίδραση",
   "Keep on top": "Διατήρηση στην κορυφή",
   "Put at the bottom": "Τοποθέτηση στο κάτω μέρος",
-  "Preview only. This event has not been triggered.": "Μόνο προεπισκόπηση. Αυτό το γεγονός δεν έχει ακόμη ενεργοποιηθεί."
+  "Preview only. This event has not been triggered.": "Μόνο προεπισκόπηση. Αυτό το γεγονός δεν έχει ακόμη ενεργοποιηθεί.",
+  "Invalid Calendar preview": "Μη έγκυρη προεπισκόπηση Ημερολογίου",
+  "Invalid Calendar payment": "Μη έγκυρη πληρωμή για το Ημερολόγιο",
+  "Calendar is waiting for a response": "Το Ημερολόγιο περιμένει απάντηση",
+  "Alternative research available": "Διαθέσιμος εναλλακτικός τρόπος έρευνας",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Χρησιμοποιήστε μία από τις παρακάτω κάρτες ή ικανότητες αντί για κανονική έρευνα. Το κόστος και οι επιδράσεις της εξακολουθούν να ισχύουν.",
+  "No research resource cost": "Έρευνα χωρίς κόστος πόρων"
 }

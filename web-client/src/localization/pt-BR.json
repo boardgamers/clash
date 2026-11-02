@@ -5238,5 +5238,11 @@
   "Civil effect": "Efeito civil",
   "Keep on top": "Manter no topo",
   "Put at the bottom": "Colocar no fundo",
-  "Preview only. This event has not been triggered.": "Apenas uma prévia. Este evento ainda não foi desencadeado."
+  "Preview only. This event has not been triggered.": "Apenas uma prévia. Este evento ainda não foi desencadeado.",
+  "Invalid Calendar preview": "Prévia inválida do Calendário",
+  "Invalid Calendar payment": "Pagamento inválido do Calendário",
+  "Calendar is waiting for a response": "O Calendário está aguardando uma resposta",
+  "Alternative research available": "Alternativa de pesquisa disponível",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Use uma carta ou habilidade abaixo em vez da pesquisa normal. Seus próprios custos e efeitos continuam se aplicando.",
+  "No research resource cost": "Pesquisa sem custo em recursos"
 }

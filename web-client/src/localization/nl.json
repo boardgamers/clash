@@ -5238,5 +5238,11 @@
   "Civil effect": "Civiel effect",
   "Keep on top": "Boven op de stapel laten",
   "Put at the bottom": "Onder op de stapel leggen",
-  "Preview only. This event has not been triggered.": "Alleen een voorbeeld. Deze gebeurtenis is nog niet geactiveerd."
+  "Preview only. This event has not been triggered.": "Alleen een voorbeeld. Deze gebeurtenis is nog niet geactiveerd.",
+  "Invalid Calendar preview": "Ongeldig Kalendervoorbeeld",
+  "Invalid Calendar payment": "Ongeldige betaling voor Kalender",
+  "Calendar is waiting for a response": "Kalender wacht op een antwoord",
+  "Alternative research available": "Andere onderzoeksmogelijkheid beschikbaar",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Gebruik een kaart of vaardigheid hieronder in plaats van normaal onderzoek. De eigen kosten en effecten blijven gelden.",
+  "No research resource cost": "Geen grondstofkosten voor onderzoek"
 }

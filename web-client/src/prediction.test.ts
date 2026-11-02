@@ -516,6 +516,54 @@ test('rolls and hidden draws wait even when sampled visible outcomes could coinc
   }
 });
 
+test('Calendar never predicts a private top-card preview even if sampled cards could coincide', () => {
+  let executions = 0;
+  const raw = JSON.stringify({ board_history: { id: 'calendar', frames: [] } });
+  const simulation = { tryMove: () => { executions++; return raw; }, stripSecret: () => raw };
+  assert.deepEqual(predictMove(simulation, raw, { Playing: { Custom: { action: 'Calendar' } } }, 0),
+    { reason: 'unsupported' });
+  assert.equal(executions, 0, 'do not inspect a shuffled local deck at all');
+});
+
+test('Calendar Cancel never optimistically undoes the committed move before the preview', async () => {
+  let raw = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'calendar-prediction', {});
+  for (const civilization of ['Maya', 'Rome']) {
+    raw = move(raw, { ChooseCivilization: civilization }, engine.currentPlayer(raw));
+  }
+  const seat = engine.currentPlayer(raw);
+  const initial = JSON.parse(raw);
+  initial.players[seat].advances.push('Fishing', 'Navigation', 'Cartography', 'Astronomy');
+  initial.players[seat].resources.food = 0;
+  raw = JSON.stringify(initial);
+  const city = initial.players[seat].cities[0].position;
+  const collection = { Playing: { Collect: { city_position: city,
+    collections: [{ position: city, pile: { food: 1 }, times: 1 }], action_type: 'Collect' } } };
+  const app = harness();
+  try {
+    app.controller.setPlayer(seat);
+    await app.controller.load(strip(raw, seat));
+    raw = move(raw, collection, seat);
+    await app.controller.load(strip(raw, seat));
+    const collected = structuredClone(app.session().game!);
+    const calendar = app.session().view!.specialActions!.find(a => a.name === 'Calendar')!.action;
+    const pending = move(raw, calendar, seat);
+    assert.equal(engine.logLength(pending), engine.logLength(raw));
+    await app.controller.load(strip(pending, seat));
+    assert.equal(app.session().view!.canUndo, true);
+    app.controller.submit('Undo');
+    assert.deepEqual(app.sent.map(action => JSON.parse(action)), ['Undo']);
+    assert.equal(app.session().game!.actions_left, collected.actions_left);
+    assert.deepEqual(app.session().game!.players[seat].resources, collected.players[seat].resources);
+    assert.equal(app.session().game!.log_index, collected.log_index);
+    const closed = move(pending, 'Undo', seat);
+    await app.controller.load(strip(closed, seat));
+    assert.equal(app.session().pending, false);
+    assert.ok(!app.session().view!.decision);
+    assert.equal(app.session().view!.canUndo, false);
+    assert.deepEqual(app.session().game!.players[seat].resources, collected.players[seat].resources);
+  } finally { app.close(); }
+});
+
 test('Spy waits before looking at a masked hand without trapping the local engine', () => {
   const game = JSON.parse(
     readFileSync(new URL('../../server/tests/test_games/action_cards/spy.json', import.meta.url), 'utf8'),

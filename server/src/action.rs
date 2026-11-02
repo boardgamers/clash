@@ -76,7 +76,12 @@ pub fn try_execute_action(
     player_index: usize,
 ) -> Result<Game, String> {
     game.early_choice_update = false;
-    if let Action::QueueMoves { key, actions, waiting } = &action {
+    if let Action::QueueMoves {
+        key,
+        actions,
+        waiting,
+    } = &action
+    {
         crate::action_queue::save(&mut game, player_index, key, actions.clone(), *waiting)?;
         return Ok(game);
     }
@@ -84,12 +89,29 @@ pub fn try_execute_action(
         crate::early_choices::save(&mut game, player_index, key, response.clone())?;
         return Ok(game);
     }
+    // A persisted transient prompt has no action/cursor to undo or deck to
+    // mutate yet. Even lower-level callers must resolve it at the live boundary.
+    // Recorded/replayed Calendar actions never carry this marker. Independent
+    // private queue updates above must remain available to the other seats.
+    if game.uncommitted_calendar {
+        return crate::board_history::execute(game, action, player_index);
+    }
     if game.civilization_draft.is_some() {
         crate::game_setup::execute_draft_choice(&mut game, player_index, &action)?;
         return Ok(game);
     }
     if player_index != game.active_player() {
         return Err(format!("Player {player_index} is not the active player"));
+    }
+
+    if let Action::Response(response) = &action
+        && crate::content::civilizations::maya::is_calendar_event(&game)
+    {
+        crate::content::civilizations::maya::validate_calendar_response(
+            &game,
+            response,
+            player_index,
+        )?;
     }
 
     if game.context == GameContext::AI {

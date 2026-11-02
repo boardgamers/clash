@@ -5238,5 +5238,11 @@
   "Civil effect": "Мирный эффект",
   "Keep on top": "Оставить сверху колоды",
   "Put at the bottom": "Положить под колоду",
-  "Preview only. This event has not been triggered.": "Только предварительный просмотр. Это событие ещё не произошло."
+  "Preview only. This event has not been triggered.": "Только предварительный просмотр. Это событие ещё не произошло.",
+  "Invalid Calendar preview": "Недопустимый просмотр Календаря",
+  "Invalid Calendar payment": "Недопустимая оплата Календаря",
+  "Calendar is waiting for a response": "Календарь ожидает ответа",
+  "Alternative research available": "Доступен другой способ исследования",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Используйте указанную ниже карту или способность вместо обычного исследования. Её собственные затраты и эффекты по-прежнему применяются.",
+  "No research resource cost": "Исследование без затрат ресурсов"
 }

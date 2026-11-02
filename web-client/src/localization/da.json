@@ -5238,5 +5238,11 @@
   "Civil effect": "Civil effekt",
   "Keep on top": "Behold øverst i bunken",
   "Put at the bottom": "Læg nederst i bunken",
-  "Preview only. This event has not been triggered.": "Kun en forhåndsvisning. Denne begivenhed er endnu ikke udløst."
+  "Preview only. This event has not been triggered.": "Kun en forhåndsvisning. Denne begivenhed er endnu ikke udløst.",
+  "Invalid Calendar preview": "Ugyldig forhåndsvisning for Kalender",
+  "Invalid Calendar payment": "Ugyldig betaling for Kalender",
+  "Calendar is waiting for a response": "Kalender afventer et svar",
+  "Alternative research available": "En anden forskningsmulighed er tilgængelig",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Brug et kort eller en evne nedenfor i stedet for normal forskning. Dets egne omkostninger og effekter gælder stadig.",
+  "No research resource cost": "Ingen ressourceomkostning for forskning"
 }

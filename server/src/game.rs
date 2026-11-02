@@ -136,6 +136,8 @@ pub struct Game {
     pub events: Vec<PersistentEventState>,
     pub early_choices: Vec<crate::early_choices::SavedChoice>,
     pub early_choice_update: bool,
+    /// A private Calendar prompt, not yet part of the committed action history.
+    pub uncommitted_calendar: bool,
     pub action_plan: Option<crate::action_queue::Plan>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,
@@ -339,12 +341,15 @@ impl Game {
 
     #[must_use]
     pub fn can_undo(&self) -> bool {
-        self.context != GameContext::AI && self.undo_limit < self.log_index
+        self.context != GameContext::AI
+            && (self.uncommitted_calendar || self.undo_limit < self.log_index)
     }
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
-        self.context != GameContext::AI && self.log_index < current_turn_log(self).actions.len()
+        self.context != GameContext::AI
+            && !self.uncommitted_calendar
+            && self.log_index < current_turn_log(self).actions.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {

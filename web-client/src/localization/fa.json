@@ -5238,5 +5238,11 @@
   "Civil effect": "اثر غیرنظامی",
   "Keep on top": "بالای دسته نگه دار",
   "Put at the bottom": "زیر دسته قرار بده",
-  "Preview only. This event has not been triggered.": "فقط پیش‌نمایش است. این رویداد هنوز فعال نشده است."
+  "Preview only. This event has not been triggered.": "فقط پیش‌نمایش است. این رویداد هنوز فعال نشده است.",
+  "Invalid Calendar preview": "پیش‌نمایش تقویم نامعتبر است",
+  "Invalid Calendar payment": "پرداخت تقویم نامعتبر است",
+  "Calendar is waiting for a response": "تقویم منتظر پاسخ است",
+  "Alternative research available": "روش دیگری برای پژوهش در دسترس است",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "به‌جای پژوهش معمول، از یکی از کارت‌ها یا توانایی‌های زیر استفاده کنید. هزینه‌ها و اثرهای خود آن همچنان اعمال می‌شوند.",
+  "No research resource cost": "پژوهش بدون هزینهٔ منابع"
 }

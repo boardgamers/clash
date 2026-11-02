@@ -5238,5 +5238,11 @@
   "Civil effect": "Ziviler Effekt",
   "Keep on top": "Oben auf dem Stapel lassen",
   "Put at the bottom": "Unter den Stapel legen",
-  "Preview only. This event has not been triggered.": "Nur eine Vorschau. Dieses Ereignis wurde noch nicht ausgelöst."
+  "Preview only. This event has not been triggered.": "Nur eine Vorschau. Dieses Ereignis wurde noch nicht ausgelöst.",
+  "Invalid Calendar preview": "Ungültige Kalendervorschau",
+  "Invalid Calendar payment": "Ungültige Zahlung für Kalender",
+  "Calendar is waiting for a response": "Kalender wartet auf eine Antwort",
+  "Alternative research available": "Andere Forschungsmöglichkeit verfügbar",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Nutze eine der folgenden Karten oder Fähigkeiten statt der normalen Forschung. Ihre eigenen Kosten und Effekte gelten weiterhin.",
+  "No research resource cost": "Keine Ressourcenkosten für die Forschung"
 }

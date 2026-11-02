@@ -27,6 +27,7 @@ import { happinessTargets } from './happiness';
 import { UndoPreview } from './undo-preview';
 import { fingerprint, isTrap, predictMove, predictUndo } from './prediction';
 import {
+  calendarDecision,
   researchDecision,
   mapDecisionOptions,
   mapDecisionIndex,
@@ -1953,6 +1954,9 @@ export class Controller {
       return null;
     try {
       if (move === 'Undo') {
+        // Closing Calendar does not rewind the committed log. An older local
+        // snapshot could otherwise incorrectly undo the action before the peek.
+        if (calendarDecision(s.game)) return null;
         // Undo patches are stripped from the browser's state: restore the
         // position this seat was shown one step earlier on the same branch.
         const previous = this.undoPreview.previous(s.game, s.view);

@@ -20,11 +20,18 @@ const suggestions: Record<string, { context: CardContext; benefit: string }> = {
 export function contextualCards(view: View | null, context: CardContext) {
   if (!view?.canPlay) return [];
   return (view.actionCards ?? []).flatMap((card: ActionCard) => {
-    const suggestion = suggestions[card.name];
+    // Engine-declared targets cover Great Persons without guessing from rules
+    // text. Empty targets must not advertise a card whose secondary effect is
+    // playable but whose research is not.
+    const suggestion = suggestions[card.name] ??
+      (card.researchAdvances?.length ? {
+        context: 'research' as const,
+        benefit: card.freeResearch ? 'No research resource cost' : 'Gain an advance',
+      } : undefined);
     const matches =
       suggestion?.context === context ||
       (context === 'after-battle' && (card.name === 'Great Ideas' || card.name === 'Hero General'));
-    return card.action && suggestion && matches ? [{ card, benefit: suggestion.benefit }] : [];
+    return card.action && !card.reason && suggestion && matches ? [{ card, benefit: suggestion.benefit }] : [];
   });
 }
 

@@ -96,6 +96,10 @@ function excluded(raw: string, move: unknown, seat: number) {
     if (next === game.starting_player_index) return true;
   }
   if ('ChooseCivilization' in move) return true;
+  // Calendar's tentative look does not change the authoritative RNG or pile.
+  // Two samples can coincidentally reveal the same card, so always wait for the
+  // owner-only server prompt rather than previewing the shuffled browser deck.
+  if ((move as Json).Playing?.Custom?.action === 'Calendar') return true;
   const destination = (move as Json).Movement?.Move?.destination;
   if (!destination) return false;
   // Capturing undefended settlers or cities is deterministic and stays eligible.

@@ -157,12 +157,84 @@ fn title(action: &Action) -> String {
     .to_owned()
 }
 
-pub fn execute(game: Game, action: Action, player: usize) -> Result<Game, String> {
+pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, String> {
     if matches!(
         action,
         Action::QueueChoice { .. } | Action::QueueMoves { .. }
     ) {
         return try_execute_action(game, action, player);
+    }
+    // Look-only Calendar is a bounded live update, not an atomic logged action.
+    // Keep this ahead of snapshots, clock credits, automatic choices and plans.
+    if game.uncommitted_calendar {
+        if player != game.active_player() {
+            return Err(format!("Player {player} is not the active player"));
+        }
+        if game.events.len() != 1 || !crate::content::civilizations::maya::is_calendar_event(&game)
+        {
+            return Err("Invalid Calendar preview".into());
+        }
+        let keep = match &action {
+            Action::Undo => true,
+            Action::Response(response) => {
+                crate::content::civilizations::maya::validate_calendar_response(
+                    &game, response, player,
+                )?;
+                matches!(response, crate::content::persistent_events::EventResponse::Payment(p)
+                    if p[0].is_empty())
+            }
+            _ => return Err("Calendar is waiting for a response".into()),
+        };
+        let event = game.events.pop().expect("Calendar event");
+        game.uncommitted_calendar = false;
+        if keep {
+            game.early_choice_update = true;
+            return Ok(game);
+        }
+        // Commit the original start and the paid response as TWO ordinary
+        // actions. A composite undo patch would rewind two states but one cursor.
+        let crate::content::persistent_events::PersistentEventType::CustomAction(start) =
+            event.event_type
+        else {
+            unreachable!("validated Calendar event")
+        };
+        game = execute_one(
+            game,
+            Action::Playing(PlayingAction::Custom(start.action)),
+            player,
+        )?;
+    } else if matches!(&action, Action::Playing(PlayingAction::Custom(custom))
+        if custom.action == crate::content::custom_actions::CustomActionType::Calendar)
+        && game.events.is_empty()
+    {
+        if player != game.active_player() {
+            return Err(format!("Player {player} is not the active player"));
+        }
+        // Special action cost lookup assumes the ability exists. Reject an
+        // unavailable Calendar before entering that lower-level executor.
+        if !game.player(player).special_actions.contains_key(
+            &crate::content::custom_actions::SpecialAction::Custom(
+                crate::content::custom_actions::CustomActionType::Calendar,
+            ),
+        ) {
+            return Err("Custom action not available".into());
+        }
+        let prepared = try_execute_action(game.clone(), action, player)?;
+        if prepared.events.len() != 1
+            || !crate::content::civilizations::maya::is_calendar_event(&prepared)
+            || prepared.current_event_handler().is_none()
+        {
+            return Err("Invalid Calendar preview".into());
+        }
+        // The clone alone may replenish/shuffle an empty deck. Only the private
+        // request comes back; cancel never changes authoritative RNG or decks.
+        game.events = prepared.events;
+        game.uncommitted_calendar = true;
+        // Knowledge cannot be undone, including Astronomy purchased beforehand.
+        // This is deliberately NOT information_revealed(): no clock credit.
+        game.lock_undo();
+        game.early_choice_update = true;
+        return Ok(game);
     }
     let history_navigation = matches!(action, Action::Undo | Action::Redo);
     let mut game = execute_one(game, action, player)?;

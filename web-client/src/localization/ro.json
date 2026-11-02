@@ -5238,5 +5238,11 @@
   "Civil effect": "Efect civil",
   "Keep on top": "Păstrează deasupra teancului",
   "Put at the bottom": "Pune sub teanc",
-  "Preview only. This event has not been triggered.": "Doar previzualizare. Acest eveniment nu a fost încă declanșat."
+  "Preview only. This event has not been triggered.": "Doar previzualizare. Acest eveniment nu a fost încă declanșat.",
+  "Invalid Calendar preview": "Previzualizare nevalidă pentru Calendar",
+  "Invalid Calendar payment": "Plată nevalidă pentru Calendar",
+  "Calendar is waiting for a response": "Calendar așteaptă un răspuns",
+  "Alternative research available": "Alternativă de cercetare disponibilă",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Folosește o carte sau o abilitate de mai jos în locul cercetării normale. Costurile și efectele proprii se aplică în continuare.",
+  "No research resource cost": "Cercetare fără cost în resurse"
 }

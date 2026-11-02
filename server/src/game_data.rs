@@ -48,6 +48,8 @@ pub struct GameData {
     early_choices: Vec<crate::early_choices::SavedChoice>,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     early_choice_update: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    uncommitted_calendar: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     action_plan: Option<crate::action_queue::Plan>,
     players: Vec<PlayerData>,
@@ -128,6 +130,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         action_plan: data.action_plan,
         early_choices: data.early_choices,
         early_choice_update: data.early_choice_update,
+        uncommitted_calendar: data.uncommitted_calendar,
         context,
         cache,
         options: data.options,
@@ -193,6 +196,7 @@ pub fn data(game: Game) -> GameData {
         action_plan: game.action_plan,
         early_choices: game.early_choices,
         early_choice_update: game.early_choice_update,
+        uncommitted_calendar: game.uncommitted_calendar,
         players: game.players.into_iter().map(player_data).collect(),
         map: game.map.data(),
         civilization_draft: game.civilization_draft,
@@ -234,6 +238,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         action_plan: game.action_plan.clone(),
         early_choices: game.early_choices.clone(),
         early_choice_update: game.early_choice_update,
+        uncommitted_calendar: game.uncommitted_calendar,
         players: game.players.iter().map(cloned_player_data).collect(),
         map: game.map.cloned_data(),
         civilization_draft: game.civilization_draft.clone(),

@@ -58,7 +58,7 @@ function rust(directory) {
         // Ignore test modules and diagnostics: these are not player-facing rules.
         if (/#\[cfg\(test\)\]/.test(content.slice(0, start))) continue;
         const context = content.slice(Math.max(0, start - 120), start);
-        if (/(?:panic!|assert(?:_eq|_ne)?!|debug_assert(?:_eq|_ne)?!|expect)\s*\([^;]*$/.test(context)) continue;
+        if (/(?:panic!|unreachable!|assert(?:_eq|_ne)?!|debug_assert(?:_eq|_ne)?!|expect)\s*\([^;]*$/.test(context)) continue;
         add(rustTemplate(value), path.relative(root, file));
       }
     }

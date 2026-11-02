@@ -354,6 +354,19 @@ test('research graph has valid prerequisites and setup summaries retain historic
   );
 });
 
+test('empty live log deltas and update notifications fetch authoritative state for Calendar previews', () => {
+  // The real viewer supplies onState, not custom onLog/onUpdate handlers.
+  const client = createViewer<string, string>({ onState() {} });
+  let refreshes = 0;
+  client.emitter.on('fetchState', () => { refreshes++; });
+  try {
+    client.emitter.emit('gamelog', { start: 4, data: [] });
+    assert.equal(refreshes, 1, 'an unchanged log still refreshes the private prompt');
+    client.emitter.emit('state:updated');
+    assert.equal(refreshes, 2, 'same-player live updates also refresh on websocket notification');
+  } finally { client.destroy(); }
+});
+
 test('BGS lifecycle, chat acknowledgements, journal, and cleanup', async () => {
   const chat = new ChatController({ readDelayMs: 0 });
   let renders = 0;

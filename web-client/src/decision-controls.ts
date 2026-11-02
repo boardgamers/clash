@@ -72,9 +72,18 @@ export function toggleDecisionSelection(decision: Decision, selected: number[], 
   return selected.length < decision.max ? [...selected, index] : selected;
 }
 
+/** Calendar may have an uncommitted prompt without an action-log entry. */
+export function calendarDecision(game: Game | null): boolean {
+  const type = game?.events?.at(-1)?.event_type;
+  if (!type || typeof type !== 'object') return false;
+  const custom = type.CustomAction;
+  return !!custom && typeof custom === 'object' && 'action' in custom && custom.action === 'Calendar';
+}
+
 /** Cancel an initial ability prompt or refund a pending government-change payment. */
 export function canCancelAbility(game: Game | null, view: View | null): boolean {
   if (!game || !view?.decision || !view.canUndo) return false;
+  if (calendarDecision(game)) return true;
   const governmentChoice = view.decision.options.some((option) =>
     option.value && typeof option.value === 'object' && 'new_government' in option.value);
   if (governmentChoice) return true; // Undo refunds the optional government-change payment.

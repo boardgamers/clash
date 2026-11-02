@@ -5238,5 +5238,11 @@
   "Civil effect": "Hiệu ứng dân sự",
   "Keep on top": "Giữ trên cùng chồng bài",
   "Put at the bottom": "Đặt xuống dưới cùng chồng bài",
-  "Preview only. This event has not been triggered.": "Chỉ là xem trước. Sự kiện này chưa được kích hoạt."
+  "Preview only. This event has not been triggered.": "Chỉ là xem trước. Sự kiện này chưa được kích hoạt.",
+  "Invalid Calendar preview": "Xem trước Lịch không hợp lệ",
+  "Invalid Calendar payment": "Thanh toán cho Lịch không hợp lệ",
+  "Calendar is waiting for a response": "Lịch đang chờ phản hồi",
+  "Alternative research available": "Có cách nghiên cứu khác",
+  "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Dùng một lá bài hoặc khả năng bên dưới thay cho nghiên cứu thông thường. Chi phí và hiệu ứng riêng của nó vẫn áp dụng.",
+  "No research resource cost": "Nghiên cứu không tốn tài nguyên"
 }

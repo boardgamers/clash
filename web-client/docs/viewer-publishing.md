@@ -776,3 +776,32 @@ no game rules or deployed engine update is required. Regression coverage include
 private previews, free/paid keep-bury responses, zero-culture cases, public/free
 Great Persons, and desktop/mobile browser checks in English and French. Retain
 French objective/retry and Chinese locale-switching browser regressions too.
+
+## Viewer 0.1.193 / engine 0.4.128
+
+Calendar look-only previews are bounded live updates. Opening, keeping the top
+card, or cancelling with Undo adds no committed actions, journal entries, board
+frames or clock credits. Preview requests remain owner-only, and speculative
+empty-deck shuffles leave the authoritative deck and RNG unchanged. Looking seals
+prior committed undo history; cancelling only closes the preview. A paid burial
+commits the existing start/payment action pair, preserving payment Undo/Redo
+until another reveal. Saved previews, legacy recorded prompts, private queues
+and current-state replay retain their respective history and privacy boundaries.
+
+Research now advertises legal card and leader alternatives for each advance,
+including Great Scientist, Merchant and Warlord, the other direct research Great
+Persons, research action cards, and applicable leader abilities. Explicit source
+buttons use the existing card/ability flow and show action/token costs separately
+from research resource costs. Ordinary research stays a separate deliberate
+purchase; selecting an advance never automatically spends a source. Availability,
+prerequisites, ownership, Shogunate limits and private hands are respected, and
+existing free-advance decisions do not show redundant alternatives. Aqueduct and
+Synergies retain their dedicated explanations.
+
+Publish the matching engine and viewer together. All 17 catalogs include the
+new wording. Regression checks cover repeated look/cancel cycles, payment
+Undo/Redo, replay and privacy, prediction safety, empty-log state refreshes,
+research-source eligibility and explicit purchases, plus English/French desktop
+and mobile browser flows. Existing Great Person localization, Synergies/Aqueduct,
+French objective/retry and Chinese locale-switching browser checks are retained.
+No live game moves or historical game-state repairs are part of this release.
