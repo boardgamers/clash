@@ -100,3 +100,48 @@ test('ordinary construction still spends one action, resources and a city activa
   assert.deepEqual(game.players[0].resources, { food: 2, wood: 2, ore: 2 });
   assert.equal(game.players[0].cities.find((c: any) => c.position === 'C2').mood_state, 'Angry');
 });
+
+for (const [civilization, architecture] of [['Greece', false], ['Egypt', false], ['Egypt', true]] as const) {
+  for (const used of [false, true]) {
+    for (const card of [17, 18]) {
+      test(`${civilization} City Development ${card} Temple: State Religion ${used ? 'used' : 'unused'}, Architecture ${architecture}`, () => {
+        let game = fixture('action_cards/city_development');
+        const player = game.players[0];
+        player.civilization = civilization;
+        player.advances = ['Farming', 'Mining', 'Myths', 'StateReligion', 'Dogma'];
+        if (architecture) player.advances.push('Engineering');
+        player.action_cards = [card];
+        player.incident_tokens = 3;
+        player.event_info = used ? { StateReligion: 'used' } : {};
+        const actionsBeforeCard = game.actions_left;
+        game = move(game, { Playing: { ActionCard: card } });
+        game = move(game, { Response: { Payment: [{ culture_tokens: 1 }] } });
+        const building = offer(game, 'C1', 'Temple');
+        assert.equal(building.source, 'City Development');
+        assert.equal(building.free, true);
+        assert.equal(building.activateCity, true);
+        assert.equal(building.reason, null);
+        assert.deepEqual(building.payment, {});
+        assert.ok(building.choices.length > 0, 'The free Temple must have an executable choice');
+        const before = { ...game.players[0].resources };
+        game = move(game, building.choices[0].action);
+        assert.deepEqual(game.players[0].resources ?? {}, before);
+        assert.equal(game.actions_left, actionsBeforeCard - 1);
+        assert.equal(game.players[0].cities.find((c: any) => c.position === 'C1').activations, 1);
+        assert.equal(game.players[0].event_info?.StateReligion === 'used', used);
+        assert.ok(!JSON.stringify(game.log).includes('Reduce the food cost to 0'));
+        // Free construction still grants both the Temple reward and Dogma advance.
+        game = move(game, { Response: { ResourceReward: { mood_tokens: 1 } } });
+        game = move(game, { Response: { SelectAdvance: 'Devotion' } });
+        assert.ok(game.players[0].advances.includes('Devotion'));
+        game.players[0].resources = { food: 3, wood: 3, ore: 3 };
+        const nextTemple = offer(game, 'B2', 'Temple');
+        assert.equal(nextTemple.source, null);
+        assert.equal(nextTemple.reason, null);
+        assert.deepEqual(nextTemple.payment, used ? { food: 1, wood: 1, ore: 1 } : { wood: 1, ore: 1 });
+        game = move(game, nextTemple.choices[0].action);
+        assert.equal(game.players[0].event_info.StateReligion, 'used');
+      });
+    }
+  }
+}

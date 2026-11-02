@@ -118,7 +118,10 @@ fn state_religion() -> AdvanceBuilder {
         |event| &mut event.building_cost,
         0,
         |i, &b, _, p| {
-            if matches!(b, Temple) {
+            // Free construction (such as City Development, applied at priority 1)
+            // has no food to waive. A mandatory food conversion would make its
+            // empty cost unpayable and incorrectly consume the once-per-turn use.
+            if matches!(b, Temple) && i.cost.default.food > 0 {
                 once_per_turn_ability(
                     p,
                     i,

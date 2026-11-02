@@ -688,3 +688,12 @@ Verified 913 frontend tests, 199 targeted Rust tests, locale and type checks,
 engine protocol/timing checks, wonder-payment benchmarks, and desktop/mobile
 tactics browser checks. Broader Rust suites retain unrelated influence-log and
 Great Gardens error-text snapshot mismatches; those fixtures were not changed.
+
+## Viewer 0.1.187 / engine 0.4.126
+
+Fix City Development's free Temple construction when State Religion is available.
+Only apply State Religion when the building cost contains food to waive; free
+Temples neither require an impossible food discount nor consume its once-per-turn
+use. Preserve normal construction, Great Engineer, Architecture substitutions,
+Temple rewards and Dogma follow-ups. Regression coverage includes both card copies,
+Egypt/Greece, and used/unused State Religion. Publish the matching engine and viewer.
