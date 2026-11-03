@@ -125,6 +125,7 @@
                 />{:else}<small>In range</small>{/if}
               {#if from.position === target.position}<span class="source-boost-warning" aria-label="Same hex: cannot boost the roll"><TriangleAlert size={15} /></span>{/if}
               {#if from.reroll}<RotateCcw size={14} />{/if}
+              {#each from.successRewards ?? [] as reward}<span class="source-success-reward" title={reward.name}>+<ResourceAmount pile={reward.resources} compact /></span>{/each}
             </button>{/each}
         </div>{/if}
       {#if !paymentStep}
@@ -176,6 +177,7 @@
           ? 'Protected target · No range or roll boost'
           : 'Boost after rolling · 1 culture per +1.'}</span>
         {#if origin?.reroll}<span>Buddhism · One optional reroll</span>{/if}
+        {#each origin?.successRewards ?? [] as reward}<span class="source-success-reward">{reward.name} · +<ResourceAmount pile={reward.resources} compact /></span>{/each}
       </div>
       <div class="influence-methods" aria-label="Influence payment method">
         {#each methods as method}
@@ -196,6 +198,7 @@
 
 <style>
   .source-boost-warning { display: inline-flex; color: var(--gold, #b79351); }
+  .source-success-reward { display: inline-flex; align-items: center; gap: 0.2rem; }
   .influence-picker { min-height: 0; overflow-y: auto; }
   .influence-submit { flex-shrink: 0; padding-top: 0.4rem; border-top: 1px solid var(--line); }
   .movement-heading { flex-shrink: 0; }
@@ -206,7 +209,7 @@
   .route-choice strong { font-size: 14px; }
   .route-target { flex: 1; min-width: 0; }
   .influence-methods { display: flex; gap: 0.5rem; margin: 0; }
-  .influence-methods button { flex: 1; flex-direction: column; align-items: stretch; gap: 0.3rem; }
+  .influence-methods button { flex: 1; height: auto; flex-direction: column; align-items: stretch; gap: 0.3rem; }
   .influence-action-cost { display: inline-flex; align-items: center; gap: 0.2rem; color: inherit; font-size: inherit; line-height: 1; }
   .method-title { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
   .influence-methods small { font-size: 11px; color: inherit; }

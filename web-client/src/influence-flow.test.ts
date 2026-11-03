@@ -169,6 +169,57 @@ test('destination selection defers Arts versus regular influence and defaults to
 });
 
 
+test('equal-cost influence defaults prefer Buddhism without overriding price, action cost or explicit sources', () => {
+  const g = influenceFixture(), p = g.players[0];
+  p.civilization = 'India';
+  p.advances.push('Myths', 'StateReligion', 'Dogma', 'Conversion', 'Arts');
+  p.cities[0].city_pieces = { temple: 0 };
+  p.cities.push({ position: 'C2', mood_state: 'Happy', city_pieces: { temple: 0 } });
+  p.units = [{ id: 0, position: 'C2', unit_type: { Leader: 'Ashoka' } }];
+  p.next_unit_id = 1;
+  g.players[1].cities[0].city_pieces = { market: 1 };
+  g.dice_roll_outcomes = [10, 2]; // raw 2 + Conversion, then raw 6
+  const v = view(g);
+  const targets = v.influence!.filter(o => o.position === 'C1' && o.name === 'Market');
+  assert.ok(targets.some(o => o.variant === 'Arts'));
+  for (const target of targets) {
+    const ordinary = target.origins!.find(o => o.position === 'A1')!;
+    const ashoka = target.origins!.find(o => o.position === 'C2')!;
+    assert.equal(ordinary.reroll, false);
+    assert.equal(ashoka.reroll, true);
+    assert.deepEqual(ordinary.payment, ashoka.payment);
+    assert.equal(bestInfluenceOrigin(target)?.position, 'C2');
+    assert.equal(bestInfluenceOrigin({ ...target, origins: [ashoka, ordinary] })?.position, 'C2');
+    assert.equal(bestInfluenceOrigin({ ...target, origins: [ordinary, { ...ashoka, payment: { culture_tokens: 1 } }] })?.position, 'A1', 'do not spend extra for the reroll automatically');
+    assert.equal(bestInfluenceOrigin({ ...target, origins: [{ ...ordinary, free: true }, { ...ashoka, free: false }] })?.position, 'A1', 'do not spend an extra action for the reroll automatically');
+    assert.equal(bestInfluenceOrigin({ ...target, origins: [ordinary, { ...ashoka, reroll: false }] })?.position, 'A1', 'preserve stable ordering without an available reroll');
+    const selection = { view: v, mode: 'overview', abilitiesOpen: true, influenceMode: true, influenceTarget: influenceKey(target) } as Session;
+    assert.equal(activeInfluence(selection)?.source, 'C2');
+    assert.equal(activeInfluence({ ...selection, influenceOrigin: 'A1' })?.source, 'A1', 'explicit non-reroll choices are respected');
+
+    for (const origin of [ordinary, ashoka]) {
+      let state = move(g, origin.action);
+      if (view(state).influenceContext?.stage === 'payment') state = move(state, { Response: { Payment: [origin.actionPayment] } });
+      if (view(state).influenceContext?.stage === 'range') state = move(state, { Response: { Payment: [origin.payment] } });
+      assert.equal(view(state).influenceContext?.source, origin.position);
+      assert.equal(view(state).influenceContext?.roll, 3);
+      assert.equal(view(state).influenceContext?.stage, origin.reroll ? 'reroll' : 'boost');
+      if (origin.reroll) {
+        assert.ok(view(state).choiceDecision?.choices.some(c => c.name === 'Reroll with Buddhism'));
+        const rerolled = move(state, { Response: { Bool: true } });
+        assert.ok(rerolled.successful_cultural_influence);
+        assert.equal(rerolled.players[0].event_info.Buddhism, 'used');
+      } else {
+        assert.equal(view(state).decision!.fields[0].cost.culture_tokens, 2);
+      }
+    }
+  }
+  p.event_info = { Buddhism: 'used' };
+  const used = view(g).influence!.find(o => o.position === 'C1' && o.name === 'Market')!;
+  assert.ok(used.origins!.every(o => !o.reroll));
+  assert.equal(bestInfluenceOrigin(used)?.position, 'A1');
+});
+
 test('reclaiming influence allows another city and boosting, but self-targeting cannot boost', () => {
   const g = influenceFixture();
   const reclaimedCity = g.players[1].cities.shift();

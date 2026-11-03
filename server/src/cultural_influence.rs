@@ -592,15 +592,35 @@ fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceC
     influence_success(game, influencer_index, info);
 }
 
-fn influence_success(game: &mut Game, influencer_index: usize, info: &InfluenceCultureAttemptInfo) {
+/// Rewards that depend on the selected source, not on the target or the roll.
+/// Shared by successful resolution and the read-only source preview; universal
+/// success rewards such as Conversion remain in their resolve listeners.
+pub(crate) fn source_success_rewards(
+    game: &Game,
+    player: usize,
+    starting_position: Position,
+) -> Vec<(EventOrigin, ResourcePile)> {
     if crate::content::civilizations::phoenicia::leader_at(
-        game.player(influencer_index),
+        game.player(player),
         crate::leader::Leader::Darius,
-        info.starting_city_position,
+        starting_position,
     ) {
+        vec![(
+            EventOrigin::LeaderAbility("Cultural Unity".into()),
+            ResourcePile::mood_tokens(1),
+        )]
+    } else {
+        vec![]
+    }
+}
+
+fn influence_success(game: &mut Game, influencer_index: usize, info: &InfluenceCultureAttemptInfo) {
+    for (origin, resources) in
+        source_success_rewards(game, influencer_index, info.starting_city_position)
+    {
         info.player(influencer_index)
-            .with_origin(EventOrigin::LeaderAbility("Cultural Unity".into()))
-            .gain_resources(game, ResourcePile::mood_tokens(1));
+            .with_origin(origin)
+            .gain_resources(game, resources);
     }
     let city_position = info.position;
     game.trigger_transient_event_with_game_value(

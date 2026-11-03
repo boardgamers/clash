@@ -328,6 +328,8 @@ export interface View {
       actionPayment?: Pile;
       rollBonus?: number;
       preventBoost?: boolean;
+      /** Source-dependent rewards only; common success effects do not distinguish origins. */
+      successRewards?: { name: string; resources: Pile }[];
     }[];
     free?: boolean;
     actionPayment?: Pile;

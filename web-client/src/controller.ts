@@ -3,7 +3,7 @@ import { liveActionMessages } from './live-actions';
 import { eventNotices, liveEventNotices } from './event-notices';
 import { publicActions } from './replay-actions';
 import { boardingPlan, type BoardingGroup } from './boarding';
-import { activeInfluence, influenceKey, influenceDestinations, influenceMapPick, influencePaymentMatches } from './influence';
+import { activeInfluence, influenceKey, influenceDestinationKey, influenceDestinations, influenceMapPick, influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
 import { nextCollectionSelection } from './collection-yield';
 import { get, writable } from 'svelte/store';
@@ -1108,14 +1108,14 @@ export class Controller {
     const influence = activeInfluence(s);
     if (influence) {
       const offer = influenceMapPick(influence.offers, position, influence.position === position ? pick : { kind: 'tile' });
-      if (influence.targets.includes(position))
-        this.patch({
-          influencePosition: position,
-          influenceTarget: offer ? influenceKey(offer) : null,
-          influenceOrigin: null,
-          error: '',
-        });
-      else if (influence.origins.includes(position)) this.patch({ influenceOrigin: position, error: '' });
+      if (influence.targets.includes(position)) {
+        if (offer) this.selectInfluenceTarget(influenceKey(offer));
+        else if (influence.target?.position !== position) {
+          // Open a new ambiguous hex, but do not discard an already selected
+          // building/source just because its own hex was clicked again.
+          this.patch({ influencePosition: position, influenceTarget: null, influenceOrigin: null, error: '' });
+        }
+      } else if (influence.origins.includes(position)) this.patch({ influenceOrigin: position, error: '' });
       return;
     }
     const ability = activeCityAbility(s);
@@ -1236,10 +1236,14 @@ export class Controller {
   selectInfluenceTarget(key: string | null) {
     const s = get(this.session);
     const offer = s.view?.influence?.find((o) => influenceKey(o) === key);
+    const previous = s.view?.influence?.find((o) => influenceKey(o) === s.influenceTarget);
+    const keepSource = offer && previous &&
+      influenceDestinationKey(offer) === influenceDestinationKey(previous) &&
+      offer.origins?.some((o) => o.position === s.influenceOrigin);
     this.patch({
       influenceTarget: offer ? key : null,
       influencePosition: offer?.position ?? s.influencePosition ?? null,
-      influenceOrigin: null,
+      influenceOrigin: keepSource ? s.influenceOrigin : null,
       error: '',
     });
   }

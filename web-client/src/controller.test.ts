@@ -13,6 +13,7 @@ import { requiredRecruitDiscards } from './recruit-discards.ts';
 import { happinessPreview, happinessCities } from './happiness.ts';
 import { frameDetails } from './playback.ts';
 import { frameResources } from './resource-playback.ts';
+import { activeInfluence, influenceKey } from './influence.ts';
 
 const engine = createRequire(import.meta.url)('../.engine/server.js');
 // Bundle the actual controller so Node can run its browser TypeScript imports.
@@ -1088,6 +1089,67 @@ test('cultural influence opens a map mode where clicking the target building cho
     assert.equal(app.session().influenceTarget, null);
   } finally {
     app.close();
+  }
+});
+
+test('reselecting an influence target preserves the explicit legal source through map and list paths', async () => {
+  for (const multipleBuildings of [false, true]) {
+    const app = paymentController(), c = app.controller;
+    try {
+      const g = JSON.parse(fixture('base/cultural_influence_instant'));
+      g.current_player_index = 0;
+      const p = g.players[0];
+      p.civilization = 'India';
+      p.advances.push('Myths', 'StateReligion', 'Dogma', 'Conversion', 'Arts');
+      p.cities = ['A1', 'C2'].map(position => ({ position, mood_state: 'Happy', city_pieces: { temple: 0 } }));
+      p.units = [{ id: 0, position: 'C2', unit_type: { Leader: 'Ashoka' } }];
+      p.next_unit_id = 1;
+      g.players[1].cities[0].city_pieces = multipleBuildings ? { market: 1, academy: 1 } : { market: 1 };
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(JSON.stringify(g), 0));
+      c.chooseInfluence();
+      c.selectTile('C1', { kind: 'tile' });
+      const targets = app.session().view!.influence!;
+      const market = targets.find(o => o.name === 'Market')!;
+      const arts = targets.find(o => o.name === 'Market' && o.variant === 'Arts')!;
+      if (multipleBuildings) {
+        assert.equal(app.session().influenceTarget, null, 'a new ambiguous hex still asks for a building');
+        c.selectInfluenceTarget(influenceKey(market));
+      }
+      assert.equal(activeInfluence(app.session())?.source, 'C2');
+      for (const source of ['A1', 'C2']) {
+        c.selectInfluenceOrigin(source);
+        c.selectInfluenceTarget(influenceKey(market));
+        assert.equal(app.session().influenceOrigin, source, 'list reselection must respect both reroll and non-reroll sources');
+        c.selectTile('C1', { kind: 'city', player: 1, structure: 'Building:Market' });
+        assert.equal(app.session().influenceOrigin, source, 'same building on the map preserves the source');
+        c.selectTile('C1', { kind: 'tile' });
+        assert.equal(app.session().influenceOrigin, source, 'same hex preserves its already selected building and source');
+        assert.equal(app.session().influenceTarget, influenceKey(market));
+        c.selectInfluenceTarget(influenceKey(arts));
+        assert.equal(app.session().influenceOrigin, source, 'changing only the action method preserves a legal source');
+        c.selectTile('C1', { kind: 'city', player: 1, structure: 'Building:Market' });
+        assert.equal(activeInfluence(app.session())?.source, source);
+      }
+      if (multipleBuildings) {
+        c.selectTile('C1', { kind: 'city', player: 1, structure: 'Building:Academy' });
+        assert.equal(app.session().influenceOrigin, null, 'a different building resets the source');
+        assert.match(app.session().influenceTarget!, /Academy/);
+      }
+      c.selectInfluenceTarget(influenceKey(market));
+      c.selectInfluenceOrigin('C2');
+      const v = app.session().view!;
+      c.patch({ view: { ...v, influence: v.influence!.map(o => ({ ...o, origins: o.origins!.filter(from => from.position !== 'C2') })) } });
+      c.selectInfluenceTarget(influenceKey(market));
+      assert.equal(app.session().influenceOrigin, null, 'do not retain a source that is no longer eligible');
+      assert.equal(activeInfluence(app.session())?.source, 'A1');
+      c.selectInfluenceOrigin('A1');
+      c.selectInfluenceTarget(null);
+      assert.equal(app.session().influenceOrigin, null, 'clearing the target still clears the source');
+      assert.deepEqual(app.sent, [], 'source selection never submits a move');
+    } finally {
+      app.close();
+    }
   }
 });
 

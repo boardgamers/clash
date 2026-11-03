@@ -864,3 +864,36 @@ Repeated awards to the same player remain legal while they have capacity; normal
 waste remains possible only when all eligible opponents are full. The active
 player and NPC Barbarians/Pirates do not count as recipients. Fixed rewards for
 all players are unchanged.
+
+## Viewer 0.1.197 / engine 0.4.132: benefit-aware cultural-influence sources
+
+Reselecting the same influence destination—through the map or its building
+button—keeps an explicitly selected source while it remains eligible. Clicking
+an already selected target's hex no longer clears its building/source when the
+hex has multiple buildings. Changing the destination or losing source eligibility
+still resets the choice. Switching between Arts and ordinary influence for the
+same destination also preserves a valid source.
+
+At equal upfront resource and action cost, defaults compare the exact chance of
+success without paying for a roll boost (including roll bonuses and an available
+Buddhism reroll), then the option to boost, then source-dependent success rewards.
+Darius's city therefore wins otherwise equivalent attempts for Cultural Unity's
+extra mood token, including Arts and Zoroastrianism unit conversion. The source
+buttons and payment summary show that bonus. Payment buttons grow to fit wrapped
+labels and boost limits on narrow screens. Common rewards such as Conversion
+and Code of Laws do not distinguish sources. Mood tokens have no storage cap.
+
+The existing reclaim preference for another boostable city remains, even if it
+has a range fee; outside that existing exception the default does not buy extra
+range or spend an extra action for a potential benefit. Explicit choices always
+win, including a city without Ashoka or Darius. Equal outcomes retain stable
+ordering. Cheaper-source recommendations no longer suggest sacrificing success
+chances, boosting, or a source reward merely to save range cost.
+
+The engine supplies source-dependent success rewards through the same pure
+helper used to grant them, with no RNG inspection or state mutation. This changes
+preview metadata and selection, not influence rules, saved states or history.
+Regression coverage includes real Arts and unit conversions, Darius's exact
+position, moved/missing leaders, uncapped rewards, Ashoka plus Conversion and
+used rerolls, manual selections, map/list reselection, and English/French desktop
+and mobile browser flows. Publish the matching viewer and engine together.

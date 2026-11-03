@@ -36,6 +36,24 @@ type Attempt = {
 export const influenceKey = (offer: InfluenceOffer) => `${offer.position}/${offer.name}/${offer.variant}`;
 
 export const influenceDestinationKey = (offer: InfluenceOffer) => `${offer.position}/${offer.name}`;
+type InfluenceOrigin = NonNullable<InfluenceOffer['origins']>[number];
+
+// Fair d6, success at 5+. Compare exact numerators over 36, including an optional
+// reroll of a failed die. A reroll adds no benefit when success is already certain.
+export function influenceSuccessScore(origin: InfluenceOrigin) {
+  const successes = Math.max(0, Math.min(6, 2 + (origin.rollBonus ?? 0)));
+  return origin.reroll ? 12 * successes - successes * successes : 6 * successes;
+}
+const canBoost = (offer: InfluenceOffer, origin: InfluenceOrigin) =>
+  origin.position !== offer.position && !origin.preventBoost;
+const successReward = (origin: InfluenceOrigin) => (origin.successRewards ?? [])
+  .reduce<Pile>((total, reward) => influenceUpfrontCost(total, reward.resources), {});
+const rewardSize = (origin: InfluenceOrigin) =>
+  Object.values(successReward(origin)).reduce((sum, n) => sum + (n ?? 0), 0);
+const compareBenefits = (offer: InfluenceOffer, a: InfluenceOrigin, b: InfluenceOrigin) =>
+  influenceSuccessScore(b) - influenceSuccessScore(a) ||
+  Number(canBoost(offer, b)) - Number(canBoost(offer, a)) || rewardSize(b) - rewardSize(a);
+
 export function bestInfluenceOrigin(offer: InfluenceOffer) {
   const cost = (o: NonNullable<InfluenceOffer['origins']>[number]) =>
     Object.values(influenceUpfrontCost(o.actionPayment, o.payment)).reduce((sum, n) => sum + (n ?? 0), 0);
@@ -45,7 +63,9 @@ export function bestInfluenceOrigin(offer: InfluenceOffer) {
     ? origins.filter(o => o.position !== offer.position && !o.settlers && !o.preventBoost)
     : [];
   return [...(boostableCities.length ? boostableCities : origins)]
-    .sort((a, b) => cost(a) - cost(b) || Number(!!b.free) - Number(!!a.free))[0] ?? null;
+    // Improve otherwise equal-cost attempts without buying a benefit. The existing
+    // reclaim preference above is intentional; explicit choices bypass all defaults.
+    .sort((a, b) => cost(a) - cost(b) || Number(!!b.free) - Number(!!a.free) || compareBenefits(offer, a, b))[0] ?? null;
 }
 export function influenceDestinations(offers: InfluenceOffer[]) {
   return offers.filter((o, i) => offers.findIndex(other => influenceDestinationKey(other) === influenceDestinationKey(o)) === i);
@@ -112,6 +132,15 @@ export function activeInfluence(s: Session) {
   };
 }
 
+/** Recommend savings only when they do not give up source benefits. */
+function retainsInfluenceBenefits(offer: InfluenceOffer, candidate: InfluenceOrigin, selected: InfluenceOrigin) {
+  const kept = successReward(candidate);
+  return influenceSuccessScore(candidate) >= influenceSuccessScore(selected) &&
+    (!canBoost(offer, selected) || canBoost(offer, candidate)) &&
+    Object.entries(successReward(selected)).every(([resource, amount]) =>
+      (kept[resource as keyof Pile] ?? 0) >= (amount ?? 0));
+}
+
 /** Recommend only an eligible city for this same target and action variant. */
 export function cheaperInfluenceOrigin(
   offer: InfluenceOffer | null,
@@ -124,11 +153,12 @@ export function cheaperInfluenceOrigin(
       .filter(
         (from) =>
           !from.settlers &&
+          (!selected || retainsInfluenceBenefits(offer, from, selected)) &&
           // Self-targeting loses the ability to boost, so it is not an equivalent saving.
           !(from.position === offer.position && selected?.position !== offer.position && !selected?.preventBoost) &&
           from.position !== (selected?.position ?? offer.origin) &&
           (from.payment.culture_tokens ?? 0) < currentCost,
       )
-      .sort((a, b) => (a.payment.culture_tokens ?? 0) - (b.payment.culture_tokens ?? 0))[0] ?? null
+      .sort((a, b) => (a.payment.culture_tokens ?? 0) - (b.payment.culture_tokens ?? 0) || compareBenefits(offer, a, b))[0] ?? null
   );
 }

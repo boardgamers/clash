@@ -421,6 +421,13 @@ pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     }).collect()
 }
 
+fn influence_source_success_rewards(game: &Game, seat: usize, source: Position) -> Vec<Value> {
+    crate::cultural_influence::source_success_rewards(game, seat, source)
+        .into_iter()
+        .map(|(origin, resources)| json!({"name":origin.name(game),"resources":resources}))
+        .collect()
+}
+
 pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     use crate::cultural_influence::{
         InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
@@ -440,6 +447,7 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
                     attempt.starting_position = Some(origin);
                     Some(json!({"position":origin,"settlers":game.try_get_any_city(origin).is_none(),
                         "reroll":crate::content::civilizations::india::buddhism_available(game,seat,&from),
+                        "successRewards":influence_source_success_rewards(game,seat,from.starting_city_position),
                         "free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":from.roll_boost,"preventBoost":from.prevent_boost,"payment":from.range_boost_cost.default_payment(),
                         "action":Action::Playing(PlayingAction::InfluenceCultureAttempt(attempt))}))
                 }).collect::<Vec<_>>();
@@ -474,7 +482,9 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
                     let origins=influence_start_positions(game,game.player(seat)).into_iter().filter_map(|(pos,_)| {
                     let mut selected=attempt.clone();selected.starting_position=Some(pos);
                     let from=crate::cultural_influence::unit_influence_cost(game,seat,&selected,true).ok()?;
-                    Some(json!({"position":pos,"settlers":false,"reroll":false,"free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":from.roll_boost,"preventBoost":from.prevent_boost,"payment":from.range_boost_cost.default_payment(),"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(selected))}))
+                    Some(json!({"position":pos,"settlers":false,"reroll":false,
+                        "successRewards":influence_source_success_rewards(game,seat,from.starting_city_position),
+                        "free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":from.roll_boost,"preventBoost":from.prevent_boost,"payment":from.range_boost_cost.default_payment(),"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(selected))}))
                 }).collect::<Vec<_>>();
                     offers.push(json!({"name":format!("{} · {} #{}",owner.civilization.name,unit.unit_type.non_leader_name(),unit.id+1),"position":unit.position,"origin":info.starting_city_position,"variant":"Zoroastrianism","free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":info.roll_boost,"preventBoost":info.prevent_boost,"payment":info.range_boost_cost.default_payment(),"origins":origins,"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(attempt))}));
                 }
