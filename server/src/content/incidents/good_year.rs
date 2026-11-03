@@ -144,7 +144,16 @@ fn good_year(mut builder: IncidentBuilder, amount: u8, good_year_type: &GoodYear
             builder = builder.add_incident_player_request(
                 IncidentTarget::ActivePlayer,
                 "Select a player to gain 1 food",
-                |_, _, _| true,
+                |p, game, incident| {
+                    // Allocate each food where it can be kept. Re-evaluate on
+                    // every award; wasting it is legal only when unavoidable.
+                    p.resources.food < p.resource_limit.food
+                        || !game.players.iter().any(|other| {
+                            other.is_human()
+                                && other.index != incident.active_player
+                                && other.resources.food < other.resource_limit.food
+                        })
+                },
                 i as i32,
                 move |game, s, _| {
                     s.other_player(s.choice)

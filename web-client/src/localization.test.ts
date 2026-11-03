@@ -207,6 +207,46 @@ test('real catalogs translate current rules and optional caption variants in eve
   }
 });
 
+test('tactics requirement punctuation cannot fall through to broad sentence templates', () => {
+  const translator = createTranslator({ fr: {
+    'Requires your {p0} in the battle': 'Nécessite votre {p0} dans la bataille',
+    'Requires {p0}': 'Nécessite {p0}',
+    '{p0} battle': 'Bataille {p0}',
+    '{p0} card': 'Carte {p0}',
+    '{p0}. {p1}': '{p0}. {p1}',
+    'Attacking only': 'En attaque seulement',
+    'Defending only': 'En défense seulement',
+    Army: 'Armée', Fortress: 'Forteresse', Ship: 'Navire', City: 'Ville', or: 'ou',
+    'Roll a die. Draw 1 card.': 'Lancez un dé. Piochez 1 carte.',
+  } }, 'fr');
+  for (const fighters of ['Army', 'Fortress', 'Ship', 'Army or Ship', 'Army or Fortress']) {
+    const source = `Requires your ${fighters} in the battle`;
+    const translated = `Nécessite votre ${fighters.split(' ').map((part) => translator.translate(part)).join(' ')} dans la bataille`;
+    assert.equal(translator.translate(source), translated);
+    assert.equal(translator.translate(source + '.'), translated + '.');
+    assert.equal(
+      translator.translate(`${source}. Roll a die. Draw 1 card.`),
+      `${translated}. Lancez un dé. Piochez 1 carte.`,
+    );
+    assert.equal(
+      translator.translate(` Attacking only · City battle · ${source}. Roll a die. Draw 1 card.\n`),
+      ` En attaque seulement · Bataille Ville · ${translated}. Lancez un dé. Piochez 1 carte.\n`,
+    );
+  }
+  assert.equal(
+    translator.translate('Defending only · City battle. Roll a die. Draw 1 card.'),
+    'En défense seulement · Bataille Ville. Lancez un dé. Piochez 1 carte.',
+  );
+  // Do not generalize this into splitting arbitrary prose at periods. Existing
+  // authored-key coverage guards must still expose missing sentences intact.
+  const unknown = 'An entirely new rule appears here. Army';
+  assert.equal(translator.translate(unknown), unknown);
+  translator.setNames(['Requires your Army in the battle.']);
+  assert.equal(translator.translate('Requires your Army in the battle.'), 'Requires your Army in the battle.');
+  translator.setLocale('en');
+  assert.equal(translator.translate('Requires your Army in the battle.'), 'Requires your Army in the battle.');
+});
+
 test('ambiguous adjacent parameters are not guessed, and nested caches do not poison later translations', () => {
   const t = createTranslator({ fr: {
     'Build {p0}{p1}': 'incorrect {p0}{p1}',

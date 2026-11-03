@@ -175,6 +175,9 @@ export function predictUndo(previous: string, current: string): string | null {
   delete undone.combat_stats;
   delete undone.undo;
   before.log = log;
+  // Calendar may let the triggering action be undone while sealing everything
+  // before it, as if the owner had peeked first. Knowledge is not rewound.
+  before.undo_limit = Math.max(before.undo_limit ?? 0, after.undo_limit ?? 0);
   // Playback history is outside the undo patch: Undo only trims later frames.
   if (after.board_history) {
     const cursor = logLength(after) - 1;

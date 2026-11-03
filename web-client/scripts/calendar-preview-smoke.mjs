@@ -142,9 +142,52 @@ try {
       await emit(merchant, 1 - seat);
       await preview.waitFor({ state: 'detached' });
       assert.equal(await page.locator('.decision-panel').count(), 0, 'opponent cannot see or act on this preview');
+
+      // The real Undo control must navigate a Calendar-known incident, not just
+      // close a look-only prompt. It must not offer a second undo past the peek.
+      const data = JSON.parse(setup);
+      const owner = data.players[seat];
+      owner.advances = [...new Set([...owner.advances, 'Math', 'Astronomy'])];
+      owner.resources.food = 7;
+      owner.incident_tokens = 1;
+      data.incidents_left = [29, 30]; // Vulcan: no effect with one city.
+      for (const player of data.players) player.objective_cards = [];
+      const wedge = view(setup).cardCatalog.find(card => card.tactics?.name === 'Wedge Formation');
+      owner.action_cards = [wedge.id];
+      const beforeIncident = JSON.stringify(data);
+      await emit(beforeIncident);
+      const triggered = move(beforeIncident, { Playing: { Advance: { advance: 'Storage', payment: { food: 2 } } } });
+      await emit(triggered);
+      await page.getByRole('button', { name: t('Dismiss event explanation'), exact: true }).click();
+      const undo = page.locator('[data-tutorial="undo"]');
+      await undo.waitFor();
+      assert.ok(await undo.isEnabled());
+      await undo.click();
+      await page.waitForFunction(() => sent.length === 1);
+      assert.equal(JSON.parse(await page.evaluate(() => sent[0])), 'Undo');
+      const undoneIncident = move(triggered, 'Undo');
+      assert.equal(view(undoneIncident, seat).canUndo, false);
+      assert.deepEqual(engine.timeIncrements(undoneIncident), engine.timeIncrements(beforeIncident));
+      await emit(undoneIncident);
+      await undo.click();
+      await page.locator('.undo-options button').waitFor();
+      assert.deepEqual(await page.evaluate(() => sent), [], 'the second click opens Redo, not another Undo');
+      await page.locator('.undo-options button').click();
+      await page.waitForFunction(() => sent.length === 1);
+      assert.equal(JSON.parse(await page.evaluate(() => sent[0])), 'Redo');
+      await emit(move(undoneIncident, 'Redo'));
+
+      // This is the same ResourceText path that displayed mixed French/English.
+      await page.locator('[data-tutorial="cards"]').click();
+      const battleRule = page.locator('.cards-dialog .card-battle-use p');
+      await battleRule.waitFor();
+      assert.equal((await battleRule.innerText()).trim(), locale === 'fr'
+        ? "En attaque seulement · Nécessite votre Armée dans la bataille. Recevez 1 en valeur de combat pour chaque unité d'armée en défense"
+        : wedge.tactics.description);
+      await page.screenshot({ path: `/tmp/clash-wedge-${locale}-${width}.png` });
       assert.deepEqual(errors, []);
       await page.close();
-      console.log(`${locale} ${width}: Great Person sections, localized acquisition, top/bottom, no-culture, public card and privacy passed.`);
+      console.log(`${locale} ${width}: Calendar preview/privacy, incident Undo/Redo and complete tactics translation passed.`);
     }
   }
 } finally { await browser.close(); }

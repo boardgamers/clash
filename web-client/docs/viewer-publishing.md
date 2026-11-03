@@ -836,3 +836,31 @@ player still requires the existing Confirm step. Regression coverage includes
 both Spy copies, three- and four-player games, redaction and spectator privacy,
 public-card exclusions, and English/French desktop and mobile layouts. Publish
 the matching engine and viewer together; rules and game history are unchanged.
+
+## Viewer 0.1.196 / engine 0.4.131: Calendar incident undo, event food distribution and tactics localization
+
+An existing Calendar lets its owner undo an action that draws the current top
+event during their turn, without requiring an explicit preview first. Their own
+incident choices remain undoable until control passes to another player or a
+new hidden-information boundary is crossed. Dice, other card draws, replacement
+events and empty-deck reshuffles still seal undo. The implicit preview seals
+older actions, so undoing the trigger cannot also refund Astronomy or a prior
+paid burial. Acquiring Calendar in the triggering research does not qualify,
+including an incident deferred through Great Mausoleum. Undo prediction keeps
+this knowledge boundary; undo/redo cannot farm clock credits.
+
+Tactics restrictions are now translated separately from the complete card effect,
+using the engine's bounded restriction grammar. This prevents broad translation
+templates from corrupting phrases such as “Requires your Army in the battle”
+when punctuation and an effect follow them. Existing catalog translations and
+resource icons are preserved, including Army-or-Ship alternatives. Regression
+coverage checks all 16 tactics descriptions across all 17 catalogs, plus the
+built English/French desktop and mobile viewer.
+
+Food distributed to other players by A good year, An awesome year and A fantastic
+year must go to a recipient with room whenever possible. Eligibility is checked
+again after each individual food award, using that player's actual food limit.
+Repeated awards to the same player remain legal while they have capacity; normal
+waste remains possible only when all eligible opponents are full. The active
+player and NPC Barbarians/Pirates do not count as recipients. Fixed rewards for
+all players are unchanged.

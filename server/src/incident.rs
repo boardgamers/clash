@@ -728,40 +728,89 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     }
 }
 
+/// Snapshot only knowledge available before the action, not Calendar newly
+/// unlocked by that action. A later/replacement incident is not the top card
+/// the player could have inspected before starting the current incident.
+pub(crate) fn calendar_undo_candidate(game: &Game, player: usize) -> Option<u8> {
+    if game.state != crate::game::GameState::Playing
+        || player != game.current_player_index
+        || !game
+            .player(player)
+            .has_special_advance(SpecialAdvance::Calendar)
+        || game.events.iter().any(|event| match &event.event_type {
+            PersistentEventType::Incident(_) => true,
+            // A wonder may defer the draw to a response whose immediate origin
+            // is the wonder, but Calendar was still acquired by this incident's
+            // triggering research and could not preview it beforehand.
+            PersistentEventType::ChooseIncident(info) => {
+                info.cause == EventOrigin::Advance(Advance::Astronomy)
+            }
+            PersistentEventType::Advance(info) => info.advance == Advance::Astronomy,
+            _ => false,
+        })
+    {
+        return None;
+    }
+    // Replenishment is a new random draw, not an already available top card.
+    game.incidents_left.first().copied()
+}
+
 pub(crate) fn draw_and_discard_incident_card_from_pile(
     game: &mut Game,
     player: &EventPlayer,
 ) -> u8 {
-    let id = draw_card_from_pile(
-        game,
-        player,
-        "Events",
-        |g| &mut g.incidents_left,
-        |g| {
-            g.cache
-                .get_incidents()
-                .iter()
-                .filter(|i| {
-                    !g.action_cards_discarded
-                        .contains(&(i.id + GREAT_PERSON_OFFSET))
-                })
-                .map(|i| i.id)
-                .collect_vec()
-        },
-        |p| {
-            p.action_cards
-                .iter()
-                .filter_map(|a| {
-                    if *a >= GREAT_PERSON_OFFSET {
-                        Some(a - GREAT_PERSON_OFFSET)
-                    } else {
-                        None
-                    }
-                })
-                .collect()
-        },
-    )
-    .expect("incident should exist");
+    let calendar_known = game.calendar_incident_undo.is_some()
+        && game.calendar_incident_undo.as_ref() == game.incidents_left.first()
+        && player.index == game.current_player_index
+        // Astronomy can leave a ChooseIncident prompt before drawing, so the
+        // action-start ownership check alone is not enough in that case.
+        && player.origin != EventOrigin::Advance(Advance::Astronomy);
+    let id = if calendar_known {
+        game.calendar_incident_undo = None;
+        // This is equivalent to peeking immediately before the triggering
+        // action, never to erasing a lock from dice, another card or a player.
+        let floor = game.log_index.saturating_sub(1);
+        game.undo_limit = game.undo_limit.max(floor);
+        for action in crate::log::current_turn_log_mut(game)
+            .actions
+            .iter_mut()
+            .take(floor)
+        {
+            action.undo.clear();
+        }
+        game.incidents_left.remove(0)
+    } else {
+        draw_card_from_pile(
+            game,
+            player,
+            "Events",
+            |g| &mut g.incidents_left,
+            |g| {
+                g.cache
+                    .get_incidents()
+                    .iter()
+                    .filter(|i| {
+                        !g.action_cards_discarded
+                            .contains(&(i.id + GREAT_PERSON_OFFSET))
+                    })
+                    .map(|i| i.id)
+                    .collect_vec()
+            },
+            |p| {
+                p.action_cards
+                    .iter()
+                    .filter_map(|a| {
+                        if *a >= GREAT_PERSON_OFFSET {
+                            Some(a - GREAT_PERSON_OFFSET)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
+        )
+        .expect("incident should exist")
+    };
 
     discard_card(|g| &mut g.incidents_discarded, id, player.index, game);
     id

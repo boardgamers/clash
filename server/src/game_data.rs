@@ -147,6 +147,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         board_history: data.board_history,
         time_increments: data.time_increments,
         timing_revealed: false,
+        calendar_incident_undo: None,
         log_index: data.log_index,
         undo_limit: data.undo_limit,
         round: data.round,

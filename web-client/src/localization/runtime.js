@@ -39,6 +39,16 @@ export function resolveLocale(value) {
 
 const normalize = (text) => text.replace(/\s+/g, ' ').trim();
 
+// TacticsCardBuilder::build in server/src/tactics_card.rs composes these
+// restrictions, then appends ". " and the complete (possibly multi-sentence)
+// effect. Keep that boundary explicit: broad historical templates such as
+// "Requires {p0}" and "{p0} battle" must not consume the effect or its grammar.
+const tacticsFighters = '(?:Army|Fortress|Ship)(?: or (?:Army|Fortress|Ship))*';
+const tacticsFighterRequirement = new RegExp(`^Requires your (${tacticsFighters}) in the battle$`);
+const tacticsRequirement = new RegExp(
+  `^(?:(?:Attacking|Defending) only|(?:City|Sea|Land) battle|Requires your ${tacticsFighters} in the battle)$`,
+);
+
 export function createTranslator(catalogs, initialLocale = 'en') {
   let locale = resolveLocale(initialLocale);
   let names = new Set();
@@ -75,6 +85,24 @@ export function createTranslator(catalogs, initialLocale = 'en') {
     }
     if (translated === undefined && depth === 0 && cache.has(text)) {
       translated = cache.get(text);
+    }
+    if (translated === undefined && depth < 6) {
+      const boundary = text.indexOf('.');
+      if (boundary >= 0 && (boundary === text.length - 1 || text[boundary + 1] === ' ')) {
+        const requirements = text.slice(0, boundary).split(' · ');
+        if (requirements.every((part) => tacticsRequirement.test(part))) {
+          translated = requirements.map((part) => translate(part, depth + 1)).join(' · ') + '.';
+          if (boundary < text.length - 1) translated += ' ' + translate(text.slice(boundary + 2), depth + 1);
+        }
+      }
+      // Fighter alternatives are a rules list, not arbitrary prose to guess at.
+      // In particular Martyr requires an Army OR a Ship, not both.
+      const fighters = tacticsFighterRequirement.exec(text);
+      const requirement = catalog['Requires your {p0} in the battle'];
+      if (translated === undefined && fighters && requirement !== undefined) {
+        const labels = fighters[1].split(' or ').map((part) => translate(part, depth + 1));
+        translated = requirement.replace('{p0}', () => labels.join(` ${translate('or', depth + 1)} `));
+      }
     }
     // Tutorial headings contain a progress prefix. Translate the complete title
     // before broad patterns such as "{p0} {p1} to {p2}" can split its grammar.

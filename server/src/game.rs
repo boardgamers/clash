@@ -151,6 +151,8 @@ pub struct Game {
     pub(crate) time_increments: Vec<u64>,
     /// Transient signal for one saved atomic action, not a persisted undo cursor.
     pub(crate) timing_revealed: bool,
+    /// One top incident Calendar could inspect before this atomic action; never saved.
+    pub(crate) calendar_incident_undo: Option<u8>,
     // index for the next action log
     pub log_index: usize,
     pub undo_limit: usize,

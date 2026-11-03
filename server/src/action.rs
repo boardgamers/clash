@@ -133,9 +133,17 @@ pub fn try_execute_action(
     }
 
     let add_undo = !matches!(&action, Action::Undo);
-    let old = to_serde_value(&game);
+    let calendar_incident = crate::incident::calendar_undo_candidate(&game, player_index);
+    game.calendar_incident_undo = calendar_incident;
+    let mut old = to_serde_value(&game);
     let old_player = game.active_player();
     execute_without_undo(&mut game, action, player_index)?;
+    if game.calendar_incident_undo.take().is_none() && calendar_incident.is_some() {
+        // Treat this reveal like a free Calendar look just before the action.
+        // Keep that knowledge boundary when applying the undo patch: otherwise
+        // Undo could also refund Astronomy or a previous paid burial.
+        old["undo_limit"] = old["log_index"].clone();
+    }
     let new = to_serde_value(&game);
     let new_player = game.active_player();
     let patch = json_patch::diff(&new, &old);
