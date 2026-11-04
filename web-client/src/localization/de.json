@@ -5244,5 +5244,7 @@
   "Calendar is waiting for a response": "Kalender wartet auf eine Antwort",
   "Alternative research available": "Andere Forschungsmöglichkeit verfügbar",
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Nutze eine der folgenden Karten oder Fähigkeiten statt der normalen Forschung. Ihre eigenen Kosten und Effekte gelten weiterhin.",
-  "No research resource cost": "Keine Ressourcenkosten für die Forschung"
+  "No research resource cost": "Keine Ressourcenkosten für die Forschung",
+  "Required for {p0}": "Erforderlich für {p0}",
+  "Wonder in your hand": "Wunder auf deiner Hand"
 }

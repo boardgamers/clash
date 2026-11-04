@@ -59,12 +59,35 @@ try {
       const alternatives = detail.locator('.research-alternatives');
       const primary = detail.locator('.research-payment > .primary');
 
-      // Merely opening/selecting an advance never spends either resources or a card.
+      // A wonder in the private hand highlights its missing required advance, without exposing an opponent's hand.
       let game = await fixture();
+      game.players[0].wonder_cards = ['GreatLibrary'];
+      assert.equal(v(game).wonderCards[0].requiredAdvance, 'Philosophy');
+      await mount(game); await open('Philosophy');
+      const wonderHint = page.locator('#research-Philosophy .research-wonder-hint');
+      await wonderHint.waitFor();
+      const hintText = await wonderHint.innerText();
+      assert.equal(await wonderHint.locator('strong').innerText(), t('Required for {p0}').replace('{p0}', t('Great Library')));
+      assert.equal(await wonderHint.locator('small').innerText(), t('Wonder in your hand'));
+      assert(!hintText.includes(t('Requires')), hintText);
+      assert.equal(await page.locator('.research-wonder-hint').count(), 1);
+      assert.deepEqual(await sent(), []);
+      await page.locator('#research-Philosophy').screenshot({ path: `/tmp/clash-wonder-research-${locale}-${width}.png` });
+      game.players[0].wonder_cards = [];
+      game.players[1].wonder_cards = ['GreatLibrary'];
+      await mount(game); await open('Philosophy');
+      assert.equal(await page.locator('.research-wonder-hint').count(), 0, 'opponent hand is private');
+      game.players[0].wonder_cards = ['GreatLibrary'];
+      game.players[0].advances.push('Philosophy');
+      await mount(game); await open('Philosophy');
+      assert.equal(await page.locator('.research-wonder-hint').count(), 0, 'already researched');
+
+      // Merely opening/selecting an advance never spends either resources or a card.
+      game = await fixture();
       await mount(game); await open('Medicine');
       const provinceLink = page.locator('.research-civilization-link').filter({ hasText: t('Provinces') }).first();
       assert.equal(await provinceLink.getByText(t('Unlocks'), { exact: true }).count(), 1);
-      await alternatives.getByText(t('Alternative research available'), { exact: true }).waitFor();
+      await alternatives.waitFor();
       assert((await alternatives.innerText()).includes(t('No research resource cost')));
       assert.deepEqual(await sent(), []);
       assert(await primary.isEnabled(), 'normal paid research remains an explicit separate option');

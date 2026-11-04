@@ -5244,5 +5244,7 @@
   "Calendar is waiting for a response": "تقویم منتظر پاسخ است",
   "Alternative research available": "روش دیگری برای پژوهش در دسترس است",
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "به‌جای پژوهش معمول، از یکی از کارت‌ها یا توانایی‌های زیر استفاده کنید. هزینه‌ها و اثرهای خود آن همچنان اعمال می‌شوند.",
-  "No research resource cost": "پژوهش بدون هزینهٔ منابع"
+  "No research resource cost": "پژوهش بدون هزینهٔ منابع",
+  "Required for {p0}": "لازم برای {p0}",
+  "Wonder in your hand": "عجایب در دست شما"
 }

@@ -908,3 +908,15 @@ Regression coverage includes real Arts and unit conversions, Darius's exact
 position, moved/missing leaders, uncapped rewards, Ashoka plus Conversion and
 used rerolls, manual selections, map/list reselection, and English/French desktop
 and mobile browser flows. Publish the matching viewer and engine together.
+
+# Viewer 0.1.199 / engine unchanged (0.4.133)
+
+Research highlights missing advances required by wonders in the viewing player's
+private hand, without exposing opponents' cards or highlighting requirements
+already satisfied. The compact two-line hint reads “Required for [wonder name]”
+and “Wonder in your hand”, translated in every supported locale.
+Alternative research cards and abilities use a compact inline
+layout with numeric action costs and action icons. Research payment allocation
+omits redundant explanatory text and totals while retaining explicit confirmation;
+other payment pickers are unchanged. Regression coverage includes private-hand
+filtering and English/French desktop/mobile research flows.

@@ -21,6 +21,8 @@
     Map,
     Layers,
     Info,
+    Landmark,
+    Zap,
   } from 'lucide-svelte';
   import type { Controller } from './controller';
   import CardReferenceDialog from './CardReferenceDialog.svelte';
@@ -42,9 +44,10 @@
     type View,
   } from './types';
   import { buildingInfo } from './city';
-  import { manGodAbility, researchOwners, researchFreeHints, aqueductResearch, researchCardHints, researchAbilityHints, type ResearchReference } from './research-links';
+  import { manGodAbility, researchOwners, researchFreeHints, aqueductResearch, researchCardHints, researchAbilityHints, wonderResearchHints, type ResearchReference } from './research-links';
   import { actionReason, pileText } from './model';
   import { groupIcons, researchPresentation } from './research';
+  import { wonderIcons } from './wonder-icons';
   import { researchDecision } from './decision-controls';
   let {
     controller,
@@ -427,6 +430,12 @@
                   +<ResourceAmount pile={bonus.pile} compact /> · {bonus.source}
                 </span>{/each}
             </div>
+            {#each wonderResearchHints(view, advance) as card (card.id)}{@const WonderIcon = wonderIcons[card.id] ?? Landmark}
+              <div class="research-wonder-hint">
+                <WonderIcon size={16} aria-hidden="true" />
+                <span class="research-wonder-hint-text"><strong>{`Required for ${printedCardName(card.name)}`}</strong><small>Wonder in your hand</small></span>
+              </div>
+            {/each}
             {#if !advance.owned && (!choice || advance.action) && (!early || warnsEvent)}<div class="research-node-cost">
                 {#if !early}<span
                   class="research-flexible-cost"
@@ -565,8 +574,7 @@
         {#if unavailableReason(selected) && !selected.owned}<small>{unavailableReason(selected)}</small>{/if}
         {#if cardHints(selected).length || abilityHints(selected).length}
           <section class="research-alternatives" aria-label="Alternative research available">
-            <strong>Alternative research available</strong>
-            <p>Use a card or ability below instead of normal research. Its own costs and effects still apply.</p>
+
             {#each cardHints(selected) as card}
               <div class="research-source-row">
                 <button class="secondary research-source" disabled={$session.pending}
@@ -575,7 +583,7 @@
                   <span class="research-source-cost">
                     {card.freeResearch ? 'No research resource cost' : 'Pay research cost next'}
                     {#if Object.values(card.cost).some(Boolean)}<ResourceAmount pile={card.cost} compact />{/if}
-                    · {card.free ? 'Free action' : '1 action'}
+                    · <span class="research-action-cost" title={card.free ? 'Free action' : 'Costs 1 action'} aria-label={card.free ? 'Free action' : 'Costs 1 action'}>{card.free ? 0 : 1}<Zap size={13} aria-hidden="true" /></span>
                   </span>
                 </button>
                 <button class="icon-button" aria-label={`Details of ${printedCardName(card.name)}`}
@@ -589,7 +597,7 @@
                 <span class="research-source-cost">
                   {ability.freeResearch ? 'No research resource cost' : 'Pay research cost next'}
                   {#if ability.cost && Object.values(ability.cost).some(Boolean)}<ResourceAmount pile={ability.cost} compact />{/if}
-                  · {ability.free ? 'Free action' : '1 action'}
+                  · <span class="research-action-cost" title={ability.free ? 'Free action' : 'Costs 1 action'} aria-label={ability.free ? 'Free action' : 'Costs 1 action'}>{ability.free ? 0 : 1}<Zap size={13} aria-hidden="true" /></span>
                 </span>
               </button>
             {/each}
@@ -613,6 +621,7 @@
               }}
               pending={$session.pending}
               label="Research payment"
+              minimal
             />
           {/if}
           {#if selectedAqueduct}
@@ -668,7 +677,7 @@
                         : selectedPayment.payment}
                       compact
                     /> ·
-                  {/if}1 action{/if}</span
+                  {/if}<span class="research-action-cost" title="Costs 1 action" aria-label="Costs 1 action">1<Zap size={13} aria-hidden="true" /></span>{/if}</span
               >{/if}
           </button>
         </div>{/if}
@@ -694,12 +703,10 @@
   .research-card-hint .research-advance-link { display: flex; align-items: center; gap: .35rem; text-align: left; font-size: .8rem; }
   .research-card-hint .icon-button { flex-shrink: 0; }
   .research-card-hint small { display: block; color: var(--muted); font-size: .7rem; }
-  .research-alternatives { margin-top: .7rem; padding: .65rem; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 5px; background: var(--paper); }
-  .research-alternatives > strong { font-size: .85rem; }
-  .research-alternatives > p { margin: .25rem 0 .5rem; }
+  .research-alternatives { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-top: .6rem; }
   .research-source-row { display: flex; align-items: center; gap: .35rem; }
   .research-source-row .icon-button { flex-shrink: 0; }
-  .research-source { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: .3rem; margin-top: .3rem; min-width: 0; width: 100%; text-align: left; white-space: normal; }
+  .research-source { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; padding: .45rem .6rem; min-width: 0; max-width: 100%; text-align: left; white-space: normal; }
   .research-source > span { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; }
   .research-source .research-source-cost { font-size: .72rem; font-weight: normal; }
 </style>

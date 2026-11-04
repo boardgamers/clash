@@ -14,6 +14,7 @@
     reward = false,
     variableAmount = false,
     label = 'Payment',
+    minimal = false,
   }: {
     options: { payment: Pile; disabled?: boolean }[];
     value: Pile;
@@ -24,6 +25,7 @@
     reward?: boolean;
     variableAmount?: boolean;
     label?: string;
+    minimal?: boolean;
   } = $props();
   const icons = {
     food: Wheat,
@@ -117,7 +119,7 @@
         {/if}
         {#if !onPay && samePayment(option.payment, value)}<Check size={14} />{/if}
       </button>
-    {:else}<p class="inline-error">No affordable payment available.</p>{/each}
+    {:else}{#if !minimal}<p class="inline-error">No affordable payment available.</p>{/if}{/each}
   </div>
 {:else}
   <div class="payment-builder" role="group" aria-label={label}>
@@ -143,12 +145,12 @@
           </label>
         {/each}
       </div>
-      <small class="payment-builder-hint"
+      {#if !minimal}<small class="payment-builder-hint"
         >Choose an amount; other resources adjust automatically.</small
       >
       <div class="payment-builder-total">
         <span>{reward ? 'You gain' : 'You pay'}</span><ResourceAmount pile={allocation} />
-      </div>
+      </div>{/if}
       <div class="payment-builder-actions">
         {#if emptyOption}<button
             class="secondary"
@@ -174,6 +176,6 @@
             onclick={() => selected && onPay?.(selected.payment)}>{emptyLabel}</button
           >{:else}<span>{optional ? 'Declined' : 'Free'}</span>{/if}
       </div>
-    {:else}<p class="inline-error">No affordable payment available.</p>{/if}
+    {:else if !minimal}<p class="inline-error">No affordable payment available.</p>{/if}
   </div>
 {/if}

@@ -261,3 +261,15 @@ test('ambiguous adjacent parameters are not guessed, and nested caches do not po
   assert.equal(t.translate('Forest · city size 3, Fortress · 2 army (1 aboard)'), 'Forêt · ville de taille 3, Forteresse · 2 armée (1 à bord)');
   assert.equal(t.translate('city size 3, Fortress'), 'ville de taille 3, Forteresse');
 });
+
+test('wonder research hints translate the complete required-for caption and private-hand subtitle', async () => {
+  const { readFile } = await import('node:fs/promises');
+  for (const locale of ['en', 'fr', 'de', 'da', 'el', 'fa', 'hi', 'it', 'ko', 'nl', 'pl', 'pt-BR', 'ro', 'ru', 'vi', 'zh-CN', 'zh-TW']) {
+    const catalog = JSON.parse(await readFile(new URL(`./localization/${locale}.json`, import.meta.url), 'utf8'));
+    const translator = createTranslator({ [locale]: catalog }, locale);
+    for (const name of ['Great Library', 'Great Gardens']) {
+      assert.equal(translator.translate(`Required for ${name}`), catalog['Required for {p0}'].replace('{p0}', catalog[name] ?? name), locale);
+    }
+    assert.equal(translator.translate('Wonder in your hand'), catalog['Wonder in your hand'], locale);
+  }
+});

@@ -5244,5 +5244,7 @@
   "Calendar is waiting for a response": "Kalender wacht op een antwoord",
   "Alternative research available": "Andere onderzoeksmogelijkheid beschikbaar",
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Gebruik een kaart of vaardigheid hieronder in plaats van normaal onderzoek. De eigen kosten en effecten blijven gelden.",
-  "No research resource cost": "Geen grondstofkosten voor onderzoek"
+  "No research resource cost": "Geen grondstofkosten voor onderzoek",
+  "Required for {p0}": "Vereist voor {p0}",
+  "Wonder in your hand": "Wereldwonder in je hand"
 }

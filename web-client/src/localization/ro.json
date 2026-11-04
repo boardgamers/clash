@@ -5244,5 +5244,7 @@
   "Calendar is waiting for a response": "Calendar așteaptă un răspuns",
   "Alternative research available": "Alternativă de cercetare disponibilă",
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Folosește o carte sau o abilitate de mai jos în locul cercetării normale. Costurile și efectele proprii se aplică în continuare.",
-  "No research resource cost": "Cercetare fără cost în resurse"
+  "No research resource cost": "Cercetare fără cost în resurse",
+  "Required for {p0}": "Necesar pentru {p0}",
+  "Wonder in your hand": "Minune în mâna ta"
 }

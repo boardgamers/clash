@@ -300,6 +300,23 @@
 .research-node-cost svg {
   flex-shrink: 0;
 }
+.research-wonder-hint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 12px 9px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.research-wonder-hint svg { flex-shrink: 0; color: var(--gold); }
+.research-wonder-hint-text { display: flex; flex-direction: column; gap: 1px; }
+.research-wonder-hint strong { font-weight: 700; }
+.research-wonder-hint small { color: var(--muted); font-size: 10px; }
+.research-action-cost { display: inline-flex; align-items: center; gap: 3px; }
 .research-node-cost {
   border-top: 1px solid var(--line);
   padding-top: 8px;

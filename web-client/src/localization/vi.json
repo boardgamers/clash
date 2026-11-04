@@ -5244,5 +5244,7 @@
   "Calendar is waiting for a response": "Lịch đang chờ phản hồi",
   "Alternative research available": "Có cách nghiên cứu khác",
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Dùng một lá bài hoặc khả năng bên dưới thay cho nghiên cứu thông thường. Chi phí và hiệu ứng riêng của nó vẫn áp dụng.",
-  "No research resource cost": "Nghiên cứu không tốn tài nguyên"
+  "No research resource cost": "Nghiên cứu không tốn tài nguyên",
+  "Required for {p0}": "Cần cho {p0}",
+  "Wonder in your hand": "Kỳ quan trên tay bạn"
 }

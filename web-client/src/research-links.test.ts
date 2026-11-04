@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { manGodAbility, researchReferences, researchTextParts, researchOwners } from './research-links.ts';
-import type { View } from './types.ts';
+import { manGodAbility, researchReferences, researchTextParts, researchOwners, wonderResearchHints } from './research-links.ts';
+import type { AdvanceView, View } from './types.ts';
 
 const advances = ['Irrigation', 'Education', 'Public Education', 'Mining'].map((name) => ({
   id: name.replaceAll(' ', ''),
@@ -76,6 +76,19 @@ test('research ownership badges use public permanent advances and exclude the vi
     [0, 1],
   );
   assert.deepEqual(researchOwners(view, 'Mining', 0), []);
+});
+
+test('research highlights only missing advances needed by wonder cards in the viewing hand', () => {
+  const library = { id: 'GreatLibrary', name: 'Great Library', requiredAdvance: 'Philosophy', requiredAdvanceOwned: false };
+  const garden = { id: 'GreatGardens', name: 'Great Gardens', requiredAdvance: 'Irrigation', requiredAdvanceOwned: false };
+  const view = { wonderCards: [library, garden] } as View;
+  const philosophy = { id: 'Philosophy', name: 'Philosophy', owned: false } as AdvanceView;
+  assert.deepEqual(wonderResearchHints(view, philosophy), [library]);
+  assert.deepEqual(wonderResearchHints(view, { ...philosophy, name: 'Education' }), []);
+  assert.deepEqual(wonderResearchHints(view, { ...philosophy, owned: true }), []);
+  assert.deepEqual(wonderResearchHints({ wonderCards: [{ ...library, requiredAdvanceOwned: true }] } as View, philosophy), []);
+  assert.deepEqual(wonderResearchHints({ wonderCards: [] } as unknown as View, philosophy), []);
+  assert.deepEqual(wonderResearchHints(null, philosophy), []);
 });
 
 test('Man God indicator distinguishes granted abilities from research and Great Library loans', () => {

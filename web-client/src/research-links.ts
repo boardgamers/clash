@@ -1,5 +1,13 @@
 import type { AdvanceView, PublicAdvance, View } from './types.ts';
 
+/** Only the viewing seat's private hand is exposed as wonderCards. A borrowed advance may already satisfy a card's requirement. */
+export function wonderResearchHints(view: View | null | undefined, advance: AdvanceView) {
+  if (advance.owned) return [];
+  return (view?.wonderCards ?? []).filter(
+    (card) => !card.requiredAdvanceOwned && card.requiredAdvance === advance.name,
+  );
+}
+
 /** Ability access is not ownership and must never affect research eligibility. */
 export function manGodAbility(advance: Pick<AdvanceView, 'id' | 'owned'>, abilities: PublicAdvance[] = []): boolean {
   return !advance.owned && abilities.some(

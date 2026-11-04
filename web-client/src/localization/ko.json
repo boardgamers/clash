@@ -5244,5 +5244,7 @@
   "Calendar is waiting for a response": "달력이 응답을 기다리고 있습니다",
   "Alternative research available": "다른 연구 방법 사용 가능",
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "일반 연구 대신 아래 카드나 능력을 사용하세요. 해당 카드나 능력의 비용과 효과는 그대로 적용됩니다.",
-  "No research resource cost": "연구 자원 비용 없음"
+  "No research resource cost": "연구 자원 비용 없음",
+  "Required for {p0}": "{p0}에 필요",
+  "Wonder in your hand": "손에 있는 불가사의"
 }
