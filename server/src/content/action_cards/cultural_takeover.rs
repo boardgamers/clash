@@ -158,7 +158,7 @@ pub(crate) fn use_cultural_takeover() -> Ability {
                     &mut game.permanent_effects,
                     &PermanentEffect::CulturalTakeover,
                 )
-                .is_some_and(|_| outcome.success)
+                .is_some_and(|_| outcome.success && outcome.barbarian_takeover)
                 {
                     let mut info = ActionCardInfo::new(15, None, None);
                     info.selected_position = Some(outcome.position);
@@ -169,7 +169,10 @@ pub(crate) fn use_cultural_takeover() -> Ability {
         .build()
 }
 
-fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureAttemptInfo) -> bool {
+pub(crate) fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureAttemptInfo) -> bool {
+    if c.target_unit.is_some() || !matches!(c.structure, Structure::CityCenter) {
+        return false;
+    }
     let city = game.get_any_city(c.position);
     city.player_index == get_barbarians_player(game).index
         && city.size() == 1

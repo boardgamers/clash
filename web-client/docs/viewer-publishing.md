@@ -935,3 +935,15 @@ The read-only public projection shares pure combat listeners without executing
 payments, tactics, rolls or mutations. Existing battle resolution and saved history
 are unchanged. New UI strings are translated in all 17 locales. Publish the matching
 viewer and engine together.
+
+# Viewer 0.1.201 / engine 0.4.135
+
+Cultural Takeover removes barbarian units and offers a replacement unit only after
+successfully taking over an eligible size-one barbarian city center. Successful
+influence of a Market or another building no longer removes the barbarian army or
+creates an infantry unit. Eligibility is captured before city ownership changes;
+failed attempts and empty settlements retain their existing behavior. The card's
+next-attempt effect is still consumed normally. Five regression tests cover
+building influence, defended and empty settlements, failures, and ineligible
+city centers. Publish the matching viewer rules bridge and engine together.
+Existing game history is not replayed or repaired.

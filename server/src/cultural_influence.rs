@@ -126,6 +126,8 @@ impl InfluenceCultureBoostInfo {
 #[derive(Clone, PartialEq)]
 pub struct InfluenceCultureOutcome {
     pub success: bool,
+    /// True only for an eligible settlement takeover, checked before city ownership changes.
+    pub barbarian_takeover: bool,
     pub player: usize,
     pub position: Position,
 }
@@ -135,6 +137,7 @@ impl InfluenceCultureOutcome {
     pub fn new(success: bool, player: usize, position: Position) -> InfluenceCultureOutcome {
         InfluenceCultureOutcome {
             success,
+            barbarian_takeover: false,
             player,
             position,
         }
@@ -546,7 +549,7 @@ fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceC
         let id = new.get(game).next_unit_id;
         crate::player::gain_unit(game, new, city_position, unit.unit_type);
         game.successful_cultural_influence = true;
-        influence_success(game, influencer_index, info);
+        influence_success(game, influencer_index, info, false);
         if game
             .player(target.player)
             .units
@@ -564,6 +567,10 @@ fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceC
         }
         return;
     }
+    // The attempt's barbarian_takeover flag is a legality-preview override, not
+    // evidence of a real takeover. Check the target before transferring ownership.
+    let barbarian_takeover =
+        crate::content::action_cards::cultural_takeover::is_barbarian_takeover(game, info);
     let city_owner = game.get_any_city(city_position).player_index;
     match info.structure {
         Structure::CityCenter
@@ -589,7 +596,7 @@ fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceC
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     }
     game.successful_cultural_influence = true;
-    influence_success(game, influencer_index, info);
+    influence_success(game, influencer_index, info, barbarian_takeover);
 }
 
 /// Rewards that depend on the selected source, not on the target or the roll.
@@ -614,7 +621,12 @@ pub(crate) fn source_success_rewards(
     }
 }
 
-fn influence_success(game: &mut Game, influencer_index: usize, info: &InfluenceCultureAttemptInfo) {
+fn influence_success(
+    game: &mut Game,
+    influencer_index: usize,
+    info: &InfluenceCultureAttemptInfo,
+    barbarian_takeover: bool,
+) {
     for (origin, resources) in
         source_success_rewards(game, influencer_index, info.starting_city_position)
     {
@@ -622,11 +634,12 @@ fn influence_success(game: &mut Game, influencer_index: usize, info: &InfluenceC
             .with_origin(origin)
             .gain_resources(game, resources);
     }
-    let city_position = info.position;
+    let mut outcome = InfluenceCultureOutcome::new(true, influencer_index, info.position);
+    outcome.barbarian_takeover = barbarian_takeover;
     game.trigger_transient_event_with_game_value(
         influencer_index,
         |e| &mut e.on_influence_culture_resolve,
-        &InfluenceCultureOutcome::new(true, influencer_index, city_position),
+        &outcome,
         &(),
     );
 }
