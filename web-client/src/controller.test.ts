@@ -2729,6 +2729,27 @@ test('triggered event rules appear live and replay pauses on their historical fr
   } finally {app.close();}
 });
 
+test('adjacent battle with Roads chooses the free route without a payment picker', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const g = JSON.parse(fixture('movement/movement'));
+    g.current_player_index = 0;
+    g.players[0].advances.push('Tactics', 'Roads');
+    g.players[0].resources = { food: 7, ore: 7, gold: 7 };
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(JSON.stringify(g), 0));
+    c.openUnits([0]);
+    const offers = app.session().moveDestinations.filter(d => d.position === 'C1');
+    assert.equal(offers.length, 1, 'no paid Roads routes for a one-step battle');
+    assert.deepEqual(offers[0].payment, {});
+    c.chooseMoveDestination('C1');
+    assert.equal(app.session().moveDestination, app.session().moveDestinations.indexOf(offers[0]), 'the only route is selected immediately');
+    assert.deepEqual(app.sent, [], 'the battle still needs its normal preview');
+    c.chooseMoveDestination('C1');
+    assert.deepEqual(app.sent.map(a => JSON.parse(a)), [offers[0].action]);
+  } finally { app.close(); }
+});
+
 test('Roads offers food/gold choices before an attack and submits the selected payment', async () => {
   const app = paymentController(), c = app.controller;
   try {

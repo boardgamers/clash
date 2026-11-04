@@ -865,6 +865,17 @@ waste remains possible only when all eligible opponents are full. The active
 player and NPC Barbarians/Pirates do not count as recipients. Fixed rewards for
 all players are unchanged.
 
+## Viewer 0.1.198 / engine 0.4.133: avoid redundant one-step Roads payments
+
+The movement preview omits a paid Roads route when a legal ordinary route
+reaches the same adjacent hex without a useful terrain benefit. This includes
+one-step attacks, where battle stops movement regardless of the terrain, and
+non-Mountain/non-Forest destinations. One-step Roads still appears when it alone
+makes the move legal (for example, bypassing an existing Mountain restriction),
+or when entering a Mountain or Forest without combat can avoid that terrain's
+future movement restriction. Two-space Roads routes, alternative payment
+methods, and the server's validation of saved actions are unchanged.
+
 ## Viewer 0.1.197 / engine 0.4.132: benefit-aware cultural-influence sources
 
 Reselecting the same influence destination—through the map or its building

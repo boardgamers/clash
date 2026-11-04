@@ -258,7 +258,26 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
     );
     let mut destinations = vec![];
     for carrier in carriers {
-        for route in possible_move_routes(p, game, &units, start, carrier).unwrap_or_default() {
+        let routes = possible_move_routes(p, game, &units, start, carrier).unwrap_or_default();
+        for route in &routes {
+            // A paid one-step Roads route is redundant when ordinary movement
+            // reaches the same hex and no terrain stop needs bypassing. Keep
+            // Roads for Mountains/Forests and for routes only Roads makes legal.
+            // Combat always imposes its own stop, even on a Mountain or Forest.
+            if route.ignore_terrain_movement_restrictions
+                && start.is_neighbor(route.destination)
+                && (game.enemy_player(seat, route.destination).is_some()
+                    || !matches!(
+                        game.map.get(route.destination),
+                        Some(Terrain::Mountain | Terrain::Forest)
+                    ))
+                && routes.iter().any(|ordinary| {
+                    ordinary.destination == route.destination
+                        && !ordinary.ignore_terrain_movement_restrictions
+                })
+            {
+                continue;
+            }
             let payments =
                 super::decisions::payment_choices(&route.cost, &p.resources, false, false)
                     .unwrap_or_else(|| {

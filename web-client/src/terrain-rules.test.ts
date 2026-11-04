@@ -162,6 +162,46 @@ test('paid Roads ignore both crossed and destination terrain, then allow a new M
   }
 });
 
+test('one-step Roads choices appear only when they change the outcome', () => {
+  const g = fixture('Barren');
+  g.players[1].units = [{ id: 0, position: 'C1', unit_type: 'Infantry' }];
+  g.players[0].advances.push('Roads');
+  g.players[0].resources = { food: 7, ore: 7, gold: 7 };
+  const choices = (target: string) => JSON.parse(engine.webQuery(
+    engine.stripSecret(JSON.stringify(g), 0), 0,
+    JSON.stringify({ kind: 'movement', units: [0] }),
+  )).destinations.filter((d: any) => d.position === target);
+  const free = (d: any) => !Object.values(d.payment).some(Boolean);
+  const paid = (d: any) => d.payment.food === 1 && d.payment.ore === 1;
+
+  assert.equal(choices('C1').length, 1, 'an adjacent battle has only the ordinary route');
+  assert(choices('C1')[0].attack && free(choices('C1')[0]));
+  g.map.tiles.find((t: any) => t[0] === 'C1')[1] = 'Mountain';
+  assert.equal(choices('C1').length, 1, 'battle still stops movement on a Mountain');
+  assert(free(choices('C1')[0]));
+  g.map.tiles.find((t: any) => t[0] === 'C1')[1] = 'Forest';
+  assert.equal(choices('C1').length, 1, 'battle still stops movement in a Forest');
+  assert(free(choices('C1')[0]));
+
+  g.players[1].units = [];
+  g.map.tiles.find((t: any) => t[0] === 'B2')[1] = 'Fertile';
+  assert.equal(choices('B2').length, 1, 'an adjacent ordinary tile needs no Roads payment');
+  assert(free(choices('B2')[0]));
+  g.map.tiles.find((t: any) => t[0] === 'B2')[1] = 'Forest';
+  assert(choices('B2').some(free) && choices('B2').some(paid), 'Roads still avoids a Forest attack restriction');
+  assert(choices('B1').some(free) && choices('B1').some(paid), 'Roads still avoids a Mountain stop');
+  assert(choices('A1').some(paid) && !choices('A1').some(free), 'a two-space Roads move remains available');
+
+  // When Mountain restrictions make ordinary movement illegal, an adjacent
+  // Roads route is still the only available choice, even to an ordinary hex.
+  g.players[0].units[0].movement_restrictions = ['Mountain'];
+  assert(choices('B2').some(paid));
+  g.map.tiles.find((t: any) => t[0] === 'B2')[1] = 'Fertile';
+  assert(choices('B2').some(paid) && !choices('B2').some(free));
+  g.players[1].units = [{ id: 0, position: 'C1', unit_type: 'Infantry' }];
+  assert(choices('C1').some(paid) && !choices('C1').some(free), 'Roads may still make a one-step attack legal');
+});
+
 test('one-space Roads entry into a mountain city permits regrouping in a new Move action', () => {
   const g = fixture('Mountain');
   g.actions_left = 3;
