@@ -18,6 +18,8 @@ const cities = [
   { buildings: ['obelisk', 'temple', 'port', 'market'] },
   { buildings: ['temple', 'market'], wonders: ['GreatWall'] },
   { buildings: ['temple', 'fortress', 'port', 'academy'], wonders: ['Pyramids', 'GreatStatue'] },
+  { buildings: [] },
+  { buildings: ['temple'] },
 ];
 const gallery = await build({
   stdin: {
@@ -93,11 +95,11 @@ const pieces = (buildings, owner, wonders = []) => ({
 game.players[0].cities = [
   { position: 'C3', mood_state: 'Happy', city_pieces: pieces(cities[2].buildings, 0) },
   { position: 'E3', mood_state: 'Neutral', city_pieces: pieces(cities[3].buildings, 0) },
-  { position: 'C5', mood_state: 'Neutral', city_pieces: pieces(cities[0].buildings, 0) },
+  { position: 'C5', mood_state: 'Neutral', city_pieces: pieces(cities[6].buildings, 0) },
 ];
 game.players[1].cities = [
   { position: 'D5', mood_state: 'Happy', city_pieces: pieces(cities[2].buildings, 1) },
-  { position: 'E5', mood_state: 'Neutral', city_pieces: pieces(cities[1].buildings, 1) },
+  { position: 'E5', mood_state: 'Neutral', city_pieces: pieces(cities[7].buildings, 1) },
 ];
 game.players[0].units = [];
 game.players[1].units = [];

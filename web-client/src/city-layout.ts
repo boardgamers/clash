@@ -55,7 +55,9 @@ export function cityLayout(buildings: number, wonders: number): CityLayout {
   // Rows are spaced by each piece's widest roof or temple so no two pieces share ground.
   const [settlement, scale, slots]: [PiecePlacement, number, number[][]] =
     buildings === 0
-      ? [{ x: 0, z: -0.09, scale: 0.88 }, 0, []]
+      ? // Keep a lone center the same size as one with its first annex; the flag
+        // already supplies visibility and is positioned/scaled independently.
+        [{ x: 0, z: -0.09, scale: 0.57 }, 0, []]
       : buildings === 1
         ? [{ x: -0.2, z: -0.09, scale: 0.57 }, 0.62, [[0.4, 0.18]]]
         : buildings === 2

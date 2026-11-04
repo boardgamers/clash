@@ -158,6 +158,28 @@ function cityPieces(civilization: string | undefined, kinds: BuildingKind[], won
   ];
 }
 
+test('a lone settlement matches its first-annex scale without moving ownership markers', () => {
+  const lone = cityLayout(0, 0);
+  assert.deepEqual(lone, {
+    settlement: { x: 0, z: -0.09, scale: 0.57 },
+    buildings: [],
+    wonders: [],
+    ownership: { x: 0, z: 0 },
+  });
+  assert.equal(lone.settlement.scale, cityLayout(1, 0).settlement.scale);
+  assert.deepEqual(
+    [1, 2, 3, 4].map((count) => cityLayout(count, 0).settlement.scale),
+    [0.57, 0.53, 0.53, 0.5],
+  );
+  // A wonder-only city still uses the separate landmark layout.
+  assert.deepEqual(cityLayout(0, 1), {
+    settlement: { x: 0, z: 0.2, scale: 0.46 },
+    buildings: [],
+    wonders: [{ x: 0, z: -0.36, scale: 0.8 }],
+    ownership: { x: 0, z: 0.2 + 0.09 },
+  });
+});
+
 test('city pieces never clip into the city center or each other', () => {
   const clipping = new Set<string>();
   for (const { civilization, kinds, wonders } of cities()) {
