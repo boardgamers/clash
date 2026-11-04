@@ -51,6 +51,10 @@ impl PlayerEvents {
 }
 
 pub(crate) struct TransientEvents {
+    // Read-only projection of the same public, unconditional round-strength rules.
+    pub combat_strength_preview: Event<crate::combat_listeners::CombatStrength, Combat, Game>,
+    pub combat_opponent_strength_preview:
+        Event<crate::combat_listeners::CombatStrength, Combat, Game>,
     pub on_influence_culture_attempt:
         Event<Result<InfluenceCultureAttemptInfo, String>, City, Game>,
     pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
@@ -76,6 +80,8 @@ pub(crate) struct TransientEvents {
 impl TransientEvents {
     pub fn new() -> TransientEvents {
         TransientEvents {
+            combat_strength_preview: Event::new("combat_strength_preview"),
+            combat_opponent_strength_preview: Event::new("combat_opponent_strength_preview"),
             on_influence_culture_attempt: Event::new("on_influence_culture_attempt"),
             on_influence_culture_resolve: Event::new("on_influence_culture_resolve"),
             before_move: Event::new("before_move"),

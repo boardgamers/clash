@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Use a card or ability below instead of normal research. Its own costs and effects still apply.",
   "No research resource cost": "No research resource cost",
   "Required for {p0}": "Required for {p0}",
-  "Wonder in your hand": "Wonder in your hand"
+  "Wonder in your hand": "Wonder in your hand",
+  "Current combat forces": "Current combat forces",
+  "Public combat bonuses before tactics": "Public combat bonuses before tactics",
+  "Value bonus": "Value bonus",
+  "Fortress: cancels 1 hit (round 1)": "Fortress: cancels 1 hit (round 1)",
+  "Fortress: +1 die (round 1)": "Fortress: +1 die (round 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices",
+  "Steel Weapons not activated: +{p0} value if activated": "Steel Weapons not activated: +{p0} value if activated",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Round 1: total bonus capped at +2, including dice-symbol bonuses",
+  "Battle · Round": "Battle · Round"
 }

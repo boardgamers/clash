@@ -5,6 +5,7 @@
   import GreatPersonAcquisition from './GreatPersonAcquisition.svelte';
   import RazeActions from './RazeActions.svelte';
   import CombatEstimate from './CombatEstimate.svelte';
+  import CombatForces from './CombatForces.svelte';
   import { printedCardName } from './card-names';
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
@@ -53,7 +54,7 @@
   const description = $derived(
     razeChoice ? 'Select a highlighted city on the map.' : combatBenefit ??
       (decision.tacticsSelection && decision.name === 'Tactics'
-        ? 'Play one battle effect or skip.'
+        ? ''
         : decision.name === 'Place Settler'
           ? 'Free Settler after losing a city.'
           : decision.description),
@@ -280,6 +281,7 @@
       </div>
     {/if}
   </header>
+  {#if !$session.playback}<CombatForces game={$session.game} view={$session.view} />{/if}
   {#if cardOffer}
     <GreatPersonEffect card={cardOffer} />
   {/if}

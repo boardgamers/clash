@@ -8,12 +8,20 @@ export interface ActiveCombat {
 
 /** Combat may sit below another pending ability on the event stack. */
 export function activeCombat(game: Pick<Game, 'events'>): ActiveCombat | null {
+  return activeCombatState(game)?.stats ?? null;
+}
+
+/** Only the currently visible event stack; never history or an unredacted snapshot. */
+export function activeCombatState(
+  game: Pick<Game, 'events'>,
+): { stats: ActiveCombat; attackers?: number[] } | null {
   for (const { event_type: event } of [...(game.events ?? [])].reverse()) {
     if (typeof event !== 'object' || event === null) continue;
     if ('CombatEnd' in event) return null;
     const combat = (event.CombatStart ??
       (event.CombatRoundStart as { combat?: unknown })?.combat ??
-      (event.CombatRoundEnd as { combat?: unknown })?.combat) as { stats?: ActiveCombat } | undefined;
+      (event.CombatRoundEnd as { combat?: unknown })?.combat) as
+      { stats?: ActiveCombat; attackers?: number[] } | undefined;
     const stats = combat?.stats;
     if (
       stats &&
@@ -21,7 +29,7 @@ export function activeCombat(game: Pick<Game, 'events'>): ActiveCombat | null {
         (side) => side && /^[A-Z]+\d+$/.test(side.position) && Number.isInteger(side.player),
       )
     )
-      return stats;
+      return { stats, attackers: combat?.attackers };
   }
   return null;
 }
@@ -29,7 +37,12 @@ export function activeCombat(game: Pick<Game, 'events'>): ActiveCombat | null {
 /** Public advances include borrowed abilities, just as the engine's combat calculation does. */
 export function steelWeaponsBenefit(game: Game | null, view: View | null, player?: number): string | null {
   const combat = game && activeCombat(game);
-  if (!combat || !view || game?.map.tiles.find(([position]) => position === combat.defender.position)?.[1] === 'Water') return null;
+  if (
+    !combat ||
+    !view ||
+    game?.map.tiles.find(([position]) => position === combat.defender.position)?.[1] === 'Water'
+  )
+    return null;
   const enemy =
     combat.attacker.player === player
       ? combat.defender.player

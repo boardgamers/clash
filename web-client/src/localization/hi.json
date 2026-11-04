@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "सामान्य शोध के बजाय नीचे दिया गया कार्ड या क्षमता इस्तेमाल करें। उसके अपने खर्च और प्रभाव फिर भी लागू होंगे।",
   "No research resource cost": "शोध के लिए संसाधन खर्च नहीं",
   "Required for {p0}": "{p0} के लिए आवश्यक",
-  "Wonder in your hand": "आपके हाथ में अजूबा"
+  "Wonder in your hand": "आपके हाथ में अजूबा",
+  "Current combat forces": "वर्तमान युद्ध बल",
+  "Public combat bonuses before tactics": "रणनीतियों से पहले सार्वजनिक युद्ध बोनस",
+  "Value bonus": "युद्ध मूल्य बोनस",
+  "Fortress: cancels 1 hit (round 1)": "किला: 1 प्रहार रोकता है (दौर 1)",
+  "Fortress: +1 die (round 1)": "किला: +1 पासा (दौर 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "केवल सार्वजनिक बोनस · रणनीतियाँ, पासों के चिह्नों के प्रभाव और लंबित विकल्प शामिल नहीं",
+  "Steel Weapons not activated: +{p0} value if activated": "इस्पात के हथियार सक्रिय नहीं: सक्रिय करने पर +{p0} युद्ध मूल्य",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "दौर 1: कुल बोनस अधिकतम +2, पासों के चिह्नों के बोनस सहित",
+  "Battle · Round": "युद्ध · दौर"
 }

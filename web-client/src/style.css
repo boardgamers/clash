@@ -6324,6 +6324,14 @@ small {
 .collapsible-map-guide[open] > summary { margin-bottom: 8px; }
 .collapsible-map-guide > summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
+/* Only the identity itself triggers the platform hovercard, not row padding. */
+.player-identity {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* Keep the civilization emblem while identifying the BGS player beside their name. */
 .player-info .player-avatar {
   width: 12px;

@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Dùng một lá bài hoặc khả năng bên dưới thay cho nghiên cứu thông thường. Chi phí và hiệu ứng riêng của nó vẫn áp dụng.",
   "No research resource cost": "Nghiên cứu không tốn tài nguyên",
   "Required for {p0}": "Cần cho {p0}",
-  "Wonder in your hand": "Kỳ quan trên tay bạn"
+  "Wonder in your hand": "Kỳ quan trên tay bạn",
+  "Current combat forces": "Lực lượng chiến đấu hiện tại",
+  "Public combat bonuses before tactics": "Thưởng chiến đấu công khai trước chiến thuật",
+  "Value bonus": "Thưởng giá trị",
+  "Fortress: cancels 1 hit (round 1)": "Pháo đài: hủy 1 đòn trúng (vòng 1)",
+  "Fortress: +1 die (round 1)": "Pháo đài: +1 xúc xắc (vòng 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Chỉ thưởng công khai · không gồm chiến thuật, hiệu ứng biểu tượng xúc xắc và lựa chọn chưa giải quyết",
+  "Steel Weapons not activated: +{p0} value if activated": "Vũ khí thép chưa kích hoạt: +{p0} giá trị nếu kích hoạt",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Vòng 1: tổng thưởng tối đa +2, gồm cả thưởng biểu tượng xúc xắc",
+  "Battle · Round": "Trận chiến · Vòng"
 }

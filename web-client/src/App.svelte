@@ -964,17 +964,6 @@
               .filter(Boolean)
               .join('. ')}
             onclick={() => controller.patch({ scorePlayer: player.index })}
-            onmouseenter={(e) => {
-              const r = e.currentTarget.getBoundingClientRect();
-              controller.commands.hoverPlayer(player.index, {
-                x: r.x,
-                y: r.y,
-                width: r.width,
-                height: r.height,
-              });
-            }}
-            onmouseleave={() => controller.commands.leavePlayer()}
-            onfocus={() => {}}
             onblur={() => controller.commands.leavePlayer()}
           >
             <span class="civilization-watermark" aria-hidden="true"
@@ -991,18 +980,32 @@
                 >{/if}</span
             ><span class="player-info"
               ><strong>{player.civilization}</strong><small
-                >{#if $session.avatars[player.index]}<img
-                    class="player-avatar"
-                    src={$session.avatars[player.index]}
-                    alt=""
-                  />{/if}<span class="player-name">{player.index === $session.seat
-                  ? 'You'
-                  : player.name}</span>{#if $session.playerBadges?.[player.index]}<img
-                    class="supporter-badge"
-                    src={$session.playerBadges[player.index]!.url}
-                    alt={$session.playerBadges[player.index]!.label}
-                    title={$session.playerBadges[player.index]!.label}
-                  />{/if}</small
+                ><span
+                  class="player-identity"
+                  role="group"
+                  onmouseenter={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    controller.commands.hoverPlayer(player.index, {
+                      x: r.x,
+                      y: r.y,
+                      width: r.width,
+                      height: r.height,
+                    });
+                  }}
+                  onmouseleave={() => controller.commands.leavePlayer()}
+                  >{#if $session.avatars[player.index]}<img
+                      class="player-avatar"
+                      src={$session.avatars[player.index]}
+                      alt=""
+                    />{/if}<span class="player-name"
+                    >{player.index === $session.seat ? 'You' : player.name}</span
+                  >{#if $session.playerBadges?.[player.index]}<img
+                      class="supporter-badge"
+                      src={$session.playerBadges[player.index]!.url}
+                      alt={$session.playerBadges[player.index]!.label}
+                      title={$session.playerBadges[player.index]!.label}
+                    />{/if}</span
+                ></small
               ><span class="player-events"><EventMarkers remaining={player.eventTokens} /></span>
               {#if turnLabel || progressLabel}<span class="player-turn" class:round-inactive={!turnLabel}
                   >{#if turnLabel || status === 'current'}<ArrowRight

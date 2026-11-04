@@ -52,19 +52,13 @@ pub(crate) fn use_great_warlord() -> Ability {
                 }
             },
         )
-        .add_simple_persistent_event_listener(
-            |event| &mut event.combat_round_start,
-            9,
-            |_game, p, r| {
-                if r.combat.modifiers.contains(&CombatModifier::GreatWarlord)
-                    && r.combat.attacker() == p.index
-                {
-                    r.attacker_strength.extra_combat_value += 2;
-                    r.attacker_strength
-                        .roll_log
-                        .push("Player gets +2 combat value for Great Warlord".to_string());
-                }
-            },
-        )
+        .add_combat_strength_listener(9, |_game, combat, strength, role| {
+            if combat.modifiers.contains(&CombatModifier::GreatWarlord) && role.is_attacker() {
+                strength.extra_combat_value += 2;
+                strength
+                    .roll_log
+                    .push("Player gets +2 combat value for Great Warlord".to_string());
+            }
+        })
         .build()
 }

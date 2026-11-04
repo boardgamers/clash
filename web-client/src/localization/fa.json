@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "به‌جای پژوهش معمول، از یکی از کارت‌ها یا توانایی‌های زیر استفاده کنید. هزینه‌ها و اثرهای خود آن همچنان اعمال می‌شوند.",
   "No research resource cost": "پژوهش بدون هزینهٔ منابع",
   "Required for {p0}": "لازم برای {p0}",
-  "Wonder in your hand": "عجایب در دست شما"
+  "Wonder in your hand": "عجایب در دست شما",
+  "Current combat forces": "نیروهای فعلی نبرد",
+  "Public combat bonuses before tactics": "پاداش‌های عمومی نبرد پیش از تاکتیک‌ها",
+  "Value bonus": "پاداش ارزش",
+  "Fortress: cancels 1 hit (round 1)": "دژ: ۱ ضربه را خنثی می‌کند (دور ۱)",
+  "Fortress: +1 die (round 1)": "دژ: ۱+ تاس (دور ۱)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "فقط پاداش‌های عمومی · بدون تاکتیک‌ها، اثر نمادهای تاس و انتخاب‌های حل‌نشده",
+  "Steel Weapons not activated: +{p0} value if activated": "سلاح‌های فولادی فعال نیست: در صورت فعال‌سازی {p0}+ ارزش",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "دور ۱: مجموع پاداش حداکثر ۲+، شامل پاداش نمادهای تاس",
+  "Battle · Round": "نبرد · دور"
 }

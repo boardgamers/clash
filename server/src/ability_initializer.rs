@@ -246,7 +246,13 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Sync
         + Send,
     ) -> Self {
-        self.add_simple_persistent_event_listener(
+        let preview = listener.clone();
+        self.add_transient_event_listener(
+            |event| &mut event.combat_strength_preview,
+            priority,
+            move |strength, combat, game, p| preview(game, combat, strength, combat.role(p.index)),
+        )
+        .add_simple_persistent_event_listener(
             |event| &mut event.combat_round_start,
             priority,
             move |game, p, s| {

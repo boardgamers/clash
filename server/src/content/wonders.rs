@@ -50,24 +50,34 @@ fn great_wall() -> WonderInfo {
         ResourcePile::new(3, 2, 7, 0, 0, 0, 5),
         Advance::Siegecraft,
     )
+    .add_transient_event_listener(
+        |event| &mut event.combat_opponent_strength_preview,
+        8,
+        |s, c, game, p| great_wall_strength(game, c, p.index, s),
+    )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_round_start,
         8,
-        move |game, p, s| {
-            let c = &s.combat;
-            if c.first_round()
-                && c.role(p.index) == CombatRole::Defender
-                && c.defender_city(game)
-                    .is_some_and(|c| c.mood_state == MoodState::Happy)
-            {
-                s.attacker_strength.extra_combat_value -= 2;
-                s.attacker_strength
-                    .roll_log
-                    .push("Great Wall gives -2 combat value in the first round".to_string());
-            }
-        },
+        |game, p, s| great_wall_strength(game, &s.combat, p.index, &mut s.attacker_strength),
     )
     .build()
+}
+
+fn great_wall_strength(
+    game: &Game,
+    c: &crate::combat::Combat,
+    owner: usize,
+    s: &mut crate::combat_listeners::CombatStrength,
+) {
+    if c.first_round()
+        && c.role(owner) == CombatRole::Defender
+        && c.defender_city(game)
+            .is_some_and(|city| city.mood_state == MoodState::Happy)
+    {
+        s.extra_combat_value -= 2;
+        s.roll_log
+            .push("Great Wall gives -2 combat value in the first round".to_string());
+    }
 }
 
 fn great_statue() -> WonderInfo {

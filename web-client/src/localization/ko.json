@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "일반 연구 대신 아래 카드나 능력을 사용하세요. 해당 카드나 능력의 비용과 효과는 그대로 적용됩니다.",
   "No research resource cost": "연구 자원 비용 없음",
   "Required for {p0}": "{p0}에 필요",
-  "Wonder in your hand": "손에 있는 불가사의"
+  "Wonder in your hand": "손에 있는 불가사의",
+  "Current combat forces": "현재 전투 병력",
+  "Public combat bonuses before tactics": "전술 적용 전 공개 전투 보너스",
+  "Value bonus": "전투 값 보너스",
+  "Fortress: cancels 1 hit (round 1)": "요새: 명중 1회 취소 (1라운드)",
+  "Fortress: +1 die (round 1)": "요새: 주사위 +1개 (1라운드)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "공개 보너스만 표시 · 전술, 주사위 기호 효과 및 미결정 선택 제외",
+  "Steel Weapons not activated: +{p0} value if activated": "강철 무기 미활성: 활성화 시 전투 값 +{p0}",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "1라운드: 주사위 기호 보너스를 포함한 총 보너스는 최대 +2",
+  "Battle · Round": "전투 · 라운드"
 }

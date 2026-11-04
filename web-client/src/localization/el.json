@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Χρησιμοποιήστε μία από τις παρακάτω κάρτες ή ικανότητες αντί για κανονική έρευνα. Το κόστος και οι επιδράσεις της εξακολουθούν να ισχύουν.",
   "No research resource cost": "Έρευνα χωρίς κόστος πόρων",
   "Required for {p0}": "Απαιτείται για {p0}",
-  "Wonder in your hand": "Θαύμα στο χέρι σας"
+  "Wonder in your hand": "Θαύμα στο χέρι σας",
+  "Current combat forces": "Τρέχουσες δυνάμεις μάχης",
+  "Public combat bonuses before tactics": "Δημόσια μπόνους μάχης πριν από τις τακτικές",
+  "Value bonus": "Μπόνους αξίας",
+  "Fortress: cancels 1 hit (round 1)": "Οχυρό: ακυρώνει 1 πλήγμα (γύρος 1)",
+  "Fortress: +1 die (round 1)": "Οχυρό: +1 ζάρι (γύρος 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Μόνο δημόσια μπόνους · εξαιρούνται τακτικές, επιδράσεις συμβόλων ζαριών και εκκρεμείς επιλογές",
+  "Steel Weapons not activated: +{p0} value if activated": "Χαλύβδινα όπλα ανενεργά: +{p0} αξία αν ενεργοποιηθούν",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Γύρος 1: συνολικό μπόνους έως +2, μαζί με τα μπόνους συμβόλων ζαριών",
+  "Battle · Round": "Μάχη · Γύρος"
 }

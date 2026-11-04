@@ -25,6 +25,7 @@ use serde_json::{Value, json};
 mod actions;
 mod collection_potential;
 mod combat_estimate;
+mod combat_summary;
 mod decisions;
 mod effects;
 mod journal;
@@ -268,7 +269,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         "cities": p.cities.iter().map(|c| json!({"position": c.position, "size": c.size(), "capacity": c.mood_modified_size(p), "mood": c.mood_state, "activations": c.activations,"protection":crate::content::civilizations::egypt::protection(p,c.position),"independentPort":crate::content::civilizations::phoenicia::independent_port(game,c.pieces.port),"influenceMarker":c.influence_marker})).collect::<Vec<_>>()
     })).collect::<Vec<_>>();
     let Some(seat) = seat else {
-        let mut result = json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"activeEffects":active_effects,"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
+        let mut result = json!({"logOriginNames":log_origin_names,"builtWonders":built_wonders,"cardCatalog":card_catalog,"eventCatalog":event_catalog,"activeEffects":active_effects,"combatSummary":combat_summary::describe(game),"pendingEvent":pending_event,"civilizationDraft":civilization_draft,"waitingFor":waiting_for,"activePlayers":active_players,"activePlayer": active, "canPlay": false, "supportedPhase": supported_phase, "players": players, "cities": [], "advances": [], "objectiveCards": [], "wonderCards": [], "wonderCatalog":wonder_catalog, "objectiveDecision": null, "cityActions": [], "settlers": [], "stopMovement": null, "canUndo": false, "canEndTurn": false, "barbarianGuide":barbarian_guide,"pirateSpawns":pirate_spawns,"seaRoutes":sea_routes});
         result["tradeRoutes"] = json!(trade_routes);
         result["regions"] = json!(regions);
         return result;
@@ -458,6 +459,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             .collect::<Vec<_>>()
     );
     result["activeEffects"] = json!(active_effects);
+    result["combatSummary"] = combat_summary::describe(game);
     result["earlyChoices"] = json!(early_offers);
     result
 }

@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Gebruik een kaart of vaardigheid hieronder in plaats van normaal onderzoek. De eigen kosten en effecten blijven gelden.",
   "No research resource cost": "Geen grondstofkosten voor onderzoek",
   "Required for {p0}": "Vereist voor {p0}",
-  "Wonder in your hand": "Wereldwonder in je hand"
+  "Wonder in your hand": "Wereldwonder in je hand",
+  "Current combat forces": "Huidige strijdkrachten",
+  "Public combat bonuses before tactics": "Openbare gevechtsbonussen vóór tactieken",
+  "Value bonus": "Gevechtswaardebonus",
+  "Fortress: cancels 1 hit (round 1)": "Fort: annuleert 1 treffer (ronde 1)",
+  "Fortress: +1 die (round 1)": "Fort: +1 dobbelsteen (ronde 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Alleen openbare bonussen · zonder tactieken, dobbelsteensymbooleffecten en onbesliste keuzes",
+  "Steel Weapons not activated: +{p0} value if activated": "Stalen wapens niet geactiveerd: +{p0} gevechtswaarde bij activering",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Ronde 1: totale bonus maximaal +2, inclusief dobbelsteensymboolbonussen",
+  "Battle · Round": "Gevecht · Ronde"
 }

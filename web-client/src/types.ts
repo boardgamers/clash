@@ -278,7 +278,16 @@ export interface ActiveEffect {
   players: number[];
   rules: string[];
 }
+export interface PublicCombatBonus {
+  dice: number;
+  extraDice: number;
+  valueBonus: number;
+  hitCancels: number;
+  effects: string[];
+  inactive: string[];
+}
 export interface View {
+  combatSummary?: { round: number; attacker: PublicCombatBonus; defender: PublicCombatBonus } | null;
   earlyChoices?: { key: string; title: string; options: { label: string; description: string; response: unknown }[]; selected: unknown | null }[];
   activeEffects?: ActiveEffect[];
   cardCatalog?: Pick<ActionCard, 'id' | 'name' | 'description' | 'free' | 'tactics'>[];

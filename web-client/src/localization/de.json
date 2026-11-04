@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Nutze eine der folgenden Karten oder Fähigkeiten statt der normalen Forschung. Ihre eigenen Kosten und Effekte gelten weiterhin.",
   "No research resource cost": "Keine Ressourcenkosten für die Forschung",
   "Required for {p0}": "Erforderlich für {p0}",
-  "Wonder in your hand": "Wunder auf deiner Hand"
+  "Wonder in your hand": "Wunder auf deiner Hand",
+  "Current combat forces": "Aktuelle Kampftruppen",
+  "Public combat bonuses before tactics": "Öffentliche Kampfboni vor Taktiken",
+  "Value bonus": "Kampfwertbonus",
+  "Fortress: cancels 1 hit (round 1)": "Festung: verhindert 1 Treffer (Runde 1)",
+  "Fortress: +1 die (round 1)": "Festung: +1 Würfel (Runde 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Nur öffentliche Boni · ohne Taktiken, Würfelsymboleffekte und offene Entscheidungen",
+  "Steel Weapons not activated: +{p0} value if activated": "Stahlwaffen nicht aktiviert: +{p0} Kampfwert bei Aktivierung",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Runde 1: Gesamtbonus auf +2 begrenzt, einschließlich Würfelsymbolboni",
+  "Battle · Round": "Kampf · Runde"
 }

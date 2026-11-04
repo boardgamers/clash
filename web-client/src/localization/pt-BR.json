@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Use uma carta ou habilidade abaixo em vez da pesquisa normal. Seus próprios custos e efeitos continuam se aplicando.",
   "No research resource cost": "Pesquisa sem custo em recursos",
   "Required for {p0}": "Necessário para {p0}",
-  "Wonder in your hand": "Maravilha na sua mão"
+  "Wonder in your hand": "Maravilha na sua mão",
+  "Current combat forces": "Forças atuais em combate",
+  "Public combat bonuses before tactics": "Bônus públicos de combate antes das táticas",
+  "Value bonus": "Bônus de valor",
+  "Fortress: cancels 1 hit (round 1)": "Fortaleza: cancela 1 acerto (rodada 1)",
+  "Fortress: +1 die (round 1)": "Fortaleza: +1 dado (rodada 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Somente bônus públicos · exclui táticas, efeitos dos símbolos dos dados e escolhas pendentes",
+  "Steel Weapons not activated: +{p0} value if activated": "Armas de aço não ativadas: +{p0} de valor se ativadas",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Rodada 1: bônus total limitado a +2, incluindo bônus dos símbolos dos dados",
+  "Battle · Round": "Batalha · Rodada"
 }

@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Используйте указанную ниже карту или способность вместо обычного исследования. Её собственные затраты и эффекты по-прежнему применяются.",
   "No research resource cost": "Исследование без затрат ресурсов",
   "Required for {p0}": "Требуется для {p0}",
-  "Wonder in your hand": "Чудо у вас на руке"
+  "Wonder in your hand": "Чудо у вас на руке",
+  "Current combat forces": "Текущие боевые силы",
+  "Public combat bonuses before tactics": "Открытые боевые бонусы до тактики",
+  "Value bonus": "Бонус к боевому значению",
+  "Fortress: cancels 1 hit (round 1)": "Крепость: отменяет 1 попадание (раунд 1)",
+  "Fortress: +1 die (round 1)": "Крепость: +1 кубик (раунд 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Только открытые бонусы · без тактики, эффектов символов кубиков и нерешённых выборов",
+  "Steel Weapons not activated: +{p0} value if activated": "Стальное оружие не активировано: +{p0} к значению при активации",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Раунд 1: общий бонус не более +2, включая бонусы символов кубиков",
+  "Battle · Round": "Битва · Раунд"
 }

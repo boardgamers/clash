@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Folosește o carte sau o abilitate de mai jos în locul cercetării normale. Costurile și efectele proprii se aplică în continuare.",
   "No research resource cost": "Cercetare fără cost în resurse",
   "Required for {p0}": "Necesar pentru {p0}",
-  "Wonder in your hand": "Minune în mâna ta"
+  "Wonder in your hand": "Minune în mâna ta",
+  "Current combat forces": "Forțele actuale de luptă",
+  "Public combat bonuses before tactics": "Bonusuri publice de luptă înaintea tacticilor",
+  "Value bonus": "Bonus de valoare",
+  "Fortress: cancels 1 hit (round 1)": "Fortăreață: anulează 1 lovitură (runda 1)",
+  "Fortress: +1 die (round 1)": "Fortăreață: +1 zar (runda 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Doar bonusuri publice · fără tactici, efectele simbolurilor zarurilor și alegeri nerezolvate",
+  "Steel Weapons not activated: +{p0} value if activated": "Arme de oțel neactivate: +{p0} valoare dacă sunt activate",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Runda 1: bonus total limitat la +2, inclusiv bonusurile simbolurilor zarurilor",
+  "Battle · Round": "Luptă · Runda"
 }

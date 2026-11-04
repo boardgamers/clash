@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "Brug et kort eller en evne nedenfor i stedet for normal forskning. Dets egne omkostninger og effekter gælder stadig.",
   "No research resource cost": "Ingen ressourceomkostning for forskning",
   "Required for {p0}": "Påkrævet til {p0}",
-  "Wonder in your hand": "Vidunder på din hånd"
+  "Wonder in your hand": "Vidunder på din hånd",
+  "Current combat forces": "Aktuelle kampstyrker",
+  "Public combat bonuses before tactics": "Offentlige kampbonusser før taktikker",
+  "Value bonus": "Kampværdibonus",
+  "Fortress: cancels 1 hit (round 1)": "Fæstning: annullerer 1 træffer (runde 1)",
+  "Fortress: +1 die (round 1)": "Fæstning: +1 terning (runde 1)",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "Kun offentlige bonusser · uden taktikker, terningsymboleffekter og uafklarede valg",
+  "Steel Weapons not activated: +{p0} value if activated": "Stålvåben ikke aktiveret: +{p0} kampværdi ved aktivering",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "Runde 1: samlet bonus begrænset til +2, inklusive terningsymbolbonusser",
+  "Battle · Round": "Kamp · Runde"
 }

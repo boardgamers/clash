@@ -920,3 +920,18 @@ layout with numeric action costs and action icons. Research payment allocation
 omits redundant explanatory text and totals while retaining explicit confirmation;
 other payment pickers are unchanged. Regression coverage includes private-hand
 filtering and English/French desktop/mobile research flows.
+
+# Viewer 0.1.200 / engine 0.4.134
+
+Player hovercards now open only over the player's name/avatar, not the surrounding
+civilization tile. Live combat decisions share a compact journal-style force table:
+only engaged attacker IDs count, alongside surviving defenders, dice and public
+combat-value effects. Fortress round-one dice/protection and activated versus
+conditional Steel Weapons use the engine's existing rules. Unresolved choices,
+tactics and dice-symbol effects are excluded explicitly in the tooltip. Duplicate
+totals and the generic tactics instruction are removed.
+
+The read-only public projection shares pure combat listeners without executing
+payments, tactics, rolls or mutations. Existing battle resolution and saved history
+are unchanged. New UI strings are translated in all 17 locales. Publish the matching
+viewer and engine together.

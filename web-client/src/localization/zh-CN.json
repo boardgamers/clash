@@ -5246,5 +5246,14 @@
   "Use a card or ability below instead of normal research. Its own costs and effects still apply.": "可以使用下方的卡牌或能力代替普通研究。该卡牌或能力自身的费用与效果仍然适用。",
   "No research resource cost": "研究无需支付资源",
   "Required for {p0}": "{p0}所需",
-  "Wonder in your hand": "你手中的奇迹"
+  "Wonder in your hand": "你手中的奇迹",
+  "Current combat forces": "当前参战兵力",
+  "Public combat bonuses before tactics": "战术前的公开战斗加成",
+  "Value bonus": "战斗值加成",
+  "Fortress: cancels 1 hit (round 1)": "要塞：抵消1次命中（第1回合）",
+  "Fortress: +1 die (round 1)": "要塞：+1颗骰子（第1回合）",
+  "Public bonuses only · excludes tactics, dice-symbol effects and unresolved choices": "仅公开加成 · 不含战术、骰子符号效果及未解决的选择",
+  "Steel Weapons not activated: +{p0} value if activated": "钢铁武器未激活：激活后战斗值+{p0}",
+  "Round 1: total bonus capped at +2, including dice-symbol bonuses": "第1回合：总加成上限为+2，包括骰子符号加成",
+  "Battle · Round": "战斗 · 回合"
 }
