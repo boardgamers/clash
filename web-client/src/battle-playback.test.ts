@@ -125,3 +125,47 @@ test('rolls arriving after a tactics prompt stay assigned to their public battle
   assert.equal(cue.combat.attacker.hits, 1);
   assert.equal(cue.combat.defender.hits, 0);
 });
+
+test('popup cues retain every discarded leader roll and the final result exactly once', () => {
+  const game = fixture('retreat_no.outcome1');
+  game.log![0].rounds[0].turns[0].actions = [
+    {
+      items: [
+        {
+          player: 0,
+          origin: { Ability: 'Combat' },
+          CombatRound: {
+            round: 1,
+            attackers: { leader: 1, infantry: 1 },
+            defenders: { infantry: 1 },
+            defending_player: 1,
+          },
+        },
+        {
+          player: 0,
+          origin: { Ability: 'Combat' },
+          CombatRoll: {
+            rolls: [
+              { value: 1, unit_type: 'Leader', bonus: true },
+              { value: 1, unit_type: 'Leader', bonus: true },
+              { value: 6, unit_type: 'Infantry', bonus: true },
+              { value: 1, unit_type: 'Leader', bonus: false },
+            ],
+            combat_value: 8,
+            hits: 1,
+          },
+        },
+      ],
+    },
+  ];
+  game.log_index = 1;
+  const [cue] = battleCues(game, 0);
+  assert.deepEqual(cue.combat.attacker.dice, [
+    { value: 1, symbol: 'Leader', effect: 're-roll' },
+    { value: 1, symbol: 'Leader', effect: 're-roll' },
+    { value: 6, symbol: 'Infantry', effect: '+1 combat value' },
+    { value: 1, symbol: 'Leader' },
+  ]);
+  assert.equal(cue.combat.attacker.value, 8);
+  assert.equal(cue.combat.attacker.hits, 1);
+});

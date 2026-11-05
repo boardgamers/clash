@@ -227,6 +227,12 @@
   border-color: #ad935d;
   color: var(--ink);
 }
+.battle-die.rerolled {
+  color: var(--muted);
+}
+.battle-die.rerolled b {
+  text-decoration: line-through;
+}
 .battle-hit-count {
   display: flex;
   flex-wrap: wrap;

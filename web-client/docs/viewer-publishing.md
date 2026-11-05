@@ -964,3 +964,22 @@ and the six-age default; legacy Epic remains eight ages. The accessible AgeTrack
 provides localized mode rules and ending captions on desktop and mobile.
 No existing games are migrated or replayed. See
 [implementation and verification](../../docs/monumental-game-length.md).
+
+# Viewer 0.1.204 / engine unchanged (0.4.137)
+
+Battle popups now match the journal: discarded dice explicitly recorded with the
+`re-roll` effect have muted, struck-through values and a reroll icon. Final rolls,
+inactive leader faces and blocked abilities retain their normal presentation.
+Accessible labels identify rerolled dice. Combat values, hits, rules and saved
+history are unchanged. Regression coverage retains repeated discarded rolls and
+the final result exactly once; the battle-dice browser smoke checks 1400, 390 and
+320px widths with animation enabled and reduced motion.
+
+Publish only the viewer, preserving engine 0.4.137 and the current creation
+options, including the exact game-length labels and Standard default. No live
+game changes or smaller-city experiment are included.
+
+Verified with 1,029 frontend tests, locale checks, Svelte checks, production build
+and the focused battle-dice browser smoke. The older `combat-smoke.mjs` still
+fails its unrelated map-label expectation (`Battle · C1` versus the existing
+`Battle · Round 1`); this release does not change that label or suppress the test.

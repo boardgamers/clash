@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Swords, Shield, X, CircleSlash } from 'lucide-svelte';
+  import { Swords, Shield, X, CircleSlash, RotateCcw } from 'lucide-svelte';
   import type { Controller } from './controller';
   import CivilizationEmblem from './CivilizationEmblem.svelte';
   import UnitIcon from './UnitIcon.svelte';
@@ -41,17 +41,22 @@
             </div>
             {#if side.dice}
               <div class="battle-dice" aria-label={`${side.civilization ?? ''} recorded dice`}>
-                {#each side.dice as die, i}<span
+                {#each side.dice as die, i}
+                  {@const label = `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : (die.blockedBy ? `Ability blocked by ${die.blockedBy}` : die.effect ?? 'No ability activated')}` : 'Face not recorded'}`}
+                  <span
                     class="battle-die"
                     class:activated={!!die.effect}
                     class:ability-blocked={!!die.blockedBy}
+                    class:rerolled={die.effect === 're-roll'}
                     style={`--die-delay:${i * 45}ms`}
-                    title={`${die.value}${die.symbol ? ` · ${die.symbol}` : ''}${die.blockedBy ? ` · Ability blocked by ${die.blockedBy}` : die.effect ? ` · ${die.effect}` : ''}`}
+                    role="img"
+                    aria-label={label}
+                    title={label}
                   >
                     <b>{die.value}</b>{#if die.symbol}<UnitIcon
                         type={die.symbol === 'Leader' ? { Leader: 'Leader' } : die.symbol}
                         size={12}
-                      />{/if}{#if die.blockedBy}<CircleSlash size={10} />{/if}
+                      />{/if}{#if die.blockedBy}<CircleSlash size={10} />{/if}{#if die.effect === 're-roll'}<RotateCcw size={10} />{/if}
                   </span>{:else}<small>No dice</small>{/each}
               </div>
               {#if side.dice.some(d => d.blockedBy)}<small class="combat-blocked-note">Abilities blocked by {side.diceBlockedBy}</small>{/if}
