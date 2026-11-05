@@ -14,10 +14,13 @@ test('published creation choices match the approved modes and preserve the defau
   );
   assert.deepEqual(option, proposal);
   assert.equal(option.default, 'Standard');
-  assert.deepEqual(
-    option.items.map((item: { name: string }) => item.name),
-    ['Standard', 'Shorter', 'RollToEnd', 'WonderfulEnding', 'Epic'],
-  );
+  assert.deepEqual(option.items, [
+    { name: 'Shorter', label: '4 ages — 2 settlers, 2 free advances per status phase' },
+    { name: 'Standard', label: '6 ages' },
+    { name: 'RollToEnd', label: '6–7 ages — roll to end' },
+    { name: 'WonderfulEnding', label: '6–7 ages — wonderful ending' },
+    { name: 'Epic', label: '8 ages' },
+  ]);
   for (const item of option.items) {
     const game = JSON.parse(await engine.init(2, [], { length: item.name }, 'creation-options', {}));
     assert.equal(game.options?.length ?? 'Standard', item.name);

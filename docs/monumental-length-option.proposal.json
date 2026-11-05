@@ -4,10 +4,10 @@
   "name": "length",
   "default": "Standard",
   "items": [
-    { "name": "Standard", "label": "Normal — 6 ages" },
-    { "name": "Shorter", "label": "Shorter — 4 ages, 2 settlers, two free advances" },
-    { "name": "RollToEnd", "label": "Roll to End, up to 7 ages" },
-    { "name": "WonderfulEnding", "label": "Wonderful Ending, up to 7 ages" },
-    { "name": "Epic", "label": "Epic — 8 ages" }
+    { "name": "Shorter", "label": "4 ages — 2 settlers, 2 free advances per status phase" },
+    { "name": "Standard", "label": "6 ages" },
+    { "name": "RollToEnd", "label": "6–7 ages — roll to end" },
+    { "name": "WonderfulEnding", "label": "6–7 ages — wonderful ending" },
+    { "name": "Epic", "label": "8 ages" }
   ]
 }
