@@ -77,6 +77,11 @@ pub struct PaymentOptions {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub alternatives: Vec<ResourcePile>,
     pub default: ResourcePile,
+    /// Separately converted fee: the first entry is included in `default` and
+    /// every alternative. Each entry is a complete legal fee payment; the outer
+    /// conversions apply only to the remaining cost, never to these entries.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub separate_fee: Vec<ResourcePile>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub conversions: Vec<PaymentConversion>,
@@ -97,6 +102,7 @@ impl PaymentOptions {
         PaymentOptions {
             alternatives: Vec::new(),
             default,
+            separate_fee: Vec::new(),
             conversions,
             modifiers,
             origin,
@@ -109,6 +115,24 @@ impl PaymentOptions {
     }
 
     fn find_payment(&self, available: &ResourcePile, exact: bool) -> Option<ResourcePile> {
+        if let Some(default_fee) = self.separate_fee.first() {
+            let mut remainder = self.clone();
+            remainder.default -= default_fee.clone();
+            for alternative in &mut remainder.alternatives {
+                *alternative -= default_fee.clone();
+            }
+            remainder.separate_fee.clear();
+            return self.separate_fee.iter().find_map(|fee| {
+                if !available.has_at_least(fee) {
+                    return None;
+                }
+                let mut remaining = available.clone();
+                remaining -= fee.clone();
+                remainder
+                    .find_payment(&remaining, exact)
+                    .map(|payment| payment + fee.clone())
+            });
+        }
         if !self.alternatives.is_empty() {
             let mut option = self.clone();
             option.alternatives.clear();
@@ -276,6 +300,9 @@ impl PaymentOptions {
         }
         for conversion in &self.conversions {
             vec.extend(conversion.to.types());
+        }
+        for fee in &self.separate_fee {
+            vec.extend(fee.types());
         }
         vec
     }
@@ -642,6 +669,35 @@ pub(crate) fn base_resources() -> Vec<ResourcePile> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn separate_fee_tries_all_choices_without_converting_the_fee() {
+        let mut cost = PaymentOptions::new(
+            ResourcePile::mood_tokens(2),
+            vec![PaymentConversion::unlimited(
+                ResourcePile::mood_tokens(1),
+                ResourcePile::wood(1),
+            )],
+            vec![],
+            check_event_origin(),
+        );
+        cost.separate_fee = vec![
+            ResourcePile::mood_tokens(1),
+            ResourcePile::culture_tokens(1),
+        ];
+        // Spending mood on the fee first leaves an unusable culture token.
+        // The search must retry with culture reserved for the fee instead.
+        let payment = ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1);
+        assert!(cost.is_valid_payment(&payment));
+        assert_eq!(cost.first_valid_payment(&payment), Some(payment));
+        assert!(!cost.is_valid_payment(&ResourcePile::wood(2)));
+        assert_eq!(cost.first_valid_payment(&ResourcePile::wood(2)), None);
+        assert!(
+            cost.possible_resource_types()
+                .contains(&ResourceType::CultureTokens)
+        );
+        assert_eq!(cost.default_payment(), ResourcePile::mood_tokens(2));
+    }
+
     #[test]
     fn optional_token_discount_accepts_every_exact_payment_in_the_range() {
         use super::*;

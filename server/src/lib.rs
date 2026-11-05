@@ -29,6 +29,7 @@ pub mod analysis;
 pub mod barbarians;
 pub mod board_history;
 pub mod cache;
+pub mod calendar_knowledge;
 pub mod card;
 pub mod city;
 pub mod city_pieces;

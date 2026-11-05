@@ -190,6 +190,8 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         early_choices: vec![],
         early_choice_update: false,
         uncommitted_calendar: false,
+        calendar_knowledge: None,
+        secrets_stripped: false,
         seed: setup.seed.clone(),
         context: GameContext::Play,
         version: JSON_SCHEMA_VERSION,

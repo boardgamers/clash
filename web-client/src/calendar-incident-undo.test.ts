@@ -30,7 +30,7 @@ async function ready(calendar = true) {
 }
 
 test('Calendar exposes Undo for the owner after a known incident, without predicting the hidden draw', async () => {
-  const before = await ready();
+  const before = move(move(await ready(), { Playing: { Custom: { action: "Calendar" } } }), "Undo");
   const action = research('Storage');
   assert.deepEqual(predictMove(engine, strip(before), action, 0), { reason: 'hidden' });
   const after = move(before, action);
@@ -55,7 +55,7 @@ test('predicted Undo preserves the new knowledge floor and cannot refund Astrono
   const game = JSON.parse(await ready(false));
   game.players[0].incident_tokens = 2;
   const astronomy = move(JSON.stringify(game), research('Astronomy'));
-  assert.equal(view(astronomy).canUndo, true);
+  assert.equal(view(astronomy).canUndo, false, "automatic acquisition disclosure seals Astronomy");
   const after = move(astronomy, research('Storage'));
   assert.equal(view(after).canUndo, true);
   const undone = move(after, 'Undo');

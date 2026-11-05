@@ -119,6 +119,7 @@ export class Controller {
   private raw = '';
   /** The latest state received from the host. */
   private confirmedRaw = '';
+  private localCalendar: { base: string; turn: number; incident: number } | null = null;
   private planningInfo: {key: string; base: string; projected: string; actions: Move[]; waiting: boolean; other: string; label: string; pendingPlayer: number} | null = null;
   private planningQueue: ActionQueue | null = null;
   private confirmedPrint: string | null = null;
@@ -341,9 +342,15 @@ export class Controller {
         // A predicted capture can already be showing the planning board while
         // the confirmed game still waits for the defender's replacement settler.
         // Keep queries on that same projection after acknowledging the capture.
-        this.raw = this.planningInfo && !this.planningInfo.waiting
-          ? this.planningInfo.projected
-          : raw;
+        if (this.localCalendar) {
+          // A private local prompt is not in the outbox. Confirm its underlying
+          // move without replacing the displayed prompt or its query state.
+          this.localCalendar.base = raw;
+        } else {
+          this.raw = this.planningInfo && !this.planningInfo.waiting
+            ? this.planningInfo.projected
+            : raw;
+        }
         this.markSeen();
         if (get(this.session).error === WAITING) this.patch({ error: '' });
       }
@@ -366,8 +373,9 @@ export class Controller {
     this.notify('Game updated.');
     return true;
   }
-  private apply(raw: string, { predicted = false, quiet = false } = {}) {
+  private apply(raw: string, { predicted = false, quiet = false, local = false } = {}) {
     if (!this.engine) return;
+    this.localCalendar = null;
     if (quiet) {
       // Withdrawn moves must not continue with their quoted payments or card flows.
       this.quotedActionPayment = null;
@@ -396,7 +404,7 @@ export class Controller {
     this.raw = raw;
     this.moveCache.clear();
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
-    this.undoPreview.remember(raw, game, view, old.seat);
+    if (!local) this.undoPreview.remember(raw, game, view, old.seat);
     if (view.influenceContext) this.influenceAttemptPending = true;
     const quotedPayment = this.quotedActionPayment;
     this.quotedActionPayment = null;
@@ -608,7 +616,7 @@ export class Controller {
         }
       }
     }
-    this.commands.replaceLog(journal(game, view).map((entry) => entry.text));
+    if (!local) this.commands.replaceLog(journal(game, view).map((entry) => entry.text));
     if (view.decision || view.objectiveDecision || view.choiceDecision || view.explorationDecision)
       this.closeActivity();
     const recruitedMover = bonusGranted
@@ -654,8 +662,10 @@ export class Controller {
       this.influenceAttemptPending = false;
     }
     this.submittedMove = null;
-    this.afterPlaybackLoad(old, game, !predicted);
-    this.migrateRazeSetting();
+    if (!local) {
+      this.afterPlaybackLoad(old, game, !predicted);
+      this.migrateRazeSetting();
+    }
     if (automaticPayment) this.submit(automaticPayment);
     else if (!quiet) this.continueBoarding();
   }
@@ -1912,6 +1922,31 @@ export class Controller {
     )
       return;
     if ((move === 'Undo' && !s.view?.canUndo) || (move === 'Redo' && !s.view?.canRedo)) return;
+    // A known card is a private local view, not a move or a prediction/outbox entry.
+    if (this.localCalendar) {
+      const local = this.localCalendar;
+      const payments = typeof move === 'object' && move !== null
+        ? (move as { Response?: { Payment?: Pile[] } }).Response?.Payment : undefined;
+      if (move !== 'Undo' && !payments) return;
+      this.localCalendar = null;
+      this.apply(local.base, { quiet: true, local: true });
+      if (move === 'Undo' || !payments?.some(p => Object.values(p).some(Boolean))) return;
+      this.submit({ CalendarBury: { turn: local.turn, incident: local.incident, payment: payments[0] } });
+      return;
+    }
+    const known = s.game?.calendar_knowledge;
+    if (known?.player === s.seat && known.incident != null &&
+        typeof move === 'object' && move !== null &&
+        (move as { Playing?: { Custom?: { action?: string } } }).Playing?.Custom?.action === 'Calendar' &&
+        this.engine?.tryMove && s.view?.canPlay) {
+      try {
+        const base = this.raw;
+        const opened = this.engine.tryMove(base, JSON.stringify(move), s.seat);
+        this.apply(opened, { quiet: true, local: true });
+        this.localCalendar = { base, turn: known.turn, incident: known.incident };
+      } catch (error) { this.patch({ error: String(error) }); }
+      return;
+    }
     this.patch({ pending: true, error: '' });
     this.submittedMove = move;
     this.quotedActionPayment =

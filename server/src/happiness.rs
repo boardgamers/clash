@@ -194,8 +194,30 @@ pub fn happiness_cost(
         city_size_steps,
         &[ResourceType::MoodTokens],
     );
-    // either none or both can use Colosseum
-    payment_options.default += action_type.payment_options(game, player).default;
+    let activation_options = action_type.payment_options(game, player);
+    let activation_cost = activation_options.default.clone();
+    // Voting's extra token is outside Rituals' city happiness payment, but
+    // retains its own legal conversions (notably Colosseum's mood/culture).
+    if matches!(
+        action_type,
+        PlayingActionType::Special(SpecialAction::Modifier(
+            PlayingActionModifier::VotingIncreaseHappiness
+        ))
+    ) {
+        // Voting has a one-token fee. Resolve its choices independently before
+        // the happiness listeners add Rituals' resource conversions.
+        assert_eq!(activation_cost.amount(), 1);
+        payment_options.separate_fee.push(activation_cost.clone());
+        for resource in activation_options.possible_resource_types() {
+            let fee = ResourcePile::of(resource, 1);
+            if activation_options.is_valid_payment(&fee)
+                && !payment_options.separate_fee.contains(&fee)
+            {
+                payment_options.separate_fee.push(fee);
+            }
+        }
+    }
+    payment_options.default += activation_cost;
 
     p.trigger_cost_event(
         |e| &e.happiness_cost,

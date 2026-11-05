@@ -17,6 +17,8 @@ pub struct ReplayGameData {
     // Look-only information boundaries are intentionally absent from the log.
     #[serde(default)]
     undo_limit: Option<usize>,
+    #[serde(default)]
+    calendar_knowledge: Option<crate::calendar_knowledge::CalendarKnowledge>,
     players: Vec<ReplayPlayerData>,
     #[serde(default)]
     dropped_players: Vec<usize>,
@@ -141,6 +143,9 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         game = try_execute_action(game, item.action.clone(), item.player)
             .map_err(|e| format!("Failed to replay move {}: {e}", i + 1))?;
         game.context = context;
+        if full_replay {
+            crate::calendar_knowledge::disclose(&mut game);
+        }
     }
     if log_length(&game) != to {
         return Err(format!(
@@ -155,6 +160,7 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
     // Reconstructing any cursor must neither earn nor revoke existing credits.
     game.time_increments = data.time_increments;
     if full_replay {
+        game.calendar_knowledge = data.calendar_knowledge;
         // Reconstructing a playable current save must not reopen actions sealed
         // by an unrecorded Calendar look. Historical cursors keep their own limits.
         if let Some(limit) = data.undo_limit {
@@ -169,6 +175,9 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
             }
         }
         game.finish_after_drop();
+    } else {
+        // Historical cursors are not live private disclosures.
+        game.calendar_knowledge = None;
     }
     Ok(game)
 }

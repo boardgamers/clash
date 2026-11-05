@@ -71,6 +71,8 @@ export interface Playback {
   animate: boolean;
 }
 export interface Game {
+  calendar_knowledge?: { player: number; turn: number; incident: number | null };
+  secrets_stripped?: boolean;
   action_cards_discarded?: number[];
   incidents_discarded?: number[];
   successful_cultural_influence?: boolean;

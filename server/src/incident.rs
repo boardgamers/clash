@@ -769,7 +769,11 @@ pub(crate) fn draw_and_discard_incident_card_from_pile(
         game.calendar_incident_undo = None;
         // This is equivalent to peeking immediately before the triggering
         // action, never to erasing a lock from dice, another card or a player.
-        let floor = game.log_index.saturating_sub(1);
+        let floor = if crate::calendar_knowledge::known(game, player.index).is_some() {
+            game.undo_limit
+        } else {
+            game.log_index.saturating_sub(1)
+        };
         game.undo_limit = game.undo_limit.max(floor);
         for action in crate::log::current_turn_log_mut(game)
             .actions
@@ -778,6 +782,9 @@ pub(crate) fn draw_and_discard_incident_card_from_pile(
         {
             action.undo.clear();
         }
+        // The incident itself disclosed this card too. Keep that identity across
+        // Undo, without disclosing the replacement now at the top.
+        crate::calendar_knowledge::remember(game, player.index);
         game.incidents_left.remove(0)
     } else {
         draw_card_from_pile(

@@ -128,6 +128,17 @@ try {
       assert.deepEqual(engine.timeIncrements(closed), engine.timeIncrements(merchant));
       await emit(closed);
       await preview.waitFor({ state: 'detached' });
+      // Known peeks never enter the host move stream, even on repeated opens.
+      for (let cycle = 0; cycle < 2; cycle++) {
+        await page.getByRole('button', { name: t('Abilities'), exact: true }).click();
+        await page.locator('.ability-offer').filter({ has: page.getByRole('heading', { name: t('Calendar'), exact: true }) }).getByRole('button').click();
+        await preview.waitFor();
+        assert.equal(await page.evaluate(() => sent.length), 0);
+        if (cycle === 0) await actions.getByRole('button', { name: t('Keep on top'), exact: true }).click();
+        else await cancel.click();
+        await preview.waitFor({ state: 'detached' });
+        assert.equal(await page.evaluate(() => sent.length), 0, 'known Keep/Cancel is local too');
+      }
       await emit(fixture('Great Merchant', 0));
       await preview.waitFor();
       assert.equal(await actions.getByRole('button').count(), 1);

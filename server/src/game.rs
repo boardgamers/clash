@@ -138,6 +138,10 @@ pub struct Game {
     pub early_choice_update: bool,
     /// A private Calendar prompt, not yet part of the committed action history.
     pub uncommitted_calendar: bool,
+    /// Live private disclosure; not restored by undo patches.
+    pub calendar_knowledge: Option<crate::calendar_knowledge::CalendarKnowledge>,
+    /// Filtered states must never create knowledge from shuffled hidden piles.
+    pub secrets_stripped: bool,
     pub action_plan: Option<crate::action_queue::Plan>,
     // in turn order starting from starting_player_index and wrapping around
     pub players: Vec<Player>,

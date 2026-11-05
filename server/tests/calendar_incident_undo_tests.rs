@@ -216,9 +216,21 @@ fn deferred_astronomy_incident_does_not_use_new_calendar_through_a_wonder() {
             choosing.current_event_handler().unwrap().request,
             PersistentEventRequest::BoolRequest(_)
         ));
+        if !already_owned {
+            assert!(
+                choosing.calendar_knowledge.is_none(),
+                "deferred acquisition must not disclose the pending draw"
+            );
+        }
         // The draw's direct origin is Great Mausoleum, not Astronomy.
         let resolved = play(choosing, Action::Response(EventResponse::Bool(false)));
         assert_eq!(resolved.can_undo(), already_owned);
+        if !already_owned {
+            assert_eq!(
+                resolved.calendar_knowledge.as_ref().unwrap().incident,
+                resolved.incidents_left.first().copied()
+            );
+        }
         assert_eq!(
             time_increments(&resolved),
             if already_owned { [8, 5] } else { [9, 5] }
@@ -231,7 +243,10 @@ fn implicit_calendar_knowledge_cannot_refund_earlier_astronomy() {
     let mut before = ready(29, false);
     before.player_mut(0).incident_tokens = 2;
     let astronomy = play(before, research(Advance::Astronomy));
-    assert!(astronomy.can_undo());
+    assert!(
+        !astronomy.can_undo(),
+        "acquisition disclosure seals Astronomy immediately"
+    );
     assert!(astronomy.player(0).has_advance(Advance::Astronomy));
     let game = play(astronomy.clone(), research(Advance::Storage));
     let undone = play(load(saved(&game)), Action::Undo);
@@ -260,9 +275,35 @@ fn implicit_calendar_knowledge_cannot_refund_a_previous_paid_burial() {
     );
     assert!(buried.can_undo());
     let game = play(buried.clone(), research(Advance::Storage));
+    assert_eq!(
+        server::game_api::strip_secret(game.clone(), Some(0))
+            .calendar_knowledge
+            .unwrap()
+            .incident,
+        None
+    );
     let undone = play(game, Action::Undo);
     assert_same_position(&undone, &buried);
     assert!(!undone.can_undo());
+    assert_eq!(
+        server::game_api::strip_secret(undone.clone(), Some(0))
+            .calendar_knowledge
+            .unwrap()
+            .incident,
+        Some(29)
+    );
+    let floor = undone.undo_limit;
+    let opened = play(
+        load(saved(&undone)),
+        Action::Playing(PlayingAction::Custom(CustomAction::new(
+            CustomActionType::Calendar,
+            None,
+        ))),
+    );
+    assert_eq!(
+        opened.undo_limit, floor,
+        "the incident already disclosed this restored card"
+    );
 }
 
 #[test]

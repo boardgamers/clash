@@ -37,6 +37,11 @@ pub enum Action {
     Playing(PlayingAction),
     Movement(MovementAction),
     Response(EventResponse),
+    CalendarBury {
+        turn: usize,
+        incident: u8,
+        payment: crate::resource_pile::ResourcePile,
+    },
     QueueMoves {
         key: String,
         actions: Vec<Action>,
@@ -100,7 +105,7 @@ pub fn try_execute_action(
     // mutate yet. Even lower-level callers must resolve it at the live boundary.
     // Recorded/replayed Calendar actions never carry this marker. Independent
     // private queue updates above must remain available to the other seats.
-    if game.uncommitted_calendar {
+    if game.uncommitted_calendar || matches!(action, Action::CalendarBury { .. }) {
         return crate::board_history::execute(game, action, player_index);
     }
     if game.civilization_draft.is_some() {
@@ -133,12 +138,14 @@ pub fn try_execute_action(
     }
 
     let add_undo = !matches!(&action, Action::Undo);
+    let already_known = crate::calendar_knowledge::known(&game, player_index).is_some();
     let calendar_incident = crate::incident::calendar_undo_candidate(&game, player_index);
     game.calendar_incident_undo = calendar_incident;
     let mut old = to_serde_value(&game);
     let old_player = game.active_player();
     execute_without_undo(&mut game, action, player_index)?;
-    if game.calendar_incident_undo.take().is_none() && calendar_incident.is_some() {
+    if game.calendar_incident_undo.take().is_none() && calendar_incident.is_some() && !already_known
+    {
         // Treat this reveal like a free Calendar look just before the action.
         // Keep that knowledge boundary when applying the undo patch: otherwise
         // Undo could also refund Astronomy or a previous paid burial.

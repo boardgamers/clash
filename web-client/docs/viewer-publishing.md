@@ -947,3 +947,9 @@ next-attempt effect is still consumed normally. Five regression tests cover
 building influence, defended and empty settlements, failures, and ineligible
 city centers. Publish the matching viewer rules bridge and engine together.
 Existing game history is not replayed or repaired.
+
+# Viewer 0.1.202 / engine 0.4.136
+
+Calendar now persists owner-only known-top state at the first legal turn boundary. Reopening a known card, Keep and Cancel are local: no backend move, history entry or clock credit. Replacement cards require an explicit new inspection; stale-safe paid burial records the existing actions. Historical views omit private knowledge, and reload/reconstruction preserve knowledge and undo floors.
+
+Voting’s activation fee remains separate from Rituals’ city happiness conversions. Sparta can replace Draft tokens but cannot convert a recruited leader’s own mood fee. Both fees retain general Colosseum conversions. Publish the matching viewer and engine together; no production game repair or historical rewrite is needed.

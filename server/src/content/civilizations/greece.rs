@@ -64,6 +64,27 @@ fn sparta() -> SpecialAdvanceInfo {
         0,
         |cost, units, game, p| {
             if units.infantry > 0 {
+                // Sparta substitutes only Draft's mood tokens. A leader recruited
+                // alongside Infantry still owes its normal mood token, including
+                // when the Infantry is bought with resources rather than Draft.
+                if units.leader.is_some() {
+                    let leader_fee = ResourcePile::mood_tokens(1);
+                    // Resolve the fee with general payment permissions only,
+                    // before Draft/Sparta conversions can touch it. Colosseum
+                    // may still substitute culture for the leader's mood.
+                    let fee_options = p
+                        .payment_options()
+                        .resources(p.get(game), leader_fee.clone());
+                    cost.cost.separate_fee = vec![leader_fee];
+                    for resource in fee_options.possible_resource_types() {
+                        let fee = ResourcePile::of(resource, 1);
+                        if fee_options.is_valid_payment(&fee)
+                            && !cost.cost.separate_fee.contains(&fee)
+                        {
+                            cost.cost.separate_fee.push(fee);
+                        }
+                    }
+                }
                 cost.info
                     .add_log(p, "Paid Draft with culture tokens");
                 cost.cost.conversions.insert(

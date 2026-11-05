@@ -95,7 +95,9 @@ function excluded(raw: string, move: unknown, seat: number) {
     for (let skipped = 0; skipped < humans && next !== game.starting_player_index && game.dropped_players?.includes(next); skipped++) next = (next + 1) % humans;
     if (next === game.starting_player_index) return true;
   }
-  if ('ChooseCivilization' in move) return true;
+  if ('ChooseCivilization' in move || 'CalendarBury' in move) return true;
+  if ((game.events ?? []).some((e: Json) => e.event_type?.CustomAction?.action?.action === 'Calendar') &&
+      (move as Json).Response?.Payment?.some((p: Json) => Object.values(p).some(Boolean))) return true;
   // Calendar's tentative look does not change the authoritative RNG or pile.
   // Two samples can coincidentally reveal the same card, so always wait for the
   // owner-only server prompt rather than previewing the shuffled browser deck.
@@ -128,6 +130,15 @@ export function predictMove(engine: PredictionEngine, raw: string, move: unknown
   try {
     const result = engine.tryMove(raw, serialized, seat);
     const before = JSON.parse(raw) as Json, after = JSON.parse(result) as Json;
+    // A filtered simulation cannot supply a first-turn/acquisition disclosure.
+    // Wait for the host rather than briefly enabling Undo across that knowledge.
+    const owner = after.players?.[seat];
+    const turn = (after.log ?? []).flatMap((a: Json) => a.rounds ?? []).reduce((n: number, r: Json) => n + r.turns.length, 0);
+    if (after.current_player_index === seat && after.state === 'Playing' && !(after.events?.length) &&
+        owner?.civilization === 'Maya' && owner.advances?.includes('Astronomy') &&
+        (after.calendar_knowledge?.player !== seat || after.calendar_knowledge?.turn !== turn)) {
+      return { reason: 'hidden' };
+    }
     // Never guess a roll or hidden draw, even if two sampled outcomes happen
     // to coincide. Check before stripSecret resets the random stream.
     if (before.rng !== after.rng ||
@@ -166,6 +177,8 @@ export function predictUndo(previous: string, current: string): string | null {
   const before = JSON.parse(previous) as Json,
     after = JSON.parse(current) as Json;
   if (before.log_index !== after.log_index - 1) return null;
+  if (after.calendar_knowledge?.incident == null && after.calendar_knowledge &&
+      before.calendar_knowledge?.incident == null) return null;
   const log = structuredClone(after.log);
   const actions = lastTurn({ log })?.actions;
   const undone = actions?.[after.log_index - 1];
@@ -175,8 +188,12 @@ export function predictUndo(previous: string, current: string): string | null {
   delete undone.combat_stats;
   delete undone.undo;
   before.log = log;
+  delete before.early_choice_update;
   // Calendar may let the triggering action be undone while sealing everything
   // before it, as if the owner had peeked first. Knowledge is not rewound.
+  // Knowledge is monotonic; do not restore a replacement card from an older snapshot.
+  if (after.calendar_knowledge) before.calendar_knowledge = { ...after.calendar_knowledge,
+    incident: after.calendar_knowledge.incident ?? before.calendar_knowledge?.incident ?? null };
   before.undo_limit = Math.max(before.undo_limit ?? 0, after.undo_limit ?? 0);
   // Playback history is outside the undo patch: Undo only trims later frames.
   if (after.board_history) {

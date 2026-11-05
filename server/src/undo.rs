@@ -5,7 +5,8 @@ use crate::movement::execute_movement_action;
 use json_patch::{PatchOperation, patch};
 use serde_json::Value;
 
-const IGNORE_PATHS: [&str; 6] = [
+const IGNORE_PATHS: [&str; 7] = [
+    "/calendar_knowledge",
     "/log/",
     "/log_index",
     "/early_choices",
@@ -44,8 +45,10 @@ pub(crate) fn undo(mut game: Game) -> Result<Game, String> {
 
     let mut v = to_serde_value(&game);
 
+    let floor = game.undo_limit;
     patch(&mut v, &p).map_err(|e| format!("Failed to apply patch: {e}"))?;
 
+    v["undo_limit"] = serde_json::json!(floor.max(v["undo_limit"].as_u64().unwrap_or(0) as usize));
     Ok(Game::from_data(
         serde_json::from_value(v).map_err(|e| format!("Failed to deserialize game: {e}"))?,
         game.cache,

@@ -171,6 +171,7 @@ fn fallback(game: &Game, entry: &ActionLogAction) -> String {
         },
         Action::Movement(_) => "Moved units".into(),
         Action::ChooseCivilization(name) => format!("Chose {name}"),
+        Action::CalendarBury { .. } => "Used an ability".into(),
         Action::QueueMoves { .. } => "Updated queued actions".into(),
         Action::QueueChoice { .. } => "Queued a choice".into(),
         Action::StartTurn => "Started turn".into(),

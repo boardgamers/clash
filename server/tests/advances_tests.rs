@@ -248,7 +248,7 @@ fn test_increase_happiness_voting_rituals() {
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
                     ],
-                    ResourcePile::new(1, 0, 1, 3, 1, 0, 0),
+                    ResourcePile::new(1, 0, 1, 3, 0, 1, 0),
                     PlayingActionType::Special(SpecialAction::Modifier(
                         PlayingActionModifier::VotingIncreaseHappiness,
                     )),

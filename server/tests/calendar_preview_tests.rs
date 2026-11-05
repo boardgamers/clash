@@ -147,13 +147,12 @@ fn hundreds_of_keep_and_cancel_cycles_are_bounded_live_updates_without_clock_cre
 }
 
 #[test]
-fn looking_seals_astronomy_but_cancels_only_the_uncommitted_prompt() {
+fn acquisition_disclosure_seals_astronomy_but_cancels_only_the_uncommitted_prompt() {
     let before = before_astronomy();
     let game = play(before.clone(), research(Advance::Astronomy));
-    assert!(game.can_undo());
-    let undone = play(game.clone(), Action::Undo);
-    assert!(!undone.player(0).advances.contains(Advance::Astronomy));
-    assert_eq!(undone.player(0).resources, before.player(0).resources);
+    assert!(!game.can_undo());
+    assert!(game.calendar_knowledge.as_ref().unwrap().incident.is_some());
+    assert!(board_history::execute(game.clone(), Action::Undo, 0).is_err());
     for close in [Action::Undo, keep()] {
         let peek = play(game.clone(), calendar());
         assert_eq!(peek.undo_limit, peek.log_index);
@@ -191,8 +190,8 @@ fn paid_burial_has_two_actions_and_one_step_undo_redo_until_the_next_look() {
     assert_eq!(undone.player(0).resources.culture_tokens, culture);
     assert!(!undone.uncommitted_calendar);
     assert!(
-        !undone.can_undo(),
-        "recorded look is an information boundary"
+        undone.can_undo(),
+        "recording an already known card introduces no information boundary"
     );
     assert!(undone.can_redo());
     assert!(prompt(&undone).starts_with(&undone.cache.get_incident(deck[0]).name));
@@ -370,6 +369,7 @@ fn full_replay_omits_transient_prompts_preserves_the_seal_and_reproduces_paid_ac
         assert_eq!(replayed.incidents_left, state.incidents_left);
         assert_eq!(replayed.rng.seed, state.rng.seed);
         assert_eq!(replayed.player(0).resources, state.player(0).resources);
+        assert_eq!(replayed.calendar_knowledge, state.calendar_knowledge);
         assert!(!replayed.uncommitted_calendar);
         assert!(replayed.events.is_empty());
         assert!(
@@ -385,9 +385,175 @@ fn full_replay_omits_transient_prompts_preserves_the_seal_and_reproduces_paid_ac
     assert_eq!(replayed.rng.seed, paid.rng.seed);
     assert_eq!(replayed.player(0).resources, paid.player(0).resources);
     assert_eq!(time_increments(&replayed), time_increments(&paid));
+    assert_eq!(replayed.calendar_knowledge, paid.calendar_knowledge);
+    let historical = server::replay::replay(
+        serde_json::from_value(saved(&paid)).unwrap(),
+        Some(log_length(&paid) - 2),
+    )
+    .unwrap();
+    assert!(historical.calendar_knowledge.is_none());
     assert!(replayed.can_undo());
     let undone = play(replayed, Action::Undo);
     assert!(!undone.uncommitted_calendar);
     assert!(undone.can_redo());
     assert_eq!(log_length(&undone), log_length(&paid) - 1);
+}
+
+#[test]
+fn turn_start_known_card_survives_moves_repeated_peeks_reload_undo_and_redo() {
+    let game = play(ready(), Action::Playing(PlayingAction::EndTurn));
+    assert!(
+        strip_secret(game.clone(), Some(0))
+            .calendar_knowledge
+            .is_none()
+    );
+    let start = board_history::execute(game, Action::Playing(PlayingAction::EndTurn), 1).unwrap();
+    let known = start.calendar_knowledge.clone().unwrap();
+    assert_eq!(known.incident, start.incidents_left.first().copied());
+    assert_eq!(known.player, 0);
+    assert!(start.events.is_empty());
+    let home = start.player(0).cities[0].position;
+    let mut moved = play(
+        start.clone(),
+        Action::Playing(PlayingAction::Collect(Collect::new(
+            home,
+            vec![PositionCollection::new(home, ResourcePile::food(1))],
+            PlayingActionType::Collect,
+        ))),
+    );
+    let floor = moved.undo_limit;
+    let history = saved(&moved)["log"].clone();
+    let frames = saved(&moved)["board_history"].clone();
+    let clocks = time_increments(&moved);
+    for _ in 0..20 {
+        moved = play(play(reload(saved(&moved)), calendar()), keep());
+        assert_eq!(moved.undo_limit, floor);
+        assert!(moved.can_undo());
+        assert_eq!(saved(&moved)["log"], history);
+        assert_eq!(saved(&moved)["board_history"], frames);
+        assert_eq!(time_increments(&moved), clocks);
+    }
+    let undone = play(moved.clone(), Action::Undo);
+    assert_eq!(undone.player(0).resources, start.player(0).resources);
+    assert_eq!(undone.calendar_knowledge, Some(known.clone()));
+    let redone = play(undone, Action::Redo);
+    assert_eq!(redone.player(0).resources, moved.player(0).resources);
+    assert_eq!(redone.calendar_knowledge, Some(known));
+}
+
+#[test]
+fn cached_burial_is_authoritative_stale_safe_and_does_not_disclose_replacement() {
+    let start = ready();
+    let k = start.calendar_knowledge.clone().unwrap();
+    let burial = Action::CalendarBury {
+        turn: k.turn,
+        incident: k.incident.unwrap(),
+        payment: ResourcePile::culture_tokens(1),
+    };
+    assert!(board_history::execute(start.clone(), burial.clone(), 1).is_err());
+    assert!(
+        board_history::execute(strip_secret(start.clone(), Some(0)), burial.clone(), 0).is_err()
+    );
+    let paid = play(start.clone(), burial.clone());
+    assert_eq!(log_length(&paid), log_length(&start) + 2);
+    assert!(paid.can_undo());
+    assert_eq!(
+        strip_secret(paid.clone(), Some(0))
+            .calendar_knowledge
+            .unwrap()
+            .incident,
+        None
+    );
+    assert!(board_history::execute(paid.clone(), burial, 0).is_err());
+    let undone = play(reload(saved(&paid)), Action::Undo);
+    assert_eq!(
+        strip_secret(undone, Some(0))
+            .calendar_knowledge
+            .unwrap()
+            .incident,
+        k.incident
+    );
+    let shape = history_shape(&paid);
+    let inspected = play(paid, calendar());
+    assert_eq!(history_shape(&inspected), shape);
+    assert_eq!(inspected.undo_limit, inspected.log_index);
+    let closed = play(inspected, keep());
+    assert!(!closed.can_undo());
+    assert_eq!(history_shape(&closed), shape);
+}
+
+#[test]
+fn filtered_states_never_create_knowledge_or_leak_it_between_seats() {
+    let game = ready();
+    for seat in [None, Some(1)] {
+        assert!(
+            strip_secret(game.clone(), seat)
+                .calendar_knowledge
+                .is_none()
+        );
+    }
+    let owner = strip_secret(game.clone(), Some(0));
+    let once = owner.calendar_knowledge.clone();
+    assert_eq!(
+        strip_secret(owner.clone(), Some(0)).calendar_knowledge,
+        once
+    );
+    let other = strip_secret(owner, Some(1));
+    assert!(strip_secret(other, Some(0)).calendar_knowledge.is_none());
+    let mut unknown = strip_secret(game, Some(0));
+    unknown.calendar_knowledge = None;
+    assert!(board_history::execute(unknown, calendar(), 0).is_err());
+}
+
+#[test]
+fn g5_f5_stop_then_known_calendar_does_not_seal_movement() {
+    let game = play(ready(), Action::Playing(PlayingAction::EndTurn));
+    let start = board_history::execute(game, Action::Playing(PlayingAction::EndTurn), 1).unwrap();
+    let mut data = saved(&start);
+    data["players"][0]["units"][0]["position"] = json!("G5");
+    let mut second = data["players"][0]["units"][0].clone();
+    second["id"] = json!(1);
+    data["players"][0]["units"]
+        .as_array_mut()
+        .unwrap()
+        .push(second);
+    data["players"][0]["next_unit_id"] = json!(2);
+    for tile in data["map"]["tiles"].as_array_mut().unwrap() {
+        if tile[0] == "G5" || tile[0] == "F5" {
+            tile[1] = json!("Fertile");
+        }
+    }
+    let start = reload(data);
+    let unit = start.player(0).units[0].id;
+    let moved = play(
+        start.clone(),
+        serde_json::from_value(json!({"Movement":{"Move":{"units":[unit],"destination":"F5"}}}))
+            .unwrap(),
+    );
+    assert!(
+        board_history::execute(moved.clone(), calendar(), 0).is_err(),
+        "not a free-action opportunity during movement"
+    );
+    let stopped = play(
+        moved,
+        Action::Movement(server::movement::MovementAction::Stop),
+    );
+    let floor = stopped.undo_limit;
+    let shape = history_shape(&stopped);
+    let closed = play(play(stopped.clone(), calendar()), Action::Undo);
+    assert_eq!(closed.undo_limit, floor);
+    assert_eq!(history_shape(&closed), shape);
+    assert!(closed.can_undo());
+    let undone_stop = play(reload(saved(&closed)), Action::Undo);
+    let undone_move = play(undone_stop, Action::Undo);
+    assert_eq!(
+        undone_move.player(0).units[0].position,
+        start.player(0).units[0].position
+    );
+    let redone = play(play(undone_move, Action::Redo), Action::Redo);
+    assert_eq!(
+        redone.player(0).units[0].position,
+        stopped.player(0).units[0].position
+    );
+    assert_eq!(redone.calendar_knowledge, start.calendar_knowledge);
 }

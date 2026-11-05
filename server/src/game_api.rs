@@ -147,6 +147,7 @@ pub fn civilizations(game: Game) -> Vec<String> {
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    crate::calendar_knowledge::strip(&mut game, player_index);
     if game
         .action_plan
         .as_ref()

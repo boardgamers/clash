@@ -457,7 +457,8 @@ fn action_origin(a: &Action, player: &Player) -> Option<EventOrigin> {
         Action::Movement(_) => Some(move_event_origin()),
         Action::Undo => panic!("Unexpected undo in log"),
         Action::Redo => panic!("Unexpected redo in log"),
-        Action::QueueMoves { .. }
+        Action::CalendarBury { .. }
+        | Action::QueueMoves { .. }
         | Action::QueueChoice { .. }
         | Action::StartTurn
         | Action::Response(_)

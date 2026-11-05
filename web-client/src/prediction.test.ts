@@ -559,7 +559,7 @@ test('Calendar Cancel never optimistically undoes the committed move before the 
     await app.controller.load(strip(closed, seat));
     assert.equal(app.session().pending, false);
     assert.ok(!app.session().view!.decision);
-    assert.equal(app.session().view!.canUndo, false);
+    assert.equal(app.session().view!.canUndo, true, 'known preview adds no knowledge lock');
     assert.deepEqual(app.session().game!.players[seat].resources, collected.players[seat].resources);
   } finally { app.close(); }
 });
@@ -851,5 +851,99 @@ test('Great Person offers expose the normal queue and Wait controls', async () =
     await app.controller.load(strip(raw));
     assert.equal(app.session().planning, undefined);
     assert.equal(app.session().view?.canPlay, true);
+  } finally { app.close(); }
+});
+
+test('known Calendar open/keep/cancel is purely local with zero history or calls; burial is authoritative', async () => {
+  let raw = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'calendar-local-cache', {});
+  for (const civilization of ['Maya', 'Rome']) raw = move(raw, { ChooseCivilization: civilization }, engine.currentPlayer(raw));
+  const seat = engine.currentPlayer(raw);
+  const initial = JSON.parse(raw);
+  initial.players[seat].advances.push('Fishing', 'Navigation', 'Cartography', 'Astronomy');
+  initial.players[seat].resources.food = 0;
+  initial.players[seat].resources.culture_tokens = 2;
+  raw = JSON.stringify(initial);
+  const city = initial.players[seat].cities[0].position;
+  const collection = { Playing: { Collect: { city_position: city,
+    collections: [{ position: city, pile: { food: 1 }, times: 1 }], action_type: 'Collect' } } };
+  const app = harness();
+  try {
+    app.controller.setPlayer(seat);
+    await app.controller.load(strip(raw, seat));
+    raw = move(raw, collection, seat);
+    await app.controller.load(strip(raw, seat));
+    const base = structuredClone(app.session().game!);
+    const calendar = app.session().view!.specialActions!.find(a => a.name === 'Calendar')!.action;
+    assert.ok(base.calendar_knowledge?.incident != null);
+    const journalUpdates = app.logs.length;
+    for (let i = 0; i < 30; i++) {
+      app.controller.submit(calendar);
+      assert.ok(app.session().view!.decision);
+      assert.equal(app.session().pending, false);
+      assert.deepEqual(app.session().game!.log, base.log);
+      assert.deepEqual(app.session().game!.board_history, base.board_history);
+      assert.equal(app.session().game!.log_index, base.log_index);
+      app.controller.submit(i % 2 ? 'Undo' : { Response: { Payment: [{}] } });
+      assert.ok(!app.session().view!.decision);
+      assert.equal(app.session().view!.canUndo, true);
+      assert.deepEqual(app.session().game, base);
+      assert.equal(app.sent.length, 0);
+      assert.equal(app.logs.length, journalUpdates, 'local peek does not even replace the host journal');
+    }
+    app.controller.submit('Undo');
+    assert.deepEqual(app.sent.map(s => JSON.parse(s)), ['Undo']);
+    const undone = move(raw, 'Undo', seat);
+    await app.controller.load(strip(undone, seat));
+    assert.equal(app.session().game!.log_index, base.log_index - 1);
+    app.controller.submit('Redo');
+    raw = move(undone, 'Redo', seat);
+    await app.controller.load(strip(raw, seat));
+    assert.equal(app.session().game!.log_index, base.log_index);
+    app.controller.submit(calendar);
+    app.controller.submit({ Response: { Payment: [{ culture_tokens: 1 }] } });
+    const burial = JSON.parse(app.sent.at(-1)!);
+    assert.ok(burial.CalendarBury);
+    assert.equal(app.session().pending, true);
+    assert.deepEqual(app.session().game!.players[seat].resources, base.players[seat].resources);
+    raw = move(raw, burial, seat);
+    await app.controller.load(strip(raw, seat));
+    assert.equal(app.session().game!.calendar_knowledge?.incident, null);
+    assert.equal(app.session().view!.canUndo, true);
+    const count = app.sent.length;
+    app.controller.submit(calendar);
+    assert.equal(app.sent.length, count + 1, 'unknown replacement requires explicit server inspection');
+  } finally { app.close(); }
+});
+
+test('known local Calendar stays local across an optimistic move acknowledgement', async () => {
+  let raw = await engine.init(2, [], { civilization: 'ChooseCivilization' }, 'calendar-pending-cache', {});
+  for (const civilization of ['Maya', 'Rome']) raw = move(raw, { ChooseCivilization: civilization }, engine.currentPlayer(raw));
+  const seat = engine.currentPlayer(raw);
+  const data = JSON.parse(raw);
+  data.players[seat].advances.push('Fishing', 'Navigation', 'Cartography', 'Astronomy');
+  data.players[seat].resources.food = 0;
+  const calendar = { Playing: { Custom: { action: 'Calendar' } } };
+  raw = move(move(JSON.stringify(data), calendar, seat), 'Undo', seat);
+  const city = data.players[seat].cities[0].position;
+  const collection = { Playing: { Collect: { city_position: city,
+    collections: [{ position: city, pile: { food: 1 }, times: 1 }], action_type: 'Collect' } } };
+  const app = harness();
+  try {
+    app.controller.setPlayer(seat);
+    await app.controller.load(strip(raw, seat));
+    app.controller.submit(collection);
+    assert.equal(app.session().pending, false);
+    assert.equal(app.sent.length, 1);
+    app.controller.submit(calendar);
+    assert.ok(app.session().view!.decision);
+    assert.equal(app.sent.length, 1, 'cached preview never enters the pending outbox');
+    raw = move(raw, collection, seat);
+    await app.controller.load(strip(raw, seat));
+    assert.ok(app.session().view!.decision, 'acknowledgement preserves local prompt');
+    app.controller.submit('Undo');
+    assert.equal(app.sent.length, 1);
+    assert.ok(!app.session().view!.decision);
+    assert.equal(app.session().game!.players[seat].resources?.food, JSON.parse(raw).players[seat].resources.food);
+    assert.equal(app.session().view!.canUndo, true);
   } finally { app.close(); }
 });

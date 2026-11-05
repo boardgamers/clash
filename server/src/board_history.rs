@@ -164,6 +164,37 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
     ) {
         return try_execute_action(game, action, player);
     }
+    if let Action::CalendarBury {
+        turn,
+        incident,
+        payment,
+    } = &action
+    {
+        if game.secrets_stripped
+            || !crate::calendar_knowledge::eligible(&game, player)
+            || crate::calendar_knowledge::turn(&game) != *turn
+            || crate::calendar_knowledge::known(&game, player) != Some(*incident)
+            || payment.is_empty()
+        {
+            return Err("Invalid Calendar preview".into());
+        }
+        let payment = payment.clone();
+        let open = Action::Playing(PlayingAction::Custom(
+            crate::content::custom_actions::CustomAction::new(
+                crate::content::custom_actions::CustomActionType::Calendar,
+                None,
+            ),
+        ));
+        let game = execute(game, open, player)?;
+        return execute(
+            game,
+            Action::Response(crate::content::persistent_events::EventResponse::Payment(
+                vec![payment],
+            )),
+            player,
+        );
+    }
+    crate::calendar_knowledge::disclose(&mut game);
     // Look-only Calendar is a bounded live update, not an atomic logged action.
     // Keep this ahead of snapshots, clock credits, automatic choices and plans.
     if game.uncommitted_calendar {
@@ -219,6 +250,9 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
         ) {
             return Err("Custom action not available".into());
         }
+        if game.secrets_stripped && crate::calendar_knowledge::known(&game, player).is_none() {
+            return Err("Invalid Calendar preview".into());
+        }
         let prepared = try_execute_action(game.clone(), action, player)?;
         if prepared.events.len() != 1
             || !crate::content::civilizations::maya::is_calendar_event(&prepared)
@@ -232,7 +266,10 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
         game.uncommitted_calendar = true;
         // Knowledge cannot be undone, including Astronomy purchased beforehand.
         // This is deliberately NOT information_revealed(): no clock credit.
-        game.lock_undo();
+        if crate::calendar_knowledge::known(&game, player).is_none() {
+            game.lock_undo();
+            crate::calendar_knowledge::remember(&mut game, player);
+        }
         game.early_choice_update = true;
         return Ok(game);
     }
@@ -276,7 +313,9 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
             player,
         )?;
     }
-    Ok(crate::action_queue::resume(game))
+    let mut game = crate::action_queue::resume(game);
+    crate::calendar_knowledge::disclose(&mut game);
+    Ok(game)
 }
 
 fn auto_keep_government(game: &Game) -> bool {

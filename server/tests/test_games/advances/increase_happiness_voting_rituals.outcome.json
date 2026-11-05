@@ -8,8 +8,8 @@
         "wood": 5,
         "ore": 4,
         "ideas": 2,
-        "gold": 4,
-        "mood_tokens": 9,
+        "gold": 5,
+        "mood_tokens": 8,
         "culture_tokens": 9
       },
       "resource_limit": {
@@ -271,7 +271,7 @@
                           "food": 1,
                           "ore": 1,
                           "ideas": 3,
-                          "gold": 1
+                          "mood_tokens": 1
                         },
                         "action_type": {
                           "Special": {
@@ -313,7 +313,7 @@
                           "food": 1,
                           "ore": 1,
                           "ideas": 3,
-                          "gold": 1
+                          "mood_tokens": 1
                         },
                         "balance": "Pay"
                       },
