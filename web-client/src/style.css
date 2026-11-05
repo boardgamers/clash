@@ -6470,3 +6470,165 @@ small {
 .player-info .supporter-badge {
   flex-shrink: 0;
 }
+
+/* Age-track rule affordances stay in the masthead, including on touch layouts. */
+.age-track {
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+  max-width: 100%;
+}
+.age-steps {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+button.age-step {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  height: 30px;
+}
+button.age-step.current {
+  background: var(--green);
+  color: #fff7dc;
+}
+.age-step:focus-visible,
+.age-phase:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+.age-end-icon {
+  position: absolute;
+  right: -8px;
+  top: -3px;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 3px;
+  display: flex;
+}
+.age-end-icon.inactive {
+  opacity: 0.45;
+}
+.age-track .round-label {
+  position: static;
+  transform: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 3px 7px;
+  line-height: 1.3;
+  white-space: normal;
+  text-align: center;
+}
+.age-phase {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  padding: 2px;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.age-length-details {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(340px, calc(100vw - 32px));
+  max-height: 65vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  z-index: 50;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 8px 28px #0003;
+  font:
+    12px/1.5 'DM Sans',
+    sans-serif;
+}
+.age-length-details strong {
+  display: block;
+  padding-right: 24px;
+}
+.age-length-details p {
+  margin: 8px 0;
+}
+.age-end-thresholds {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.age-end-thresholds th,
+.age-end-thresholds td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.age-end-thresholds th {
+  color: var(--muted);
+  font-weight: 500;
+}
+.age-end-thresholds tr.current {
+  background: color-mix(in srgb, var(--ink) 9%, var(--paper));
+  font-weight: bold;
+}
+
+.age-details-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.age-ending {
+  font-weight: bold;
+}
+@media (max-width: 1050px) {
+  .age-steps {
+    gap: 10px;
+  }
+}
+@media (max-width: 760px), (max-width: 1000px) and (max-height: 500px) {
+  .masthead {
+    grid-template-rows: 58px auto 44px;
+    grid-template-areas: 'brand actions' 'ages ages' 'resources resources';
+  }
+  .spectating .masthead {
+    grid-template-rows: 48px auto;
+    grid-template-areas: 'brand actions' 'ages ages';
+  }
+  .age-track {
+    display: flex;
+    width: 100%;
+    padding: 3px 0 7px;
+  }
+  .age-steps {
+    gap: 16px;
+  }
+  button.age-step {
+    width: 24px;
+    min-height: 30px;
+  }
+  .age-track .round-label {
+    font-size: 11px;
+  }
+}
+.masthead:has(.age-length-details) {
+  z-index: 90;
+}

@@ -111,7 +111,12 @@ pub(super) fn advance_mode(game: &Game, handler: &PersistentEventHandler) -> &'s
 // costs resources (e.g. Synergies). The Library only borrows an effect. Regular
 // purchases, the status-phase advance, Dogma and leader research use a marker.
 pub(super) fn advance_uses_event_marker(game: &Game, handler: &PersistentEventHandler) -> bool {
-    !matches!(handler.origin, EventOrigin::CivilCard(_))
+    !matches!(
+        game.events.last().map(|event| &event.event_type),
+        Some(PersistentEventType::StatusPhase(
+            crate::status_phase::StatusPhaseState::SecondFreeAdvance
+        ))
+    ) && !matches!(handler.origin, EventOrigin::CivilCard(_))
         && !matches!(&handler.origin, EventOrigin::Ability(name) if name == "Teach us")
         && advance_mode(game, handler) != "borrow"
 }

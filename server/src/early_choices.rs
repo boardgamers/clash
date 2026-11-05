@@ -122,7 +122,7 @@ fn advance_key(game: &Game) -> String {
 }
 
 fn advance_offer(game: &Game, player: usize) -> Option<Offer> {
-    if game.age >= game.options.length.ages() {
+    if game.variable_end.is_some() || game.age >= game.options.length.ages() {
         return None;
     }
     let status = game

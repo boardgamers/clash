@@ -76,7 +76,8 @@ export interface Game {
   action_cards_discarded?: number[];
   incidents_discarded?: number[];
   successful_cultural_influence?: boolean;
-  options?: { length?: 'Standard' | 'Epic'; variant?: 'Standard' | 'Builder' };
+  options?: { length?: 'Standard' | 'Epic' | 'Shorter' | 'RollToEnd' | 'WonderfulEnding'; variant?: 'Standard' | 'Builder' };
+  variable_end?: 'RollToEnd' | 'WonderfulEnding';
   permanent_effects?: unknown[];
   board_history?: { id: string; frames: BoardFrame[] };
   state: unknown;

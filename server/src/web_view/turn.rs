@@ -9,7 +9,7 @@ use serde_json::{Value, json};
 // This is a forecast from the visible board, not a simulated turn. In particular,
 // do not trigger rewards, reveal secrets, or consume randomness while viewing it.
 pub(super) fn trade_warning(game: &Game, seat: usize) -> Option<Value> {
-    if game.round == 3 && game.age >= game.options.length.ages() {
+    if game.variable_end.is_some() || (game.round == 3 && game.age >= game.options.length.ages()) {
         return None; // No next turn after the final age.
     }
     let player = game.player(seat);

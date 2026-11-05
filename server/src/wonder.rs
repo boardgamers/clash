@@ -505,6 +505,16 @@ pub(crate) fn construct_wonder(
     wonder: Wonder,
     city_position: Position,
 ) {
+    if game.options.length == crate::game::GameLength::WonderfulEnding
+        && crate::game::variable_end_threshold(game.age, game.round).is_some()
+        && game.variable_end.is_none()
+    {
+        game.variable_end = Some(crate::game::VariableEnd::WonderfulEnding);
+        player.log(
+            game,
+            "Wonderful Ending: finish this round, then complete objectives",
+        );
+    }
     player.get_mut(game).wonders_built.push(wonder);
     activate_city(city_position, game, &EventOrigin::Wonder(wonder));
     log_card_transfer(

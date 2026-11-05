@@ -220,6 +220,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         undo_limit: 0,
         actions_left: ACTIONS,
         successful_cultural_influence: false,
+        variable_end: None,
         round: 1,
         age: 0,
         messages: vec![],
@@ -297,6 +298,9 @@ fn execute_setup_round(player_amount: usize, game: &mut Game, map_setup: Option<
             gain_city(game, player, City::new(player_index, position));
             set_city_mood(game, position, &origin, MoodState::Happy);
             gain_unit(game, player, position, UnitType::Settler);
+            if game.options.length == crate::game::GameLength::Shorter {
+                gain_unit(game, player, position, UnitType::Settler);
+            }
         }
     }
 }

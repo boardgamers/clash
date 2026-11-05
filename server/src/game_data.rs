@@ -82,6 +82,8 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     successful_cultural_influence: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    variable_end: Option<crate::game::VariableEnd>,
     round: u32,
     age: u32,
     messages: Vec<String>,
@@ -156,6 +158,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         calendar_incident_undo: None,
         log_index: data.log_index,
         undo_limit: data.undo_limit,
+        variable_end: data.variable_end,
         round: data.round,
         age: data.age,
         messages: data.messages,
@@ -218,6 +221,7 @@ pub fn data(game: Game) -> GameData {
         undo_limit: game.undo_limit,
         actions_left: game.actions_left,
         successful_cultural_influence: game.successful_cultural_influence,
+        variable_end: game.variable_end.clone(),
         round: game.round,
         age: game.age,
         messages: game.messages,
@@ -262,6 +266,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         undo_limit: game.undo_limit,
         actions_left: game.actions_left,
         successful_cultural_influence: game.successful_cultural_influence,
+        variable_end: game.variable_end.clone(),
         round: game.round,
         age: game.age,
         messages: game.messages.clone(),

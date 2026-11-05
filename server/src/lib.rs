@@ -83,3 +83,6 @@ pub mod utils;
 pub mod victory_points;
 pub mod web_view;
 pub mod wonder;
+
+#[cfg(test)]
+mod game_length_tests;

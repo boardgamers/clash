@@ -35,6 +35,7 @@ pub enum StatusPhaseStateType {
 pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,
+    SecondFreeAdvance,
     DrawCards,
     RazeSize1City,
     ChangeGovernmentType(bool),
@@ -116,7 +117,8 @@ fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState, response: boo
 
         phase = match phase {
             CompleteObjectives => {
-                if game.age >= game.options.length.ages()
+                if game.variable_end.is_some()
+                    || game.age >= game.options.length.ages()
                     || game
                         .players
                         .iter()
@@ -128,7 +130,10 @@ fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState, response: boo
                 }
                 FreeAdvance
             }
-            FreeAdvance => DrawCards,
+            FreeAdvance if game.options.length == crate::game::GameLength::Shorter => {
+                SecondFreeAdvance
+            }
+            FreeAdvance | SecondFreeAdvance => DrawCards,
             DrawCards => RazeSize1City,
             RazeSize1City => ChangeGovernmentType(false),
             ChangeGovernmentType(_) => DetermineFirstPlayer(player_that_chooses_next_first_player(
@@ -182,13 +187,13 @@ pub(crate) fn free_advance() -> Ability {
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
             },
-            |game, c, _| {
+            |game, c, phase| {
                 gain_advance_without_payment(
                     game,
                     c.choice,
                     &c.player(),
                     ResourcePile::empty(),
-                    true,
+                    *phase != StatusPhaseState::SecondFreeAdvance,
                 );
             },
         )
@@ -523,7 +528,9 @@ pub(crate) fn player_that_chooses_next_first_player(players: &[&Player]) -> usiz
 pub fn status_phase_type(p: &StatusPhaseState) -> StatusPhaseStateType {
     match p {
         StatusPhaseState::CompleteObjectives => StatusPhaseStateType::CompleteObjectives,
-        StatusPhaseState::FreeAdvance => StatusPhaseStateType::FreeAdvance,
+        StatusPhaseState::FreeAdvance | StatusPhaseState::SecondFreeAdvance => {
+            StatusPhaseStateType::FreeAdvance
+        }
         StatusPhaseState::DrawCards => StatusPhaseStateType::DrawCards,
         StatusPhaseState::RazeSize1City => StatusPhaseStateType::RazeSize1City,
         StatusPhaseState::ChangeGovernmentType(_) => StatusPhaseStateType::ChangeGovernmentType,

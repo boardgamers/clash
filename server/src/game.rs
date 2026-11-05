@@ -64,6 +64,9 @@ pub enum GameLength {
     #[default]
     Standard,
     Epic,
+    Shorter,
+    RollToEnd,
+    WonderfulEnding,
 }
 
 impl GameLength {
@@ -72,6 +75,8 @@ impl GameLength {
         match self {
             Self::Standard => crate::consts::AGES,
             Self::Epic => 8,
+            Self::Shorter => 4,
+            Self::RollToEnd | Self::WonderfulEnding => 7,
         }
     }
 
@@ -79,6 +84,25 @@ impl GameLength {
     pub fn is_default(&self) -> bool {
         self == &Self::Standard
     }
+}
+
+/// The printed seven-age track's final five rounds.
+#[must_use]
+pub fn variable_end_threshold(age: u32, round: u32) -> Option<u8> {
+    match (age, round) {
+        (6, 2) => Some(6),
+        (6, 3) => Some(5),
+        (7, 1) => Some(4),
+        (7, 2) => Some(3),
+        (7, 3) => Some(2),
+        _ => None,
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub enum VariableEnd {
+    RollToEnd,
+    WonderfulEnding,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Clone, Default)]
@@ -162,6 +186,8 @@ pub struct Game {
     pub undo_limit: usize,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
+    /// Set by a variable ending; `WonderfulEnding` waits until this round completes.
+    pub variable_end: Option<VariableEnd>,
     pub round: u32, // starts at 1
     pub age: u32,   // starts at 1
     pub messages: Vec<String>,
@@ -414,7 +440,11 @@ impl Game {
     pub(crate) fn start_turn(&mut self) {
         let player = self.current_player_index;
         add_turn_log(self, TurnType::Player(player));
+        self.start_turn_after_log();
+    }
 
+    fn start_turn_after_log(&mut self) {
+        let player = self.current_player_index;
         self.actions_left = ACTIONS;
         let lost_action = self
             .permanent_effects
@@ -456,7 +486,8 @@ impl Game {
     pub fn increment_player_index(&mut self) {
         // Barbarians and Pirates have the highest player indices
         self.current_player_index += 1;
-        self.current_player_index %= self.human_players_count();
+        // Seat indices remain stable when a player drops.
+        self.current_player_index %= self.players.iter().filter(|p| p.is_human()).count();
     }
 
     #[must_use]
@@ -537,6 +568,10 @@ impl Game {
     }
 
     fn next_round(&mut self) {
+        if self.variable_end == Some(VariableEnd::WonderfulEnding) {
+            enter_status_phase(self);
+            return;
+        }
         self.round += 1;
         self.skip_dropped_players();
         if self.round > 3 {
@@ -544,6 +579,30 @@ impl Game {
             return;
         }
         add_round_log(self, self.round);
+        if self.options.length == GameLength::RollToEnd
+            && let Some(threshold) = variable_end_threshold(self.age, self.round)
+        {
+            // Establish the log before rolling, but do not run any turn-start abilities.
+            add_turn_log(self, TurnType::Player(self.current_player_index));
+            add_start_turn_action_if_needed(self, self.current_player_index);
+            let roll = self.next_dice_roll().value;
+            self.log(
+                self.current_player_index,
+                &EventOrigin::Ability("Roll to End".into()),
+                &format!("Roll to End: {roll} (end on {threshold}–6)"),
+            );
+            if roll >= threshold {
+                self.variable_end = Some(VariableEnd::RollToEnd);
+                enter_status_phase(self);
+            } else {
+                self.start_turn_after_log();
+            }
+            // Final-status / turn-start logging can replace the current turn.
+            // Keep the reveal barrier in that new log too (including when the
+            // first-player chooser is also the next active player).
+            self.lock_undo();
+            return;
+        }
         self.start_turn();
     }
 
@@ -611,6 +670,10 @@ impl Game {
         true
     }
 
+    /// Remove a player while keeping surviving seat indices and round order stable.
+    ///
+    /// # Panics
+    /// Panics if the saved human-seat layout is inconsistent with its active players.
     pub fn drop_player(&mut self, player_index: usize) {
         if self.civilization_draft.is_some() {
             crate::game_setup::drop_draft_player(self, player_index);
@@ -626,12 +689,22 @@ impl Game {
             "{} has left the game",
             self.player_name(player_index)
         ));
+        let dropped_first = self.starting_player_index == player_index;
+        if dropped_first {
+            let seats = self.players.iter().filter(|p| p.is_human()).count();
+            self.starting_player_index = (1..seats)
+                .map(|offset| (player_index + offset) % seats)
+                .find(|p| !self.dropped_players.contains(p))
+                .expect("an active player remains");
+        }
         if self.current_player_index != player_index {
             return;
         }
         self.skip_dropped_players();
-        if self.current_player_index == self.starting_player_index {
+        if !dropped_first && self.current_player_index == self.starting_player_index {
             self.next_round();
+        } else if self.events.is_empty() {
+            self.start_turn();
         }
     }
 

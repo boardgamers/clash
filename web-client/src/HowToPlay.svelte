@@ -21,7 +21,7 @@
     Drama,
   } from 'lucide-svelte';
   import ResourceText from './ResourceText.svelte';
-  import { ageCount, ageLabel } from './game-length';
+  import { ageCount, ageLabel, lengthRule } from './game-length';
   import type { Game } from './types';
   let { game, onClose }: { game: Game | null; onClose: () => void } = $props();
   const sections = $derived([
@@ -153,6 +153,7 @@
   >
   <h2 id="how-to-play-title">How to play</h2>
   <p class="guide-intro">Build your civilization over {ageCount(game)} ages. Most victory points wins.</p>
+  {#if lengthRule(game)}<p>{lengthRule(game)}</p>{/if}
   {#if game?.options?.variant === 'Builder'}
     <p class="guide-intro">
       <strong>Builder:</strong> No military attacks against other players. Cultural Influence is allowed; barbarians

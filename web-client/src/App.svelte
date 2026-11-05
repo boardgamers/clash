@@ -125,7 +125,8 @@
   import CollectionIndicators from './CollectionIndicators.svelte';
   import { movementBonus } from './movement-bonus';
   import { sinceLastTurn } from './playback';
-  import { ageCount, ageLabel } from './game-length';
+  import { ageLabel } from './game-length';
+  import AgeTrack from './AgeTrack.svelte';
   import { roundProgress, personalRoundLabel } from './round-progress';
   let { controller, concurrentPreview }: { controller: Controller; concurrentPreview?: { pending: boolean; waiting: boolean; seat: number; other: string; label?: string; pendingPlayer?: number; queued: number; ended: boolean; onUndo: () => void; onWait: () => void } } = $props();
   const session = $derived(controller.session);
@@ -832,31 +833,12 @@
         >
       </p>
     </div>
-    <div
-      class="age-track"
-      role="group"
-      aria-label={`Age ${$session.playback?.frame?.age ?? $session.game?.age ?? 1} of ${ageCount($session.game)}`}
-    >
-      {#each Array.from({ length: ageCount($session.game) }, (_, i) => i + 1) as age}
-        <span
-          class="age-step"
-          class:current={age === ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
-          class:past={age < ($session.playback?.frame?.age ?? $session.game?.age ?? 1)}
-          title={`Age ${age} of ${ageCount($session.game)}`}
-        >
-          {ageLabel(age)}
-        </span>
-      {/each}
-      <small class="round-label"
-        >{($session.playback?.frame?.round ?? $session.game?.round ?? 1) > 3
-          ? 'End of age'
-          : `Round ${$session.playback?.frame?.round ?? $session.game?.round ?? 1}/3`}{#if roundHint}<span
-            class="round-personal"
-          >
-            · {roundHint}</span
-          >{/if}</small
-      >
-    </div>
+    <AgeTrack
+      game={$session.game}
+      age={$session.playback?.frame?.age ?? $session.game?.age ?? 1}
+      round={$session.playback?.frame?.round ?? $session.game?.round ?? 1}
+      {roundHint}
+    />
     <nav class="header-actions">
       {#if $session.view?.activeEffects?.length}
         <button

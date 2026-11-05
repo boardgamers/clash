@@ -953,3 +953,14 @@ Existing game history is not replayed or repaired.
 Calendar now persists owner-only known-top state at the first legal turn boundary. Reopening a known card, Keep and Cancel are local: no backend move, history entry or clock credit. Replacement cards require an explicit new inspection; stale-safe paid burial records the existing actions. Historical views omit private knowledge, and reload/reconstruction preserve knowledge and undo floors.
 
 Voting’s activation fee remains separate from Rituals’ city happiness conversions. Sparta can replace Draft tokens but cannot convert a recruited leader’s own mood fee. Both fees retain general Colosseum conversions. Publish the matching viewer and engine together; no production game repair or historical rewrite is needed.
+
+# Viewer 0.1.203 / engine 0.4.137
+
+Publish the matching engine, viewer and game-length creation options together.
+Shorter adds four ages, two starting settlers and two free-advance passes;
+Roll to End and Wonderful Ending use the official seven-age track and their
+respective dice/construction ending windows. Normal retains serialized Standard
+and the six-age default; legacy Epic remains eight ages. The accessible AgeTrack
+provides localized mode rules and ending captions on desktop and mobile.
+No existing games are migrated or replayed. See
+[implementation and verification](../../docs/monumental-game-length.md).
