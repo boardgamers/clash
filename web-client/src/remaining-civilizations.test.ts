@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
+import { pendingActionCard } from './card-reference.ts';
 import { frameDetails } from './playback.ts';
 import { journal } from './journal.ts';
 import { manGodAbility } from './research-links.ts';
@@ -578,6 +579,56 @@ test('Subterfuge discards both cards while leaving the cancelled card costs unpa
   assert.equal((after.players[index].action_cards ?? []).length, 0);
   assert.equal((after.players[1 - index].action_cards ?? []).length, 0);
   assert.ok(!JSON.stringify(after.permanent_effects ?? []).includes('Assassination'));
+});
+for (const id of [3, 4]) test(`Subterfuge exposes exact Inspiration ${id} rules, not the opponent hand, and can cancel or allow`, async () => {
+  const g = await setup('Greece');
+  const index = seat(g), opponentIndex = 1 - index;
+  const p = g.players[index], opponent = g.players[opponentIndex];
+  opponent.civilization = 'Japan';
+  addAdvance(opponent, 'Tactics', 'Writing', 'Husbandry');
+  opponent.units[0].position = p.cities[0].position;
+  opponent.units[0].unit_type = 'Infantry';
+  p.action_cards = [id, 27, 11];
+  opponent.action_cards = [9];
+  const declared = move(g, { Playing: { ActionCard: id } });
+  const stripped = JSON.parse(engine.stripSecret(serialize(declared), opponentIndex));
+  const reaction = view(declared, opponentIndex);
+  assert.equal(reaction.decision.pendingActionCard, id);
+  const card = pendingActionCard(reaction, reaction.decision)!;
+  assert.equal(card.id, id);
+  assert.equal(card.name, 'Inspiration');
+  assert.match(card.description, /Gain 1 advance for free/);
+  assert.match(card.description, /Normal advance prerequisites apply/);
+  assert.equal(card.tactics!.name, id === 3 ? 'Encircled' : 'Peltasts');
+  assert.ok(stripped.events.some((event: any) => event.event_type?.DeclareActionCard?.card === id));
+  assert.ok(!stripped.players[index].action_cards.some((c: number) => [id, 27, 11].includes(c)));
+  assert.deepEqual(reaction.actionCards.map((c: any) => c.id), [9]);
+  assert.deepEqual(reaction.decision.options.map((o: any) => o.value), [{ ActionCard: 9 }]);
+  assert.equal(pendingActionCard(reaction, { ...reaction.decision, pendingActionCard: undefined }), null);
+  assert.equal(pendingActionCard(reaction, { ...reaction.decision, pendingActionCard: 255 }), null);
+
+  const cancelled = move(declared, { Response: { SelectHandCards: [{ ActionCard: 9 }] } });
+  assert.deepEqual(cancelled.players[index].action_cards, [27, 11]);
+  assert.deepEqual(cancelled.players[index].advances, p.advances);
+  assert.deepEqual(cancelled.players[index].resources, p.resources);
+  assert.equal(cancelled.actions_left, g.actions_left);
+  assert.ok(cancelled.action_cards_discarded.includes(id));
+  assert.ok(cancelled.action_cards_discarded.includes(9));
+  assert.equal(view(cancelled).decision?.pendingActionCard, undefined);
+
+  const allowed = move(declared, { Response: { SelectHandCards: [] } });
+  assert.equal(seat(allowed), index);
+  assert.equal(view(allowed).decision.pendingActionCard, undefined);
+  assert.ok(view(allowed).decision.advanceSelection);
+  const advance = view(allowed).decision.options[0].value;
+  const resolved = move(allowed, { Response: { SelectAdvance: advance } });
+  assert.ok(resolved.players[index].advances.includes(advance));
+  assert.deepEqual(resolved.players[index].action_cards, [27, 11]);
+  assert.deepEqual(resolved.players[opponentIndex].action_cards, [9]);
+  // Acquiring an advance may grant its printed token bonus, but Inspiration costs nothing.
+  for (const [resource, amount] of Object.entries(p.resources))
+    assert.ok(resolved.players[index].resources[resource] >= (amount as number));
+  assert.equal(resolved.actions_left, g.actions_left);
 });
 test('Shogunate offers an optional free action and uses the allowance only after the card is accepted', async () => {
   const g = await setup('Japan'),

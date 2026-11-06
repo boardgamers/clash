@@ -669,6 +669,16 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),
         "advanceMode":matches!(h.request,PersistentEventRequest::SelectAdvance(_)).then(|| advance_mode(game, h)),
         "endOfAge":crate::status_phase::get_status_phase(game).is_some()});
+    // The declaration is public; identify only that card, never the player's hand.
+    // Use its id rather than its title (civil titles can have different battle uses).
+    if matches!(
+        h.origin,
+        EventOrigin::SpecialAdvance(crate::special_advance::SpecialAdvance::Subterfuge)
+    ) && let PersistentEventType::DeclareActionCard(announcement) =
+        &game.current_event().event_type
+    {
+        decision["pendingActionCard"] = json!(announcement.card);
+    }
     if let Some((player, round)) = tactics_context {
         decision["opponentTactics"] = json!(crate::tactics_card::opponent_tactics_status(
             game, player, round,

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { handCardDescription } from './card-text';
   import GreatPersonEffect from './GreatPersonEffect.svelte';
+  import CardReferenceDialog from './CardReferenceDialog.svelte';
+  import { pendingActionCard } from './card-reference';
   import CalendarEventPreview from './CalendarEventPreview.svelte';
   import GreatPersonAcquisition from './GreatPersonAcquisition.svelte';
   import RazeActions from './RazeActions.svelte';
@@ -34,6 +36,8 @@
   }: { controller: Controller; decision: Decision; onHighlight: (position: string | null) => void } =
     $props();
   const session = $derived(controller.session);
+  const announcedCard = $derived(pendingActionCard($session.view, decision));
+  let announcedRulesOpen = $state(false);
   const panelId = $props.id();
   const selected = $derived($session.decisionSelection);
   const opponentTactics = $derived(opponentTacticsLabel(decision));
@@ -290,6 +294,20 @@
         text={description.replaceAll('Status Phase', 'End of age').replaceAll('status phase', 'end of age')}
       />
     </p>{/if}
+  {#if announcedCard}
+    <article class="play-card announced-card">
+      <header class="play-card-header">
+        <button class="secondary" onclick={() => (announcedRulesOpen = true)}>
+          <BookOpen size={16} />{printedCardName(announcedCard.name)}
+        </button>
+        <p class="card-use-rule"><Zap size={14} />{announcedCard.free ? 'Free action' : 'Costs 1 action'}</p>
+      </header>
+      <p class="announced-card-effect"><ResourceText text={handCardDescription(announcedCard.description)} /></p>
+    </article>
+    {#if announcedRulesOpen}
+      <CardReferenceDialog card={announcedCard} onDismiss={() => (announcedRulesOpen = false)} />
+    {/if}
+  {/if}
   {#if opponentTactics}<p class="tactics-opponent-status" role="status">
     <Layers size={16} aria-hidden="true" /><span>{opponentTactics}</span>
   </p>{/if}
@@ -547,6 +565,19 @@
   .decision-heading > .icon-button {
     flex-shrink: 0;
   }
+
+  .announced-card .play-card-header {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .announced-card .card-use-rule {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+  }
+  .announced-card .card-use-rule :global(svg) { flex-shrink: 0; }
+  .announced-card .announced-card-effect { margin: 8px 0 0; }
 
   .tactics-opponent-status {
     display: flex;

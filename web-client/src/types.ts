@@ -717,6 +717,8 @@ export interface ActionCard {
   action: Move | null;
 }
 export interface Decision {
+  /** Publicly declared card being considered for Subterfuge, not an opponent hand. */
+  pendingActionCard?: number;
   origin?: Record<string, unknown>;
   /** Private Calendar preview, structured from the owner's visible payment request. */
   calendarPreview?: {

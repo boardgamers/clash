@@ -983,3 +983,31 @@ Verified with 1,029 frontend tests, locale checks, Svelte checks, production bui
 and the focused battle-dice browser smoke. The older `combat-smoke.mjs` still
 fails its unrelated map-label expectation (`Battle · C1` versus the existing
 `Battle · Round 1`); this release does not change that label or suppress the test.
+
+# Viewer 0.1.205 / engine 0.4.138
+
+Subterfuge shows the publicly declared action card’s complete civil rules and
+opens its exact printed copy, including the correct battle use. The read-only
+`pendingActionCard` decision field comes exclusively from the public
+DeclareActionCard event; opponent hands remain redacted. Scoped header spacing
+keeps the title, action cost and rules readable at desktop and narrow widths.
+No game rules, historical outcomes or saved games change.
+
+Publish the matching engine and viewer together. Build with
+`npm run build:bridge`, package the generated Node bridge as
+`@boardgamers/clash-server` 0.4.138 (server.js and server_bg.wasm), then run
+`npm run build` and `npm run publish:bgs -- --engine=/absolute/path/to/package.tgz`
+(first with `--dry-run`). Preserve all creation options, including exact
+game-length labels/order and the Standard default. No live game mutations or
+smaller-city experiment are included.
+
+Regression coverage checks both Inspiration IDs, cancel/allow resolution,
+hidden-hand privacy, and exact battle-side lookup; the Subterfuge browser smoke
+checks full rules, card dialog and spacing at 1400, 390 and 320px.
+
+Verified with the full native workspace tests, pinned Rust 1.94.1 build/format/
+Clippy checks, 1,031 frontend tests, locales, Svelte checks and production build.
+The packed-engine civilization suite passes 226 tests, including both Inspiration
+copies and privacy/cancel/allow coverage. Both copies pass the browser smoke at
+all three widths; battle-dice smoke also passes. The pre-existing combat smoke
+still expects `Battle · C1` instead of `Battle · Round 1`; it remains unchanged.
