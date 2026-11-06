@@ -5421,14 +5421,31 @@ small {
   z-index: 80;
   bottom: 126px;
   left: 50%;
+  right: auto;
   transform: translateX(-50%);
   width: 720px;
   max-width: calc(100% - 24px);
+  max-height: calc(100% - 138px);
   padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.playback-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+.playback-controls {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 10px 16px;
+  gap: 8px 12px;
+  flex-shrink: 0;
 }
 .playback-description {
   grid-column: 1 / -1;
@@ -5439,8 +5456,9 @@ small {
 }
 .playback-description strong {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 7px;
+  gap: 5px 7px;
   font-size: 14px;
 }
 .playback-description small {
@@ -5458,11 +5476,12 @@ small {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
   font-size: 11px;
   color: var(--muted);
-  white-space: nowrap;
 }
 .playback-preference input {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
 }
@@ -5492,6 +5511,35 @@ small {
   align-items: center;
   padding: 7px 12px;
   white-space: nowrap;
+}
+/* Keep recaps beside the board, not across the action. A landscape phone also
+   benefits from the side layout when there is little vertical space. */
+@media (min-width: 1100px), (min-width: 760px) and (max-height: 550px) {
+  .playback-bar {
+    top: 20px;
+    bottom: auto;
+    left: 20px;
+    transform: none;
+    width: 350px;
+    max-height: calc(100% - 40px);
+  }
+  .playback-controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .playback-transport {
+    grid-column: 1 / -1;
+  }
+  .playback-transport > button {
+    flex: 1;
+    padding-inline: 6px;
+  }
+  .playback-exit {
+    justify-self: end;
+  }
+  .playback-progress {
+    flex-basis: 100%;
+    margin-left: 23px;
+  }
 }
 .public-effect {
   position: absolute;
@@ -5567,11 +5615,14 @@ small {
 }
 @media (max-width: 600px) {
   .playback-bar {
-    grid-template-columns: 1fr auto;
     gap: 8px;
     bottom: 120px;
+    max-height: calc(100% - 132px);
     width: calc(100% - 24px);
     padding: 10px 12px;
+  }
+  .playback-controls {
+    grid-template-columns: 1fr auto;
   }
   .playback-exit {
     margin-left: auto;
@@ -6247,9 +6298,11 @@ small {
   font: bold 12px/1 sans-serif;
 }
 
-.game-shell.playing-back:not(.full-replay) .activity.floating-panel {
-  bottom: 260px;
-  height: min(470px, calc(100% - 280px));
+@media (max-width: 1099px) and (min-height: 551px), (max-width: 759px) {
+  .game-shell.playing-back:not(.full-replay) .activity.floating-panel {
+    bottom: 260px;
+    height: min(470px, calc(100% - 280px));
+  }
 }
 @media (max-width: 600px) {
   .game-shell.playing-back:not(.full-replay) .activity.floating-panel {

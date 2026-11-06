@@ -161,10 +161,9 @@
   z-index: 70;
   padding: 10px 12px;
 }
-.playback-bar > .battle-recap {
-  grid-column: 1 / -1;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 9px;
+.playback-content > .battle-recap {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
 }
 .battle-recap {
   min-width: 0;

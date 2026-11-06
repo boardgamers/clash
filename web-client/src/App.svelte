@@ -1951,6 +1951,7 @@
       >
         <BattlePlayback {controller} />
       </div>{/if}
+    {#if $session.playback && $session.playback.range !== 'all'}<PlaybackPanel {controller} />{/if}
   </main>
   {#if wonderReference}<WonderReferenceDialog
       card={wonderReference}
@@ -1975,7 +1976,7 @@
   {#if $session.cardsOpen && $session.seat !== undefined}<ActionCardsDialog {controller} />{/if}
   {#if !$session.playback && !$session.eventNotices?.length}<CardReveal {controller} />{/if}
   {#if $session.mode !== 'research'}<EventReveal {controller}/>{/if}
-  <PlaybackPanel {controller} />
+  {#if $session.playback?.range === 'all'}<PlaybackPanel {controller} />{/if}
   <PublicEffects {controller} />
   {#if effectsOpen}<ActiveEffectsDialog
       effects={$session.view?.activeEffects ?? []}

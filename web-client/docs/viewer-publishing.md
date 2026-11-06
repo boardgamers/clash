@@ -1011,3 +1011,36 @@ The packed-engine civilization suite passes 226 tests, including both Inspiratio
 copies and privacy/cancel/allow coverage. Both copies pass the browser smoke at
 all three widths; battle-dice smoke also passes. The pre-existing combat smoke
 still expects `Battle · C1` instead of `Battle · Round 1`; it remains unchanged.
+
+# Viewer 0.1.206 / engine unchanged (0.4.138)
+
+“Since your last turn” is a compact 350px left dock inside the board layout on
+wide desktop screens and short landscape screens. The action heading, battle
+recap and event explanations share a bounded content scroller; Back, Next,
+Play/Pause/Replay, autoplay preference and Skip/Back to game stay visible outside
+it. Each new action resets the content to its heading without remounting the
+transport controls. Narrow screens retain the bottom recap above the toolbar.
+Full-game replay keeps its existing root event overlay and never gets the recap
+dock. Chat/Journal no longer reserve bottom-recap space when the dock is active.
+
+Publish only the viewer with `npm run publish:bgs` (first with `--dry-run`),
+preserving engine 0.4.138's exact package URL and all unrelated metadata, including
+the exact game-length labels/order and Standard default. No game rules, saved
+data, live game moves or smaller-city experiment are included.
+
+The new `node web-client/scripts/recap-layout-smoke.mjs` uses repository battle
+fixtures with the real engine and built viewer. It covers eight viewport sizes,
+English and French, overflowing event rules, stable controls and scroll reset,
+all recap transport actions, and recap/full-replay isolation across resizes.
+For a read-only local preview, add `--serve --port 8673`; `?stress` adds overflow,
+`?locale=fr` selects French and `?theme=light` selects the light theme.
+
+Verified 1,031 frontend tests, 17 locale catalogs and four extraction tests,
+Svelte checks (zero errors/warnings), the rebuilt WASM bridge and production
+build, all eight recap smoke sizes, battle-dice smoke, and engine protocol checks.
+Rust 1.94.1 build/format/Clippy and all 465 native workspace tests pass (one
+existing ignored test); Clippy retains existing warnings. The legacy combat
+smoke still expects `Battle · C1` rather than `Battle · Round 1`, and the legacy
+playback smoke still expects the board toolbar to be hidden. Both failures were
+reproduced against the hash-verified published 0.1.205 viewer and engine 0.4.138;
+neither assertion was changed or suppressed.

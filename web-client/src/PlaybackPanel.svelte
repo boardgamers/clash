@@ -37,64 +37,75 @@
 
 {#if playback && recap}
   <section class="playback-bar floating-panel" aria-label="Board replay">
-    {#if playback.events?.length}<div class="replay-event-explanations" aria-label="Event explanation">
-      {#each playback.events as notice}<EventExplanation {notice}/>{/each}
-    </div>{/if}
-    {#if $session.battles?.length}<BattlePlayback {controller} />{/if}
-    <div class="playback-description" aria-live="polite">
-      <strong
-        ><History size={16} />Since your last turn
-        {#if playback.end > playback.start}<span class="playback-progress"
-            >{atStart ? 'Start' : `Action ${progress} of ${count}`}</span
-          >{/if}
-      </strong>
-      <small
-        >{#if atStart}Use Next to step through, or Play to watch.{:else}<ResourceText
-            text={details.caption}
-            compactResources
-          />{/if}</small
-      >
-    </div>
-    {#if playback.end > playback.start}<div class="playback-transport">
-        <button aria-label="Previous action" disabled={atStart} onclick={() => controller.stepPlayback(-1)}
-          ><ChevronLeft size={16} />Back</button
-        >
-        <button
-          class="playback-next"
-          aria-label="Next action"
-          disabled={atEnd}
-          onclick={() => controller.stepPlayback(1)}>Next<ChevronRight size={16} /></button
-        >
-        {#if atEnd}
-          <button aria-label="Replay these actions" onclick={() => controller.restartPlayback()}
-            ><RotateCcw size={16} />Replay</button
+    {#key playback.index}
+      <div class="playback-content">
+        <div class="playback-description" aria-live="polite">
+          <strong
+            ><History size={16} />Since your last turn
+            {#if playback.end > playback.start}<span class="playback-progress"
+                >{atStart ? 'Start' : `Action ${progress} of ${count}`}</span
+              >{/if}
+          </strong>
+          <small
+            >{#if atStart}Use Next to step through, or Play to watch.{:else}<ResourceText
+                text={details.caption}
+                compactResources
+              />{/if}</small
           >
-        {:else}
+        </div>
+        {#if $session.battles?.length}<BattlePlayback {controller} />{/if}
+        {#if playback.events?.length}<div class="replay-event-explanations" aria-label="Event explanation">
+            {#each playback.events as notice}<EventExplanation {notice} />{/each}
+          </div>{/if}
+      </div>
+    {/key}
+    <div class="playback-controls">
+      {#if playback.end > playback.start}<div class="playback-transport">
+          <button aria-label="Previous action" disabled={atStart} onclick={() => controller.stepPlayback(-1)}
+            ><ChevronLeft size={16} />Back</button
+          >
           <button
-            aria-label={playback.playing ? 'Pause replay' : 'Play replay'}
-            onclick={() => controller.togglePlayback()}
-            >{#if playback.playing}<Pause size={16} />Pause{:else}<Play size={16} />Play{/if}</button
+            class="playback-next"
+            aria-label="Next action"
+            disabled={atEnd}
+            onclick={() => controller.stepPlayback(1)}>Next<ChevronRight size={16} /></button
           >
-        {/if}
-      </div>{/if}
-    <label class="playback-preference" title="Remember this preference for future opponent recaps">
-      <input
-        type="checkbox"
-        checked={$session.replayAutoplay}
-        onchange={(event) => controller.setReplayAutoplay(event.currentTarget.checked)}
-      />Autoplay on return
-    </label>
-    <button class="playback-exit" onclick={() => controller.endPlayback()}>
-      {atEnd ? 'Back to game' : 'Skip'}<X size={15} />
-    </button>
+          {#if atEnd}
+            <button aria-label="Replay these actions" onclick={() => controller.restartPlayback()}
+              ><RotateCcw size={16} />Replay</button
+            >
+          {:else}
+            <button
+              aria-label={playback.playing ? 'Pause replay' : 'Play replay'}
+              onclick={() => controller.togglePlayback()}
+              >{#if playback.playing}<Pause size={16} />Pause{:else}<Play size={16} />Play{/if}</button
+            >
+          {/if}
+        </div>{/if}
+      <label class="playback-preference" title="Remember this preference for future opponent recaps">
+        <input
+          type="checkbox"
+          checked={$session.replayAutoplay}
+          onchange={(event) => controller.setReplayAutoplay(event.currentTarget.checked)}
+        />Autoplay on return
+      </label>
+      <button class="playback-exit" onclick={() => controller.endPlayback()}>
+        {atEnd ? 'Back to game' : 'Skip'}<X size={15} />
+      </button>
+    </div>
   </section>
 {/if}
 
 {#if playback && !recap && playback.events?.length}
   <aside class="card-reveal" aria-label="Replay event explanation">
-    {#each playback.events as notice}<EventExplanation {notice}/>{/each}
+    {#each playback.events as notice}<EventExplanation {notice} />{/each}
   </aside>
 {/if}
+
 <style>
-  .replay-event-explanations { grid-column: 1 / -1; width:100%; max-height:35vh; overflow:auto; border-bottom:1px solid var(--line); padding-bottom:.6rem; }
+  .replay-event-explanations {
+    min-width: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
 </style>
