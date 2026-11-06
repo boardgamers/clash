@@ -92,7 +92,12 @@ try {
     const back = bar.getByRole('button', { name: 'Previous action', exact: true });
     await bar.waitFor();
     assert.match(await bar.innerText(), /Since your last turn/);
-    assert.equal(await page.locator('.board-toolbar').isVisible(), false);
+    // Replay keeps reference tools available, but cannot submit live actions.
+    const toolbar = page.locator('.board-toolbar');
+    assert(await toolbar.isVisible());
+    assert.match(await toolbar.innerText(), /Replay · Browse game details/);
+    assert(await toolbar.getByRole('button', { name: 'Undo last action', exact: true }).isDisabled());
+    assert(await toolbar.getByRole('button', { name: 'End turn', exact: true }).isDisabled());
     await bar.getByRole('button', { name: 'Pause replay', exact: true }).click();
     assert(await next.isVisible());
     assert(await back.isVisible());
@@ -111,22 +116,35 @@ try {
     );
     assert.match(caption, /Action 2 of 3/);
     const bounds = await bar.boundingBox();
-    assert(bounds.x >= 0 && bounds.x + bounds.width <= width + 1 && bounds.height < 185);
+    assert(bounds.x >= 0 && bounds.x + bounds.width <= width + 1);
+    assert(bounds.y >= 0 && bounds.y + bounds.height <= height + 1);
+    // The current recap is a narrow desktop dock, or a bottom panel on phones.
+    if (width >= 1100 || (width >= 760 && height <= 550)) {
+      assert(bounds.x <= 30 && bounds.width <= 380);
+      assert(bounds.x + bounds.width < width / 2, 'recap leaves the map center clear');
+    } else {
+      assert(bounds.y + bounds.height >= height - 150, 'phone recap stays near the bottom');
+    }
+    for (const control of await bar.locator('.playback-controls button, .playback-controls input').all()) {
+      const box = await control.boundingBox();
+      assert(box && box.x >= bounds.x && box.x + box.width <= bounds.x + bounds.width + 1);
+      assert(box.y >= bounds.y && box.y + box.height <= bounds.y + bounds.height + 1);
+    }
     assert.equal(await bar.evaluate((el) => el.scrollWidth <= el.clientWidth), true);
     await page.screenshot({ path: `/tmp/clash-replay-${width}.png` });
     await next.click();
     await bar.getByRole('button', { name: 'Back to game', exact: true }).waitFor();
     assert(await next.isDisabled());
-    await bar.getByRole('button', { name: 'Replay this turn', exact: true }).click();
+    await bar.getByRole('button', { name: 'Replay these actions', exact: true }).click();
     assert(await back.isDisabled());
     assert.match(await bar.innerText(), /Start/);
     await bar.getByRole('button', { name: 'Skip', exact: true }).click();
-    const shortcut = page.getByRole('button', { name: 'Replay last turn', exact: true });
+    const shortcut = page.getByRole('button', { name: 'Replay since your last turn', exact: true });
     await shortcut.waitFor();
-    if (width <= 760) assert(await shortcut.getByText('Last turn', { exact: true }).isVisible());
+    if (width <= 760) assert(await shortcut.getByText('Since my turn', { exact: true }).isVisible());
     await shortcut.click();
     await bar.getByRole('button', { name: 'Play replay', exact: true }).waitFor();
-    assert.match(await bar.innerText(), /Last turn/);
+    assert.match(await bar.innerText(), /Since your last turn/);
     assert(await back.isDisabled());
     await page.evaluate((raw) => host.emit('state', raw), updated);
     await next.click();
@@ -142,19 +160,30 @@ try {
     await bar.getByRole('button', { name: 'Back to game', exact: true }).waitFor({ timeout: 15000 });
     assert(await bar.isVisible(), 'autoplay finishes without dismissing the recap');
     await bar.getByRole('button', { name: 'Back to game', exact: true }).click();
+    // Full replay uses the host's transport, not the since-last-turn recap panel.
     await page.evaluate(() => host.emit('replay:start'));
-    await bar.waitFor();
+    await page.locator('.game-shell.full-replay').waitFor();
+    assert.equal(await bar.count(), 0, 'host replay does not render recap controls');
+    await page.waitForFunction(
+      ({ start, end }) => replayInfo.at(-1)?.start === start && replayInfo.at(-1)?.end === end,
+      { start: history.frames[0].cursor, end: history.frames.at(-1).cursor },
+    );
     await page.evaluate((cursor) => host.emit('replay:to', cursor), history.frames.at(-1).cursor);
     await page.waitForFunction(
       (cursor) => replayInfo.at(-1)?.current === cursor,
       history.frames.at(-1).cursor,
     );
-    await bar.getByRole('button', { name: 'Back to game', exact: true }).click();
+    assert.equal(await page.locator('.public-effect').count(), 0, 'host replay has no recap notifications');
+    await page.evaluate(() => host.emit('replay:end'));
+    await page.locator('.game-shell.playing-back').waitFor({ state: 'hidden' });
+    await shortcut.waitFor();
     await page.evaluate(() => host.emit('preferences', { analysis: true, sound: false }));
+    await page.getByText('Analysis · Simulation', { exact: true }).waitFor();
     await page.evaluate(() => host.emit('replay:start'));
+    assert.equal(await page.locator('.game-shell.playing-back').count(), 0);
     assert.equal(await bar.count(), 0);
     assert.equal(await shortcut.count(), 0);
-    await page.getByText('Analysis · Simulation', { exact: true }).waitFor();
+    assert.deepEqual(await page.evaluate(() => sent), [], 'recaps and host replay never submit moves');
     assert.deepEqual(errors, []);
     console.log(
       `${width}x${height}: manual/automatic recap, visible stepping, bounded last-turn replay, remembered preference, live updates, native replay and analysis isolation verified.`,

@@ -55,10 +55,11 @@ try {
     );
     const marker = page.locator('.map-combat-label');
     await marker.waitFor();
-    assert.equal(await marker.innerText(), 'Battle · C1');
-    assert.match(await marker.getAttribute('aria-label'), /Rome attacks Greece · C2 to C1/);
+    assert.equal(await marker.innerText(), 'Battle · Round 1');
+    assert.equal(await marker.getAttribute('aria-label'), 'Rome attacks Greece · C2 to C1 · Round 1');
     await page.getByRole('button', { name: 'Open journal', exact: true }).click();
-    const table = page.getByRole('table', { name: 'Combat round 1', exact: true });
+    const journal = page.getByRole('tabpanel', { name: 'Journal', exact: true });
+    const table = journal.getByRole('table', { name: 'Combat round 1', exact: true });
     await table.waitFor();
     assert.equal(
       await table
@@ -85,9 +86,10 @@ try {
     await page.screenshot({ path: `/tmp/clash-combat-active-${width}.png` });
     await page.evaluate((state) => host.emit('state', state), completed);
     await marker.waitFor({ state: 'hidden' });
-    await page.getByText('Rome wins', { exact: true }).waitFor();
+    await journal.getByText('Rome wins', { exact: true }).waitFor();
     assert.match(await table.innerText(), /Peltasts/);
-    assert.match(await table.innerText(), /Encircled/);
+    // The fixture's engine name "Encircled" is printed as "Routing" in the UI.
+    assert.match(await table.innerText(), /Routing/);
     assert.doesNotMatch(await table.innerText(), /Gain Fortress|Lose Fortress/);
     assert.ok(await page.locator('.journal').evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
     await page.screenshot({ path: `/tmp/clash-combat-result-${width}.png` });
@@ -108,10 +110,14 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.screenshot({ path: `/tmp/clash-combat-elephant-${width}.png` });
     await page.evaluate((state) => host.emit('state', state), naval);
-    await page.waitForFunction(() => document.querySelectorAll('.combat-die').length === 3);
+    // The carried-unit casualty decision closes the journal. Wait for the naval
+    // state to render, then reopen it before waiting for its (unmounted) dice.
+    await page.locator('.map-combat-label[aria-label="Greece attacks Rome · C3 to D2 · Round 1"]').waitFor();
     const journalButton = page.getByRole('button', { name: 'Open journal', exact: true });
-    if ((await journalButton.getAttribute('aria-expanded')) === 'false') await journalButton.click();
+    await journalButton.and(page.locator('[aria-expanded="false"]')).waitFor();
+    await journalButton.click();
     await table.waitFor();
+    assert.equal(await table.locator('.combat-die').count(), 3);
     await page.screenshot({ path: `/tmp/clash-combat-naval-${width}.png` });
     assert.equal(
       await table.getByRole('img', { name: '6 · Infantry face · No ability activated', exact: true }).count(),
