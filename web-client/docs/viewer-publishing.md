@@ -1044,3 +1044,32 @@ smoke still expects `Battle · C1` rather than `Battle · Round 1`, and the lega
 playback smoke still expects the board toolbar to be hidden. Both failures were
 reproduced against the hash-verified published 0.1.205 viewer and engine 0.4.138;
 neither assertion was changed or suppressed.
+
+# Viewer 0.1.207 / engine 0.4.139
+
+Printed Defiance (objective cards 27 and 28, internally `Resistance`) is available
+immediately after defending a battle and eliminating at least two opposing army
+units, including barbarian armies. Winning is not required: defensive losses and
+draws qualify. Infantry, cavalry, elephants and leaders count; settlers, ships
+and the defender's own casualties do not. The card adds no land-only restriction.
+The separate internal `Defiance` objective, printed Against All Odds, is unchanged.
+Both card copies and all 17 locale catalogs use the corrected rule.
+
+Publish the matching viewer and engine together. Package the generated Node
+bridge as `@boardgamers/clash-server` 0.4.139, then run
+`npm run publish:bgs -- --engine=/absolute/path/to/package.tgz` (first with
+`--dry-run`). Preserve all unrelated metadata and creation options, including
+the exact game-length labels/order and Standard default. Existing saves and
+completed objectives remain compatible; historical battles are not replayed or
+repaired. No live game moves or smaller-city experiment are included.
+
+Verified with Rust 1.94.1 build/format/Clippy and 471 native workspace tests (one
+existing ignored test), 1,034 frontend tests against the packed engine, all 17
+locale catalogs and four extraction tests, Svelte checks (zero errors/warnings),
+production build and engine protocol checks. Seven native Defiance tests and
+WASM regressions cover both cards, casualty types, attacker/nonbattle exclusions,
+real defensive losses/draws, pending-choice persistence and one claim per battle.
+Combat, playback, recap-layout, battle-dice and Subterfuge browser smokes all pass
+against the packed engine. The previously stale combat/playback assertions were
+corrected separately in `786352b3` to retain coverage of current behavior. Clippy
+retains existing warnings; expected invalid-move rejection tests log WASM panics.

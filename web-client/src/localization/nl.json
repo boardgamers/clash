@@ -2,7 +2,7 @@
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Kies een andere speler. Jullie kunnen elkaar niet aanvallen, tenzij de aanvaller de verdediger 2 cultuurfiches betaalt. Leg deze kaart af als een van beide spelers de ander aanvalt. Je mag de kaart afleggen als een gewone actie.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Kies een andere speler. Jullie kunnen elkaar niet aanvallen, tenzij de aanvaller de verdediger 2 cultuurfiches betaalt. Leg deze kaart af als een van beide spelers de ander aanvalt. Je mag de kaart afleggen als een gewone actie.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Direct na het bouwen van het eerste wereldwonder in het spel, of in de statusfase als jij de enige speler was die in de laatste ronde wereldwonderen bouwde.",
-  "You won a battle as defender and killed at least 2 enemy units.": "Je won een gevecht als verdediger en doodde minstens 2 vijandelijke eenheden.",
+  "Immediately after a battle where you were attacked and eliminated at least 2 army units (including barbarian army units).": "Direct na een gevecht waarin je werd aangevallen en minstens 2 legereenheden hebt uitgeschakeld (inclusief barbaarse legereenheden).",
   "# Arguments": "# Argumenten",
   "# Errors": "# Fouten",
   "# Panics": "# Panieks",

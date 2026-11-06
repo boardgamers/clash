@@ -314,21 +314,30 @@ pub(crate) fn barbarian_conquest() -> Objective {
     .build()
 }
 
+// Printed as Defiance on objective cards 27 and 28.
 pub(crate) fn resistance() -> Objective {
     let name = "Resistance";
     Objective::builder(
         name,
-        "You won a battle as defender and killed at least 2 enemy units.",
+        "Immediately after a battle where you were attacked and eliminated at least 2 army units (including barbarian army units).",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         12,
         |game, p, s| {
             let player = p.index;
-            if s.is_winner(player)
-                && s.defender.player == player
-                && s.opponent(player).losses.amount() >= 2
-            {
+            if !s.is_battle() || s.defender.player != player {
+                return;
+            }
+
+            let army_losses: u8 = s
+                .opponent(player)
+                .losses
+                .clone()
+                .into_iter()
+                .filter_map(|(unit, count)| unit.is_army_unit().then_some(count))
+                .sum();
+            if army_losses >= 2 {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
