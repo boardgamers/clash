@@ -5281,5 +5281,12 @@
   "Casualties": "傷亡",
   "Casualties:": "傷亡:",
   "Casualties: {p0}": "傷亡: {p0}",
-  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}",
+  "Exchange one objective from your hand for one new objective, or keep your current hand.": "用手中的一個目標交換一個新目標，或保留目前手牌。",
+  "New objectives — choose one to keep": "新目標 — 選擇一個保留",
+  "Your objectives — choose one to return": "你的目標 — 選擇一個歸還",
+  "Exchange objectives": "交換目標",
+  "Keep current objectives": "保留目前目標",
+  "Keep": "保留",
+  "Return": "歸還"
 }

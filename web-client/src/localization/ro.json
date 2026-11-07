@@ -5281,5 +5281,12 @@
   "Casualties": "Pierderi",
   "Casualties:": "Pierderi:",
   "Casualties: {p0}": "Pierderi: {p0}",
-  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}",
+  "Exchange one objective from your hand for one new objective, or keep your current hand.": "Schimbă un obiectiv din mână cu unul nou sau păstrează mâna actuală.",
+  "New objectives — choose one to keep": "Obiective noi — alege unul de păstrat",
+  "Your objectives — choose one to return": "Obiectivele tale — alege unul de returnat",
+  "Exchange objectives": "Schimbă obiective",
+  "Keep current objectives": "Păstrează obiectivele actuale",
+  "Keep": "Păstrează",
+  "Return": "Returnează"
 }

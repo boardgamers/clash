@@ -5281,5 +5281,12 @@
   "Casualties": "사상자",
   "Casualties:": "사상자:",
   "Casualties: {p0}": "사상자: {p0}",
-  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}",
+  "Exchange one objective from your hand for one new objective, or keep your current hand.": "손에 든 목표 하나를 새 목표 하나와 교환하거나 현재 손패를 유지하세요.",
+  "New objectives — choose one to keep": "새 목표 — 보관할 목표 하나 선택",
+  "Your objectives — choose one to return": "내 목표 — 반환할 목표 하나 선택",
+  "Exchange objectives": "목표 교환",
+  "Keep current objectives": "현재 목표 유지",
+  "Keep": "보관",
+  "Return": "반환"
 }

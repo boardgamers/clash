@@ -5281,5 +5281,12 @@
   "Casualties": "Baixas",
   "Casualties:": "Baixas:",
   "Casualties: {p0}": "Baixas: {p0}",
-  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}",
+  "Exchange one objective from your hand for one new objective, or keep your current hand.": "Troque um objetivo da sua mão por um novo objetivo ou mantenha sua mão atual.",
+  "New objectives — choose one to keep": "Novos objetivos — escolha um para manter",
+  "Your objectives — choose one to return": "Seus objetivos — escolha um para devolver",
+  "Exchange objectives": "Trocar objetivos",
+  "Keep current objectives": "Manter objetivos atuais",
+  "Keep": "Manter",
+  "Return": "Devolver"
 }

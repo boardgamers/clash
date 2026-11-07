@@ -72,7 +72,7 @@ try {
       },
       { state: engine.stripSecret(state, 0), dark },
     );
-    const panel = page.getByRole('region', { name: 'Great Seer', exact: true });
+    const panel = page.getByRole('region', { name: 'Great Oracle', exact: true });
     await panel.waitFor();
     assert.match(await panel.innerText(), /The other card goes to Greece on their next objective draw/);
     assert.equal(await panel.locator('.decision-card-face').count(), 4);
@@ -100,7 +100,7 @@ try {
     );
     state = spy;
     await page.evaluate((state) => host.emit('state', state), engine.stripSecret(state, 0));
-    const spyPanel = page.getByRole('region', { name: 'Spy', exact: true });
+    const spyPanel = page.getByRole('region', { name: 'Spies', exact: true });
     await spyPanel.waitFor();
     assert.ok(await spyPanel.getByText('Battle · Requires Tactics', { exact: true }).count());
     assert.ok(await spyPanel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
@@ -112,6 +112,7 @@ try {
     await page.locator('.variant-picker button').filter({ hasText: 'Free Economy' }).click();
     const tiles = page.locator('.collection-tile-list');
     await tiles.locator('summary').click();
+    // Real pointer clicks must reach the list even above the sticky footer at 320px.
     await tiles.locator('button').first().click();
     await page.locator('.collect-submit').click();
     await page.waitForFunction(

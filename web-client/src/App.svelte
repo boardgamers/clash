@@ -375,7 +375,7 @@
               : $session.view?.decision
                 ? $session.view.decision.endOfAge
                   ? 'End of age'
-                  : $session.view.decision.name
+                  : printedCardName($session.view.decision.name)
                 : $session.view?.explorationDecision
                   ? 'Place explored terrain'
                   : choiceDecision

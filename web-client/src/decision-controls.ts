@@ -68,6 +68,11 @@ export function mapDecisionIndex(decision: Decision, position: string, pick: Map
 export function toggleDecisionSelection(decision: Decision, selected: number[], index: number) {
   if (!decision.options[index]) return selected;
   if (selected.includes(index)) return selected.filter((i) => i !== index);
+  if (decision.objectiveExchange) {
+    const role = decision.options[index].exchangeRole;
+    if (!role) return selected;
+    return [...selected.filter((i) => decision.options[i]?.exchangeRole !== role), index];
+  }
   if (decision.max === 1) return [index];
   return selected.length < decision.max ? [...selected, index] : selected;
 }

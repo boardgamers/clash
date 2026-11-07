@@ -56,6 +56,7 @@
     && decision.fields.some((field) => field.name === 'Pay to gain the Action Card')
     ? decision.eventContext.card : null);
   const description = $derived(
+    decision.objectiveExchange ? 'Exchange one objective from your hand for one new objective, or keep your current hand.' :
     razeChoice ? 'Select a highlighted city on the map.' : combatBenefit ??
       (decision.tacticsSelection && decision.name === 'Tactics'
         ? ''
@@ -144,6 +145,10 @@
   );
   const optionGroups = $derived.by(() => {
     const indexed = decision.options.map((option, index) => ({option,index}));
+    if (decision.objectiveExchange) return [
+      {label:'New objectives — choose one to keep', options:indexed.filter(({option}) => option.exchangeRole === 'keep')},
+      {label:'Your objectives — choose one to return', options:indexed.filter(({option}) => option.exchangeRole === 'return')},
+    ];
     if (new Set(indexed.map(({option})=>option.owner?.player).filter(p=>p!==undefined)).size < 2)
       return [{label:'', options:indexed}];
     const type = (option: typeof decision.options[number]) => option.card?.kind === 'action' ? 'Action cards' : option.card?.kind === 'objective' ? 'Objectives' : 'Wonders';
@@ -190,12 +195,13 @@
         class="decision-option"
         class:has-description={!!presented.description || !!option.handCounts}
         class:card-option={!!option.card}
+        class:exchange-option={decision.objectiveExchange}
         class:selected={selected.includes(i)}
         aria-label={presented.name}
         aria-describedby={presented.description || option.handCounts ? `${panelId}-option-${i}` : undefined}
         aria-pressed={selected.includes(i)}
         disabled={$session.pending ||
-          (!selected.includes(i) && decision.max > 1 && selected.length >= decision.max)}
+          (!decision.objectiveExchange && !selected.includes(i) && decision.max > 1 && selected.length >= decision.max)}
         onmouseenter={() => onHighlight(option.position)}
         onmouseleave={() => onHighlight(null)}
         onfocus={() => onHighlight(option.position)}
@@ -209,7 +215,9 @@
             {foodRecipient.resources?.food ?? 0}/{foodRecipient.resource_limit?.food ?? 0}<Wheat size={15} />
           </span>
         {/if}
-        {#if firstPlayerChoice}
+        {#if decision.objectiveExchange && selected.includes(i)}
+          <span class="exchange-selection"><Check size={13} />{option.exchangeRole === 'keep' ? 'Keep' : 'Return'}</span>
+        {:else if firstPlayerChoice}
           {#if selected.includes(i)}<Check size={18} aria-hidden="true" />{/if}
         {:else}<span class="decision-selection" aria-hidden="true"
           >{#if selected.includes(i)}<Check size={13} />{/if}</span>{/if}
@@ -492,11 +500,22 @@
     {#if (decision.tacticsSelection || decision.name === 'Siegecraft') && preview.action}
       <CombatEstimate {controller} action={preview.action} />
     {/if}
-    <div class="decision-footer" class:map-decision-footer={mapChoice}>
+    <div class="decision-footer" class:objective-exchange-footer={decision.objectiveExchange} class:map-decision-footer={mapChoice}>
       {#if razeChoice}
         <RazeActions selected={selected.length ? decision.options[selected[0]].position : null} pending={$session.pending}
           onkeep={() => { const response = controller.query<{action: Move}>({kind:'decision', values:[], payments:[]}); controller.submit(response.action); }}
           onraze={() => preview.action && controller.submit(preview.action)} />
+      {:else if decision.objectiveExchange}
+        <button class="secondary" disabled={$session.pending}
+          onclick={() => {
+            const response = controller.query<{action: Move}>({kind:'decision', values:[], payments:[]});
+            controller.submit(response.action);
+          }}>Keep current objectives</button>
+        <button class="primary" disabled={$session.pending || !preview.action || selected.length !== 2 ||
+          !selected.some(i => decision.options[i].exchangeRole === 'keep') ||
+          !selected.some(i => decision.options[i].exchangeRole === 'return')}
+          onclick={() => preview.action && selected.length === 2 && controller.submit(preview.action)}
+          >Exchange objectives<Check size={16} /></button>
       {:else if decision.tacticsSelection}
         {#if selected.length}<small class="tactics-discard">Discards the selected card</small>{/if}
         <button
@@ -541,7 +560,7 @@
           />
         </button>
       {/if}
-      {#if preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
+      {#if !decision.objectiveExchange && preview.error && (selected.length > 0 || decision.fields.length)}<p class="inline-error">
           {preview.error}
         </p>{/if}
     </div>
@@ -550,6 +569,12 @@
 </section>
 
 <style>
+  .decision-options .exchange-option { flex-direction: column; }
+  .exchange-option :global(.decision-option-content) { width: 100%; }
+  .exchange-option > .exchange-selection, .exchange-option > .decision-selection { order: -1; align-self: flex-end; }
+  .exchange-selection { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; color: var(--ink); }
+  .objective-exchange-footer { display: flex; flex-wrap: wrap; gap: 8px; }
+  .objective-exchange-footer button { white-space: normal; flex: 1 1 180px; }
   @media (min-width: 761px) {
     :global(.play-layout) .action-panel.floating-panel.calendar-decision {
       width: min(460px, calc(100% - 40px));

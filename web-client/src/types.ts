@@ -747,6 +747,7 @@ export interface Decision {
     } | null;
   } | null;
   advanceSelection?: boolean;
+  objectiveExchange?: boolean;
   tacticsSelection?: boolean;
   opponentTactics?: 'played' | 'pending' | 'none' | null;
   advanceMode?: 'free' | 'paid' | 'borrow' | null;
@@ -765,6 +766,7 @@ export interface Decision {
       | { kind: 'unit'; player: number; unit: number; unitType: UnitView['type'] }
       | { kind: 'structure'; structure: string | { Building: string } | { Wonder: string } };
     terrain?: Terrain;
+    exchangeRole?: 'keep' | 'return';
     owner?: { player: number; civilization: string; you: boolean };
     /** Public counts of the hand categories Spy can inspect, never card identities. */
     handCounts?: { action: number; objective: number; wonder: number };

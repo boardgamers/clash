@@ -1145,3 +1145,33 @@ Verified with Rust 1.94.1 build/format/Clippy and all 482 native workspace tests
 17 locale catalogs and four extraction tests, Svelte checks (zero errors/warnings)
 and the production build. Clippy retains existing warnings; intentional rejected
 moves in the regression suite emit expected WASM panic diagnostics.
+
+# Viewer 0.1.210 / engine 0.4.142
+
+New Goals (canonical New Plans, cards 31/32) separates newly drawn objectives to
+keep from current objectives to return. Each group allows one selection, with
+independent highlights and complete card faces. Explicit **Exchange objectives**
+and **Keep current objectives** controls replace generic confirmation; keeping
+always submits an empty selection, regardless of highlights. Toolbar and panel
+use the printed card name. All 17 locales include the new wording.
+
+The private decision bridge supplies optional `objectiveExchange` and per-option
+`exchangeRole` metadata only to the active player. Canonical card enums and move
+payloads are unchanged. Existing generic card choices, including Spies and Great
+Oracle, retain their behavior. The rules still charge one action and one culture
+and allow exchanging exactly one objective or none; no saved history is changed.
+
+Card-choice browser coverage also caught a pre-existing 320px collection-list
+layout bug: flex shrinking placed tile choices beneath the sticky Collect button.
+The expanded list now retains its height in the scrolling panel. Real pointer
+clicks verify Free Economy without forced interaction.
+
+Publish the matching bridge as `@boardgamers/clash-server` 0.4.142 using
+`npm run publish:bgs -- --engine=/absolute/path/to/package.tgz` (dry-run first).
+Preserve unrelated metadata, including game-length labels/order and Standard as
+the default. Coverage includes all 482 native workspace tests (one existing
+ignored test), 1,054 frontend tests against the packed engine, 17 locales and four
+extraction tests, Svelte checks, and the production build. Browser checks cover
+both copies in English/German at 1400/390/320px, generic card choices, combat and
+playback. Existing Clippy warnings and expected rejected-move WASM panic
+diagnostics remain. No live moves or historical repairs are performed.

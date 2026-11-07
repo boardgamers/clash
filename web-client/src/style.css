@@ -3787,6 +3787,8 @@ small {
 }
 .collection-tile-list {
   min-height: 0;
+  /* Keep the open list in flow above the sticky confirmation on short phones. */
+  flex-shrink: 0;
 }
 .collection-tile-list > summary {
   display: flex;

@@ -312,6 +312,8 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
     let mut max = 1;
     let mut fields = vec![];
     let p = game.player(game.current_event().player.index);
+    let objective_exchange = matches!(&h.request, PersistentEventRequest::SelectHandCards(_))
+        && matches!(&h.origin, EventOrigin::CivilCard(31 | 32));
     let tactics_selection = matches!(&h.request, PersistentEventRequest::SelectHandCards(_))
         && (matches!(
             &h.origin,
@@ -590,6 +592,9 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                         } else { None }
                     });
                     let mut choice = option(card, card.name(game), text, None);
+                    if objective_exchange {
+                        choice["exchangeRole"] = json!(if matches!(card, HandCard::ObjectiveCard(id) if p.objective_cards.contains(id)) { "return" } else { "keep" });
+                    }
                     if let Some(owner) = owner {
                         choice["owner"] = json!({"player":owner.index,"civilization":owner.civilization.name,"you":owner.index == seat});
                     }
@@ -665,6 +670,7 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
         "eventContext":event_context,
         "calendarPreview":super::journal::calendar_preview(game, seat),
         "reward":matches!(h.request,PersistentEventRequest::ResourceReward(_)),
+        "objectiveExchange":objective_exchange,
         "tacticsSelection":tactics_selection,
         "advanceSelection":matches!(h.request,PersistentEventRequest::SelectAdvance(_)),
         "advanceMode":matches!(h.request,PersistentEventRequest::SelectAdvance(_)).then(|| advance_mode(game, h)),

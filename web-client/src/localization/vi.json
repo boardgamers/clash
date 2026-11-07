@@ -5281,5 +5281,12 @@
   "Casualties": "Thương vong",
   "Casualties:": "Thương vong:",
   "Casualties: {p0}": "Thương vong: {p0}",
-  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}",
+  "Exchange one objective from your hand for one new objective, or keep your current hand.": "Đổi một mục tiêu trên tay lấy một mục tiêu mới, hoặc giữ nguyên bài trên tay.",
+  "New objectives — choose one to keep": "Mục tiêu mới — chọn một để giữ",
+  "Your objectives — choose one to return": "Mục tiêu của bạn — chọn một để trả lại",
+  "Exchange objectives": "Đổi mục tiêu",
+  "Keep current objectives": "Giữ mục tiêu hiện tại",
+  "Keep": "Giữ",
+  "Return": "Trả lại"
 }
