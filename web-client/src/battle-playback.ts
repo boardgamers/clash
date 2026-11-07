@@ -53,9 +53,14 @@ export function battleCues(
         a.combat_stats ||
         a.items?.some(
           (i) =>
-            i.CombatRound || i.CombatRoll || i.origin?.Ability === 'Combat' || i.Text === 'wins the battle',
+            i.CombatRound ||
+            i.CombatRoll ||
+            i.CombatHitReport ||
+            i.origin?.Ability === 'Combat' ||
+            i.Text === 'Ignore the first hit' ||
+            i.Text === 'wins the battle',
         ) ||
-        a.log?.some((l) => /Combat|Tactics|wins|battle/.test(l)),
+        a.log?.some((l) => /Combat|Tactics|wins|battle|Ignore the first hit/.test(l)),
     )
   )
     return [];

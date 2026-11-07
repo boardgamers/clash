@@ -277,6 +277,13 @@ pub enum ActionLogEntry {
     },
     CombatRound(ActionLogEntryCombatRound),
     CombatRoll(ActionLogEntryCombatRoll),
+    // Reporting only: retain the uncapped arithmetic separately from casualties.
+    CombatHitReport {
+        combat_value: u8,
+        hit_cancels: u8,
+        extra_hits: u8,
+        casualties: u8,
+    },
     InfluenceCultureAttempt(InfluenceCultureAttemptInfo),
 }
 

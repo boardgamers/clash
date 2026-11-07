@@ -61,12 +61,24 @@ for (const declineFirst of [false, true])
       } else if (r.BoolRequest) {
         response = { Bool: false };
       } else assert.fail(JSON.stringify(h));
+      const items = (state: any) => state.log.flatMap((a: any) => a.rounds.flatMap((r: any) =>
+        r.turns.flatMap((t: any) => (t.actions ?? []).flatMap((a: any) => a.items ?? []))));
+      const beforeItems = items(g);
+      const beforeReport = beforeItems.filter((i: any) => i.player === 1 && i.CombatHitReport).at(-1)?.CombatHitReport;
       // Round trips through saved JSON must preserve the once-per-battle marker.
       raw = engine.tryMove(
         JSON.stringify(g),
         JSON.stringify({ Response: response }),
         engine.currentPlayer(raw),
       );
+      if (r.Payment) {
+        const afterItems = items(JSON.parse(raw));
+        const final = afterItems.slice(beforeItems.length).find((i: any) => i.player === 1 && i.CombatHitReport)?.CombatHitReport;
+        assert.ok(beforeReport && final, 'Roll and post-payment hit reports must both exist');
+        const reduction = response.Payment?.[0].culture_tokens ? 1 : 0;
+        assert.deepEqual(final, { ...beforeReport, hit_cancels: beforeReport.hit_cancels + reduction, casualties: beforeReport.casualties - reduction });
+        assert.deepEqual(afterItems.slice(0, beforeItems.length), beforeItems, 'Payment must not rewrite earlier rolls or reports');
+      }
     }
     assert.equal(paid, 1);
     assert.equal(offers, declineFirst ? 2 : 1);

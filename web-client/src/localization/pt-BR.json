@@ -5276,5 +5276,10 @@
   "End on": "Termina com",
   "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
   "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "Depois, você pode explorar uma região adjacente a uma região onde você tem uma cidade. Se fizer isso, pode pagar 2 comida para fundar uma cidade na região explorada, sem usar um Colono.",
-  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Depois, você pode explorar uma região adjacente a uma região onde você tem uma cidade. Se fizer isso, pode pagar 2 comida para fundar uma cidade na região explorada, sem usar um Colono."
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Depois, você pode explorar uma região adjacente a uma região onde você tem uma cidade. Se fizer isso, pode pagar 2 comida para fundar uma cidade na região explorada, sem usar um Colono.",
+  "{p0} ignores 1 hit": "{p0} ignora 1 acerto",
+  "Casualties": "Baixas",
+  "Casualties:": "Baixas:",
+  "Casualties: {p0}": "Baixas: {p0}",
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
 }

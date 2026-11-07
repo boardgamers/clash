@@ -5276,5 +5276,10 @@
   "End on": "結束點數",
   "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
   "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "然後，你可以探索與你擁有城市的地區相鄰的一個地區。如果這樣做，你可以支付2食物，在探索的地區建立一座城市，無需使用移民。",
-  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} 然後，你可以探索與你擁有城市的地區相鄰的一個地區。如果這樣做，你可以支付2食物，在探索的地區建立一座城市，無需使用移民。"
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} 然後，你可以探索與你擁有城市的地區相鄰的一個地區。如果這樣做，你可以支付2食物，在探索的地區建立一座城市，無需使用移民。",
+  "{p0} ignores 1 hit": "{p0} 忽略 1 次命中",
+  "Casualties": "傷亡",
+  "Casualties:": "傷亡:",
+  "Casualties: {p0}": "傷亡: {p0}",
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
 }

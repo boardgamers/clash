@@ -12,7 +12,12 @@ export interface CombatSide {
   units?: { type: string | { Leader: string }; count: number; label: string }[];
   dice?: CombatDie[];
   value?: number;
+  /** Capped losses from the engine, not the nominal hit total. */
   hits?: number;
+  nominalHits?: number;
+  hitReport?: { value: number; cancels: number; extra: number; casualties: number; lateCount: number };
+  lateCancellations?: string[];
+  unresolvedHits?: boolean;
   cancelledHits?: { before: number; reasons: string[] };
   modifiers: string[];
   tactics?: string;
@@ -34,18 +39,54 @@ const cancelsHits = (text: string) =>
   );
 
 function explainCancelledHits(side: CombatSide, opponent: CombatSide) {
-  if (side.value === undefined || side.hits === undefined || !opponent.units) return;
   const reasons = [
     ...(opponent.dice
       ?.filter((die) => die.effect === '-1 hits, no combat value')
       .map(() => 'Elephant blocks 1 hit') ?? []),
     ...opponent.modifiers.filter(cancelsHits),
   ];
+  const late = opponent.lateCancellations ?? [];
+  if (side.hitReport) {
+    const h = side.hitReport;
+    side.value = h.value;
+    const before = Math.floor(h.value / 5) + h.extra;
+    const pending = late.length - h.lateCount;
+    side.nominalHits = Math.max(0, Math.floor(h.value / 5) - h.cancels - pending) + h.extra;
+    // The engine only offers these paid abilities when each reduces losses by
+    // one. A later authoritative report replaces this interim projection.
+    side.hits = Math.max(0, h.casualties - pending);
+    if (before > side.nominalHits) side.cancelledHits = { before, reasons: [...reasons, ...late] };
+    return;
+  }
+  if (
+    side.value === undefined ||
+    side.hits === undefined ||
+    !opponent.units ||
+    side.unresolvedHits ||
+    opponent.unresolvedHits
+  )
+    return;
+  // Legacy logs: count explicit quantities, never the number of reason strings.
+  // If the equation cannot reproduce the recorded capped result, leave it alone:
+  // an unrecorded modifier / extra hit cannot safely be reconstructed.
+  const counts = reasons.map((reason) => {
+    const matches = [
+      ...reason.matchAll(
+        /\b(?:cancels?|cancelled|canceled|ignores?|ignored|blocks?|blocked) (one|a|\d+|the first) hits?\b/gi,
+      ),
+    ];
+    if (matches.length !== 1) return undefined;
+    const quantity = matches[0][1];
+    return /^\d+$/.test(quantity) ? Number(quantity) : 1;
+  });
+  if (counts.some((n) => n === undefined)) return;
   const fighters = opponent.units.reduce((n, unit) => n + (unit.type === 'Settler' ? 0 : unit.count), 0);
-  const before = Math.min(Math.floor(side.value / 5), fighters);
-  // The logged hit count already includes these cancellations. Explain the reduction;
-  // never subtract it again or mistake the enemy unit cap for a cancelled hit.
-  if (reasons.length && before > side.hits) side.cancelledHits = { before, reasons };
+  const before = Math.floor(side.value / 5);
+  const nominal = Math.max(0, before - counts.reduce<number>((n, count) => n + count!, 0));
+  if (Math.min(nominal, fighters) !== side.hits) return;
+  side.nominalHits = Math.max(0, nominal - late.length);
+  side.hits = Math.min(side.nominalHits, fighters);
+  if (before > side.nominalHits) side.cancelledHits = { before, reasons: [...reasons, ...late] };
 }
 
 function unitCounts(text: string): NonNullable<CombatSide['units']> {
@@ -149,6 +190,21 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
         continue;
       }
     }
+    // These exact success messages are emitted only after payment. Prompts,
+    // declined payments and unrelated ability prose must not cancel anything.
+    if (
+      current?.combat &&
+      ['Tactician', 'Fireworks'].includes(entry.title) &&
+      entry.notes.some((note) => /^Ignore the first hit$/i.test(note))
+    ) {
+      const side = [current.combat.attacker, current.combat.defender].find((s) => s.player === entry.player);
+      if (side) {
+        (side.lateCancellations ??= []).push(`${entry.title} ignores 1 hit`);
+        current.combat.outcomes.push(entry);
+        latest();
+        continue;
+      }
+    }
     if (entry.title !== 'Combat' || entry.player === undefined) {
       output.push(entry);
       continue;
@@ -198,6 +254,20 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
       target.hits = Number(roll[3]);
       text = text.replace(roll[0], '');
     }
+    const reports = [
+      ...text.matchAll(/(?:^|, )Hit report: value (\d+); cancels (\d+); extra (\d+); casualties (\d+)/g),
+    ];
+    for (const report of reports) {
+      const opponent = current!.combat![role === 'attacker' ? 'defender' : 'attacker'];
+      target.hitReport = {
+        value: Number(report[1]),
+        cancels: Number(report[2]),
+        extra: Number(report[3]),
+        casualties: Number(report[4]),
+        lateCount: opponent.lateCancellations?.length ?? 0,
+      };
+      text = text.replace(report[0], '');
+    }
     text = text.replace(/^,\s*|,\s*$/g, '');
     if (text.startsWith('Combat modifiers: ')) {
       const clauses = text
@@ -237,7 +307,10 @@ export function combatJournal(entries: JournalEntry[]): JournalEntry[] {
           target.tacticsEffect = clause.replace('rolls a', 'rolled a');
         }
         if (/combat value|extra die/i.test(clause) || cancelsHits(clause)) target.modifiers.push(clause);
-        else remainder.push(clause);
+        else {
+          if (/\bhits?\b/i.test(clause)) target.unresolvedHits = true;
+          remainder.push(clause);
+        }
       }
       text = remainder.join(', ');
     }

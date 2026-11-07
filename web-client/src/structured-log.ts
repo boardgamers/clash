@@ -169,6 +169,10 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
       if (roll.combat_modifiers?.length)
         add(item.player, 'Combat', `Combat modifiers: ${roll.combat_modifiers.join(', ')}`);
     }
+    if (item.CombatHitReport) {
+      const h = item.CombatHitReport;
+      add(item.player, 'Combat', `Hit report: value ${h.combat_value}; cancels ${h.hit_cancels}; extra ${h.extra_hits}; casualties ${h.casualties}`);
+    }
     if (item.InfluenceCultureAttempt) {
       const attempt = item.InfluenceCultureAttempt;
       write(

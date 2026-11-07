@@ -5276,5 +5276,10 @@
   "End on": "Slut ved",
   "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
   "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "Derefter må du udforske en region, der støder op til en region, hvor du har en by. Hvis du gør det, må du betale 2 mad for at grundlægge en by i den udforskede region uden at bruge en nybygger.",
-  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Derefter må du udforske en region, der støder op til en region, hvor du har en by. Hvis du gør det, må du betale 2 mad for at grundlægge en by i den udforskede region uden at bruge en nybygger."
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Derefter må du udforske en region, der støder op til en region, hvor du har en by. Hvis du gør det, må du betale 2 mad for at grundlægge en by i den udforskede region uden at bruge en nybygger.",
+  "{p0} ignores 1 hit": "{p0} ignorerer 1 træffer",
+  "Casualties": "Tab",
+  "Casualties:": "Tab:",
+  "Casualties: {p0}": "Tab: {p0}",
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
 }

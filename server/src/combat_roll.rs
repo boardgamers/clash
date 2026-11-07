@@ -55,6 +55,20 @@ impl CombatHits {
         hits.min(self.opponent_fighters)
     }
 
+    /// Public reporting only; hit resolution remains in `hits`.
+    pub(crate) fn report(&self, game: &mut Game, player: usize) {
+        EventPlayer::new(player, combat_event_origin()).add_log_entry(game, self.hit_report());
+    }
+
+    fn hit_report(&self) -> ActionLogEntry {
+        ActionLogEntry::CombatHitReport {
+            combat_value: self.combat_value,
+            hit_cancels: self.opponent_hit_cancels,
+            extra_hits: self.extra_hits,
+            casualties: self.hits(),
+        }
+    }
+
     pub(crate) fn all_opponents_killed(&self) -> bool {
         self.hits() == self.opponent_fighters
     }
@@ -145,6 +159,7 @@ impl CombatRoundStats {
                 combat_modifiers: self.strength.roll_log.clone(),
             }),
         );
+        combat_hits.report(game, self.player);
         combat_hits
     }
 }
@@ -306,4 +321,41 @@ fn roll_die(game: &mut Game, roll_log: &mut Vec<UnitCombatRoll>) -> CombatDieRol
         combat_bonus: None,
     });
     roll
+}
+
+#[cfg(test)]
+mod hit_reporting_tests {
+    use super::*;
+
+    #[test]
+    fn hit_reports_preserve_uncapped_arithmetic_without_changing_casualties() {
+        for (value, cancels, extra, fighters, casualties) in [
+            (29, 1, 0, 3, 3),
+            (29, 1, 0, 4, 4),
+            (29, 2, 0, 4, 3),
+            (29, 3, 0, 4, 2),
+            (29, 0, 0, 3, 3),
+            (0, 3, 0, 4, 0),
+            (4, 3, 2, 4, 2),
+            (29, 2, 1, 3, 3),
+        ] {
+            let mut hits = CombatHits::new(None, cancels, fighters, value);
+            hits.extra_hits = extra;
+            let before = hits.clone();
+            assert_eq!(
+                hits.hit_report(),
+                ActionLogEntry::CombatHitReport {
+                    combat_value: value,
+                    hit_cancels: cancels,
+                    extra_hits: extra,
+                    casualties,
+                }
+            );
+            assert_eq!(hits.hits(), casualties);
+            assert_eq!(hits, before);
+            let json = serde_json::to_string(&hits.hit_report()).unwrap();
+            let decoded: ActionLogEntry = serde_json::from_str(&json).unwrap();
+            assert_eq!(decoded, hits.hit_report());
+        }
+    }
 }

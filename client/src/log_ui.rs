@@ -273,6 +273,15 @@ fn draw_entry(drawer: &mut RichTextDrawer, entry: &ActionLogEntry, player: usize
                 r.combat_value, r.hits,
             ));
         }
+        ActionLogEntry::CombatHitReport {
+            combat_value,
+            hit_cancels,
+            extra_hits,
+            casualties,
+        } => {
+            let hits = (combat_value / 5).saturating_sub(*hit_cancels) + extra_hits;
+            drawer.text(&format!("{hits} hits; {casualties} casualties"));
+        }
         ActionLogEntry::Text(m) => {
             drawer.text(m);
         }

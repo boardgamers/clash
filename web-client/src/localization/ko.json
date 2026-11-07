@@ -5276,5 +5276,10 @@
   "End on": "종료 결과",
   "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
   "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "그런 다음, 자신의 도시가 있는 지역에 인접한 지역을 탐험할 수 있습니다. 그렇게 했다면 식량 2개를 지불하여 개척자를 사용하지 않고 탐험한 지역에 도시를 건설할 수 있습니다.",
-  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} 그런 다음, 자신의 도시가 있는 지역에 인접한 지역을 탐험할 수 있습니다. 그렇게 했다면 식량 2개를 지불하여 개척자를 사용하지 않고 탐험한 지역에 도시를 건설할 수 있습니다."
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} 그런 다음, 자신의 도시가 있는 지역에 인접한 지역을 탐험할 수 있습니다. 그렇게 했다면 식량 2개를 지불하여 개척자를 사용하지 않고 탐험한 지역에 도시를 건설할 수 있습니다.",
+  "{p0} ignores 1 hit": "{p0}: 적중 1회 무시",
+  "Casualties": "사상자",
+  "Casualties:": "사상자:",
+  "Casualties: {p0}": "사상자: {p0}",
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
 }

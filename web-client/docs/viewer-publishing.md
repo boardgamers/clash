@@ -1113,3 +1113,35 @@ unaffordability and exhausted city supply. Combat, playback, recap-layout and
 Subterfuge browser smokes pass against the packed engine; the standalone
 battle-dice smoke also passes. Clippy retains existing warnings; expected
 invalid-move rejection tests log WASM panics.
+
+# Viewer 0.1.209 / engine 0.4.141
+
+Combat journals and battle playback distinguish nominal hits from capped
+casualties. For example, 29 combat value against three fighters with a Fortress
+shows 5 → 4 hits and 3 casualties, not a misleading cancellation caused by the
+unit cap. Elephant and WarShips cancellation quantities combine correctly;
+successfully paid Fireworks and Qin Shi Huang's Tactician update the existing
+battle cue without replaying its dice. Declined or unaffordable abilities do not
+invent cancellations. Extra hits remain uncancellable.
+
+The engine appends public `CombatHitReport` arithmetic after each roll and after
+late hit modifiers, before casualty choices. Original roll records and casualty
+resolution are unchanged. Older saves remain readable; legacy displays infer
+nominal hits only when explicit cancellation quantities reconcile with the
+recorded capped result. Unknown modifiers remain conservative. Historical golden
+tests exclude only these new public action-log items; dedicated native and packed
+engine tests verify both reports, serialization, seat/spectator visibility,
+paid/declined/unaffordable reductions and unchanged earlier roll records.
+
+Publish the matching viewer and engine together. Package the fresh Node bridge
+as `@boardgamers/clash-server` 0.4.141, then run `npm run publish:bgs --
+--engine=/absolute/path/to/package.tgz` (first with `--dry-run`). Preserve all
+unrelated metadata, especially game-length labels/order and the Standard default.
+All 17 catalogs include the five new messages (5,283 source strings). No live game
+moves, historical repairs or smaller-city experiments are included.
+
+Verified with Rust 1.94.1 build/format/Clippy and all 482 native workspace tests
+(one existing ignored test), 1,052 frontend tests against the packed engine,
+17 locale catalogs and four extraction tests, Svelte checks (zero errors/warnings)
+and the production build. Clippy retains existing warnings; intentional rejected
+moves in the regression suite emit expected WASM panic diagnostics.

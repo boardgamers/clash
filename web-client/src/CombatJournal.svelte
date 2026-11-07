@@ -18,7 +18,7 @@
   } = $props();
   const sides = $derived([combat.attacker, combat.defender]);
   const dieLabel = (die: CombatDie) =>
-    `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : (die.blockedBy ? `Ability blocked by ${die.blockedBy}` : die.effect ?? 'No ability activated')}` : 'Face not recorded'}`;
+    `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : die.blockedBy ? `Ability blocked by ${die.blockedBy}` : (die.effect ?? 'No ability activated')}` : 'Face not recorded'}`;
 </script>
 
 <table class="combat-table" aria-label={`Combat round ${combat.round ?? ''}`}>
@@ -76,10 +76,14 @@
                 <b>{die.value}</b>{#if die.symbol}<UnitIcon
                     type={die.symbol === 'Leader' ? { Leader: 'Leader' } : die.symbol}
                     size={14}
-                  />{/if}{#if die.blockedBy}<CircleSlash size={10} />{/if}{#if die.effect === 're-roll'}<RotateCcw size={10} />{/if}
+                  />{/if}{#if die.blockedBy}<CircleSlash
+                    size={10}
+                  />{/if}{#if die.effect === 're-roll'}<RotateCcw size={10} />{/if}
               </span>{:else}{side.dice ? 'None' : '—'}{/each}
           </div>
-          {#if side.dice?.some(d => d.blockedBy)}<span class="combat-blocked-note">Dice-symbol abilities blocked by {side.diceBlockedBy}</span>{/if}
+          {#if side.dice?.some((d) => d.blockedBy)}<span class="combat-blocked-note"
+              >Dice-symbol abilities blocked by {side.diceBlockedBy}</span
+            >{/if}
           {#each side.dice?.filter((d) => d.effect && d.effect !== 're-roll') ?? [] as die}
             <span class="combat-die-effect"
               ><UnitIcon type={die.symbol === 'Leader' ? { Leader: 'Leader' } : die.symbol!} size={12} />
@@ -108,12 +112,17 @@
       ><th scope="row">Hits dealt</th>{#each sides as side}<td
           title={side.cancelledHits?.reasons.join(' · ')}
           aria-label={side.cancelledHits
-            ? `${side.cancelledHits.before} before cancellation; ${side.hits} hits dealt. ${side.cancelledHits.reasons.join('. ')}`
+            ? `${side.cancelledHits.before} before cancellation; ${side.nominalHits ?? side.hits} hits dealt. ${side.cancelledHits.reasons.join('. ')}`
             : undefined}
           >{#if side.cancelledHits}<s aria-hidden="true">{side.cancelledHits.before}</s>
-          {/if}<b>{side.hits ?? '—'}</b></td
+          {/if}<b>{side.nominalHits ?? side.hits ?? '—'}</b></td
         >{/each}</tr
     >
+    {#if sides.some((s) => s.nominalHits !== undefined && s.nominalHits !== s.hits)}
+      <tr class="combat-casualties"
+        ><th scope="row">Casualties</th>{#each sides as side}<td>{side.hits ?? '—'}</td>{/each}</tr
+      >
+    {/if}
   </tbody>
 </table>
 <div class="combat-dice-legend">Dice: number + face · Highlighted: ability used</div>

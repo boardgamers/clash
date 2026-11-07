@@ -42,7 +42,7 @@
             {#if side.dice}
               <div class="battle-dice" aria-label={`${side.civilization ?? ''} recorded dice`}>
                 {#each side.dice as die, i}
-                  {@const label = `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : (die.blockedBy ? `Ability blocked by ${die.blockedBy}` : die.effect ?? 'No ability activated')}` : 'Face not recorded'}`}
+                  {@const label = `${die.value} · ${die.symbol ? `${die.symbol} face · ${die.effect === 're-roll' ? 'Rerolled' : die.blockedBy ? `Ability blocked by ${die.blockedBy}` : (die.effect ?? 'No ability activated')}` : 'Face not recorded'}`}
                   <span
                     class="battle-die"
                     class:activated={!!die.effect}
@@ -56,19 +56,26 @@
                     <b>{die.value}</b>{#if die.symbol}<UnitIcon
                         type={die.symbol === 'Leader' ? { Leader: 'Leader' } : die.symbol}
                         size={12}
-                      />{/if}{#if die.blockedBy}<CircleSlash size={10} />{/if}{#if die.effect === 're-roll'}<RotateCcw size={10} />{/if}
+                      />{/if}{#if die.blockedBy}<CircleSlash
+                        size={10}
+                      />{/if}{#if die.effect === 're-roll'}<RotateCcw size={10} />{/if}
                   </span>{:else}<small>No dice</small>{/each}
               </div>
-              {#if side.dice.some(d => d.blockedBy)}<small class="combat-blocked-note">Abilities blocked by {side.diceBlockedBy}</small>{/if}
+              {#if side.dice.some((d) => d.blockedBy)}<small class="combat-blocked-note"
+                  >Abilities blocked by {side.diceBlockedBy}</small
+                >{/if}
               <div class="battle-hit-count">
                 <span>{side.value} value</span><strong
                   >{#if side.cancelledHits}<s title={side.cancelledHits.reasons.join(' · ')}
                       >{side.cancelledHits.before}</s
                     >{/if}
-                  {side.hits}
-                  {side.hits === 1 ? 'hit' : 'hits'}</strong
+                  {side.nominalHits ?? side.hits}
+                  {(side.nominalHits ?? side.hits) === 1 ? 'hit' : 'hits'}</strong
                 >
               </div>
+              {#if side.nominalHits !== undefined && side.nominalHits !== side.hits}<small
+                  class="battle-casualties">Casualties: {side.hits}</small
+                >{/if}
             {:else}<small class="battle-preparing"
                 >Preparing battle{#if side.units?.length}
                   · {side.units.reduce((sum, u) => sum + u.count, 0)} units{/if}</small

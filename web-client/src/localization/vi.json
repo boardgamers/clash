@@ -5276,5 +5276,10 @@
   "End on": "Kết thúc khi ra",
   "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
   "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "Sau đó, bạn có thể khám phá một vùng liền kề với vùng có thành phố của bạn. Nếu làm vậy, bạn có thể trả 2 lương thực để lập một thành phố trong vùng vừa khám phá mà không dùng Người định cư.",
-  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Sau đó, bạn có thể khám phá một vùng liền kề với vùng có thành phố của bạn. Nếu làm vậy, bạn có thể trả 2 lương thực để lập một thành phố trong vùng vừa khám phá mà không dùng Người định cư."
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Sau đó, bạn có thể khám phá một vùng liền kề với vùng có thành phố của bạn. Nếu làm vậy, bạn có thể trả 2 lương thực để lập một thành phố trong vùng vừa khám phá mà không dùng Người định cư.",
+  "{p0} ignores 1 hit": "{p0} bỏ qua 1 đòn đánh",
+  "Casualties": "Thương vong",
+  "Casualties:": "Thương vong:",
+  "Casualties: {p0}": "Thương vong: {p0}",
+  "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}": "Hit report: value {p0}; cancels {p1}; extra {p2}; casualties {p3}"
 }

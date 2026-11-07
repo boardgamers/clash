@@ -603,6 +603,13 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                 } else {
                     "defending"
                 };
+                // All hit-changing tactics and abilities have resolved before this
+                // listener. Report even zero losses, before any casualty prompt.
+                if role.is_attacker() {
+                    r.defender.report(game, r.combat.defender());
+                } else {
+                    r.attacker.report(game, r.combat.attacker());
+                }
                 let casualties = r.losses(role);
                 if casualties == 0 {
                     return None;

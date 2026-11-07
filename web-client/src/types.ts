@@ -115,6 +115,12 @@ export interface LoggedAction {
       defenders: Record<string, number | string>;
       defending_player: number;
     };
+    CombatHitReport?: {
+      combat_value: number;
+      hit_cancels: number;
+      extra_hits: number;
+      casualties: number;
+    };
     CombatRoll?: {
       rolls: {
         value: number;

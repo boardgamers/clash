@@ -103,3 +103,67 @@ fn great_wall() {
         ],
     );
 }
+
+#[test]
+fn paid_fireworks_reports_final_hits_without_rewriting_the_roll() {
+    use server::game_api::execute;
+    use server::log::ActionLogEntry;
+    let game = execute(
+        JSON.load_game("fireworks"),
+        move_action(vec![0], Position::from_offset("C1")),
+        0,
+    );
+    let reports = |game: &server::game::Game| {
+        game.log
+            .iter()
+            .flat_map(|a| &a.rounds)
+            .flat_map(|r| &r.turns)
+            .flat_map(|t| &t.actions)
+            .flat_map(|a| &a.items)
+            .filter(|i| i.player == 1)
+            .filter_map(|i| match i.entry {
+                ActionLogEntry::CombatHitReport {
+                    combat_value,
+                    hit_cancels,
+                    extra_hits,
+                    casualties,
+                } => Some((combat_value, hit_cancels, extra_hits, casualties)),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(reports(&game), vec![(6, 0, 0, 1)]);
+    let original_roll_action = game
+        .log
+        .last()
+        .unwrap()
+        .rounds
+        .last()
+        .unwrap()
+        .turns
+        .last()
+        .unwrap()
+        .actions
+        .last()
+        .unwrap()
+        .items
+        .clone();
+    let game = execute(game, payment_response(ResourcePile::gold(2)), 0);
+    assert_eq!(reports(&game), vec![(6, 0, 0, 1), (6, 1, 0, 0)]);
+    for seat in [None, Some(0), Some(1)] {
+        let public = server::game_api::strip_secret(game.clone(), seat);
+        assert_eq!(reports(&public), reports(&game));
+    }
+    let actions = &game
+        .log
+        .last()
+        .unwrap()
+        .rounds
+        .last()
+        .unwrap()
+        .turns
+        .last()
+        .unwrap()
+        .actions;
+    assert_eq!(actions[actions.len() - 2].items, original_roll_action);
+}

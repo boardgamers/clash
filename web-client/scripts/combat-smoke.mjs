@@ -73,7 +73,7 @@ try {
         .locator('tbody tr')
         .filter({ has: page.getByRole('rowheader', { name: 'Hits dealt', exact: true }) })
         .innerText(),
-      'Hits dealt\t2\t2',
+      'Hits dealt\t5\t2',
     );
     assert.ok(await table.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
     assert.equal(await table.locator('.combat-die').count(), 6);
