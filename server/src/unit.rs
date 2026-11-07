@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{AddAssign, SubAssign};
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::city::is_valid_city_terrain;
+use crate::city::is_valid_city_terrain_for_player;
 use crate::city_pieces::Building;
 use crate::combat_roll::COMBAT_DIE_SIDES;
 use crate::content::ability::Ability;
@@ -105,10 +105,7 @@ impl Unit {
             return Some("Move to an empty land tile to found a city");
         }
         let terrain = game.map.get(self.position).expect("Unit should be on map");
-        if !(is_valid_city_terrain(terrain)
-            || (*terrain == crate::map::Terrain::Barren
-                && player.has_special_advance(SpecialAdvance::FloodPlains)))
-        {
+        if !is_valid_city_terrain_for_player(terrain, player) {
             return Some(match terrain {
                 crate::map::Terrain::Barren => "Cities cannot be founded on Barren land",
                 crate::map::Terrain::Exhausted(_) => "Cities cannot be founded on exhausted land",

@@ -5274,5 +5274,7 @@
   "{p0} {p1}/3": "{p0} {p1}/3",
   "{p0}–6": "{p0}–6",
   "End on": "Einde bij",
-  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}"
+  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
+  "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "Daarna mag je een regio verkennen die grenst aan een regio waar je een stad hebt. Als je dat doet, mag je 2 voedsel betalen om in de verkende regio een stad te stichten, zonder een kolonist te gebruiken.",
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Daarna mag je een regio verkennen die grenst aan een regio waar je een stad hebt. Als je dat doet, mag je 2 voedsel betalen om in de verkende regio een stad te stichten, zonder een kolonist te gebruiken."
 }

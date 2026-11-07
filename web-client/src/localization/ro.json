@@ -5274,5 +5274,7 @@
   "{p0} {p1}/3": "{p0} {p1}/3",
   "{p0}–6": "{p0}–6",
   "End on": "Sfârșit la",
-  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}"
+  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
+  "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "Apoi poți explora o regiune adiacentă unei regiuni în care ai un oraș. Dacă o faci, poți plăti 2 hrană pentru a întemeia un oraș în regiunea explorată, fără a folosi un Colonist.",
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Apoi poți explora o regiune adiacentă unei regiuni în care ai un oraș. Dacă o faci, poți plăti 2 hrană pentru a întemeia un oraș în regiunea explorată, fără a folosi un Colonist."
 }

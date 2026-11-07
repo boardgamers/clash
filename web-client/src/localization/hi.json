@@ -5274,5 +5274,7 @@
   "{p0} {p1}/3": "{p0} {p1}/3",
   "{p0}–6": "{p0}–6",
   "End on": "समाप्ति का परिणाम",
-  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}"
+  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
+  "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "इसके बाद, आप उस क्षेत्र के पड़ोसी क्षेत्र की खोज कर सकते हैं जहाँ आपका शहर है। यदि आप ऐसा करते हैं, तो आप बसने वाले का उपयोग किए बिना खोजे गए क्षेत्र में शहर बसाने के लिए 2 भोजन दे सकते हैं।",
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} इसके बाद, आप उस क्षेत्र के पड़ोसी क्षेत्र की खोज कर सकते हैं जहाँ आपका शहर है। यदि आप ऐसा करते हैं, तो आप बसने वाले का उपयोग किए बिना खोजे गए क्षेत्र में शहर बसाने के लिए 2 भोजन दे सकते हैं।"
 }

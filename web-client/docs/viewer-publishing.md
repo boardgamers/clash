@@ -1073,3 +1073,43 @@ Combat, playback, recap-layout, battle-dice and Subterfuge browser smokes all pa
 against the packed engine. The previously stale combat/playback assertions were
 corrected separately in `786352b3` to retain coverage of current behavior. Clippy
 retains existing warnings; expected invalid-move rejection tests log WASM panics.
+
+# Viewer 0.1.208 / engine 0.4.140
+
+Printed Great Discoverer (E18, internally `Great Explorer`, action card 118)
+uses the same player-aware founding terrain rule as Settlers. Egypt with
+Irrigation/Flood Plains may place its city on Barren land in the newly explored
+region; other civilizations and Egypt without Irrigation may not. Water,
+exhausted land, occupied city sites and tiles outside that region remain excluded.
+No Settler is consumed. Settler-only restrictions are unchanged.
+
+The printed **2-food placement cost is retained**, including normal gold
+substitutions and mandatory selected-payment validation. The complete card rule
+now states that fee in all 17 locale catalogs (source: the English E18 scan linked
+in `docs/card-text-audit.json`). If the player cannot afford the fee or has no
+city pieces left, placement is skipped with its existing translated reason before
+any location is offered. Exploration and the free Seafaring advance remain;
+declining exploration or placement costs nothing. The separate optional-advance
+wording/timing audit is out of scope and the advance flow is unchanged.
+
+Older pending location choices are revalidated before recording a decision to
+build. Older invalid supply/site payment choices finish without placing a city
+and refund the validated payment. Existing history is not rewritten, and no live
+game moves, replay repairs or smaller-city experiments are included.
+
+Publish the matching viewer and engine together. Package the fresh generated Node
+bridge as `@boardgamers/clash-server` 0.4.140, then run
+`npm run publish:bgs -- --engine=/absolute/path/to/package.tgz` (first with
+`--dry-run`). Preserve all unrelated metadata and creation options, including the
+exact game-length labels/order and Standard default.
+
+Verified with Rust 1.94.1 build/format/Clippy and 480 native workspace tests (one
+existing ignored test), including nine new real-flow regressions and the original
+Great Explorer 2-food payment fixture. All 1,044 frontend tests against the packed
+engine, 17 locale catalogs, four extraction tests, Svelte checks, production build
+and engine protocol checks pass. Desktop/mobile Great Discoverer browser coverage
+checks map eligibility, Barren placement, mandatory food/gold payments, skipping,
+unaffordability and exhausted city supply. Combat, playback, recap-layout and
+Subterfuge browser smokes pass against the packed engine; the standalone
+battle-dice smoke also passes. Clippy retains existing warnings; expected
+invalid-move rejection tests log WASM panics.

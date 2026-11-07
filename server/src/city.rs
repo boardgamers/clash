@@ -288,6 +288,14 @@ pub(crate) fn is_valid_city_terrain(t: &Terrain) -> bool {
     t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
 }
 
+// Player-founded cities, including card placements, share civilization exceptions.
+// Keep the generic terrain rule for neutral cities and other terrain-only checks.
+pub(crate) fn is_valid_city_terrain_for_player(t: &Terrain, player: &Player) -> bool {
+    is_valid_city_terrain(t)
+        || (*t == Terrain::Barren
+            && player.has_special_advance(crate::special_advance::SpecialAdvance::FloodPlains))
+}
+
 pub(crate) fn execute_found_city_action(
     game: &mut Game,
     player_index: usize,

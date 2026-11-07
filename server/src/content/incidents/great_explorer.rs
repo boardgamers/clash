@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::city::{found_city, is_valid_city_terrain};
+use crate::city::{found_city, is_valid_city_terrain_for_player};
 use crate::content::advances::AdvanceGroup;
 use crate::content::incidents::great_persons::{
     GreatPersonType, great_person_card, tech_great_person_description,
@@ -16,6 +16,8 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
+// Printed Great Discoverer, E18 (English event-deck scan in docs/card-text-audit.json):
+// the optional city costs 2 food even though no Settler is used.
 pub(crate) fn great_explorer() -> ActionCard {
     let groups = vec![AdvanceGroup::Seafaring];
     let mut builder = great_person_card(
@@ -24,7 +26,7 @@ pub(crate) fn great_explorer() -> ActionCard {
         "Great Explorer",
         &format!(
             "{} Then, you may explore a region adjacent to a region \
-            where you have a city. If you do, you may found a city in the explored region,\
+            where you have a city. If you do, you may pay 2 food to found a city in the explored region, \
             without using a Settler.",
             tech_great_person_description(&groups)
         ),
@@ -37,33 +39,54 @@ pub(crate) fn great_explorer() -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             8,
-            |game, p, a| Some(place_city_request(game, p, a.selected_positions.clone())),
+            |game, p, a| place_city_request(game, p, &a.selected_positions),
             |game, s, a| {
-                let pos = s.choice.first().copied();
-                if let Some(pos) = pos {
-                    s.log(game, &format!("Decided to build a city {pos}",));
+                a.selected_position = None;
+                if let Some(&pos) = s.choice.first() {
+                    // Old saves can still contain a location offered without checking
+                    // affordability or the city supply. Finish those choices safely.
+                    if let Some(reason) = placement_blocker(game, &s.player()).or_else(|| {
+                        city_site_blocker(game, &s.player(), pos, &a.selected_positions)
+                    }) {
+                        s.log(game, reason);
+                        return;
+                    }
+                    s.log(game, &format!("Decided to build a city {pos}"));
+                    a.selected_position = Some(pos);
                 } else {
                     s.log(game, "decided not to build a city");
                 }
-                a.selected_position = pos;
             },
         )
         .add_payment_request_listener(
             |e| &mut e.play_action_card,
             7,
             |game, player, a| {
-                a.selected_position?;
+                let pos = a.selected_position?;
+                if let Some(reason) = placement_blocker(game, player)
+                    .or_else(|| city_site_blocker(game, player, pos, &a.selected_positions))
+                {
+                    player.log(game, reason);
+                    return None;
+                }
                 Some(vec![PaymentRequest::mandatory(
                     city_cost(player.get(game), player.origin.clone()),
                     "Pay to build the city",
                 )])
             },
             |game, s, a| {
-                found_city(
-                    game,
-                    &s.player(),
-                    a.selected_position.expect("position not found"),
-                );
+                let pos = a.selected_position.expect("position not found");
+                // A saved payment request may predate supply/site validation. The
+                // normal payment validator still runs; refund an obsolete choice
+                // rather than exceeding supply or rewriting any previous action.
+                if let Some(reason) =
+                    city_site_blocker(game, &s.player(), pos, &a.selected_positions)
+                {
+                    s.player().gain_resources(game, s.choice[0].clone());
+                    s.log(game, reason);
+                    return;
+                }
+                found_city(game, &s.player(), pos);
             },
         )
         .build()
@@ -96,21 +119,64 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
 fn place_city_request(
     game: &mut Game,
     p: &EventPlayer,
-    positions: Vec<Position>,
-) -> PositionRequest {
+    positions: &[Position],
+) -> Option<PositionRequest> {
+    if positions.is_empty() {
+        return None;
+    }
+    if let Some(reason) = placement_blocker(game, p) {
+        p.log(game, reason);
+        return None;
+    }
+
+    let choices = positions
+        .iter()
+        .copied()
+        .filter(|pos| city_site_blocker(game, p, *pos, positions).is_none())
+        .collect_vec();
+
+    Some(PositionRequest::new(
+        choices,
+        0..=1,
+        "Place a city for 2 food",
+    ))
+}
+
+fn placement_blocker(game: &Game, p: &EventPlayer) -> Option<&'static str> {
+    if !p.get(game).is_city_available() {
+        return Some("You have reached your city limit");
+    }
     if !p
         .get(game)
         .can_afford(&city_cost(p.get(game), check_event_origin()))
     {
-        p.log(game, "Player cannot afford to build a city");
+        return Some("Player cannot afford to build a city");
     }
+    None
+}
 
-    let choices = positions
-        .into_iter()
-        .filter(|p| game.map.get(*p).is_some_and(is_valid_city_terrain))
-        .collect_vec();
-
-    PositionRequest::new(choices, 0..=1, "Place a city for 2 food")
+fn city_site_blocker(
+    game: &Game,
+    p: &EventPlayer,
+    pos: Position,
+    explored_region: &[Position],
+) -> Option<&'static str> {
+    if !p.get(game).is_city_available() {
+        return Some("You have reached your city limit");
+    }
+    if !explored_region.contains(&pos)
+        || !game
+            .map
+            .get(pos)
+            .is_some_and(|t| is_valid_city_terrain_for_player(t, p.get(game)))
+        || game
+            .players
+            .iter()
+            .any(|player| player.try_get_city(pos).is_some())
+    {
+        return Some("Move to an empty land tile to found a city");
+    }
+    None
 }
 
 fn city_cost(player: &Player, origin: EventOrigin) -> PaymentOptions {

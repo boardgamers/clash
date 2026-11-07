@@ -5274,5 +5274,7 @@
   "{p0} {p1}/3": "{p0} {p1}/3",
   "{p0}–6": "{p0}–6",
   "End on": "Λήξη με",
-  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}"
+  "{p0} · {p1} {p2}": "{p0} · {p1} {p2}",
+  "Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "Έπειτα, μπορείς να εξερευνήσεις μια περιοχή γειτονική σε περιοχή όπου έχεις πόλη. Αν το κάνεις, μπορείς να πληρώσεις 2 τροφή για να ιδρύσεις πόλη στην εξερευνημένη περιοχή, χωρίς να χρησιμοποιήσεις Άποικο.",
+  "{p0} Then, you may explore a region adjacent to a region where you have a city. If you do, you may pay 2 food to found a city in the explored region, without using a Settler.": "{p0} Έπειτα, μπορείς να εξερευνήσεις μια περιοχή γειτονική σε περιοχή όπου έχεις πόλη. Αν το κάνεις, μπορείς να πληρώσεις 2 τροφή για να ιδρύσεις πόλη στην εξερευνημένη περιοχή, χωρίς να χρησιμοποιήσεις Άποικο."
 }
