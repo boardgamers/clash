@@ -39,6 +39,11 @@ export async function validateCaptures() {
   }
   return manifest.images;
 }
+export function unrelatedMetadata(value) {
+  const copy = structuredClone(value);
+  delete copy.gallery; delete copy.assets; delete copy.updatedAt;
+  return copy;
+}
 async function main() {
   const images = await validateCaptures();
   if (process.argv.includes('--check')) { console.log('Eight frozen captures validated.'); return; }
@@ -77,7 +82,7 @@ async function main() {
   for (const image of images.filter(i => i.asset)) {
     // Content-derived keys keep the currently selected gallery untouched until
     // every new image has been uploaded and independently downloaded/verified.
-    const uploaded = await api(`/gameinfo/clash/assets/${image.asset}`, 'PUT',
+    const uploaded = before.assets[image.asset] ? before : await api(`/gameinfo/clash/assets/${image.asset}`, 'PUT',
       await readFile(new URL(`release/screenshots/${image.file}`, root)), 'image/png');
     const asset = uploaded.assets[image.asset];
     const response = await fetch(asset.url, {signal:AbortSignal.timeout(60000)});
@@ -93,13 +98,8 @@ async function main() {
   await api('/gameinfo/clash/gallery', 'PUT', {gallery});
   const after = await api('/gameinfo/clash/1');
   assert.deepEqual(after.gallery, gallery);
-  const unaffected = value => {
-    const copy = structuredClone(value);
-    delete copy.gallery; delete copy.assets; delete copy.updatedAt;
-    return copy;
-  };
-  assert.deepEqual(unaffected(after), unaffected(before), 'Unrelated game settings changed');
-  assert.deepEqual(await api('/gameinfo/clash/meta'), metaBefore, 'General metadata changed');
+  assert.deepEqual(unrelatedMetadata(after), unrelatedMetadata(before), 'Unrelated game settings changed');
+  assert.deepEqual(unrelatedMetadata(await api('/gameinfo/clash/meta')), unrelatedMetadata(metaBefore), 'General metadata changed');
   for (const [key, asset] of Object.entries(before.assets)) assert.deepEqual(after.assets[key], asset);
   await verifyRules();
   await save('publication-after', after);

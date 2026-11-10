@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { replaceGallery, validateCaptures } from './publish-gallery.mjs';
+import { replaceGallery, validateCaptures, unrelatedMetadata } from './publish-gallery.mjs';
 
 test('all eight frozen PNGs and capture checks match the manifest', async () => {
   const images = await validateCaptures();
@@ -18,4 +18,11 @@ test('missing or duplicated target pairs fail closed', () => {
   const images = [{previousAsset:'old',asset:'new'}];
   assert.throws(() => replaceGallery([], images));
   assert.throws(() => replaceGallery([{asset:'old'}, {asset:'old'}], images));
+});
+test('metadata comparison excludes only gallery fields and server timestamp', () => {
+  const before = {gallery:[],assets:{old:{}},updatedAt:'before',rules:'Keep',engine:{version:143},viewer:{url:'same'},options:[1]};
+  const after = {...before,gallery:[{asset:'new'}],assets:{old:{},new:{}},updatedAt:'after'};
+  assert.deepEqual(unrelatedMetadata(before), unrelatedMetadata(after));
+  assert.notDeepEqual(unrelatedMetadata(before), unrelatedMetadata({...after,rules:'Changed'}));
+  assert.notDeepEqual(unrelatedMetadata(before), unrelatedMetadata({...after,options:[]}));
 });
