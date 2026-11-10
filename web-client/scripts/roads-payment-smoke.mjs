@@ -36,11 +36,12 @@ try {
   });
   await page.goto('http://clash.test');
   await page.evaluate(state=>{window.host=clash3d.launch('#app');window.sent=[];host.on('move',a=>sent.push(a));host.emit('player',{index:1});host.emit('theme',{dark:true});host.emit('preferences',{sound:false});host.emit('state',state)},engine.stripSecret(JSON.stringify(state),1));
-  await page.waitForTimeout(500);
-  await page.waitForTimeout(400);
   async function tile(pos) {
-    const box=await page.locator(`.map-hit-target[data-position="${pos}"]`).boundingBox();
-    assert(box); await page.mouse.click(box.x+box.width/2,box.y+box.height/2); await page.waitForTimeout(250);
+    // Use the map's accessible target, not coordinates that move while the
+    // camera finishes framing the board.
+    const target = page.locator(`.map-hit-target[data-position="${pos}"]`);
+    await target.focus();
+    await target.press('Enter');
   }
   await tile('D8');
   await page.screenshot({path:`/tmp/move-before-target-${width}.png`});
