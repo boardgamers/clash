@@ -3,6 +3,8 @@
     id: number;
     position: string;
     structure: string | { Building: string } | { Wonder: string };
+    cityOwner?: number;
+    owner?: { player: number; civilization: string } | null;
   }
 </script>
 
@@ -65,7 +67,6 @@
       <button
         class="decision-option"
         class:selected={selected.includes(choice.id)}
-        aria-label={name}
         aria-pressed={selected.includes(choice.id)}
         disabled={pending || (!selected.includes(choice.id) && limit > 1 && selected.length >= limit)}
         onclick={() => onSelect(choice.id)}
@@ -75,7 +76,10 @@
         onblur={() => onHighlight(null)}
       >
         <Icon size={19} /><span class="decision-option-content"
-          ><span class="decision-option-name">{name}</span></span
+          ><span class="decision-option-name">{name}</span>
+          {#if choice.owner && choice.cityOwner !== undefined && choice.owner.player !== choice.cityOwner}
+            <span class="decision-option-description structure-owner">{choice.owner.civilization}</span>
+          {/if}</span
         >
         <span class="decision-selection" aria-hidden="true"
           >{#if selected.includes(choice.id)}<Check size={13} />{/if}</span
@@ -84,3 +88,15 @@
     {/each}
   </div>
 </div>
+
+<style>
+  .structure-owner {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .decision-option-content {
+    gap: 3px;
+  }
+</style>

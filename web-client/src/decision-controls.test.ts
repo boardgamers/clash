@@ -395,6 +395,14 @@ test('Earthquake offers separate building choices at the same city and respects 
   const options = mapDecisionOptions(d);
   assert.ok(options.length > 3);
   assert.ok(options.every((o) => o.mapTarget?.kind === 'structure'));
+  const temple = options.find((o) => o.position === 'C2' && o.mapTarget?.kind === 'structure' && structureKey(o.mapTarget.structure) === 'Building:Temple')!.mapTarget!;
+  assert.equal(temple.kind, 'structure');
+  if (temple.kind === 'structure') {
+    assert.equal(temple.cityOwner, 0);
+    assert.deepEqual(temple.owner, { player: 1, civilization: 'Greece' });
+  }
+  const center = options.find((o) => o.position === 'C2' && o.mapTarget?.kind === 'structure' && o.mapTarget.structure === 'CityCenter')!.mapTarget!;
+  if (center.kind === 'structure') assert.equal(center.owner?.player, center.cityOwner);
   const sameCity = options.flatMap((o, i) => (o.position === 'C2' ? [i] : []));
   assert.ok(sameCity.length >= 2);
   assert.equal(mapDecisionIndex(d, 'C2', { kind: 'city', player: 0 }), -1);

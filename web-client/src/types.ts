@@ -764,7 +764,14 @@ export interface Decision {
     position: string | null;
     mapTarget?:
       | { kind: 'unit'; player: number; unit: number; unitType: UnitView['type'] }
-      | { kind: 'structure'; structure: string | { Building: string } | { Wonder: string } };
+      | {
+          kind: 'structure';
+          structure: string | { Building: string } | { Wonder: string };
+          /** Compare ownership with the city, not the acting player. */
+          cityOwner?: number;
+          /** Existing piece owner; absent for unbuilt construction candidates. */
+          owner?: { player: number; civilization: string } | null;
+        };
     terrain?: Terrain;
     exchangeRole?: 'keep' | 'return';
     owner?: { player: number; civilization: string; you: boolean };

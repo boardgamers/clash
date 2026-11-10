@@ -360,6 +360,9 @@ test('Cultural Influx offers free influence after construction', async () => {
     .buildings.find((b: any) => b.name === 'Academy');
   const built = move(g, offer.choices[0].action);
   assert.match(view(built).decision.description, /Cultural Influx/);
+  const target = view(built).decision.options.find((o: any) => o.position === 'C1' && o.mapTarget?.structure?.Building === 'Temple').mapTarget;
+  assert.equal(target.cityOwner, 1, 'city owner is not the acting player');
+  assert.deepEqual(target.owner, { player: 1, civilization: g.players[1].civilization });
   const after = move(built, {
     Response: { SelectStructures: [{ position: 'C1', structure: { Building: 'Temple' } }] },
   });

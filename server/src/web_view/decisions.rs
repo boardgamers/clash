@@ -529,7 +529,27 @@ pub(super) fn describe(game: &Game, seat: usize) -> Option<Value> {
                         "",
                         Some(s.position),
                     );
-                    o["mapTarget"] = json!({"kind":"structure","structure":s.structure});
+                    let city = game.get_any_city(s.position);
+                    let owner = match &s.structure {
+                        Structure::CityCenter => Some(city.player_index),
+                        Structure::Building(building) => city.pieces.building_owner(*building),
+                        Structure::Wonder(wonder) => game
+                            .players
+                            .iter()
+                            .find(|p| {
+                                city.pieces.wonders.contains(wonder)
+                                    && p.wonders_owned.contains(*wonder)
+                            })
+                            .map(|p| p.index),
+                    };
+                    o["mapTarget"] = json!({
+                        "kind":"structure", "structure":s.structure,
+                        "cityOwner": city.player_index,
+                        "owner": owner.map(|player| json!({
+                            "player": player,
+                            "civilization": game.player(player).civilization.name,
+                        })),
+                    });
                     o
                 })
                 .collect()

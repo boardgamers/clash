@@ -70,7 +70,13 @@
     pieceChoice
       ? decision.options.flatMap((option, id) =>
           option.mapTarget?.kind === 'structure' && option.position
-            ? [{ id, position: option.position, structure: option.mapTarget.structure }]
+            ? [{
+                id,
+                position: option.position,
+                structure: option.mapTarget.structure,
+                owner: option.mapTarget.owner,
+                cityOwner: option.mapTarget.cityOwner,
+              }]
             : [],
         )
       : [],

@@ -1175,3 +1175,14 @@ extraction tests, Svelte checks, and the production build. Browser checks cover
 both copies in English/German at 1400/390/320px, generic card choices, combat and
 playback. Existing Clippy warnings and expected rejected-move WASM panic
 diagnostics remain. No live moves or historical repairs are performed.
+
+
+Viewer 0.1.211 / engine 0.4.143 labels foreign-owned structures in selection prompts
+with their owning civilization, without an “Owner:” prefix. Ownership is compared with
+the containing city, not the acting player, so ordinary city-owned buildings, centers
+and wonders stay uncluttered. Public decision metadata reports actual existing piece
+owners; unbuilt construction candidates do not invent ownership. Older metadata remains
+supported. Earthquake and cultural-influx coverage includes selection in another
+player's city; accessible button names include the foreign civilization. Event rules,
+scoring and existing game history are unchanged. Publish the matching viewer and engine
+together.
