@@ -1,4 +1,9 @@
 {
+  "source": "https://boardgamers.space/game/Open-clash-a52a21ee",
+  "status": "ended",
+  "capturedAt": "2026-11-10T18:56:38.346Z",
+  "boardHash": "411f62a3c258bc1c73e7a5ebebefcc567c1d66e29b602f8675c73202de5b3e05",
+  "viewerVersion": "0.1.211",
   "errors": [],
   "checks": [
     {
@@ -46,7 +51,8 @@
       "dark": false,
       "mobile": {
         "width": 390,
-        "scrollWidth": 390
+        "scrollWidth": 390,
+        "moves": 0
       }
     },
     {
@@ -94,7 +100,8 @@
       "dark": true,
       "mobile": {
         "width": 390,
-        "scrollWidth": 390
+        "scrollWidth": 390,
+        "moves": 0
       }
     }
   ]
