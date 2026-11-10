@@ -695,7 +695,7 @@ impl Game {
     /// Repair the old withdrawal shape: the seat pointer advanced, but Banking
     /// still belongs to the departed seat and the successor has not started.
     /// Removing the event before starting the successor makes repeated load/clone
-    /// idempotent and avoids resuming TurnStart with the wrong seat pointer.
+    /// idempotent and avoids resuming `TurnStart` with the wrong seat pointer.
     pub(crate) fn reconcile_dropped_banking(&mut self) {
         let Some(player) = self.dropped_banking_player() else {
             return;
