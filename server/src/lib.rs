@@ -86,3 +86,6 @@ pub mod wonder;
 
 #[cfg(test)]
 mod game_length_tests;
+
+#[cfg(test)]
+mod withdrawal_tests;

@@ -193,6 +193,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
     for player_index in 0..game.players.len() {
         initialize_player(player_index, &mut game, &all);
     }
+    game.reconcile_dropped_banking();
     game
 }
 

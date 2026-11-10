@@ -670,6 +670,65 @@ impl Game {
         true
     }
 
+    /// Cancel only an unsubmitted, standalone Banking reward. Other turn-start
+    /// handlers include mandatory payments and shared effects; they are not safe
+    /// to discard generically, nor are nested persistent-event continuations.
+    fn dropped_banking_player(&self) -> Option<usize> {
+        use crate::content::persistent_events::PersistentEventRequest;
+        use crate::special_advance::SpecialAdvance;
+        let [event] = self.events.as_slice() else {
+            return None;
+        };
+        let handler = event.player.handler.as_ref()?;
+        (matches!(self.state, GameState::Playing)
+            && matches!(event.event_type, PersistentEventType::TurnStart)
+            && event.origin_override.is_none()
+            && event.players_used.is_empty()
+            && handler.priority == 5
+            && self.dropped_players.contains(&event.player.index)
+            && handler.origin == EventOrigin::SpecialAdvance(SpecialAdvance::Banking)
+            && matches!(handler.request, PersistentEventRequest::ResourceReward(_))
+            && handler.response.is_none())
+        .then_some(event.player.index)
+    }
+
+    /// Repair the old withdrawal shape: the seat pointer advanced, but Banking
+    /// still belongs to the departed seat and the successor has not started.
+    /// Removing the event before starting the successor makes repeated load/clone
+    /// idempotent and avoids resuming TurnStart with the wrong seat pointer.
+    pub(crate) fn reconcile_dropped_banking(&mut self) {
+        let Some(player) = self.dropped_banking_player() else {
+            return;
+        };
+        if self.human_players_count() <= 1 || self.current_player_index == player {
+            return;
+        }
+        let seats = self.players.iter().filter(|p| p.is_human()).count();
+        let next = (1..seats)
+            .map(|offset| (player + offset) % seats)
+            .find(|p| !self.dropped_players.contains(p));
+        // The old code entered next_round at the boundary. Do not guess whether
+        // that round's effects have already run; only repair the confirmed shape.
+        if next != Some(self.current_player_index)
+            || self.current_player_index == self.starting_player_index
+            || self.log.is_empty()
+            || current_turn_log(self).turn_type != TurnType::Player(player)
+        {
+            return;
+        }
+        self.events.clear();
+        self.cleanup_withdrawn_turn(player);
+        self.start_turn();
+    }
+
+    fn cleanup_withdrawn_turn(&mut self, player: usize) {
+        end_turn(self, player);
+        for action in &mut current_turn_log_mut(self).actions {
+            action.undo.clear();
+        }
+        check_for_waste(self);
+    }
+
     /// Remove a player while keeping surviving seat indices and round order stable.
     ///
     /// # Panics
@@ -679,9 +738,12 @@ impl Game {
             crate::game_setup::drop_draft_player(self, player_index);
             return;
         }
-        if !self.dropped_players.contains(&player_index) {
-            self.dropped_players.push(player_index);
+        if self.dropped_players.contains(&player_index) {
+            self.reconcile_dropped_banking();
+            self.finish_after_drop();
+            return;
         }
+        self.dropped_players.push(player_index);
         if self.finish_after_drop() {
             return;
         }
@@ -699,6 +761,10 @@ impl Game {
         }
         if self.current_player_index != player_index {
             return;
+        }
+        if self.dropped_banking_player() == Some(player_index) {
+            self.events.clear();
+            self.cleanup_withdrawn_turn(player_index);
         }
         self.skip_dropped_players();
         if !dropped_first && self.current_player_index == self.starting_player_index {

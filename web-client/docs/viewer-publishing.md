@@ -1186,3 +1186,30 @@ supported. Earthquake and cultural-influx coverage includes selection in another
 player's city; accessible button names include the foreign civilization. Event rules,
 scoring and existing game history are unchanged. Publish the matching viewer and engine
 together.
+
+Viewer 0.1.212 / engine 0.4.144 fixes withdrawal while Persia is choosing its
+standalone Banking start-of-turn reward. The unresolved personal reward and
+remaining start-of-turn sequence are cancelled, the departed turn is cleaned up,
+and the next surviving seat starts exactly once. No gold/culture is selected on
+behalf of the departed player. Stable seats, first-seat changes, round boundaries,
+opponent withdrawals and last-survivor victory retain their existing behavior.
+Repeated withdrawal notifications are idempotent.
+
+Loading also deterministically normalizes the confirmed legacy shape: a dropped
+Banking owner, a pointer already advanced to the next surviving seat, and a latest
+turn log still owned by the departed seat. Recovery is limited to non-boundary
+Playing saves with exactly one unsubmitted Banking event. The successor's normal
+start effects run once; subsequent loads and moves use that normalized state.
+This includes the reported Fossil-cyclone-9455 shape. Engine reads do not persist a
+repaired save or update BGS's separately stored currentPlayers/timers; a platform
+refresh/recovery action may still be required. No live move or repair is performed
+by this release.
+
+This is intentionally not a general withdrawal-decision policy: combat, mandatory
+payments (including Viking Raids), shared choices, nested events, draft choices,
+and ambiguous legacy round-boundary saves are not automatically resolved. Full
+historical replay cannot in general reconstruct unlogged withdrawal timing; this
+release does not change that separate limitation. Tests use synthetic setups only;
+production saves are not committed. Publish the matching bridge and viewer while
+preserving the existing gallery and all unrelated metadata, including game-length
+labels/order and Standard as default.

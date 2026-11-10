@@ -3,6 +3,61 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 const engine = createRequire(import.meta.url)('../.engine/server.js');
+async function bankingFixture() {
+  const g = JSON.parse(await engine.init(4, [], {}, 'withdraw-bank', {}));
+  assert.equal(g.players[2].civilization, 'Persia');
+  assert.equal(g.players[3].civilization, 'Rome');
+  for (const p of g.players) p.objective_cards = [];
+  g.starting_player_index = 0;
+  g.current_player_index = 1;
+  g.age = 4;
+  g.round = 2;
+  g.players[2].advances.push('Currency');
+  g.players[2].resources = { gold: 1 };
+  g.permanent_effects = [{ AssassinationLoseAction: 3 }];
+  const pending = JSON.parse(engine.tryMove(JSON.stringify(g), JSON.stringify({ Playing: 'EndTurn' }), 1));
+  assert.equal(pending.events[0].event_type, 'TurnStart');
+  assert.deepEqual(pending.events[0].handler.origin, { SpecialAdvance: 'Banking' });
+  return pending;
+}
+
+test('four-seat Banking withdrawal skips the reward and starts Rome exactly once', async () => {
+  const g = await bankingFixture();
+  const raw = await engine.dropPlayer(JSON.stringify(g), 2);
+  const result = JSON.parse(raw);
+  assert.equal(engine.currentPlayer(raw), 3);
+  assert.equal(result.actions_left, 2);
+  assert.equal(result.round, 2);
+  assert.equal(result.events?.length ?? 0, 0);
+  assert.deepEqual(result.players[2].resources, { gold: 1 });
+  assert.equal(result.players.length, 6);
+  assert.equal(await engine.dropPlayer(raw, 2), raw);
+  const next = JSON.parse(engine.tryMove(raw, JSON.stringify({ Playing: 'EndTurn' }), 3));
+  assert.equal(next.current_player_index, 0);
+  assert.equal(next.round, 3);
+});
+
+test('legacy advanced-pointer Banking save normalizes consistently at every engine read', async () => {
+  const g = await bankingFixture();
+  g.dropped_players = [2];
+  g.current_player_index = 3;
+  const raw = JSON.stringify(g);
+  assert.equal(engine.currentPlayer(raw), 3);
+  assert.equal(engine.currentPlayer(raw), 3);
+  const normalized = await engine.dropPlayer(raw, 2);
+  assert.equal(JSON.parse(normalized).actions_left, 2);
+  assert.equal(await engine.dropPlayer(normalized, 2), normalized);
+  const move = JSON.stringify({ Playing: 'EndTurn' });
+  assert.equal(engine.tryMove(raw, move, 3), engine.tryMove(normalized, move, 3));
+});
+
+test('opponent withdrawal does not cancel Persia Banking', async () => {
+  const g = await bankingFixture();
+  const result = JSON.parse(await engine.dropPlayer(JSON.stringify(g), 1));
+  assert.deepEqual(result.events, g.events);
+  assert.equal(engine.currentPlayer(JSON.stringify(result)), 2);
+});
+
 async function fixture() {
   const g = JSON.parse(readFileSync(new URL('../../server/tests/test_games/combat/direct_capture_city_fortress.json', import.meta.url), 'utf8'));
   const initial = JSON.parse(await engine.init(2, [], {}, 'drop-player', {}));
