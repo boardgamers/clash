@@ -103,8 +103,8 @@ try {
       assert(state.players[0].cities.some((c) => c.city_pieces?.wonders?.includes('Colosseum')));
       if (count === 10) {
         await page.locator('.city-map-label').first().click();
-        await page.getByRole('button', { name: 'Colosseum', exact: true }).click();
-        const info = page.getByRole('region', { name: 'Colosseum effect', exact: true });
+        await page.getByRole('button', { name: 'Great Arena', exact: true }).click();
+        const info = page.getByRole('region', { name: 'Great Arena effect', exact: true });
         await info.waitFor();
         assert.match(await info.innerText(), /combat value/);
         assert(await info.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
@@ -123,16 +123,16 @@ try {
           engine.stripSecret(JSON.stringify(state), 0),
         );
         await page.locator('.city-map-label').first().click();
-        for (const name of ['Great Lighthouse', 'Pyramids']) {
+        for (const name of ['Great Lighthouse', 'Great Pyramids']) {
           await page.getByRole('button', { name, exact: true }).click();
-          const effect = page.getByRole('region', { name: `${name} effect`, exact: true });
+          const effect = page.getByRole('region', { name: `${name === 'Great Pyramids' ? 'Great Pyramid' : name} effect`, exact: true });
           await effect.waitFor();
-          if (name === 'Pyramids')
+          if (name === 'Great Pyramids')
             assert.match(await effect.innerText(), /5\.1 VP for building · 0 VP for owning/);
         }
         await page.screenshot({ path: `/tmp/clash-multiple-wonders-${width}.png` });
         await page.getByRole('button', { name: 'Close tile actions', exact: true }).click();
-        await page.getByRole('button', { name: 'Toggle top-down view', exact: true }).click();
+        await page.getByRole('button', { name: 'Strategy map', exact: true }).click();
         await page.screenshot({ path: `/tmp/clash-wonders-overhead-${width}.png` });
       }
       if (count === 34) {
@@ -179,15 +179,10 @@ try {
         const hex = page.locator('.map-hit-target[data-position="C1"]');
         await hex.focus();
         await hex.press('Enter');
-        const terrain = movement.getByRole('complementary', { name: 'Mountain rules', exact: true });
-        await terrain.waitFor();
-        assert.match(await terrain.innerText(), /cannot move again/);
-        assert.match(await terrain.innerText(), /No terrain bonus to combat value/);
-        assert(await movement.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
-        assert((await terrain.boundingBox()).height < 115, 'Terrain explanation remains compact');
-        await page.screenshot({ path: `/tmp/clash-terrain-move-${width}.png` });
-        await movement.getByRole('button', { name: 'Move here', exact: true }).click();
+        // Ordinary unambiguous moves now submit directly; only attacks and
+        // exploration retain a preview/confirmation step.
         await page.waitForFunction(() => !document.querySelector('.settler-confirm'));
+        await page.screenshot({ path: `/tmp/clash-terrain-move-${width}.png` });
         assert.equal(sent, 3);
         assert(state.players[0].units[0].movement_restrictions.includes('Mountain'));
         const closeMovement = page.getByRole('button', { name: 'Close movement controls', exact: true });

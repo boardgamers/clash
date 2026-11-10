@@ -55,7 +55,7 @@ try {
   const bounds=await page.locator('[aria-label="Unit movement"]').boundingBox();
   const attack=await page.locator('.settler-confirm button').boundingBox();
   assert.ok(bounds && attack && attack.y >= bounds.y && attack.y + attack.height <= bounds.y + bounds.height, 'attack stays visible');
-  assert.equal(await page.getByLabel('Attack preview',{exact:true}).locator('h3').innerText(),'Defenders');
+  assert.equal(await page.getByLabel('Attack preview',{exact:true}).locator('.defenders-label').innerText(),'Defenders');
   await page.screenshot({path:`/tmp/clash-roads-payment-${width}.png`});
   assert.deepEqual(errors,[]);
   await page.close();

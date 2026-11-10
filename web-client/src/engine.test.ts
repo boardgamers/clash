@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { createViewer } from '@boardgamers/protocol/viewer';
 import { ChatController } from '@boardgamers/protocol/chat';
 import { journal, positionXY } from './model.ts';
+import { samePayment } from './payment-options.ts';
 import type { View, Game } from './types.ts';
 const require = createRequire(import.meta.url);
 const engine = require('../.engine/server.js');
@@ -622,6 +623,32 @@ test('research displays a stable flexible cost and offers executable food, idea,
   const waiting: View = JSON.parse(engine.webView(engine.stripSecret(state, 1 - seat), 1 - seat));
   assert.ok(waiting.advances.every((a) => a.payments.every((p) => p.action === null)));
   assert.ok(view.advances.find((a) => a.id === 'Farming')!.payments.every((p) => p.action === null));
+});
+
+test('research defaults conserve gold without removing explicit gold choices', async () => {
+  const raw = JSON.parse(await initial());
+  const seat = engine.currentPlayer(JSON.stringify(raw));
+  for (const [resources, expected] of [
+    [{ food: 2, gold: 2 }, { food: 2 }],
+    [{ food: 1, gold: 2 }, { food: 1, gold: 1 }],
+    [{ ideas: 2, food: 2, gold: 2 }, { ideas: 2 }],
+    [{ ideas: 1, food: 2, gold: 2 }, { ideas: 1, food: 1 }],
+    [{ gold: 2 }, { gold: 2 }],
+  ]) {
+    raw.players[seat].resources = resources;
+    const state = JSON.stringify(raw);
+    const view: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
+    const research = view.advances.find((a) => a.id === 'Storage')!;
+    assert.deepEqual(research.payment, expected);
+    const recommended = research.payments.find((p) => samePayment(p.payment, expected));
+    assert.ok(recommended?.action, 'the recommendation is an executable picker choice');
+    assert.deepEqual(research.action, recommended.action);
+    const gold = research.payments.find((p) => p.payment.gold === 2)!;
+    assert.ok(gold.action, 'manual gold remains available');
+    const after = JSON.parse(engine.tryMove(state, JSON.stringify(gold.action), seat));
+    assert.equal(after.players[seat].resources.gold ?? 0, 0);
+    assert.equal(after.players[seat].resources.food ?? 0, resources.food ?? 0);
+  }
 });
 
 test('research discounts produce a free payment while still consuming an action and event marker', async () => {

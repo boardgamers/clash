@@ -111,7 +111,25 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
-        self.find_payment(available, false)
+        let mut payment = self.find_payment(available, false)?;
+        // The conversion search proves legality, but its first route may mix in
+        // gold even when more of the ordinary resources are available (research
+        // can take one food, then one gold, before trying two food). Recommend
+        // conserving wildcard gold without changing that search's exact-payment
+        // semantics or enumerating every possible payment. Keep printed gold.
+        let mut lower = self.default.gold.min(payment.gold);
+        let mut upper = payment.gold;
+        let mut limited = available.clone();
+        while lower < upper {
+            limited.gold = lower + (upper - lower) / 2;
+            if let Some(candidate) = self.find_payment(&limited, false) {
+                upper = candidate.gold;
+                payment = candidate;
+            } else {
+                lower = limited.gold + 1;
+            }
+        }
+        Some(payment)
     }
 
     fn find_payment(&self, available: &ResourcePile, exact: bool) -> Option<ResourcePile> {
@@ -284,7 +302,8 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn can_afford(&self, available: &ResourcePile) -> bool {
-        self.is_free() || self.first_valid_payment(available).is_some()
+        // Availability only needs a witness, not the preferred allocation.
+        self.is_free() || self.find_payment(available, false).is_some()
     }
 
     #[must_use]
@@ -669,6 +688,94 @@ pub(crate) fn base_resources() -> Vec<ResourcePile> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn recommendations_conserve_gold_for_research_and_mixed_costs() {
+        let research = payment_options_sum(
+            2,
+            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            check_event_origin(),
+        );
+        for (available, expected) in [
+            (
+                ResourcePile::food(2) + ResourcePile::gold(2),
+                ResourcePile::food(2),
+            ),
+            (
+                ResourcePile::food(1) + ResourcePile::gold(2),
+                ResourcePile::food(1) + ResourcePile::gold(1),
+            ),
+            (ResourcePile::gold(2), ResourcePile::gold(2)),
+            (
+                ResourcePile::ideas(2) + ResourcePile::food(2) + ResourcePile::gold(2),
+                ResourcePile::ideas(2),
+            ),
+        ] {
+            assert_eq!(research.first_valid_payment(&available), Some(expected));
+        }
+        assert!(
+            research.is_valid_payment(&ResourcePile::gold(2)),
+            "manual gold remains legal"
+        );
+        assert_eq!(research.first_valid_payment(&ResourcePile::food(1)), None);
+
+        let mixed = PaymentOptions::fixed_resources(
+            ResourcePile::food(2) + ResourcePile::wood(1) + ResourcePile::ore(1),
+            check_event_origin(),
+        );
+        let native = ResourcePile::food(2) + ResourcePile::ore(1);
+        assert_eq!(
+            mixed.first_valid_payment(&(native.clone() + ResourcePile::gold(4))),
+            Some(native + ResourcePile::gold(1))
+        );
+    }
+
+    #[test]
+    fn recommendations_preserve_printed_gold_and_separate_fees() {
+        let mut cost = PaymentOptions::fixed_resources(
+            ResourcePile::food(2) + ResourcePile::gold(1),
+            check_event_origin(),
+        );
+        let expected = cost.default.clone();
+        assert_eq!(
+            cost.first_valid_payment(&(ResourcePile::food(3) + ResourcePile::gold(3))),
+            Some(expected.clone())
+        );
+        assert_eq!(cost.first_valid_payment(&ResourcePile::food(4)), None);
+        cost.default += ResourcePile::mood_tokens(1);
+        cost.separate_fee = vec![ResourcePile::mood_tokens(1)];
+        assert_eq!(
+            cost.first_valid_payment(&(ResourcePile::food(2) + ResourcePile::gold(3))),
+            None
+        );
+        assert_eq!(
+            cost.first_valid_payment(
+                &(ResourcePile::food(2) + ResourcePile::gold(3) + ResourcePile::mood_tokens(1))
+            ),
+            Some(expected + ResourcePile::mood_tokens(1))
+        );
+    }
+
+    #[test]
+    fn recommendations_keep_discounts_and_alternative_payments() {
+        let mut cost = PaymentOptions::fixed_resources(ResourcePile::food(3), check_event_origin());
+        cost.conversions.push(PaymentConversion::limited(
+            ResourcePile::food(1),
+            ResourcePile::empty(),
+            1,
+        ));
+        assert_eq!(
+            cost.first_valid_payment(&(ResourcePile::food(3) + ResourcePile::gold(3))),
+            Some(ResourcePile::food(2))
+        );
+        assert!(cost.is_valid_payment(&ResourcePile::gold(2)));
+        cost.conversions.pop();
+        cost.alternatives.push(ResourcePile::wood(2));
+        assert_eq!(
+            cost.first_valid_payment(&(ResourcePile::wood(2) + ResourcePile::gold(3))),
+            Some(ResourcePile::wood(2))
+        );
+    }
+
     #[test]
     fn separate_fee_tries_all_choices_without_converting_the_fee() {
         let mut cost = PaymentOptions::new(

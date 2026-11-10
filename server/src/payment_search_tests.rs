@@ -253,7 +253,14 @@ fn alternative_costs_keep_their_own_payment_totals() {
         ResourcePile::culture_tokens(3),
     ] {
         assert!(cost.is_valid_payment(&payment), "{payment}");
-        assert_eq!(cost.first_valid_payment(&payment), Some(payment));
+        let expected = if payment == ResourcePile::gold(2) {
+            // The cheaper alternative is recommended, but spending two gold
+            // remains an exact legal manual choice.
+            ResourcePile::gold(1)
+        } else {
+            payment.clone()
+        };
+        assert_eq!(cost.first_valid_payment(&payment), Some(expected));
     }
     assert!(!cost.is_valid_payment(&ResourcePile::culture_tokens(2)));
     assert!(!cost.is_valid_payment(&ResourcePile::gold(3)));

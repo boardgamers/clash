@@ -87,8 +87,8 @@ try {
       await panel.waitFor();
       assert.match(await panel.innerText(), new RegExp(`\\+${enemySteel ? 1 : 2} combat value each round`));
       assert.equal((await panel.innerText()).includes('Enemy has Steel Weapons.'), enemySteel);
-      assert.doesNotMatch(await panel.innerText(), /Use steel weapons|Pay|Decline/);
-      const buttons = panel.locator('.cost-only button');
+      // Steel Weapons now previews a selected payment before explicit confirmation.
+      const buttons = panel.locator('.compact-payments button');
       assert.equal(await buttons.count(), 3);
       const bounds = await buttons.evaluateAll((els) =>
         els.map((el) => ({
@@ -99,12 +99,14 @@ try {
         })),
       );
       assert(
-        bounds.every((b) => b.width <= 90 && b.height >= 36),
-        'Payment choices are compact touch targets',
+        bounds.every((b) => b.width >= 36 && b.height >= 36 && b.height <= 48),
+        'Payment choices remain compact-height touch targets',
       );
       assert(
-        bounds.every((b) => Math.abs(b.y - bounds[0].y) < 1),
-        'All three options fit in one row',
+        bounds.every((b, i) => bounds.slice(i + 1).every((other) =>
+          b.x + b.width <= other.x + 1 || other.x + other.width <= b.x + 1 ||
+          b.y + b.height <= other.y + 1 || other.y + other.height <= b.y + 1)),
+        'All payment choices fit without overlapping in the responsive grid',
       );
       assert(await panel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
       if (scenario === 'regular' || scenario === 'enemy-steel')
@@ -112,10 +114,12 @@ try {
       const payment = scenario === 'decline' ? {} : scenario === 'regular' ? { gold: 1 } : { ore: 1 };
       await panel
         .getByRole('button', {
-          name: scenario === 'decline' ? 'No' : scenario === 'regular' ? 'Pay 1 gold' : 'Pay 1 ore',
+          name: scenario === 'decline' ? 'Decline' : scenario === 'regular' ? 'Pay 1 gold' : 'Pay 1 ore',
           exact: true,
         })
         .click();
+      assert.deepEqual(sent, [], 'Selecting a payment does not submit before confirmation');
+      await panel.getByRole('button', { name: 'Confirm', exact: true }).click();
       await page.waitForFunction(() => window.moveApplied);
       assert.deepEqual(sent, [{ Response: { Payment: [payment] } }]);
       const payments = state.log
@@ -128,7 +132,7 @@ try {
           (item) =>
             item.player === 0 &&
             item.origin?.Advance === 'SteelWeapons' &&
-            item.Resources?.balance === 'Loss',
+            item.Resources?.balance === 'Pay',
         )
         .map((item) => item.Resources.resources);
       assert.deepEqual(payments, [payment]);

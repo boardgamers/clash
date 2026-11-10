@@ -1213,3 +1213,17 @@ release does not change that separate limitation. Tests use synthetic setups onl
 production saves are not committed. Publish the matching bridge and viewer while
 preserving the existing gallery and all unrelated metadata, including game-length
 labels/order and Standard as default.
+
+# Viewer 0.1.213 / engine 0.4.145
+
+Default payments conserve wildcard gold when ordinary resources can cover the
+cost, including research using food or ideas. A bounded gold-allowance search
+reuses the existing legality checks and keeps required printed gold, separate
+fees, discounts and native-resource preferences. Affordability-only checks avoid
+the preference search. Alternative-payment enumeration order and reward semantics
+are unchanged; this changes the recommendation, not the list of legal choices.
+Manual gold payments remain valid and survive ordinary host refreshes.
+
+Publish the matching engine, bridge and viewer. Preserve the existing gallery and
+all unrelated metadata, including game-length option labels/order and Standard as
+default. This release performs no live game moves or historical repairs.
