@@ -1227,3 +1227,17 @@ Manual gold payments remain valid and survive ordinary host refreshes.
 Publish the matching engine, bridge and viewer. Preserve the existing gallery and
 all unrelated metadata, including game-length option labels/order and Standard as
 default. This release performs no live game moves or historical repairs.
+
+# Viewer 0.1.214 / engine 0.4.146
+
+Carthage's Warbeasts now applies its mandatory gold-or-culture replacement to
+all existing recruitment prices, preserving Mercenaries' one-unit Draft
+alternatives when Elephants and Ships or Infantry are recruited together without
+a Market. Every branch still replaces at least one resource per Elephant; the
+regular price remains the default branch. Civil Liberties' mixed gold/mood
+payments and leaders' reserved mood costs remain separate. With a Market,
+ship-only recruitment and gold-conserving payment recommendations are unchanged.
+
+Publish the matching engine, bridge and viewer. Preserve the existing gallery and
+all unrelated metadata, including game-length option labels/order and Standard as
+default. This release performs no live game moves or historical repairs.

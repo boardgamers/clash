@@ -1180,6 +1180,51 @@ test('Warbeasts replaces a resource per Elephant and Mercenaries drafts ships', 
   });
   assert.equal(ship.players[seat(sea)].units.filter((u: any) => u.unit_type === 'Ship').length, 2);
 });
+test('Warbeasts and Mercenaries offer and execute combined Elephant and Ship payments', async () => {
+  for (const market of [false, true]) {
+    const g = await carthageSea(), index = seat(g), p = g.players[index];
+    addAdvance(p, 'Draft', 'Husbandry');
+    if (market) p.cities[0].city_pieces.market = index;
+    const units = { elephants: 1, ships: 1 };
+    const offer = query(g, { kind: 'recruit', city: 'D2', units, replaced: [] });
+    for (const payment of [
+      { food: 1, gold: 2 },
+      { food: 1, gold: 1, mood_tokens: 1 },
+      { food: 1, culture_tokens: 1, gold: 1 },
+    ]) {
+      assert.ok(offer.payments.some((candidate: any) =>
+        Object.entries(payment).every(([key, value]) => candidate[key] === value) &&
+        Object.keys(candidate).length === Object.keys(payment).length));
+      const selected = query(g, { kind: 'recruit', city: 'D2', units, replaced: [], payment });
+      assert.deepEqual(selected.payment, payment);
+      const after = move(g, selected.action), ap = after.players[index];
+      assert.equal(ap.units.filter((u: any) => u.unit_type === 'Elephant').length, 1);
+      assert.equal(ap.units.filter((u: any) => u.unit_type === 'Ship').length, 2);
+      for (const [key, value] of Object.entries(p.resources))
+        assert.equal(ap.resources[key] ?? 0, Number(value) - ((payment as any)[key] ?? 0));
+    }
+    if (!market) {
+      for (const payment of [{ food: 2, wood: 2 }, { food: 2, mood_tokens: 1 }])
+        assert.throws(() => query(g, { kind: 'recruit', city: 'D2', units, replaced: [], payment }));
+    }
+    const ship = query(g, { kind: 'recruit', city: 'D2', units: { ships: 1 }, replaced: [] });
+    assert.deepEqual(ship.payment, { wood: 2 }, 'Do not broaden default-payment discount policy');
+  }
+});
+test('Warbeasts and Mercenaries retain Sanitation for a separately recruited Settler', async () => {
+  const g = await carthageSea(), index = seat(g), p = g.players[index];
+  addAdvance(p, 'Draft', 'Husbandry', 'Sanitation');
+  p.cities[0].city_pieces.temple = index;
+  const payment = { food: 1, gold: 1, mood_tokens: 2 };
+  const offer = query(g, { kind: 'recruit', city: 'D2',
+    units: { settlers: 1, ships: 1, elephants: 1 }, replaced: [], payment });
+  assert.deepEqual(offer.payment, payment);
+  assert.ok(offer.payments.some((candidate: any) => candidate.food === 1 &&
+    candidate.gold === 1 && candidate.mood_tokens === 2 && Object.keys(candidate).length === 3));
+  const after = move(g, offer.action);
+  assert.equal(after.players[index].units.length, p.units.length + 3);
+  assert.equal(after.players[index].resources.mood_tokens, p.resources.mood_tokens - 2);
+});
 test('Pirate Allies offers peaceful entry and attack, holds extra ships, and releases them when unescorted', async () => {
   const g = await carthageSea(),
     index = seat(g);

@@ -193,13 +193,23 @@ fn warbeasts() -> SpecialAdvanceInfo {
             let city=p.get(game).get_city(cost.city_position.unwrap());
             cost.cost.conversions.push(PaymentConversion::resource_options(vec![ResourcePile::food(1)],ResourcePile::culture_tokens(1),PaymentConversionType::MayNotOverpay(units.elephants * UnitType::Elephant.cost().amount())));
             if city.pieces.market.is_none(){
-                let base=cost.cost.default.clone();let elephant=UnitType::Elephant.cost();let mut alternatives=vec![base];
+                // Earlier listeners (notably Mercenaries) provide complete alternative
+                // costs. Apply the mandatory replacement to every branch, not only
+                // the regular price, and keep the transformed regular price first.
+                let elephant=UnitType::Elephant.cost();
+                let mut alternatives=std::iter::once(cost.cost.default.clone())
+                    .chain(cost.cost.alternatives.clone()).collect::<Vec<_>>();
                 for _ in 0..units.elephants{
                     alternatives=alternatives.into_iter().flat_map(|base|elephant.types().into_iter().filter_map(move |kind|{
                         (base.get(&kind)>0).then(||{let mut c=base.clone();c.add_type(kind,-1);c.gold+=1;c})
                     })).collect();
                 }
-                alternatives.sort_by_key(|r|r.to_string());alternatives.dedup();cost.cost.default=alternatives.remove(0);cost.cost.alternatives=alternatives;
+                let mut seen=HashSet::new();
+                alternatives.retain(|base|seen.insert(base.clone()));
+                if let Some((default,others))=alternatives.split_first(){
+                    cost.cost.default=default.clone();
+                    cost.cost.alternatives=others.to_vec();
+                }
                 cost.cost.conversions.push(PaymentConversion::limited(ResourcePile::gold(1),ResourcePile::culture_tokens(1),units.elephants));
                 cost.info.add_log(p,"Warbeasts: pay at least 1 gold or culture per Elephant instead of a normal resource");
             }
