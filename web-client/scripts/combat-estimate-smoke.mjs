@@ -57,7 +57,7 @@ try {
     const panel = page.getByRole('region', { name: 'Steel Weapons', exact: true });
     await panel.waitFor();
     await panel.locator('.estimate-summary').waitFor({ timeout: 60000 });
-    await panel.getByRole('button', { name: 'Assumptions & options', exact: false }).click();
+    await panel.getByTitle('Assumptions & options', { exact: true }).click();
     await panel.getByText('2048 simulations', { exact: false }).waitFor({ timeout: 60000 });
     assert.match(await panel.innerText(), /Win ≈\d+%/);
     assert.equal(await page.evaluate(() => window.sent.length), 0, 'estimating must never submit a move');
@@ -94,7 +94,7 @@ try {
     await target.press('Enter');
     const attackPanel = page.getByRole('region', { name: 'Unit movement' });
     await attackPanel.locator('.estimate-summary').waitFor({ timeout: 60000 });
-    await attackPanel.getByRole('button', { name: 'Assumptions & options', exact: false }).click();
+    await attackPanel.getByTitle('Assumptions & options', { exact: true }).click();
     await attackPanel.getByText('2048 simulations', { exact: false }).waitFor({ timeout: 60000 });
     assert.match(await attackPanel.innerText(), /Cancel both/);
     assert.equal(await page.evaluate(() => window.sent.length), 0);
