@@ -383,7 +383,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
         let payment_options = if advance_choice.is_some_and(|(_, mode)| mode != "paid") {
             vec![ResourcePile::empty()]
         } else {
-            advance_payments(&cost)
+            advance_payments(&cost, &p.resources)
         };
         let owned = p.has_advance(*advance);
         let reason = if owned { Some("Already researched".to_string()) }
@@ -540,7 +540,7 @@ fn advance_description(game: &Game, advance: Advance) -> Value {
 // Research conversions replace resources one-for-one or waive their cost. Enumerate
 // the small set of possible splits, validating every payment against the engine.
 // Keeping unaffordable splits here lets the UI describe the cost independently of stock.
-fn advance_payments(cost: &PaymentOptions) -> Vec<ResourcePile> {
+fn advance_payments(cost: &PaymentOptions, available: &ResourcePile) -> Vec<ResourcePile> {
     fn visit(
         cost: &PaymentOptions,
         types: &[ResourceType],
@@ -571,6 +571,7 @@ fn advance_payments(cost: &PaymentOptions) -> Vec<ResourcePile> {
         ResourcePile::empty(),
         &mut result,
     );
+    cost.order_paid_choices(&mut result, available);
     result
 }
 

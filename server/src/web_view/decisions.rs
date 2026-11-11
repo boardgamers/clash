@@ -292,6 +292,9 @@ pub(super) fn payment_choices(
     ) {
         return None;
     }
+    if !reward {
+        cost.order_paid_choices(&mut result, stock);
+    }
     if optional && !result.iter().any(ResourcePile::is_empty) {
         result.push(ResourcePile::empty());
     }
@@ -878,5 +881,89 @@ pub(super) fn influence_context(game: &Game, seat: usize) -> Option<Value> {
             )
         }
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod payment_order_tests {
+    use super::*;
+    use crate::events::check_event_origin;
+    use crate::payment::PaymentConversion;
+
+    #[test]
+    fn paid_roads_order_rewards_declines_and_fallback() {
+        let cost = PaymentOptions::fixed_resources(
+            ResourcePile::food(1) + ResourcePile::ore(1),
+            check_event_origin(),
+        );
+        let stock = ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2);
+        let expected = vec![
+            ResourcePile::food(1) + ResourcePile::ore(1),
+            ResourcePile::ore(1) + ResourcePile::gold(1),
+            ResourcePile::food(1) + ResourcePile::gold(1),
+            ResourcePile::gold(2),
+        ];
+        assert_eq!(
+            payment_choices(&cost, &stock, false, false),
+            Some(expected.clone())
+        );
+        let mut optional = expected.clone();
+        optional.push(ResourcePile::empty());
+        assert_eq!(payment_choices(&cost, &stock, false, true), Some(optional));
+        assert_eq!(
+            payment_choices(&cost, &stock, true, false),
+            Some(vec![
+                expected[3].clone(),
+                expected[1].clone(),
+                expected[2].clone(),
+                expected[0].clone()
+            ])
+        );
+        assert_eq!(
+            payment_choices(&cost, &ResourcePile::gold(2), false, false),
+            Some(vec![ResourcePile::gold(2)])
+        );
+        let huge = PaymentOptions::fixed_resources(ResourcePile::food(200), check_event_origin());
+        assert!(
+            payment_choices(
+                &huge,
+                &(ResourcePile::food(200) + ResourcePile::gold(200)),
+                false,
+                false
+            )
+            .is_none()
+        );
+    }
+
+    #[test]
+    fn ordering_retains_all_exact_discounted_and_fee_payments() {
+        let mut cost = PaymentOptions::fixed_resources(
+            ResourcePile::food(2) + ResourcePile::gold(1),
+            check_event_origin(),
+        );
+        cost.conversions.push(PaymentConversion::limited(
+            ResourcePile::food(1),
+            ResourcePile::empty(),
+            1,
+        ));
+        cost.default += ResourcePile::mood_tokens(1);
+        cost.separate_fee = vec![ResourcePile::mood_tokens(1)];
+        let stock = ResourcePile::food(2) + ResourcePile::gold(3) + ResourcePile::mood_tokens(1);
+        let choices = payment_choices(&cost, &stock, false, false).unwrap();
+        assert_eq!(choices.first(), cost.first_valid_payment(&stock).as_ref());
+        let mut exact = vec![];
+        for food in 0..=2 {
+            for gold in 0..=3 {
+                let pile = ResourcePile::food(food)
+                    + ResourcePile::gold(gold)
+                    + ResourcePile::mood_tokens(1);
+                if cost.is_valid_payment(&pile) {
+                    exact.push(pile);
+                }
+            }
+        }
+        assert_eq!(choices.len(), exact.len());
+        assert!(exact.iter().all(|p| choices.contains(p)));
+        assert!(choices.iter().all(|p| p.gold >= 1 && p.mood_tokens == 1));
     }
 }

@@ -640,6 +640,7 @@ test('research defaults conserve gold without removing explicit gold choices', a
     const view: View = JSON.parse(engine.webView(engine.stripSecret(state, seat), seat));
     const research = view.advances.find((a) => a.id === 'Storage')!;
     assert.deepEqual(research.payment, expected);
+    assert.deepEqual(research.payments.find((p) => p.action)?.payment, expected, 'first affordable choice is the native recommendation');
     const recommended = research.payments.find((p) => samePayment(p.payment, expected));
     assert.ok(recommended?.action, 'the recommendation is an executable picker choice');
     assert.deepEqual(research.action, recommended.action);

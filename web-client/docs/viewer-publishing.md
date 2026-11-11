@@ -1241,3 +1241,30 @@ ship-only recruitment and gold-conserving payment recommendations are unchanged.
 Publish the matching engine, bridge and viewer. Preserve the existing gallery and
 all unrelated metadata, including game-length option labels/order and Standard as
 default. This release performs no live game moves or historical repairs.
+
+# Viewer 0.1.215 / engine 0.4.147
+
+Centralized paid-choice ordering lists lower-gold payments first, then the native
+recommendation among equal-gold choices, retaining stable ties. Research and the
+shared web payment enumerator use the same policy. Roads offers food/ore,
+ore/gold, food/gold, then two gold; explicitly selecting gold remains valid for
+both routes and attacks. Carthage recruitment retains all legal alternatives.
+Empty choices retain their positions, optional declines remain unchanged, and
+rewards bypass ordering. Legality, default recommendations, route ordering and
+oversized-enumeration fallback are unchanged; no extra exhaustive enumeration is
+introduced.
+
+Publish the matching engine, bridge and viewer. Preserve the existing real-game
+gallery and all unrelated metadata, including game-length labels/order and
+Standard as default. No live game moves or historical repairs are performed.
+
+Release checks also caught an unused inline WASM fallback in the combat worker.
+The existing external-WASM build transform now runs in worker builds too, keeping
+the engine out of the inline worker script. Worker initialization still receives
+the explicit external engine URL. The bundle smoke checks a single WASM request
+and ready event on desktop/mobile.
+
+Verified with Rust 1.94.1: 500 native workspace tests pass (one existing ignored),
+1,062 frontend tests against the packed engine, gallery checks, all 17 locales,
+extraction checks, Svelte (zero errors/warnings), and production build. Existing
+Clippy warnings and expected rejected-move WASM diagnostics remain.

@@ -2763,17 +2763,36 @@ test('Roads offers food/gold choices before an attack and submits the selected p
     await c.load(engine.stripSecret(JSON.stringify(g), 1));
     c.openUnits([0, 1]);
     const offers = app.session().moveDestinations.filter(d => d.position === 'F7');
-    assert(offers.some(d => d.payment.food === 1 && d.payment.ore === 1));
-    assert(offers.some(d => d.payment.food === 1 && d.payment.gold === 1));
-    assert(offers.some(d => d.payment.gold === 2));
+    assert.deepEqual(offers.map(d => d.payment), [
+      { food: 1, ore: 1 }, { ore: 1, gold: 1 }, { food: 1, gold: 1 }, { gold: 2 },
+    ]);
+    for (const offer of offers)
+      assert.doesNotThrow(() => engine.tryMove(JSON.stringify(g), JSON.stringify(offer.action), 1));
     c.chooseMoveDestination('F7');
     assert.deepEqual(app.sent, []);
-    const index = app.session().moveDestinations.findIndex(d => d.position === 'F7' && d.payment.food === 1 && d.payment.ore === 1);
+    const index = app.session().moveDestinations.findIndex(d => d.position === 'F7' && d.payment.gold === 2);
     c.chooseMoveRoute(index);
     assert.deepEqual(app.sent, [], 'choosing payment previews the battle without starting it');
     const action = app.session().moveDestinations[index].action;
     c.chooseMoveRoute(index);
     assert.deepEqual(app.sent.map(a => JSON.parse(a)), [action]);
+    assert.doesNotThrow(() => engine.tryMove(JSON.stringify(g), app.sent[0], 1));
+  } finally { app.close(); }
+});
+
+test('Roads retains the gold-only fallback when ordinary resources are missing', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    const g = JSON.parse(fixture('advances/roads_unit_test'));
+    g.current_player_index = 1;
+    g.players[1].resources = { gold: 2 };
+    c.setPlayer(1);
+    await c.load(engine.stripSecret(JSON.stringify(g), 1));
+    c.openUnits([0, 1]);
+    const offers = app.session().moveDestinations.filter(d => d.position === 'F7');
+    assert.deepEqual(offers.map(d => d.payment), [{ gold: 2 }]);
+    c.chooseMoveDestination('F7');
+    assert.deepEqual(app.sent.map(a => JSON.parse(a)), [offers[0].action]);
     assert.doesNotThrow(() => engine.tryMove(JSON.stringify(g), app.sent[0], 1));
   } finally { app.close(); }
 });

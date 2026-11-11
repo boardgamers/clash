@@ -132,6 +132,23 @@ impl PaymentOptions {
         Some(payment)
     }
 
+    /// Order already-enumerated paid choices without changing their membership.
+    /// Conserve gold, then prefer the engine's native recommendation; keep other
+    /// ties stable. Empty choices (including optional declines) stay in place.
+    /// Callers presenting rewards must retain their original enumeration order.
+    pub fn order_paid_choices(&self, choices: &mut [ResourcePile], available: &ResourcePile) {
+        let recommended = self.first_valid_payment(available);
+        let mut paid = choices
+            .iter()
+            .filter(|p| !p.is_empty())
+            .cloned()
+            .collect::<Vec<_>>();
+        paid.sort_by_key(|payment| (payment.gold, Some(payment) != recommended.as_ref()));
+        for (choice, payment) in choices.iter_mut().filter(|p| !p.is_empty()).zip(paid) {
+            *choice = payment;
+        }
+    }
+
     fn find_payment(&self, available: &ResourcePile, exact: bool) -> Option<ResourcePile> {
         if let Some(default_fee) = self.separate_fee.first() {
             let mut remainder = self.clone();
@@ -688,6 +705,47 @@ pub(crate) fn base_resources() -> Vec<ResourcePile> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn paid_choice_order_preserves_empty_slots_and_native_research_preference() {
+        let cost = payment_options_sum(
+            2,
+            &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            check_event_origin(),
+        );
+        let food = ResourcePile::food(2);
+        let ideas = ResourcePile::ideas(2);
+        let mixed = ResourcePile::food(1) + ResourcePile::ideas(1);
+        let gold = ResourcePile::gold(2);
+        let mut choices = vec![
+            ResourcePile::empty(),
+            gold.clone(),
+            food.clone(),
+            ResourcePile::empty(),
+            mixed.clone(),
+            ideas.clone(),
+            ResourcePile::empty(),
+        ];
+        cost.order_paid_choices(&mut choices, &(food.clone() + ideas.clone() + gold.clone()));
+        assert_eq!(
+            choices,
+            vec![
+                ResourcePile::empty(),
+                ideas,
+                food,
+                ResourcePile::empty(),
+                mixed,
+                gold,
+                ResourcePile::empty()
+            ]
+        );
+        let once = choices.clone();
+        cost.order_paid_choices(
+            &mut choices,
+            &(ResourcePile::food(2) + ResourcePile::ideas(2) + ResourcePile::gold(2)),
+        );
+        assert_eq!(choices, once);
+    }
+
     #[test]
     fn recommendations_conserve_gold_for_research_and_mixed_costs() {
         let research = payment_options_sum(

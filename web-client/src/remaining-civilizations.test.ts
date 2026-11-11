@@ -1187,6 +1187,13 @@ test('Warbeasts and Mercenaries offer and execute combined Elephant and Ship pay
     if (market) p.cities[0].city_pieces.market = index;
     const units = { elephants: 1, ships: 1 };
     const offer = query(g, { kind: 'recruit', city: 'D2', units, replaced: [] });
+    assert.deepEqual(offer.payments.map((p: any) => p.gold ?? 0),
+      offer.payments.map((p: any) => p.gold ?? 0).sort((a: number, b: number) => a - b));
+    for (const payment of offer.payments) {
+      const selected = query(g, { kind: 'recruit', city: 'D2', units, replaced: [], payment });
+      assert.deepEqual(selected.payment, payment);
+      assert.doesNotThrow(() => move(g, selected.action));
+    }
     for (const payment of [
       { food: 1, gold: 2 },
       { food: 1, gold: 1, mood_tokens: 1 },

@@ -2,7 +2,25 @@ import { defineConfig } from 'vite';
 import { readFileSync } from 'node:fs';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { previewApi } from './scripts/preview-api';
+// Worker builds have their own plugin pipeline; keep their unused default URL
+// external too, rather than embedding a second engine in the inline worker.
+function externalWasmFallback() {
+  return {
+    name: 'external-wasm-fallback',
+    enforce: 'pre' as const,
+    transform(code: string, id: string) {
+      if (!id.endsWith('/.bridge/server.js')) return;
+      // wasm-bindgen's default URL must stay external in library builds too.
+      // Otherwise Vite embeds a second copy alongside our explicit Wasm import.
+      return code.replace(
+        "new URL('server_bg.wasm', import.meta.url)",
+        "new URL('server_bg.wasm?no-inline', import.meta.url)",
+      );
+    },
+  };
+}
 export default defineConfig({
+  worker: { plugins: () => [externalWasmFallback()] },
   base: './',
   publicDir: false,
   plugins: [
@@ -30,19 +48,7 @@ export default defineConfig({
         });
       },
     },
-    {
-      name: 'external-wasm-fallback',
-      enforce: 'pre',
-      transform(code, id) {
-        if (!id.endsWith('/.bridge/server.js')) return;
-        // wasm-bindgen's default URL must stay external in library builds too.
-        // Otherwise Vite embeds a second copy alongside our explicit Wasm import.
-        return code.replace(
-          "new URL('server_bg.wasm', import.meta.url)",
-          "new URL('server_bg.wasm?no-inline', import.meta.url)",
-        );
-      },
-    },
+    externalWasmFallback(),
     // BGS loads the viewer script alone, so component styles must travel with it.
     svelte({ emitCss: false }),
     previewApi(),
