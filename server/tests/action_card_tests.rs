@@ -510,3 +510,87 @@ fn technology_trade_only_offers_partners_within_two_spaces() {
         }
     }
 }
+
+#[test]
+fn test_explorers_independent_benefits() {
+    use server::action_card::ActionCardInfo;
+    use server::content::persistent_events::PersistentEventRequest;
+    use server::map::Terrain;
+    use server::unit::{Unit, UnitType};
+
+    for id in [21, 22] {
+        for revealed in [false, true] {
+            for settlers in [0, 4] {
+                for owns_city in [false, true] {
+                    let mut game = JSON.load_game("explorer");
+                    if revealed {
+                        game.map.unexplored_blocks.clear();
+                        for terrain in game.map.tiles.values_mut() {
+                            if terrain.is_unexplored() {
+                                *terrain = Terrain::Fertile;
+                            }
+                        }
+                    }
+                    let position = game.player(1).cities[0].position;
+                    let p = game.player_mut(1);
+                    p.action_cards = vec![id];
+                    p.units = (0..settlers)
+                        .map(|n| Unit::new(1, position, UnitType::Settler, n))
+                        .collect();
+                    p.next_unit_id = settlers;
+                    if !owns_city {
+                        p.cities.clear();
+                    }
+                    let card = game.cache.get_action_card(id);
+                    assert_eq!(
+                        (card.civil_card.can_play)(
+                            &game,
+                            game.player(1),
+                            &ActionCardInfo::new(id, None, None)
+                        ),
+                        owns_city && (!revealed || settlers < 4),
+                        "card {id}, revealed {revealed}, settlers {settlers}, city {owns_city}"
+                    );
+                    if !revealed || !owns_city || settlers == 4 {
+                        continue;
+                    }
+                    for accept in [false, true] {
+                        let actions = game.actions_left;
+                        let culture = game.player(1).resources.culture_tokens;
+                        let activations = game.player(1).cities[0].activations;
+                        let mut after = server::game_api::execute(
+                            game.clone(),
+                            Action::Playing(PlayingAction::ActionCard(id)),
+                            1,
+                        );
+                        after = server::game_api::execute(
+                            after,
+                            payment_response(ResourcePile::culture_tokens(1)),
+                            1,
+                        );
+                        let PersistentEventRequest::SelectPositions(request) =
+                            &after.current_event_handler().unwrap().request
+                        else {
+                            panic!("expected settler placement, not exploration");
+                        };
+                        assert_eq!(request.description, "Gain a free settler");
+                        after = server::game_api::execute(
+                            after,
+                            Action::Response(EventResponse::SelectPositions(if accept {
+                                vec![position]
+                            } else {
+                                vec![]
+                            })),
+                            1,
+                        );
+                        assert!(after.current_event_handler().is_none());
+                        assert_eq!(after.player(1).units.len(), usize::from(accept));
+                        assert_eq!(after.actions_left, actions - 1);
+                        assert_eq!(after.player(1).resources.culture_tokens, culture - 1);
+                        assert_eq!(after.player(1).cities[0].activations, activations);
+                    }
+                }
+            }
+        }
+    }
+}

@@ -154,9 +154,11 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         AND/OR gain a free settler in one of your cities.",
         |c| c.action().culture_tokens(1),
         |game, player, _| {
-            !action_explore_request(game, player.index)
-                .choices
-                .is_empty()
+            // The printed card allows one or both benefits, independently.
+            (!player.cities.is_empty() && player.available_units().settlers > 0)
+                || !action_explore_request(game, player.index)
+                    .choices
+                    .is_empty()
         },
     )
     .tactics_card(tactics_card);

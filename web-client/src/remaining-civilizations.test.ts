@@ -1876,3 +1876,75 @@ test('Great Engineer construction works at zero actions through Idol and Shoguna
     assert.equal(after.actions_left, 0);
   }
 });
+
+test('both Explorers cards independently grant settlers on a fully revealed map', async () => {
+  for (const civ of ['Japan', 'Rome']) for (const id of [21, 22]) {
+    for (const accept of [false, true]) for (const shogunate of ['none', 'accept', 'decline', 'zero']) {
+      if (shogunate !== 'none' && civ !== 'Japan') continue;
+      const freeAction = shogunate === 'accept' || shogunate === 'zero';
+      const g = await setup(civ), index = seat(g), p = g.players[index];
+      p.action_cards = [id];
+      g.map.unexplored_blocks = [];
+      g.map.tiles = g.map.tiles.map(([pos, terrain]: [string, any]) =>
+        [pos, typeof terrain === 'object' || terrain === 'Unexplored' ? 'Fertile' : terrain]);
+      if (shogunate !== 'none') addAdvance(p, 'Nationalism');
+      if (shogunate === 'zero') g.actions_left = 0;
+      const card = view(g).actionCards.find((c: any) => c.id === id);
+      assert.ok(card.action, `${civ} ${id}: ${card.reason}`);
+      let after = move(g, card.action);
+      if (shogunate === 'accept' || shogunate === 'decline') {
+        assert.match(view(after).choiceDecision.name, /Shogunate/);
+        after = move(after, { Response: { Bool: freeAction } });
+      }
+      after = move(after, { Response: { Payment: [{ culture_tokens: 1 }] } });
+      assert.equal(view(after).decision.description, 'Gain a free settler', 'no phantom exploration choice');
+      after = move(after, { Response: { SelectPositions: accept ? [p.cities[0].position] : [] } });
+      assert.equal(view(after).decision, null);
+      assert.equal(after.players[index].units.length, p.units.length + Number(accept));
+      if (accept) {
+        const settler = after.players[index].units.at(-1);
+        assert.equal(settler.unit_type, 'Settler');
+        assert.equal(settler.position, p.cities[0].position);
+      }
+      assert.equal(after.actions_left, g.actions_left - Number(!freeAction));
+      assert.equal(after.players[index].resources.culture_tokens, p.resources.culture_tokens - 1);
+      assert.deepEqual(after.players[index].cities, p.cities, 'free settler does not activate or change a city');
+      assert.ok(!(after.players[index].action_cards ?? []).includes(id));
+      assert.equal(after.players[index].event_info?.['Shogunate card'] === 'used', freeAction);
+    }
+  }
+});
+
+test('Explorers requires at least one available benefit and preserves ordinary costs', async () => {
+  for (const civ of ['Japan', 'Rome']) for (const id of [21, 22]) {
+    const original = await setup(civ), index = seat(original);
+    original.players[index].action_cards = [id];
+    for (const scenario of ['explore-only', 'neither', 'no-city', 'no-culture', 'no-actions']) {
+      const g = structuredClone(original), p = g.players[index];
+      if (scenario !== 'explore-only') {
+        g.map.unexplored_blocks = [];
+        g.map.tiles = g.map.tiles.map(([pos, terrain]: [string, any]) =>
+          [pos, typeof terrain === 'object' || terrain === 'Unexplored' ? 'Fertile' : terrain]);
+      }
+      if (scenario === 'explore-only' || scenario === 'neither') {
+        p.units = Array.from({ length: 4 }, (_, id) => ({ id, position: p.cities[0].position, unit_type: 'Settler' }));
+        p.next_unit_id = 4;
+      }
+      if (scenario === 'no-city') p.cities = [];
+      if (scenario === 'no-culture') p.resources.culture_tokens = 0;
+      if (scenario === 'no-actions') g.actions_left = 0;
+      const card = view(g).actionCards.find((c: any) => c.id === id);
+      assert.equal(Boolean(card.action), scenario === 'explore-only', `${civ} ${id}: ${scenario}`);
+      if (scenario === 'explore-only') {
+        let after = move(g, card.action);
+        after = move(after, { Response: { Payment: [{ culture_tokens: 1 }] } });
+        assert.match(view(after).decision.description, /explore/i);
+        after = move(after, { Response: { SelectPositions: [] } });
+        assert.equal(view(after).decision, null);
+        assert.equal(after.players[index].units.length, 4);
+      } else {
+        assert.throws(() => move(g, { Playing: { ActionCard: id } }), 'engine rejects ineligible play, not just UI');
+      }
+    }
+  }
+});

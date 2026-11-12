@@ -1268,3 +1268,25 @@ Verified with Rust 1.94.1: 500 native workspace tests pass (one existing ignored
 1,062 frontend tests against the packed engine, gallery checks, all 17 locales,
 extraction checks, Svelte (zero errors/warnings), and production build. Existing
 Clippy warnings and expected rejected-move WASM diagnostics remain.
+
+# Viewer 0.1.216 / engine 0.4.148
+
+Explorers (A21 and A22) can be played for its free Settler even when no eligible
+unrevealed region remains. The printed cards independently allow one or both
+benefits; see `docs/explorers-eligibility.md` for the checked source and locations.
+Exploration alone remains available with exhausted Settler supply, and a card
+with neither benefit remains unavailable. Empty exploration is skipped; optional
+choices, the action and culture costs, Japan's Shogunate exceptions, and placement
+without city activation are preserved.
+
+Publish the matching engine, bridge and viewer. Preserve the real-game gallery,
+all unrelated metadata, and game-length labels/order with Standard as default.
+No live game moves, historical repairs or Fossil refresh are part of this release.
+
+Verified with Rust 1.94.1: 501 native workspace tests pass (one existing ignored),
+1,064 frontend tests against the packed engine, gallery and locale checks, Svelte
+with zero errors/warnings, and production build. Eight desktop/mobile browser
+cases cover Japan/Rome and both cards through real card play, culture payment,
+map city selection and Settler confirmation. Packed-engine protocol and split
+WASM bundle checks pass. Existing Clippy warnings and expected rejected-move
+WASM diagnostics remain.
