@@ -1290,3 +1290,29 @@ cases cover Japan/Rome and both cards through real card play, culture payment,
 map city selection and Settler confirmation. Packed-engine protocol and split
 WASM bundle checks pass. Existing Clippy warnings and expected rejected-move
 WASM diagnostics remain.
+
+# Viewer 0.1.217 / engine 0.4.149
+
+Permanent piece-loss journal notes now name the destroyed city center or building
+and its owner's remaining total capacity, including pieces already on the board.
+Earthquake, Major Earthquake and Vulcan retain their structure and victory-point
+entries. Rune Stone conversion reports the reduced Obelisk capacity without
+calling conversion destruction. Automatic capture razing explicitly explains
+when no city center is available; normal captures and voluntary razing are unchanged.
+All 17 locales in both clients include the four new messages.
+
+Publish the matching engine, bridge and viewer. Piece availability calculations,
+ownership, points and rules are unchanged; existing history is not rewritten.
+Preserve the real-game gallery and unrelated BGS metadata, including game-length
+labels/order and Standard as default. No live moves, history repairs or Fossil
+refresh are part of this release.
+
+Verified with Rust 1.94.1: 503 native workspace tests pass (one existing ignored),
+1,066 frontend tests against the packed engine, gallery and both 17-locale
+catalogs, extraction checks, Svelte with zero errors/warnings, formatting and
+production build. Desktop/mobile browser checks exercise actual engine journal
+notes, foreign building ownership, prior capacity losses and forced razing;
+protocol, split-WASM bundle and combat journal checks also pass. Existing Clippy
+warnings and expected rejected-move WASM diagnostics remain. The first native
+random-actions run hit the existing Tributes eligibility rejection; a complete
+workspace rerun passed. No Tributes rules or unrelated snapshots were changed.

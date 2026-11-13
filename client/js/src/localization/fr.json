@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} sacrifie {p1} pour des Archers",
   "{p0} was selected to gain 1 settler.": "{p0} a été choisi pour gagner 1 colon.",
   "{p0} withdraws to {p1}": "{p0} se replie vers {p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Vous avez remporté une bataille contre les Barbares dans une ville et éliminé au moins 2 de leurs unités."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Vous avez remporté une bataille contre les Barbares dans une ville et éliminé au moins 2 de leurs unités.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Centre-ville en {p0} détruit définitivement ; limite de villes réduite à {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} en {p1} détruit définitivement ; limite totale de ces pièces réduite à {p2}",
+  "Razed {p0} because no city centers were available": "{p0} rasée car aucun centre-ville n’était disponible",
+  "Obelisk total piece limit reduced to {p0}": "Limite totale des obélisques réduite à {p0}"
 }

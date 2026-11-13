@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} sacrifică {p1} pentru Arcași",
   "{p0} was selected to gain 1 settler.": "{p0} a fost selectat pentru a primi 1 colonist.",
   "{p0} withdraws to {p1}": "{p0} se retrage la {p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Ai câștigat o luptă împotriva barbarilor într-un oraș și ai eliminat cel puțin 2 dintre unitățile lor."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Ai câștigat o luptă împotriva barbarilor într-un oraș și ai eliminat cel puțin 2 dintre unitățile lor.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Centrul orașului de la {p0} distrus permanent; limita de orașe redusă la {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} de la {p1} distrus permanent; limita totală a acestor piese redusă la {p2}",
+  "Razed {p0} because no city centers were available": "{p0} distrus deoarece nu erau disponibile centre de oraș",
+  "Obelisk total piece limit reduced to {p0}": "Limita totală de obeliscuri redusă la {p0}"
 }

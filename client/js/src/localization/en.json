@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} sacrifices {p1} for Archers",
   "{p0} was selected to gain 1 settler.": "{p0} was selected to gain 1 settler.",
   "{p0} withdraws to {p1}": "{p0} withdraws to {p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "You won a battle against Barbarians in a city and killed at least 2 of their units."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "You won a battle against Barbarians in a city and killed at least 2 of their units.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "City center at {p0} permanently destroyed; city limit reduced to {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}",
+  "Razed {p0} because no city centers were available": "Razed {p0} because no city centers were available",
+  "Obelisk total piece limit reduced to {p0}": "Obelisk total piece limit reduced to {p0}"
 }

@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} приносит в жертву {p1} ради лучников",
   "{p0} was selected to gain 1 settler.": "{p0} выбран, чтобы получить 1 поселенца.",
   "{p0} withdraws to {p1}": "{p0} отступает в {p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Вы выиграли бой против варваров в городе и уничтожили не менее 2 их отрядов."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Вы выиграли бой против варваров в городе и уничтожили не менее 2 их отрядов.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Центр города в {p0} уничтожен навсегда; предел числа городов снижен до {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} в {p1} уничтожено навсегда; общий предел этих элементов снижен до {p2}",
+  "Razed {p0} because no city centers were available": "Город {p0} разрушен, так как не было доступных центров городов",
+  "Obelisk total piece limit reduced to {p0}": "Общий предел обелисков снижен до {p0}"
 }

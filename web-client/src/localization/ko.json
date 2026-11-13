@@ -5288,5 +5288,9 @@
   "Exchange objectives": "목표 교환",
   "Keep current objectives": "현재 목표 유지",
   "Keep": "보관",
-  "Return": "반환"
+  "Return": "반환",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "{p0}의 도시 중심부가 영구 파괴됨; 도시 한도가 {p1}(으)로 감소",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p1}의 {p0} 영구 파괴됨; 해당 부품의 총 한도가 {p2}(으)로 감소",
+  "Razed {p0} because no city centers were available": "사용 가능한 도시 중심부가 없어 {p0} 파괴",
+  "Obelisk total piece limit reduced to {p0}": "오벨리스크 부품 총 한도가 {p0}(으)로 감소"
 }

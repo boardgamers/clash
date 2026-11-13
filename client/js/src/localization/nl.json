@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} offert {p1} voor Boogschutters",
   "{p0} was selected to gain 1 settler.": "{p0} is geselecteerd om 1 kolonist te krijgen.",
   "{p0} withdraws to {p1}": "{p0} trekt zich terug naar {p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Je hebt een gevecht tegen Barbaren in een stad gewonnen en minstens 2 van hun eenheden gedood."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Je hebt een gevecht tegen Barbaren in een stad gewonnen en minstens 2 van hun eenheden gedood.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Stadscentrum bij {p0} permanent vernietigd; stadslimiet verlaagd naar {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} bij {p1} permanent vernietigd; totale limiet voor deze stukken verlaagd naar {p2}",
+  "Razed {p0} because no city centers were available": "{p0} verwoest omdat er geen stadscentra beschikbaar waren",
+  "Obelisk total piece limit reduced to {p0}": "Totale limiet voor obelisken verlaagd naar {p0}"
 }

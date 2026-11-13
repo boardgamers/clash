@@ -5288,5 +5288,9 @@
   "Exchange objectives": "Ziele tauschen",
   "Keep current objectives": "Aktuelle Ziele behalten",
   "Keep": "Behalten",
-  "Return": "Zurückgeben"
+  "Return": "Zurückgeben",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Stadtzentrum bei {p0} dauerhaft zerstört; Stadtlimit auf {p1} reduziert",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} bei {p1} dauerhaft zerstört; Gesamtlimit dieser Bauteile auf {p2} reduziert",
+  "Razed {p0} because no city centers were available": "{p0} zerstört, da keine Stadtzentren verfügbar waren",
+  "Obelisk total piece limit reduced to {p0}": "Gesamtlimit der Obelisken auf {p0} reduziert"
 }

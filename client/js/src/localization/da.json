@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} ofrer {p1} for Bueskytter",
   "{p0} was selected to gain 1 settler.": "{p0} blev valgt til at få 1 nybygger.",
   "{p0} withdraws to {p1}": "{p0} trækker sig tilbage til {p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Du har vundet et slag mod barbarer i en by og dræbt mindst 2 af deres enheder."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Du har vundet et slag mod barbarer i en by og dræbt mindst 2 af deres enheder.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Bycenter ved {p0} permanent ødelagt; bygrænse reduceret til {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} ved {p1} permanent ødelagt; samlet grænse for disse brikker reduceret til {p2}",
+  "Razed {p0} because no city centers were available": "{p0} nedbrændt, fordi ingen bycentre var tilgængelige",
+  "Obelisk total piece limit reduced to {p0}": "Samlet grænse for obelisker reduceret til {p0}"
 }

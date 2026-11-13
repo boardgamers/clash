@@ -284,10 +284,12 @@ fn runes() -> SpecialAdvanceInfo {
                 let p = game.player_mut(s.player_index);
                 p.destroyed_structures.add_building(Building::Obelisk);
                 p.gain_objective_victory_points(1.0, &s.origin);
+                let limit = p.building_piece_limit(Building::Obelisk);
                 s.log(
                     game,
                     "Converted an Obelisk to a Rune Stone for 1 objective point",
                 );
+                s.log(game, &format!("Obelisk total piece limit reduced to {limit}"));
             } else {
                 s.log(game, "Did not convert an Obelisk to a Rune Stone");
             }

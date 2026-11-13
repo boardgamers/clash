@@ -310,12 +310,24 @@ impl Player {
             .flat_map(|city| city.pieces.building_owners())
             .filter(|(b, owner)| b == &building && owner.is_some_and(|owner| owner == self.index))
             .count()
-            < CITY_PIECE_LIMIT - self.destroyed_structures.get_building(building)
+            < self.building_piece_limit(building)
+    }
+
+    /// Total surviving pieces, including pieces already on the board.
+    #[must_use]
+    pub fn building_piece_limit(&self, building: Building) -> usize {
+        CITY_PIECE_LIMIT - self.destroyed_structures.get_building(building)
+    }
+
+    /// Total surviving city centers, including cities already on the board.
+    #[must_use]
+    pub fn city_limit(&self) -> usize {
+        (CITY_LIMIT - self.destroyed_structures.cities) as usize
     }
 
     #[must_use]
     pub fn is_city_available(&self) -> bool {
-        self.cities.len() < (CITY_LIMIT - self.destroyed_structures.cities) as usize
+        self.cities.len() < self.city_limit()
     }
 
     #[must_use]

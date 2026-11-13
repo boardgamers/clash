@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} तीरंदाजों के लिए {p1} का बलिदान देता है",
   "{p0} was selected to gain 1 settler.": "{p0} को 1 बसने वाला प्राप्त करने के लिए चुना गया।",
   "{p0} withdraws to {p1}": "{p0} {p1} की ओर पीछे हटता है",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "आपने एक शहर में बर्बरों के विरुद्ध लड़ाई जीती और उनकी कम से कम 2 इकाइयाँ मारीं।"
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "आपने एक शहर में बर्बरों के विरुद्ध लड़ाई जीती और उनकी कम से कम 2 इकाइयाँ मारीं।",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "{p0} पर शहर केंद्र स्थायी रूप से नष्ट; शहरों की सीमा घटकर {p1} हुई",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p1} पर {p0} स्थायी रूप से नष्ट; इस प्रकार के टुकड़ों की कुल सीमा घटकर {p2} हुई",
+  "Razed {p0} because no city centers were available": "कोई शहर केंद्र उपलब्ध न होने के कारण {p0} ध्वस्त किया गया",
+  "Obelisk total piece limit reduced to {p0}": "ओबिलिस्क टुकड़ों की कुल सीमा घटकर {p0} हुई"
 }

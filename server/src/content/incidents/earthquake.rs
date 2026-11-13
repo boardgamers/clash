@@ -183,6 +183,12 @@ fn destroy_city_center(game: &mut Game, position: Position, origin: &EventOrigin
     );
     p.gain_event_victory_points(2.0, origin);
     p.destroyed_structures.cities += 1;
+    let limit = p.city_limit();
+    game.log(
+        owner,
+        origin,
+        &format!("City center at {position} permanently destroyed; city limit reduced to {limit}"),
+    );
     game.log(
         owner,
         origin,
@@ -200,8 +206,14 @@ fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &E
     let o = game.player_mut(owner);
     o.gain_event_victory_points(2.0, origin);
     o.destroyed_structures.add_building(b);
+    let limit = o.building_piece_limit(b);
     let player = EventPlayer::new(city_owner, origin.clone());
     lose_building(game, &player, b, position);
+    game.log(
+        owner,
+        origin,
+        &format!("{b} at {position} permanently destroyed; total piece limit reduced to {limit}"),
+    );
     game.log(
         owner,
         origin,

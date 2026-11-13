@@ -5288,5 +5288,9 @@
   "Exchange objectives": "Đổi mục tiêu",
   "Keep current objectives": "Giữ mục tiêu hiện tại",
   "Keep": "Giữ",
-  "Return": "Trả lại"
+  "Return": "Trả lại",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Trung tâm thành phố tại {p0} bị phá hủy vĩnh viễn; giới hạn thành phố giảm còn {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} tại {p1} bị phá hủy vĩnh viễn; tổng giới hạn loại quân cờ này giảm còn {p2}",
+  "Razed {p0} because no city centers were available": "Đã phá hủy {p0} vì không còn trung tâm thành phố khả dụng",
+  "Obelisk total piece limit reduced to {p0}": "Tổng giới hạn Đài Tưởng Niệm giảm còn {p0}"
 }

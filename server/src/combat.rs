@@ -400,6 +400,10 @@ pub(crate) fn conquer_city(
                     ResourcePile::gold(defender.get(game).get_city(position).size() as u8),
                 );
         }
+        attacker.log(
+            game,
+            &format!("Razed {position} because no city centers were available"),
+        );
         raze_city(game, defender, position);
     }
 }

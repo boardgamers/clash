@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0}为弓箭手牺牲{p1}",
   "{p0} was selected to gain 1 settler.": "{p0}被选中获得1个移民。",
   "{p0} withdraws to {p1}": "{p0}撤退至{p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "你在城市中战胜蛮族，并杀死至少 2 个蛮族单位。"
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "你在城市中战胜蛮族，并杀死至少 2 个蛮族单位。",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "{p0}的城市中心被永久摧毁；城市上限降至{p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p1}的{p0}被永久摧毁；此类配件总数上限降至{p2}",
+  "Razed {p0} because no city centers were available": "因没有可用的城市中心，夷平了{p0}",
+  "Obelisk total piece limit reduced to {p0}": "方尖碑配件总数上限降至{p0}"
 }

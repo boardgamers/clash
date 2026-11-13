@@ -410,6 +410,13 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Text": "Razed C1 because no city centers were available",
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Structure": {
                         "structure": {

@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0}이(가) 궁수를 위해 {p1}을(를) 희생합니다",
   "{p0} was selected to gain 1 settler.": "{p0}이(가) 개척자 1명을 얻도록 선택되었습니다.",
   "{p0} withdraws to {p1}": "{p0}이(가) {p1}(으)로 철수합니다",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "도시에서 야만인과의 전투에 승리하고 야만인 유닛을 최소 2개 처치했습니다."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "도시에서 야만인과의 전투에 승리하고 야만인 유닛을 최소 2개 처치했습니다.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "{p0}의 도시 중심부가 영구 파괴됨; 도시 한도가 {p1}(으)로 감소",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p1}의 {p0} 영구 파괴됨; 해당 부품의 총 한도가 {p2}(으)로 감소",
+  "Razed {p0} because no city centers were available": "사용 가능한 도시 중심부가 없어 {p0} 파괴",
+  "Obelisk total piece limit reduced to {p0}": "오벨리스크 부품 총 한도가 {p0}(으)로 감소"
 }

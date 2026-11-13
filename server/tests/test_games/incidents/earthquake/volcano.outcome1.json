@@ -275,6 +275,13 @@
                     },
                     {
                       "player": 0,
+                      "Text": "Fortress at C2 permanently destroyed; total piece limit reduced to 4",
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Text": "Gain 2 points for the Fortress at C2",
                       "origin": {
                         "Incident": 29
@@ -290,6 +297,13 @@
                         "position": "C2",
                         "port_position": null
                       },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Text": "Temple at C2 permanently destroyed; total piece limit reduced to 4",
                       "origin": {
                         "Incident": 29
                       }
@@ -318,6 +332,13 @@
                     {
                       "player": 0,
                       "Text": "Gain 0 points for the Great Pyramid at C2",
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Text": "City center at C2 permanently destroyed; city limit reduced to 6",
                       "origin": {
                         "Incident": 29
                       }

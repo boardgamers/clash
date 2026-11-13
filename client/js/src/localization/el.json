@@ -2281,5 +2281,9 @@
   "{p0} sacrifices {p1} for Archers": "{p0} θυσιάζει {p1} για Τοξότες",
   "{p0} was selected to gain 1 settler.": "{p0} επιλέχθηκε να κερδίσει 1 άποικο.",
   "{p0} withdraws to {p1}": "{p0} αποσύρεται στο {p1}",
-  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Κερδίσατε μάχη εναντίον Βαρβάρων σε πόλη και σκοτώσατε τουλάχιστον 2 μονάδες τους."
+  "You won a battle against Barbarians in a city and killed at least 2 of their units.": "Κερδίσατε μάχη εναντίον Βαρβάρων σε πόλη και σκοτώσατε τουλάχιστον 2 μονάδες τους.",
+  "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Το κέντρο πόλης στο {p0} καταστράφηκε οριστικά· το όριο πόλεων μειώθηκε σε {p1}",
+  "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} στο {p1} καταστράφηκε οριστικά· το συνολικό όριο αυτών των κομματιών μειώθηκε σε {p2}",
+  "Razed {p0} because no city centers were available": "Η πόλη {p0} ισοπεδώθηκε επειδή δεν υπήρχαν διαθέσιμα κέντρα πόλης",
+  "Obelisk total piece limit reduced to {p0}": "Το συνολικό όριο οβελίσκων μειώθηκε σε {p0}"
 }
