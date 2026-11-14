@@ -1,0 +1,371 @@
+{
+  "revision": 3,
+  "width": 256,
+  "height": 256,
+  "assets": [
+    {
+      "key": "achievement-complete-shorter",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-win-shorter",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-complete-standard",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-win-standard",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-complete-roll-to-end",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-win-roll-to-end",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-complete-wonderful-ending",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-win-wonderful-ending",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-complete-epic",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-win-epic",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-score-30",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-score-40",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-seven-cities",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-twenty-advances",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-three-objectives",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-two-wonders-built",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-captured-leader",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-arena",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-pyramids",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-gardens",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-library",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-lighthouse",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-mausoleum",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-statue",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-built-great-wall",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-complete-builder",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    }
+  ]
+}

@@ -126,32 +126,38 @@ pub fn definitions() -> Manifest {
             id: format!("complete-{id}"),
             name: format!("Complete {name}"),
             description: format!("Finish a {name} game without dropping out."),
-            icon: None,
+            icon: Some(Icon::Asset {
+                key: format!("achievement-complete-{id}"),
+            }),
         });
         definitions.push(Definition {
             id: format!("win-{id}"),
             name: format!("Win {name}"),
             description: format!("Finish a {name} game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins."),
-            icon: None,
+            icon: Some(Icon::Asset { key: format!("achievement-win-{id}") }),
         });
     }
     definitions.extend(FEATS.map(|(id, name, description)| Definition {
         id: id.into(),
         name: name.into(),
         description: description.into(),
-        icon: None,
+        icon: Some(Icon::Asset {
+            key: format!("achievement-{id}"),
+        }),
     }));
     definitions.extend(WONDERS.map(|(_, id, name)| Definition {
         id: id.into(),
         name: format!("{name}: Recorded as Built"),
         description: format!("Finish with {name} recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count."),
-        icon: None,
+        icon: Some(Icon::Asset { key: format!("achievement-{id}") }),
     }));
     definitions.push(Definition {
         id: "complete-builder".into(),
         name: "Complete Builder".into(),
         description: "Finish a Builder variant game without dropping out.".into(),
-        icon: None,
+        icon: Some(Icon::Asset {
+            key: "achievement-complete-builder".into(),
+        }),
     });
     definitions.extend(FACTIONS.map(|(name, slug)| Definition {
         id: format!("win-{slug}"),
@@ -160,7 +166,7 @@ pub fn definitions() -> Manifest {
         icon: Some(Icon::Asset { key: format!("achievement-faction-{slug}") }),
     }));
     Manifest {
-        revision: 2,
+        revision: 3,
         achievements: definitions,
     }
 }
@@ -313,7 +319,7 @@ mod tests {
     #[test]
     fn manifest_and_real_end_turn_for_all_lengths() {
         let manifest = definitions();
-        assert_eq!(manifest.revision, 2);
+        assert_eq!(manifest.revision, 3);
         assert_eq!(manifest.achievements.len(), 41);
         assert_eq!(
             manifest
@@ -439,7 +445,7 @@ mod tests {
             FACTIONS.iter().map(|(name, _)| (*name).into()).collect()
         );
         let manifest = serde_json::to_value(definitions()).unwrap();
-        assert_eq!(manifest["revision"], 2);
+        assert_eq!(manifest["revision"], 3);
         assert_eq!(manifest.as_object().unwrap().len(), 2);
         let entries = manifest["achievements"].as_array().unwrap();
         assert_eq!(entries.len(), 41);
@@ -458,8 +464,11 @@ mod tests {
                 );
                 assert_eq!(entry.as_object().unwrap().len(), 4);
             } else {
-                assert!(entry.get("icon").is_none());
-                assert_eq!(entry.as_object().unwrap().len(), 3);
+                assert_eq!(
+                    entry["icon"]["key"],
+                    format!("achievement-{}", entry["id"].as_str().unwrap())
+                );
+                assert_eq!(entry.as_object().unwrap().len(), 4);
             }
         }
         assert!(!manifest.to_string().contains("four-cities"));
@@ -576,7 +585,12 @@ mod tests {
                     "Finish with {name} recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count."
                 )
             );
-            assert!(entry.icon.is_none());
+            assert_eq!(
+                entry.icon,
+                Some(Icon::Asset {
+                    key: format!("achievement-{id}")
+                })
+            );
         }
         assert!(
             manifest.achievements.iter().all(

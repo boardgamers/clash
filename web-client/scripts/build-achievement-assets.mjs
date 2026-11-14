@@ -16,6 +16,10 @@ import {
 } from './achievement-asset-inputs.mjs';
 import assert from 'node:assert/strict';
 
+if (process.argv.includes('--nonfaction')) {
+  await (await import('./nonfaction-assets.mjs')).build();
+  process.exit(0);
+}
 const manifest = await validateInputs();
 if (process.argv.includes('--check')) {
   await validateOutputs();
