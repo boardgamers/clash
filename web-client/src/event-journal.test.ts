@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync, readdirSync } from 'node:fs';
 import { journal } from './journal.ts';
+import { readableHistory } from './structured-log.ts';
 import { journalParts } from './model.ts';
 import { localizedParts } from './localized-parts.ts';
 import { createTranslator } from './localization/runtime.js';
@@ -454,4 +455,57 @@ test('Earthquake never labels a non-target player as below its city threshold', 
   const event = journal(game, v)[0].event!;
   assert.deepEqual(event.explanations.map(e => e.player), [0]);
   assert.match(event.explanations[0].text, /requires 3/);
+});
+
+for (const [name, id] of [['pandemics/drought', 52], ['famine/famine', 7]] as const) {
+  test(`${name}: an engine food loss and its explanation produce one badge`, () => {
+    const raw = JSON.parse(fixture(name));
+    raw.players[0].resources.food = 1;
+    const state = run(JSON.stringify(raw), advance);
+    assert.equal(JSON.parse(state).players[0].resources.food ?? 0, 0);
+    const game = JSON.parse(engine.stripSecret(state));
+    const before = JSON.stringify(game);
+    const items = game.log.flatMap((a: any) => a.rounds.flatMap((r: any) =>
+      r.turns.flatMap((t: any) => t.actions.flatMap((a: LoggedAction) => a.items ?? []))));
+    assert.ok(items.some((i: any) => i.origin?.Incident === id && i.Resources?.resources.food === 1));
+    assert.ok(items.some((i: any) => i.origin?.Incident === id && i.Text === 'Lost 1 food'));
+    const event = journal(game, view(state)).find(e => e.event)!;
+    assert.deepEqual(event.event!.outcomes.flatMap(e => e.tokens).filter(t => t.icon === 'food')
+      .map(t => t.value), ['−1']);
+    assert.equal(JSON.stringify(game), before, 'presentation must not change engine state or records');
+  });
+}
+
+test('food explanations are suppressed only beside their matching incident resource record', () => {
+  const famine = { ...info, id: 52, name: 'Famine: Draught' };
+  const loss = { player: 0, origin: { Incident: 52 }, Resources: { balance: 'Loss' as const, resources: { food: 1 } } };
+  const text = { player: 0, origin: { Incident: 52 }, Text: 'Lost 1 food' };
+  const count = (actions: LoggedAction[]) => {
+    const game = history(actions);
+    game.players.push({ ...game.players[0], id: 1, civilization: 'Phoenicia' });
+    return journal(game, publicView([famine]))
+      .flatMap(e => e.event ? e.event.outcomes : [e]).flatMap(e => e.tokens).filter(t => t.icon === 'food').length;
+  };
+  assert.equal(count([{ items: [loss] }]), 1);
+  assert.equal(count([{ items: [text] }]), 1);
+  assert.equal(count([{ log: ['Player1: Famine: Draught: Lost 1 food'] }]), 1);
+  assert.equal(count([{ items: [loss, text] }]), 1);
+  assert.equal(count([{ items: [loss, loss] }]), 2);
+  assert.equal(count([{ items: [loss, text, loss, text] }]), 2);
+  assert.equal(count([{ items: [loss, text, text] }]), 2);
+  assert.equal(count([{ items: [loss] }, { items: [text] }]), 2);
+  assert.equal(count([{ items: [loss, { ...text, origin: { Incident: 7 } }] }]), 2);
+  assert.equal(count([{ items: [loss, { ...text, player: 1 }] }]), 2);
+  assert.equal(count([{ items: [loss, { ...text, Text: 'Lost 2 food' }] }]), 2);
+  assert.equal(count([{ items: [loss, { ...text, Text: 'A separate effect' }, text] }]), 2);
+  assert.equal(count([{ items: [text, loss] }]), 2, 'prose before a loss is not its trailing explanation');
+  assert.equal(count([{ items: [{ ...loss, origin: { Advance: 'Storage' } }, { ...text, origin: { Advance: 'Storage' } }] }]), 2);
+  assert.equal(count([{ items: [{ ...loss, Resources: { balance: 'Gain', resources: { food: 1 } } }, text] }]), 2);
+  assert.equal(count([{ items: [{ ...loss, Resources: { balance: 'Loss', resources: { food: 1, wood: 1 } } }, text] }]), 2);
+  for (const origin of [undefined, { Incident: 52 }]) {
+    const game = readableHistory(history([{ items: [
+      { ...loss, origin }, { ...text, origin, Text: 'Lost 1 food and became angry' },
+    ] }]));
+    assert.ok(game.log![0].rounds[0].turns[0].actions![0].log!.some(line => line.endsWith('Lost 1 food and became angry')));
+  }
 });

@@ -1411,3 +1411,33 @@ protocol, split-WASM bundle and combat journal checks also pass. Existing Clippy
 warnings and expected rejected-move WASM diagnostics remain. The first native
 random-actions run hit the existing Tributes eligibility rejection; a complete
 workspace rerun passed. No Tributes rules or unrelated snapshots were changed.
+
+# Viewer 0.1.218 / engine unchanged (0.4.152)
+
+Famine and Drought show one food-loss badge when the engine records a structured
+food-only loss immediately followed by its identical “Lost N food” explanation.
+Suppression is limited to that adjacent explanation within the same action,
+incident, player and amount. Resource records are never deduplicated; legacy
+prose, separate actions/effects, other players, gains and mixed losses remain.
+Rules and protection details stay available in the expanded event journal.
+
+After fetching main, production was already on achievement engine 0.4.152 (not
+the earlier 0.4.149). Preserve that exact engine URL/package with a viewer-only
+publication; do not pass `--engine`. No engine source or gameplay changes, live
+moves, history repairs or Fossil refresh are included. Preserve all gallery,
+achievement and unrelated metadata, including game-length labels/order and
+Standard defaults.
+
+Verified: 1,079 frontend tests, four gallery tests, 19 achievement publication
+checks (two existing artifact-dependent skips), locale validation and extraction,
+Svelte with zero errors/warnings, and a production build from the current bridge.
+The built-viewer offline famine regression runs at 1400px and 390px, asserting
+one food badge and complete expanded rules/protection text. Journal, combat,
+event-explanation, piece-loss and split-WASM bundle browser checks also pass.
+Engine-backed tests cover Drought 52 and Famine 7 reducing food from one to zero
+without presentation mutating history. Expected rejected-move diagnostics remain.
+
+Integration also repairs the stale revision-2 achievement test on main to check
+the already-shipped revision-3 catalog and both artwork sets. The artwork input
+lockfile hash is refreshed solely for the viewer version bump; dependencies and
+artwork bytes are unchanged. No achievement publication is performed.

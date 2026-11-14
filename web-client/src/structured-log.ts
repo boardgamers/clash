@@ -69,13 +69,26 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
     result.push(`${actor(game, player)}: ${origin}: ${text}`);
   if (collect && action.items?.length)
     add(action.player ?? action.items[0].player, 'Collect', `Use city ${collect.city_position}`);
-  for (const item of action.items ?? []) {
+  const items = action.items ?? [];
+  for (const [index, item] of items.entries()) {
     const played = playedCardId(action, item);
     const origin = typeof played === 'number'
       ? source({ ...item, origin: { CivilCard: played } }, context)
       : source(item, context);
     const write = (text: string) => add(item.player, origin, text);
-    if (item.Text !== undefined && !offeredDiscount(item.Text)) {
+    // Famine's listener logs the loss, then repeats it as "Lost N food".
+    // Only suppress that adjacent explanation for the same incident and player;
+    // never deduplicate resource records (equal losses can be separate effects).
+    const previous = items[index - 1];
+    const foodLoss = item.Text?.match(/^Lost (\d+) food$/);
+    const repeatedFoodLoss = foodLoss &&
+      item.origin?.Incident !== undefined &&
+      previous?.origin?.Incident === item.origin.Incident &&
+      previous.player === item.player &&
+      previous.Resources?.balance === 'Loss' &&
+      previous.Resources.resources.food === Number(foodLoss[1]) &&
+      Object.entries(previous.Resources.resources).every(([resource, amount]) => resource === 'food' || !amount);
+    if (item.Text !== undefined && !offeredDiscount(item.Text) && !repeatedFoodLoss) {
       const event = item.Text.match(/^triggers the event (.+)$/);
       if (event) result.push(`A new game event has been triggered: ${event[1]}`);
       else if (item.Text === 'wins the battle')

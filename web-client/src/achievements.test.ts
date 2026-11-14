@@ -20,7 +20,7 @@ const finish = () => engine.tryMove(fixture, JSON.stringify({ Playing: 'EndTurn'
 
 test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const manifest = achievementManifestSchema.parse(hooks.achievementDefinitions());
-  assert.equal(manifest.revision, 2);
+  assert.equal(manifest.revision, 3);
   assert.equal(manifest.achievements.length, 41);
   assert.ok(!manifest.achievements.some((a) => a.id === 'four-cities'));
   assert.ok(manifest.achievements.some((a) => a.id === 'seven-cities'));
@@ -32,13 +32,17 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const art = JSON.parse(
     readFileSync(new URL('../release/achievement-assets.json', import.meta.url), 'utf8'),
   );
-  assert.equal(art.revision, manifest.revision);
+  const nonfactionArt = JSON.parse(
+    readFileSync(new URL('../release/achievement-assets-nonfaction.json', import.meta.url), 'utf8'),
+  );
+  assert.equal(nonfactionArt.revision, manifest.revision);
+  assert.equal(art.revision, 2, 'revision 3 preserves the existing faction artwork');
   assert.deepEqual(
     manifest.achievements
       .filter((a) => a.icon?.type === 'asset')
       .map((a) => (a.icon!.type === 'asset' ? a.icon!.key : ''))
       .sort(),
-    art.assets.map((a: { key: string }) => a.key).sort(),
+    [...art.assets, ...nonfactionArt.assets].map((a: { key: string }) => a.key).sort(),
   );
   for (const length of ['shorter', 'standard', 'roll-to-end', 'wonderful-ending', 'epic']) {
     for (const verb of ['complete', 'win'])
