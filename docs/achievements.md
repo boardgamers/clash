@@ -1,6 +1,10 @@
 # Clash of Cultures achievements
 
-Review-only implementation; no release or BGS publication is implied.
+Prepared engine release: `@boardgamers/clash-server` **0.4.150**, BGS `clash/1`
+(Clash of Cultures: Monumental edition). Publication awaits release-delta review;
+this source document does not assert deployment. Engine-only release; the hosted
+viewer remains 0.1.217. See `web-client/release/engine-package.json` for the reproducible
+package metadata.
 
 The native Rust evaluator is the single source of truth. The WASM package exports
 `achievementDefinitions()` and `achievements(serializedData)` directly, alongside
@@ -31,6 +35,12 @@ Additional feats are evaluated independently of victory:
 | `three-objectives` | At least three completed objective records |
 | `two-wonders-built` | At least two recorded wonders built, not merely owned |
 | `captured-leader` | At least one recorded captured leader |
+
+The wonder feat deliberately uses the **final surviving `wonders_built` record**,
+not a lifetime construction count: `destroy_wonder` removes a destroyed wonder
+from that record for every player. Two wonders built earlier do not qualify if
+fewer than two remain recorded at completion. Merely capturing/owning a wonder
+never substitutes for a built record. This is covered by a destruction regression.
 
 Icons are omitted intentionally: the platform's generic fallback is sufficient.
 IDs are permanent identities and must not be repurposed. This catalog is BGS

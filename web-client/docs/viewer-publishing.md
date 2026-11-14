@@ -1291,6 +1291,50 @@ map city selection and Settler confirmation. Packed-engine protocol and split
 WASM bundle checks pass. Existing Clippy warnings and expected rejected-move
 WASM diagnostics remain.
 
+# Engine 0.4.150 (viewer stays 0.1.217)
+
+Engine-only release for **Clash of Cultures: Monumental edition**, BGS `clash/1`.
+Adds the revision-1 catalog of 17 achievements and the two optional engine hooks.
+See `docs/achievements.md` for exact final-state predicates and the destroyed-wonder
+caveat. No rules, saved games, history, practice policy, or creation options change.
+
+Build with the pinned Rust 1.94.1 toolchain using `npm run build:bridge`, then run
+`node scripts/package-engine.mjs` from `web-client`. The tracked package identity
+is `release/engine-package.json`; the ignored artifact lands in `.engine/releases`.
+Test the unpacked package and its named exports, including the official protocol
+0.11.0 achievement schemas, before upload.
+
+Artifact/source integrity recipe (run from a clean, committed release checkout):
+
+```sh
+git status --porcelain # must be empty
+git rev-parse HEAD     # record this source commit with the artifact hash
+rustup run 1.94.1 rustc --version
+wasm-bindgen --version # must match Cargo.lock: 0.2.105
+RUSTUP_TOOLCHAIN=1.94.1 npm --prefix web-client run build:bridge
+node web-client/scripts/package-engine.mjs
+```
+
+The bridge build uses `cargo --locked` and the packager copies only the declared
+Node bridge files plus LICENSE; it runs `npm pack --ignore-scripts` and reports
+the archive SHA-256. It does not build, upload or publish a viewer, install an
+engine, or push Git. It packages existing `.engine` outputs, so **do not skip the
+fresh build above**. Unpack the archive and byte-compare every declared file to
+`.engine`, run protocol/fixture tests against its `server.js` via dynamic import,
+and retain the source commit, toolchain versions and artifact SHA-256 together.
+Any later source edits require a fresh build and validation before publication.
+
+For this engine-only release, use the existing authenticated admin endpoint
+`POST /api/admin/gameinfo/clash/1/engine` with the raw npm tarball and
+`Content-Type: application/octet-stream`. Read credentials from `~/.bgs` in memory;
+never put them in source or command arguments. Do not run `publish.mjs`, which also
+uploads a viewer. Preserve the engine entry point, viewer, gallery, options,
+preferences, settings and tutorial. Verify hosted artifact bytes, then wait for
+the asynchronous installer to publish `achievementManifest` revision 1 with all
+17 definitions. Check the public `/badges/games/clash` album without creating games.
+Commit and non-force push the matching source/version to canonical `main` in the
+same delivery task.
+
 # Viewer 0.1.217 / engine 0.4.149
 
 Permanent piece-loss journal notes now name the destroyed city center or building

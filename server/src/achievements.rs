@@ -347,6 +347,22 @@ mod tests {
     }
 
     #[test]
+    fn destroyed_wonder_no_longer_counts_in_final_built_record() {
+        let mut game = finish(setup(GameLength::Standard));
+        let position = game.player(0).cities[0].position;
+        let owner = crate::events::EventPlayer::new(
+            0,
+            EventOrigin::Ability("wonder destruction regression".into()),
+        );
+        game.player_mut(0).wonders_built = vec![Wonder::Pyramids, Wonder::Colosseum];
+        crate::wonder::gain_wonder(&mut game, &owner, Wonder::Pyramids, position);
+        assert!(has(&game, 0, "two-wonders-built"));
+        crate::wonder::destroy_wonder(&mut game, &owner, Wonder::Pyramids, position);
+        assert_eq!(game.player(0).wonders_built, vec![Wonder::Colosseum]);
+        assert!(!has(&game, 0, "two-wonders-built"));
+    }
+
+    #[test]
     fn saved_end_game_fixture_and_nonwinning_feats() {
         let data: crate::game_data::GameData = serde_json::from_str(include_str!(
             "../tests/test_games/status_phase/end_game.json"
