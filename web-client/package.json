@@ -16,7 +16,7 @@
     "tutorial:fixtures": "node scripts/build-tutorial-fixtures.mjs"
   },
   "dependencies": {
-    "@boardgamers/protocol": "0.9.0",
+    "@boardgamers/protocol": "0.11.0",
     "lucide-svelte": "^0.577.0",
     "svelte": "^5.0.0",
     "three": "^0.186.0"

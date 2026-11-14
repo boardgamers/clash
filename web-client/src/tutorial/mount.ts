@@ -72,6 +72,8 @@ export const mountTutorial: TutorialMount = async (target, options) => {
         void send({ step: lesson.steps[latest.step].id, kind: 'move', move: JSON.parse(move) });
         return true;
       },
+      openChat: noop,
+      undo: noop,
       openPlayer: noop,
       hoverPlayer: noop,
       leavePlayer: noop,

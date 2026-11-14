@@ -30,6 +30,7 @@
     const localization=mountLocalization(document.body);
     controller=new Controller({move(raw){void move(raw);return true;},fetchState(){void refresh();return true;},
       updatePreference(name,value){controller!.setPreferences({mapView:'3d',[name]:value});return true;},
+      openChat(){return false;},undo(){return false;},
       updateSetting(){return true;},openPlayer(){return true;},hoverPlayer(){return true;},leavePlayer(){return true;},openBoardgame(){return true;},fetchLog(){return true;},addLog(){return true;},replaceLog(){return true;},setReplayInfo(){return true;},
     },new URL('/',location.href),{predict:false});
     controller.setPreferences({mapView:'3d',locale:'en',sound:false});

@@ -51,6 +51,9 @@ javascript(
 function rust(directory) {
   for (const item of fs.readdirSync(directory, { withFileTypes: true })) {
     const file = path.join(directory, item.name);
+    // BGS consumes this catalog as platform metadata, not viewer-localized prose.
+    // It has its own revisioned names/descriptions and is never rendered by this viewer.
+    if (item.name === 'achievements.rs') continue;
     if (item.isDirectory()) rust(file);
     else if (item.name.endsWith('.rs') && !/(?:^|_)tests?\.rs$/.test(item.name) && item.name !== 'timing.rs') {
       const content = fs.readFileSync(file, 'utf8');

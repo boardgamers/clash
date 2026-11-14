@@ -153,6 +153,21 @@ pub fn ended(game: String) -> JsValue {
     JsValue::from_bool(game_api::ended(&game))
 }
 
+/// Public catalog; contains no game or player data.
+#[wasm_bindgen(js_name = "achievementDefinitions")]
+pub fn achievement_definitions() -> JsValue {
+    serde_wasm_bindgen::to_value(&crate::achievements::definitions())
+        .expect("achievement definitions should be serializable")
+}
+
+/// Query only authoritative, completed saves; never infer feats from a viewer snapshot.
+#[wasm_bindgen]
+pub fn achievements(game: String) -> JsValue {
+    let game = get_game(game);
+    serde_wasm_bindgen::to_value(&crate::achievements::achievements(&game))
+        .expect("achievement results should be serializable")
+}
+
 #[wasm_bindgen]
 pub fn scores(game: String) -> JsValue {
     let game = get_game(game);
