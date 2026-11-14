@@ -1291,6 +1291,43 @@ map city selection and Settler confirmation. Packed-engine protocol and split
 WASM bundle checks pass. Existing Clippy warnings and expected rejected-move
 WASM diagnostics remain.
 
+# Prepared engine 0.4.151 / achievement manifest revision 2
+
+**Pending independent code/artwork review; do not upload or push release source yet.**
+Clash of Cultures (`clash/1`) gains 15 canonical civilization-win achievements,
+8 individual surviving wonder-build-record feats and `complete-builder`;
+`seven-cities` replaces the removed `four-cities` definition. Standard length
+achievement wording is simply Standard. There are 41 definitions. No migration/backfill, rule, practice-policy or viewer
+release is included. See `docs/achievements.md` for predicates and eligibility.
+
+Artwork preparation uses the existing source symbols and locked Lucide components:
+
+```sh
+npm --prefix web-client run build:achievement-assets
+npm --prefix web-client run test:achievement-assets
+node web-client/scripts/publish-achievement-assets.mjs # offline dry run only
+```
+
+The source/integrity manifest is `release/achievement-assets.json`; generated
+256px PNGs, a light/dark contact sheet and their SHA-256 receipt remain ignored
+under `.engine/achievement-assets/`. Four legacy PNG provenance records still
+require exact-source/license verification; do not treat repository inclusion as
+proof of third-party licensing. Lucide notices are included verbatim.
+
+After the code, provenance and exact artwork receipt have independent approval,
+upload named assets through the dedicated helper with its explicit publish flag
+and reviewed receipt hash. It must verify all 15 public images under the durable
+`achievements/clash/achievement-faction-<slug>/...` namespace before the engine
+manifest is activated. BGS re-encodes PNG uploads to WebP: verify the **downloaded
+WebP** hash and byte length against its URL/metadata, not against the input PNG.
+Preserve gallery, other assets and all unrelated metadata. Never change bucket
+policy or point icons at viewer-bundle files as a workaround.
+
+Only then release the exact reviewed 0.4.151 engine archive and matching source
+using the existing engine-only procedure below. Its packaging/activation receipt
+must record source HEAD, both artwork and engine hashes, canonical remote commit,
+41 revision-2 definitions, public album visibility, and unchanged hosted viewer.
+
 # Engine 0.4.150 (viewer stays 0.1.217)
 
 Engine-only release for **Clash of Cultures: Monumental edition**, BGS `clash/1`.

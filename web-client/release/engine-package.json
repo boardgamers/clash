@@ -1,6 +1,6 @@
 {
   "name": "@boardgamers/clash-server",
-  "version": "0.4.150",
+  "version": "0.4.151",
   "description": "Clash of Cultures: Monumental edition engine for Boardgamers Space",
   "license": "MIT",
   "type": "commonjs",

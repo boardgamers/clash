@@ -1,6 +1,7 @@
 //! Read-only, revisioned achievements derived from authoritative final game state.
-use crate::game::{Game, GameLength, GameState};
+use crate::game::{Game, GameLength, GameState, GameVariant};
 use crate::victory_points::compare_score;
+use crate::wonder::Wonder;
 use serde::Serialize;
 use std::cmp::Ordering;
 
@@ -15,6 +16,14 @@ pub struct Definition {
     pub id: String,
     pub name: String,
     pub description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub icon: Option<Icon>,
+}
+
+#[derive(Debug, PartialEq, Eq, Serialize)]
+#[serde(tag = "type", rename_all = "lowercase")]
+pub enum Icon {
+    Asset { key: String },
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize)]
@@ -26,7 +35,7 @@ pub struct SeatAchievements {
 
 const LENGTHS: [(GameLength, &str, &str); 5] = [
     (GameLength::Shorter, "shorter", "Shorter"),
-    (GameLength::Standard, "standard", "Standard (Normal)"),
+    (GameLength::Standard, "standard", "Standard"),
     (GameLength::RollToEnd, "roll-to-end", "Roll to End"),
     (
         GameLength::WonderfulEnding,
@@ -34,6 +43,41 @@ const LENGTHS: [(GameLength, &str, &str); 5] = [
         "Wonderful Ending",
     ),
     (GameLength::Epic, "epic", "Epic"),
+];
+const FACTIONS: [(&str, &str); 15] = [
+    ("Rome", "rome"),
+    ("Greece", "greece"),
+    ("China", "china"),
+    ("Vikings", "vikings"),
+    ("Babylonia", "babylonia"),
+    ("India", "india"),
+    ("Egypt", "egypt"),
+    ("Phoenicia", "phoenicia"),
+    ("Maya", "maya"),
+    ("Persia", "persia"),
+    ("Japan", "japan"),
+    ("Huns", "huns"),
+    ("Celts", "celts"),
+    ("Aztecs", "aztecs"),
+    ("Carthage", "carthage"),
+];
+const WONDERS: [(Wonder, &str, &str); 8] = [
+    (Wonder::Colosseum, "built-great-arena", "Great Arena"),
+    (Wonder::Pyramids, "built-great-pyramids", "Great Pyramids"),
+    (Wonder::GreatGardens, "built-great-gardens", "Great Gardens"),
+    (Wonder::GreatLibrary, "built-great-library", "Great Library"),
+    (
+        Wonder::GreatLighthouse,
+        "built-great-lighthouse",
+        "Great Lighthouse",
+    ),
+    (
+        Wonder::GreatMausoleum,
+        "built-great-mausoleum",
+        "Great Mausoleum",
+    ),
+    (Wonder::GreatStatue, "built-great-statue", "Great Statue"),
+    (Wonder::GreatWall, "built-great-wall", "Great Wall"),
 ];
 const FEATS: [(&str, &str, &str); 7] = [
     (
@@ -47,9 +91,9 @@ const FEATS: [(&str, &str, &str); 7] = [
         "Finish a game with at least 40 victory points in the final state.",
     ),
     (
-        "four-cities",
-        "Four Cities",
-        "Finish a game owning at least 4 cities in the final state.",
+        "seven-cities",
+        "Seven Cities",
+        "Finish a game owning at least 7 cities in the final state.",
     ),
     (
         "twenty-advances",
@@ -76,26 +120,47 @@ const FEATS: [(&str, &str, &str); 7] = [
 /// The stable achievement catalogue. Array order also defines award order.
 #[must_use]
 pub fn definitions() -> Manifest {
-    let mut definitions = Vec::with_capacity(17);
+    let mut definitions = Vec::with_capacity(41);
     for (_, id, name) in LENGTHS {
         definitions.push(Definition {
             id: format!("complete-{id}"),
             name: format!("Complete {name}"),
             description: format!("Finish a {name} game without dropping out."),
+            icon: None,
         });
         definitions.push(Definition {
             id: format!("win-{id}"),
             name: format!("Win {name}"),
             description: format!("Finish a {name} game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins."),
+            icon: None,
         });
     }
     definitions.extend(FEATS.map(|(id, name, description)| Definition {
         id: id.into(),
         name: name.into(),
         description: description.into(),
+        icon: None,
+    }));
+    definitions.extend(WONDERS.map(|(_, id, name)| Definition {
+        id: id.into(),
+        name: format!("{name}: Recorded as Built"),
+        description: format!("Finish with {name} recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count."),
+        icon: None,
+    }));
+    definitions.push(Definition {
+        id: "complete-builder".into(),
+        name: "Complete Builder".into(),
+        description: "Finish a Builder variant game without dropping out.".into(),
+        icon: None,
+    });
+    definitions.extend(FACTIONS.map(|(name, slug)| Definition {
+        id: format!("win-{slug}"),
+        name: format!("Win as {name}"),
+        description: format!("Finish a game as {name} as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins."),
+        icon: Some(Icon::Asset { key: format!("achievement-faction-{slug}") }),
     }));
     Manifest {
-        revision: 1,
+        revision: 2,
         achievements: definitions,
     }
 }
@@ -132,7 +197,7 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
             let predicates = [
                 score >= 30.0,
                 score >= 40.0,
-                p.cities.len() >= 4,
+                p.cities.len() >= 7,
                 p.advances.len() >= 20,
                 p.completed_objectives.len() >= 3,
                 p.wonders_built.len() >= 2,
@@ -140,6 +205,11 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
             ];
             for ((id, _, _), met) in FEATS.iter().zip(predicates) {
                 if met {
+                    awards.push((*id).into());
+                }
+            }
+            for (wonder, id, _) in &WONDERS {
+                if p.wonders_built.contains(wonder) {
                     awards.push((*id).into());
                 }
             }
@@ -155,6 +225,16 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
             } else {
                 "win"
             };
+            if game.options.variant == GameVariant::Builder {
+                awards.push("complete-builder".into());
+            }
+            if outcome == "win"
+                && let Some((_, slug)) = FACTIONS
+                    .iter()
+                    .find(|(name, _)| *name == p.civilization.name)
+            {
+                awards.push(format!("win-{slug}"));
+            }
             SeatAchievements {
                 seat: p.index,
                 earned: awards,
@@ -178,17 +258,21 @@ mod tests {
     use crate::playing_actions::PlayingAction;
     use crate::special_advance::SpecialAdvance;
     use crate::victory_points::{SpecialVictoryPoints, VictoryPointAttribution};
-    use crate::wonder::Wonder;
     use enumset::EnumSet;
     use std::collections::HashSet;
 
     fn setup(length: GameLength) -> Game {
+        setup_variant(length, GameVariant::Standard)
+    }
+
+    fn setup_variant(length: GameLength, variant: GameVariant) -> Game {
         let mut game = setup_game(
             &GameSetupBuilder::new(2)
                 .seed("achievements-tests".into())
                 .assigned_civilizations(vec!["Rome".into(), "Greece".into()])
                 .options(GameOptions {
                     length,
+                    variant,
                     ..GameOptions::default()
                 })
                 .build(),
@@ -229,8 +313,8 @@ mod tests {
     #[test]
     fn manifest_and_real_end_turn_for_all_lengths() {
         let manifest = definitions();
-        assert_eq!(manifest.revision, 1);
-        assert_eq!(manifest.achievements.len(), 17);
+        assert_eq!(manifest.revision, 2);
+        assert_eq!(manifest.achievements.len(), 41);
         assert_eq!(
             manifest
                 .achievements
@@ -238,13 +322,13 @@ mod tests {
                 .map(|d| &d.id)
                 .collect::<HashSet<_>>()
                 .len(),
-            17
+            41
         );
         assert!(
             manifest
                 .achievements
                 .iter()
-                .any(|d| d.name == "Complete Standard (Normal)")
+                .any(|d| d.name == "Complete Standard")
         );
         for (length, id, _) in LENGTHS {
             let mut game = setup(length);
@@ -318,10 +402,8 @@ mod tests {
     #[test]
     fn final_state_counts_not_special_advances_or_owned_wonders() {
         let mut game = finish(setup(GameLength::Standard));
-        let pos = game.player(0).cities[0].position;
         for count in [0, 1, 2] {
             let p = game.player_mut(0);
-            p.cities = (0..3 + count).map(|_| City::new(0, pos)).collect();
             p.advances = EnumSet::<Advance>::all().iter().take(19 + count).collect();
             p.special_advances.insert(SpecialAdvance::Aqueduct);
             p.completed_objectives = (0..2 + count)
@@ -335,13 +417,205 @@ mod tests {
                 [Wonder::Colosseum, Wonder::Pyramids, Wonder::GreatGardens][..1 + count].to_vec();
             p.captured_leaders = [Leader::Alexander, Leader::Caesar][..count].to_vec();
             for id in [
-                "four-cities",
                 "twenty-advances",
                 "three-objectives",
                 "two-wonders-built",
                 "captured-leader",
             ] {
                 assert_eq!(has(&game, 0, id), count >= 1, "{id}, offset {count}");
+            }
+        }
+    }
+
+    #[test]
+    fn faction_catalog_matches_every_playable_civilization_and_wire_shape() {
+        let playable: HashSet<_> = crate::content::civilizations::get_all_uncached()
+            .into_iter()
+            .filter(crate::civilization::Civilization::can_choose)
+            .map(|c| c.name)
+            .collect();
+        assert_eq!(
+            playable,
+            FACTIONS.iter().map(|(name, _)| (*name).into()).collect()
+        );
+        let manifest = serde_json::to_value(definitions()).unwrap();
+        assert_eq!(manifest["revision"], 2);
+        assert_eq!(manifest.as_object().unwrap().len(), 2);
+        let entries = manifest["achievements"].as_array().unwrap();
+        assert_eq!(entries.len(), 41);
+        for entry in entries {
+            let faction = FACTIONS
+                .iter()
+                .find(|(_, slug)| entry["id"] == format!("win-{slug}"));
+            if let Some((name, slug)) = faction {
+                assert_eq!(*slug, name.to_lowercase());
+                assert_eq!(entry["name"], format!("Win as {name}"));
+                assert_eq!(
+                    entry["icon"],
+                    serde_json::json!({
+                        "type": "asset", "key": format!("achievement-faction-{slug}")
+                    })
+                );
+                assert_eq!(entry.as_object().unwrap().len(), 4);
+            } else {
+                assert!(entry.get("icon").is_none());
+                assert_eq!(entry.as_object().unwrap().len(), 3);
+            }
+        }
+        assert!(!manifest.to_string().contains("four-cities"));
+    }
+
+    #[test]
+    fn every_faction_requires_exact_name_and_a_win_not_loss_or_draw() {
+        for civilization in crate::content::civilizations::get_all_uncached()
+            .into_iter()
+            .filter(crate::civilization::Civilization::can_choose)
+        {
+            let name = civilization.name.clone();
+            let mut game = finish(setup(GameLength::Standard));
+            game.player_mut(0).civilization = civilization;
+            for (score, outcome) in [(30.0, "win"), (10.0, "loss"), (20.0, "draw")] {
+                set_score(&mut game, 0, score);
+                set_score(&mut game, 1, 20.0);
+                let results = achievements(&game);
+                assert_eq!(results[0].outcome, outcome, "{name}");
+                for result in &results {
+                    for (faction, slug) in FACTIONS {
+                        assert_eq!(
+                            result.earned.contains(&format!("win-{slug}")),
+                            result.outcome == "win"
+                                && game.player(result.seat).civilization.name == faction,
+                            "{name}, {outcome}, {slug}"
+                        );
+                    }
+                }
+                let json = serde_json::to_value(&results).unwrap();
+                assert_eq!(
+                    json[0],
+                    serde_json::json!({
+                        "seat": 0, "earned": results[0].earned, "outcome": outcome
+                    })
+                );
+                assert!(!json.to_string().contains("four-cities"));
+            }
+            set_score(&mut game, 0, 30.0);
+            game.player_mut(0).civilization.name = name.to_lowercase();
+            assert!(!has(&game, 0, &format!("win-{}", name.to_lowercase())));
+        }
+    }
+
+    #[test]
+    fn seven_current_cities_is_the_legal_capacity_boundary() {
+        let mut game = finish(setup(GameLength::Standard));
+        let positions: Vec<_> = game.map.tiles.keys().copied().take(7).collect();
+        assert_eq!(positions.len(), 7);
+        assert_eq!(game.player(0).city_limit(), 7);
+        for (count, earned) in [(6, false), (7, true), (6, false)] {
+            game.player_mut(0).cities = positions
+                .iter()
+                .take(count)
+                .map(|pos| City::new(0, *pos))
+                .collect();
+            assert_eq!(has(&game, 0, "seven-cities"), earned);
+            assert!(
+                !serde_json::to_string(&achievements(&game))
+                    .unwrap()
+                    .contains("four-cities")
+            );
+        }
+    }
+
+    #[test]
+    fn builder_real_end_turn_awards_losing_seat_but_not_unfinished_or_stripped() {
+        let mut game = setup_variant(GameLength::Standard, GameVariant::Builder);
+        set_score(&mut game, 0, 40.0);
+        assert!(achievements(&game).is_empty());
+        let mut game = finish(game);
+        let results = achievements(&game);
+        assert_eq!(results[1].outcome, "loss");
+        assert!(has(&game, 0, "complete-builder"));
+        assert!(has(&game, 1, "complete-builder"));
+        assert!(has(&game, 0, "win-rome"));
+        assert!(!has(&game, 1, "win-greece"));
+        game.secrets_stripped = true;
+        assert!(achievements(&game).is_empty());
+        assert!(!has(
+            &finish(setup(GameLength::Standard)),
+            0,
+            "complete-builder"
+        ));
+    }
+
+    #[test]
+    fn wonder_catalog_matches_real_registry_and_standard_names() {
+        let registered: HashSet<_> = crate::content::wonders::get_all_uncached()
+            .into_iter()
+            .map(|info| info.wonder)
+            .filter(|wonder| *wonder != Wonder::Hidden)
+            .collect();
+        assert_eq!(
+            registered,
+            WONDERS.iter().map(|(wonder, _, _)| *wonder).collect()
+        );
+        assert!(
+            !WONDERS
+                .iter()
+                .any(|(wonder, _, _)| *wonder == Wonder::Hidden)
+        );
+        let manifest = definitions();
+        for (_, id, name) in WONDERS {
+            let entry = manifest
+                .achievements
+                .iter()
+                .find(|entry| entry.id == id)
+                .unwrap();
+            assert_eq!(entry.name, format!("{name}: Recorded as Built"));
+            assert_eq!(
+                entry.description,
+                format!(
+                    "Finish with {name} recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count."
+                )
+            );
+            assert!(entry.icon.is_none());
+        }
+        assert!(
+            manifest.achievements.iter().all(
+                |entry| !entry.name.contains("Normal") && !entry.description.contains("Normal")
+            )
+        );
+    }
+
+    #[test]
+    fn every_wonder_requires_surviving_built_record_not_ownership_or_a_win() {
+        for (wonder, id, _) in WONDERS {
+            for builder in [0, 1] {
+                let owner = 1 - builder;
+                let mut game = finish(setup(GameLength::Standard));
+                assert!(!has(&game, builder, id));
+                assert!(!has(&game, owner, id));
+                // Capturing ownership alone is not a construction record.
+                let position = game.player(owner).cities[0].position;
+                let event_player = crate::events::EventPlayer::new(
+                    owner,
+                    EventOrigin::Ability("wonder capture and destruction regression".into()),
+                );
+                crate::wonder::gain_wonder(&mut game, &event_player, wonder, position);
+                crate::wonder::init_wonder(&mut game, owner, wonder);
+                assert!(!has(&game, owner, id));
+                game.player_mut(builder).wonders_built.push(wonder);
+                set_score(&mut game, builder, 10.0);
+                set_score(&mut game, owner, 100.0);
+                assert_eq!(achievements(&game)[builder].outcome, "loss");
+                assert!(has(&game, builder, id), "{id}, builder {builder}");
+                assert!(!has(&game, owner, id));
+                for (_, other_id, _) in WONDERS {
+                    assert_eq!(has(&game, builder, other_id), other_id == id);
+                }
+                assert!(!has(&game, builder, "two-wonders-built"));
+                crate::wonder::destroy_wonder(&mut game, &event_player, wonder, position);
+                assert!(!game.player(builder).wonders_built.contains(&wonder));
+                assert!(!has(&game, builder, id));
+                assert!(!has(&game, owner, id));
             }
         }
     }

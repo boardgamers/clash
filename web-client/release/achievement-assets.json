@@ -1,0 +1,255 @@
+{
+  "revision": 2,
+  "width": 256,
+  "height": 256,
+  "render": {
+    "background": "#f3f4f6",
+    "ink": "#18212b",
+    "emblemSize": 192,
+    "strokeWidth": 2.5,
+    "lucideVersion": "0.577.0"
+  },
+  "integrity": {
+    "web-client/src/civilization-emblems.ts": "01b0cbf3fa77a8466532ccd73d63c1a3ddc9bbc79fc06ce7224b425322a9c9f0",
+    "web-client/src/civilization-flags.ts": "cd176076bfe05b3059093b80c88596b7ae46b77898695c6c7406cbe1a3a0f78b",
+    "server/src/content/civilizations.rs": "73602f3db506f3dc2dbc6de43d01179440fd3bb034c997ff209336faaef2a332",
+    "web-client/package-lock.json": "5c2509542ca8802914b81bf6bc777537c1b95a69f913f6f99aaeae1ae3d5cd6b",
+    "web-client/node_modules/lucide-svelte/dist/Icon.svelte": "f7b49ab842c143fa680fa8bd9a54a9efdc48c2e2d49fa574bd5ccf8f6cfca5be",
+    "web-client/node_modules/lucide-svelte/dist/defaultAttributes.js": "5b8981c6e3434ae6538716af9e0403554e7708c4087f18d060950a7bef00d96a",
+    "web-client/node_modules/lucide-svelte/LICENSE": "668dcc52803480e0a026b31140a4cae668772663cd764e5991d252eef03f98db"
+  },
+  "assets": [
+    {
+      "civilization": "Rome",
+      "key": "achievement-faction-rome",
+      "source": {
+        "type": "png",
+        "path": "client/assets/colosseum-rome-svgrepo-com.png",
+        "sha256": "660f60ac288e2ed97ae208fce824ec4b39681008b68429b82b76f9dfeefb6d67",
+        "provenance": {
+          "license": null,
+          "status": "unresolved — provenance investigation pending; no publication approval",
+          "originalPath": "client/assets/colosseum-rome-svgrepo-com.png"
+        }
+      }
+    },
+    {
+      "civilization": "Greece",
+      "key": "achievement-faction-greece",
+      "source": {
+        "type": "png",
+        "path": "client/assets/temple-building-with-columns-svgrepo-com.png",
+        "sha256": "939ab2c36bb3f29aa066348f5ea0f8418e76442f1fcae1537a27ec1706a57e0f",
+        "provenance": {
+          "license": null,
+          "status": "unresolved — provenance investigation pending; no publication approval",
+          "originalPath": "client/assets/temple-building-with-columns-svgrepo-com.png"
+        }
+      }
+    },
+    {
+      "civilization": "China",
+      "key": "achievement-faction-china",
+      "source": {
+        "type": "png",
+        "path": "client/assets/great-wall-of-china-chinese-svgrepo-com.png",
+        "sha256": "edc3bfe45c937482fedb708bcd794ed589241f96b095a55daa25be7bb4656e3c",
+        "provenance": {
+          "license": null,
+          "status": "unresolved — provenance investigation pending; no publication approval",
+          "originalPath": "client/assets/great-wall-of-china-chinese-svgrepo-com.png"
+        }
+      }
+    },
+    {
+      "civilization": "Vikings",
+      "key": "achievement-faction-vikings",
+      "source": {
+        "type": "png",
+        "path": "client/assets/viking-ship-svgrepo-com.png",
+        "sha256": "a195e2fcafbb2338a6b79c05f55f6c3e5aa64fd68352c30f82e13b8d9094274b",
+        "provenance": {
+          "license": null,
+          "status": "unresolved — provenance investigation pending; no publication approval",
+          "originalPath": "client/assets/viking-ship-svgrepo-com.png"
+        }
+      }
+    },
+    {
+      "civilization": "Babylonia",
+      "key": "achievement-faction-babylonia",
+      "source": {
+        "type": "lucide",
+        "icon": "Castle",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/castle.svelte",
+        "sha256": "a4728d2a4ffb9f91680aad23e52e69b8889ee5685e81bcecb0f78b34a65dffe1",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "India",
+      "key": "achievement-faction-india",
+      "source": {
+        "type": "lucide",
+        "icon": "Flower2",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/flower-2.svelte",
+        "sha256": "a326d49e378d4be8ae317ceecac4681862c8b98aba0b6522233ff39c42730852",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Egypt",
+      "key": "achievement-faction-egypt",
+      "source": {
+        "type": "lucide",
+        "icon": "Pyramid",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/pyramid.svelte",
+        "sha256": "155703be10c462c6a9262a7d16b874fddeae28bd0b12c075b1ad7c41c3d2ce78",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Phoenicia",
+      "key": "achievement-faction-phoenicia",
+      "source": {
+        "type": "lucide",
+        "icon": "Anchor",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/anchor.svelte",
+        "sha256": "dde616b2f903881bb649122535e6d05dc6e558d778606286e5c5bdea21e1e4d3",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Maya",
+      "key": "achievement-faction-maya",
+      "source": {
+        "type": "lucide",
+        "icon": "Sunrise",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/sunrise.svelte",
+        "sha256": "9e71ca6595f47c1fc31dd4e6cdf3879ab3b05a222ded44e8e6417cc660c936f1",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Persia",
+      "key": "achievement-faction-persia",
+      "source": {
+        "type": "lucide",
+        "icon": "Crown",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/crown.svelte",
+        "sha256": "73cc2544bb9e40288bec8195b52bac60a14dcf51d72ca8f34082c656e9ba719c",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Japan",
+      "key": "achievement-faction-japan",
+      "source": {
+        "type": "lucide",
+        "icon": "Sun",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/sun.svelte",
+        "sha256": "959e560160d0dcfd005484eff0dc78b14aa59969f7e78c9d3175df7c09af1723",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Huns",
+      "key": "achievement-faction-huns",
+      "source": {
+        "type": "lucide",
+        "icon": "Swords",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/swords.svelte",
+        "sha256": "4e49e51ea49addb5ee156e9fd770d0a8027107411a6a9822476adb497539de5d",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Celts",
+      "key": "achievement-faction-celts",
+      "source": {
+        "type": "lucide",
+        "icon": "TreePine",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/tree-pine.svelte",
+        "sha256": "94cab10db147c5003f5e9bf027614b1c2ec2f415084043e7bfaf72209c64b1a7",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Aztecs",
+      "key": "achievement-faction-aztecs",
+      "source": {
+        "type": "lucide",
+        "icon": "Flame",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/flame.svelte",
+        "sha256": "d8c299d553203ea4e7d8633e6893d1cdb388c4866c6c328fb4c6f7ef0b4f4dd3",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    },
+    {
+      "civilization": "Carthage",
+      "key": "achievement-faction-carthage",
+      "source": {
+        "type": "lucide",
+        "icon": "Ship",
+        "path": "web-client/node_modules/lucide-svelte/dist/icons/ship.svelte",
+        "sha256": "bc63970b33997f2de8ec077d48c252fc6dd42f03b57735a0e6528e7a38337c49",
+        "provenance": {
+          "license": "ISC; Feather-derived portions MIT",
+          "upstream": "https://github.com/lucide-icons/lucide",
+          "version": "0.577.0",
+          "licenseFile": "web-client/release/achievement-assets/LICENSE-lucide.txt"
+        }
+      }
+    }
+  ]
+}
