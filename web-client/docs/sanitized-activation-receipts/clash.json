@@ -1,0 +1,978 @@
+{
+  "schema": 1,
+  "game": "clash",
+  "status": "activated-and-verified",
+  "sourceCommit": "384bcbe254933ad4ee5369c07aacfd87c51d15e8",
+  "envelopeSha256": "85a854983be938f09e0eb6287e7db9c7f9a7678508e7cde8988ef81009b599f3",
+  "privateReceiptSha256": "a76f8f47e88e1708da62674a3d3fd456728f566090f64124d0d17f160d1b0eb1",
+  "assets": {
+    "achievement-built-great-arena": {
+      "sourceSha256": "7e685867147860ce0555151545472da2fe27efe34fabff4571193753467b669a",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-arena/7fb6e3654426db8d/achievement-built-great-arena.webp",
+      "sha256": "7fb6e3654426db8decf574b40a3b38934e5379cb05a87f044f4f8a381bc93a63",
+      "size": 7732,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.698Z",
+      "metadataPreserved": true
+    },
+    "achievement-built-great-gardens": {
+      "sourceSha256": "42b49a3004f9537bf3b6cdd94fb7c5ab46d923e7c2bcea406b5389e8fd2c2fc8",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-gardens/b6e60a59ae1e4111/achievement-built-great-gardens.webp",
+      "sha256": "b6e60a59ae1e41116485fed046eaa177fe55dcaf2b09dd30578adc8b78f23c72",
+      "size": 7982,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.726Z",
+      "metadataPreserved": true
+    },
+    "achievement-built-great-library": {
+      "sourceSha256": "f2ee2029928d429885caedf1f2c1c83dbc6eb373fb0460d988c46152f0f6a34f",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-library/8a8780f88da1e700/achievement-built-great-library.webp",
+      "sha256": "8a8780f88da1e7000209fd120d68bb1826015e32a13a99b3bcb5b2bd31567da7",
+      "size": 7370,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.753Z",
+      "metadataPreserved": true
+    },
+    "achievement-built-great-lighthouse": {
+      "sourceSha256": "84cec0341d87b56ffa77392131d233e2e912504daafe2e6c3ef3a83d0302bddb",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-lighthouse/15c536561576b6a0/achievement-built-great-lighthouse.webp",
+      "sha256": "15c536561576b6a02cda467a2763aae6bf79cbca459d5521ba84723a9594fe96",
+      "size": 7708,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.777Z",
+      "metadataPreserved": true
+    },
+    "achievement-built-great-mausoleum": {
+      "sourceSha256": "0905a1b88147eb52a6a04b0542c6960324531c4b06d6ef396c4df43c92baa2c7",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-mausoleum/60c197c58a65df74/achievement-built-great-mausoleum.webp",
+      "sha256": "60c197c58a65df74bd31d1a34984b2614f366f6b0ab3732f1760920976d0f642",
+      "size": 7020,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.808Z",
+      "metadataPreserved": true
+    },
+    "achievement-built-great-pyramids": {
+      "sourceSha256": "f2c4e3e12007d96d403899e8e1f22e6fa13ba12adfefe6ff7c15f0c98db6afd1",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-pyramids/d23d0b4f0682db9d/achievement-built-great-pyramids.webp",
+      "sha256": "d23d0b4f0682db9daa8ad487062c967b9dbd1364f8a67e2e7578e63df7e41e93",
+      "size": 7374,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.833Z",
+      "metadataPreserved": true
+    },
+    "achievement-built-great-statue": {
+      "sourceSha256": "76605df7de9ddbdf94e9e5dfd5333589981c20642af63b287bd58de2c9aee076",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-statue/900d8cdbc7db7988/achievement-built-great-statue.webp",
+      "sha256": "900d8cdbc7db79882a69dbb9bad236cbec6f3e9113c5ac8b722b49bf3ed6a852",
+      "size": 7248,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.862Z",
+      "metadataPreserved": true
+    },
+    "achievement-built-great-wall": {
+      "sourceSha256": "f7c14a2ecd802dfc857eb21f16640fee4580b3d11507a2009cd8f3306955e2c8",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-built-great-wall/8823c6cee5bc8119/achievement-built-great-wall.webp",
+      "sha256": "8823c6cee5bc81192b3f7df6505f05c5bf473d9c5a1ff93ee5f3b03ecbf0b960",
+      "size": 7562,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.888Z",
+      "metadataPreserved": true
+    },
+    "achievement-captured-leader": {
+      "sourceSha256": "683b2db941e4eab749f3c8779faae4886426032ab60ffddfc516402aa90e2990",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-captured-leader/f6547d3a810da4c3/achievement-captured-leader.webp",
+      "sha256": "f6547d3a810da4c378ac2b9a9e51061c60bd9050af63b1e85c155a8bbcb58c92",
+      "size": 7272,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.914Z",
+      "metadataPreserved": true
+    },
+    "achievement-complete-builder": {
+      "sourceSha256": "e7bc08b98efa32f663dc61d83dc6ee8d10182c015b53660a257300e8f479d921",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-complete-builder/47553d5e103113eb/achievement-complete-builder.webp",
+      "sha256": "47553d5e103113ebc98cea3d71177af89e78320789ddc9acd4a456b67c378bad",
+      "size": 6848,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.942Z",
+      "metadataPreserved": true
+    },
+    "achievement-complete-epic": {
+      "sourceSha256": "e7e3190225e5459d5d475598c413f0b8f035b092e3186b36d315ed48ce907cc3",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-complete-epic/68356a804a907650/achievement-complete-epic.webp",
+      "sha256": "68356a804a907650f5ad1a59d14e507fa3c5ef6ba6ba73415b9d0d904b4bfad7",
+      "size": 8320,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.966Z",
+      "metadataPreserved": true
+    },
+    "achievement-complete-roll-to-end": {
+      "sourceSha256": "d41eada7142d1ecdf6eb42d0282d93437d979316078e4c38ac38b5bd0a93570b",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-complete-roll-to-end/78bc3910b3184324/achievement-complete-roll-to-end.webp",
+      "sha256": "78bc3910b3184324cf42200dfd4ee0ee1be4ca8b3e3125784a17667f0e32fad7",
+      "size": 6866,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:38.991Z",
+      "metadataPreserved": true
+    },
+    "achievement-complete-shorter": {
+      "sourceSha256": "54cb63f28f9e5c4d53ebcba5e8e0be4fec56bb80654a9abb52c105e173ddf076",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-complete-shorter/371b52f1a5f35f60/achievement-complete-shorter.webp",
+      "sha256": "371b52f1a5f35f60501fb087b5faaa083a76ca623bf27ad953282e33b6980b11",
+      "size": 6888,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.029Z",
+      "metadataPreserved": true
+    },
+    "achievement-complete-standard": {
+      "sourceSha256": "d85e16aaf8fb9aa5e9a845a592ecdc8e49026ab3a029b2c368ae1603b54211fa",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-complete-standard/49a277bb85b89ac9/achievement-complete-standard.webp",
+      "sha256": "49a277bb85b89ac908a5777c9a2bd8aed01c9b9970bb9acef676171e9cfef229",
+      "size": 7616,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.054Z",
+      "metadataPreserved": true
+    },
+    "achievement-complete-wonderful-ending": {
+      "sourceSha256": "0abb6bb7a20fb2405993113a386683bd7656ba7024257671bff88e4761c56dda",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-complete-wonderful-ending/1d1c4ca53b0c8122/achievement-complete-wonderful-ending.webp",
+      "sha256": "1d1c4ca53b0c812219f559bcf174ea0e6fc139ea87446b7dda0516e39fafdf76",
+      "size": 6876,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.078Z",
+      "metadataPreserved": true
+    },
+    "achievement-score-30": {
+      "sourceSha256": "1f6335f6c5de0a742f334fd19a9a6ba7bb18722025d6127eb3b03a5cb2f0bb14",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-score-30/68196bcc8b38893f/achievement-score-30.webp",
+      "sha256": "68196bcc8b38893fb88a88a41d47519bc5756697fda925b81c531a1d626c8847",
+      "size": 7486,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.101Z",
+      "metadataPreserved": true
+    },
+    "achievement-score-40": {
+      "sourceSha256": "dd44cca604caae9d8bf03245f7043b6a833630eb8a72e92a8315d48429b425d4",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-score-40/2e3425053a695a7d/achievement-score-40.webp",
+      "sha256": "2e3425053a695a7d80763e319a489c4125185d0fc04d66e3f78691f27f5709e3",
+      "size": 8048,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.126Z",
+      "metadataPreserved": true
+    },
+    "achievement-seven-cities": {
+      "sourceSha256": "c8c9eeed30f05783864574398badce29c02ef02e4e1609aaa153087539bdf0e3",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-seven-cities/cc32c407d848ccac/achievement-seven-cities.webp",
+      "sha256": "cc32c407d848ccac36463613abd7e7bd24c1ca40636629e55fe8998238e6e528",
+      "size": 8402,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.148Z",
+      "metadataPreserved": true
+    },
+    "achievement-three-objectives": {
+      "sourceSha256": "05073553f47fa9d752c54853e4a1c58fdb7c01abb0fbab903ebdcf33865e179f",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-three-objectives/d321b4109adb767e/achievement-three-objectives.webp",
+      "sha256": "d321b4109adb767e5a59033f76fc9a8287bfc4c6ba8d2be8a0d3a8e5db0c5af6",
+      "size": 7232,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.174Z",
+      "metadataPreserved": true
+    },
+    "achievement-twenty-advances": {
+      "sourceSha256": "91f7b71f4df55efc36f9ce2ee5b2eaf08105e835a0af452ea7527160494ffeb1",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-twenty-advances/c7f0fa2dd390217f/achievement-twenty-advances.webp",
+      "sha256": "c7f0fa2dd390217f4fcb9eae92923370b07324a37a147423602abf85e51fe2eb",
+      "size": 9906,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.197Z",
+      "metadataPreserved": true
+    },
+    "achievement-two-wonders-built": {
+      "sourceSha256": "9bb5411bbc84dff24c430b3ab08e35983531fddf6e8710e825ccf0b72cda46d9",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-two-wonders-built/1e8303d85e2769d7/achievement-two-wonders-built.webp",
+      "sha256": "1e8303d85e2769d7a1b64fd6583d9a8cda468e560a13586f822ac8dbcb064667",
+      "size": 7992,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.227Z",
+      "metadataPreserved": true
+    },
+    "achievement-win-epic": {
+      "sourceSha256": "5678c65e20fbad1e7c354c2d53bf25af72a6a3c45b51c82279159b3a5264c38e",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-win-epic/24649a482bb1455e/achievement-win-epic.webp",
+      "sha256": "24649a482bb1455ecb103cd0acb0ab60f5bd7fbf859b91ce947af5c75f69d900",
+      "size": 8984,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.248Z",
+      "metadataPreserved": true
+    },
+    "achievement-win-roll-to-end": {
+      "sourceSha256": "9517653185dc237bfcad690e09030574bb3851f8be05088e6fb9150f4f687a92",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-win-roll-to-end/e7e037830551a336/achievement-win-roll-to-end.webp",
+      "sha256": "e7e037830551a336b4834774be0bb923db29b1be53406826b189ffe510331978",
+      "size": 8096,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.276Z",
+      "metadataPreserved": true
+    },
+    "achievement-win-shorter": {
+      "sourceSha256": "c1105938c19f817cac9d82f1f8a3ed32f1aac965991f72a04b87c2929e10b059",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-win-shorter/311d43b9f635c638/achievement-win-shorter.webp",
+      "sha256": "311d43b9f635c638df07cf751d3e01f54d45c2e706e6ae15ecfe0a45fa22dae7",
+      "size": 8112,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.299Z",
+      "metadataPreserved": true
+    },
+    "achievement-win-standard": {
+      "sourceSha256": "f6f7d13d411a29e535f0e88df48f3f6374044002e7ee07f52105b6ff1adde70d",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-win-standard/054831be2a5c7ea7/achievement-win-standard.webp",
+      "sha256": "054831be2a5c7ea7037dbc4ab233048490ec50229fd9374a5bed05c599a59957",
+      "size": 8626,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.327Z",
+      "metadataPreserved": true
+    },
+    "achievement-win-wonderful-ending": {
+      "sourceSha256": "e2858de77d3bfa0822499e92bcb0dad10cb21ca1243532b7b36b94c0560a627d",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-win-wonderful-ending/13cd34d1634e0626/achievement-win-wonderful-ending.webp",
+      "sha256": "13cd34d1634e06268144d8af61ae6c3e1c704b814d6f2fbde444fe36612127ce",
+      "size": 8052,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.350Z",
+      "metadataPreserved": true
+    }
+  },
+  "preserved": {
+    "achievement-faction-aztecs": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-aztecs/bb3067aaa3f5f62c/achievement-faction-aztecs.webp",
+      "sha256": "bb3067aaa3f5f62cc5fc87d33855b6452ad4f795c42267ee5762fd8b1d409956",
+      "size": 2014,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.370Z"
+    },
+    "achievement-faction-babylonia": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-babylonia/c4817c8f740f4c3d/achievement-faction-babylonia.webp",
+      "sha256": "c4817c8f740f4c3d521116ced508ac4e3566414964156a4b971adddae453c919",
+      "size": 1572,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.392Z"
+    },
+    "achievement-faction-carthage": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-carthage/812722e6f56229a6/achievement-faction-carthage.webp",
+      "sha256": "812722e6f56229a6de107b1f40c07391de281655f960e499f431f7abcb876e57",
+      "size": 2330,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.414Z"
+    },
+    "achievement-faction-celts": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-celts/cd0c66d8e0d9d22f/achievement-faction-celts.webp",
+      "sha256": "cd0c66d8e0d9d22f8037faba1d545c829ab3fecbae4276e7e8918611544bf2b2",
+      "size": 1732,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.435Z"
+    },
+    "achievement-faction-china": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-china/b0963f4e52c647c8/achievement-faction-china.webp",
+      "sha256": "b0963f4e52c647c84326208d11697f48c8979a2ba127331dadc52f5d7e7cd784",
+      "size": 2732,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.459Z"
+    },
+    "achievement-faction-egypt": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-egypt/22861a321c645c57/achievement-faction-egypt.webp",
+      "sha256": "22861a321c645c5792d66c17c394f7a477d66fdc547a2e28a038ad8427b8d3bd",
+      "size": 2240,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.479Z"
+    },
+    "achievement-faction-greece": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-greece/2390e73b4425f49b/achievement-faction-greece.webp",
+      "sha256": "2390e73b4425f49b2dffda3363953973b57fd0e4de2205d3f92f37110678730b",
+      "size": 1422,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.500Z"
+    },
+    "achievement-faction-huns": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-huns/a6bc33fdb170be40/achievement-faction-huns.webp",
+      "sha256": "a6bc33fdb170be4069251b30b24995be9c57a00d719db9d6dd601f3aa10b4fb5",
+      "size": 2848,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.524Z"
+    },
+    "achievement-faction-india": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-india/c8ff5b5eadb39d90/achievement-faction-india.webp",
+      "sha256": "c8ff5b5eadb39d906d8de824b7084b34236f245d6931e36390ab35eb26f2b139",
+      "size": 2706,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.549Z"
+    },
+    "achievement-faction-japan": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-japan/47fbbcf9b0c61bbb/achievement-faction-japan.webp",
+      "sha256": "47fbbcf9b0c61bbb04ae1965eb8ed13a5b7633e40a093bbd29e205fa4e6bfbaa",
+      "size": 2452,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.572Z"
+    },
+    "achievement-faction-maya": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-maya/5529921279c47398/achievement-faction-maya.webp",
+      "sha256": "5529921279c473983485fc30d3c8125c6801a6fc8fd0289e7d522a08630ce54f",
+      "size": 2226,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.625Z"
+    },
+    "achievement-faction-persia": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-persia/ddfc16a3973efab0/achievement-faction-persia.webp",
+      "sha256": "ddfc16a3973efab0a540a446a31648c93f5f6c7a7ee637e962c02eb5c38bbb63",
+      "size": 2114,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.648Z"
+    },
+    "achievement-faction-phoenicia": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-phoenicia/5a0472b571e0cc47/achievement-faction-phoenicia.webp",
+      "sha256": "5a0472b571e0cc4739b500c99dbb0c2d0b6fc68597ed40791f25e2737f7222ce",
+      "size": 2042,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.670Z"
+    },
+    "achievement-faction-rome": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-rome/c21a7a0fade1d2e5/achievement-faction-rome.webp",
+      "sha256": "c21a7a0fade1d2e5a870c37973ef2430957de9e11753a29ec34c7131a87f4d42",
+      "size": 1760,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.694Z"
+    },
+    "achievement-faction-vikings": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-vikings/81f1f0359f296162/achievement-faction-vikings.webp",
+      "sha256": "81f1f0359f2961628e72ea924302bc1789be5544645bbde3932c1334a6ad50d9",
+      "size": 2008,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.715Z"
+    },
+    "pictogram": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/pictogram/162b4b56b3efdd4f/pictogram.webp",
+      "sha256": "162b4b56b3efdd4feced612e5e71c32d3fc3ff545f39b5e9b90a1980165fc1b3",
+      "size": 8786,
+      "format": "webp",
+      "width": 256,
+      "height": 256,
+      "verifiedAt": "2026-11-14T12:45:39.761Z"
+    },
+    "screenshot-076b3455-fb2a-403a-9893-81e04b439394": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-076b3455-fb2a-403a-9893-81e04b439394/d8a5a813d29ec609/screenshot-076b3455-fb2a-403a-9893-81e04b439394.webp",
+      "sha256": "d8a5a813d29ec6095e58926b86875b50370ce63fc26df9f4b14b7ad909de1634",
+      "size": 99126,
+      "format": "webp",
+      "width": 1382,
+      "height": 1010,
+      "verifiedAt": "2026-11-14T12:45:39.857Z"
+    },
+    "screenshot-3de34e33-9546-4a6f-a895-beed6a5a899a": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-3de34e33-9546-4a6f-a895-beed6a5a899a/f822ddf60d079d9b/screenshot-3de34e33-9546-4a6f-a895-beed6a5a899a.webp",
+      "sha256": "f822ddf60d079d9b46f718b7647a3553a7a3d3204066ee5d7ca0709a5b20def1",
+      "size": 99260,
+      "format": "webp",
+      "width": 1382,
+      "height": 1010,
+      "verifiedAt": "2026-11-14T12:45:39.901Z"
+    },
+    "screenshot-8ad59212-b12c-4d43-893c-e34ef310b5eb": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-8ad59212-b12c-4d43-893c-e34ef310b5eb/5a61563e8f3c5fd1/screenshot-8ad59212-b12c-4d43-893c-e34ef310b5eb.webp",
+      "sha256": "5a61563e8f3c5fd1f2f32d492fc63274575c6be38fc43b04173029fd251f8a92",
+      "size": 113880,
+      "format": "webp",
+      "width": 1382,
+      "height": 1010,
+      "verifiedAt": "2026-11-14T12:45:39.951Z"
+    },
+    "screenshot-c4bf2061-8deb-47c5-a3f2-d9a09040713d": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-c4bf2061-8deb-47c5-a3f2-d9a09040713d/ea392f41e43e3380/screenshot-c4bf2061-8deb-47c5-a3f2-d9a09040713d.webp",
+      "sha256": "ea392f41e43e3380ee2bc19a13c27d8508b879a5a097bac7c04e2502cd3e9520",
+      "size": 114968,
+      "format": "webp",
+      "width": 1382,
+      "height": 1010,
+      "verifiedAt": "2026-11-14T12:45:39.991Z"
+    },
+    "screenshot-release-board-dark": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-board-dark/df2915750d6a0a5d/screenshot-release-board-dark.webp",
+      "sha256": "df2915750d6a0a5dd5af34432d49f075c35ad1a4fd579a0df9fda5ad0fd1acaf",
+      "size": 60264,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.029Z"
+    },
+    "screenshot-release-board-dark-30bce9962712": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-board-dark-30bce9962712/7a5aa01ef01d38c6/screenshot-release-board-dark-30bce9962712.webp",
+      "sha256": "7a5aa01ef01d38c6dd0f477b6ff66404a8f1c4ab0d01e0772977f6b8a9130f54",
+      "size": 105852,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.072Z"
+    },
+    "screenshot-release-board-light": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-board-light/fa8f96333d1a1956/screenshot-release-board-light.webp",
+      "sha256": "fa8f96333d1a1956c55c8e97803bbf9ff9781c2964272146cbeb778f23ef06dd",
+      "size": 61526,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.132Z"
+    },
+    "screenshot-release-board-light-ca89ad69f965": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-board-light-ca89ad69f965/4cc0c9592259ed1f/screenshot-release-board-light-ca89ad69f965.webp",
+      "sha256": "4cc0c9592259ed1f4b6703de4eea982ba49b7d13b89e91c79a716a6e74cc41bc",
+      "size": 106696,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.176Z"
+    },
+    "screenshot-release-mobile-dark": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-mobile-dark/35ff042787318c60/screenshot-release-mobile-dark.webp",
+      "sha256": "35ff042787318c6047b0c97661b86202735fcee54b399834fc5c08a9fe815285",
+      "size": 28982,
+      "format": "webp",
+      "width": 390,
+      "height": 844,
+      "verifiedAt": "2026-11-14T12:45:40.202Z"
+    },
+    "screenshot-release-mobile-dark-a3a370d0e216": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-mobile-dark-a3a370d0e216/8e15ba2a6ff6fcbd/screenshot-release-mobile-dark-a3a370d0e216.webp",
+      "sha256": "8e15ba2a6ff6fcbd03a7444af90dea6bb73c6fb7049fd34e3d870b182595de7a",
+      "size": 31212,
+      "format": "webp",
+      "width": 390,
+      "height": 844,
+      "verifiedAt": "2026-11-14T12:45:40.231Z"
+    },
+    "screenshot-release-mobile-light": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-mobile-light/0653ba4f34c104ab/screenshot-release-mobile-light.webp",
+      "sha256": "0653ba4f34c104ab163e4442a33a0762462e587cd20ba3308ab4e93b65bd5831",
+      "size": 29528,
+      "format": "webp",
+      "width": 390,
+      "height": 844,
+      "verifiedAt": "2026-11-14T12:45:40.259Z"
+    },
+    "screenshot-release-mobile-light-9dc122ba7be4": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-mobile-light-9dc122ba7be4/e2854d8e67028d13/screenshot-release-mobile-light-9dc122ba7be4.webp",
+      "sha256": "e2854d8e67028d13f801ff54623a07d824d5760607bbfcdf7fc58ce477b7bd99",
+      "size": 31840,
+      "format": "webp",
+      "width": 390,
+      "height": 844,
+      "verifiedAt": "2026-11-14T12:45:40.286Z"
+    },
+    "screenshot-release-research-dark": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-research-dark/8335563bf446a16a/screenshot-release-research-dark.webp",
+      "sha256": "8335563bf446a16a4daadada04558aca93ea14cd68551f25303ddef78e33a578",
+      "size": 106416,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.324Z"
+    },
+    "screenshot-release-research-dark-e2bd26b63ea5": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-research-dark-e2bd26b63ea5/47ef0898cbd323b1/screenshot-release-research-dark-e2bd26b63ea5.webp",
+      "sha256": "47ef0898cbd323b1d098fe21e73394770252887b24a68265bbb88e393848e279",
+      "size": 101750,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.363Z"
+    },
+    "screenshot-release-research-light": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-research-light/caa75b3412d4de89/screenshot-release-research-light.webp",
+      "sha256": "caa75b3412d4de89d41d43c966aa49d0b052aa2491ef5ab238b9ed78d8d130b0",
+      "size": 110208,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.405Z"
+    },
+    "screenshot-release-research-light-7e5dcdb3abb5": {
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/assets/clash/screenshot-release-research-light-7e5dcdb3abb5/be382c5e13a08e23/screenshot-release-research-light-7e5dcdb3abb5.webp",
+      "sha256": "be382c5e13a08e236a81ba7b545d15d952d73376f911c0e12cc6d1cecec58867",
+      "size": 105362,
+      "format": "webp",
+      "width": 1440,
+      "height": 960,
+      "verifiedAt": "2026-11-14T12:45:40.442Z"
+    }
+  },
+  "planSha256": "c2d79e59e76d42965f575e6471a429e29b7b50ab6f34e04e20d2ec40e034c3b6",
+  "activationReceiptSha256": "a9a386adf715124e586f52f1575e13ca4d5b47e43511fd0087d3d6ef273a8fb6",
+  "tgzSha256": "61a7f537d547cd0d4baea74f5d1331ffca0804779dcdb59bb566742fc59427db",
+  "package": {
+    "name": "@boardgamers/clash-server",
+    "version": "0.4.152",
+    "url": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/engine/61a7f537d547cd0d/boardgamers-clash-server-0.4.152.tgz"
+  },
+  "hostedPackage": {
+    "url": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/engine/61a7f537d547cd0d/boardgamers-clash-server-0.4.152.tgz",
+    "size": 1743303,
+    "sha256": "61a7f537d547cd0d4baea74f5d1331ffca0804779dcdb59bb566742fc59427db"
+  },
+  "manifest": {
+    "revision": 3,
+    "achievements": [
+      {
+        "id": "complete-shorter",
+        "name": "Complete Shorter",
+        "description": "Finish a Shorter game without dropping out.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-complete-shorter"
+        }
+      },
+      {
+        "id": "win-shorter",
+        "name": "Win Shorter",
+        "description": "Finish a Shorter game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-win-shorter"
+        }
+      },
+      {
+        "id": "complete-standard",
+        "name": "Complete Standard",
+        "description": "Finish a Standard game without dropping out.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-complete-standard"
+        }
+      },
+      {
+        "id": "win-standard",
+        "name": "Win Standard",
+        "description": "Finish a Standard game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-win-standard"
+        }
+      },
+      {
+        "id": "complete-roll-to-end",
+        "name": "Complete Roll to End",
+        "description": "Finish a Roll to End game without dropping out.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-complete-roll-to-end"
+        }
+      },
+      {
+        "id": "win-roll-to-end",
+        "name": "Win Roll to End",
+        "description": "Finish a Roll to End game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-win-roll-to-end"
+        }
+      },
+      {
+        "id": "complete-wonderful-ending",
+        "name": "Complete Wonderful Ending",
+        "description": "Finish a Wonderful Ending game without dropping out.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-complete-wonderful-ending"
+        }
+      },
+      {
+        "id": "win-wonderful-ending",
+        "name": "Win Wonderful Ending",
+        "description": "Finish a Wonderful Ending game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-win-wonderful-ending"
+        }
+      },
+      {
+        "id": "complete-epic",
+        "name": "Complete Epic",
+        "description": "Finish a Epic game without dropping out.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-complete-epic"
+        }
+      },
+      {
+        "id": "win-epic",
+        "name": "Win Epic",
+        "description": "Finish a Epic game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-win-epic"
+        }
+      },
+      {
+        "id": "score-30",
+        "name": "30 Points",
+        "description": "Finish a game with at least 30 victory points in the final state.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-score-30"
+        }
+      },
+      {
+        "id": "score-40",
+        "name": "40 Points",
+        "description": "Finish a game with at least 40 victory points in the final state.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-score-40"
+        }
+      },
+      {
+        "id": "seven-cities",
+        "name": "Seven Cities",
+        "description": "Finish a game owning at least 7 cities in the final state.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-seven-cities"
+        }
+      },
+      {
+        "id": "twenty-advances",
+        "name": "Twenty Advances",
+        "description": "Finish a game with at least 20 regular advances in the final state; special advances do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-twenty-advances"
+        }
+      },
+      {
+        "id": "three-objectives",
+        "name": "Three Objectives",
+        "description": "Finish a game with at least 3 completed objectives in the final state.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-three-objectives"
+        }
+      },
+      {
+        "id": "two-wonders-built",
+        "name": "Two Wonders Built",
+        "description": "Finish a game having built at least 2 wonders, as recorded in the final state; merely owning wonders does not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-two-wonders-built"
+        }
+      },
+      {
+        "id": "captured-leader",
+        "name": "Captured Leader",
+        "description": "Finish a game with at least 1 captured leader in the final state.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-captured-leader"
+        }
+      },
+      {
+        "id": "built-great-arena",
+        "name": "Great Arena: Recorded as Built",
+        "description": "Finish with Great Arena recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-arena"
+        }
+      },
+      {
+        "id": "built-great-pyramids",
+        "name": "Great Pyramids: Recorded as Built",
+        "description": "Finish with Great Pyramids recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-pyramids"
+        }
+      },
+      {
+        "id": "built-great-gardens",
+        "name": "Great Gardens: Recorded as Built",
+        "description": "Finish with Great Gardens recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-gardens"
+        }
+      },
+      {
+        "id": "built-great-library",
+        "name": "Great Library: Recorded as Built",
+        "description": "Finish with Great Library recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-library"
+        }
+      },
+      {
+        "id": "built-great-lighthouse",
+        "name": "Great Lighthouse: Recorded as Built",
+        "description": "Finish with Great Lighthouse recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-lighthouse"
+        }
+      },
+      {
+        "id": "built-great-mausoleum",
+        "name": "Great Mausoleum: Recorded as Built",
+        "description": "Finish with Great Mausoleum recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-mausoleum"
+        }
+      },
+      {
+        "id": "built-great-statue",
+        "name": "Great Statue: Recorded as Built",
+        "description": "Finish with Great Statue recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-statue"
+        }
+      },
+      {
+        "id": "built-great-wall",
+        "name": "Great Wall: Recorded as Built",
+        "description": "Finish with Great Wall recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-built-great-wall"
+        }
+      },
+      {
+        "id": "complete-builder",
+        "name": "Complete Builder",
+        "description": "Finish a Builder variant game without dropping out.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-complete-builder"
+        }
+      },
+      {
+        "id": "win-rome",
+        "name": "Win as Rome",
+        "description": "Finish a game as Rome as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-rome"
+        }
+      },
+      {
+        "id": "win-greece",
+        "name": "Win as Greece",
+        "description": "Finish a game as Greece as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-greece"
+        }
+      },
+      {
+        "id": "win-china",
+        "name": "Win as China",
+        "description": "Finish a game as China as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-china"
+        }
+      },
+      {
+        "id": "win-vikings",
+        "name": "Win as Vikings",
+        "description": "Finish a game as Vikings as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-vikings"
+        }
+      },
+      {
+        "id": "win-babylonia",
+        "name": "Win as Babylonia",
+        "description": "Finish a game as Babylonia as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-babylonia"
+        }
+      },
+      {
+        "id": "win-india",
+        "name": "Win as India",
+        "description": "Finish a game as India as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-india"
+        }
+      },
+      {
+        "id": "win-egypt",
+        "name": "Win as Egypt",
+        "description": "Finish a game as Egypt as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-egypt"
+        }
+      },
+      {
+        "id": "win-phoenicia",
+        "name": "Win as Phoenicia",
+        "description": "Finish a game as Phoenicia as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-phoenicia"
+        }
+      },
+      {
+        "id": "win-maya",
+        "name": "Win as Maya",
+        "description": "Finish a game as Maya as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-maya"
+        }
+      },
+      {
+        "id": "win-persia",
+        "name": "Win as Persia",
+        "description": "Finish a game as Persia as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-persia"
+        }
+      },
+      {
+        "id": "win-japan",
+        "name": "Win as Japan",
+        "description": "Finish a game as Japan as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-japan"
+        }
+      },
+      {
+        "id": "win-huns",
+        "name": "Win as Huns",
+        "description": "Finish a game as Huns as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-huns"
+        }
+      },
+      {
+        "id": "win-celts",
+        "name": "Win as Celts",
+        "description": "Finish a game as Celts as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-celts"
+        }
+      },
+      {
+        "id": "win-aztecs",
+        "name": "Win as Aztecs",
+        "description": "Finish a game as Aztecs as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-aztecs"
+        }
+      },
+      {
+        "id": "win-carthage",
+        "name": "Win as Carthage",
+        "description": "Finish a game as Carthage as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+        "icon": {
+          "type": "asset",
+          "key": "achievement-faction-carthage"
+        }
+      }
+    ]
+  },
+  "verification": {
+    "publicCatalog": true,
+    "allAssets": true,
+    "unchangedMetadata": true
+  }
+}
