@@ -1,10 +1,10 @@
 # Clash of Cultures achievements
 
-Prepared engine release: `@boardgamers/clash-server` **0.4.150**, BGS `clash/1`
-(Clash of Cultures: Monumental edition). Publication awaits release-delta review;
-this source document does not assert deployment. Engine-only release; the hosted
-viewer remains 0.1.217. See `web-client/release/engine-package.json` for the reproducible
-package metadata.
+Delivered engine release: `@boardgamers/clash-server` **0.4.150**, BGS `clash/1`
+(Clash of Cultures: Monumental edition). Engine-only release; the hosted viewer
+remains 0.1.217. See `web-client/release/engine-package.json` for package metadata
+and [the delivery receipt](../web-client/docs/achievements-0.4.150-receipt.md) for
+the exact reviewed artifact, source commit and activation evidence.
 
 The native Rust evaluator is the single source of truth. The WASM package exports
 `achievementDefinitions()` and `achievements(serializedData)` directly, alongside

@@ -1322,7 +1322,13 @@ engine, or push Git. It packages existing `.engine` outputs, so **do not skip th
 fresh build above**. Unpack the archive and byte-compare every declared file to
 `.engine`, run protocol/fixture tests against its `server.js` via dynamic import,
 and retain the source commit, toolchain versions and artifact SHA-256 together.
-Any later source edits require a fresh build and validation before publication.
+These checks establish **same-build source/artifact integrity**, not bit-for-bit
+reproducibility: wasm-bindgen output can differ between invocations even with the
+same compiled input. Once an archive has been independently approved, preserve
+and upload that exact SHA-256; do not repackage later ignored `.engine` outputs.
+Runtime/package source edits require a fresh build and review before publication;
+post-delivery receipt-only documentation does not change the approved artifact.
+See [the 0.4.150 delivery receipt](achievements-0.4.150-receipt.md).
 
 For this engine-only release, use the existing authenticated admin endpoint
 `POST /api/admin/gameinfo/clash/1/engine` with the raw npm tarball and
