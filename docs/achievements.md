@@ -1,11 +1,12 @@
 # Clash of Cultures achievements
 
-Prepared engine release: `@boardgamers/clash-server` **0.4.151**, BGS `clash/1`
-(Clash of Cultures: Monumental edition). Revision 2 and its artwork await independent
-review before any production upload or source push. No viewer release is planned;
-the hosted viewer remains 0.1.217. See `web-client/release/engine-package.json`.
-The [revision-1 delivery receipt](../web-client/docs/achievements-0.4.150-receipt.md)
-records the previously delivered 0.4.150 artifact, not this prepared release.
+Delivered engine release: `@boardgamers/clash-server` **0.4.151**, BGS `clash/1`
+(Clash of Cultures: Monumental edition). Revision 2 and all 15 faction assets were
+independently reviewed, published and verified. The hosted viewer remains 0.1.217;
+no viewer release was made. See `web-client/release/engine-package.json` and the
+[revision-2 delivery receipt](../web-client/docs/achievements-0.4.151-receipt.md).
+The [revision-1 receipt](../web-client/docs/achievements-0.4.150-receipt.md)
+records the previously delivered 0.4.150 artifact.
 
 The native Rust evaluator is the single source of truth. The WASM package exports
 `achievementDefinitions()` and `achievements(serializedData)` directly, alongside

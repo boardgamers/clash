@@ -1,0 +1,127 @@
+{
+  "formatRevision": 1,
+  "verifiedAt": "2026-11-14T01:39:56.246Z",
+  "source": "1684b3064d7d9d80e69af6593e11ed636abf7670",
+  "engine": {
+    "package": {
+      "name": "@boardgamers/clash-server",
+      "version": "0.4.151",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/engine/ec0f936cf29a9088/boardgamers-clash-server-0.4.151.tgz"
+    },
+    "entryPoint": "server.js"
+  },
+  "engineSha256": "ec0f936cf29a908835f98048f885ff5b74f0c8ec5654122b218864ce2846e7bd",
+  "achievementRevision": 2,
+  "definitions": 41,
+  "reviewedArtworkReceiptSha256": "0830bc330eca0e072e2b61abdd798b26d933a3dd26593198d0ecd156741cf021",
+  "assets": [
+    {
+      "key": "achievement-faction-rome",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-rome/c21a7a0fade1d2e5/achievement-faction-rome.webp",
+      "size": 1760,
+      "sha256": "c21a7a0fade1d2e5a870c37973ef2430957de9e11753a29ec34c7131a87f4d42",
+      "localSha256": "d7d2fc0f6d9481b7a5d8344037c900c63a46980d1e8e56d3ca7bf2cab629d355"
+    },
+    {
+      "key": "achievement-faction-greece",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-greece/2390e73b4425f49b/achievement-faction-greece.webp",
+      "size": 1422,
+      "sha256": "2390e73b4425f49b2dffda3363953973b57fd0e4de2205d3f92f37110678730b",
+      "localSha256": "eec6bb137430028a8d08786ca3f7c21ce4cac7151d0760e673f554285ffbe753"
+    },
+    {
+      "key": "achievement-faction-china",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-china/b0963f4e52c647c8/achievement-faction-china.webp",
+      "size": 2732,
+      "sha256": "b0963f4e52c647c84326208d11697f48c8979a2ba127331dadc52f5d7e7cd784",
+      "localSha256": "f511768c3e36d326512c6c841606033107f327d2bde0ed37b0fde90231f9c490"
+    },
+    {
+      "key": "achievement-faction-vikings",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-vikings/81f1f0359f296162/achievement-faction-vikings.webp",
+      "size": 2008,
+      "sha256": "81f1f0359f2961628e72ea924302bc1789be5544645bbde3932c1334a6ad50d9",
+      "localSha256": "e86b470565a09e8ae5f56ef6050c57e2b164cae57e35e28fe24500d9b109dbf6"
+    },
+    {
+      "key": "achievement-faction-babylonia",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-babylonia/c4817c8f740f4c3d/achievement-faction-babylonia.webp",
+      "size": 1572,
+      "sha256": "c4817c8f740f4c3d521116ced508ac4e3566414964156a4b971adddae453c919",
+      "localSha256": "fbccec04cf6ccfb31afe793802d687724e76d9b4db44698b17ccdeb256413acb"
+    },
+    {
+      "key": "achievement-faction-india",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-india/c8ff5b5eadb39d90/achievement-faction-india.webp",
+      "size": 2706,
+      "sha256": "c8ff5b5eadb39d906d8de824b7084b34236f245d6931e36390ab35eb26f2b139",
+      "localSha256": "bfae862329b2adb99e134f3f9e186c34865975666440a9a1231ddb8672f60120"
+    },
+    {
+      "key": "achievement-faction-egypt",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-egypt/22861a321c645c57/achievement-faction-egypt.webp",
+      "size": 2240,
+      "sha256": "22861a321c645c5792d66c17c394f7a477d66fdc547a2e28a038ad8427b8d3bd",
+      "localSha256": "dd53b055f74870ff295c6506fb4f620644c9cc3db6d1da6cccec0c9a5194227b"
+    },
+    {
+      "key": "achievement-faction-phoenicia",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-phoenicia/5a0472b571e0cc47/achievement-faction-phoenicia.webp",
+      "size": 2042,
+      "sha256": "5a0472b571e0cc4739b500c99dbb0c2d0b6fc68597ed40791f25e2737f7222ce",
+      "localSha256": "d5ab764279ddd9b9b65e70e84106ca1c6cf1698213b2fb7ce2852e745088440d"
+    },
+    {
+      "key": "achievement-faction-maya",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-maya/5529921279c47398/achievement-faction-maya.webp",
+      "size": 2226,
+      "sha256": "5529921279c473983485fc30d3c8125c6801a6fc8fd0289e7d522a08630ce54f",
+      "localSha256": "0ae05cc3620ea43592aaeaa2c600f0474e02989d165ff6cda06ba24faf6f5d67"
+    },
+    {
+      "key": "achievement-faction-persia",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-persia/ddfc16a3973efab0/achievement-faction-persia.webp",
+      "size": 2114,
+      "sha256": "ddfc16a3973efab0a540a446a31648c93f5f6c7a7ee637e962c02eb5c38bbb63",
+      "localSha256": "a1da095b7c45ced4bfb62a96dbf438d4989670cfeef232ac6e349bbb72ca4216"
+    },
+    {
+      "key": "achievement-faction-japan",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-japan/47fbbcf9b0c61bbb/achievement-faction-japan.webp",
+      "size": 2452,
+      "sha256": "47fbbcf9b0c61bbb04ae1965eb8ed13a5b7633e40a093bbd29e205fa4e6bfbaa",
+      "localSha256": "9237311170ddbbe31156e820b2bc637831462ee651348f878eb2f384461b812a"
+    },
+    {
+      "key": "achievement-faction-huns",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-huns/a6bc33fdb170be40/achievement-faction-huns.webp",
+      "size": 2848,
+      "sha256": "a6bc33fdb170be4069251b30b24995be9c57a00d719db9d6dd601f3aa10b4fb5",
+      "localSha256": "17043fa65b030d40803739a881d31a55abeb8edcaae725599582afbce2f34151"
+    },
+    {
+      "key": "achievement-faction-celts",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-celts/cd0c66d8e0d9d22f/achievement-faction-celts.webp",
+      "size": 1732,
+      "sha256": "cd0c66d8e0d9d22f8037faba1d545c829ab3fecbae4276e7e8918611544bf2b2",
+      "localSha256": "9fbb6009bf5bcb0c89c278ccd1fd710e61e326d93baac6b463c541b537ed5bcb"
+    },
+    {
+      "key": "achievement-faction-aztecs",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-aztecs/bb3067aaa3f5f62c/achievement-faction-aztecs.webp",
+      "size": 2014,
+      "sha256": "bb3067aaa3f5f62cc5fc87d33855b6452ad4f795c42267ee5762fd8b1d409956",
+      "localSha256": "65113ac72d6f81f82d01d9a7dbc7f5a416b37d39cc2d347a26e11f7fe994917e"
+    },
+    {
+      "key": "achievement-faction-carthage",
+      "url": "https://s3.fr-par.scw.cloud/bgs-assets/achievements/clash/achievement-faction-carthage/812722e6f56229a6/achievement-faction-carthage.webp",
+      "size": 2330,
+      "sha256": "812722e6f56229a6de107b1f40c07391de281655f960e499f431f7abcb876e57",
+      "localSha256": "a77f1e0b68138f0333fe6e6672f1872ad4ba9079b8a9594acc57c85c10934d4b"
+    }
+  ],
+  "viewerUrl": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/viewer/assets-890e8364e4f3fe49236b/viewer.js",
+  "publicAlbum": "https://boardgamers.space/badges/games/clash",
+  "status": "verified"
+}

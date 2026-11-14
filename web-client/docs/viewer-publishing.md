@@ -1291,9 +1291,10 @@ map city selection and Settler confirmation. Packed-engine protocol and split
 WASM bundle checks pass. Existing Clippy warnings and expected rejected-move
 WASM diagnostics remain.
 
-# Prepared engine 0.4.151 / achievement manifest revision 2
+# Delivered engine 0.4.151 / achievement manifest revision 2
 
-**Pending independent code/artwork review; do not upload or push release source yet.**
+**Independently approved and delivered; see [delivery receipt](achievements-0.4.151-receipt.md).**
+The following records the preparation and guarded publication procedure used.
 Clash of Cultures (`clash/1`) gains 15 canonical civilization-win achievements,
 8 individual surviving wonder-build-record feats and `complete-builder`;
 `seven-cities` replaces the removed `four-cities` definition. Standard length
