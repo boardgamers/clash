@@ -27,9 +27,18 @@
         "path": "client/assets/colosseum-rome-svgrepo-com.png",
         "sha256": "660f60ac288e2ed97ae208fce824ec4b39681008b68429b82b76f9dfeefb6d67",
         "provenance": {
+          "type": "verified-existing-project-asset",
           "license": null,
-          "status": "unresolved — provenance investigation pending; no publication approval",
-          "originalPath": "client/assets/colosseum-rome-svgrepo-com.png"
+          "licenseStatus": "per-item-license-unverified",
+          "sourcePath": "client/assets/colosseum-rome-svgrepo-com.png",
+          "sourceSha256": "660f60ac288e2ed97ae208fce824ec4b39681008b68429b82b76f9dfeefb6d67",
+          "historicalCommit": "603be9b8f0a361bebcef69d019c6451d75255eb8",
+          "existingUse": {
+            "viewerUrl": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/viewer/assets-890e8364e4f3fe49236b/viewer.js",
+            "embeddedPngSha256": "660f60ac288e2ed97ae208fce824ec4b39681008b68429b82b76f9dfeefb6d67",
+            "evidence": "Original commit bytes and current production viewer embedded PNG bytes exactly match this source hash; canonical faction mapping uses this PNG. Import PR #233."
+          },
+          "authorization": "explicit-user-request-to-reuse-established-project-artwork"
         }
       }
     },
@@ -41,9 +50,18 @@
         "path": "client/assets/temple-building-with-columns-svgrepo-com.png",
         "sha256": "939ab2c36bb3f29aa066348f5ea0f8418e76442f1fcae1537a27ec1706a57e0f",
         "provenance": {
+          "type": "verified-existing-project-asset",
           "license": null,
-          "status": "unresolved — provenance investigation pending; no publication approval",
-          "originalPath": "client/assets/temple-building-with-columns-svgrepo-com.png"
+          "licenseStatus": "per-item-license-unverified",
+          "sourcePath": "client/assets/temple-building-with-columns-svgrepo-com.png",
+          "sourceSha256": "939ab2c36bb3f29aa066348f5ea0f8418e76442f1fcae1537a27ec1706a57e0f",
+          "historicalCommit": "7fc48ab4187c9d8bb874b11ec2581ce1b4a1fc97",
+          "existingUse": {
+            "viewerUrl": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/viewer/assets-890e8364e4f3fe49236b/viewer.js",
+            "embeddedPngSha256": "939ab2c36bb3f29aa066348f5ea0f8418e76442f1fcae1537a27ec1706a57e0f",
+            "evidence": "Original commit bytes and current production viewer embedded PNG bytes exactly match this source hash; canonical faction mapping uses this PNG. Import PR #97."
+          },
+          "authorization": "explicit-user-request-to-reuse-established-project-artwork"
         }
       }
     },
@@ -55,9 +73,18 @@
         "path": "client/assets/great-wall-of-china-chinese-svgrepo-com.png",
         "sha256": "edc3bfe45c937482fedb708bcd794ed589241f96b095a55daa25be7bb4656e3c",
         "provenance": {
+          "type": "verified-existing-project-asset",
           "license": null,
-          "status": "unresolved — provenance investigation pending; no publication approval",
-          "originalPath": "client/assets/great-wall-of-china-chinese-svgrepo-com.png"
+          "licenseStatus": "per-item-license-unverified",
+          "sourcePath": "client/assets/great-wall-of-china-chinese-svgrepo-com.png",
+          "sourceSha256": "edc3bfe45c937482fedb708bcd794ed589241f96b095a55daa25be7bb4656e3c",
+          "historicalCommit": "603be9b8f0a361bebcef69d019c6451d75255eb8",
+          "existingUse": {
+            "viewerUrl": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/viewer/assets-890e8364e4f3fe49236b/viewer.js",
+            "embeddedPngSha256": "edc3bfe45c937482fedb708bcd794ed589241f96b095a55daa25be7bb4656e3c",
+            "evidence": "Original commit bytes and current production viewer embedded PNG bytes exactly match this source hash; canonical faction mapping uses this PNG. Import PR #233."
+          },
+          "authorization": "explicit-user-request-to-reuse-established-project-artwork"
         }
       }
     },
@@ -69,9 +96,18 @@
         "path": "client/assets/viking-ship-svgrepo-com.png",
         "sha256": "a195e2fcafbb2338a6b79c05f55f6c3e5aa64fd68352c30f82e13b8d9094274b",
         "provenance": {
+          "type": "verified-existing-project-asset",
           "license": null,
-          "status": "unresolved — provenance investigation pending; no publication approval",
-          "originalPath": "client/assets/viking-ship-svgrepo-com.png"
+          "licenseStatus": "per-item-license-unverified",
+          "sourcePath": "client/assets/viking-ship-svgrepo-com.png",
+          "sourceSha256": "a195e2fcafbb2338a6b79c05f55f6c3e5aa64fd68352c30f82e13b8d9094274b",
+          "historicalCommit": "77bfc205eec2b664b24846753e0680ebf6ec9740",
+          "existingUse": {
+            "viewerUrl": "https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/viewer/assets-890e8364e4f3fe49236b/viewer.js",
+            "embeddedPngSha256": "a195e2fcafbb2338a6b79c05f55f6c3e5aa64fd68352c30f82e13b8d9094274b",
+            "evidence": "Original commit bytes and current production viewer embedded PNG bytes exactly match this source hash; canonical faction mapping uses this PNG. Import PR #265."
+          },
+          "authorization": "explicit-user-request-to-reuse-established-project-artwork"
         }
       }
     },

@@ -1310,9 +1310,16 @@ node web-client/scripts/publish-achievement-assets.mjs # offline dry run only
 
 The source/integrity manifest is `release/achievement-assets.json`; generated
 256px PNGs, a light/dark contact sheet and their SHA-256 receipt remain ignored
-under `.engine/achievement-assets/`. Four legacy PNG provenance records still
-require exact-source/license verification; do not treat repository inclusion as
-proof of third-party licensing. Lucide notices are included verbatim.
+under `.engine/achievement-assets/`. Four legacy PNGs use the explicitly authorized
+`verified-existing-project-asset` route, pinned to source paths/hashes, import
+commits and identical production-use evidence. Their per-item licenses remain
+unverified; neither CC0 nor blanket MIT is asserted. Lucide notices are included
+verbatim. The guard permits only these four established identities through this route.
+
+Before any PUT, original metadata and version snapshots must be durably saved in
+unique 0700 `.engine/releases/achievement-assets/run-*` directories with 0600 files.
+The per-run receipt references backup paths/hashes, never credentials. Persistence
+failure stops uploads; retries preserve previous originals. No broad restore is provided.
 
 After the code, provenance and exact artwork receipt have independent approval,
 upload named assets through the dedicated helper with its explicit publish flag

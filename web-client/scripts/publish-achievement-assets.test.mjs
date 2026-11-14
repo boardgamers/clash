@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import {
   run,
   licenseBlockers,
@@ -86,6 +87,58 @@ test('PNG clearance requires source URL, exact license/source hash match, and ev
   }
 });
 
+test('only the four pinned existing project PNGs qualify without a per-item license claim', async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL('../release/achievement-assets.json', import.meta.url), 'utf8'),
+  );
+  assert.deepEqual(licenseBlockers(manifest), []);
+  const assets = manifest.assets.filter((a) => a.source.type === 'png');
+  assert.equal(assets.length, 4);
+  for (const asset of assets) {
+    assert.equal(asset.source.provenance.license, null);
+    for (const field of [
+      'sourcePath',
+      'sourceSha256',
+      'historicalCommit',
+      'licenseStatus',
+      'authorization',
+    ]) {
+      const changed = structuredClone(asset);
+      changed.source.provenance[field] = 'invalid';
+      assert.ok(licenseBlockers({ assets: [changed] }).length, field);
+    }
+    for (const field of ['viewerUrl', 'embeddedPngSha256', 'evidence']) {
+      const changed = structuredClone(asset);
+      changed.source.provenance.existingUse[field] = '';
+      assert.ok(licenseBlockers({ assets: [changed] }).length, field);
+    }
+    for (const mutate of [
+      (a) => {
+        a.key = 'achievement-faction-arbitrary';
+      },
+      (a) => {
+        a.source.path = 'other.png';
+      },
+      (a) => {
+        a.source.sha256 = '0'.repeat(64);
+      },
+      (a) => {
+        a.source.type = 'lucide';
+      },
+      (a) => {
+        a.source.provenance.license = 'CC0';
+      },
+      (a) => {
+        delete a.source.provenance;
+      },
+    ]) {
+      const changed = structuredClone(asset);
+      mutate(changed);
+      assert.ok(licenseBlockers({ assets: [changed] }).length);
+    }
+  }
+});
+
 test('review rejects changed receipt, unexpected key and invalid dimensions', () => {
   const local = fixture();
   const validate = () =>
@@ -164,6 +217,12 @@ function mockPublication(local, mutate = () => {}) {
   const deps = {
     loadLocal: async () => local,
     readToken: async () => 'SECRET-DO-NOT-LOG',
+    persistBackup: async () => ({
+      directory: '/mock/run-unique',
+      receiptPath: '/mock/run-unique/upload-receipt.json',
+      meta: { path: '/mock/run-unique/meta.json', sha256: '1'.repeat(64) },
+      version: { path: '/mock/run-unique/version.json', sha256: '2'.repeat(64) },
+    }),
     save: async (value) => saved.push(structuredClone(value)),
     fetch: async (url, options) => {
       calls.push({ url, options });

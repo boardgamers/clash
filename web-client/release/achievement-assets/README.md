@@ -46,7 +46,7 @@ change: inspect the changes, review provenance, and deliberately update hashes.
 A successful local build is **not** artwork approval or permission to publish.
 No uploads are performed by these tools.
 
-## Attribution and unresolved provenance
+## Attribution and established project reuse
 
 The eleven Lucide symbols come from `lucide-svelte` **0.577.0**,
 https://github.com/lucide-icons/lucide. The full package license is copied verbatim
@@ -55,8 +55,22 @@ portions. Preserve these notices with distributions of the derived artwork.
 
 Rome, Greece, China, and Vikings reuse the repository's original PNG assets in
 `client/assets/` (exact original paths and SHA-256 hashes are in the manifest).
-Their upstream authorship, original download locations, and applicable licenses
-are **still under investigation**. Filenames mentioning SVG Repo are not adequate
-license evidence. This document does **not** assert that the repository's root
-MIT license covers these PNGs. Publication remains blocked pending documented
-provenance/license review and independent visual review of the contact sheet.
+The user explicitly authorized reuse of this established project artwork after
+confirmation that the original import bytes and currently served viewer PNGs match.
+The manifest records source paths/hashes, historical commits and production-use
+evidence as `verified-existing-project-asset`. The publisher accepts only these four
+pinned identities through this path; it is not an arbitrary missing-license bypass.
+Per-item licenses remain **unverified** (`license: null`); no CC0 or blanket root-MIT
+coverage is claimed. No known restriction was found in the bounded investigation.
+Independent review of the final delta and exact artwork receipt remains required.
+
+## Durable publication backups
+
+Before any PUT, the publisher saves original metadata and version snapshots under
+`.engine/releases/achievement-assets/run-*`. Each run has a unique 0700 directory,
+exclusive-created 0600 snapshots, and fsynced files/directories. Failure to persist
+backups or the initial receipt stops uploads. Retries never overwrite prior runs.
+The per-run `upload-receipt.json` references snapshot paths and SHA-256 hashes;
+credentials/request headers are not included. Preserve these records if an upload
+fails. Recovery is manual and limited to affected named assets after inspection;
+this tool deliberately provides no broad metadata restore operation.

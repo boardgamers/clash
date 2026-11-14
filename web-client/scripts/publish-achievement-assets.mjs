@@ -1,7 +1,7 @@
 // Offline by default. This tool only writes named assets, never game metadata,
 // gallery, engine releases, activation, or viewer configuration.
 import assert from 'node:assert/strict';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, mkdir, mkdtemp, chmod, open, rename, rmdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -22,8 +22,35 @@ function httpsUrl(value) {
   }
 }
 
-// License clearance is a human review, not inferred from a filename or an icon
-// site's general license. PNG provenance must contain:
+// Narrow, user-authorized reuse of the exact four symbols already served by Clash.
+// These pins establish project identity/history, NOT per-item license clearance.
+const existingProjectPngs = {
+  'achievement-faction-rome': [
+    'client/assets/colosseum-rome-svgrepo-com.png',
+    '660f60ac288e2ed97ae208fce824ec4b39681008b68429b82b76f9dfeefb6d67',
+    '603be9b8f0a361bebcef69d019c6451d75255eb8',
+  ],
+  'achievement-faction-greece': [
+    'client/assets/temple-building-with-columns-svgrepo-com.png',
+    '939ab2c36bb3f29aa066348f5ea0f8418e76442f1fcae1537a27ec1706a57e0f',
+    '7fc48ab4187c9d8bb874b11ec2581ce1b4a1fc97',
+  ],
+  'achievement-faction-china': [
+    'client/assets/great-wall-of-china-chinese-svgrepo-com.png',
+    'edc3bfe45c937482fedb708bcd794ed589241f96b095a55daa25be7bb4656e3c',
+    '603be9b8f0a361bebcef69d019c6451d75255eb8',
+  ],
+  'achievement-faction-vikings': [
+    'client/assets/viking-ship-svgrepo-com.png',
+    'a195e2fcafbb2338a6b79c05f55f6c3e5aa64fd68352c30f82e13b8d9094274b',
+    '77bfc205eec2b664b24846753e0680ebf6ec9740',
+  ],
+};
+const existingViewer =
+  'https://s3.fr-par.scw.cloud/bgs-assets/games/clash/1/viewer/assets-890e8364e4f3fe49236b/viewer.js';
+
+// Other PNGs still need matched source/license evidence, not a filename or a
+// site's general license. Their provenance must contain:
 // license: nonempty license identifier/text; sourceUrl: exact HTTPS artwork URL;
 // verification: { sourceUrl, sourceSha256, license, evidence }.
 // The first three verification fields must match this source exactly; evidence
@@ -33,6 +60,24 @@ export function licenseBlockers(manifest) {
   return manifest.assets.flatMap(({ key, source }) => {
     const p = source.provenance ?? {};
     const errors = [];
+    if (p.type === 'verified-existing-project-asset') {
+      const pin = existingProjectPngs[key];
+      const valid =
+        source.type === 'png' &&
+        pin &&
+        source.path === pin[0] &&
+        source.sha256 === pin[1] &&
+        p.sourcePath === pin[0] &&
+        p.sourceSha256 === pin[1] &&
+        p.historicalCommit === pin[2] &&
+        p.license === null &&
+        p.licenseStatus === 'per-item-license-unverified' &&
+        p.existingUse?.viewerUrl === existingViewer &&
+        p.existingUse?.embeddedPngSha256 === pin[1] &&
+        nonempty(p.existingUse?.evidence) &&
+        p.authorization === 'explicit-user-request-to-reuse-established-project-artwork';
+      return valid ? [] : [{ key, reason: 'invalid verified existing project asset evidence' }];
+    }
     if (!nonempty(p.license)) errors.push('missing license');
     if (source.type === 'png') {
       if (!httpsUrl(p.sourceUrl)) errors.push('missing unsigned HTTPS sourceUrl');
@@ -114,6 +159,59 @@ async function loadLocal() {
   return { manifest, receipt, receiptBytes, files };
 }
 
+async function syncDirectory(directory) {
+  const handle = await open(directory, 'r');
+  try {
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+}
+
+async function writeExclusive(file, bytes) {
+  const handle = await open(file, 'wx', 0o600);
+  try {
+    await handle.chmod(0o600);
+    await handle.writeFile(bytes);
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+}
+
+// Only the two source JSON responses belong here: never request options or credentials.
+// Each attempt gets a new directory; even failed attempts retain their originals.
+export async function persistBackup(
+  { meta, version },
+  baseDirectory = path.join(path.dirname(outputDir), 'releases', 'achievement-assets'),
+) {
+  await mkdir(baseDirectory, { recursive: true, mode: 0o700 });
+  const directory = await mkdtemp(path.join(baseDirectory, 'run-'));
+  await chmod(directory, 0o700);
+  const result = { directory, receiptPath: path.join(directory, 'upload-receipt.json') };
+  for (const [name, value] of Object.entries({ meta, version })) {
+    const bytes = Buffer.from(JSON.stringify(value, null, 2) + '\n');
+    const file = path.join(directory, `${name}.json`);
+    await writeExclusive(file, bytes);
+    result[name] = { path: file, sha256: sha256(bytes) };
+  }
+  await syncDirectory(directory);
+  await syncDirectory(baseDirectory);
+  await syncDirectory(path.dirname(baseDirectory));
+  return result;
+}
+
+async function saveBackupReceipt(backup, data) {
+  // Exclusive temporary file + rename keeps the previous receipt intact on failure.
+  const temporary = await mkdtemp(path.join(backup.directory, '.receipt-'));
+  await chmod(temporary, 0o700);
+  const file = path.join(temporary, 'receipt.json');
+  await writeExclusive(file, JSON.stringify(data, null, 2) + '\n');
+  await rename(file, backup.receiptPath);
+  await rmdir(temporary);
+  await syncDirectory(backup.directory);
+}
+
 export async function run(args = [], dependencies = {}) {
   assert.ok(
     args.every((a) => a === '--publish' || a === '--dry-run' || /^--reviewed-sha256=[a-f0-9]{64}$/.test(a)),
@@ -147,12 +245,7 @@ export async function run(args = [], dependencies = {}) {
   ).trim();
   assert.ok(token.length > 0, 'Missing admin token');
   const fetcher = dependencies.fetch ?? globalThis.fetch;
-  const save =
-    dependencies.save ??
-    ((data) =>
-      writeFile(path.join(outputDir, 'upload-receipt.json'), JSON.stringify(data, null, 2) + '\n', {
-        mode: 0o600,
-      }));
+
   // Never echo remote bodies, errors, headers, or tokens (including fetch errors).
   try {
     async function request(url, options = {}) {
@@ -175,11 +268,14 @@ export async function run(args = [], dependencies = {}) {
     }
     const before = await api('/gameinfo/clash/meta');
     const gameBefore = await api('/gameinfo/clash/1');
+    const backup = await (dependencies.persistBackup ?? persistBackup)({ meta: before, version: gameBefore });
+    const save = dependencies.save ?? ((data) => saveBackupReceipt(backup, data));
     const uploads = [];
     const evidence = {
       formatRevision: 1,
       achievementRevision: receipt.revision,
       reviewedReceiptSha256: reviewedSha256,
+      backup,
       assets: uploads,
       status: 'incomplete',
     };

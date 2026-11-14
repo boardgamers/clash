@@ -152,7 +152,7 @@ if (process.argv.includes('--check')) {
           `<figure><img src="data:image/png;base64,${first[i].data}"><figcaption>${a.civilization}<br><small>${a.key}</small></figcaption></figure>`,
       )
       .join('');
-    const html = `<!doctype html><meta charset="utf-8"><title>Achievement artwork review — local only</title><style>body{font:16px sans-serif;margin:24px;background:#fff;color:#18212b}section{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;padding:16px}figure{margin:0;text-align:center}img{width:192px;height:192px}figcaption{padding:8px}small{font-size:11px}.dark{background:#18212b;color:#fff}</style><h1>Local achievement artwork review</h1><p>15 canonical symbols. PNG provenance unresolved; not publication approval.</p><section>${cards}</section><h2>Dark surround</h2><section class="dark">${cards}</section>`;
+    const html = `<!doctype html><meta charset="utf-8"><title>Achievement artwork review — local only</title><style>body{font:16px sans-serif;margin:24px;background:#fff;color:#18212b}section{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;padding:16px}figure{margin:0;text-align:center}img{width:192px;height:192px}figcaption{padding:8px}small{font-size:11px}.dark{background:#18212b;color:#fff}</style><h1>Local achievement artwork review</h1><p>15 canonical symbols. Established project PNG reuse; per-item licenses unverified. Final review required.</p><section>${cards}</section><h2>Dark surround</h2><section class="dark">${cards}</section>`;
     await writeFile(path.join(outputDir, 'contact-sheet.html'), html);
     await page.setContent(html);
     await page.screenshot({ path: path.join(outputDir, 'contact-sheet.png'), fullPage: true });
