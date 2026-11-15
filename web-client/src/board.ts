@@ -24,6 +24,7 @@ import { explorationPreview } from './exploration-preview';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
+import { buildingCivilization } from './building-owner';
 import { positionXY } from './model';
 import { terrainInfo } from './terrain';
 import { PieceModels, type BuildingKind } from './piece-models';
@@ -1394,7 +1395,7 @@ export class World {
               const annex = models.building(
                 name,
                 playerColor(buildingOwner, s.colorBlind, s.playerColors),
-                player.civilization,
+                buildingCivilization(buildingOwner, player, s.game.players),
               );
               const place = layout.buildings[j];
               annex.scale.setScalar(place.scale);
@@ -1423,7 +1424,7 @@ export class World {
               const port = models.building(
                 'port',
                 playerColor(city.city_pieces.port, s.colorBlind, s.playerColors),
-                player.civilization,
+                buildingCivilization(city.city_pieces.port, player, s.game.players),
               );
               port.scale.setScalar(portDock.scale);
               dock.add(port);

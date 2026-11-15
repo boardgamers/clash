@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Swords, Ship, Footprints, Landmark, Shield, Skull, Smile, Meh, Frown } from 'lucide-svelte';
+  import { buildingInfo } from './city';
   import BarbarianIcon from './BarbarianIcon.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import { playerColor, playerSymbol } from './types';
@@ -39,6 +40,16 @@
             title={occupant.city.mood_state}><Mood size={17} aria-hidden="true" /></span
           >{/if}</span
       >{/if}
+    {#if occupant.city}
+      {#each Object.entries(occupant.city.city_pieces ?? {}) as [building, owner]}
+        {@const info = buildingInfo[building[0].toUpperCase() + building.slice(1)]}
+        {#if typeof owner === 'number' && owner !== occupant.player.id && info}
+          <span class="foreign-building-icon" style={`color:${playerColor(owner, colorBlind, playerColors)}`}>
+            <info.icon size={17} />
+          </span>
+        {/if}
+      {/each}
+    {/if}
     {#if occupant.army || occupant.ships || occupant.settlers}<span class="strategy-forces">
         {#if occupant.army - occupant.aboard > 0}<span
             >{#if occupant.player.civilization === 'Barbarians'}<BarbarianIcon size={18} />{:else}<Swords

@@ -24,9 +24,12 @@
     >{/if}
   {#if $data.city}
     <div class="tile-hover-buildings">
-      {#each $data.city.buildings as name}
+      {#each $data.city.buildings as { name, civilization }}
         {@const Icon = buildingInfo[name]?.icon ?? Landmark}
-        <span><Icon size={14} />{name}</span>
+        <span
+          ><Icon size={14} />{name}{#if civilization}
+            · {civilization}{/if}</span
+        >
       {/each}
       {#each $data.city.wonders as name}<span><Star size={14} />{name}</span>{/each}
     </div>

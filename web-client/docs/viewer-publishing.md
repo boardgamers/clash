@@ -1441,3 +1441,33 @@ Integration also repairs the stale revision-2 achievement test on main to check
 the already-shipped revision-3 catalog and both artwork sets. The artwork input
 lockfile hash is refreshed solely for the viewer version bump; dependencies and
 artwork bytes are unchanged. No achievement publication is performed.
+
+# Viewer 0.1.219 / engine unchanged (0.4.152)
+
+Every city building, including waterfront Ports, uses its actual owner's normal
+civilization model and material palette, rather than the host city's architecture.
+City centers, city flags, same-owner buildings, ships and placement are unchanged.
+Strategy view shows foreign buildings using their owner-colored icons; no extra
+on-board civilization text, outlines or flags are added. City hover details name
+only foreign building owners (for example, “Temple · Greece”), including Ports;
+same-owner buildings remain uncluttered. Owner lookup uses player IDs, with a safe
+host-city fallback for missing owners. No prototype URL switches remain.
+
+This is viewer-only: preserve the deployed 0.4.152 engine URL and bytes. Publish
+without `--engine`, preserving achievements, real-game gallery, preferences,
+settings, tutorial and game-length labels/order/default Standard. No live moves,
+history repairs, Fossil refresh, or unrelated rules changes are included. The
+artwork manifest's lockfile hash changes only for the viewer version bump.
+
+Regression coverage includes owner lookup and malformed IDs, actual Temple,
+Academy and Port geometry/indices/material equality with normal Greek models
+(and inequality with Roman models), all six Port orientations, city and water-route
+picking, a four-ship harbor, plus built-viewer desktop/mobile 3D and Strategy hover
+ownership and same-owner controls. These fixtures are isolated from live games
+and do not replace the public gallery.
+
+Verified locally: 1,081 frontend tests, four gallery tests, 19 achievement checks
+(two existing artifact-dependent skips), both clients' 17-locale catalogs and
+extraction, Svelte with zero errors/warnings, and production build. Ownership
+browser checks also verify every building kind and English/German hover names;
+existing tile-hover, structure-owner and split-WASM bundle checks pass.
