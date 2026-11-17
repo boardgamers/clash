@@ -1471,3 +1471,54 @@ Verified locally: 1,081 frontend tests, four gallery tests, 19 achievement check
 extraction, Svelte with zero errors/warnings, and production build. Ownership
 browser checks also verify every building kind and English/German hover names;
 existing tile-hover, structure-owner and split-WASM bundle checks pass.
+
+# Viewer 0.1.220 / engine 0.4.153
+
+Waiting combatants can privately queue a tactics card in the ordinary Tactics
+panel after their own combat-start decisions (including Steel Weapons) finish.
+The normal printed card names, battle rules and Combat Forces are reused, without
+an Abilities detour or extra opening step. Own Steel Weapons remains the live
+payment prompt first; unresolved opposing Steel Weapons is shown as pending,
+with its conditional bonus. Queue tactics saves or replaces the choice, Cancel
+removes it, and Skip queues no tactics. The redundant “Discards the selected
+card” footer is removed from both queued and live tactics; actual card effect
+rules and discard decisions are unchanged. Monte Carlo estimates remain on live
+choices, not provisional queued decisions.
+
+Queues are battle-round scoped private metadata: they do not move cards, spend
+resources, advance time or append history. The normal tactics handler revalidates
+and consumes the saved choice exactly once, preserving face-down commitments,
+reveal order, effects and normal replay actions. Missing cards and late Scout
+ineligibility return to the ordinary prompt. Skipped abilities, completed rounds,
+and undo/redo cannot carry a plan into another battle. Opponents and spectators
+receive neither queued content nor its bookkeeping flag. The viewer adapter only
+accepts single authorized cards present in the owner's hand, never placeholder 0.
+
+The disposable localhost match has a real-engine Steel/tactics fixture, readable
+native selectors in both themes, and persisted fixture restart across tabs. The
+rejected standalone simulated queue prototype and its unused EarlyChoices hooks
+are not included. No production moves, game repairs, achievement/gallery updates,
+Fossil refresh, or unrelated card/rules changes are part of this release.
+
+Verification includes the complete Rust 1.94.1 workspace suite, 11 focused native
+queue tests, frontend and packed-engine queue/privacy/replay regressions, both
+17-locale catalogs and source extraction, Svelte, bridge and production builds.
+Built-viewer queue/edit/cancel/skip and live tactics checks run at 1400, 390 and
+320px, including absence of the removed footer. Existing Steel payment, combat
+forces, journal, playback and split-WASM browser regressions are also exercised.
+Achievement artwork is generated locally solely to exercise the two otherwise
+artifact-dependent validation tests; it is not republished. Existing Clippy
+warnings and expected rejected-move WASM diagnostics remain.
+
+Publish only after matching main-branch CI passes, using the supported publisher
+with the tested 0.4.153 engine package. Independently compare every hosted viewer
+asset and the engine package against the frozen tested build; preserve all other
+BGS metadata, especially real-game gallery, achievements, and game-length
+labels/order with the Standard default.
+
+Local result: 528 native tests passed (one existing ignored); 1,086 frontend
+tests, four gallery checks, 21 achievement checks with no artifact-dependent
+skips, and four localization-source tests passed. One full native rerun hit the
+pre-existing random-actions Tributes eligibility rejection; a subsequent complete
+workspace rerun passed without skipping or changing it. No Tributes rule changes
+are included. Svelte reports zero errors/warnings.

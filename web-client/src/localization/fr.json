@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Préparer la tactique",
+  "Queued": "En attente",
+  "Steel Weapons pending: +{p0} value if activated": "Armes en acier en attente : +{p0} en valeur si activées",
+  "No tactics": "Aucune tactique",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Choisir un autre joueur. Vous ne pouvez pas vous attaquer, sauf si l’attaquant paie 2 jetons de culture au défenseur. Défaussez cette carte si l'un des joueurs attaque l'autre. Vous pouvez défausser la carte comme action normale.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Choisir un autre joueur. Vous ne pouvez pas vous attaquer, sauf si l’attaquant paie 2 jetons de culture au défenseur. Défaussez cette carte si l'un des joueurs attaque l'autre. Vous pouvez défausser la carte comme action normale.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Immédiatement après avoir construit la première Merveille de la partie, ou en phase de statut si vous êtes le seul joueur à avoir construit des Merveilles lors de la dernière manche.",
@@ -1021,7 +1025,6 @@
   "Discard {p0} at {p1}": "Défausser {p0} à {p1}",
   "Discard {p0} for recruitment": "Défausser {p0} pour le recrutement",
   "Discarded card rules": "Règles de la carte défaussée",
-  "Discards the selected card": "Défausse la carte sélectionnée",
   "Disembark": "Débarquer",
   "Disembark the Settler to found a city": "Débarquez le Colon pour fonder une ville",
   "Disembark units": "Débarquer des unités",

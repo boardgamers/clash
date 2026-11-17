@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 export const previewScenarios = [
+  { id: 'tactics', label: 'Tactics · Steel Weapons', note: 'Local engine match. Queue tactics privately, then switch seats to resolve Steel Weapons and play the battle.' },
   { id: 'advance', label: 'Free advance', note: 'Research lets you save an early choice.' },
   { id: 'raze', label: 'Raze city', note: 'Cities lets you save an early choice.' },
   { id: 'objectives-before', label: 'Objectives · during turn', note: 'Queue in Objectives now; conditions are checked again before scoring.' },
@@ -13,7 +14,7 @@ export const previewScenarios = [
 export async function createPreviewScenario(engine: any, id: string) {
   if (!previewScenarios.some(s => s.id === id)) throw Error('Unknown preview scenario');
   const names: Record<string, string> = {
-    advance: 'status_phase/free_advance', raze: 'status_phase/raze_city_decline',
+    tactics: 'tactics_cards/peltasts', advance: 'status_phase/free_advance', raze: 'status_phase/raze_city_decline',
     'objectives-before': 'objective_cards/status_phase/standing_army', objectives: 'objective_cards/status_phase/standing_army', person: 'incidents/pirates_spawn',
     government: 'status_phase/change_government', first: 'status_phase/change_government',
   };
@@ -28,12 +29,24 @@ export async function createPreviewScenario(engine: any, id: string) {
     game.action_cards_left = game.action_cards_left?.filter((card: number) => ![7, 9, 17].includes(card));
   }
   if (id === 'government' || id === 'first') { game.players[1].advances = [...game.players[0].advances]; game.players[0].resources.mood_tokens = 6; }
+  if (id === 'tactics') {
+    delete game.dice_roll_outcomes;
+    delete game.dice_roll_log;
+    for (const p of game.players.slice(0, 2)) {
+      p.advances = [...new Set([...p.advances, 'Tactics', 'SteelWeapons'])];
+      p.resources.ore = 4; p.resources.gold = 3;
+    }
+    game.players[0].action_cards = [3, 6, 11];
+    game.players[1].action_cards = [4, 7, 23];
+    game.action_cards_left = game.action_cards_left?.filter((card: number) => ![3, 6, 11, 4, 7, 23].includes(card));
+  }
   let state = JSON.stringify(game);
   const apply = (action: unknown) => { state = engine.tryMove(state, JSON.stringify(action), engine.currentPlayer(state)); };
+  if (id === 'tactics') apply({ Movement: { Move: { units: [0, 1, 2], destination: 'C1', payment: {} } } });
   if (id === 'advance' || id === 'objectives') apply({ Playing: 'EndTurn' });
   if (id === 'government' || id === 'first') apply({ Response: { SelectPositions: [] } });
   if (id === 'person') for (const response of [{ SelectAdvance: 'Storage' }, { SelectPositions: ['A2'] }, { SelectPositions: ['D1'] }, { Payment: [{ food: 1 }] }]) apply({ Response: response });
-  const seat = id === 'objectives-before' ? 1 : 1 - engine.currentPlayer(state);
+  const seat = id === 'tactics' ? 0 : id === 'objectives-before' ? 1 : 1 - engine.currentPlayer(state);
   // Check the fixture can be rendered from both seats before replacing the preview.
   for (const player of [0, 1]) engine.webView(engine.stripSecret(state, player), player);
   return { state, seat };

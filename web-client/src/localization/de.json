@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Taktik vormerken",
+  "Queued": "Vorgemerkt",
+  "Steel Weapons pending: +{p0} value if activated": "Stahlwaffen ausstehend: +{p0} Wert bei Aktivierung",
+  "No tactics": "Keine Taktik",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Wähle einen anderen Spieler. Ihr könnt euch nicht gegenseitig angreifen, es sei denn, der Angreifer zahlt dem Verteidiger 2 Kulturmarker. Lege diese Karte ab, falls ein Spieler den anderen angreift. Du darfst die Karte als reguläre Aktion ablegen.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Wähle einen anderen Spieler. Ihr könnt euch nicht gegenseitig angreifen, es sei denn, der Angreifer zahlt dem Verteidiger 2 Kulturmarker. Lege diese Karte ab, falls ein Spieler den anderen angreift. Du darfst die Karte als reguläre Aktion ablegen.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Sofort nach dem Bau des ersten Weltwunders im Spiel oder in der Statusphase, wenn nur du in der letzten Runde Weltwunder gebaut hast.",
@@ -1021,7 +1025,6 @@
   "Discard {p0} at {p1}": "{p0} bei {p1} abwerfen",
   "Discard {p0} for recruitment": "{p0} für Rekrutierung abwerfen",
   "Discarded card rules": "Regeln der abgeworfenen Karte",
-  "Discards the selected card": "Wirft die gewählte Karte ab",
   "Disembark": "Anlanden",
   "Disembark the Settler to found a city": "Lass den Siedler an Land gehen, um eine Stadt zu gründen",
   "Disembark units": "Einheiten ausschiffen",

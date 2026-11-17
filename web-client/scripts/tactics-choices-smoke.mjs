@@ -102,8 +102,8 @@ try {
       assert(await panel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
       if (width < 760) {
         const bounds = await panel.boundingBox();
-        assert(bounds.height <= 400 && bounds.height < height * 0.6);
-        assert(bounds.y >= 100 && bounds.y + bounds.height <= height - 55);
+        assert(bounds.height < height - 76);
+        assert(bounds.y >= 60 && bounds.y + bounds.height <= height - 55);
         assert((await play.boundingBox()).width < 170);
       }
       await play.scrollIntoViewIfNeeded();

@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "預選戰術",
+  "Queued": "已預選",
+  "Steel Weapons pending: +{p0} value if activated": "鋼製武器待決定：啟用後戰鬥值+{p0}",
+  "No tactics": "不使用戰術",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "選擇另一位玩家。除非攻擊方向防守方支付2個文化標記，否則你們不能互相攻擊。若任一方攻擊另一方，棄掉此卡。你可以將棄掉此卡作為一個常規行動。",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} 選擇另一位玩家。除非攻擊方向防守方支付2個文化標記，否則你們不能互相攻擊。若任一方攻擊另一方，棄掉此卡。你可以將棄掉此卡作為一個常規行動。",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "建造本局首座奇觀後立即完成；或在狀態階段完成，條件是上一輪只有你建造過奇觀。",
@@ -956,7 +960,6 @@
   "Discard {p0} at {p1}": "在 {p1} 移除 {p0}",
   "Discard {p0} for recruitment": "為招募移除 {p0}",
   "Discarded card rules": "棄置卡牌規則",
-  "Discards the selected card": "棄置所選卡牌",
   "Disembark": "登陸",
   "Disembark the Settler to found a city": "讓移民登陸後才能建立城市",
   "Disembark units": "登陸單位",

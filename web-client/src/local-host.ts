@@ -70,6 +70,12 @@ async function refresh(force = false) {
     const response = await fetch(`/api/state?seat=${seatSelect.value}`);
     const data = await response.json();
     if (!response.ok) throw Error(data.error);
+    // The persisted local engine, not a tab's session, owns the active fixture.
+    const activeScenario = scenarios.find(s => s.id === data.activeScenario);
+    scenarioSelect.value = activeScenario?.id ?? '';
+    restartScenario.disabled = !activeScenario;
+    scenarioNote.textContent = activeScenario?.note ?? '';
+    scenarioNote.style.display = activeScenario ? 'block' : 'none';
     if (force || data.revision !== revision || data.seat !== seat) {
       revision = data.revision;
       seat = data.seat;
@@ -202,9 +208,7 @@ let scenarios: {id: string; label: string; note: string}[] = [];
 fetch('/api/scenarios').then(r => r.json()).then(data => {
   scenarios = data;
   for (const item of scenarios) scenarioSelect.add(new Option(item.label, item.id));
-  const remembered = sessionStorage.getItem('clash-preview-scenario');
-  const scenario = scenarios.find(s => s.id === remembered);
-  if (scenario) { scenarioSelect.value = scenario.id; restartScenario.disabled = false; scenarioNote.textContent = scenario.note; scenarioNote.style.display = 'block'; }
+  void refresh(true);
 });
 async function loadScenario() {
   if (!scenarioSelect.value) return;

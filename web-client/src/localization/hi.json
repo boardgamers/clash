@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "रणनीति कतार में रखें",
+  "Queued": "कतार में",
+  "Steel Weapons pending: +{p0} value if activated": "इस्पात हथियार लंबित: सक्रिय होने पर +{p0} मूल्य",
+  "No tactics": "कोई रणनीति नहीं",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "दूसरा खिलाड़ी चुनें। आप एक-दूसरे पर हमला नहीं कर सकते, जब तक कि हमलावर रक्षक को 2 संस्कृति टोकन का भुगतान न करे। यदि कोई भी खिलाड़ी दूसरे पर हमला करता है तो यह कार्ड त्याग दें। आप नियमित क्रिया के रूप में कार्ड त्याग सकते हैं।",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} दूसरा खिलाड़ी चुनें। आप एक-दूसरे पर हमला नहीं कर सकते, जब तक कि हमलावर रक्षक को 2 संस्कृति टोकन का भुगतान न करे। यदि कोई भी खिलाड़ी दूसरे पर हमला करता है तो यह कार्ड त्याग दें। आप नियमित क्रिया के रूप में कार्ड त्याग सकते हैं।",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "खेल का पहला अजूबा बनाने के तुरंत बाद, या स्थिति चरण में यदि पिछले दौर में केवल आपने अजूबे बनाए थे।",
@@ -956,7 +960,6 @@
   "Discard {p0} at {p1}": "{p1} पर {p0} त्यागें",
   "Discard {p0} for recruitment": "भर्ती के लिए {p0} त्यागें",
   "Discarded card rules": "त्यागे गए कार्ड के नियम",
-  "Discards the selected card": "चुने हुए कार्ड को त्यागता है",
   "Disembark": "उतरें",
   "Disembark the Settler to found a city": "नगर बसाने के लिए बसने वाले को जहाज़ से उतारें",
   "Disembark units": "इकाइयाँ उतारें",

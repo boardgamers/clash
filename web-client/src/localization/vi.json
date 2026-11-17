@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Xếp chiến thuật vào hàng đợi",
+  "Queued": "Đã xếp hàng",
+  "Steel Weapons pending: +{p0} value if activated": "Vũ khí thép đang chờ: +{p0} giá trị nếu kích hoạt",
+  "No tactics": "Không dùng chiến thuật",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Chọn người chơi khác. Các bạn không thể tấn công nhau, trừ khi người tấn công trả cho người phòng thủ 2 token văn hóa. Loại bỏ thẻ này nếu một trong hai người chơi tấn công người kia. Bạn có thể loại bỏ thẻ như một hành động thường.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Chọn người chơi khác. Các bạn không thể tấn công nhau, trừ khi người tấn công trả cho người phòng thủ 2 token văn hóa. Loại bỏ thẻ này nếu một trong hai người chơi tấn công người kia. Bạn có thể loại bỏ thẻ như một hành động thường.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Ngay sau khi xây Kỳ quan đầu tiên của ván chơi, hoặc trong giai đoạn trạng thái nếu bạn là người duy nhất xây Kỳ quan trong vòng vừa qua.",
@@ -956,7 +960,6 @@
   "Discard {p0} at {p1}": "Loại bỏ {p0} tại {p1}",
   "Discard {p0} for recruitment": "Loại bỏ {p0} để tuyển quân",
   "Discarded card rules": "Luật lá bài đã bỏ",
-  "Discards the selected card": "Bỏ lá bài đã chọn",
   "Disembark": "Lên bờ",
   "Disembark the Settler to found a city": "Cho Người định cư lên bờ để lập thành phố",
   "Disembark units": "Cho quân lên bờ",

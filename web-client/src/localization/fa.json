@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "تاکتیک را در صف بگذار",
+  "Queued": "در صف",
+  "Steel Weapons pending: +{p0} value if activated": "سلاح‌های فولادی در انتظار: +{p0} قدرت در صورت فعال‌سازی",
+  "No tactics": "بدون تاکتیک",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "بازیکن دیگری انتخاب کنید. مگر با پرداخت ۲ نشان فرهنگ از مهاجم به مدافع، به هم حمله نمی‌کنید. اگر یکی حمله کرد، این کارت را دور بیندازید. می‌توانید با اقدام عادی هم کارت را دور بیندازید.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} بازیکن دیگری انتخاب کنید. مگر با پرداخت ۲ نشان فرهنگ از مهاجم به مدافع، به هم حمله نمی‌کنید. اگر یکی حمله کرد، این کارت را دور بیندازید. می‌توانید با اقدام عادی هم کارت را دور بیندازید.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "بلافاصله پس از ساخت نخستین شگفتی بازی، یا در مرحله وضعیت اگر تنها بازیکنی بودید که در دور گذشته شگفتی ساخته است.",
@@ -1031,7 +1035,6 @@
   "Discard {p0} at {p1}": "حذف {p0} در {p1}",
   "Discard {p0} for recruitment": "حذف {p0} برای جذب نیرو",
   "Discarded card rules": "قوانین کارت دورریخته‌شده",
-  "Discards the selected card": "کارت انتخاب‌شده را دور می‌اندازد",
   "Disembark": "پیاده شدن",
   "Disembark the Settler to found a city": "برای بنای شهر، مهاجر را از کشتی پیاده کنید",
   "Disembark units": "پیاده‌کردن واحدها",

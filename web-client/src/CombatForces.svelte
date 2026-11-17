@@ -100,4 +100,10 @@
     color: var(--muted);
     font-style: italic;
   }
+  @media (max-width: 760px) {
+    .combat-forces { padding: 6px; margin: 6px 0; }
+    .combat-table { margin: 3px 0; }
+    .combat-table th, .combat-table td { padding: 4px 3px; font-size: 10px; }
+    .detail { font-size: 10px; line-height: 1.25; }
+  }
 </style>

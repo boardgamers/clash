@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Tactiek klaarzetten",
+  "Queued": "Klaargezet",
+  "Steel Weapons pending: +{p0} value if activated": "Stalen wapens in afwachting: +{p0} waarde indien geactiveerd",
+  "No tactics": "Geen tactiek",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Kies een andere speler. Jullie kunnen elkaar niet aanvallen, tenzij de aanvaller de verdediger 2 cultuurfiches betaalt. Leg deze kaart af als een van beide spelers de ander aanvalt. Je mag de kaart afleggen als een gewone actie.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Kies een andere speler. Jullie kunnen elkaar niet aanvallen, tenzij de aanvaller de verdediger 2 cultuurfiches betaalt. Leg deze kaart af als een van beide spelers de ander aanvalt. Je mag de kaart afleggen als een gewone actie.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Direct na het bouwen van het eerste wereldwonder in het spel, of in de statusfase als jij de enige speler was die in de laatste ronde wereldwonderen bouwde.",
@@ -1021,7 +1025,6 @@
   "Discard {p0} at {p1}": "{p0} op {p1} afleggen",
   "Discard {p0} for recruitment": "{p0} afleggen voor rekrutering",
   "Discarded card rules": "Regels van de afgelegde kaart",
-  "Discards the selected card": "Legt de geselecteerde kaart af",
   "Disembark": "Ontschepen",
   "Disembark the Settler to found a city": "Laat de Kolonist aan land gaan om een stad te stichten",
   "Disembark units": "Eenheden ontschepen",

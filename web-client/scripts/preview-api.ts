@@ -14,10 +14,12 @@ export function previewApi(): Plugin {
         fileURLToPath(new URL('../.engine/preview-state.json', import.meta.url));
       let state: string;
       let revision = 0;
+      let activeScenario: string | null = null;
       let messages: any[] = [];
       let readAt: Record<string, number> = {};
-      const persist = () => writeFileSync(save, JSON.stringify({ state, revision, messages, readAt }));
+      const persist = () => writeFileSync(save, JSON.stringify({ state, revision, messages, readAt, activeScenario }));
       const reset = async () => {
+        activeScenario = null;
         state = await engine.init(2, [], { civilization: 'Random' }, 'clash-preview-20260927', {});
         for (let i = 0; i < 2; i++)
           state = engine.setPlayerMetaData(state, i, { name: ['Leif', 'Aurelia'][i] });
@@ -30,6 +32,7 @@ export function previewApi(): Plugin {
         if (existsSync(save)) {
           const saved = JSON.parse(readFileSync(save, 'utf8'));
           state = saved.state;
+          activeScenario = saved.activeScenario ?? null;
           revision = saved.revision;
           messages = saved.messages;
           readAt = saved.readAt ?? {};
@@ -98,6 +101,7 @@ export function previewApi(): Plugin {
             if (req.method !== 'POST') { res.end(JSON.stringify(previewScenarios)); return; }
             const scenario = await createPreviewScenario(engine, body.id);
             state = scenario.state;
+            activeScenario = body.id;
             revision++;
             messages = []; readAt = {};
             persist();
@@ -161,6 +165,7 @@ export function previewApi(): Plugin {
               settings: seat === undefined ? null : engine.playerSettings(state, seat),
               seat,
               revision,
+              activeScenario,
               messages,
               lastReadAt: readAt[String(seat)] ?? 0,
             }),

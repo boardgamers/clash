@@ -1,6 +1,6 @@
 {
   "name": "@boardgamers/clash-web-client",
-  "version": "0.1.219",
+  "version": "0.1.220",
   "private": true,
   "type": "module",
   "scripts": {

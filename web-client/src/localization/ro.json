@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Pregătește tactica",
+  "Queued": "În așteptare",
+  "Steel Weapons pending: +{p0} value if activated": "Arme de oțel în așteptare: +{p0} valoare dacă sunt activate",
+  "No tactics": "Fără tactică",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Alege alt jucător. Nu vă puteți ataca reciproc, decât dacă atacatorul plătește apărătorului 2 jetoane de cultură. Aruncă această carte dacă oricare jucător îl atacă pe celălalt. Poți arunca cartea ca acțiune obișnuită.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Alege alt jucător. Nu vă puteți ataca reciproc, decât dacă atacatorul plătește apărătorului 2 jetoane de cultură. Aruncă această carte dacă oricare jucător îl atacă pe celălalt. Poți arunca cartea ca acțiune obișnuită.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Imediat după construirea primei Minuni din joc sau în faza de statut dacă ai fost singurul jucător care a construit Minuni în ultima rundă.",
@@ -1031,7 +1035,6 @@
   "Discard {p0} at {p1}": "Elimină {p0} la {p1}",
   "Discard {p0} for recruitment": "Elimină {p0} pentru recrutare",
   "Discarded card rules": "Regulile cărții decartate",
-  "Discards the selected card": "Decartează cartea aleasă",
   "Disembark": "Debarcă",
   "Disembark the Settler to found a city": "Debarcă Colonistul pentru a întemeia un oraș",
   "Disembark units": "Debarcă unități",

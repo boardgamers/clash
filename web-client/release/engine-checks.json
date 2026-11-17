@@ -8,9 +8,9 @@
       "missing": []
     },
     "optional": {
-      "completed": 15,
-      "total": 28,
-      "percent": 54,
+      "completed": 17,
+      "total": 30,
+      "percent": 57,
       "missing": [
         "presenceChanged",
         "phase",

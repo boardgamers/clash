@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Prepara tattica",
+  "Queued": "In attesa",
+  "Steel Weapons pending: +{p0} value if activated": "Armi d’acciaio in attesa: +{p0} al valore se attivate",
+  "No tactics": "Nessuna tattica",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Scegli un altro giocatore. Non potete attaccarvi a vicenda, a meno che l'attaccante non paghi 2 segnalini cultura al difensore. Scarta questa carta se uno dei due giocatori attacca l'altro. Puoi scartare la carta come azione regolare.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Scegli un altro giocatore. Non potete attaccarvi a vicenda, a meno che l'attaccante non paghi 2 segnalini cultura al difensore. Scarta questa carta se uno dei due giocatori attacca l'altro. Puoi scartare la carta come azione regolare.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Subito dopo aver costruito la prima Meraviglia della partita, oppure nella fase di stato se sei stato l'unico giocatore a costruire Meraviglie nell'ultimo round.",
@@ -1021,7 +1025,6 @@
   "Discard {p0} at {p1}": "Scarta {p0} a {p1}",
   "Discard {p0} for recruitment": "Scarta {p0} per il reclutamento",
   "Discarded card rules": "Regole della carta scartata",
-  "Discards the selected card": "Scarta la carta selezionata",
   "Disembark": "Sbarca",
   "Disembark the Settler to found a city": "Sbarca il Colono per fondare una città",
   "Disembark units": "Sbarca le unità",

@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "전술 예약",
+  "Queued": "예약됨",
+  "Steel Weapons pending: +{p0} value if activated": "강철 무기 대기 중: 활성화 시 전투력 +{p0}",
+  "No tactics": "전술 없음",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "다른 플레이어를 선택하세요. 공격자가 방어자에게 문화 토큰 2개를 지불하지 않으면 서로 공격할 수 없습니다. 어느 플레이어가 다른 플레이어를 공격하면 이 카드를 버립니다. 일반 행동으로 카드를 버릴 수 있습니다.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} 다른 플레이어를 선택하세요. 공격자가 방어자에게 문화 토큰 2개를 지불하지 않으면 서로 공격할 수 없습니다. 어느 플레이어가 다른 플레이어를 공격하면 이 카드를 버립니다. 일반 행동으로 카드를 버릴 수 있습니다.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "게임의 첫 불가사의를 건설한 직후, 또는 지난 라운드에 불가사의를 건설한 유일한 플레이어라면 상태 단계에 달성합니다.",
@@ -956,7 +960,6 @@
   "Discard {p0} at {p1}": "{p1}에서 {p0} 제거",
   "Discard {p0} for recruitment": "모집을 위해 {p0} 제거",
   "Discarded card rules": "버린 카드 규칙",
-  "Discards the selected card": "선택한 카드를 버립니다",
   "Disembark": "하선",
   "Disembark the Settler to found a city": "도시를 세우려면 개척자를 하선시키세요",
   "Disembark units": "유닛 하선",

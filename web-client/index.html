@@ -46,9 +46,13 @@
         gap: 4px;
         cursor: pointer;
       }
+      /* The host bar stays dark in both viewer themes. Give native controls
+         opaque colors so OS popup/field defaults cannot wash out the labels. */
+      #preview-bar select,
       #preview-bar select option {
-        color: #222;
-        background: #eee;
+        color-scheme: dark;
+        color: #e4e8d9;
+        background-color: #233d35;
       }
       #preview-bar #status {
         margin-left: auto;
@@ -94,7 +98,7 @@
   </head>
   <body>
     <div id="preview-bar">
-      <strong>Design preview</strong
+      <strong>Local engine match</strong
       ><select id="seat" aria-label="Preview player">
         <option value="auto">Hotseat</option>
         <option value="0">Player 1</option>

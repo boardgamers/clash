@@ -12,6 +12,7 @@
   import { onDestroy } from 'svelte';
   import { untrack } from 'svelte';
   import { Check, Sparkles, Layers, BookOpen, ChevronRight, ArrowLeft, X, Zap, Wheat } from 'lucide-svelte';
+  import type { TacticsQueue } from './queued-tactics';
   import type { Controller } from './controller';
   import type { Decision, Move, Pile, UnitKind } from './types';
   import { unitInfo } from './city';
@@ -33,13 +34,18 @@
     controller,
     decision,
     onHighlight,
-  }: { controller: Controller; decision: Decision; onHighlight: (position: string | null) => void } =
+    queue,
+  }: { controller: Controller; decision: Decision; queue?: TacticsQueue; onHighlight: (position: string | null) => void } =
     $props();
   const session = $derived(controller.session);
   const announcedCard = $derived(pendingActionCard($session.view, decision));
   let announcedRulesOpen = $state(false);
   const panelId = $props.id();
-  const selected = $derived($session.decisionSelection);
+  let queuedSelection = $state<number[]>(untrack(() => {
+    const cards = (queue?.selected as {SelectHandCards?: unknown[]} | null)?.SelectHandCards ?? [];
+    return decision.options.flatMap((o, i) => cards.some(c => JSON.stringify(c) === JSON.stringify(o.value)) ? [i] : []);
+  }));
+  const selected = $derived(queue ? queuedSelection : $session.decisionSelection);
   const opponentTactics = $derived(opponentTacticsLabel(decision));
   const resourceChoice = $derived(decision.reward && decision.name === 'Select a resource to gain');
   const title = $derived(resourceChoice ? 'Gain resources' : printedCardName(decision.name));
@@ -133,6 +139,7 @@
     payments = payments.map((p, j) => (i === j ? payment : p));
   }
   const preview = $derived.by(() => {
+    if (queue) return { action: {QueueChoice: {key: queue.key, response: {SelectHandCards: selected.map(i => decision.options[i].value)}}} as Move, error: '' };
     try {
       return {
         ...controller.query<{ action: Move }>({
@@ -168,7 +175,8 @@
     return [...groups.values()].sort((a,b)=>a.order-b.order);
   });
   function toggle(i: number) {
-    controller.selectDecisionOption(i);
+    if (queue) queuedSelection = selected.includes(i) ? [] : [i];
+    else controller.selectDecisionOption(i);
   }
   onDestroy(() => onHighlight(null));
 </script>
@@ -503,7 +511,7 @@
         Always keep cities in future ages
       </label>
     {/if}
-    {#if (decision.tacticsSelection || decision.name === 'Siegecraft') && preview.action}
+    {#if !queue && (decision.tacticsSelection || decision.name === 'Siegecraft') && preview.action}
       <CombatEstimate {controller} action={preview.action} />
     {/if}
     <div class="decision-footer" class:objective-exchange-footer={decision.objectiveExchange} class:map-decision-footer={mapChoice}>
@@ -523,11 +531,15 @@
           onclick={() => preview.action && selected.length === 2 && controller.submit(preview.action)}
           >Exchange objectives<Check size={16} /></button>
       {:else if decision.tacticsSelection}
-        {#if selected.length}<small class="tactics-discard">Discards the selected card</small>{/if}
         <button
           class="secondary"
           disabled={$session.pending}
           onclick={() => {
+            if (queue) {
+              queuedSelection = [];
+              controller.submit({QueueChoice: {key: queue.key, response: {SelectHandCards: []}}});
+              return;
+            }
             const response = controller.query<{ action: Move }>({
               kind: 'decision',
               values: [],
@@ -540,7 +552,7 @@
             class="primary"
             disabled={!preview.action || $session.pending}
             onclick={() => preview.action && controller.submit(preview.action)}
-            >Play tactics<Check size={16} /></button
+            >{queue ? 'Queue tactics' : 'Play tactics'}<Check size={16} /></button
           >{/if}
       {:else}
         {#if decision.options.length && !mapChoice && !firstPlayerChoice}<div class="decision-count">
@@ -561,7 +573,7 @@
           title={preview.error || 'Confirm selection'}
           onclick={() => preview.action && controller.submit(preview.action)}
         >
-          {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : tribalStopChoice ? 'Continue' : 'Confirm'}{#if tribalStopChoice && selected.length}<ResourceAmount pile={{ food: 1 }} compact />{/if}<Check
+          {selected.length === 0 && !decision.fields.length && decision.min === 0 ? 'Skip' : queue ? 'Queue tactics' : tribalStopChoice ? 'Continue' : 'Confirm'}{#if tribalStopChoice && selected.length}<ResourceAmount pile={{ food: 1 }} compact />{/if}<Check
             size={16}
           />
         </button>
@@ -571,6 +583,7 @@
         </p>{/if}
     </div>
   {/if}
+  {#if queue?.selected}<div class="choice-row"><span role="status">Queued</span><button disabled={$session.pending} onclick={() => { queuedSelection = []; controller.submit({QueueChoice: {key: queue!.key, response: null}}); }}>Cancel queued choice</button></div>{/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
 </section>
 

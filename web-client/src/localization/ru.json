@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Запланировать тактику",
+  "Queued": "Запланировано",
+  "Steel Weapons pending: +{p0} value if activated": "Стальное оружие ожидает решения: +{p0} к силе при активации",
+  "No tactics": "Без тактики",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Выберите другого игрока. Вы не можете атаковать друг друга, если атакующий не заплатит защитнику 2 жетона культуры. Сбросьте эту карту, если один из игроков атакует другого. Вы можете сбросить карту как обычное действие.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Выберите другого игрока. Вы не можете атаковать друг друга, если атакующий не заплатит защитнику 2 жетона культуры. Сбросьте эту карту, если один из игроков атакует другого. Вы можете сбросить карту как обычное действие.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Сразу после постройки первого чуда в игре или в фазе статуса, если только вы строили чудеса в последнем раунде.",
@@ -1031,7 +1035,6 @@
   "Discard {p0} at {p1}": "Убрать {p0} в {p1}",
   "Discard {p0} for recruitment": "Убрать {p0} для найма",
   "Discarded card rules": "Правила сброшенной карты",
-  "Discards the selected card": "Сбрасывает выбранную карту",
   "Disembark": "Высадиться",
   "Disembark the Settler to found a city": "Высадите Поселенца, чтобы основать город",
   "Disembark units": "Высадить отряды",

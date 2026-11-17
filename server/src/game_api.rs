@@ -147,6 +147,8 @@ pub fn civilizations(game: Game) -> Vec<String> {
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    // Platform bookkeeping is not public evidence of a private commitment.
+    game.early_choice_update = false;
     crate::calendar_knowledge::strip(&mut game, player_index);
     if game
         .action_plan

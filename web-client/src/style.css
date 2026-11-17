@@ -5173,11 +5173,6 @@ small {
   bottom: -12px;
   padding: 8px 0 12px;
 }
-.tactics-discard {
-  flex: 1 0 100%;
-  color: var(--muted);
-  font-size: 11px;
-}
 .game-shell .tactics-decision .decision-footer button {
   width: auto;
   min-width: 72px;
@@ -5193,7 +5188,8 @@ small {
     right: 8px;
     bottom: calc(56px + var(--mobile-bottom));
     width: auto;
-    max-height: min(54%, 400px);
+    /* Battle forces and the first card must fit without an extra opening step. */
+    max-height: calc(100% - 76px - var(--mobile-bottom));
   }
   .game-shell .tactics-decision .decision-footer button {
     min-height: 40px;
@@ -5299,9 +5295,6 @@ small {
   }
   .game-shell .decision-footer .inline-error {
     flex-basis: 100%;
-  }
-  .game-shell .tactics-discard {
-    flex: 1 1 110px;
   }
 }
 .map-exploration-label {

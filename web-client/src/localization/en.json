@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "Queue tactics",
+  "Queued": "Queued",
+  "Steel Weapons pending: +{p0} value if activated": "Steel Weapons pending: +{p0} value if activated",
+  "No tactics": "No tactics",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.",
@@ -1500,7 +1504,6 @@
   "Discard an action card to cancel another player's non-combat action card when their units or cities are within 2 spaces of your cities or armies. The cancelled card is discarded; its costs are not paid.": "Discard an action card to cancel another player's non-combat action card when their units or cities are within 2 spaces of your cities or armies. The cancelled card is discarded; its costs are not paid.",
   "Discard Pile": "Discard Pile",
   "Discarded card rules": "Discarded card rules",
-  "Discards the selected card": "Discards the selected card",
   "discount cannot rebate culture": "discount cannot rebate culture",
   "discount cannot rebate mood": "discount cannot rebate mood",
   "discount must be used": "discount must be used",

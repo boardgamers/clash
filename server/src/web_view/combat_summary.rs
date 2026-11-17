@@ -51,9 +51,15 @@ pub(super) fn describe(game: &Game) -> Value {
             activated.modifiers.push(modifier);
             let bonus =
                 strength(game, &activated, player).extra_combat_value - s.extra_combat_value;
-            inactive.push(format!(
-                "Steel Weapons not activated: +{bonus} value if activated"
-            ));
+            let pending = game.events.iter().any(|event| {
+                matches!(event.event_type, PersistentEventType::CombatStart(_))
+                    && !event.players_used.contains(&player)
+            });
+            inactive.push(if pending {
+                format!("Steel Weapons pending: +{bonus} value if activated")
+            } else {
+                format!("Steel Weapons not activated: +{bonus} value if activated")
+            });
         }
         if crate::content::civilizations::persia::caps_opponent_bonus(game, c, player) {
             s.extra_combat_value = s.extra_combat_value.min(2);

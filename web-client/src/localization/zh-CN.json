@@ -1,4 +1,8 @@
 {
+  "Queue tactics": "预选战术",
+  "Queued": "已预选",
+  "Steel Weapons pending: +{p0} value if activated": "钢制武器待决定：激活后战斗值+{p0}",
+  "No tactics": "不使用战术",
   "Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "选择另一位玩家。除非攻击方向防守方支付2枚文化标记，否则你们不能互相攻击。任一玩家攻击另一方时弃置此卡。你也可以用一次常规行动弃置此卡。",
   "{p0} Choose another player. You cannot attack each other, unless the attacker pays the defender 2 culture tokens. Discard this card if either player attacks the other. You may discard the card as a regular action.": "{p0} 选择另一位玩家。除非攻击方向防守方支付2枚文化标记，否则你们不能互相攻击。任一玩家攻击另一方时弃置此卡。你也可以用一次常规行动弃置此卡。",
   "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.": "建造本局首座奇迹后立即完成；或在状态阶段完成，条件是上一轮只有你建造过奇迹。",
@@ -1500,7 +1504,6 @@
   "Discard an action card to cancel another player's non-combat action card when their units or cities are within 2 spaces of your cities or armies. The cancelled card is discarded; its costs are not paid.": "当其他玩家的单位或城市距你的城市或军队两格内时，可弃置一张行动卡，取消该玩家的一张非战斗行动卡。被取消卡牌弃置，无需支付其费用。",
   "Discard Pile": "弃牌堆",
   "Discarded card rules": "已弃置卡牌规则",
-  "Discards the selected card": "弃置所选卡牌",
   "discount cannot rebate culture": "折扣不能返还文化",
   "discount cannot rebate mood": "折扣不能返还心情",
   "discount must be used": "必须使用折扣",

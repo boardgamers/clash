@@ -31,6 +31,99 @@ pub struct Offer {
     pub selected: Option<EventResponse>,
 }
 
+// A plan belongs to this battle round, not to a transient event phase.
+fn tactics_key(game: &Game, combat: &crate::combat::Combat) -> String {
+    format!(
+        "{}:{}:{}:{}:{}:{}:{}/tactics",
+        game.age,
+        game.round,
+        game.current_player_index,
+        game.actions_left,
+        combat.attacker(),
+        combat.defender_position(),
+        combat.stats.round
+    )
+}
+
+fn tactics_offer(game: &Game, player: usize) -> Option<Offer> {
+    use crate::combat_listeners::{CombatEventPhase, CombatRoundStart};
+    let event = game.events.iter().rev().find(|e| {
+        matches!(
+            e.event_type,
+            PersistentEventType::CombatStart(_) | PersistentEventType::CombatRoundStart(_)
+        )
+    })?;
+    let round = match &event.event_type {
+        PersistentEventType::CombatStart(c) => CombatRoundStart::new(c.clone()),
+        PersistentEventType::CombatRoundStart(r)
+            if matches!(
+                r.phase,
+                CombatEventPhase::AllowTacticsCard
+                    | CombatEventPhase::Loyalty
+                    | CombatEventPhase::Default
+            ) =>
+        {
+            if r.phase == CombatEventPhase::Default
+                && (event.players_used.contains(&player) || event.player.index == player)
+            {
+                return None;
+            }
+            r.clone()
+        }
+        _ => return None,
+    };
+    let c = &round.combat;
+    if !c.players().contains(&player)
+        || !game
+            .player(player)
+            .can_use_advance(crate::advance::Advance::Tactics)
+        || crate::combat::get_combat_strength(player, &round).deny_tactics_card
+        || (player == c.defender()
+            && c.first_round()
+            && c.modifiers
+                .contains(&crate::combat::CombatModifier::TrojanHorse))
+    {
+        return None;
+    }
+    let mut options = vec![option("No tactics", EventResponse::SelectHandCards(vec![]))];
+    for id in game
+        .player(player)
+        .action_cards
+        .iter()
+        .filter(|id| **id != 0)
+    {
+        let card = game.cache.get_action_card(*id);
+        let Some(tactics) = &card.tactics_card else {
+            continue;
+        };
+        // Scout's enemy-card requirement is deliberately provisional; never
+        // inspect a hidden enemy commitment to build an early offer.
+        if tactics.name == "Scout"
+            || crate::tactics_card::can_play_tactics_card(game, player, card, &round)
+        {
+            options.push(OptionChoice {
+                label: tactics.name.clone(),
+                description: tactics.description.clone(),
+                response: EventResponse::SelectHandCards(vec![HandCard::ActionCard(*id)]),
+            });
+        }
+    }
+    if options.len() == 1 {
+        return None;
+    }
+    let key = tactics_key(game, c);
+    Some(Offer {
+        selected: game
+            .early_choices
+            .iter()
+            .find(|s| s.player == player && s.key == key)
+            .map(|s| s.response.clone()),
+        key,
+        title: "Tactics".into(),
+        options,
+    })
+}
+
 fn scope(game: &Game, index: usize) -> Option<String> {
     let name = match &game.events.get(index)?.event_type {
         PersistentEventType::StatusPhase(phase) => format!("status:{phase:?}"),
@@ -98,6 +191,28 @@ fn objective_offers(game: &Game, player: usize) -> Vec<Offer> {
 }
 
 pub fn prune_objectives(game: &mut Game) {
+    // Navigation and interrupted/skipped rounds must not leave a plan that can
+    // attach to a later battle at the same location.
+    let combat_keys: Vec<_> = game
+        .events
+        .iter()
+        .filter_map(|event| match &event.event_type {
+            PersistentEventType::CombatStart(c) => Some(tactics_key(game, c)),
+            PersistentEventType::CombatRoundStart(r)
+                if matches!(
+                    r.phase,
+                    crate::combat_listeners::CombatEventPhase::AllowTacticsCard
+                        | crate::combat_listeners::CombatEventPhase::Loyalty
+                        | crate::combat_listeners::CombatEventPhase::Default
+                ) =>
+            {
+                Some(tactics_key(game, &r.combat))
+            }
+            _ => None,
+        })
+        .collect();
+    game.early_choices
+        .retain(|c| !c.key.ends_with("/tactics") || combat_keys.contains(&c.key));
     let invalid: Vec<_> = game
         .early_choices
         .iter()
@@ -194,6 +309,9 @@ pub fn offers(game: &Game, player: usize) -> Vec<Offer> {
         return vec![];
     }
     let mut result = current_offers(game, player);
+    if let Some(offer) = tactics_offer(game, player) {
+        result.push(offer);
+    }
     if let Some(offer) = advance_offer(game, player) {
         result.push(offer);
     }
@@ -351,7 +469,9 @@ fn current_offers(game: &Game, player: usize) -> Vec<Offer> {
 }
 
 pub fn can_save(game: &Game, player: usize, key: &str, response: Option<&EventResponse>) -> bool {
-    (player != game.active_player() || (game.events.is_empty() && key.contains(":objective:")))
+    (player != game.active_player()
+        || key.ends_with("/tactics")
+        || (game.events.is_empty() && key.contains(":objective:")))
         && offers(game, player).iter().any(|offer| {
             offer.key == key
                 && response.is_none_or(|r| offer.options.iter().any(|o| &o.response == r))
@@ -386,6 +506,14 @@ pub fn save(
 }
 
 pub fn expire_current_event(game: &mut Game) {
+    if let Some(PersistentEventType::CombatRoundStart(r)) =
+        game.events.last().map(|e| &e.event_type)
+    {
+        if r.phase == crate::combat_listeners::CombatEventPhase::Default {
+            let key = tactics_key(game, &r.combat);
+            game.early_choices.retain(|c| c.key != key);
+        }
+    }
     if game.events.last().is_some_and(|e| {
         matches!(
             e.event_type,
@@ -424,6 +552,31 @@ pub fn take_ready(game: &mut Game) -> Option<EventResponse> {
     let player = game.active_player();
     let event = game.events.last()?;
     let handler = event.player.handler.as_ref()?;
+    if let PersistentEventType::CombatRoundStart(r) = &event.event_type {
+        if r.phase != crate::combat_listeners::CombatEventPhase::Default
+            || handler.origin
+                != crate::events::EventOrigin::Advance(crate::advance::Advance::Tactics)
+        {
+            return None;
+        }
+        let key = tactics_key(game, &r.combat);
+        let at = game
+            .early_choices
+            .iter()
+            .position(|c| c.player == player && c.key == key)?;
+        let valid = match (&handler.request, &game.early_choices[at].response) {
+            (
+                PersistentEventRequest::SelectHandCards(request),
+                EventResponse::SelectHandCards(cards),
+            ) => {
+                request.needed.contains(&(cards.len() as u8))
+                    && cards.iter().all(|c| request.choices.contains(c))
+            }
+            _ => false,
+        };
+        let choice = game.early_choices.remove(at);
+        return valid.then_some(choice.response);
+    }
     let (index, suffix) = match &event.event_type {
         PersistentEventType::StatusPhase(StatusPhaseState::DetermineFirstPlayer(_)) => {
             (game.events.len() - 1, "first".into())
