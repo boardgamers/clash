@@ -118,7 +118,8 @@ test('selected Steel Weapons and tactics responses are simulated before confirmi
   assert.notDeepEqual(withSteel, withoutSteel);
   raw = engine.tryMove(raw, JSON.stringify(paid), 0);
   raw = engine.tryMove(raw, JSON.stringify({ Response: { Payment: [{}, {}] } }), 0);
-  raw = engine.tryMove(raw, JSON.stringify(paid), 1);
+  // Attacker chooses tactics before the defender's battle-start payments.
+  assert.equal(engine.currentPlayer(raw), 0);
   const visible = engine.stripSecret(raw, 0);
   const withTactic = estimate(visible, { Response: { SelectHandCards: [{ ActionCard: 1 }] } });
   const withoutTactic = estimate(visible, { Response: { SelectHandCards: [] } });

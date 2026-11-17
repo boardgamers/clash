@@ -1522,3 +1522,47 @@ skips, and four localization-source tests passed. One full native rerun hit the
 pre-existing random-actions Tributes eligibility rejection; a subsequent complete
 workspace rerun passed without skipping or changing it. No Tributes rule changes
 are included. Svelte reports zero errors/warnings.
+
+# Viewer 0.1.221 / engine 0.4.154 — prepared locally
+
+Replaces combat tactics queues with committed ordinary preparation: attacker
+battle-start abilities and tactics, then defender battle-start abilities and
+tactics, then reveal/effects/rolls. Eligibility, Scouts, Loyalty (including a third
+player's Barbarian card), Martyr sacrifice and later-round rules are unchanged.
+No production moves or save repairs are involved. Other early-choice queues are
+retained; obsolete combat plans are pruned and never auto-consumed.
+
+Old open combats retain legacy order. Historical replay uses its recorded format
+boundary (or legacy order when absent), then clamps the boundary to the returned
+cursor's next action. This permits new battles on both full and partial replay
+branches without reinterpreting old recorded responses. Undo/redo retains the
+recorded mode; replacing an undone future starts a new branch. The frozen synthetic
+217-action history was independently reconstructed by production engine 0.4.153;
+actual engine.replay regression checks compare its board, players, events and RNG.
+See `docs/asynchronous-combat-preparation.md` for the exact ordering contract.
+
+Release preparation includes Rust 1.94.1 formatting/lint/native tests, Svelte,
+frontend/localization tests, bridge and production builds, packaged-engine
+protocol/replay/privacy checks, and built-viewer combat/payment/forces, tactics,
+journal, playback and split-WASM browser regressions. Local-host regression pays
+both Steel Weapons choices, commits both normal Tactics choices, checks opponent
+and spectator privacy, and asserts actual dice rolls with no combat queue.
+
+Package-lock version and achievement source-integrity manifest are updated;
+artwork is generated only for validation, not published. Gallery, achievements,
+other game metadata and game-length labels/order/Standard default must remain
+unchanged. No special-rule changes, Fossil refresh or unrelated edits are included.
+
+**Not yet shipped.** Frozen artifacts and verification evidence are prepared in
+`/tmp/release221`. Publish only after the matching source commit is pushed and
+both Check and Web viewer CI succeed. Use the supported publisher with the frozen
+0.4.154 tarball, then independently compare every hosted viewer asset and engine
+byte and run downloaded-engine checks. Do not reuse the 0.1.220 publish script.
+
+Local verification result: **530 native tests passed, one existing ignored**,
+including 13 focused preparation/replay/undo tests. **1,090 frontend tests**,
+four gallery tests, 21 achievement tests without artifact-dependent skips, and
+four localization-source tests passed. Svelte reports zero errors/warnings;
+both 17-language catalogs validate. Rust 1.94.1 Clippy completes with existing
+warnings. Six actual-engine preparation tests also run against the extracted
+release tarball. No production publication is implied by these local results.

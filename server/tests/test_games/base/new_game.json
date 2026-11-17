@@ -3,6 +3,7 @@
     "civilization": "ChooseCivilization"
   },
   "version": 2,
+  "asynchronous_combat_from": 0,
   "state": "ChooseCivilization",
   "players": [
     {

@@ -194,6 +194,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         secrets_stripped: false,
         seed: setup.seed.clone(),
         context: GameContext::Play,
+        asynchronous_combat_from: Some(0),
         version: JSON_SCHEMA_VERSION,
         options: GameOptions {
             legacy_undo: None,

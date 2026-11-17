@@ -1,0 +1,483 @@
+{
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "wood": 4,
+        "mood_tokens": 3,
+        "culture_tokens": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 0
+          },
+          "mood_state": "Angry",
+          "position": "D2"
+        },
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Neutral",
+          "position": "D4"
+        }
+      ],
+      "units": [
+        {
+          "position": "D5",
+          "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 3
+        },
+        {
+          "position": "E2",
+          "unit_type": "Infantry",
+          "id": 5
+        }
+      ],
+      "civilization": "Phoenicia",
+      "available_leaders": [
+        "Ithobaal",
+        "Hiram",
+        "Pygmalion"
+      ],
+      "advances": [
+        "Bartering",
+        "Currency",
+        "Farming",
+        "Fishing",
+        "FreeEducation",
+        "Husbandry",
+        "Irrigation",
+        "Mining",
+        "Myths",
+        "Navigation",
+        "Priesthood",
+        "Roads",
+        "StateReligion",
+        "Tactics",
+        "Writing"
+      ],
+      "incident_tokens": 1,
+      "next_unit_id": 6
+    },
+    {
+      "id": 1,
+      "resources": {
+        "wood": 5,
+        "culture_tokens": 1
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "position": "D7"
+        },
+        {
+          "mood_state": "Happy",
+          "position": "E5"
+        },
+        {
+          "mood_state": "Neutral",
+          "position": "F7"
+        }
+      ],
+      "units": [
+        {
+          "position": "E5",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "E5",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "D7",
+          "unit_type": "Settler",
+          "id": 5
+        }
+      ],
+      "civilization": "India",
+      "available_leaders": [
+        "SriGupta",
+        "Ashoka",
+        "Akbar"
+      ],
+      "advances": [
+        "Arts",
+        "Cartography",
+        "Engineering",
+        "Farming",
+        "Fishing",
+        "Math",
+        "Mining",
+        "Navigation",
+        "Roads",
+        "Sanitation",
+        "Storage",
+        "Tactics",
+        "Writing"
+      ],
+      "incident_tokens": 2,
+      "completed_objectives": [
+        {
+          "card": 13,
+          "name": "Wood Supplies"
+        },
+        {
+          "card": 16,
+          "name": "Goal Focused"
+        }
+      ],
+      "wonder_cards": [
+        "Colosseum"
+      ],
+      "action_cards": [
+        33,
+        9,
+        30,
+        12
+      ],
+      "objective_cards": [
+        17,
+        15,
+        19,
+        4
+      ],
+      "next_unit_id": 6
+    },
+    {
+      "id": 2,
+      "cities": [
+        {
+          "mood_state": "Neutral",
+          "position": "B2"
+        },
+        {
+          "mood_state": "Angry",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "E8",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "C3",
+          "unit_type": "Elephant",
+          "id": 2
+        },
+        {
+          "position": "C3",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "C3",
+          "unit_type": "Infantry",
+          "id": 5
+        },
+        {
+          "position": "B2",
+          "unit_type": "Infantry",
+          "id": 6
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 7
+        }
+      ],
+      "civilization": "Barbarians",
+      "next_unit_id": 8
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
+    }
+  ],
+  "events": [
+    {
+      "event_type": {
+        "CombatRoundStart": {
+          "combat": {
+            "attackers": [
+              3
+            ],
+            "retreat": "CanRetreat",
+            "stats": {
+              "round": 1,
+              "battleground": "City",
+              "attacker": {
+                "position": "D5",
+                "player": 0,
+                "present": {
+                  "elephants": 1
+                }
+              },
+              "defender": {
+                "position": "E5",
+                "player": 1,
+                "present": {
+                  "settlers": 1,
+                  "infantry": 1
+                }
+              },
+              "city_mood": "Happy"
+            }
+          },
+          "attacker_strength": {},
+          "defender_strength": {}
+        }
+      },
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectHandCards": {
+            "choices": [
+              {
+                "ActionCard": 9
+              },
+              {
+                "ActionCard": 12
+              },
+              {
+                "ActionCard": 30
+              },
+              {
+                "ActionCard": 33
+              }
+            ],
+            "needed": {
+              "start": 0,
+              "end": 1
+            },
+            "description": "Play Tactics Card"
+          }
+        },
+        "origin": {
+          "Advance": "Tactics"
+        }
+      }
+    }
+  ],
+  "rng": "222724077733091596346276912534125779896",
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Water"
+      ],
+      [
+        "A5",
+        "Fertile"
+      ],
+      [
+        "A7",
+        "Unexplored"
+      ],
+      [
+        "B2",
+        "Fertile"
+      ],
+      [
+        "B3",
+        "Mountain"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Forest"
+      ],
+      [
+        "B6",
+        "Unexplored"
+      ],
+      [
+        "B7",
+        "Unexplored"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Barren"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Fertile"
+      ],
+      [
+        "C6",
+        "Forest"
+      ],
+      [
+        "C7",
+        "Unexplored"
+      ],
+      [
+        "C8",
+        "Mountain"
+      ],
+      [
+        "D1",
+        "Water"
+      ],
+      [
+        "D2",
+        "Fertile"
+      ],
+      [
+        "D3",
+        "Mountain"
+      ],
+      [
+        "D4",
+        "Mountain"
+      ],
+      [
+        "D5",
+        "Fertile"
+      ],
+      [
+        "D6",
+        "Water"
+      ],
+      [
+        "D7",
+        "Fertile"
+      ],
+      [
+        "D8",
+        "Barren"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Forest"
+      ],
+      [
+        "E4",
+        "Fertile"
+      ],
+      [
+        "E5",
+        "Fertile"
+      ],
+      [
+        "E6",
+        "Barren"
+      ],
+      [
+        "E7",
+        {
+          "Exhausted": "Fertile"
+        }
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        "Water"
+      ],
+      [
+        "F3",
+        "Fertile"
+      ],
+      [
+        "F4",
+        "Forest"
+      ],
+      [
+        "F5",
+        "Forest"
+      ],
+      [
+        "F6",
+        "Barren"
+      ],
+      [
+        "F7",
+        "Fertile"
+      ],
+      [
+        "G3",
+        "Water"
+      ],
+      [
+        "G5",
+        "Water"
+      ],
+      [
+        "G7",
+        "Water"
+      ]
+    ],
+    "unexplored_blocks": [
+      {
+        "position": {
+          "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Fertile",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      }
+    ]
+  },
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        3
+      ]
+    }
+  },
+  "actions_left": 2,
+  "current_player_index": 0
+}

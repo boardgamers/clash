@@ -22,6 +22,7 @@ const HIGH_MORALE: u8 = 6;
 
 fn setup(attacker_cards: &[u8], defender_cards: &[u8]) -> Game {
     let mut game = JsonTest::new("tactics_cards").load_game("scout");
+    game.asynchronous_combat_from = Some(0);
     game.players[0].action_cards = attacker_cards.to_vec();
     game.players[1].action_cards = defender_cards.to_vec();
     game

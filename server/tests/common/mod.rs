@@ -140,6 +140,12 @@ fn clean_json(expected: &str) -> String {
     // those records intact and compare all gameplay/log data except this new
     // redundant arithmetic, covered explicitly by hit-reporting regressions.
     let mut value: serde_json::Value = serde_json::from_str(expected).unwrap();
+    if value["asynchronous_combat_from"] == serde_json::json!(usize::MAX) {
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("asynchronous_combat_from");
+    }
     // Only public action-log items qualify, never arbitrary arrays or game state.
     if let Some(ages) = value
         .get_mut("log")
@@ -463,7 +469,12 @@ pub fn load_game(path: &GamePath) -> Game {
     let game_data: GameData = serde_json::from_str(&read_game_str(path))
         .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",));
     let cache = Cache::new(&game_data.options);
-    let game = Game::from_data(game_data, cache, GameContext::Play);
+    let mut game = Game::from_data(game_data, cache, GameContext::Play);
+    // These golden histories record the legacy battle response order. Exercise
+    // that compatibility path; new sequencing has dedicated preparation tests.
+    if game.asynchronous_combat_from.is_none() {
+        game.asynchronous_combat_from = Some(usize::MAX);
+    }
     if update_expected() {
         write_result(&to_json(&game), path);
     }

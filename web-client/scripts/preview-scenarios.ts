@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 export const previewScenarios = [
-  { id: 'tactics', label: 'Tactics · Steel Weapons', note: 'Local engine match. Queue tactics privately, then switch seats to resolve Steel Weapons and play the battle.' },
+  { id: 'tactics', label: 'Tactics · Steel Weapons', note: 'Local asynchronous sequence: attacker Steel Weapons and tactics, then defender Steel Weapons and tactics, then reveal.' },
   { id: 'advance', label: 'Free advance', note: 'Research lets you save an early choice.' },
   { id: 'raze', label: 'Raze city', note: 'Cities lets you save an early choice.' },
   { id: 'objectives-before', label: 'Objectives · during turn', note: 'Queue in Objectives now; conditions are checked again before scoring.' },

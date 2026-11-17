@@ -452,6 +452,12 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
     let player = game.active_player();
     let origin = action_origin(&item, game.player(player)).clone();
     let i = game.log_index;
+    if current_turn_log(game).actions.len() > i {
+        // A fresh action replaces the undone future. Redo bypasses this path and
+        // must retain the recorded format boundary for deterministic history.
+        let next = crate::game_api::log_length(game).saturating_add(1);
+        game.asynchronous_combat_from = game.asynchronous_combat_from.map(|from| from.min(next));
+    }
     let l = &mut current_turn_log_mut(game).actions;
     remove_redo_actions(l, i);
     l.push(ActionLogAction::new(item, player, origin, active_events));

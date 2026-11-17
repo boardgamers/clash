@@ -32,8 +32,12 @@ test('attacker can still pay to cancel both fortress abilities', () => {
 });
 for (const payment of [[{}, {}], [{ gold: 2 }, { gold: 2 }]]) {
   test(`saved defender prompt safely resolves ${JSON.stringify(payment)}`, () => {
-    const g = attack(fixture());
+    // Recreate the historical CombatStart format, not a corrupted new continuation.
+    const initial = fixture();
+    initial.asynchronous_combat_from = 999999;
+    const g = attack(initial);
     const event = siege(g);
+    assert(event.event_type.CombatStart);
     event.player = 1;
     event.players_used = [0];
     const after = move(g, { Response: { Payment: payment } }, 1);

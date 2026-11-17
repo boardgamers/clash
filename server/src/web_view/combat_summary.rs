@@ -51,9 +51,18 @@ pub(super) fn describe(game: &Game) -> Value {
             activated.modifiers.push(modifier);
             let bonus =
                 strength(game, &activated, player).extra_combat_value - s.extra_combat_value;
-            let pending = game.events.iter().any(|event| {
-                matches!(event.event_type, PersistentEventType::CombatStart(_))
-                    && !event.players_used.contains(&player)
+            let pending = game.events.iter().any(|event| match &event.event_type {
+                PersistentEventType::CombatStart(_) => !event.players_used.contains(&player),
+                PersistentEventType::CombatRoundStart(round) => {
+                    use crate::combat_listeners::PreparationStep;
+                    if player == c.attacker() {
+                        round.preparation == Some(PreparationStep::AttackerAbilities)
+                    } else {
+                        round.preparation.is_some()
+                            && round.preparation != Some(PreparationStep::DefenderTactics)
+                    }
+                }
+                _ => false,
             });
             inactive.push(if pending {
                 format!("Steel Weapons pending: +{bonus} value if activated")

@@ -102,7 +102,6 @@
   import CollectionCapacity from './CollectionCapacity.svelte';
   import ContextualCards from './ContextualCards.svelte';
   import DecisionPanel from './DecisionPanel.svelte';
-  import { queuedTacticsDecision } from './queued-tactics';
   import EarlyChoices from './EarlyChoices.svelte';
   import EarlyChoiceBadge from './EarlyChoiceBadge.svelte';
   import CombatJournal from './CombatJournal.svelte';
@@ -137,14 +136,12 @@
   const planningQueue = $derived(!!queueControls?.pending && queueControls.seat === 0);
   let earlyPanel = $state<'cities' | 'abilities' | 'first' | null>(null);
   const earlyOffers = $derived(!$session.playback ? $session.view?.earlyChoices ?? [] : []);
-  const tacticsQueue = $derived(!$session.view?.decision ? earlyOffers.find(o => o.key.endsWith('/tactics')) : undefined);
-  const queuedTactics = $derived(queuedTacticsDecision($session.view, tacticsQueue));
   const earlyAdvance = $derived(earlyOffers.find(o => o.key.endsWith('/advance')));
   const earlyFirst = $derived(earlyOffers.filter(o => o.key.endsWith(':first')));
   const earlyCities = $derived(earlyOffers.filter(o => o.key.endsWith('/raze')));
   const earlyObjectives = $derived(earlyOffers.filter(o => o.key.includes(':objective:')));
   const earlyPeople = $derived(earlyOffers.filter(o => o.key.endsWith('/offer')));
-  const earlyAbilities = $derived(earlyOffers.filter(o => !o.key.endsWith('/tactics') && !o.key.endsWith('/advance') && !o.key.endsWith('/raze') && !o.key.includes(':objective:') && !o.key.endsWith('/offer') && !o.key.endsWith('/government') && !o.key.endsWith(':first')));
+  const earlyAbilities = $derived(earlyOffers.filter(o => !o.key.endsWith('/advance') && !o.key.endsWith('/raze') && !o.key.includes(':objective:') && !o.key.endsWith('/offer') && !o.key.endsWith('/government') && !o.key.endsWith(':first')));
   const panelOffers = $derived(earlyPanel === 'cities' ? earlyCities : earlyPanel === 'abilities' ? earlyAbilities : earlyPanel === 'first' ? earlyFirst : []);
   function openEarly(panel: 'cities' | 'abilities' | 'first') {
     earlyPanel = earlyPanel === panel ? null : panel;
@@ -1897,9 +1894,6 @@
     {:else if $session.view?.decision && !researchChoice && !$session.automaticPayment}{#key `${$session.seat}:${$session.game?.log_index}:${JSON.stringify($session.view.decision)}`}<DecisionPanel
           {controller}
           decision={$session.view.decision}
-          onHighlight={(position) => world?.highlightCoordinate(position)}
-        />{/key}{:else if queuedTactics && tacticsQueue}{#key `${$session.seat}:${tacticsQueue.key}`}<DecisionPanel
-          {controller} decision={queuedTactics} queue={tacticsQueue}
           onHighlight={(position) => world?.highlightCoordinate(position)}
         />{/key}{/if}
     {#if $session.abilitiesOpen && $session.mode === 'overview' && !$session.view?.decision && !choiceDecision && !objectiveDecision}<AbilitiesPanel

@@ -344,17 +344,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
     }).collect::<Vec<_>>();
     let early_offers: Vec<_> = crate::early_choices::offers(game, seat)
         .into_iter()
-        // Combat queues use the same waiting-player surface as other early choices.
-        // Never offer tactics before this player's combat-start choices (notably
-        // Steel Weapons) have finished. Keep engine queue authorization separate.
         .filter(|_| seat != active || game.events.is_empty())
-        .filter(|o| {
-            !o.key.ends_with("/tactics")
-                || !game.events.iter().any(|event| {
-                    matches!(event.event_type, PersistentEventType::CombatStart(_))
-                        && !event.players_used.contains(&seat)
-                })
-        })
         .collect();
     let early_advance = early_offers.iter().find(|o| o.key.ends_with("/advance"));
     let early_advance_choices: Vec<_> = early_advance

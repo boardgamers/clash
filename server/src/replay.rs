@@ -12,6 +12,8 @@ pub struct ReplayGameData {
     #[serde(default)]
     options: GameOptions,
     seed: String,
+    #[serde(default)]
+    asynchronous_combat_from: Option<usize>,
     log: Vec<ActionLogAge>,
     log_index: usize,
     // Look-only information boundaries are intentionally absent from the log.
@@ -108,6 +110,10 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         builder = builder.assigned_civilizations(civilizations);
     }
     let mut game = setup_game(&builder.build());
+    game.asynchronous_combat_from = Some(
+        data.asynchronous_combat_from
+            .unwrap_or(actions.len().saturating_add(1)),
+    );
     if data.options.civilization == CivSetupOption::DraftThree {
         // Draft locks are private and absent from the action log; setup turns
         // record their final choices. Re-deal before locking to preserve the RNG.
@@ -152,6 +158,13 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
             "Replay target {to} is not a complete action boundary"
         ));
     }
+    // The returned position is playable, not a promise to execute the discarded
+    // future. Preserve the recorded switch while reconstructing, then enable new
+    // battles at the first action beyond this cursor. An open battle keeps its
+    // own persisted preparation mode, so legacy continuations remain legacy.
+    game.asynchronous_combat_from = game
+        .asynchronous_combat_from
+        .map(|from| from.min(to.saturating_add(1)));
     for player in data.players {
         game.players[player.id].settings = player.settings;
     }

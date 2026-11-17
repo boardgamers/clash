@@ -49,6 +49,8 @@ pub enum CombatRetreatState {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Combat {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub asynchronous_preparation: bool,
     pub attackers: Vec<u32>,
     pub retreat: CombatRetreatState,
     #[serde(default)]
@@ -61,6 +63,7 @@ impl Combat {
     #[must_use]
     pub fn new(attackers: Vec<u32>, can_retreat: bool, stats: CombatStats) -> Self {
         Self {
+            asynchronous_preparation: false,
             attackers,
             modifiers: vec![],
             retreat: if can_retreat {
@@ -219,7 +222,11 @@ pub fn initiate_combat(
         &attackers,
         None,
     );
-    let combat = Combat::new(attackers, can_retreat, stats);
+    let mut combat = Combat::new(attackers, can_retreat, stats);
+    // Persist the history boundary, rather than reinterpret old logged responses.
+    let index = crate::game_api::log_length(game);
+    let from = *game.asynchronous_combat_from.get_or_insert(index);
+    combat.asynchronous_preparation = index >= from;
     log_round(game, &combat);
     start_combat(game, combat);
 }
@@ -261,6 +268,10 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     stop_current_move(game);
+    if combat.asynchronous_preparation {
+        combat_loop(game, CombatRoundStart::new(combat));
+        return;
+    }
 
     let Some(c) = game.trigger_persistent_event(
         &combat.players(),

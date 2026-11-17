@@ -1,0 +1,3015 @@
+{
+  "seed": "historical-combat-0",
+  "log": [
+    {
+      "age": 0,
+      "rounds": [
+        {
+          "round": 0,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Setup": {
+                  "civilization": "Phoenicia",
+                  "player": 0
+                }
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Setup": {
+                  "civilization": "India",
+                  "player": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E7",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Sanitation",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "F6",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Bartering",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D2",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "C2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D2",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "C2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 14
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D7",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "E7",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "F5",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Arts",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "C3",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Fishing",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "B3",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D7",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "E8",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E5",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "D5",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "E2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Irrigation",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "B4",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ExploreResolution": 0
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Engineering"
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B2"
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnitType": "Elephant"
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Navigation"
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "FreeAdvance"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DrawCards"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": []
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": []
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "RazeSize1City"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "ChangeGovernmentType"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPlayer": 0
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DetermineFirstPlayer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "age": 2,
+      "rounds": [
+        {
+          "round": 1,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "B3",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "FoundCity": {
+                        "settler": 0
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 10
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E5",
+                        "units": [
+                          0
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "FoundCity": {
+                        "settler": 0
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "IncreaseHappiness": {
+                        "action_type": "IncreaseHappiness",
+                        "happiness_increases": [
+                          [
+                            "E5",
+                            1
+                          ]
+                        ],
+                        "payment": {
+                          "mood_tokens": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "B3",
+                        "payment": {
+                          "food": 1,
+                          "ore": 1
+                        },
+                        "units": {
+                          "infantry": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "E2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_piece": "Market",
+                        "city_position": "D2",
+                        "payment": {
+                          "gold": 1,
+                          "ore": 1,
+                          "wood": 1
+                        },
+                        "port_position": null
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "C8",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "E8",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D7",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "C8",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "D7",
+                        "payment": {
+                          "food": 1,
+                          "ore": 1
+                        },
+                        "units": {
+                          "infantry": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "C2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "B3",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "A3",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "B3",
+                        "payment": {
+                          "food": 1,
+                          "gold": 1
+                        },
+                        "units": {
+                          "infantry": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "EndDiplomaticRelations"
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "C8",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "E5",
+                        "collections": [
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "F4",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "F5",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Myths"
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Writing"
+                    }
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "FreeAdvance"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DrawCards"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": []
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": []
+                    }
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "RazeSize1City"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "ChangeGovernmentType"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPlayer": 1
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DetermineFirstPlayer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "age": 3,
+      "rounds": [
+        {
+          "round": 1,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "E8",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "E5",
+                        "collections": [
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "F4",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "F5",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 32
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 16
+                        },
+                        {
+                          "ObjectiveCard": 37
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "E2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "B3",
+                        "collections": [
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "B3",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "IncreaseHappiness": {
+                        "action_type": "IncreaseHappiness",
+                        "happiness_increases": [
+                          [
+                            "D2",
+                            2
+                          ]
+                        ],
+                        "payment": {
+                          "mood_tokens": 4
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 6
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D7",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "E5",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "E5",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D5",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D2",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "C2",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "ore": 1
+                            },
+                            "position": "E2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "D2",
+                        "payment": {
+                          "food": 1,
+                          "gold": 1
+                        },
+                        "units": {
+                          "elephants": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D2",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "C2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Tactics",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "E8"
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 123
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E7",
+                        "units": [
+                          1
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "StateReligion",
+                        "payment": {
+                          "food": 1,
+                          "gold": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 121
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 5
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 13
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Fishing"
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Roads"
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "FreeAdvance"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DrawCards"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": []
+                    }
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "RazeSize1City"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "ChangeGovernmentType"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPlayer": 0
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DetermineFirstPlayer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "age": 4,
+      "rounds": [
+        {
+          "round": 1,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Currency",
+                        "payment": {
+                          "ideas": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Priesthood",
+                        "payment": {
+                          "food": 1,
+                          "gold": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B2"
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "C3"
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 36
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "E5",
+                        "payment": {
+                          "mood_tokens": 1
+                        },
+                        "units": {
+                          "settlers": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "D4",
+                        "units": [
+                          2
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ExploreResolution": 0
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": "Stop"
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D7",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 39
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Roads"
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Tactics"
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "D4",
+                        "payment": {
+                          "food": 1,
+                          "ore": 1
+                        },
+                        "units": [
+                          3,
+                          4
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "FoundCity": {
+                        "settler": 4
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "D2",
+                        "payment": {
+                          "gold": 1,
+                          "ore": 1
+                        },
+                        "units": {
+                          "infantry": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 11
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 119
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "F6",
+                        "units": [
+                          1
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "E5",
+                        "payment": {
+                          "food": 1,
+                          "mood_tokens": 1,
+                          "ore": 1
+                        },
+                        "units": {
+                          "infantry": 1,
+                          "settlers": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D7",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D7",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E3",
+                        "units": [
+                          5
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": "Stop"
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Husbandry",
+                        "payment": {
+                          "ideas": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "D2",
+                        "collections": [
+                          {
+                            "pile": {
+                              "wood": 1
+                            },
+                            "position": "C2",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "F7",
+                        "units": [
+                          1
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 41
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": "Stop"
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E6",
+                        "payment": {
+                          "food": 1,
+                          "ore": 1
+                        },
+                        "units": [
+                          3,
+                          4
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "E5",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "E5",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D5",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 16
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "CompleteObjectives"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "FreeEducation"
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectAdvance": "Math"
+                    }
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "FreeAdvance"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DrawCards"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": []
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": []
+                    }
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "RazeSize1City"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "ChangeGovernmentType"
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPlayer": 0
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "StatusPhase": "DetermineFirstPlayer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "age": 5,
+      "rounds": [
+        {
+          "round": 1,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E2",
+                        "units": [
+                          5
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": "Stop"
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "D2",
+                        "payment": {
+                          "gold": 1,
+                          "ore": 1
+                        },
+                        "units": [
+                          5
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": "Stop"
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "C5",
+                        "units": [
+                          3
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 28
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Bartering"
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "action_type": "Collect",
+                        "city_position": "E5",
+                        "collections": [
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "E5",
+                            "times": 1
+                          },
+                          {
+                            "pile": {
+                              "food": 1
+                            },
+                            "position": "D5",
+                            "times": 1
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E5",
+                        "units": [
+                          3,
+                          4
+                        ]
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 15
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "InfluenceCultureAttempt": {
+                        "action_type": {
+                          "Special": {
+                            "Modifier": "ArtsInfluenceCultureAttempt"
+                          }
+                        },
+                        "selected_structure": {
+                          "position": "F7",
+                          "structure": "CityCenter"
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E2",
+                        "units": [
+                          5
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": "Stop"
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "D5",
+                        "units": [
+                          3
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Movement": "Stop"
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_piece": "Market",
+                        "city_position": "D4",
+                        "payment": {
+                          "gold": 2,
+                          "wood": 1
+                        },
+                        "port_position": null
+                      }
+                    }
+                  },
+                  "player": 0
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            },
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Cartography",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "E7"
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "mood_tokens": 1
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Navigation",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "city_position": "D7",
+                        "payment": {
+                          "mood_tokens": 1
+                        },
+                        "units": {
+                          "settlers": 1
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "InfluenceCultureAttempt": {
+                        "action_type": {
+                          "Special": {
+                            "Modifier": "ArtsInfluenceCultureAttempt"
+                          }
+                        },
+                        "selected_structure": {
+                          "position": "D4",
+                          "structure": {
+                            "Building": "Market"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "player": 1
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  },
+                  "player": 1
+                }
+              ],
+              "turn_type": {
+                "Player": 1
+              }
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "turns": [
+            {
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "destination": "E5",
+                        "units": [
+                          3
+                        ]
+                      }
+                    }
+                  },
+                  "player": 0
+                }
+              ],
+              "turn_type": {
+                "Player": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "log_index": 1,
+  "players": [
+    {
+      "id": 0,
+      "civilization": "Phoenicia"
+    },
+    {
+      "id": 1,
+      "civilization": "India"
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians"
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates"
+    }
+  ]
+}

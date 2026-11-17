@@ -85,7 +85,19 @@ impl CombatEventPhase {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum PreparationStep {
+    AttackerAbilities,
+    Eligibility,
+    Loyalty,
+    AttackerTactics,
+    DefenderAbilities,
+    DefenderTactics,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatRoundStart {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preparation: Option<PreparationStep>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub displaced_unit: Option<u32>,
     pub combat: Combat,
@@ -103,6 +115,8 @@ impl CombatRoundStart {
     #[must_use]
     pub fn new(combat: Combat) -> Self {
         Self {
+            preparation: (combat.asynchronous_preparation && combat.first_round())
+                .then_some(PreparationStep::AttackerAbilities),
             combat,
             displaced_unit: None,
             attacker_strength: CombatStrength::new(),
@@ -277,8 +291,11 @@ const ROUND_START_TYPES: &[CombatEventPhase; 5] = &[
 
 pub(crate) fn combat_round_start(
     game: &mut Game,
-    start: CombatRoundStart,
+    mut start: CombatRoundStart,
 ) -> Option<CombatRoundStart> {
+    if start.preparation.is_some() {
+        start = prepare_first_round(game, start)?;
+    }
     event_with_tactics(
         game,
         start,
@@ -297,6 +314,84 @@ pub(crate) fn combat_round_start(
         |s| s.attacker_strength.tactics_card.as_ref(),
         |s| s.defender_strength.tactics_card.as_ref(),
     )
+}
+
+// Start listeners still receive Combat; the serialized continuation contains the
+// entire round, including the attacker's hidden selection while the defender pays.
+fn prepare_first_round(game: &mut Game, mut round: CombatRoundStart) -> Option<CombatRoundStart> {
+    use PreparationStep::*;
+    while let Some(step) = round.preparation.clone() {
+        match step {
+            AttackerAbilities | DefenderAbilities => {
+                let player = if step == AttackerAbilities {
+                    round.combat.attacker()
+                } else {
+                    round.combat.defender()
+                };
+                let saved = round.clone();
+                round.combat = game.trigger_persistent_event(
+                    &[player],
+                    |e| &mut e.combat_start,
+                    round.combat.clone(),
+                    move |combat| {
+                        let mut continuation = saved.clone();
+                        continuation.combat = combat;
+                        PersistentEventType::CombatRoundStart(continuation)
+                    },
+                )?;
+            }
+            Eligibility => {
+                round = game.trigger_persistent_event(
+                    &round.combat.players(),
+                    |e| &mut e.combat_round_start_allow_tactics,
+                    round,
+                    PersistentEventType::CombatRoundStart,
+                )?;
+            }
+            Loyalty => {
+                if let Some(player) =
+                    crate::content::civilizations::celts::loyalty_controller(game, &round.combat)
+                {
+                    round = game.trigger_persistent_event(
+                        &[player],
+                        |e| &mut e.loyalty,
+                        round,
+                        PersistentEventType::CombatRoundStart,
+                    )?;
+                }
+            }
+            AttackerTactics | DefenderTactics => {
+                let player = if step == AttackerTactics {
+                    round.combat.attacker()
+                } else {
+                    round.combat.defender()
+                };
+                round = game.trigger_persistent_event(
+                    &[player],
+                    |e| &mut e.combat_round_start,
+                    round,
+                    PersistentEventType::CombatRoundStart,
+                )?;
+            }
+        }
+        round.preparation = match step {
+            AttackerAbilities => Some(Eligibility),
+            Eligibility => Some(Loyalty),
+            Loyalty => Some(AttackerTactics),
+            AttackerTactics => Some(DefenderAbilities),
+            DefenderAbilities => Some(DefenderTactics),
+            DefenderTactics => None,
+        };
+        round.phase = match round.preparation {
+            Some(AttackerAbilities | Eligibility) => CombatEventPhase::AllowTacticsCard,
+            Some(Loyalty) => CombatEventPhase::Loyalty,
+            Some(AttackerTactics | DefenderAbilities | DefenderTactics) => {
+                CombatEventPhase::Default
+            }
+            None => CombatEventPhase::RevealTacticsCard,
+        };
+    }
+    Some(round)
 }
 
 const ROUND_END_TYPES: &[CombatEventPhase; 3] = &[
