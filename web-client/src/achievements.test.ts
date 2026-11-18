@@ -7,7 +7,9 @@ import { achievementManifestSchema, achievementResultsSchema } from '@boardgamer
 
 const require = createRequire(import.meta.url);
 // Check the generated WASM API, not a parallel JS achievement implementation.
-const engine: typeof import('../.bridge/server.js') = require('../.engine/server.js');
+const engine: typeof import('../.bridge/server.js') = require(
+  process.env.CLASH_TEST_ENGINE ?? '../.engine/server.js',
+);
 const hooks = {
   achievementDefinitions: (): AchievementManifest => engine.achievementDefinitions(),
   achievements: (data: string): SeatAchievements[] => engine.achievements(data),
@@ -20,8 +22,8 @@ const finish = () => engine.tryMove(fixture, JSON.stringify({ Playing: 'EndTurn'
 
 test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const manifest = achievementManifestSchema.parse(hooks.achievementDefinitions());
-  assert.equal(manifest.revision, 3);
-  assert.equal(manifest.achievements.length, 41);
+  assert.equal(manifest.revision, 4);
+  assert.equal(manifest.achievements.length, 42);
   assert.ok(!manifest.achievements.some((a) => a.id === 'four-cities'));
   assert.ok(manifest.achievements.some((a) => a.id === 'seven-cities'));
   assert.ok(manifest.achievements.some((a) => a.id === 'complete-builder'));
@@ -35,13 +37,16 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const nonfactionArt = JSON.parse(
     readFileSync(new URL('../release/achievement-assets-nonfaction.json', import.meta.url), 'utf8'),
   );
-  assert.equal(nonfactionArt.revision, manifest.revision);
-  assert.equal(art.revision, 2, 'revision 3 preserves the existing faction artwork');
+  assert.equal(nonfactionArt.revision, 3, 'revision 4 reuses the existing objective artwork');
+  assert.equal(art.revision, 2, 'revision 4 preserves the existing faction artwork');
   assert.deepEqual(
-    manifest.achievements
-      .filter((a) => a.icon?.type === 'asset')
-      .map((a) => (a.icon!.type === 'asset' ? a.icon!.key : ''))
-      .sort(),
+    [
+      ...new Set(
+        manifest.achievements
+          .filter((a) => a.icon?.type === 'asset')
+          .map((a) => (a.icon!.type === 'asset' ? a.icon!.key : '')),
+      ),
+    ].sort(),
     [...art.assets, ...nonfactionArt.assets].map((a: { key: string }) => a.key).sort(),
   );
   for (const length of ['shorter', 'standard', 'roll-to-end', 'wonderful-ending', 'epic']) {
@@ -285,4 +290,41 @@ test('filtered snapshots and all-withdrawn completions cannot award achievements
   const dropped = JSON.parse(finished);
   dropped.dropped_players = [0, 1];
   assert.deepEqual(hooks.achievements(JSON.stringify(dropped)), []);
+});
+
+test('five objectives uses completed records, with inclusive boundaries and unchanged eligibility', () => {
+  const manifest = hooks.achievementDefinitions();
+  assert.deepEqual(
+    manifest.achievements.find((a) => a.id === 'five-objectives'),
+    {
+      id: 'five-objectives',
+      name: 'Five Objectives',
+      description: 'Complete 5 objectives in a single game.',
+      icon: { type: 'asset', key: 'achievement-three-objectives' },
+    },
+  );
+  for (const count of [4, 5, 6]) {
+    const data = JSON.parse(finish());
+    data.players[0].completed_objectives = Array.from({ length: count }, (_, card) => ({
+      card,
+      name: `test ${card}`,
+    }));
+    data.players[1].completed_objectives = [];
+    data.players[1].special_victory_points = [
+      { points: 100, origin: { Ability: 'objective fixture' }, attribution: 'Events' },
+    ];
+    const raw = JSON.stringify(data);
+    const results = achievementResultsSchema(manifest, 2).parse(hooks.achievements(raw));
+    assert.equal(results[0].outcome, 'loss');
+    assert.equal(results[0].earned.includes('five-objectives'), count >= 5);
+    assert.ok(results[0].earned.includes('three-objectives'));
+    assert.ok(!results[1].earned.includes('five-objectives'));
+    assert.deepEqual(hooks.achievements(raw), results);
+    assert.deepEqual(hooks.achievements(engine.stripSecret(raw, 0)), []);
+    data.dropped_players = [0];
+    assert.ok(hooks.achievements(JSON.stringify(data)).every((r) => r.seat !== 0));
+    data.dropped_players = [];
+    data.state = 'Playing';
+    assert.deepEqual(hooks.achievements(JSON.stringify(data)), []);
+  }
 });

@@ -1,12 +1,10 @@
 # Clash of Cultures achievements
 
-Delivered engine release: `@boardgamers/clash-server` **0.4.151**, BGS `clash/1`
-(Clash of Cultures: Monumental edition). Revision 2 and all 15 faction assets were
-independently reviewed, published and verified. The hosted viewer remains 0.1.217;
-no viewer release was made. See `web-client/release/engine-package.json` and the
-[revision-2 delivery receipt](../web-client/docs/achievements-0.4.151-receipt.md).
-The [revision-1 receipt](../web-client/docs/achievements-0.4.150-receipt.md)
-records the previously delivered 0.4.150 artifact.
+Release **viewer 0.1.223 / engine 0.4.156** publishes catalog revision **4**
+with **42 definitions**. The previous live catalog was revision 3 (41 definitions),
+verified before this release. Artwork remains the existing 41 named achievement
+images; Five Objectives shares the Three Objectives image without changing bytes.
+Historical delivery receipts remain in `web-client/docs/achievements-*-receipt.md`.
 
 The native Rust evaluator is the single source of truth. The WASM package exports
 `achievementDefinitions()` and `achievements(serializedData)` directly, alongside
@@ -14,7 +12,32 @@ its existing engine hooks. The web-client tests check the generated API against
 `@boardgamers/protocol` **0.11.0** types and runtime schemas; there is no separate
 JavaScript scoring implementation.
 
-## Revision 2 catalog — 41 definitions
+## Revision 4 — 42 definitions
+
+Adds **Five Objectives** (`five-objectives`): “Complete 5 objectives in a single
+game.” The condition is `completed_objectives.len() >= 5` in one eligible finished
+save, additive to the existing three-objective tier and independent of winning.
+The engine records one completed objective when its card is completed and discarded;
+it does not count both printed options, cards in hand, objective opportunities,
+objective victory points, or lifetime totals. Instant and status-phase completions
+feed the same list; platform clock modes do not change this evaluator.
+
+Reuses `achievement-three-objectives` as objective-category artwork (the existing
+three-tablet image), with no new named asset or upload. The faction artwork manifest only refreshes
+its package-lock integrity hash for the wrapper version bump.
+Revision-2 faction and revision-3 nonfaction artwork inventories remain intact;
+multiple definitions may reference the same asset. Achievement metadata is excluded
+from viewer localization extraction, so no changes to the 17 viewer locales are
+needed. All prior definitions, award conditions and eligibility gates are unchanged.
+The matching engine upload activates the installer-owned achievement manifest;
+a generic metadata PUT cannot set it. Release verification must confirm revision 4
+and the exact 42-definition catalog through both authenticated and public GETs,
+not merely confirm that the engine archive uploaded. Existing 41 entries must
+remain identical. Publication uses the normal viewer/engine publisher after source
+push and green CI. No historical backfill or live-game edits are performed; the
+platform captures achievements on future natural eligible completions.
+
+## Previously delivered revision 2 catalog — 41 definitions
 
 Revision 2 removes `four-cities` and replaces it with a distinct `seven-cities` ID.
 There is no migration, historical backfill, or repurposing of the old ID.

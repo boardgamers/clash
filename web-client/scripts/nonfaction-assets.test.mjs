@@ -10,15 +10,27 @@ import { inspectEngine } from '@boardgamers/protocol/engine';
 import { ids } from './nonfaction-art.mjs';
 import { validateOutputs, outputDir } from './nonfaction-assets.mjs';
 import { root } from './achievement-asset-inputs.mjs';
-const baseline = '0099fa11cd697080bc8dccda629d8d4f5c92aae5';
-test('evaluation body and existing faction manifest remain byte identical', async () => {
+// Last source release before the additive five-objective tier.
+const baseline = 'e69d7148fb38775898389a1a5eef458993d540b1';
+test('existing evaluation and faction assets are unchanged apart from the new objective tier', async () => {
   const file = 'server/src/achievements.rs';
   const old = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: root, encoding: 'utf8' });
   const current = await readFile(path.join(root, file), 'utf8');
   const body = (s) => s.split('pub fn achievements(game: &Game)')[1].split('#[cfg(test)]')[0];
-  assert.equal(body(current), body(old));
+  // The sole evaluator change is the inclusive five-record objective predicate.
+  const addedPredicate = '                p.completed_objectives.len() >= 5,\n';
+  assert.equal(body(current).split(addedPredicate).length, 2);
+  assert.equal(body(current).replace(addedPredicate, ''), body(old));
+  const artworkFile = 'web-client/release/achievement-assets.json';
+  const previousArtwork = JSON.parse(
+    execFileSync('git', ['show', `${baseline}:${artworkFile}`], { cwd: root, encoding: 'utf8' }),
+  );
+  const currentArtwork = JSON.parse(await readFile(path.join(root, artworkFile), 'utf8'));
+  // Only the wrapper-version lockfile integrity pin changes; artwork is identical.
+  previousArtwork.integrity['web-client/package-lock.json'] =
+    currentArtwork.integrity['web-client/package-lock.json'];
+  assert.deepEqual(currentArtwork, previousArtwork);
   for (const file of [
-    'web-client/release/achievement-assets.json',
     'web-client/scripts/publish-achievement-assets.mjs',
     'web-client/scripts/achievement-asset-inputs.mjs',
   ])
@@ -27,30 +39,36 @@ test('evaluation body and existing faction manifest remain byte identical', asyn
       execFileSync('git', ['show', `${baseline}:${file}`], { cwd: root, encoding: 'utf8' }),
     );
 });
-test('exact packed engine schema, complete stable catalogue and 26 asset refs', async () => {
+test('exact packed engine schema, 42 definitions sharing 41 existing assets', async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'clash-packed-'));
+  const metadata = JSON.parse(await readFile(path.join(root, 'web-client/release/engine-package.json')));
   execFileSync('tar', [
     'xzf',
-    path.join(root, 'web-client/.engine/releases/boardgamers-clash-server-0.4.152.tgz'),
+    path.join(root, `web-client/.engine/releases/boardgamers-clash-server-${metadata.version}.tgz`),
     '-C',
     dir,
   ]);
   const engine = createRequire(import.meta.url)(path.join(dir, 'package/server.js'));
   assert.ok(inspectEngine(engine).compatible);
   const m = engine.achievementDefinitions();
-  assert.equal(m.revision, 3);
-  assert.equal(m.achievements.length, 41);
+  assert.equal(m.revision, 4);
+  assert.equal(m.achievements.length, 42);
   const factions = JSON.parse(
     await readFile(path.join(root, 'web-client/release/achievement-assets.json')),
   ).assets;
   assert.deepEqual(
-    m.achievements.map((a) => a.id),
+    m.achievements.filter((a) => a.id !== 'five-objectives').map((a) => a.id),
     [...ids, ...factions.map((a) => 'win-' + a.key.slice('achievement-faction-'.length))],
   );
   for (const a of m.achievements)
     assert.deepEqual(a.icon, {
       type: 'asset',
-      key: ids.includes(a.id) ? `achievement-${a.id}` : `achievement-faction-${a.id.slice(4)}`,
+      key:
+        a.id === 'five-objectives'
+          ? 'achievement-three-objectives'
+          : ids.includes(a.id)
+            ? `achievement-${a.id}`
+            : `achievement-faction-${a.id.slice(4)}`,
     });
   const raw = await engine.init(2, [], {}, 'artwork-package-test', {});
   assert.deepEqual(engine.achievements(raw), []);

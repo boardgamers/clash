@@ -1566,3 +1566,19 @@ four localization-source tests passed. Svelte reports zero errors/warnings;
 both 17-language catalogs validate. Rust 1.94.1 Clippy completes with existing
 warnings. Six actual-engine preparation tests also run against the extracted
 release tarball. No production publication is implied by these local results.
+
+
+# Viewer 0.1.223 / engine 0.4.156
+
+Adds Five Objectives (`five-objectives`): complete at least five objective records
+in one eligible finished authoritative game, regardless of winning. Cards in hand
+and objective victory points do not count. Catalog revision 4 has 42 definitions;
+the existing 41 definitions and all eligibility/privacy rules are unchanged.
+Reuses the existing `achievement-three-objectives` named artwork without upload.
+
+Publish the matching tested engine and viewer together. The supported engine POST
+activates the installer-owned achievement metadata (generic metadata PUTs strip
+`achievementManifest`). Verify the public and admin revision-4 catalog against the
+packaged engine, including every old definition and the shared asset URL/bytes.
+Gallery, options (including Standard length), settings and unrelated metadata must
+remain unchanged. No backfill or live-game mutation is part of this release.

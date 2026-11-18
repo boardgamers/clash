@@ -79,7 +79,7 @@ const WONDERS: [(Wonder, &str, &str); 8] = [
     (Wonder::GreatStatue, "built-great-statue", "Great Statue"),
     (Wonder::GreatWall, "built-great-wall", "Great Wall"),
 ];
-const FEATS: [(&str, &str, &str); 7] = [
+const FEATS: [(&str, &str, &str); 8] = [
     (
         "score-30",
         "30 Points",
@@ -106,6 +106,11 @@ const FEATS: [(&str, &str, &str); 7] = [
         "Finish a game with at least 3 completed objectives in the final state.",
     ),
     (
+        "five-objectives",
+        "Five Objectives",
+        "Complete 5 objectives in a single game.",
+    ),
+    (
         "two-wonders-built",
         "Two Wonders Built",
         "Finish a game having built at least 2 wonders, as recorded in the final state; merely owning wonders does not count.",
@@ -120,7 +125,7 @@ const FEATS: [(&str, &str, &str); 7] = [
 /// The stable achievement catalogue. Array order also defines award order.
 #[must_use]
 pub fn definitions() -> Manifest {
-    let mut definitions = Vec::with_capacity(41);
+    let mut definitions = Vec::with_capacity(42);
     for (_, id, name) in LENGTHS {
         definitions.push(Definition {
             id: format!("complete-{id}"),
@@ -142,7 +147,15 @@ pub fn definitions() -> Manifest {
         name: name.into(),
         description: description.into(),
         icon: Some(Icon::Asset {
-            key: format!("achievement-{id}"),
+            // Reuse the existing objective-category artwork; no new asset upload.
+            key: format!(
+                "achievement-{}",
+                if id == "five-objectives" {
+                    "three-objectives"
+                } else {
+                    id
+                }
+            ),
         }),
     }));
     definitions.extend(WONDERS.map(|(_, id, name)| Definition {
@@ -166,7 +179,7 @@ pub fn definitions() -> Manifest {
         icon: Some(Icon::Asset { key: format!("achievement-faction-{slug}") }),
     }));
     Manifest {
-        revision: 3,
+        revision: 4,
         achievements: definitions,
     }
 }
@@ -206,6 +219,7 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
                 p.cities.len() >= 7,
                 p.advances.len() >= 20,
                 p.completed_objectives.len() >= 3,
+                p.completed_objectives.len() >= 5,
                 p.wonders_built.len() >= 2,
                 !p.captured_leaders.is_empty(),
             ];
@@ -319,8 +333,8 @@ mod tests {
     #[test]
     fn manifest_and_real_end_turn_for_all_lengths() {
         let manifest = definitions();
-        assert_eq!(manifest.revision, 3);
-        assert_eq!(manifest.achievements.len(), 41);
+        assert_eq!(manifest.revision, 4);
+        assert_eq!(manifest.achievements.len(), 42);
         assert_eq!(
             manifest
                 .achievements
@@ -328,7 +342,7 @@ mod tests {
                 .map(|d| &d.id)
                 .collect::<HashSet<_>>()
                 .len(),
-            41
+            42
         );
         assert!(
             manifest
@@ -434,6 +448,55 @@ mod tests {
     }
 
     #[test]
+    fn five_objectives_counts_completed_records_in_one_eligible_game() {
+        let definition = definitions()
+            .achievements
+            .into_iter()
+            .find(|d| d.id == "five-objectives")
+            .unwrap();
+        assert_eq!(definition.name, "Five Objectives");
+        assert_eq!(
+            definition.description,
+            "Complete 5 objectives in a single game."
+        );
+        for (length, _, _) in LENGTHS {
+            for variant in [GameVariant::Standard, GameVariant::Builder] {
+                for count in [4, 5, 6] {
+                    let mut game = setup_variant(length.clone(), variant.clone());
+                    game.player_mut(0).completed_objectives = (0..count)
+                        .map(|card| CompletedObjective {
+                            card,
+                            name: format!("test {card}"),
+                        })
+                        .collect();
+                    // A high score is not a substitute for completed records.
+                    set_score(&mut game, 0, 40.0);
+                    set_score(&mut game, 1, 100.0);
+                    assert!(achievements(&game).is_empty());
+                    let mut game = finish(game);
+                    assert_eq!(achievements(&game)[0].outcome, "loss");
+                    assert_eq!(has(&game, 0, "five-objectives"), count >= 5);
+                    assert!(has(&game, 0, "three-objectives"));
+                    assert!(!has(&game, 1, "five-objectives"));
+                    let before = serde_json::to_value(game.cloned_data()).unwrap();
+                    let restored = Game::from_data(
+                        serde_json::from_value(before.clone()).unwrap(),
+                        game.cache.clone(),
+                        GameContext::Play,
+                    );
+                    assert_eq!(achievements(&game), achievements(&restored));
+                    assert_eq!(before, serde_json::to_value(game.cloned_data()).unwrap());
+                    game.secrets_stripped = true;
+                    assert!(achievements(&game).is_empty());
+                    game.secrets_stripped = false;
+                    game.dropped_players.push(0);
+                    assert!(!has(&game, 0, "five-objectives"));
+                }
+            }
+        }
+    }
+
+    #[test]
     fn faction_catalog_matches_every_playable_civilization_and_wire_shape() {
         let playable: HashSet<_> = crate::content::civilizations::get_all_uncached()
             .into_iter()
@@ -445,10 +508,10 @@ mod tests {
             FACTIONS.iter().map(|(name, _)| (*name).into()).collect()
         );
         let manifest = serde_json::to_value(definitions()).unwrap();
-        assert_eq!(manifest["revision"], 3);
+        assert_eq!(manifest["revision"], 4);
         assert_eq!(manifest.as_object().unwrap().len(), 2);
         let entries = manifest["achievements"].as_array().unwrap();
-        assert_eq!(entries.len(), 41);
+        assert_eq!(entries.len(), 42);
         for entry in entries {
             let faction = FACTIONS
                 .iter()
@@ -466,7 +529,14 @@ mod tests {
             } else {
                 assert_eq!(
                     entry["icon"]["key"],
-                    format!("achievement-{}", entry["id"].as_str().unwrap())
+                    format!(
+                        "achievement-{}",
+                        if entry["id"] == "five-objectives" {
+                            "three-objectives"
+                        } else {
+                            entry["id"].as_str().unwrap()
+                        }
+                    )
                 );
                 assert_eq!(entry.as_object().unwrap().len(), 4);
             }
