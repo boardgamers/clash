@@ -317,7 +317,7 @@
                         "combat_value": 6,
                         "hits": 1,
                         "combat_modifiers": [
-                          "Heavy resistance added -1 to combat value for each unit"
+                          "Defiant Stand: -1 total combat value (1 per attacking unit)"
                         ]
                       },
                       "origin": {

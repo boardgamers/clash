@@ -513,5 +513,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "destroyed_wonders": [
+    "GreatWall"
   ]
 }

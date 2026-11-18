@@ -303,7 +303,9 @@ pub(crate) fn force_draw_wonder_from_anywhere(
     {
         false
     } else {
-        panic!("Wonder card {wonder} not found in the game state, but was requested to be drawn.")
+        // Old saves cannot recover destructions which predate destroyed_wonders.
+        // Treat an unavailable expert wonder as an ordinary draw rather than panic.
+        false
     }
 }
 
@@ -557,6 +559,9 @@ pub(crate) fn destroy_wonder(
     wonder: Wonder,
     position: Position,
 ) {
+    if !game.destroyed_wonders.contains(&wonder) {
+        game.destroyed_wonders.push(wonder);
+    }
     lose_wonder(game, player, wonder, position);
     for p in &mut game.players {
         remove_element(&mut p.wonders_built, &wonder);
@@ -677,4 +682,162 @@ pub(crate) fn wonder_cost(game: &Game, player: &Player, w: Wonder) -> CostInfo {
             .clone()
             .add_extra_options(player, EventOrigin::Wonder(w)),
     )
+}
+
+#[cfg(test)]
+mod destroyed_wonder_tests {
+    use super::Wonder;
+    use crate::action::Action;
+    use crate::advance::Advance;
+    use crate::cache::Cache;
+    use crate::content::persistent_events::{EventResponse, SelectedStructure};
+    use crate::game::{Game, GameContext};
+    use crate::game_api;
+    use crate::game_data::GameData;
+    use crate::leader::Leader;
+    use crate::playing_actions::PlayingAction::WonderCard;
+    use crate::position::Position;
+    use crate::resource_pile::ResourcePile;
+    use crate::structure::Structure;
+    use crate::unit::UnitType;
+
+    fn game() -> Game {
+        let data: GameData = serde_json::from_str(include_str!(
+            "../tests/test_games/civilizations/china/great_wall.json"
+        ))
+        .unwrap();
+        let cache = Cache::new(&data.options);
+        Game::from_data(data, cache, GameContext::Play)
+    }
+
+    fn response(game: Game, response: EventResponse) -> Game {
+        game_api::execute(game, Action::Response(response), 0)
+    }
+
+    fn destroyed_wonder_expert_game(wonder: Wonder, civilization: &str) -> Game {
+        let city = Position::from_offset("D1");
+        let mut game = game();
+        game.players[0].civilization = game.cache.get_civilization(civilization);
+        let leader = if civilization == "China" {
+            Leader::Qin
+        } else {
+            Leader::Hammurabi
+        };
+        game.players[0].units[0].unit_type = UnitType::Leader(leader);
+        game.players[0].recruited_leaders = vec![leader];
+        game.players[0].wonder_cards = vec![wonder];
+        game.players[0].resources = ResourcePile::new(9, 9, 9, 9, 9, 9, 9);
+        game.players[0]
+            .cities
+            .push(crate::city::City::new(0, Position::from_offset("C1")));
+        game.players[0].advances.insert(Advance::Engineering);
+        game.players[0].advances.insert(Advance::Irrigation);
+        game.players[0].advances.insert(Advance::Math);
+        game.players[0].advances.insert(Advance::Astronomy);
+        let mut game = game.clone();
+        game.wonders_left.retain(|w| *w != wonder);
+        game.players[1].wonder_cards.clear();
+        let mut game = game_api::execute(game, Action::Playing(WonderCard(wonder)), 0);
+        let payment = if wonder == Wonder::GreatWall {
+            ResourcePile::new(3, 2, 7, 0, 0, 0, 3)
+        } else {
+            ResourcePile::new(5, 5, 2, 0, 0, 0, 5)
+        };
+        game = response(game, EventResponse::Payment(vec![payment]));
+        assert!(
+            game.players[0]
+                .get_city(city)
+                .pieces
+                .wonders
+                .contains(&wonder)
+        );
+        game.player_mut(0).special_advances.clear();
+        game.player_mut(0).incident_tokens = 1;
+        game.incidents_left = vec![30];
+        game.wonders_left.retain(|w| *w != Wonder::Pyramids);
+        game.wonders_left.push(Wonder::Pyramids);
+        game.permanent_effects.clear();
+        game.actions_left = 1;
+        game = game_api::execute(
+            game,
+            Action::Playing(crate::playing_actions::PlayingAction::Advance(
+                crate::advance::AdvanceAction::new(Advance::Storage, ResourcePile::food(2)),
+            )),
+            0,
+        );
+        assert!(game.cache.get_incident(30).name == "Earthquake");
+        response(
+            game,
+            EventResponse::SelectStructures(vec![SelectedStructure::new(
+                city,
+                Structure::Wonder(wonder),
+            )]),
+        )
+    }
+
+    fn ordinary_engineering_draw(mut game: Game) -> Game {
+        game.player_mut(0).advances.remove(Advance::Roads);
+        game.player_mut(0).advances.remove(Advance::Engineering);
+        let cache = game.cache.clone();
+        game = Game::from_data(game.cloned_data(), cache, GameContext::Play);
+        game_api::execute(
+            game,
+            Action::Playing(crate::playing_actions::PlayingAction::Advance(
+                crate::advance::AdvanceAction::new(Advance::Engineering, ResourcePile::empty()),
+            )),
+            0,
+        )
+    }
+
+    #[test]
+    fn destroyed_wonders_are_public_unique_and_legacy_compatible() {
+        let data = game().cloned_data();
+        let value = serde_json::to_value(&data).unwrap();
+        assert!(value.get("destroyed_wonders").is_none());
+        let legacy: GameData = serde_json::from_value(value).unwrap();
+        let legacy = Game::from_data(legacy, game().cache, GameContext::Play);
+        assert!(legacy.destroyed_wonders.is_empty());
+
+        let game = destroyed_wonder_expert_game(Wonder::GreatWall, "China");
+        let cache = game.cache.clone();
+        let roundtrip = Game::from_data(game.cloned_data(), cache, GameContext::Play);
+        assert!(roundtrip.cloned_data() == game.cloned_data());
+        for seat in [Some(0), Some(1), None] {
+            let public = crate::game_api::strip_secret(game.clone(), seat);
+            assert_eq!(public.destroyed_wonders, vec![Wonder::GreatWall]);
+        }
+        assert_eq!(game.destroyed_wonders, vec![Wonder::GreatWall]);
+    }
+
+    #[test]
+    fn destroyed_great_wall_is_not_forced_back_by_qin_engineering() {
+        let city = Position::from_offset("D1");
+        let mut game = destroyed_wonder_expert_game(Wonder::GreatWall, "China");
+        assert_eq!(game.destroyed_wonders, vec![Wonder::GreatWall]);
+        assert!(game.players[0].wonders_built.is_empty());
+        assert!(game.players[0].get_city(city).pieces.wonders.is_empty());
+        game.actions_left = 1;
+        let game = ordinary_engineering_draw(game);
+        assert_eq!(game.players[0].wonder_cards.len(), 1);
+        assert_ne!(game.players[0].wonder_cards[0], Wonder::GreatWall);
+        assert!(game.players[0].wonders_built.is_empty());
+        assert!(game.players[0].get_city(city).pieces.wonders.is_empty());
+        for seat in [Some(0), Some(1), None] {
+            let public = crate::game_api::strip_secret(game.clone(), seat);
+            assert_eq!(public.destroyed_wonders, vec![Wonder::GreatWall]);
+        }
+    }
+
+    #[test]
+    fn babylonia_also_skips_destroyed_great_gardens() {
+        let mut game = destroyed_wonder_expert_game(Wonder::GreatGardens, "Babylonia");
+        game.actions_left = 1;
+        let game = ordinary_engineering_draw(game);
+        assert_eq!(game.players[0].wonder_cards.len(), 1);
+        assert_ne!(game.players[0].wonder_cards[0], Wonder::GreatGardens);
+        for seat in [Some(0), Some(1), None] {
+            let public = crate::game_api::strip_secret(game.clone(), seat);
+            assert_eq!(public.destroyed_wonders, vec![Wonder::GreatGardens]);
+        }
+    }
 }

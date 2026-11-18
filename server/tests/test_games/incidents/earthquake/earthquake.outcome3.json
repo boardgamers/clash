@@ -542,5 +542,8 @@
   ],
   "incidents_discarded": [
     31
+  ],
+  "destroyed_wonders": [
+    "GreatGardens"
   ]
 }

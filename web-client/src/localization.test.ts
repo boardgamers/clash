@@ -262,6 +262,20 @@ test('ambiguous adjacent parameters are not guessed, and nested caches do not po
   assert.equal(t.translate('city size 3, Fortress'), 'ville de taille 3, Forteresse');
 });
 
+test('Defiant Stand journal uses a single total penalty and preserves legacy translation', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const modern = 'Defiant Stand: -3 total combat value (1 per attacking unit)';
+  const legacy = 'Heavy resistance added -3 to combat value for each unit';
+  for (const locale of ['en', 'fr', 'de', 'da', 'el', 'fa', 'hi', 'it', 'ko', 'nl', 'pl', 'pt-BR', 'ro', 'ru', 'vi', 'zh-CN', 'zh-TW']) {
+    const catalog = JSON.parse(await readFile(new URL(`./localization/${locale}.json`, import.meta.url), 'utf8'));
+    const translator = createTranslator({ [locale]: catalog }, locale);
+    const expected = catalog['Defiant Stand: -{p0} total combat value (1 per attacking unit)'].replace('{p0}', '3');
+    assert.equal(translator.translate(modern), expected, locale);
+    assert.equal(translator.translate(legacy), catalog['Heavy resistance added -{p0} to combat value for each unit'].replace('{p0}', '3'), locale);
+    assert.ok(!expected.includes('3 total combat value (3'), locale);
+  }
+});
+
 test('wonder research hints translate the complete required-for caption and private-hand subtitle', async () => {
   const { readFile } = await import('node:fs/promises');
   for (const locale of ['en', 'fr', 'de', 'da', 'el', 'fa', 'hi', 'it', 'ko', 'nl', 'pl', 'pt-BR', 'ro', 'ru', 'vi', 'zh-CN', 'zh-TW']) {

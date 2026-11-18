@@ -344,6 +344,97 @@ fn fortress_without_army_cannot_use_tactical_retreat_even_from_a_saved_prompt() 
     );
 }
 
+fn retreat_game(defender_army: usize) -> server::game::Game {
+    use server::unit::{Unit, UnitType};
+    let city = Position::from_offset("C1");
+    let destination = Position::from_offset("B1");
+    let mut setup = JSON.load_game("heavy_resistance");
+    setup.players[0].action_cards.clear();
+    setup.players[0]
+        .advances
+        .insert(server::advance::Advance::Engineering);
+    setup.players[0].cities.clear();
+    setup.players[1].civilization = setup.cache.get_civilization("Persia");
+    setup.players[1].action_cards = vec![19];
+    setup.players[1].units.clear();
+    for id in 0..defender_army as u32 {
+        setup.players[1]
+            .units
+            .push(Unit::new(1, city, UnitType::Infantry, id));
+    }
+    setup.players[1]
+        .units
+        .push(Unit::new(1, city, UnitType::Settler, 10));
+    setup.players[1]
+        .units
+        .push(Unit::new(1, destination, UnitType::Infantry, 11));
+    setup.players[1].next_unit_id = 12;
+    setup.clone()
+}
+
+fn retreat_view(game: &server::game::Game) -> serde_json::Value {
+    server::web_view::view(game, Some(1))
+}
+
+#[test]
+fn tactical_retreat_respects_stack_limit_and_moves_settlers() {
+    use server::game_api;
+    use server::unit::UnitType;
+    let city = Position::from_offset("C1");
+    let destination = Position::from_offset("B1");
+
+    let setup = retreat_game(1);
+    let game = game_api::execute(setup, move_action(vec![0], city), 0);
+    let view = retreat_view(&game);
+    assert_eq!(view["decision"]["options"].as_array().unwrap().len(), 1);
+    let game = game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+            19,
+        )])),
+        1,
+    );
+    let text = serde_json::to_value(game.cloned_data()).unwrap()["log"].to_string();
+    assert!(text.contains("withdraws to B1"));
+    assert_eq!(game.player(1).get_units(destination).len(), 3);
+    assert!(game.player(1).get_units(city).is_empty());
+    assert!(
+        game.player(1)
+            .get_units(destination)
+            .iter()
+            .any(|u| u.unit_type == UnitType::Settler)
+    );
+}
+
+#[test]
+fn tactical_retreat_is_unavailable_when_every_destination_would_overflow() {
+    use server::game_api;
+    use server::unit::{Unit, UnitType};
+    let city = Position::from_offset("C1");
+    let other = Position::from_offset("B2");
+    let mut setup = retreat_game(2);
+    setup.players[1]
+        .units
+        .push(Unit::new(1, other, UnitType::Infantry, 12));
+    setup.players[1]
+        .units
+        .push(Unit::new(1, other, UnitType::Infantry, 13));
+    setup.players[1]
+        .units
+        .push(Unit::new(1, other, UnitType::Infantry, 14));
+    let game = game_api::execute(setup, move_action(vec![0], city), 0);
+    let game = game_api::execute(
+        game,
+        Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
+            19,
+        )])),
+        1,
+    );
+    let text = serde_json::to_value(game.cloned_data()).unwrap()["log"].to_string();
+    assert!(text.contains("withdraws to"));
+    assert!(game.player(1).get_units(city).is_empty());
+}
+
 #[test]
 fn high_ground_is_not_skipped_after_attacker_flanking() {
     let mut game = JSON.load_game("high_ground");

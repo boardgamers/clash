@@ -400,5 +400,8 @@
   ],
   "incidents_discarded": [
     29
+  ],
+  "destroyed_wonders": [
+    "Pyramids"
   ]
 }

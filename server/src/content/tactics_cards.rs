@@ -3,15 +3,17 @@ use crate::action_card::{gain_action_card, gain_action_card_from_pile};
 use crate::card::HandCardLocation;
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength, kill_combat_units};
+use crate::content::civilizations::persia::stack_limit;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
+use crate::leader::Leader;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{
     CombatLocation, CombatRole, FighterRequirement, OpponentTacticsStatus, TacticsCard,
     TacticsCardTarget, opponent_tactics_status,
 };
-use crate::unit::set_unit_position;
+use crate::unit::{UnitType, set_unit_position};
 use crate::utils::a_or_an;
 use itertools::Itertools;
 use std::vec;
@@ -119,7 +121,7 @@ pub(crate) fn heavy_resistance(id: u8) -> TacticsCard {
         let v = c.fighting_units(game, player).len() as i8;
         s.extra_combat_value -= v;
         s.roll_log.push(format!(
-            "Heavy resistance added -{v} to combat value for each unit"
+            "Defiant Stand: -{v} total combat value (1 per attacking unit)"
         ));
     })
     .build()
@@ -288,11 +290,34 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
 }
 
 fn tactical_retreat_targets(c: &Combat, game: &Game) -> Vec<Position> {
-    let player = c.defender();
+    let player = game.player(c.defender());
+    let moving_army = player
+        .get_units(c.defender_position())
+        .iter()
+        .filter(|u| u.is_army_unit() && !u.is_transported())
+        .count();
+    let moving_xerxes = player
+        .get_units(c.defender_position())
+        .iter()
+        .any(|u| u.unit_type == UnitType::Leader(Leader::Xerxes));
     c.defender_position()
         .neighbors()
         .into_iter()
-        .filter(|&p| game.map.is_land(p) && game.enemy_player(player, p).is_none())
+        .filter(|&p| {
+            let existing_army = player
+                .get_units(p)
+                .iter()
+                .filter(|u| u.is_army_unit() && !u.is_transported())
+                .count();
+            let limit = if moving_xerxes {
+                5
+            } else {
+                stack_limit(player, p)
+            };
+            game.map.is_land(p)
+                && game.enemy_player(player.index, p).is_none()
+                && moving_army + existing_army <= limit
+        })
         .collect()
 }
 
@@ -453,4 +478,44 @@ pub(crate) fn flanking(id: u8) -> TacticsCard {
             s.roll_log.push("Flanking added 1 extra die".to_string());
         })
         .build()
+}
+
+#[cfg(test)]
+mod retreat_tests {
+    use super::tactical_retreat_targets;
+    use crate::game::{Game, GameContext};
+    use crate::game_data::GameData;
+    use crate::leader::Leader;
+    use crate::unit::{Unit, UnitType};
+
+    #[test]
+    fn xerxes_can_retreat_into_a_five_army_stack() {
+        let data: GameData = serde_json::from_str(include_str!(
+            "../../tests/test_games/tactics_cards/heavy_resistance.json"
+        ))
+        .unwrap();
+        let cache = crate::cache::Cache::new(&data.options);
+        let mut game = Game::from_data(data, cache, GameContext::Play);
+        let from = crate::position::Position::from_offset("C1");
+        let destination = crate::position::Position::from_offset("B1");
+        game.players[1].civilization = game.cache.get_civilization("Persia");
+        game.players[1].units.clear();
+        for id in 0..3 {
+            game.players[1]
+                .units
+                .push(Unit::new(1, from, UnitType::Infantry, id));
+        }
+        game.players[1]
+            .units
+            .push(Unit::new(1, from, UnitType::Leader(Leader::Xerxes), 4));
+        game.players[1]
+            .units
+            .push(Unit::new(1, destination, UnitType::Infantry, 5));
+        let combat = crate::combat::Combat::new(
+            vec![],
+            false,
+            crate::combat_stats::new_combat_stats(&game, 1, from, 0, &[0], None),
+        );
+        assert_eq!(tactical_retreat_targets(&combat, &game), vec![destination]);
+    }
 }

@@ -106,6 +106,9 @@ pub struct GameData {
     wonders_left: Vec<Wonder>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
+    destroyed_wonders: Vec<Wonder>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     action_cards_left: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -175,6 +178,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         dice_roll_log: data.dice_roll_log,
         dropped_players: data.dropped_players,
         wonders_left: data.wonders_left,
+        destroyed_wonders: data.destroyed_wonders,
         action_cards_left: data.action_cards_left,
         action_cards_discarded: data.action_cards_discarded,
         objective_cards_left: data.objective_cards_left,
@@ -240,6 +244,7 @@ pub fn data(game: Game) -> GameData {
         dice_roll_log: game.dice_roll_log,
         dropped_players: game.dropped_players,
         wonders_left: game.wonders_left,
+        destroyed_wonders: game.destroyed_wonders,
         action_cards_left: game.action_cards_left,
         action_cards_discarded: game.action_cards_discarded,
         objective_cards_left: game.objective_cards_left,
@@ -286,6 +291,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         dice_roll_log: game.dice_roll_log.clone(),
         dropped_players: game.dropped_players.clone(),
         wonders_left: game.wonders_left.clone(),
+        destroyed_wonders: game.destroyed_wonders.clone(),
         action_cards_left: game.action_cards_left.clone(),
         action_cards_discarded: game.action_cards_discarded.clone(),
         objective_cards_left: game.objective_cards_left.clone(),

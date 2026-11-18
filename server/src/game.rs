@@ -198,6 +198,8 @@ pub struct Game {
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
+    /// Public history of wonders removed permanently from this game.
+    pub destroyed_wonders: Vec<Wonder>,
     pub action_cards_left: Vec<u8>,
     pub action_cards_discarded: Vec<u8>,
     pub objective_cards_left: Vec<u8>,
