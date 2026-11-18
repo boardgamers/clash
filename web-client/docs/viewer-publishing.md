@@ -1582,3 +1582,22 @@ activates the installer-owned achievement metadata (generic metadata PUTs strip
 packaged engine, including every old definition and the shared asset URL/bytes.
 Gallery, options (including Standard length), settings and unrelated metadata must
 remain unchanged. No backfill or live-game mutation is part of this release.
+
+# Viewer 0.1.224 / engine 0.4.157
+
+Adds 60 Points (`score-60`), Seven Objectives (`seven-objectives`) and Thirty
+Advances (`thirty-advances`) to catalog revision 5 (45 definitions). Inclusive
+thresholds use canonical final VP, completed-objective records and regular
+advances, respectively. Eligible authoritative finished non-dropped human seats
+qualify regardless of winning; held objectives, objective bonus VP and civilization
+special advances do not count toward their respective record/advance thresholds.
+The previous 42 definitions remain unchanged. All three reuse existing named
+category artwork, with no artwork upload or changed bytes.
+
+Publish the matching frozen engine and viewer only after main-branch Check and
+Web viewer pass. Wait for installer-owned activation and verify public/admin
+revision 5 with exactly 45 definitions; an accepted upload alone is not activation.
+Independently download and compare every viewer asset, engine archive and all 58
+existing named assets. Preserve real-game gallery, game-length labels/order and
+Standard default, plus all unrelated metadata. No historical award backfill,
+live-game moves, history repair or Fossil refresh is included.

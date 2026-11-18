@@ -79,7 +79,7 @@ const WONDERS: [(Wonder, &str, &str); 8] = [
     (Wonder::GreatStatue, "built-great-statue", "Great Statue"),
     (Wonder::GreatWall, "built-great-wall", "Great Wall"),
 ];
-const FEATS: [(&str, &str, &str); 8] = [
+const FEATS: [(&str, &str, &str); 11] = [
     (
         "score-30",
         "30 Points",
@@ -120,12 +120,27 @@ const FEATS: [(&str, &str, &str); 8] = [
         "Captured Leader",
         "Finish a game with at least 1 captured leader in the final state.",
     ),
+    (
+        "score-60",
+        "60 Points",
+        "Finish a game with at least 60 victory points in the final state.",
+    ),
+    (
+        "seven-objectives",
+        "Seven Objectives",
+        "Finish a game with at least 7 completed objectives in the final state.",
+    ),
+    (
+        "thirty-advances",
+        "Thirty Advances",
+        "Finish a game with at least 30 regular advances in the final state; special advances do not count.",
+    ),
 ];
 
 /// The stable achievement catalogue. Array order also defines award order.
 #[must_use]
 pub fn definitions() -> Manifest {
-    let mut definitions = Vec::with_capacity(42);
+    let mut definitions = Vec::with_capacity(45);
     for (_, id, name) in LENGTHS {
         definitions.push(Definition {
             id: format!("complete-{id}"),
@@ -147,13 +162,14 @@ pub fn definitions() -> Manifest {
         name: name.into(),
         description: description.into(),
         icon: Some(Icon::Asset {
-            // Reuse the existing objective-category artwork; no new asset upload.
+            // Reuse existing category artwork; no new assets or uploads.
             key: format!(
                 "achievement-{}",
-                if id == "five-objectives" {
-                    "three-objectives"
-                } else {
-                    id
+                match id {
+                    "five-objectives" | "seven-objectives" => "three-objectives",
+                    "score-60" => "score-40",
+                    "thirty-advances" => "twenty-advances",
+                    _ => id,
                 }
             ),
         }),
@@ -179,7 +195,7 @@ pub fn definitions() -> Manifest {
         icon: Some(Icon::Asset { key: format!("achievement-faction-{slug}") }),
     }));
     Manifest {
-        revision: 4,
+        revision: 5,
         achievements: definitions,
     }
 }
@@ -222,6 +238,9 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
                 p.completed_objectives.len() >= 5,
                 p.wonders_built.len() >= 2,
                 !p.captured_leaders.is_empty(),
+                score >= 60.0,
+                p.completed_objectives.len() >= 7,
+                p.advances.len() >= 30,
             ];
             for ((id, _, _), met) in FEATS.iter().zip(predicates) {
                 if met {
@@ -333,8 +352,8 @@ mod tests {
     #[test]
     fn manifest_and_real_end_turn_for_all_lengths() {
         let manifest = definitions();
-        assert_eq!(manifest.revision, 4);
-        assert_eq!(manifest.achievements.len(), 42);
+        assert_eq!(manifest.revision, 5);
+        assert_eq!(manifest.achievements.len(), 45);
         assert_eq!(
             manifest
                 .achievements
@@ -342,7 +361,7 @@ mod tests {
                 .map(|d| &d.id)
                 .collect::<HashSet<_>>()
                 .len(),
-            42
+            45
         );
         assert!(
             manifest
@@ -497,6 +516,89 @@ mod tests {
     }
 
     #[test]
+    fn seven_objectives_combines_instant_and_status_phase_records() {
+        let instant: crate::game_data::GameData = serde_json::from_str(include_str!(
+            "../tests/test_games/objective_cards/instant/warmonger.outcome4.json"
+        ))
+        .unwrap();
+        let status: crate::game_data::GameData = serde_json::from_str(include_str!(
+            "../tests/test_games/objective_cards/status_phase/large_civ.outcome8.json"
+        ))
+        .unwrap();
+        let instant_cache = crate::cache::Cache::new(&instant.options);
+        let instant = Game::from_data(instant, instant_cache, GameContext::Play);
+        let status_cache = crate::cache::Cache::new(&status.options);
+        let status = Game::from_data(status, status_cache, GameContext::Play);
+        let mut game = finish(setup(GameLength::Standard));
+        game.player_mut(0).completed_objectives =
+            status.players[0].completed_objectives[..6].to_vec();
+        assert!(!has(&game, 0, "seven-objectives"));
+        game.player_mut(0)
+            .completed_objectives
+            .extend(instant.players[0].completed_objectives.clone());
+        assert_eq!(game.player(0).completed_objectives.len(), 7);
+        assert!(has(&game, 0, "seven-objectives"));
+    }
+
+    #[test]
+    fn revision_five_thresholds_and_eligibility() {
+        for (length, _, _) in LENGTHS {
+            for variant in [GameVariant::Standard, GameVariant::Builder] {
+                for offset in 0..3 {
+                    let mut game = finish(setup_variant(length.clone(), variant.clone()));
+                    let p = game.player_mut(0);
+                    p.advances = EnumSet::<Advance>::all().iter().take(29 + offset).collect();
+                    p.special_advances.insert(SpecialAdvance::Aqueduct);
+                    p.completed_objectives = (0..6 + offset)
+                        .map(|i| CompletedObjective {
+                            card: i as u8,
+                            name: format!("test {i}"),
+                        })
+                        .collect();
+                    // Held cards and bonus objective VP are not completed records.
+                    p.objective_cards = vec![1, 2, 3];
+                    p.special_victory_points.push(SpecialVictoryPoints::new(
+                        10.0,
+                        EventOrigin::Ability("objective bonus".into()),
+                        VictoryPointAttribution::Objectives,
+                    ));
+                    // Loading derives civilization special advances from regular advances.
+                    // Normalize the fixture before targeting canonical total VP.
+                    let mut game =
+                        Game::from_data(game.cloned_data(), game.cache.clone(), GameContext::Play);
+                    assert!(!game.player(0).special_advances.is_empty());
+                    let score = [59.5, 60.0, 60.5][offset];
+                    set_score(&mut game, 0, score);
+                    set_score(&mut game, 1, 100.0);
+                    assert_eq!(game.player(0).victory_points(&game), score);
+                    assert_eq!(achievements(&game)[0].outcome, "loss");
+                    for id in ["score-60", "seven-objectives", "thirty-advances"] {
+                        assert_eq!(has(&game, 0, id), offset >= 1, "{id}");
+                    }
+                    assert!(!has(&game, 1, "seven-objectives"));
+                    assert!(!has(&game, 1, "thirty-advances"));
+                    let before = serde_json::to_value(game.cloned_data()).unwrap();
+                    let restored = Game::from_data(
+                        serde_json::from_value(before.clone()).unwrap(),
+                        game.cache.clone(),
+                        GameContext::Play,
+                    );
+                    assert_eq!(achievements(&game), achievements(&restored));
+                    assert_eq!(before, serde_json::to_value(game.cloned_data()).unwrap());
+                    game.secrets_stripped = true;
+                    assert!(achievements(&game).is_empty());
+                    game.secrets_stripped = false;
+                    game.dropped_players.push(0);
+                    assert!(achievements(&game).iter().all(|r| r.seat != 0));
+                    game.dropped_players.clear();
+                    game.state = GameState::Playing;
+                    assert!(achievements(&game).is_empty());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn faction_catalog_matches_every_playable_civilization_and_wire_shape() {
         let playable: HashSet<_> = crate::content::civilizations::get_all_uncached()
             .into_iter()
@@ -508,10 +610,10 @@ mod tests {
             FACTIONS.iter().map(|(name, _)| (*name).into()).collect()
         );
         let manifest = serde_json::to_value(definitions()).unwrap();
-        assert_eq!(manifest["revision"], 4);
+        assert_eq!(manifest["revision"], 5);
         assert_eq!(manifest.as_object().unwrap().len(), 2);
         let entries = manifest["achievements"].as_array().unwrap();
-        assert_eq!(entries.len(), 42);
+        assert_eq!(entries.len(), 45);
         for entry in entries {
             let faction = FACTIONS
                 .iter()
@@ -531,10 +633,11 @@ mod tests {
                     entry["icon"]["key"],
                     format!(
                         "achievement-{}",
-                        if entry["id"] == "five-objectives" {
-                            "three-objectives"
-                        } else {
-                            entry["id"].as_str().unwrap()
+                        match entry["id"].as_str().unwrap() {
+                            "five-objectives" | "seven-objectives" => "three-objectives",
+                            "score-60" => "score-40",
+                            "thirty-advances" => "twenty-advances",
+                            id => id,
                         }
                     )
                 );

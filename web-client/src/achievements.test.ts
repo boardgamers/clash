@@ -22,8 +22,8 @@ const finish = () => engine.tryMove(fixture, JSON.stringify({ Playing: 'EndTurn'
 
 test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const manifest = achievementManifestSchema.parse(hooks.achievementDefinitions());
-  assert.equal(manifest.revision, 4);
-  assert.equal(manifest.achievements.length, 42);
+  assert.equal(manifest.revision, 5);
+  assert.equal(manifest.achievements.length, 45);
   assert.ok(!manifest.achievements.some((a) => a.id === 'four-cities'));
   assert.ok(manifest.achievements.some((a) => a.id === 'seven-cities'));
   assert.ok(manifest.achievements.some((a) => a.id === 'complete-builder'));
@@ -37,8 +37,8 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const nonfactionArt = JSON.parse(
     readFileSync(new URL('../release/achievement-assets-nonfaction.json', import.meta.url), 'utf8'),
   );
-  assert.equal(nonfactionArt.revision, 3, 'revision 4 reuses the existing objective artwork');
-  assert.equal(art.revision, 2, 'revision 4 preserves the existing faction artwork');
+  assert.equal(nonfactionArt.revision, 3, 'revision 5 reuses the existing objective artwork');
+  assert.equal(art.revision, 2, 'revision 5 preserves the existing faction artwork');
   assert.deepEqual(
     [
       ...new Set(
@@ -327,4 +327,128 @@ test('five objectives uses completed records, with inclusive boundaries and unch
     data.state = 'Playing';
     assert.deepEqual(hooks.achievements(JSON.stringify(data)), []);
   }
+});
+
+const regularAdvances = [
+  'Farming',
+  'Storage',
+  'Irrigation',
+  'Husbandry',
+  'Mining',
+  'Engineering',
+  'Sanitation',
+  'Roads',
+  'Fishing',
+  'Navigation',
+  'WarShips',
+  'Cartography',
+  'Writing',
+  'PublicEducation',
+  'FreeEducation',
+  'Philosophy',
+  'Tactics',
+  'Siegecraft',
+  'SteelWeapons',
+  'Draft',
+  'Myths',
+  'Rituals',
+  'Priesthood',
+  'StateReligion',
+  'Bartering',
+  'TradeRoutes',
+  'Taxes',
+  'Currency',
+  'Arts',
+  'Sports',
+  'Monuments',
+];
+
+test('revision 5 milestones use inclusive canonical totals and unchanged eligibility', () => {
+  const manifest = hooks.achievementDefinitions();
+  for (const [id, name, description, key] of [
+    [
+      'score-60',
+      '60 Points',
+      'Finish a game with at least 60 victory points in the final state.',
+      'score-40',
+    ],
+    [
+      'seven-objectives',
+      'Seven Objectives',
+      'Finish a game with at least 7 completed objectives in the final state.',
+      'three-objectives',
+    ],
+    [
+      'thirty-advances',
+      'Thirty Advances',
+      'Finish a game with at least 30 regular advances in the final state; special advances do not count.',
+      'twenty-advances',
+    ],
+  ]) {
+    assert.deepEqual(
+      manifest.achievements.find((a) => a.id === id),
+      {
+        id,
+        name,
+        description,
+        icon: { type: 'asset', key: `achievement-${key}` },
+      },
+    );
+  }
+  for (const offset of [0, 1, 2]) {
+    const data = JSON.parse(finish());
+    const p = data.players[0];
+    // Rome's special advances are derived on load, not counted as regular research.
+    p.civilization = 'Rome';
+    p.advances = regularAdvances.slice(0, 29 + offset);
+    p.completed_objectives = Array.from({ length: 6 + offset }, (_, card) => ({
+      card,
+      name: `test ${card}`,
+    }));
+    p.objective_cards = [1, 2, 3];
+    p.special_victory_points = [
+      { points: 10, origin: { Ability: 'objective bonus' }, attribution: 'Objectives' },
+    ];
+    data.players[1].completed_objectives = [];
+    const scores = engine.scores(JSON.stringify(data)) as number[];
+    const target = [59, 60, 61][offset];
+    for (const seat of [0, 1]) {
+      data.players[seat].special_victory_points ??= [];
+      data.players[seat].special_victory_points.push({
+        points: (seat === 0 ? target : 100) - scores[seat],
+        origin: { Ability: 'revision 5 boundary' },
+        attribution: 'Events',
+      });
+    }
+    const raw = JSON.stringify(data);
+    assert.equal((engine.scores(raw) as number[])[0], target);
+    const results = achievementResultsSchema(manifest, 2).parse(hooks.achievements(raw));
+    assert.equal(results[0].outcome, 'loss');
+    for (const id of ['score-60', 'seven-objectives', 'thirty-advances'])
+      assert.equal(results[0].earned.includes(id), offset >= 1, id);
+    assert.ok(!results[1].earned.includes('seven-objectives'));
+    assert.ok(!results[1].earned.includes('thirty-advances'));
+    assert.deepEqual(hooks.achievements(JSON.stringify(JSON.parse(raw))), results);
+    assert.equal(JSON.stringify(data), raw);
+    for (const seat of [undefined, 0, 1])
+      assert.deepEqual(hooks.achievements(engine.stripSecret(raw, seat)), []);
+    data.dropped_players = [0];
+    assert.ok(hooks.achievements(JSON.stringify(data)).every((r) => r.seat !== 0));
+    data.dropped_players = [];
+    data.state = 'Playing';
+    assert.deepEqual(hooks.achievements(JSON.stringify(data)), []);
+  }
+});
+
+test('seven objectives combines real instant and status-phase completion records', () => {
+  const completed = (path: string) =>
+    JSON.parse(
+      readFileSync(new URL(`../../server/tests/test_games/objective_cards/${path}`, import.meta.url), 'utf8'),
+    ).players[0].completed_objectives;
+  const data = JSON.parse(finish());
+  data.players[0].completed_objectives = completed('status_phase/large_civ.outcome8.json').slice(0, 6);
+  assert.ok(!hooks.achievements(JSON.stringify(data))[0].earned.includes('seven-objectives'));
+  data.players[0].completed_objectives.push(...completed('instant/warmonger.outcome4.json'));
+  assert.equal(data.players[0].completed_objectives.length, 7);
+  assert.ok(hooks.achievements(JSON.stringify(data))[0].earned.includes('seven-objectives'));
 });

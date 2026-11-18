@@ -1,6 +1,6 @@
 # Clash of Cultures achievements
 
-Release **viewer 0.1.223 / engine 0.4.156** publishes catalog revision **4**
+Previously delivered **viewer 0.1.223 / engine 0.4.156** published catalog revision **4**
 with **42 definitions**. The previous live catalog was revision 3 (41 definitions),
 verified before this release. Artwork remains the existing 41 named achievement
 images; Five Objectives shares the Three Objectives image without changing bytes.
@@ -11,6 +11,39 @@ The native Rust evaluator is the single source of truth. The WASM package export
 its existing engine hooks. The web-client tests check the generated API against
 `@boardgamers/protocol` **0.11.0** types and runtime schemas; there is no separate
 JavaScript scoring implementation.
+
+## Viewer 0.1.224 / engine 0.4.157 — revision 5, 45 definitions
+
+Adds three independent, inclusive final-state milestones:
+
+| Name | ID | Condition | Reused asset key |
+| --- | --- | --- | --- |
+| 60 Points | `score-60` | `player.victory_points(game) >= 60` | `achievement-score-40` |
+| Seven Objectives | `seven-objectives` | `completed_objectives.len() >= 7` | `achievement-three-objectives` |
+| Thirty Advances | `thirty-advances` | `advances.len() >= 30` | `achievement-twenty-advances` |
+
+The score is the canonical total VP, including city pieces, regular and special
+advances, completed objectives and objective bonus VP, wonders, event VP and
+captured leaders (and the engine's applicable scoring adjustments). It is not a
+resource count. Objectives use the same completed-record list as the three- and
+five-objective tiers: instant and status-phase completions count alike; held cards,
+printed options, bonus VP and lifetime totals do not. Advances follow the existing
+Twenty Advances tier: regular advances currently in the set, regardless of how
+acquired, excluding civilization special advances (including automatically unlocked
+ones). The prior catalog has no 50-point or 25-advance tier.
+
+All three require an authoritative `Finished` save and an eligible non-dropped human
+civilization seat, but not a win. Existing platform eligibility responsibilities
+still apply. The previous 42 definitions and their conditions are unchanged.
+There are still 41 unique achievement asset keys (58 named artwork assets overall);
+no artwork bytes, assets or localization metadata change. The wrapper versions and
+artwork package-lock integrity hash are updated for the matching release.
+Publish only after matching main-branch Check and Web viewer CI pass, using the
+frozen tested engine/viewer. The asynchronous engine installer owns activation:
+verify public and admin revision 5 with exactly 45 definitions before reporting
+completion, including equality of the previous 42 definitions and all 58 named
+asset bytes. No historical backfill or live-game mutation is performed; awards
+apply to future natural eligible completions. Generated artifacts remain ignored.
 
 ## Revision 4 — 42 definitions
 
