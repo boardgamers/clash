@@ -1644,3 +1644,35 @@ is not fixed. Preserve the deployed engine bytes, revision-7 achievement catalog
 (46 definitions), all artwork, gallery and unrelated metadata. Require main-branch
 Check and Web viewer CI before publishing the tested viewer bundle. No live-game
 moves, saved-game migration, history repair, achievement backfill or Fossil refresh.
+
+# Viewer 0.1.228 / engine 0.4.160 — exhausted terrain movement
+
+Exhaustion now retains underlying terrain for movement, matching the official
+[rulebook](https://wizkids.com/posters/repository/wizkids/Clash-of-Cultures---Rulebook---WEB---2021-02-05-compressed.pdf),
+pp.14 and 25: entered Forest prevents later army attacks that turn (not peaceful
+moves); entered Mountain prevents later ordinary moves that turn. This is per
+unit and cleared at turn end, not merely at the end of a Move action. Starting on
+a tile does not count as entering it. Exhausted Plains also retains the Great
+Gardens restriction (p.28); exhaustion changes collection/founding, not terrain.
+
+Only movement classification unwraps Exhausted. Collection, founding and barbarian
+spawn rules keep the wrapper. Huns Nomads stops on exhausted Mountains but gains
+no resource. Roads paid adjacent routes and ordinary terrain warnings use the
+same underlying classification. Roads rules/description text and translations
+are unchanged; the viewer-227 terrain display already identifies exhaustion.
+Hannibal with elephants and Maya Terracing retain their existing exceptions (the
+repository implements Terracing for Maya, not a separate Inca civilization).
+Battle and Navigator stops remain non-bypassable.
+
+Native regressions reproduce the exhausted-Forest attack bug before the fix and
+exercise separate Move actions, same-action identity, mixed groups, untouched
+units, settlers and turn clearing. `scripts/exhausted-movement-check.mjs` runs
+real WASM actions/queries for both ordinary and exhausted terrain, leaders,
+Great Gardens, paid Roads, Hannibal, Terracing and Nomads. It also accepts
+`CLASH_ENGINE=/absolute/path/server.js` for testing the frozen/downloaded engine.
+
+Require green main-commit Check and Web viewer CI before publishing the frozen
+matching viewer/engine; independently byte-verify all hosted files and engine.
+Preserve revision-7 catalog (46 definitions), all 58 named assets, gallery and
+unrelated metadata. No production moves, save migration, history repair, backfill
+or Fossil refresh. The exact user game was not provided or verified.

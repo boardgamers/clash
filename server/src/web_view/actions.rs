@@ -199,7 +199,7 @@ fn terrain_notes(
     destination: Position,
 ) -> Vec<&'static str> {
     let mut notes = vec![];
-    match game.map.get(destination) {
+    match game.map.get(destination).map(Terrain::movement_terrain) {
         Some(Terrain::Mountain) => {
             if crate::content::civilizations::carthage::ignores_mountains(player, units) {
                 notes.push("Hannibal with elephants: ignores the mountain movement stop.");
@@ -268,7 +268,9 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
                 && start.is_neighbor(route.destination)
                 && (game.enemy_player(seat, route.destination).is_some()
                     || !matches!(
-                        game.map.get(route.destination),
+                        game.map
+                            .get(route.destination)
+                            .map(Terrain::movement_terrain),
                         Some(Terrain::Mountain | Terrain::Forest)
                     ))
                 && routes.iter().any(|ordinary| {

@@ -1,13 +1,13 @@
 {
   "name": "@boardgamers/clash-web-client",
-  "version": "0.1.227",
+  "version": "0.1.228",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 8643",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "node --experimental-strip-types --test src/*.test.ts && node --test scripts/publish-gallery.test.mjs && npm run test:achievement-assets && npm run test:locales",
+    "test": "node --experimental-strip-types --test src/*.test.ts && node --test scripts/publish-gallery.test.mjs && npm run test:achievement-assets && npm run test:locales && node scripts/exhausted-movement-check.mjs",
     "test:home-orientation": "npm run build && node scripts/home-orientation-smoke.mjs",
     "build:achievement-assets": "node scripts/build-achievement-assets.mjs",
     "test:achievement-assets": "node --test scripts/achievement-assets.test.mjs scripts/publish-achievement-assets.test.mjs scripts/publish-achievement-backups.test.mjs",

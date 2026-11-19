@@ -184,6 +184,16 @@ pub enum Terrain {
 }
 
 impl Terrain {
+    /// Terrain identity for movement rules only. Exhaustion still prevents resource
+    /// collection and founding; callers of those rules must keep the wrapper.
+    #[must_use]
+    pub fn movement_terrain(&self) -> &Self {
+        match self {
+            Self::Exhausted(terrain) => terrain.movement_terrain(),
+            terrain => terrain,
+        }
+    }
+
     #[must_use]
     pub fn is_water(&self) -> bool {
         matches!(self, Terrain::Water)

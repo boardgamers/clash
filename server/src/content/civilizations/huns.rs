@@ -176,7 +176,7 @@ pub(crate) fn finish_city_move(game: &mut Game, player: usize, from: Position, t
     game.player_mut(player).event_info.remove("Nomads moving");
     let origin = EventOrigin::SpecialAdvance(SpecialAdvance::Nomads);
     activate_city(from, game, &origin);
-    let mountain = game.map.get(to) == Some(&Terrain::Mountain);
+    let mountain = game.map.get(to).map(Terrain::movement_terrain) == Some(&Terrain::Mountain);
     let city = game.player_mut(player).get_city_mut(from);
     city.position = to;
     city.nomad_mountain = mountain;

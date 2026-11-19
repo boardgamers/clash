@@ -831,7 +831,7 @@ fn terrain_movement_restriction(
     let terrain = map
         .get(destination)
         .expect("the destination position should exist on the map");
-    match terrain {
+    match terrain.movement_terrain() {
         Fertile => Some(MovementRestriction::Fertile),
         Mountain => Some(MovementRestriction::Mountain),
         Forest if unit.is_army_unit() => Some(MovementRestriction::Forest),

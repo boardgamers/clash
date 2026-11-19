@@ -33,11 +33,11 @@ for (const terrain of ['Forest', 'Mountain'])
     g.players[0].advances.push('Roads');
     assert.match(quote(g).terrainNotes.join(' '), /Roads route/);
   });
-test('forest settlers and exhausted mountains do not promise restrictions that will not apply', () => {
+test('forest settlers remain unrestricted; exhausted mountains retain their warning', () => {
   const g = fixture('Forest');
   assert.match(quote(g, [5]).terrainNotes.join(' '), /No forest movement restriction/);
   const exhausted = fixture({ Exhausted: 'Mountain' });
-  assert.deepEqual(quote(exhausted).terrainNotes, []);
+  assert.deepEqual(quote(exhausted).terrainNotes, quote(fixture('Mountain')).terrainNotes);
 });
 test('Hannibal and Terracing show their mountain exceptions before moving', () => {
   const g = fixture('Mountain');
