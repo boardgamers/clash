@@ -73,12 +73,23 @@ test('generated engine schema, 46 definitions sharing 41 existing assets', async
   const engine = createRequire(import.meta.url)(process.env.CLASH_TEST_ENGINE ?? '../.engine/server.js');
   assert.ok(inspectEngine(engine).compatible);
   const m = engine.achievementDefinitions();
-  assert.equal(m.revision, 6);
+  assert.equal(m.revision, 7);
   assert.equal(m.achievements.length, 46);
   const baselineManifest = JSON.parse(
     await readFile(path.join(root, 'web-client/src/fixtures/achievements-revision-5.json'), 'utf8'),
   );
   const previous = new Map(baselineManifest.achievements.map((a) => [a.id, a]));
+  // Revision 7 changes only these eight names; keep the revision-5 fixture historical.
+  const wonderNames = new Map([
+    ['built-great-arena', 'Great Arena'],
+    ['built-great-pyramids', 'Great Pyramids'],
+    ['built-great-gardens', 'Great Gardens'],
+    ['built-great-library', 'Great Library'],
+    ['built-great-lighthouse', 'Great Lighthouse'],
+    ['built-great-mausoleum', 'Great Mausoleum'],
+    ['built-great-statue', 'Great Statue'],
+    ['built-great-wall', 'Great Wall'],
+  ]);
   const expectedIds = [
     ...baselineManifest.achievements.slice(0, 10).map((a) => a.id),
     'score-30',
@@ -105,7 +116,9 @@ test('generated engine schema, 46 definitions sharing 41 existing assets', async
             description: 'Finish a game with at least 50 victory points in the final state.',
             icon: { type: 'asset', key: 'achievement-score-40' },
           }
-        : previous.get(id),
+        : wonderNames.has(id)
+          ? { ...previous.get(id), name: wonderNames.get(id) }
+          : previous.get(id),
     ),
   );
   const factions = JSON.parse(

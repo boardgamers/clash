@@ -181,7 +181,7 @@ pub fn definitions() -> Manifest {
     }));
     definitions.extend(WONDERS.map(|(_, id, name)| Definition {
         id: id.into(),
-        name: format!("{name}: Recorded as Built"),
+        name: name.into(),
         description: format!("Finish with {name} recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count."),
         icon: Some(Icon::Asset { key: format!("achievement-{id}") }),
     }));
@@ -200,7 +200,7 @@ pub fn definitions() -> Manifest {
         icon: Some(Icon::Asset { key: format!("achievement-faction-{slug}") }),
     }));
     Manifest {
-        revision: 6,
+        revision: 7,
         achievements: definitions,
     }
 }
@@ -358,7 +358,7 @@ mod tests {
     #[test]
     fn manifest_and_real_end_turn_for_all_lengths() {
         let manifest = definitions();
-        assert_eq!(manifest.revision, 6);
+        assert_eq!(manifest.revision, 7);
         assert_eq!(manifest.achievements.len(), 46);
         assert_eq!(
             manifest
@@ -665,7 +665,7 @@ mod tests {
             FACTIONS.iter().map(|(name, _)| (*name).into()).collect()
         );
         let manifest = serde_json::to_value(definitions()).unwrap();
-        assert_eq!(manifest["revision"], 6);
+        assert_eq!(manifest["revision"], 7);
         assert_eq!(manifest.as_object().unwrap().len(), 2);
         let entries = manifest["achievements"].as_array().unwrap();
         assert_eq!(entries.len(), 46);
@@ -806,7 +806,7 @@ mod tests {
                 .iter()
                 .find(|entry| entry.id == id)
                 .unwrap();
-            assert_eq!(entry.name, format!("{name}: Recorded as Built"));
+            assert_eq!(entry.name, name);
             assert_eq!(
                 entry.description,
                 format!(

@@ -12,6 +12,17 @@ its existing engine hooks. The web-client tests check the generated API against
 `@boardgamers/protocol` **0.11.0** types and runtime schemas; there is no separate
 JavaScript scoring implementation.
 
+## Viewer 0.1.226 / engine 0.4.159 — revision 7, 46 definitions
+
+Removes “: Recorded as Built” from the eight individual wonder titles: Great
+Arena, Great Pyramids, Great Gardens, Great Library, Great Lighthouse, Great
+Mausoleum, Great Statue and Great Wall. IDs, detailed descriptions, conditions,
+icons, award behavior and catalog order remain unchanged from revision 6.
+Tests retain the historical revision-5 fixture with an explicit eight-name
+allowlist alongside the revision-6 addition/order expectations. Publish the matching
+viewer and engine to activate revision 7 through the BGS achievement installer.
+No artwork uploads, backfill, live-game changes or history repair.
+
 ## Viewer 0.1.225 / engine 0.4.158 — revision 6, 46 definitions
 
 Adds **50 Points** (`score-50`): “Finish a game with at least 50 victory points in

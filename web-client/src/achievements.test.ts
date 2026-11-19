@@ -22,7 +22,7 @@ const finish = () => engine.tryMove(fixture, JSON.stringify({ Playing: 'EndTurn'
 
 test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const manifest = achievementManifestSchema.parse(hooks.achievementDefinitions());
-  assert.equal(manifest.revision, 6);
+  assert.equal(manifest.revision, 7);
   assert.equal(manifest.achievements.length, 46);
   assert.deepEqual(
     manifest.achievements.slice(10, 22).map((a) => a.id),
@@ -63,8 +63,8 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const nonfactionArt = JSON.parse(
     readFileSync(new URL('../release/achievement-assets-nonfaction.json', import.meta.url), 'utf8'),
   );
-  assert.equal(nonfactionArt.revision, 3, 'revision 6 reuses the existing objective artwork');
-  assert.equal(art.revision, 2, 'revision 6 preserves the existing faction artwork');
+  assert.equal(nonfactionArt.revision, 3, 'revision 7 reuses the existing objective artwork');
+  assert.equal(art.revision, 2, 'revision 7 preserves the existing faction artwork');
   assert.deepEqual(
     [
       ...new Set(
@@ -81,13 +81,24 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   }
 });
 
-test('revision 6 preserves all 45 previous definitions with the explicit new catalog order', () => {
+test('revision 7 permits only eight wonder renames alongside revision 6 additions and order', () => {
   // Captured from the generated ba8ee4e2 / engine 0.4.157 catalog before rebuilding.
   const previous: AchievementManifest = JSON.parse(
     readFileSync(new URL('./fixtures/achievements-revision-5.json', import.meta.url), 'utf8'),
   );
   const manifest = hooks.achievementDefinitions();
   const previousById = new Map(previous.achievements.map((a) => [a.id, a]));
+  // Revision 7 changes only these eight names; keep the revision-5 fixture historical.
+  const wonderNames = new Map([
+    ['built-great-arena', 'Great Arena'],
+    ['built-great-pyramids', 'Great Pyramids'],
+    ['built-great-gardens', 'Great Gardens'],
+    ['built-great-library', 'Great Library'],
+    ['built-great-lighthouse', 'Great Lighthouse'],
+    ['built-great-mausoleum', 'Great Mausoleum'],
+    ['built-great-statue', 'Great Statue'],
+    ['built-great-wall', 'Great Wall'],
+  ]);
   const expectedIds = [
     ...previous.achievements.slice(0, 10).map((a) => a.id),
     'score-30',
@@ -114,7 +125,9 @@ test('revision 6 preserves all 45 previous definitions with the explicit new cat
             description: 'Finish a game with at least 50 victory points in the final state.',
             icon: { type: 'asset', key: 'achievement-score-40' },
           }
-        : previousById.get(id),
+        : wonderNames.has(id)
+          ? { ...previousById.get(id), name: wonderNames.get(id) }
+          : previousById.get(id),
     ),
   );
 });

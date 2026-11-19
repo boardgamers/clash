@@ -1618,3 +1618,15 @@ the full viewer bundle and engine, then verify installer-owned revision 6 and th
 exact ordered catalog in both public and admin metadata. Preserve gallery, Standard
 length default and unrelated metadata. No backfill, live-game moves, history repair
 or Fossil refresh. See `docs/achievements.md` for the catalog contract.
+
+# Viewer 0.1.226 / engine 0.4.159 — wonder title cleanup
+
+The eight individual wonder titles now contain only their wonder names (no
+“: Recorded as Built” suffix). All 46 definitions retain their revision-6 IDs,
+descriptions, conditions, icons and order; evaluator and award behavior are unchanged.
+Publish the matching viewer and engine after both release-commit CI workflows pass.
+Verify installer-owned revision 7 in public and admin metadata against the exact
+46-definition engine catalog. Download and byte-verify the frozen viewer and engine
+and all 58 existing named assets; upload no artwork. Preserve gallery, Standard
+length default and unrelated metadata. No backfill, live-game changes, history repair
+or Fossil refresh. Historical fixtures and activation receipts remain untouched.
