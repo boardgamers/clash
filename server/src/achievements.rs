@@ -79,7 +79,7 @@ const WONDERS: [(Wonder, &str, &str); 8] = [
     (Wonder::GreatStatue, "built-great-statue", "Great Statue"),
     (Wonder::GreatWall, "built-great-wall", "Great Wall"),
 ];
-const FEATS: [(&str, &str, &str); 11] = [
+const FEATS: [(&str, &str, &str); 12] = [
     (
         "score-30",
         "30 Points",
@@ -89,6 +89,16 @@ const FEATS: [(&str, &str, &str); 11] = [
         "score-40",
         "40 Points",
         "Finish a game with at least 40 victory points in the final state.",
+    ),
+    (
+        "score-50",
+        "50 Points",
+        "Finish a game with at least 50 victory points in the final state.",
+    ),
+    (
+        "score-60",
+        "60 Points",
+        "Finish a game with at least 60 victory points in the final state.",
     ),
     (
         "seven-cities",
@@ -101,6 +111,11 @@ const FEATS: [(&str, &str, &str); 11] = [
         "Finish a game with at least 20 regular advances in the final state; special advances do not count.",
     ),
     (
+        "thirty-advances",
+        "Thirty Advances",
+        "Finish a game with at least 30 regular advances in the final state; special advances do not count.",
+    ),
+    (
         "three-objectives",
         "Three Objectives",
         "Finish a game with at least 3 completed objectives in the final state.",
@@ -109,6 +124,11 @@ const FEATS: [(&str, &str, &str); 11] = [
         "five-objectives",
         "Five Objectives",
         "Complete 5 objectives in a single game.",
+    ),
+    (
+        "seven-objectives",
+        "Seven Objectives",
+        "Finish a game with at least 7 completed objectives in the final state.",
     ),
     (
         "two-wonders-built",
@@ -120,27 +140,12 @@ const FEATS: [(&str, &str, &str); 11] = [
         "Captured Leader",
         "Finish a game with at least 1 captured leader in the final state.",
     ),
-    (
-        "score-60",
-        "60 Points",
-        "Finish a game with at least 60 victory points in the final state.",
-    ),
-    (
-        "seven-objectives",
-        "Seven Objectives",
-        "Finish a game with at least 7 completed objectives in the final state.",
-    ),
-    (
-        "thirty-advances",
-        "Thirty Advances",
-        "Finish a game with at least 30 regular advances in the final state; special advances do not count.",
-    ),
 ];
 
 /// The stable achievement catalogue. Array order also defines award order.
 #[must_use]
 pub fn definitions() -> Manifest {
-    let mut definitions = Vec::with_capacity(45);
+    let mut definitions = Vec::with_capacity(46);
     for (_, id, name) in LENGTHS {
         definitions.push(Definition {
             id: format!("complete-{id}"),
@@ -167,7 +172,7 @@ pub fn definitions() -> Manifest {
                 "achievement-{}",
                 match id {
                     "five-objectives" | "seven-objectives" => "three-objectives",
-                    "score-60" => "score-40",
+                    "score-50" | "score-60" => "score-40",
                     "thirty-advances" => "twenty-advances",
                     _ => id,
                 }
@@ -195,7 +200,7 @@ pub fn definitions() -> Manifest {
         icon: Some(Icon::Asset { key: format!("achievement-faction-{slug}") }),
     }));
     Manifest {
-        revision: 5,
+        revision: 6,
         achievements: definitions,
     }
 }
@@ -232,15 +237,16 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
             let predicates = [
                 score >= 30.0,
                 score >= 40.0,
+                score >= 50.0,
+                score >= 60.0,
                 p.cities.len() >= 7,
                 p.advances.len() >= 20,
+                p.advances.len() >= 30,
                 p.completed_objectives.len() >= 3,
                 p.completed_objectives.len() >= 5,
+                p.completed_objectives.len() >= 7,
                 p.wonders_built.len() >= 2,
                 !p.captured_leaders.is_empty(),
-                score >= 60.0,
-                p.completed_objectives.len() >= 7,
-                p.advances.len() >= 30,
             ];
             for ((id, _, _), met) in FEATS.iter().zip(predicates) {
                 if met {
@@ -352,8 +358,8 @@ mod tests {
     #[test]
     fn manifest_and_real_end_turn_for_all_lengths() {
         let manifest = definitions();
-        assert_eq!(manifest.revision, 5);
-        assert_eq!(manifest.achievements.len(), 45);
+        assert_eq!(manifest.revision, 6);
+        assert_eq!(manifest.achievements.len(), 46);
         assert_eq!(
             manifest
                 .achievements
@@ -361,7 +367,7 @@ mod tests {
                 .map(|d| &d.id)
                 .collect::<HashSet<_>>()
                 .len(),
-            45
+            46
         );
         assert!(
             manifest
@@ -436,6 +442,55 @@ mod tests {
             assert_eq!(has(&game, 0, "score-30"), thirty);
             assert_eq!(has(&game, 0, "score-40"), forty);
         }
+    }
+
+    #[test]
+    fn fifty_points_threshold_and_eligibility() {
+        for score in [49.0, 50.0, 51.0] {
+            let mut game = finish(setup(GameLength::Standard));
+            set_score(&mut game, 0, score);
+            set_score(&mut game, 1, 100.0);
+            assert_eq!(game.player(0).victory_points(&game), score);
+            assert_eq!(has(&game, 0, "score-50"), score >= 50.0);
+            assert!(!has(&game, 0, "win-standard"));
+            for seat in 2..game.players.len() {
+                assert!(!game.player(seat).is_human());
+                set_score(&mut game, seat, 100.0);
+                assert!(!has(&game, seat, "score-50"));
+            }
+            game.dropped_players.push(0);
+            assert!(!has(&game, 0, "score-50"));
+            game.dropped_players.clear();
+            game.secrets_stripped = true;
+            assert!(achievements(&game).is_empty());
+        }
+        assert!(achievements(&setup(GameLength::Standard)).is_empty());
+    }
+
+    #[test]
+    fn feat_tiers_are_contiguous_and_ascending() {
+        let expected = [
+            "score-30",
+            "score-40",
+            "score-50",
+            "score-60",
+            "seven-cities",
+            "twenty-advances",
+            "thirty-advances",
+            "three-objectives",
+            "five-objectives",
+            "seven-objectives",
+            "two-wonders-built",
+            "captured-leader",
+        ];
+        assert_eq!(FEATS.map(|(id, _, _)| id), expected);
+        assert_eq!(
+            definitions().achievements[10..22]
+                .iter()
+                .map(|d| d.id.as_str())
+                .collect::<Vec<_>>(),
+            expected
+        );
     }
 
     #[test]
@@ -610,10 +665,10 @@ mod tests {
             FACTIONS.iter().map(|(name, _)| (*name).into()).collect()
         );
         let manifest = serde_json::to_value(definitions()).unwrap();
-        assert_eq!(manifest["revision"], 5);
+        assert_eq!(manifest["revision"], 6);
         assert_eq!(manifest.as_object().unwrap().len(), 2);
         let entries = manifest["achievements"].as_array().unwrap();
-        assert_eq!(entries.len(), 45);
+        assert_eq!(entries.len(), 46);
         for entry in entries {
             let faction = FACTIONS
                 .iter()
@@ -635,7 +690,7 @@ mod tests {
                         "achievement-{}",
                         match entry["id"].as_str().unwrap() {
                             "five-objectives" | "seven-objectives" => "three-objectives",
-                            "score-60" => "score-40",
+                            "score-50" | "score-60" => "score-40",
                             "thirty-advances" => "twenty-advances",
                             id => id,
                         }

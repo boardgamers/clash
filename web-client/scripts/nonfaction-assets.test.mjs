@@ -4,37 +4,58 @@ import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
 import { chromium } from 'playwright';
 import { inspectEngine } from '@boardgamers/protocol/engine';
 import { ids } from './nonfaction-art.mjs';
 import { validateOutputs, outputDir } from './nonfaction-assets.mjs';
 import { root } from './achievement-asset-inputs.mjs';
-// Last source release before the three additive revision-5 milestones.
-const baseline = '59fd2671380391889d1dff0e0f15db16fdc215ff';
-test('existing evaluation and faction assets are unchanged apart from the three new milestones', async () => {
+// Last delivered release: revision 5, 45 definitions.
+const baseline = 'ba8ee4e2';
+test('existing evaluation and assets are unchanged apart from score-50 and deliberate tier ordering', async () => {
   const file = 'server/src/achievements.rs';
   const old = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: root, encoding: 'utf8' });
   const current = await readFile(path.join(root, file), 'utf8');
   const body = (s) => s.split('pub fn achievements(game: &Game)')[1].split('#[cfg(test)]')[0];
-  // Only these three inclusive predicates may change evaluation.
-  let evaluator = body(current);
-  for (const predicate of [
-    '                score >= 60.0,\n',
-    '                p.completed_objectives.len() >= 7,\n',
-    '                p.advances.len() >= 30,\n',
-  ]) {
-    assert.equal(evaluator.split(predicate).length, 2);
-    evaluator = evaluator.replace(predicate, '');
-  }
-  assert.equal(evaluator, body(old));
+  const predicates = (s) =>
+    s
+      .match(/let predicates = \[([\s\S]*?)\];/)[1]
+      .trim()
+      .split('\n')
+      .map((v) => v.trim());
+  const oldPredicates = predicates(body(old));
+  const newPredicates = predicates(body(current));
+  // Exact new order: each predicate stays aligned with its corresponding feat ID.
+  assert.deepEqual(newPredicates, [
+    oldPredicates[0],
+    oldPredicates[1],
+    'score >= 50.0,',
+    oldPredicates[8],
+    oldPredicates[2],
+    oldPredicates[3],
+    oldPredicates[10],
+    oldPredicates[4],
+    oldPredicates[5],
+    oldPredicates[9],
+    oldPredicates[6],
+    oldPredicates[7],
+  ]);
+  const withoutPredicates = (s) => s.replace(/let predicates = \[[\s\S]*?\];/, 'PREDICATES');
+  assert.equal(withoutPredicates(body(current)), withoutPredicates(body(old)));
   const artworkFile = 'web-client/release/achievement-assets.json';
   const previousArtwork = JSON.parse(
     execFileSync('git', ['show', `${baseline}:${artworkFile}`], { cwd: root, encoding: 'utf8' }),
   );
   const currentArtwork = JSON.parse(await readFile(path.join(root, artworkFile), 'utf8'));
-  // Only the wrapper-version lockfile integrity pin changes; artwork is identical.
-  previousArtwork.integrity['web-client/package-lock.json'] =
-    currentArtwork.integrity['web-client/package-lock.json'];
+  // Only the wrapper-version lockfile hash changes; artwork inputs stay identical.
+  const lockfile = 'web-client/package-lock.json';
+  assert.equal(
+    currentArtwork.integrity[lockfile],
+    createHash('sha256')
+      .update(await readFile(path.join(root, lockfile)))
+      .digest('hex'),
+  );
+  previousArtwork.integrity[lockfile] = currentArtwork.integrity[lockfile];
   assert.deepEqual(currentArtwork, previousArtwork);
   for (const file of [
     'web-client/release/achievement-assets-nonfaction.json',
@@ -46,19 +67,53 @@ test('existing evaluation and faction assets are unchanged apart from the three 
       execFileSync('git', ['show', `${baseline}:${file}`], { cwd: root, encoding: 'utf8' }),
     );
 });
-test('generated engine schema, 45 definitions sharing 41 existing assets', async () => {
+test('generated engine schema, 46 definitions sharing 41 existing assets', async () => {
   // Test current local WASM, not a stale published archive; an explicit packed
   // engine can still be supplied during a future release verification.
   const engine = createRequire(import.meta.url)(process.env.CLASH_TEST_ENGINE ?? '../.engine/server.js');
   assert.ok(inspectEngine(engine).compatible);
   const m = engine.achievementDefinitions();
-  assert.equal(m.revision, 5);
-  assert.equal(m.achievements.length, 45);
+  assert.equal(m.revision, 6);
+  assert.equal(m.achievements.length, 46);
+  const baselineManifest = JSON.parse(
+    await readFile(path.join(root, 'web-client/src/fixtures/achievements-revision-5.json'), 'utf8'),
+  );
+  const previous = new Map(baselineManifest.achievements.map((a) => [a.id, a]));
+  const expectedIds = [
+    ...baselineManifest.achievements.slice(0, 10).map((a) => a.id),
+    'score-30',
+    'score-40',
+    'score-50',
+    'score-60',
+    'seven-cities',
+    'twenty-advances',
+    'thirty-advances',
+    'three-objectives',
+    'five-objectives',
+    'seven-objectives',
+    'two-wonders-built',
+    'captured-leader',
+    ...baselineManifest.achievements.slice(21).map((a) => a.id),
+  ];
+  assert.deepEqual(
+    m.achievements,
+    expectedIds.map((id) =>
+      id === 'score-50'
+        ? {
+            id,
+            name: '50 Points',
+            description: 'Finish a game with at least 50 victory points in the final state.',
+            icon: { type: 'asset', key: 'achievement-score-40' },
+          }
+        : previous.get(id),
+    ),
+  );
   const factions = JSON.parse(
     await readFile(path.join(root, 'web-client/release/achievement-assets.json')),
   ).assets;
   const reused = {
     'five-objectives': 'three-objectives',
+    'score-50': 'score-40',
     'score-60': 'score-40',
     'seven-objectives': 'three-objectives',
     'thirty-advances': 'twenty-advances',

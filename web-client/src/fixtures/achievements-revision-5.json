@@ -1,0 +1,410 @@
+{
+  "revision": 5,
+  "achievements": [
+    {
+      "id": "complete-shorter",
+      "name": "Complete Shorter",
+      "description": "Finish a Shorter game without dropping out.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-complete-shorter"
+      }
+    },
+    {
+      "id": "win-shorter",
+      "name": "Win Shorter",
+      "description": "Finish a Shorter game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-win-shorter"
+      }
+    },
+    {
+      "id": "complete-standard",
+      "name": "Complete Standard",
+      "description": "Finish a Standard game without dropping out.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-complete-standard"
+      }
+    },
+    {
+      "id": "win-standard",
+      "name": "Win Standard",
+      "description": "Finish a Standard game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-win-standard"
+      }
+    },
+    {
+      "id": "complete-roll-to-end",
+      "name": "Complete Roll to End",
+      "description": "Finish a Roll to End game without dropping out.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-complete-roll-to-end"
+      }
+    },
+    {
+      "id": "win-roll-to-end",
+      "name": "Win Roll to End",
+      "description": "Finish a Roll to End game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-win-roll-to-end"
+      }
+    },
+    {
+      "id": "complete-wonderful-ending",
+      "name": "Complete Wonderful Ending",
+      "description": "Finish a Wonderful Ending game without dropping out.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-complete-wonderful-ending"
+      }
+    },
+    {
+      "id": "win-wonderful-ending",
+      "name": "Win Wonderful Ending",
+      "description": "Finish a Wonderful Ending game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-win-wonderful-ending"
+      }
+    },
+    {
+      "id": "complete-epic",
+      "name": "Complete Epic",
+      "description": "Finish a Epic game without dropping out.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-complete-epic"
+      }
+    },
+    {
+      "id": "win-epic",
+      "name": "Win Epic",
+      "description": "Finish a Epic game as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-win-epic"
+      }
+    },
+    {
+      "id": "score-30",
+      "name": "30 Points",
+      "description": "Finish a game with at least 30 victory points in the final state.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-score-30"
+      }
+    },
+    {
+      "id": "score-40",
+      "name": "40 Points",
+      "description": "Finish a game with at least 40 victory points in the final state.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-score-40"
+      }
+    },
+    {
+      "id": "seven-cities",
+      "name": "Seven Cities",
+      "description": "Finish a game owning at least 7 cities in the final state.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-seven-cities"
+      }
+    },
+    {
+      "id": "twenty-advances",
+      "name": "Twenty Advances",
+      "description": "Finish a game with at least 20 regular advances in the final state; special advances do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-twenty-advances"
+      }
+    },
+    {
+      "id": "three-objectives",
+      "name": "Three Objectives",
+      "description": "Finish a game with at least 3 completed objectives in the final state.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-three-objectives"
+      }
+    },
+    {
+      "id": "five-objectives",
+      "name": "Five Objectives",
+      "description": "Complete 5 objectives in a single game.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-three-objectives"
+      }
+    },
+    {
+      "id": "two-wonders-built",
+      "name": "Two Wonders Built",
+      "description": "Finish a game having built at least 2 wonders, as recorded in the final state; merely owning wonders does not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-two-wonders-built"
+      }
+    },
+    {
+      "id": "captured-leader",
+      "name": "Captured Leader",
+      "description": "Finish a game with at least 1 captured leader in the final state.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-captured-leader"
+      }
+    },
+    {
+      "id": "score-60",
+      "name": "60 Points",
+      "description": "Finish a game with at least 60 victory points in the final state.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-score-40"
+      }
+    },
+    {
+      "id": "seven-objectives",
+      "name": "Seven Objectives",
+      "description": "Finish a game with at least 7 completed objectives in the final state.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-three-objectives"
+      }
+    },
+    {
+      "id": "thirty-advances",
+      "name": "Thirty Advances",
+      "description": "Finish a game with at least 30 regular advances in the final state; special advances do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-twenty-advances"
+      }
+    },
+    {
+      "id": "built-great-arena",
+      "name": "Great Arena: Recorded as Built",
+      "description": "Finish with Great Arena recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-arena"
+      }
+    },
+    {
+      "id": "built-great-pyramids",
+      "name": "Great Pyramids: Recorded as Built",
+      "description": "Finish with Great Pyramids recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-pyramids"
+      }
+    },
+    {
+      "id": "built-great-gardens",
+      "name": "Great Gardens: Recorded as Built",
+      "description": "Finish with Great Gardens recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-gardens"
+      }
+    },
+    {
+      "id": "built-great-library",
+      "name": "Great Library: Recorded as Built",
+      "description": "Finish with Great Library recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-library"
+      }
+    },
+    {
+      "id": "built-great-lighthouse",
+      "name": "Great Lighthouse: Recorded as Built",
+      "description": "Finish with Great Lighthouse recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-lighthouse"
+      }
+    },
+    {
+      "id": "built-great-mausoleum",
+      "name": "Great Mausoleum: Recorded as Built",
+      "description": "Finish with Great Mausoleum recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-mausoleum"
+      }
+    },
+    {
+      "id": "built-great-statue",
+      "name": "Great Statue: Recorded as Built",
+      "description": "Finish with Great Statue recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-statue"
+      }
+    },
+    {
+      "id": "built-great-wall",
+      "name": "Great Wall: Recorded as Built",
+      "description": "Finish with Great Wall recorded as built by your civilization. Destroyed wonders and merely owning captured wonders do not count.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-built-great-wall"
+      }
+    },
+    {
+      "id": "complete-builder",
+      "name": "Complete Builder",
+      "description": "Finish a Builder variant game without dropping out.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-complete-builder"
+      }
+    },
+    {
+      "id": "win-rome",
+      "name": "Win as Rome",
+      "description": "Finish a game as Rome as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-rome"
+      }
+    },
+    {
+      "id": "win-greece",
+      "name": "Win as Greece",
+      "description": "Finish a game as Greece as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-greece"
+      }
+    },
+    {
+      "id": "win-china",
+      "name": "Win as China",
+      "description": "Finish a game as China as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-china"
+      }
+    },
+    {
+      "id": "win-vikings",
+      "name": "Win as Vikings",
+      "description": "Finish a game as Vikings as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-vikings"
+      }
+    },
+    {
+      "id": "win-babylonia",
+      "name": "Win as Babylonia",
+      "description": "Finish a game as Babylonia as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-babylonia"
+      }
+    },
+    {
+      "id": "win-india",
+      "name": "Win as India",
+      "description": "Finish a game as India as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-india"
+      }
+    },
+    {
+      "id": "win-egypt",
+      "name": "Win as Egypt",
+      "description": "Finish a game as Egypt as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-egypt"
+      }
+    },
+    {
+      "id": "win-phoenicia",
+      "name": "Win as Phoenicia",
+      "description": "Finish a game as Phoenicia as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-phoenicia"
+      }
+    },
+    {
+      "id": "win-maya",
+      "name": "Win as Maya",
+      "description": "Finish a game as Maya as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-maya"
+      }
+    },
+    {
+      "id": "win-persia",
+      "name": "Win as Persia",
+      "description": "Finish a game as Persia as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-persia"
+      }
+    },
+    {
+      "id": "win-japan",
+      "name": "Win as Japan",
+      "description": "Finish a game as Japan as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-japan"
+      }
+    },
+    {
+      "id": "win-huns",
+      "name": "Win as Huns",
+      "description": "Finish a game as Huns as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-huns"
+      }
+    },
+    {
+      "id": "win-celts",
+      "name": "Win as Celts",
+      "description": "Finish a game as Celts as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-celts"
+      }
+    },
+    {
+      "id": "win-aztecs",
+      "name": "Win as Aztecs",
+      "description": "Finish a game as Aztecs as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-aztecs"
+      }
+    },
+    {
+      "id": "win-carthage",
+      "name": "Win as Carthage",
+      "description": "Finish a game as Carthage as the sole highest-ranked non-dropped human seat, including score tiebreakers; tied games do not count as wins.",
+      "icon": {
+        "type": "asset",
+        "key": "achievement-faction-carthage"
+      }
+    }
+  ]
+}

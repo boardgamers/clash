@@ -12,6 +12,40 @@ its existing engine hooks. The web-client tests check the generated API against
 `@boardgamers/protocol` **0.11.0** types and runtime schemas; there is no separate
 JavaScript scoring implementation.
 
+## Viewer 0.1.225 / engine 0.4.158 — revision 6, 46 definitions
+
+Adds **50 Points** (`score-50`): “Finish a game with at least 50 victory points in
+the final state.” Uses canonical `player.victory_points(game) >= 50`, inclusive,
+for an authoritative finished, non-dropped human seat; winning is not required.
+Reuses `achievement-score-40`. The prior 45 definitions retain identical content,
+IDs, conditions and artwork. There are still 41 unique achievement asset keys and
+58 named artwork assets overall; no new asset, upload or locale text is needed.
+The matching viewer/engine release is 0.1.225/0.4.158.
+
+Catalog and earned-array order deliberately group tiers, rather than append them:
+
+- Length completion/win pairs stay in their existing order.
+- Points: `score-30`, `score-40`, `score-50`, `score-60`.
+- `seven-cities`.
+- Advances: `twenty-advances`, `thirty-advances`.
+- Objectives: `three-objectives`, `five-objectives`, `seven-objectives`.
+- `two-wonders-built`, `captured-leader`, then the existing individual wonders,
+  Builder completion and civilization wins, all retaining their relative order.
+
+The manifest is an ordered array, not a new `order` property. The BGS game album
+(`/badges/games/clash`) renders `achievementManifest.achievements` directly, so this
+array change sets its earned/unearned catalog order without platform UI changes.
+Reordering requires a revision increment because platform catalog comparison is
+order-sensitive. Profile earned badges retain received-award order, and activity
+remains chronological; no platform/profile code changes are included.
+Release verification must compare the exact revision-6 array
+(including this intentional order), and compare all previous 45 definitions by ID
+for unchanged content, not demand the old array order. Tests pin the revision-5
+baseline and the explicit new array. Publish the frozen tested build only after matching main-branch Check and Web viewer
+CI pass. Wait for installer-owned revision 6 activation in both public and admin
+metadata. No historical backfill, live-game mutation, history repair or Fossil
+refresh is performed.
+
 ## Viewer 0.1.224 / engine 0.4.157 — revision 5, 45 definitions
 
 Adds three independent, inclusive final-state milestones:
@@ -30,7 +64,7 @@ five-objective tiers: instant and status-phase completions count alike; held car
 printed options, bonus VP and lifetime totals do not. Advances follow the existing
 Twenty Advances tier: regular advances currently in the set, regardless of how
 acquired, excluding civilization special advances (including automatically unlocked
-ones). The prior catalog has no 50-point or 25-advance tier.
+ones). Revision 5 had no 50-point or 25-advance tier.
 
 All three require an authoritative `Finished` save and an eligible non-dropped human
 civilization seat, but not a win. Existing platform eligibility responsibilities

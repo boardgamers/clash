@@ -1601,3 +1601,20 @@ Independently download and compare every viewer asset, engine archive and all 58
 existing named assets. Preserve real-game gallery, game-length labels/order and
 Standard default, plus all unrelated metadata. No historical award backfill,
 live-game moves, history repair or Fossil refresh is included.
+
+# Viewer 0.1.225 / engine 0.4.158
+
+Adds 50 Points at canonical final VP >= 50 for eligible finished, non-dropped human
+seats, independent of winning, reusing `achievement-score-40`. Achievement catalog
+revision 6 has 46 definitions: points 30/40/50/60, Seven Cities, advances 20/30,
+objectives 3/5/7, Two Wonders Built, Captured Leader, then the unchanged remaining
+groups. All 45 prior definitions retain identical content; only catalog/award-array
+order changes, not profile earned-badge or chronological feed order. There are still
+41 unique achievement artwork keys and 58 named assets; no artwork upload is needed.
+
+Push matching source to main and require green Check and Web viewer CI before
+publishing the frozen tested viewer/engine. Independently download and byte-verify
+the full viewer bundle and engine, then verify installer-owned revision 6 and the
+exact ordered catalog in both public and admin metadata. Preserve gallery, Standard
+length default and unrelated metadata. No backfill, live-game moves, history repair
+or Fossil refresh. See `docs/achievements.md` for the catalog contract.

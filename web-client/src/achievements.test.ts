@@ -22,8 +22,34 @@ const finish = () => engine.tryMove(fixture, JSON.stringify({ Playing: 'EndTurn'
 
 test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const manifest = achievementManifestSchema.parse(hooks.achievementDefinitions());
-  assert.equal(manifest.revision, 5);
-  assert.equal(manifest.achievements.length, 45);
+  assert.equal(manifest.revision, 6);
+  assert.equal(manifest.achievements.length, 46);
+  assert.deepEqual(
+    manifest.achievements.slice(10, 22).map((a) => a.id),
+    [
+      'score-30',
+      'score-40',
+      'score-50',
+      'score-60',
+      'seven-cities',
+      'twenty-advances',
+      'thirty-advances',
+      'three-objectives',
+      'five-objectives',
+      'seven-objectives',
+      'two-wonders-built',
+      'captured-leader',
+    ],
+  );
+  assert.deepEqual(
+    manifest.achievements.find((a) => a.id === 'score-50'),
+    {
+      id: 'score-50',
+      name: '50 Points',
+      description: 'Finish a game with at least 50 victory points in the final state.',
+      icon: { type: 'asset', key: 'achievement-score-40' },
+    },
+  );
   assert.ok(!manifest.achievements.some((a) => a.id === 'four-cities'));
   assert.ok(manifest.achievements.some((a) => a.id === 'seven-cities'));
   assert.ok(manifest.achievements.some((a) => a.id === 'complete-builder'));
@@ -37,8 +63,8 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const nonfactionArt = JSON.parse(
     readFileSync(new URL('../release/achievement-assets-nonfaction.json', import.meta.url), 'utf8'),
   );
-  assert.equal(nonfactionArt.revision, 3, 'revision 5 reuses the existing objective artwork');
-  assert.equal(art.revision, 2, 'revision 5 preserves the existing faction artwork');
+  assert.equal(nonfactionArt.revision, 3, 'revision 6 reuses the existing objective artwork');
+  assert.equal(art.revision, 2, 'revision 6 preserves the existing faction artwork');
   assert.deepEqual(
     [
       ...new Set(
@@ -53,6 +79,44 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
     for (const verb of ['complete', 'win'])
       assert.ok(manifest.achievements.some((a) => a.id === `${verb}-${length}`));
   }
+});
+
+test('revision 6 preserves all 45 previous definitions with the explicit new catalog order', () => {
+  // Captured from the generated ba8ee4e2 / engine 0.4.157 catalog before rebuilding.
+  const previous: AchievementManifest = JSON.parse(
+    readFileSync(new URL('./fixtures/achievements-revision-5.json', import.meta.url), 'utf8'),
+  );
+  const manifest = hooks.achievementDefinitions();
+  const previousById = new Map(previous.achievements.map((a) => [a.id, a]));
+  const expectedIds = [
+    ...previous.achievements.slice(0, 10).map((a) => a.id),
+    'score-30',
+    'score-40',
+    'score-50',
+    'score-60',
+    'seven-cities',
+    'twenty-advances',
+    'thirty-advances',
+    'three-objectives',
+    'five-objectives',
+    'seven-objectives',
+    'two-wonders-built',
+    'captured-leader',
+    ...previous.achievements.slice(21).map((a) => a.id),
+  ];
+  assert.deepEqual(
+    manifest.achievements,
+    expectedIds.map((id) =>
+      id === 'score-50'
+        ? {
+            id,
+            name: '50 Points',
+            description: 'Finish a game with at least 50 victory points in the final state.',
+            icon: { type: 'asset', key: 'achievement-score-40' },
+          }
+        : previousById.get(id),
+    ),
+  );
 });
 
 test('actual completed fixture produces valid, deterministic, immutable seat achievements', () => {
@@ -80,11 +144,14 @@ test('actual completed fixture produces valid, deterministic, immutable seat ach
 });
 
 test('WASM preserves inclusive score boundaries and awards feats to losing seats', () => {
-  for (const [score, thirty, forty] of [
-    [29.5, false, false],
-    [30, true, false],
-    [39.5, true, false],
-    [40, true, true],
+  for (const [score, thirty, forty, fifty] of [
+    [29.5, false, false, false],
+    [30, true, false, false],
+    [39.5, true, false, false],
+    [40, true, true, false],
+    [49, true, true, false],
+    [50, true, true, true],
+    [51, true, true, true],
   ] as const) {
     const finished = finish();
     const data = JSON.parse(finished);
@@ -101,6 +168,14 @@ test('WASM preserves inclusive score boundaries and awards feats to losing seats
     assert.equal(result.outcome, 'loss');
     assert.equal(result.earned.includes('score-30'), thirty);
     assert.equal(result.earned.includes('score-40'), forty);
+    assert.equal(result.earned.includes('score-50'), fifty);
+    assert.equal((engine.scores(JSON.stringify(data)) as number[])[0], score);
+    assert.deepEqual(hooks.achievements(engine.stripSecret(JSON.stringify(data), 0)), []);
+    data.dropped_players = [0];
+    assert.ok(hooks.achievements(JSON.stringify(data)).every((r) => r.seat !== 0));
+    data.dropped_players = [];
+    data.state = 'Playing';
+    assert.deepEqual(hooks.achievements(JSON.stringify(data)), []);
     assert.ok(result.earned.includes('complete-standard'));
   }
 });
