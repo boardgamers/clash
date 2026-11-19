@@ -22,6 +22,9 @@
   {:else}<strong class="tile-hover-terrain"
       ><TerrainIcon terrain={$data.terrain} size={15} />{terrainInfo($data.terrain).label}</strong
     >{/if}
+  {#if $data.city && terrainInfo($data.terrain).exhausted}
+    <strong class="tile-hover-terrain"><TerrainIcon terrain={$data.terrain} size={15} />{terrainInfo($data.terrain).label}</strong>
+  {/if}
   {#if $data.city}
     <div class="tile-hover-buildings">
       {#each $data.city.buildings as { name, civilization }}

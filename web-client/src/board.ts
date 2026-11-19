@@ -27,6 +27,7 @@ import { playerColor, playerSymbol } from './types';
 import { buildingCivilization } from './building-owner';
 import { positionXY } from './model';
 import { terrainInfo } from './terrain';
+import { terrainDisplay } from './terrain-display';
 import { PieceModels, type BuildingKind } from './piece-models';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
@@ -1225,15 +1226,14 @@ export class World {
         this.center.set((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
       }
       for (const [position, terrain] of mapTiles) {
-        const exhausted = typeof terrain !== 'string';
-        const kind = exhausted ? terrain.Exhausted : terrain;
+        const { kind, exhausted } = terrainDisplay(terrain);
         const [x, z] = positionXY(position);
         const height = kind === 'Water' ? 0.13 : kind === 'Unexplored' ? 0.27 : 0.43;
         const group = new THREE.Group();
         group.position.set(x, height / 2 - 0.12, z);
         const top = this.material(
           exhausted
-            ? `#${new THREE.Color(terrainColor[kind]).lerp(new THREE.Color('#8d7c7c'), 0.6).getHexString()}`
+            ? `#${new THREE.Color(terrainColor[kind]).lerp(new THREE.Color('#8d7c7c'), 0.25).getHexString()}`
             : terrainColor[kind],
         );
         const side = this.material(
@@ -1247,17 +1247,17 @@ export class World {
         const terrainGroup = new THREE.Group();
         terrainGroup.position.y = height / 2;
         if (exhausted) {
-          // Hatching distinguishes depletion from barren ground without implying normal terrain restrictions.
+          // A small foreground hatch marks depletion without hiding the original terrain.
           const hatch = this.material('#5f5052');
           for (let i = -1; i <= 1; i++) {
-            const line = this.mesh(new THREE.BoxGeometry(i === 0 ? 1.5 : 1.05, 0.016, 0.045), hatch);
-            line.position.set(i * 0.25, 0.03, i * 0.25);
+            const line = this.mesh(new THREE.BoxGeometry(0.3, 0.016, 0.045), hatch);
+            line.position.set(i * 0.16, height / 2 + 0.03, 0.68);
             line.rotation.y = Math.PI / 4;
-            terrainGroup.add(line);
+            group.add(line);
           }
         }
         // Keep the foreground clear for pieces instead of burying them in trees/peaks.
-        if (!exhausted && !s.strategyMap && !cityPositions.has(position)) {
+        if (!s.strategyMap && !cityPositions.has(position)) {
           this.addTerrain(terrainGroup, kind, position.charCodeAt(0));
           if (unitPositions.has(position) && (kind === 'Forest' || kind === 'Mountain')) {
             terrainGroup.scale.set(0.8, 0.65, 0.6);

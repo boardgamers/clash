@@ -1630,3 +1630,17 @@ Verify installer-owned revision 7 in public and admin metadata against the exact
 and all 58 existing named assets; upload no artwork. Preserve gallery, Standard
 length default and unrelated metadata. No backfill, live-game changes, history repair
 or Fossil refresh. Historical fixtures and activation receipts remain untouched.
+
+# Viewer 0.1.227 / engine unchanged (0.4.159)
+
+Exhausted terrain retains its underlying trees, mountains and terrain colors in
+3D, with small foreground depletion hatches. Strategy tiles keep the original
+terrain icon and prominence with corner hatches; inspection explicitly names the
+exhausted terrain, including beneath cities. A real-engine local preview and
+regression/smoke coverage distinguish visual identity from engine legality.
+
+This is a visual-only release: the pending exhausted-terrain movement rules bug
+is not fixed. Preserve the deployed engine bytes, revision-7 achievement catalog
+(46 definitions), all artwork, gallery and unrelated metadata. Require main-branch
+Check and Web viewer CI before publishing the tested viewer bundle. No live-game
+moves, saved-game migration, history repair, achievement backfill or Fossil refresh.

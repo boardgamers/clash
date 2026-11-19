@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
+import { exhaustedTerrainFixture } from './exhausted-terrain-fixture.mjs';
 
 export const previewScenarios = [
+  { id: 'exhausted-terrain', label: 'Exhausted terrain', note: 'Compare normal and exhausted Forest, Mountain, Fertile and Barren terrain in 3D and Strategy map.' },
   { id: 'tactics', label: 'Tactics · Steel Weapons', note: 'Local asynchronous sequence: attacker Steel Weapons and tactics, then defender Steel Weapons and tactics, then reveal.' },
   { id: 'advance', label: 'Free advance', note: 'Research lets you save an early choice.' },
   { id: 'raze', label: 'Raze city', note: 'Cities lets you save an early choice.' },
@@ -12,6 +14,7 @@ export const previewScenarios = [
 ];
 
 export async function createPreviewScenario(engine: any, id: string) {
+  if (id === 'exhausted-terrain') return exhaustedTerrainFixture(engine);
   if (!previewScenarios.some(s => s.id === id)) throw Error('Unknown preview scenario');
   const names: Record<string, string> = {
     tactics: 'tactics_cards/peltasts', advance: 'status_phase/free_advance', raze: 'status_phase/raze_city_decline',

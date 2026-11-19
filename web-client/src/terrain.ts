@@ -1,5 +1,6 @@
 import { Compass, LandPlot, Mountain, Trees, Waves, Wheat } from 'lucide-svelte';
 import type { Terrain } from './types';
+import { terrainDisplay } from './terrain-display';
 
 const terrains = {
   Forest: { Icon: Trees, color: '#82a67d' },
@@ -11,8 +12,7 @@ const terrains = {
 };
 
 export function terrainInfo(terrain: Terrain) {
-  const exhausted = typeof terrain !== 'string';
-  const name = exhausted ? terrain.Exhausted : terrain;
+  const { kind: name, exhausted } = terrainDisplay(terrain);
   return {
     ...(terrains[name as keyof typeof terrains] ?? terrains.Barren),
     label: exhausted ? `Exhausted ${name.toLowerCase()}` : name,

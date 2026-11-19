@@ -3,6 +3,7 @@
   import { buildingInfo } from './city';
   import BarbarianIcon from './BarbarianIcon.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
+  import { terrainDisplay } from './terrain-display';
   import { playerColor, playerSymbol } from './types';
   import type { StrategyTile } from './strategy';
   let {
@@ -11,12 +12,13 @@
     playerColors,
     playerSymbols,
   }: { tile: StrategyTile; colorBlind: boolean; playerColors: string[]; playerSymbols: string[] } = $props();
+  const terrain = $derived(terrainDisplay(tile.terrain));
 </script>
 
-<span class="strategy-terrain" class:important={tile.terrain === 'Forest' || tile.terrain === 'Mountain'}
+<span class="strategy-terrain" class:important={terrain.prominent}
   ><TerrainIcon
     terrain={tile.terrain}
-    size={tile.terrain === 'Forest' || tile.terrain === 'Mountain' ? 30 : 18}
+    size={terrain.prominent ? 30 : 18}
   /></span
 >
 {#each tile.occupants as occupant}

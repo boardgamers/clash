@@ -9,5 +9,5 @@
   <title>{info.label}</title>
   <polygon points="27,14 20.5,25.3 7.5,25.3 1,14 7.5,2.7 20.5,2.7" fill={info.color} />
   <g transform="translate(6 6)"><info.Icon size={16} strokeWidth={2} color="#263f33" /></g>
-  {#if info.exhausted}<path d="M5 23 23 5" stroke="#263f33" stroke-width="2" />{/if}
+  {#if info.exhausted}<path d="m16 24 3-4 m1 4 3-4 m1 4 2-3" stroke="#263f33" stroke-width="2" />{/if}
 </svg>

@@ -1,6 +1,6 @@
 {
   "name": "@boardgamers/clash-web-client",
-  "version": "0.1.226",
+  "version": "0.1.227",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,7 +16,8 @@
     "test:locales": "node ../scripts/check-locales.mjs src/localization && node --test scripts/localization-source.test.mjs && npm run localization:check",
     "localization:check": "node scripts/extract-localization.mjs --check",
     "localization:extract": "node scripts/extract-localization.mjs",
-    "tutorial:fixtures": "node scripts/build-tutorial-fixtures.mjs"
+    "tutorial:fixtures": "node scripts/build-tutorial-fixtures.mjs",
+    "test:exhausted-terrain": "npm run build && node scripts/exhausted-terrain-smoke.mjs"
   },
   "dependencies": {
     "@boardgamers/protocol": "0.11.0",
