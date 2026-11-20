@@ -487,11 +487,16 @@ fn end_combat_and_store_stats(game: &mut Game, e: CombatEnd) {
 }
 
 fn restrict_defenders_after_battle(game: &mut Game, s: &CombatStats) {
-    // An event can make the turn owner defend. Battle restrictions expire at
-    // the owner's turn end, so out-of-turn defenders must not receive them.
+    // An incident can make the turn owner defend, but status-phase incidents
+    // are not part of that player's turn. current_player_index still points at
+    // the last turn owner then; inspect the enclosing event, not GameState or
+    // just the top (combat) event. Otherwise these flags survive into next age.
     // Do this before combat-end rewards: newly gained units did not fight.
     let defender = s.defender.player;
-    if defender == game.current_player_index && game.player(defender).is_human() {
+    if defender == game.current_player_index
+        && game.player(defender).is_human()
+        && crate::status_phase::get_status_phase(game).is_none()
+    {
         let longships = game
             .player(defender)
             .has_special_advance(SpecialAdvance::Longships);

@@ -858,3 +858,128 @@ fn splendid_year_17_grants_three_food_to_active_player() {
     assert_eq!(game.player(0).resources.food, before + 3);
     assert_eq!(game.player(1).resources.food, other);
 }
+
+// Synthetic fixture only: no production history or player information.
+fn famine_defense_game() -> server::game::Game {
+    let mut game = JSON.load_game("barbarians_attack");
+    game.incidents_left = vec![3]; // Famine: barbarian movement.
+    for unit in &mut game.player_mut(0).units {
+        unit.unit_type = UnitType::Infantry;
+    }
+    // Barbarian attack on C2 leaves one surviving infantry (id 7).
+    game.dice_roll_outcomes = vec![10; 40];
+    game
+}
+
+#[test]
+fn status_phase_barbarian_defense_does_not_restrict_next_turn() {
+    use server::game_api::execute;
+    use server::movement::MovementRestriction;
+    let game = execute(
+        famine_defense_game(),
+        Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
+        0,
+    );
+    assert_eq!(game.current_player_index, 0);
+    assert!(server::status_phase::get_status_phase(&game).is_some());
+    assert_eq!(game.player(0).units.len(), 1);
+    assert!(
+        !game
+            .player(0)
+            .get_unit(7)
+            .movement_restrictions
+            .contains(&MovementRestriction::Battle)
+    );
+
+    // Finish the actual status phase and start next age, without manual cleanup.
+    let game = execute(
+        game,
+        Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
+        1,
+    );
+    let game = execute(
+        game,
+        Action::Response(EventResponse::SelectPositions(vec![])),
+        0,
+    );
+    let game = execute(
+        game,
+        Action::Response(EventResponse::SelectPositions(vec![])),
+        1,
+    );
+    let game = execute(game, Action::Response(EventResponse::SelectPlayer(0)), 0);
+    assert_eq!(game.age, 2);
+    assert!(game.events.is_empty());
+    let destination = server::movement::possible_move_routes(
+        game.player(0),
+        &game,
+        &[7],
+        Position::from_offset("C2"),
+        None,
+    )
+    .unwrap()
+    .into_iter()
+    .find(|r| game.enemy_player(0, r.destination).is_none())
+    .unwrap()
+    .destination;
+    let game = execute(game, move_action(vec![7], destination), 0);
+    assert_eq!(game.player(0).get_unit(7).position, destination);
+}
+
+#[test]
+fn regular_turn_barbarian_defenders_remain_restricted_across_actions() {
+    use server::game_api::execute;
+    use server::movement::{MovementAction, MovementRestriction};
+    let mut game = famine_defense_game();
+    // The same incident now originates in a paid advance during a player turn.
+    game.events.clear();
+    let mut separate = game.player(0).get_unit(7).clone();
+    separate.id = 8;
+    separate.position = Position::from_offset("A1");
+    game.player_mut(0).units.push(separate);
+    game.player_mut(0).next_unit_id = 9;
+    let game = execute(
+        game,
+        advance_action(Advance::Storage, ResourcePile::ideas(2)),
+        0,
+    );
+    assert!(game.events.is_empty());
+    assert!(
+        game.player(0)
+            .get_unit(7)
+            .movement_restrictions
+            .contains(&MovementRestriction::Battle)
+    );
+    assert!(game.player(0).get_unit(8).movement_restrictions.is_empty());
+    let destination = server::movement::possible_move_routes(
+        game.player(0),
+        &game,
+        &[8],
+        Position::from_offset("A1"),
+        None,
+    )
+    .unwrap()
+    .into_iter()
+    .find(|r| game.enemy_player(0, r.destination).is_none())
+    .unwrap()
+    .destination;
+    let game = execute(game, move_action(vec![8], destination), 0);
+    let game = execute(game, Action::Movement(MovementAction::Stop), 0);
+    assert!(
+        game.player(0)
+            .get_unit(7)
+            .movement_restrictions
+            .contains(&MovementRestriction::Battle)
+    );
+    assert!(
+        server::movement::possible_move_routes(
+            game.player(0),
+            &game,
+            &[7],
+            Position::from_offset("C2"),
+            None,
+        )
+        .unwrap_or_default()
+        .is_empty()
+    );
+}
