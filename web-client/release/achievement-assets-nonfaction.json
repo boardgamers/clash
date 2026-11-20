@@ -1,5 +1,5 @@
 {
-  "revision": 3,
+  "revision": 4,
   "width": 256,
   "height": 256,
   "assets": [
@@ -8,7 +8,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -22,7 +22,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -36,7 +36,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -50,7 +50,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -64,7 +64,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -78,7 +78,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -92,7 +92,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -106,7 +106,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -120,7 +120,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -134,7 +134,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -148,7 +148,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -162,7 +162,35 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-score-50",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
+        "provenance": {
+          "type": "original-geometry",
+          "license": "MIT",
+          "author": "Clash project contributors",
+          "evidence": "New procedural geometry; no reused external image or traced input. Repository LICENSE."
+        }
+      }
+    },
+    {
+      "key": "achievement-score-60",
+      "source": {
+        "type": "original-svg",
+        "path": "web-client/scripts/nonfaction-art.mjs",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -176,7 +204,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -190,7 +218,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -204,7 +232,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -218,7 +246,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -232,7 +260,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -246,7 +274,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -260,7 +288,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -274,7 +302,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -288,7 +316,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -302,7 +330,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -316,7 +344,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -330,7 +358,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -344,7 +372,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",
@@ -358,7 +386,7 @@
       "source": {
         "type": "original-svg",
         "path": "web-client/scripts/nonfaction-art.mjs",
-        "sha256": "e21abca9d448c2ee7022370c1be643b4d47d64f339d58d8fbd31e1048a6ca40a",
+        "sha256": "5a754c41dd4dfebd42f42820709c52fcc44faa0d3526de5a29ce7f41be0d395b",
         "provenance": {
           "type": "original-geometry",
           "license": "MIT",

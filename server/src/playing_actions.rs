@@ -210,6 +210,35 @@ impl PlayingAction {
         game: &mut Game,
         player_index: usize,
     ) -> Result<(), String> {
+        if let PlayingAction::Collect(c) = &self {
+            // Validate and reserve both fees before any ordinary action payment.
+            // Ballcourts itself stays automatic, preserving historical action logs.
+            crate::collect::get_total_collection_with_ballcourts(
+                game,
+                player_index,
+                &crate::collect::collect_event_origin(&c.action_type, game.player(player_index)),
+                c.city_position,
+                &c.collections,
+                crate::player::CostTrigger::NoModifiers,
+                c.ballcourts,
+            )?;
+            if !game
+                .player(player_index)
+                .get_city(c.city_position)
+                .can_activate()
+            {
+                return Err("City can't be activated".into());
+            }
+            let cost = crate::collect::collection_payment_options(
+                game,
+                player_index,
+                &c.action_type,
+                c.ballcourts,
+            );
+            if !game.player(player_index).can_afford(&cost) {
+                return Err("Not enough mood for this action and Ballcourts".into());
+            }
+        }
         // log these before the payment for clarity
         if let PlayingAction::ActionCard(id) = &self {
             discard_action_card(

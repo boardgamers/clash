@@ -7,12 +7,12 @@ import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { chromium } from 'playwright';
 import { inspectEngine } from '@boardgamers/protocol/engine';
-import { ids } from './nonfaction-art.mjs';
+import { ids, svg } from './nonfaction-art.mjs';
 import { validateOutputs, outputDir } from './nonfaction-assets.mjs';
 import { root } from './achievement-asset-inputs.mjs';
 // Last delivered release: revision 5, 45 definitions.
 const baseline = 'ba8ee4e2';
-test('existing evaluation and assets are unchanged apart from score-50 and deliberate tier ordering', async () => {
+test('existing evaluation and faction assets are unchanged apart from score-50 and tier ordering', async () => {
   const file = 'server/src/achievements.rs';
   const old = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: root, encoding: 'utf8' });
   const current = await readFile(path.join(root, file), 'utf8');
@@ -58,7 +58,6 @@ test('existing evaluation and assets are unchanged apart from score-50 and delib
   previousArtwork.integrity[lockfile] = currentArtwork.integrity[lockfile];
   assert.deepEqual(currentArtwork, previousArtwork);
   for (const file of [
-    'web-client/release/achievement-assets-nonfaction.json',
     'web-client/scripts/publish-achievement-assets.mjs',
     'web-client/scripts/achievement-asset-inputs.mjs',
   ])
@@ -67,13 +66,13 @@ test('existing evaluation and assets are unchanged apart from score-50 and delib
       execFileSync('git', ['show', `${baseline}:${file}`], { cwd: root, encoding: 'utf8' }),
     );
 });
-test('generated engine schema, 46 definitions sharing 41 existing assets', async () => {
+test('generated engine schema, 46 definitions using 43 assets', async () => {
   // Test current local WASM, not a stale published archive; an explicit packed
   // engine can still be supplied during a future release verification.
   const engine = createRequire(import.meta.url)(process.env.CLASH_TEST_ENGINE ?? '../.engine/server.js');
   assert.ok(inspectEngine(engine).compatible);
   const m = engine.achievementDefinitions();
-  assert.equal(m.revision, 7);
+  assert.equal(m.revision, 8);
   assert.equal(m.achievements.length, 46);
   const baselineManifest = JSON.parse(
     await readFile(path.join(root, 'web-client/src/fixtures/achievements-revision-5.json'), 'utf8'),
@@ -114,11 +113,13 @@ test('generated engine schema, 46 definitions sharing 41 existing assets', async
             id,
             name: '50 Points',
             description: 'Finish a game with at least 50 victory points in the final state.',
-            icon: { type: 'asset', key: 'achievement-score-40' },
+            icon: { type: 'asset', key: 'achievement-score-50' },
           }
-        : wonderNames.has(id)
-          ? { ...previous.get(id), name: wonderNames.get(id) }
-          : previous.get(id),
+        : id === 'score-60'
+          ? { ...previous.get(id), icon: { type: 'asset', key: 'achievement-score-60' } }
+          : wonderNames.has(id)
+            ? { ...previous.get(id), name: wonderNames.get(id) }
+            : previous.get(id),
     ),
   );
   const factions = JSON.parse(
@@ -126,8 +127,6 @@ test('generated engine schema, 46 definitions sharing 41 existing assets', async
   ).assets;
   const reused = {
     'five-objectives': 'three-objectives',
-    'score-50': 'score-40',
-    'score-60': 'score-40',
     'seven-objectives': 'three-objectives',
     'thirty-advances': 'twenty-advances',
   };
@@ -148,7 +147,7 @@ test('generated engine schema, 46 definitions sharing 41 existing assets', async
   assert.deepEqual(engine.achievements(raw), []);
   assert.deepEqual(engine.timeIncrements(raw), [0, 0]);
 });
-test('all 26 unique outputs decode, dimensions and hashes match', async () => {
+test('all 28 unique outputs decode, dimensions and hashes match', async () => {
   const r = await validateOutputs();
   const browser = await chromium.launch({ headless: true });
   try {
@@ -168,4 +167,23 @@ test('all 26 unique outputs decode, dimensions and hashes match', async () => {
   } finally {
     await browser.close();
   }
+});
+
+test('score pictograms render their exact numerals and preserve every existing SVG', async () => {
+  for (const score of [30, 40, 50, 60]) {
+    const vector = svg(`score-${score}`);
+    assert.deepEqual(
+      [...vector.matchAll(/<text\b[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]),
+      [String(score)],
+    );
+  }
+  const previousSource = execFileSync('git', ['show', `${baseline}:web-client/scripts/nonfaction-art.mjs`], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  const previous = await import(
+    `data:text/javascript;base64,${Buffer.from(previousSource).toString('base64')}`
+  );
+  for (const id of previous.ids) assert.equal(svg(id), previous.svg(id), `${id} must remain unchanged`);
+  assert.equal(new Set([40, 50, 60].map((score) => svg(`score-${score}`))).size, 3);
 });

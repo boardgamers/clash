@@ -22,7 +22,7 @@ const finish = () => engine.tryMove(fixture, JSON.stringify({ Playing: 'EndTurn'
 
 test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const manifest = achievementManifestSchema.parse(hooks.achievementDefinitions());
-  assert.equal(manifest.revision, 7);
+  assert.equal(manifest.revision, 8);
   assert.equal(manifest.achievements.length, 46);
   assert.deepEqual(
     manifest.achievements.slice(10, 22).map((a) => a.id),
@@ -47,7 +47,7 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
       id: 'score-50',
       name: '50 Points',
       description: 'Finish a game with at least 50 victory points in the final state.',
-      icon: { type: 'asset', key: 'achievement-score-40' },
+      icon: { type: 'asset', key: 'achievement-score-50' },
     },
   );
   assert.ok(!manifest.achievements.some((a) => a.id === 'four-cities'));
@@ -63,7 +63,7 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   const nonfactionArt = JSON.parse(
     readFileSync(new URL('../release/achievement-assets-nonfaction.json', import.meta.url), 'utf8'),
   );
-  assert.equal(nonfactionArt.revision, 3, 'revision 7 reuses the existing objective artwork');
+  assert.equal(nonfactionArt.revision, 4, 'revision 8 adds dedicated score artwork');
   assert.equal(art.revision, 2, 'revision 7 preserves the existing faction artwork');
   assert.deepEqual(
     [
@@ -81,7 +81,7 @@ test('WASM achievement catalog follows official protocol 0.11.0', () => {
   }
 });
 
-test('revision 7 permits only eight wonder renames alongside revision 6 additions and order', () => {
+test('catalog preserves previous definitions except wonder names, score artwork and revision 6 additions/order', () => {
   // Captured from the generated ba8ee4e2 / engine 0.4.157 catalog before rebuilding.
   const previous: AchievementManifest = JSON.parse(
     readFileSync(new URL('./fixtures/achievements-revision-5.json', import.meta.url), 'utf8'),
@@ -123,11 +123,13 @@ test('revision 7 permits only eight wonder renames alongside revision 6 addition
             id,
             name: '50 Points',
             description: 'Finish a game with at least 50 victory points in the final state.',
-            icon: { type: 'asset', key: 'achievement-score-40' },
+            icon: { type: 'asset', key: 'achievement-score-50' },
           }
-        : wonderNames.has(id)
-          ? { ...previousById.get(id), name: wonderNames.get(id) }
-          : previousById.get(id),
+        : id === 'score-60'
+          ? { ...previousById.get(id), icon: { type: 'asset', key: 'achievement-score-60' } }
+          : wonderNames.has(id)
+            ? { ...previousById.get(id), name: wonderNames.get(id) }
+            : previousById.get(id),
     ),
   );
 });
@@ -458,7 +460,7 @@ test('revision 5 milestones use inclusive canonical totals and unchanged eligibi
       'score-60',
       '60 Points',
       'Finish a game with at least 60 victory points in the final state.',
-      'score-40',
+      'score-60',
     ],
     [
       'seven-objectives',

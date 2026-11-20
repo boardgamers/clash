@@ -112,9 +112,6 @@ pub(crate) fn get_total_collection_with_ballcourts(
     {
         return Err("Ballcourts requires a non-Angry city".into());
     }
-    if ballcourts && player.resources.mood_tokens == 0 {
-        return Err("Ballcourts costs 1 mood token".into());
-    }
 
     if origin == &EventOrigin::LeaderAbility("Tributes".into())
         && !crate::content::civilizations::aztecs::tributes_city(player, city_position)
@@ -227,11 +224,23 @@ pub(crate) fn execute_collect(
         c.ballcourts,
     )?;
     if c.ballcourts {
+        let origin =
+            EventOrigin::SpecialAdvance(crate::special_advance::SpecialAdvance::Ballcourts);
+        let cost = crate::payment::PaymentOptions::resources(
+            game.player(player_index),
+            origin.clone(),
+            ResourcePile::mood_tokens(1),
+        );
+        // Keep the historical immediate mood debit, using culture only when
+        // required and permitted by Great Arena. Never collect to fund this fee.
+        let payment = cost
+            .first_valid_payment(&game.player(player_index).resources)
+            .ok_or("Not enough mood for this action and Ballcourts")?;
         crate::resource::lose_resources(
             game,
             player_index,
-            ResourcePile::mood_tokens(1),
-            EventOrigin::SpecialAdvance(crate::special_advance::SpecialAdvance::Ballcourts),
+            payment,
+            origin,
             vec![],
             crate::log::ActionLogBalance::Pay,
         );
@@ -484,4 +493,29 @@ pub(crate) fn collect_event_origin(
 
 pub(crate) fn base_collect_event_origin() -> EventOrigin {
     EventOrigin::Ability("Collect".to_string())
+}
+
+/// Combined cost for affordability and preview; the ordinary action payment
+/// remains unchanged and Ballcourts is charged automatically at collection.
+pub(crate) fn collection_payment_options(
+    game: &Game,
+    player: usize,
+    kind: &PlayingActionType,
+    ballcourts: bool,
+) -> crate::payment::PaymentOptions {
+    let mut cost = kind.payment_options(game, player);
+    if ballcourts {
+        if cost.is_free() {
+            return crate::payment::PaymentOptions::resources(
+                game.player(player),
+                EventOrigin::SpecialAdvance(crate::special_advance::SpecialAdvance::Ballcourts),
+                ResourcePile::mood_tokens(1),
+            );
+        }
+        cost.default.mood_tokens += 1;
+        for alternative in &mut cost.alternatives {
+            alternative.mood_tokens += 1;
+        }
+    }
+    cost
 }

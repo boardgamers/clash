@@ -12,6 +12,28 @@ its existing engine hooks. The web-client tests check the generated API against
 `@boardgamers/protocol` **0.11.0** types and runtime schemas; there is no separate
 JavaScript scoring implementation.
 
+## Viewer 0.1.229 / engine 0.4.161 — revision 8, 46 definitions
+
+`score-50` and `score-60` now reference their own `achievement-score-50` and
+`achievement-score-60` assets. Their SVG/PNG pictograms visibly render **50** and
+**60**, using the existing 40-point panorama, palette and typography. All prior
+SVGs (including 40) are unchanged. Thresholds, titles, descriptions, award order
+and the 46 definitions are unchanged. There are now 43 unique achievement images
+(28 non-faction plus 15 faction), or 60 named artwork assets overall.
+
+Reproduce with `node web-client/scripts/build-achievement-assets.mjs --nonfaction`.
+The tracked non-faction manifest records both new keys and the generator hash;
+local SVGs, 256px PNGs and light/dark 32/48/64px contact sheets are generated under
+`web-client/.engine/achievement-assets-nonfaction/` (ignored build output).
+
+Catalog revision 8 changes only the two icon references. Non-faction artwork
+manifest/receipt revision 4 adds the two images; faction artwork stays revision 2.
+Upload and anonymously verify the two new named assets before activating the
+matching engine catalog. Preserve all 58 existing hosted assets byte-for-byte.
+The release also fixes automatic Ballcourts payment with Great Arena; see
+[Ballcourts payment and historical replay](ballcourts-payment.md).
+No backfill, live-game writes or history repair are performed.
+
 ## Viewer 0.1.226 / engine 0.4.159 — revision 7, 46 definitions
 
 Removes “: Recorded as Built” from the eight individual wonder titles: Great

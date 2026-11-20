@@ -6,7 +6,7 @@ import { pendingActionCard } from './card-reference.ts';
 import { frameDetails } from './playback.ts';
 import { journal } from './journal.ts';
 import { manGodAbility } from './research-links.ts';
-const engine = createRequire(import.meta.url)('../.engine/server.js');
+const engine = createRequire(import.meta.url)(process.env.CLASH_TEST_ENGINE ?? '../.engine/server.js');
 const serialize = (g: any) => (typeof g === 'string' ? g : JSON.stringify(g));
 const seat = (g: any) => engine.currentPlayer(serialize(g));
 const view = (g: any, p = seat(g)): any => JSON.parse(engine.webView(engine.stripSecret(serialize(g), p), p));
@@ -1946,5 +1946,50 @@ test('Explorers requires at least one available benefit and preserves ordinary c
         assert.throws(() => move(g, { Playing: { ActionCard: id } }), 'engine rejects ineligible play, not just UI');
       }
     }
+  }
+});
+
+test('Great Arena pays Ballcourts with culture for both collection and recruitment', async () => {
+  for (const recruit of [false, true]) {
+    const g = await setup('Maya'),
+      p = g.players[seat(g)],
+      city = p.cities[0];
+    addAdvance(p, 'Arts', 'Sports');
+    city.mood_state = 'Neutral';
+    city.city_pieces = { wonders: ['Colosseum'] };
+    p.resources.mood_tokens = 0;
+    p.resources.culture_tokens = 3;
+    p.resources.food = 3;
+    p.resources.wood = 3;
+    p.resources.ore = 3;
+    const choices = view(g).cities[0].choices;
+    const selections = [choices[0], choices.find((c: any) => c.position !== choices[0].position)].map(
+      (c: any) => ({ position: c.position, pile: c.pile, times: 1 }),
+    );
+    const params = recruit
+      ? { kind: 'recruit', city: city.position, units: { infantry: 2 }, replaced: [], ballcourts: true }
+      : { kind: 'collect', city: city.position, selections, variant: 'Collect', ballcourts: true };
+    const offer = query(g, params);
+    let after = move(g, offer.action);
+    const next = after.players[seat(g)];
+    assert.equal(next.resources.mood_tokens ?? 0, 0);
+    assert.equal(next.resources.culture_tokens, 2);
+    assert.equal(after.actions_left, g.actions_left - 1);
+    assert.equal(next.cities[0].activations, 1);
+    if (recruit) {
+      assert.equal(next.units.length, p.units.length + 2);
+      assert.equal(next.resources.food, 1);
+      assert.equal(next.resources.ore, 1);
+    } else {
+      for (const resource of ['food', 'wood', 'ore'])
+        assert.equal(next.resources[resource], p.resources[resource] + (offer.total[resource] ?? 0));
+    }
+    city.city_pieces.wonders = [];
+    assert.throws(() => query(g, params));
+    assert.throws(() => move(g, offer.action));
+    city.city_pieces.wonders = ['Colosseum'];
+    p.resources.culture_tokens = 0;
+    assert.throws(() => query(g, params));
+    assert.throws(() => move(g, offer.action));
   }
 });

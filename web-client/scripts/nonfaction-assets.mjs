@@ -8,12 +8,12 @@ export const outputDir = path.join(root, 'web-client/.engine/achievement-assets-
 export const manifestPath = path.join(root, 'web-client/release/achievement-assets-nonfaction.json');
 export async function validateInputs() {
   const manifest = JSON.parse(await readFile(manifestPath));
-  assert.equal(manifest.revision, 3);
+  assert.equal(manifest.revision, 4);
   assert.deepEqual(
     manifest.assets.map((a) => a.key),
     ids.map((id) => `achievement-${id}`),
   );
-  assert.equal(manifest.assets.length, 26);
+  assert.equal(manifest.assets.length, 28);
   for (const a of manifest.assets) {
     assert.equal(a.source.type, 'original-svg');
     assert.equal(a.source.path, 'web-client/scripts/nonfaction-art.mjs');
@@ -24,13 +24,13 @@ export async function validateInputs() {
 export async function validateOutputs() {
   const manifest = await validateInputs();
   const receipt = JSON.parse(await readFile(path.join(outputDir, 'receipt.json')));
-  assert.equal(receipt.revision, 3);
+  assert.equal(receipt.revision, 4);
   assert.equal(receipt.manifestSha256, sha256(await readFile(manifestPath)));
   assert.deepEqual(
     receipt.assets.map((a) => a.key),
     manifest.assets.map((a) => a.key),
   );
-  assert.equal(new Set(receipt.assets.map((a) => a.sha256)).size, 26);
+  assert.equal(new Set(receipt.assets.map((a) => a.sha256)).size, 28);
   for (const a of receipt.assets) {
     assert.equal(a.file, `${a.key}.png`);
     const b = await readFile(path.join(outputDir, a.file));
@@ -54,7 +54,7 @@ export async function build() {
     },
   };
   const manifest = {
-    revision: 3,
+    revision: 4,
     width: 256,
     height: 256,
     assets: ids.map((id) => ({ key: `achievement-${id}`, source })),
@@ -85,7 +85,7 @@ export async function build() {
       assets.push({ key, file: `${key}.png`, sha256: sha256(bytes), width: 256, height: 256 });
     }
     const receipt = {
-      revision: 3,
+      revision: 4,
       manifestSha256: sha256(await readFile(manifestPath)),
       renderer: browser.version(),
       assets,
@@ -97,7 +97,7 @@ export async function build() {
           `<figure><figcaption>${id}</figcaption>${[32, 48, 64].map((size) => `<img width="${size}" height="${size}" src="data:image/svg+xml;base64,${Buffer.from(svg(id)).toString('base64')}">`).join('')}</figure>`,
       )
       .join('');
-    const html = `<!doctype html><title>Clash 26 original achievements</title><style>body{font:13px sans-serif}section{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px}figure{margin:0;padding:10px}img{margin:5px;border-radius:50%}.dark{background:#101722;color:white}</style><h1>Clash — 32 / 48 / 64px circular review</h1><section>${cards}</section><section class="dark">${cards}</section>`;
+    const html = `<!doctype html><title>Clash 28 original achievements</title><style>body{font:13px sans-serif}section{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px}figure{margin:0;padding:10px}img{margin:5px;border-radius:50%}.dark{background:#101722;color:white}</style><h1>Clash — 32 / 48 / 64px circular review</h1><section>${cards}</section><section class="dark">${cards}</section>`;
     await writeFile(path.join(outputDir, 'contact-sheet.html'), html);
     await page.setViewportSize({ width: 1100, height: 900 });
     await page.setContent(html);

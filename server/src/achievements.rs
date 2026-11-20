@@ -167,12 +167,11 @@ pub fn definitions() -> Manifest {
         name: name.into(),
         description: description.into(),
         icon: Some(Icon::Asset {
-            // Reuse existing category artwork; no new assets or uploads.
+            // Objective and advance tiers share category artwork; score tiers have exact numerals.
             key: format!(
                 "achievement-{}",
                 match id {
                     "five-objectives" | "seven-objectives" => "three-objectives",
-                    "score-50" | "score-60" => "score-40",
                     "thirty-advances" => "twenty-advances",
                     _ => id,
                 }
@@ -200,7 +199,7 @@ pub fn definitions() -> Manifest {
         icon: Some(Icon::Asset { key: format!("achievement-faction-{slug}") }),
     }));
     Manifest {
-        revision: 7,
+        revision: 8,
         achievements: definitions,
     }
 }
@@ -358,7 +357,7 @@ mod tests {
     #[test]
     fn manifest_and_real_end_turn_for_all_lengths() {
         let manifest = definitions();
-        assert_eq!(manifest.revision, 7);
+        assert_eq!(manifest.revision, 8);
         assert_eq!(manifest.achievements.len(), 46);
         assert_eq!(
             manifest
@@ -665,7 +664,7 @@ mod tests {
             FACTIONS.iter().map(|(name, _)| (*name).into()).collect()
         );
         let manifest = serde_json::to_value(definitions()).unwrap();
-        assert_eq!(manifest["revision"], 7);
+        assert_eq!(manifest["revision"], 8);
         assert_eq!(manifest.as_object().unwrap().len(), 2);
         let entries = manifest["achievements"].as_array().unwrap();
         assert_eq!(entries.len(), 46);
@@ -690,7 +689,6 @@ mod tests {
                         "achievement-{}",
                         match entry["id"].as_str().unwrap() {
                             "five-objectives" | "seven-objectives" => "three-objectives",
-                            "score-50" | "score-60" => "score-40",
                             "thirty-advances" => "twenty-advances",
                             id => id,
                         }

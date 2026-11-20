@@ -1,0 +1,258 @@
+{
+  "before": 10,
+  "afterPayment": 11,
+  "full": 12,
+  "bonus": {
+    "Playing": {
+      "Collect": {
+        "action_type": "Collect",
+        "ballcourts": true,
+        "city_position": "D2",
+        "collections": [
+          {
+            "pile": {
+              "food": 1
+            },
+            "position": "D2",
+            "times": 1
+          },
+          {
+            "pile": {
+              "ore": 1
+            },
+            "position": "D1",
+            "times": 1
+          }
+        ]
+      }
+    }
+  },
+  "paid": {
+    "players": [
+      {
+        "id": 0,
+        "resources": {
+          "food": 1,
+          "ore": 1,
+          "culture_tokens": 1
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Neutral",
+            "activations": 1,
+            "position": "D2"
+          }
+        ],
+        "units": [
+          {
+            "position": "D2",
+            "unit_type": "Settler",
+            "id": 0
+          }
+        ],
+        "civilization": "Maya",
+        "available_leaders": [
+          "Pakal",
+          "SiyajKak",
+          "WakChanilAjaw"
+        ],
+        "advances": [
+          "Arts",
+          "Farming",
+          "Mining",
+          "Sports"
+        ],
+        "incident_tokens": 1,
+        "action_cards": [
+          32
+        ],
+        "objective_cards": [
+          12
+        ],
+        "next_unit_id": 1
+      },
+      {
+        "id": 1,
+        "resources": {
+          "food": 2
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Happy",
+            "position": "D7"
+          }
+        ],
+        "units": [
+          {
+            "position": "D7",
+            "unit_type": "Settler",
+            "id": 0
+          }
+        ],
+        "civilization": "Rome",
+        "available_leaders": [
+          "Augustus",
+          "Caesar",
+          "Sulla"
+        ],
+        "advances": [
+          "Farming",
+          "Mining"
+        ],
+        "incident_tokens": 3,
+        "action_cards": [
+          17
+        ],
+        "objective_cards": [
+          2
+        ],
+        "next_unit_id": 1
+      },
+      {
+        "id": 2,
+        "civilization": "Barbarians",
+        "next_unit_id": 0
+      },
+      {
+        "id": 3,
+        "civilization": "Pirates",
+        "next_unit_id": 0
+      }
+    ],
+    "actions_left": 1,
+    "rng": "116898312205047725755485059985240998830",
+    "time_increments": [
+      2,
+      2
+    ],
+    "state": "Playing"
+  },
+  "following": {
+    "players": [
+      {
+        "id": 0,
+        "resources": {
+          "food": 2,
+          "ore": 1,
+          "culture_tokens": 1
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Angry",
+            "activations": 2,
+            "position": "D2"
+          }
+        ],
+        "units": [
+          {
+            "position": "D2",
+            "unit_type": "Settler",
+            "id": 0
+          }
+        ],
+        "civilization": "Maya",
+        "available_leaders": [
+          "Pakal",
+          "SiyajKak",
+          "WakChanilAjaw"
+        ],
+        "advances": [
+          "Arts",
+          "Farming",
+          "Mining",
+          "Sports"
+        ],
+        "incident_tokens": 1,
+        "action_cards": [
+          32
+        ],
+        "objective_cards": [
+          12
+        ],
+        "next_unit_id": 1
+      },
+      {
+        "id": 1,
+        "resources": {
+          "food": 2
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Happy",
+            "position": "D7"
+          }
+        ],
+        "units": [
+          {
+            "position": "D7",
+            "unit_type": "Settler",
+            "id": 0
+          }
+        ],
+        "civilization": "Rome",
+        "available_leaders": [
+          "Augustus",
+          "Caesar",
+          "Sulla"
+        ],
+        "advances": [
+          "Farming",
+          "Mining"
+        ],
+        "incident_tokens": 3,
+        "action_cards": [
+          17
+        ],
+        "objective_cards": [
+          2
+        ],
+        "next_unit_id": 1
+      },
+      {
+        "id": 2,
+        "civilization": "Barbarians",
+        "next_unit_id": 0
+      },
+      {
+        "id": 3,
+        "civilization": "Pirates",
+        "next_unit_id": 0
+      }
+    ],
+    "actions_left": 0,
+    "rng": "116898312205047725755485059985240998830",
+    "time_increments": [
+      2,
+      2
+    ],
+    "state": "Playing"
+  }
+}

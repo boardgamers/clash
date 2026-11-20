@@ -745,16 +745,10 @@ fn collect_variant_preview(
         CostTrigger::NoModifiers,
         ballcourts,
     )?;
-    if ballcourts
-        && p.resources.mood_tokens
-            < kind
-                .payment_options(game, seat)
-                .first_valid_payment(&p.resources)
-                .map_or(0, |pile| pile.mood_tokens)
-                + 1
-    {
-        return Err("Not enough mood for this action and Ballcourts".into());
-    }
+    let cost = crate::collect::collection_payment_options(game, seat, &kind, ballcourts);
+    let payment = cost
+        .first_valid_payment(&p.resources)
+        .ok_or("Not enough mood for this action and Ballcourts")?;
     let mut effects = collection
         .info
         .log
@@ -767,7 +761,9 @@ fn collect_variant_preview(
         effects.push(json!({"source":"Pottery","description":format!("Gain {pottery}")}));
         total += pottery;
     }
-    let mut after = p.resources.clone() + total.clone();
+    let mut after = p.resources.clone();
+    after -= payment;
+    after += total.clone();
     let waste = after.apply_resource_limit(&p.resource_limit);
     let mut collect = Collect::new(city, selections, kind);
     collect.ballcourts = ballcourts;

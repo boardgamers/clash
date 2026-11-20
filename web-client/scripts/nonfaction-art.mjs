@@ -15,6 +15,8 @@ export const ids = [
   ...modes.flatMap((m) => [`complete-${m}`, `win-${m}`]),
   'score-30',
   'score-40',
+  'score-50',
+  'score-60',
   'seven-cities',
   'twenty-advances',
   'three-objectives',
@@ -182,13 +184,14 @@ function motif(id) {
       path('M69 177V69H172 M69 89L89 69 M149 69V94 M135 94H163V109H135Z M54 181H87') +
       group(129, 194, 0.65, check())
     );
-  const high = id === 'score-40';
+  const score = id.slice('score-'.length);
+  const high = score !== '30';
   return (
     group(high ? 91 : 89, 132, high ? 1.3 : 1.1, city()) +
     group(high ? 165 : 162, 127, high ? 0.55 : 0.45, monument(high ? 'library' : 'pyramids')) +
     group(128, 166, 0.65, book()) +
     (high ? path('M59 87H197 M68 80V94 M188 80V94') : '') +
-    `<text x="128" y="211" text-anchor="middle" stroke="none" fill="#f7cc6c" font-family="sans-serif" font-weight="bold" font-size="29">${high ? '40' : '30'}</text>`
+    `<text x="128" y="211" text-anchor="middle" stroke="none" fill="#f7cc6c" font-family="sans-serif" font-weight="bold" font-size="29">${score}</text>`
   );
 }
 export function svg(id) {
