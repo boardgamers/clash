@@ -388,3 +388,151 @@ fn defiance_can_be_claimed_after_a_real_defender_loss_or_draw_and_save_reload() 
         }
     }
 }
+
+#[test]
+fn postcombat_queue_survives_settler_objective_reload_and_claim_or_skip() {
+    use crate::{action_queue, board_history};
+    for result in [
+        CombatResult::AttackerWins,
+        CombatResult::Draw,
+        CombatResult::DefenderWins,
+    ] {
+        for claim in [false, true] {
+            let mut game = test_game(1, &CARDS, false);
+            let attackers = if result == CombatResult::AttackerWins {
+                3
+            } else {
+                2
+            };
+            game.players[0].units = (0..attackers)
+                .map(|id| Unit::new(0, Position::from_offset("C2"), UnitType::Infantry, id))
+                .collect();
+            game.players[0].units.push(Unit::new(
+                0,
+                Position::from_offset("C2"),
+                UnitType::Settler,
+                30,
+            ));
+            game.players[0].next_unit_id = 31;
+            if result == CombatResult::DefenderWins {
+                game.players[1].units.push(Unit::new(
+                    1,
+                    Position::from_offset("C1"),
+                    UnitType::Infantry,
+                    20,
+                ));
+            }
+            for position in ["B1", "B3"] {
+                game.players[1]
+                    .cities
+                    .push(City::new(1, Position::from_offset(position)));
+            }
+            game.dice_roll_outcomes = vec![11; 8];
+            let mut game = board_history::execute(
+                game,
+                Action::Movement(MovementAction::Move(MoveUnits::new(
+                    (0..attackers).collect(),
+                    Position::from_offset("C1"),
+                    None,
+                    ResourcePile::empty(),
+                ))),
+                0,
+            )
+            .unwrap();
+            let (key, _) = action_queue::offer(&game, 0).expect("postcombat off-turn choice");
+            let actions = vec![Action::Movement(MovementAction::Stop)];
+            let before_log = crate::game_api::log_length(&game);
+            game = board_history::execute(
+                game,
+                Action::QueueMoves {
+                    key: key.clone(),
+                    actions: actions.clone(),
+                    waiting: true,
+                },
+                0,
+            )
+            .unwrap();
+            assert_eq!(crate::game_api::log_length(&game), before_log);
+            if result == CombatResult::AttackerWins {
+                game = board_history::execute(
+                    game,
+                    Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                        "B1",
+                    )])),
+                    1,
+                )
+                .unwrap();
+            }
+            assert!(has_defiance_prompt(&game));
+            let mut fresh = game.clone();
+            fresh.action_plan = None;
+            let stripped = game_api::strip_secret(fresh.clone(), Some(0));
+            assert_eq!(
+                action_queue::offer(&fresh, 0),
+                action_queue::offer(&stripped, 0)
+            );
+            assert!(action_queue::project(&stripped, 0, &actions).is_ok());
+            assert_eq!(action_queue::offer(&game, 0).unwrap().0, key);
+            assert_eq!(
+                action_queue::offer(&game, 0).unwrap().1,
+                "Choosing an objective"
+            );
+            assert!(action_queue::offer(&game, 1).is_none());
+            assert!(action_queue::save(&mut game, 0, "stale", vec![], false).is_err());
+            assert!(action_queue::save(&mut game, 1, &key, vec![], false).is_err());
+            let data =
+                serde_json::from_str(&serde_json::to_string(&game.cloned_data()).unwrap()).unwrap();
+            game = Game::from_data(data, game.cache.clone(), GameContext::Play);
+            assert_eq!(action_queue::offer(&game, 0).unwrap().0, key);
+            assert!(game.action_plan.as_ref().unwrap().waiting);
+            assert_eq!(game.action_plan.as_ref().unwrap().actions, actions);
+            for viewer in [None, Some(1)] {
+                assert!(
+                    game_api::strip_secret(game.clone(), viewer)
+                        .action_plan
+                        .is_none()
+                );
+            }
+            assert!(
+                matches!(&game.state, crate::game::GameState::Movement(m) if m.movement_actions_left == 2)
+            );
+            let projected = action_queue::project(&game, 0, &[]).unwrap();
+            assert_eq!(projected.state, game.state);
+            assert!(game.players[1].completed_objectives.is_empty());
+            for variant in 0..4 {
+                let mut blocked = game.clone();
+                match variant {
+                    0 => blocked.round = 4,
+                    1 => {
+                        if let PersistentEventType::SelectObjectives(i) =
+                            &mut blocked.events[0].event_type
+                        {
+                            i.combat_turn_owner = None;
+                        }
+                    }
+                    2 => blocked.events.push(blocked.events[0].clone()),
+                    _ => blocked.events[0].player.index = 0,
+                }
+                assert!(action_queue::offer(&blocked, 0).is_none());
+            }
+            game = board_history::execute(
+                game,
+                Action::Response(EventResponse::SelectHandCards(if claim {
+                    vec![HandCard::ObjectiveCard(27)]
+                } else {
+                    vec![]
+                })),
+                1,
+            )
+            .unwrap();
+            assert!(game.events.is_empty());
+            assert!(game.action_plan.is_none());
+            assert_eq!(game.state, crate::game::GameState::Playing);
+            assert_eq!(game.current_player_index, 0);
+            assert_eq!(
+                game.players[1].completed_objectives.len(),
+                usize::from(claim)
+            );
+        }
+    }
+}

@@ -4768,6 +4768,7 @@
   "Wait for choice": "Ждать выбора",
   "{p0} queued": "В очереди: {p0}",
   "End turn queued": "Конец хода в очереди",
+  "Choosing an objective": "Выбирает цель",
   "Choosing an advance": "Выбирает достижение",
   "Placing a settler": "Размещает поселенца",
   "Discard queue": "Очистить очередь",

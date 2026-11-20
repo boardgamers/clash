@@ -1676,3 +1676,21 @@ matching viewer/engine; independently byte-verify all hosted files and engine.
 Preserve revision-7 catalog (46 definitions), all 58 named assets, gallery and
 unrelated metadata. No production moves, save migration, history repair, backfill
 or Fossil refresh. The exact user game was not provided or verified.
+
+# Viewer 0.1.231 / engine 0.4.163 — postcombat objective planning
+
+Private action plans now survive the settler → optional postcombat objective
+handoff, with stable redacted keys, explicit Wait and serialized combat-turn
+provenance. Unsupported legacy prompts remain fail-closed; no saved-game repair.
+The queue label is translated in all 17 locales. See
+[postcombat objective queue](../../docs/postcombat-objective-queue.md).
+
+Also fixes the release-blocking AI Tributes bug: choose a collection modifier per
+eligible city instead of applying the player's preferred modifier to all cities.
+The authoritative Acamapichtli/size/fee rules are unchanged. Deterministic native
+and normal/queue WASM regressions accompany the fix; random testing is not skipped.
+
+Require green main-commit Check and Web viewer CI before BGS publication.
+Preserve revision-8 catalog (46 definitions), revision-4 artwork, 60 named assets,
+gallery, Standard settings/preferences and all unrelated metadata. No production
+moves, rewinds, backfill, migration or history changes.

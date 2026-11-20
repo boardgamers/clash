@@ -224,6 +224,10 @@ impl AbilityInitializerSetup for ObjectiveBuilder {
 pub struct SelectObjectivesInfo {
     pub(crate) objective_opportunities: Vec<String>,
     pub(crate) shown_objective: Option<String>,
+    // Provenance survives reload and successive players' objective prompts.
+    // Only a completed CombatEnd event sets this; old saves fail closed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) combat_turn_owner: Option<usize>,
 }
 
 impl SelectObjectivesInfo {
@@ -232,6 +236,7 @@ impl SelectObjectivesInfo {
         Self {
             objective_opportunities,
             shown_objective: None,
+            combat_turn_owner: None,
         }
     }
 
@@ -254,7 +259,7 @@ pub(crate) fn objective_is_ready(player: &mut Player, name: &str) {
     o.dedup(); // can't fulfill 2 objectives with the same name at once
 }
 
-pub(crate) fn present_instant_objective_cards(game: &mut Game) {
+pub(crate) fn present_instant_objective_cards(game: &mut Game, combat_turn_owner: Option<usize>) {
     let Some(player) = game
         .players
         .iter()
@@ -265,20 +270,23 @@ pub(crate) fn present_instant_objective_cards(game: &mut Game) {
 
     let opportunities = std::mem::take(&mut game.player_mut(player).objective_opportunities);
 
-    present_objective_cards(game, player, opportunities);
+    let mut info = sorted_objective_info(game, opportunities);
+    info.combat_turn_owner = combat_turn_owner;
+    on_objective_cards(game, player, info);
 }
 
-pub(crate) fn present_objective_cards(
-    game: &mut Game,
-    player: usize,
-    mut opportunities: Vec<String>,
-) {
+pub(crate) fn present_objective_cards(game: &mut Game, player: usize, opportunities: Vec<String>) {
+    let info = sorted_objective_info(game, opportunities);
+    on_objective_cards(game, player, info);
+}
+
+fn sorted_objective_info(game: &Game, mut opportunities: Vec<String>) -> SelectObjectivesInfo {
     opportunities.sort_by_cached_key(|name| {
         let o = game.cache.get_objective(name);
         (-o.priority(), o.name.clone())
     });
     opportunities.dedup(); // can't use 2 objectives with the same name at once
-    on_objective_cards(game, player, SelectObjectivesInfo::new(opportunities));
+    SelectObjectivesInfo::new(opportunities)
 }
 
 pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: SelectObjectivesInfo) {

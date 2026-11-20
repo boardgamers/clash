@@ -17,7 +17,8 @@
       "event_type": {
         "SelectObjectives": {
           "objective_opportunities": [],
-          "shown_objective": "General"
+          "shown_objective": "General",
+          "combat_turn_owner": 0
         }
       },
       "player": 0,

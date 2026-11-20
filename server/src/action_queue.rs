@@ -32,6 +32,20 @@ pub fn offer(game: &Game, player: usize) -> Option<(String, String)> {
     let handler = event.player.handler.as_ref()?;
     let label = match (&event.event_type, &handler.origin, &handler.request) {
         (
+            PersistentEventType::SelectObjectives(info),
+            EventOrigin::Ability(name),
+            PersistentEventRequest::SelectHandCards(request),
+        ) if name == "Select Objective Cards to Complete"
+            && info.combat_turn_owner == Some(player)
+            && request.needed == (0..=1)
+            && request
+                .choices
+                .iter()
+                .all(|card| matches!(card, crate::card::HandCard::ObjectiveCard(_))) =>
+        {
+            "Choosing an objective"
+        }
+        (
             PersistentEventType::CombatEnd(_),
             EventOrigin::Ability(name),
             PersistentEventRequest::SelectPositions(_),
@@ -117,6 +131,21 @@ pub fn offer(game: &Game, player: usize) -> Option<(String, String)> {
     {
         return Some((plan.key.clone(), label.into()));
     }
+    // Objective identities and card choices are private. Hash the same public
+    // event shape on authoritative and stripped boards, not the opponent's hand.
+    let mut key_events = game.events.clone();
+    for event in &mut key_events {
+        if let PersistentEventType::SelectObjectives(info) = &mut event.event_type {
+            info.strip_secret();
+            if let Some(handler) = &mut event.player.handler {
+                if let PersistentEventRequest::SelectHandCards(request) = &mut handler.request {
+                    request.choices.clear();
+                    request.description.clear();
+                }
+                handler.response = None;
+            }
+        }
+    }
     let key = format!(
         "{:x}",
         Sha256::digest(
@@ -124,7 +153,7 @@ pub fn offer(game: &Game, player: usize) -> Option<(String, String)> {
                 game.age,
                 game.round,
                 crate::game_api::log_length(game),
-                &game.events
+                &key_events
             ))
             .ok()?
         )

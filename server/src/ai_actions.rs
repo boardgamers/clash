@@ -3,7 +3,7 @@ use crate::advance::AdvanceAction;
 use crate::ai_collect::{possible_collections, total_collect};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
-use crate::collect::{Collect, available_collect_actions, possible_resource_collections};
+use crate::collect::{Collect, available_collect_actions_for_city, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::custom_actions::{CustomAction, CustomActionType, SpecialAction};
 use crate::content::persistent_events::{
@@ -325,16 +325,16 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
 }
 
 fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
-    let collect = available_collect_actions(game, p.index);
-    if collect.is_empty() {
-        return vec![];
-    }
-    let action_type = prefer_custom_action(&collect);
-
     p.cities
         .iter()
-        .filter(|city| city.can_activate())
         .flat_map(|city| {
+            // A modifier may be legal in only one city (for example Tributes).
+            // Choose the preferred variant per city, not once for the player.
+            let collect = available_collect_actions_for_city(game, p.index, city.position);
+            if collect.is_empty() {
+                return vec![];
+            }
+            let action_type = prefer_custom_action(&collect);
             let info = possible_resource_collections(
                 game,
                 city.position,

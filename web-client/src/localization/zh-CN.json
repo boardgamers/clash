@@ -4768,6 +4768,7 @@
   "Wait for choice": "等待选择",
   "{p0} queued": "{p0} 项待执行",
   "End turn queued": "结束回合待执行",
+  "Choosing an objective": "正在选择目标",
   "Choosing an advance": "正在选择进步",
   "Placing a settler": "正在放置移民",
   "Discard queue": "清空队列",

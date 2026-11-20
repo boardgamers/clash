@@ -453,9 +453,16 @@ where
         }
     }
     crate::early_choices::expire_current_event(game);
-    game.events.pop();
+    let completed = game.events.pop().expect("completed event");
+    let combat_turn_owner = match completed.event_type {
+        PersistentEventType::CombatEnd(stats) if stats.result.is_some() => {
+            Some(stats.attacker.player)
+        }
+        PersistentEventType::SelectObjectives(info) => info.combat_turn_owner,
+        _ => None,
+    };
 
-    present_instant_objective_cards(game);
+    present_instant_objective_cards(game, combat_turn_owner);
 
     Some(value)
 }
