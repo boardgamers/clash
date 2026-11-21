@@ -63,9 +63,12 @@ try {
     };
     const open = async () => {
       await page.locator(`.unit-map-label[aria-label*="${settler.position}:"]`).click();
+      // Inspecting a unit now opens tile actions; explicitly enter movement.
+      await page.getByRole('button', { name: `Move Settler from ${settler.position}`, exact: true }).click();
       const unit = page
         .getByRole('region', { name: 'Unit movement', exact: true })
-        .getByRole('button', { name: 'Settler', exact: true });
+        // UnitPicker appends movement notes to the accessible name.
+        .getByRole('button', { name: /^Settler(?: · |$)/ });
       if ((await unit.getAttribute('aria-pressed')) !== 'true') await unit.click();
     };
     await open();
@@ -84,12 +87,22 @@ try {
     await page.screenshot({ path: `/tmp/clash-exploration-preview-${width}.png` });
     await choose(land.position);
     assert(await label.isHidden(), 'explored destination clears outline');
+    // Ordinary land movement now submits immediately. Restore the offline fixture
+    // before checking exploration cancellation and its separate confirmation.
+    await page.waitForFunction(() => !document.querySelector('.settler-confirm'));
+    assert.equal(sent.length, 1, 'ordinary land movement submits once');
+    assert.notEqual(state, initial);
+    state = initial;
+    sent.length = 0;
+    await page.evaluate((raw) => host.emit('state', raw), JSON.stringify(game));
+    await open();
     await choose(targets[0].position);
     await page.getByRole('button', { name: 'Close movement controls', exact: true }).click();
     assert(await label.isHidden(), 'cancelling clears outline');
     await open();
     await choose(targets[0].position);
-    await page.getByRole('button', { name: /^Explore/, exact: false }).click();
+    assert.deepEqual(sent, [], 'reopened preview still requires confirmation');
+    await choose(targets[0].position); // Second destination click confirms exploration.
     await page.waitForFunction(() => !document.querySelector('.settler-confirm'));
     assert.equal(sent.length, 1);
     assert.notEqual(state, initial, 'confirmation submits the actual move');
