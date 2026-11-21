@@ -400,7 +400,7 @@
             onclick={() => submitBuild(choice.action)}
             >{typeof choice.action === 'object' && 'Response' in choice.action
               ? (choice.position ? `Continue to payment at ${choice.position}` : 'Continue to payment')
-              : (choice.position ? `Build ${selected.name} at ${choice.position}` : `Build ${selected.name}`)}</button
+              : (choice.position ? `Construct ${selected.name} at ${choice.position}` : `Construct ${selected.name}`)}</button
           >{/each}{/if}
       </div>
     </footer>{/if}

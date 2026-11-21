@@ -117,9 +117,16 @@ export function frameDetails(
     for (const [position, terrain] of frame.tiles)
       if (JSON.stringify(tiles.get(position)) !== JSON.stringify(terrain)) positions.add(position);
   }
+  // Old recordings retain their original titles; normalize only the displayed caption.
   let description = ['Explore Resolution', 'Finish ship exploration'].includes(frame.title)
     ? 'Explore'
-    : frame.title;
+    : frame.title === 'Research'
+      ? 'Advance'
+      : frame.title === 'Build'
+        ? 'Construct'
+        : frame.title === 'Build wonder'
+          ? 'Construct wonder'
+          : frame.title;
   let generic = [
     'Resolve choice',
     'Pay for action',
@@ -256,7 +263,7 @@ export function frameDetails(
             .join(', ')}`,
         );
       if (player.id !== frame.actor) continue;
-      if (generic || frame.title === 'Build' || frame.title === 'Build wonder') {
+      if (generic || ['Construct', 'Construct wonder', 'Build', 'Build wonder'].includes(frame.title)) {
         const built = own.flatMap((item) => {
           const structure = item.Structure;
           if (
@@ -332,7 +339,7 @@ export function frameDetails(
     if (details.length)
       description =
         (generic && description === frame.title) ||
-        ['Research', 'Build', 'Build wonder', 'Collect'].includes(frame.title)
+        ['Advance', 'Construct', 'Construct wonder', 'Research', 'Build', 'Build wonder', 'Collect'].includes(frame.title)
           ? details.join(' · ')
           : [description, ...details].join(' · ');
   }
@@ -348,7 +355,7 @@ export function frameDetails(
     description =
       (
         {
-          SelectAdvance: 'Research',
+          SelectAdvance: 'Advance',
           SelectUnits: 'Selected units',
           SelectPositions: 'Selected a location',
           Payment: 'Payment',

@@ -142,7 +142,7 @@ try {
           (state) => host.emit('state', state),
           engine.stripSecret(JSON.stringify(state), 0),
         );
-        await page.getByRole('button', { name: 'Research tree', exact: true }).click();
+        await page.getByRole('button', { name: 'Advances', exact: true }).click();
         await page.locator('#research-Arts .research-pick').click();
         const payment = page.getByRole('group', { name: 'Research payment', exact: true });
         await payment.getByLabel('Ideas amount for Research payment', { exact: true }).selectOption('2');

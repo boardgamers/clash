@@ -14,6 +14,8 @@ pub struct ReplayGameData {
     seed: String,
     #[serde(default)]
     asynchronous_combat_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "crate::map::HomeLayout::is_legacy")]
+    home_layout: crate::map::HomeLayout,
     log: Vec<ActionLogAge>,
     log_index: usize,
     // Look-only information boundaries are intentionally absent from the log.
@@ -91,6 +93,7 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         return Err("Invalid replay player indices".to_string());
     }
     let mut builder = GameSetupBuilder::new(player_amount)
+        .home_layout(data.home_layout)
         .seed(data.seed)
         .options(data.options.clone());
     if data.options.civilization == CivSetupOption::Random {

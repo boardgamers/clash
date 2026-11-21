@@ -155,7 +155,7 @@ fn fallback(game: &Game, entry: &ActionLogAction) -> String {
     match &entry.action {
         Action::Playing(action) => match action {
             PlayingAction::EndTurn => "Ended turn".into(),
-            PlayingAction::Advance(_) => "Research".into(),
+            PlayingAction::Advance(_) => "Advance".into(),
             PlayingAction::FoundCity { .. } => "Found a city".into(),
             PlayingAction::Construct(_) => "Construct a building".into(),
             PlayingAction::Collect(_) => "Collect resources".into(),

@@ -191,7 +191,7 @@ test('journal combines research and its card draw without revealing hidden card 
   );
   assert.equal(entries.length, 1);
   assert.equal(entries[0].civilization, 'Vikings');
-  assert.equal(entries[0].title, 'Research');
+  assert.equal(entries[0].title, 'Advance');
   assert.deepEqual(
     entries[0].tokens.map((t) => [t.icon, t.value]),
     [
@@ -413,4 +413,16 @@ test('old prose-only recruitment discount offers are not reported as uses', () =
   assert.equal(rows[0].title, 'Recruit');
   assert(rows[0].tokens.some(t => t.icon === 'food' && t.value === '−1'));
   assert(!rows[0].text.includes('mood'));
+});
+
+test('legacy research log origins and current advance origins group the same card draw', () => {
+  for (const origin of ['Advance', 'Research']) {
+    const entries = journal(game([{
+      action: { Playing: { Advance: { advance: 'Engineering' } } },
+      log: [`Leif: ${origin}: Pay 1 action, Pay 2 food, Gain Engineering and take an event token (2 left)`, 'Leif: Engineering: Draw a wonder card'],
+      items: [{ player: 0, HandCard: { to: { Hand: 0 } }, origin: { Advance: 'Engineering' } }],
+    }]));
+    assert.equal(entries.length, 1);
+    assert.equal(entries[0].title, 'Advance');
+  }
 });

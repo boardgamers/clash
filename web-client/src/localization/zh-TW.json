@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "{p0}的城市中心被永久摧毀；城市上限降至{p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p1}的{p0}被永久摧毀；此類配件總數上限降至{p2}",
   "Razed {p0} because no city centers were available": "因沒有可用的城市中心，夷平了{p0}",
-  "Obelisk total piece limit reduced to {p0}": "方尖碑配件總數上限降至{p0}"
+  "Obelisk total piece limit reduced to {p0}": "方尖碑配件總數上限降至{p0}",
+  "Advance · {p0}": "科技 · {p0}",
+  "Advance · Sanitation · free action": "科技 · 衛生 · 免費行動",
+  "Construct {p0}": "建造{p0}",
+  "Construct {p0} at {p1}": "在{p1}建造{p0}",
+  "Construct / recruit": "建造／招募",
+  "Construct Port ·": "建造港口 ·",
+  "Construct Port · {p0}": "建造港口 · {p0}",
+  "Construct wonder": "建造奇觀",
+  "Construct, recruit and improve happiness": "建造、招募與提升幸福",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "每個文明都有專屬科技。羅馬研究工程學時獲得水道橋。開啟科技並研究工程學；水道橋會自動解鎖，不需要另行購買。"
 }

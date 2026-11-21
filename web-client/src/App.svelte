@@ -1333,12 +1333,12 @@
           class:active={$session.mode === 'research'}
           class:inspect-only={!researchAvailable}
           class:early-available={!!earlyAdvance}
-          title={earlyAdvance ? (earlyAdvance.selected ? 'Free advance saved · Click to edit' : 'Choose your free advance ahead of your turn') : researchAvailable ? 'Research tree' : 'View research · Browse advances and costs'}
+          title={earlyAdvance ? (earlyAdvance.selected ? 'Free advance saved · Click to edit' : 'Choose your free advance ahead of your turn') : 'Advances'}
           data-tutorial="research"
-          aria-label="Research tree"
+          aria-label="Advances"
           disabled={$session.seat === undefined}
           onclick={openResearch}
-          ><GraduationCap size={21} /><span>Research</span>{#if earlyAdvance}<EarlyChoiceBadge saved={earlyAdvance.selected != null} />{:else if !researchAvailable}<Eye
+          ><GraduationCap size={21} /><span>Advance</span>{#if earlyAdvance}<EarlyChoiceBadge saved={earlyAdvance.selected != null} />{:else if !researchAvailable}<Eye
               class="action-inspect"
               size={10}
               aria-hidden="true"
@@ -1350,7 +1350,7 @@
           class:early-available={!!earlyCities.length}
           aria-label="Manage cities"
           title={earlyCities.length ? 'Choose city razing ahead of your turn' : cityActionsAvailable
-            ? 'Build, recruit and improve happiness'
+            ? 'Construct, recruit and improve happiness'
             : 'View cities · Browse buildings, units and costs'}
           disabled={!city && !earlyCities.length}
           onclick={() => {
@@ -1531,7 +1531,7 @@
       <section class="action-panel floating-panel" aria-label="Choose port location">
         <button class="icon-button close-action" aria-label="Cancel port placement"
           onclick={() => controller.patch({mode:'city'})}><X size={18} /></button>
-        <h2>Build Port · {$session.portPlacement.city}</h2>
+        <h2>Construct Port · {$session.portPlacement.city}</h2>
         <p>Choose a highlighted sea space on the map.</p>
         <ResourceAmount pile={$session.portPlacement.payment} />
       </section>

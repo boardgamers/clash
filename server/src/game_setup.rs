@@ -15,7 +15,7 @@ use crate::log::{
     ActionLogAge, ActionLogRound, SetupTurnType, TurnType, add_start_turn_action_if_needed,
     add_turn_log,
 };
-use crate::map::{Map, MapSetup, get_map_setup};
+use crate::map::{HomeLayout, Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
@@ -44,6 +44,7 @@ pub struct GameSetup {
     random_map: bool,
     options: GameOptions,
     assigned_civilizations: Vec<String>,
+    home_layout: HomeLayout,
 }
 
 #[must_use]
@@ -53,6 +54,7 @@ pub struct GameSetupBuilder {
     random_map: bool,
     options: GameOptions,
     assigned_civilizations: Vec<String>,
+    home_layout: HomeLayout,
 }
 
 impl GameSetupBuilder {
@@ -63,7 +65,14 @@ impl GameSetupBuilder {
             random_map: true,
             options: GameOptions::default(),
             assigned_civilizations: Vec::new(),
+            home_layout: HomeLayout::ClockwiseV1,
         }
+    }
+
+    /// Explicit compatibility override for replaying historical setups.
+    pub fn home_layout(mut self, layout: HomeLayout) -> Self {
+        self.home_layout = layout;
+        self
     }
 
     pub fn seed(mut self, seed: String) -> Self {
@@ -93,6 +102,7 @@ impl GameSetupBuilder {
             random_map: self.random_map,
             options: self.options,
             assigned_civilizations: self.assigned_civilizations,
+            home_layout: self.home_layout,
         }
     }
 }
@@ -153,7 +163,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
     players.push(Player::new(cache.get_civilization(PIRATES), players.len()));
 
     let (map_setup, map) = if setup.random_map && civilization_draft.is_none() {
-        let setup = get_map_setup(setup.player_amount);
+        let setup = get_map_setup(setup.player_amount, setup.home_layout);
         let map = Map::random_map(&mut rng, &setup);
         (Some(setup), map)
     } else {
@@ -186,6 +196,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         .shuffled(&mut rng);
     let all = &cache.get_abilities().clone();
     let mut game = Game {
+        home_layout: setup.home_layout,
         action_plan: None,
         early_choices: vec![],
         early_choice_update: false,
@@ -308,8 +319,11 @@ fn execute_setup_round(player_amount: usize, game: &mut Game, map_setup: Option<
 }
 
 pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
-    let h = &get_map_setup(game.players.iter().filter(|p| p.is_human()).count()).home_positions
-        [player.index];
+    let h = &get_map_setup(
+        game.players.iter().filter(|p| p.is_human()).count(),
+        game.home_layout,
+    )
+    .home_positions[player.index];
     let home = player
         .get(game)
         .civilization
@@ -463,7 +477,9 @@ fn finish_civilization_draft(game: &mut Game) {
         p.civilization = civilization;
     }
     let player_amount = draft.ready.len();
-    let map_setup = draft.random_map.then(|| get_map_setup(player_amount));
+    let map_setup = draft
+        .random_map
+        .then(|| get_map_setup(player_amount, game.home_layout));
     if let Some(setup) = &map_setup {
         game.map = Map::random_map(&mut game.rng, setup);
     }

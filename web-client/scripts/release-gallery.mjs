@@ -58,7 +58,7 @@ try {
     // The research browser requires a selected civilization. This changes only
     // the local viewing seat; the payload remains spectator-stripped (no hand).
     await page.evaluate(()=>host.emit('player',{index:0}));
-    await page.getByRole('button',{name:'Research tree',exact:true}).click();
+    await page.getByRole('button',{name:'Advances',exact:true}).click();
     await page.locator('.research-tree').waitFor();
     await page.waitForTimeout(500);
     await page.screenshot({path:path.join(out,`research-${suffix}.png`)});

@@ -39,7 +39,7 @@ try {
         host.emit('preferences', { sound: false });
         host.emit('state', state);
       }, { state: stripped, seat });
-      await page.getByRole('button', { name: 'Research tree', exact: true }).click();
+      await page.getByRole('button', { name: 'Advances', exact: true }).click();
       await page.locator('#research-Storage .research-pick').click();
       const picker = page.getByRole('group', { name: 'Research payment', exact: true });
       await picker.waitFor();

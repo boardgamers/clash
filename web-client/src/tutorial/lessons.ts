@@ -408,7 +408,7 @@ export const chapters: {
     version: 2,
     steps: [
       { id: 'advance', title: 'Unlock Rome’s Aqueduct',
-        text: 'Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Research and research Engineering; Aqueduct unlocks automatically, without a separate purchase.',
+        text: 'Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.',
         kind: 'engineering' },
       {
         id: 'leader',
@@ -713,7 +713,7 @@ export function createLesson(id: string, engine: TutorialEngine, initialGame: st
         'Confirm',
       ];
     if (['storage', 'math', 'engineering', 'incident'].includes(step.kind ?? ''))
-      return ['Research', offer?.Playing?.Advance?.advance ?? '', 'Research'];
+      return ['Advance', offer?.Playing?.Advance?.advance ?? '', 'Advance'];
     if (['walk', 'explore', 'embark', 'sail', 'land'].includes(step.kind ?? ''))
       return [
         'Move',

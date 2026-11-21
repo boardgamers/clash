@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "{p0}的城市中心被永久摧毁；城市上限降至{p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p1}的{p0}被永久摧毁；此类配件总数上限降至{p2}",
   "Razed {p0} because no city centers were available": "因没有可用的城市中心，夷平了{p0}",
-  "Obelisk total piece limit reduced to {p0}": "方尖碑配件总数上限降至{p0}"
+  "Obelisk total piece limit reduced to {p0}": "方尖碑配件总数上限降至{p0}",
+  "Advance · {p0}": "进步 · {p0}",
+  "Advance · Sanitation · free action": "进步 · 卫生 · 免费行动",
+  "Construct {p0}": "建造{p0}",
+  "Construct {p0} at {p1}": "在{p1}建造{p0}",
+  "Construct / recruit": "建造／招募",
+  "Construct Port ·": "建造港口 ·",
+  "Construct Port · {p0}": "建造港口 · {p0}",
+  "Construct wonder": "建造奇迹",
+  "Construct, recruit and improve happiness": "建造、招募并提升幸福度",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "各文明都有专属进步。罗马研究工程学时获得引水渠。打开进步并研究工程学，引水渠自动解锁，无需单独购买。"
 }

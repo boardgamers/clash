@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "مرکز شهر در {p0} برای همیشه نابود شد؛ سقف شهرها به {p1} کاهش یافت",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} در {p1} برای همیشه نابود شد؛ سقف کل این نوع قطعات به {p2} کاهش یافت",
   "Razed {p0} because no city centers were available": "{p0} ویران شد زیرا هیچ مرکز شهری در دسترس نبود",
-  "Obelisk total piece limit reduced to {p0}": "سقف کل قطعات ابلیسک به {p0} کاهش یافت"
+  "Obelisk total piece limit reduced to {p0}": "سقف کل قطعات ابلیسک به {p0} کاهش یافت",
+  "Advance · {p0}": "پیشرفت · {p0}",
+  "Advance · Sanitation · free action": "پیشرفت · بهداشت · اقدام رایگان",
+  "Construct {p0}": "ساخت {p0}",
+  "Construct {p0} at {p1}": "ساخت {p0} در {p1}",
+  "Construct / recruit": "ساخت / استخدام",
+  "Construct Port ·": "ساخت بندر ·",
+  "Construct Port · {p0}": "ساخت بندر · {p0}",
+  "Construct wonder": "ساخت شگفتی",
+  "Construct, recruit and improve happiness": "ساخت، جذب نیرو و افزایش شادی",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "هر تمدن پیشرفت‌های مخصوص خود را دارد. روم با پژوهش مهندسی، آب‌گذر را به دست می‌آورد. پیشرفت‌ها را باز کنید و مهندسی را پژوهش کنید؛ آب‌گذر خودکار و بدون خرید جداگانه باز می‌شود."
 }

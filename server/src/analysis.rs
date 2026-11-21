@@ -219,7 +219,7 @@ fn remaining_blocks(game: &Game) -> Result<Vec<Block>, String> {
         }
     }
     let mut blocks = BLOCKS.to_vec();
-    for position in get_map_setup(game.human_players_count()).free_positions {
+    for position in get_map_setup(game.human_players_count(), game.home_layout).free_positions {
         if game
             .map
             .unexplored_blocks

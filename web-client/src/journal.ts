@@ -358,13 +358,13 @@ export function journal(
               entry &&
               (entry.title.toLowerCase() === origin?.toLowerCase() ||
                 entry.title.split(' · ')[0].toLowerCase() === origin?.toLowerCase() ||
-                (entry.title === 'Research' &&
-                  (origin === 'Advance' ||
+                (['Advance', 'Research'].includes(entry.title) &&
+                  (['Advance', 'Research'].includes(origin ?? '') ||
                     entry.tokens.some((token) => token.icon === 'research' && token.label === origin))));
             if (!player || !entry || entry.player !== player.id || !sameSource) {
               const title =
-                origin === 'Advance'
-                  ? 'Research'
+                origin === 'Advance' || origin === 'Research'
+                  ? 'Advance'
                   : origin === 'End Turn'
                     ? 'End turn'
                     : origin === 'Found City'
@@ -418,7 +418,7 @@ export function journal(
           // Payment and results can interleave with bonuses. Consolidate only
           // within this action and actor; preserve separate events and combat.
           if (!action.combat_stats && !entries.some(entry => entry.event)) {
-            const primaryTitles = new Set(['Recruit', 'Construct', 'Research', 'Found city', 'Increase Happiness', 'Move']);
+            const primaryTitles = new Set(['Recruit', 'Construct', 'Advance', 'Research', 'Found city', 'Increase Happiness', 'Move']);
             for (const primary of [...entries]) {
               if (!primaryTitles.has(primary.title) || !entries.includes(primary)) continue;
               for (const duplicate of [...entries]) {

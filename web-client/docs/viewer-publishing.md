@@ -1709,3 +1709,34 @@ Publish viewer only, retaining engine 0.4.163, achievement catalog revision 8 (4
 entries), artwork revision 4 and all 60 named assets. The Web viewer CI runs both
 the resource-echo and Famine offline built-viewer regressions on desktop/mobile,
 in addition to the complete frontend suite and WASM regressions.
+
+# Viewer 0.1.233 / engine 0.4.164 — clockwise homes and printed action names
+
+New games persist ClockwiseV1 home assignment; absent layout fields retain Legacy
+on load and seed/history replay. Whole home blocks change physical assignment for
+three/four players without changing logical turns, deals or RNG consumption.
+Existing games are not rearranged or migrated. See
+[home-layout compatibility](../../docs/home-layout-compatibility.md).
+
+Action controls and new history captions use Advance / Construct, with legacy
+Research / Build captions still recognized. All 17 locale catalogs retain old
+keys and add the current labels. The construction smoke explicitly selects its
+already-activated fixture city instead of relying on the toolbar's fresh-city
+preference; all warning, final-mood and layout assertions remain enabled. CI now
+runs the full construction and research-card smokes. The availability smoke also
+explicitly enables the opt-in filter rather than assuming it is the default,
+and selects the fixture's settler group independently of unit-view ordering;
+compatible units are selected on group changes, as the controller tests require.
+The mobile minimize/restore fixture supplies the Settler's actual 2-food cost
+before editing recruitment; its preceding collection deliberately remains
+unsubmitted. It targets named map controls instead of overlapping canvas pixels
+or DOM-order labels, and checks the current Happiness map tray rather than the
+obsolete modal tab. None of these smoke fixes bypasses disabled controls or changes rules.
+
+Require green main-commit Check and Web viewer CI before BGS publication. Download
+and byte-verify all 39 viewer files and the actual engine package, then exercise
+home placement, legacy replay and desktop/mobile construction/advance controls.
+Preserve catalog revision 8 (46 definitions), artwork revision 4, all 60 named
+asset bytes, gallery, preferences/settings and Standard options. The faction
+artwork manifest's lockfile integrity hash changes only for the viewer version
+bump; no artwork is republished. No production moves, history edits or rewinds.

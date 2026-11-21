@@ -56,7 +56,8 @@ try {
     await page.goto('http://clash.test/');
     await page.evaluate((seat) => {
       window.host = clash3d.launch('#app');
-      window.prefs = { sound: false, unitBadges: true };
+      // Exercise the opt-in filter; the production default is to show all.
+      window.prefs = { sound: false, unitBadges: true, availableOnly: true };
       host.on('update:preference', ({ name, value }) => {
         prefs = { ...prefs, [name]: value };
         host.emit('preferences', prefs);
@@ -68,7 +69,7 @@ try {
     }, seat);
     await emit();
     const filter = page.getByRole('checkbox', { name: 'Available only', exact: true });
-    await page.getByRole('button', { name: 'Research tree', exact: true }).click();
+    await page.getByRole('button', { name: 'Advances', exact: true }).click();
     const researchFilter = page.getByRole('combobox', { name: 'Filter advances', exact: true });
     await researchFilter.waitFor();
     assert.equal(await researchFilter.inputValue(), 'available');
@@ -185,8 +186,18 @@ try {
     await page.getByRole('button', { name: 'Close city management', exact: true }).click();
     await page.getByRole('button', { name: 'Move units and found cities', exact: true }).click();
     const movement = page.getByRole('region', { name: 'Unit movement', exact: true });
-    await movement.getByRole('button', { name: 'Show next group of units', exact: true }).click();
-    assert.equal(await movement.locator('.unit-choice[aria-pressed=true]').count(), 0);
+    // Unit views need not retain the fixture array order. Explicitly browse to
+    // its settler group before checking forest founding, rather than assuming
+    // one Next group click always lands there.
+    const settlerChoice = movement.locator('.unit-choice[aria-label^="Settler"]');
+    if (!(await settlerChoice.count()))
+      await movement.getByRole('button', { name: 'Show next group of units', exact: true }).click();
+    await settlerChoice.waitFor();
+    assert.equal(
+      await movement.locator('.unit-choice[aria-pressed=true]').count(),
+      state.players[seat].units.filter((unit) => unit.position === forest).length,
+      'switching groups selects the compatible units without submitting a move',
+    );
     const found = page.getByRole('button', { name: 'Found city here', exact: false });
     await found.waitFor();
     assert(await found.isDisabled());
@@ -217,7 +228,7 @@ try {
     await page.getByRole('button', { name: 'Close city management', exact: true }).click();
     assert.deepEqual(errors, []);
     console.log(
-      `${width}px: default filters, Show all, retained selections, empty states and forest founding with/without an action verified.`,
+      `${width}px: opt-in filters, Show all, retained selections, empty states and forest founding with/without an action verified.`,
     );
     await page.close();
   }

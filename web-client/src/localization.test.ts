@@ -161,8 +161,8 @@ test('real catalogs translate current rules and optional caption variants in eve
     rules.push(rustTemplate(rule.value).replace(/\s+/g, ' ').trim());
   }
   const examples: [string, string[]][] = [
-    ['Build {p0}', ['Temple']],
-    ['Build {p0} at {p1}', ['Temple', 'C2']],
+    ['Construct {p0}', ['Temple']],
+    ['Construct {p0} at {p1}', ['Temple', 'C2']],
     ['Continue to payment at {p0}', ['C2']],
     ['Free with {p0}', ['Engineering']],
     ['Free with {p0} · once per turn', ['Engineering']],

@@ -261,7 +261,7 @@ fn alexander() -> LeaderInfo {
         )
         .add_combat_strength_listener(100, |game, c, s, r| {
             if c.is_land_battle_with_leader(r, game) {
-                let setup = get_map_setup(game.human_players_count());
+                let setup = get_map_setup(game.human_players_count(), game.home_layout);
                 let player = c.player(r);
                 let extra = setup
                     .free_positions

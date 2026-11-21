@@ -107,7 +107,7 @@
             aria-describedby={cityMountainStop ? 'city-mountain-stop' : undefined}
             onclick={() => controller.openNomadCity(position)}><Footprints size={19} />Move city</button
           >{/if}
-        <button onclick={() => controller.openCities(position, 'build')}><Hammer size={19} />Build</button>
+        <button onclick={() => controller.openCities(position, 'build')}><Hammer size={19} />Construct</button>
         <button onclick={() => controller.openCities(position, 'recruit')}><Users size={19} />Recruit</button>
         <button onclick={() => controller.openCities(position, 'happiness')}
           ><Smile size={19} />Happiness</button

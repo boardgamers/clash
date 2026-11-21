@@ -211,7 +211,7 @@ test('recap captions and highlights describe public recruitment and movement wit
   assert.deepEqual(frameDetails(after, moved), { caption: 'Greece · Move', positions: ['A2', 'A1'] });
   const unchanged = structuredClone(moved);
   unchanged.title = 'Research';
-  assert.deepEqual(frameDetails(moved, unchanged), { caption: 'Greece · Research', positions: [] });
+  assert.deepEqual(frameDetails(moved, unchanged), { caption: 'Greece · Advance', positions: [] });
 });
 
 test('recap names researched advances from its public log interval, including old recordings', () => {
@@ -251,10 +251,11 @@ test('recap names researched advances from its public log interval, including ol
       },
     ],
   } as Game;
-  assert.equal(frameDetails(before, after, history).caption, 'Greece · researched Steel Weapons');
+  for (const title of ['Advance', 'Research'])
+    assert.equal(frameDetails(before, { ...after, title }, history).caption, 'Greece · researched Steel Weapons');
   assert.equal(
     frameDetails(before, after, { ...history, log_index: 1 }).caption,
-    'Greece · Research',
+    'Greece · Advance',
     'undone research is not presented',
   );
 });
@@ -298,7 +299,8 @@ test('recap details name construction and collected amounts without exposing coo
     ],
   } as Game;
   const after = { ...before, cursor: 1, actor: 1, title: 'Build' };
-  assert.equal(frameDetails(before, after, game).caption, 'Greece · built Academy · gained 2 food, 1 wood');
+  for (const title of ['Construct', 'Construct wonder', 'Build', 'Build wonder'])
+    assert.equal(frameDetails(before, { ...after, title }, game).caption, 'Greece · built Academy · gained 2 food, 1 wood');
   assert.equal(
     frameDetails(before, { ...after, title: 'Collect' }, game).caption,
     'Greece · collected 2 food, 1 wood',
@@ -593,4 +595,15 @@ test('recap keeps a declined influence boost even when the board does not change
   const failed = { ...before, cursor: 2, title: 'Resolve choice' };
   assert.equal(frameHasContent(game, pending, failed), true);
   assert.match(frameDetails(pending, failed, game).caption, /failed against Rome’s Fortress/);
+});
+
+test('legacy and current action frame titles share display labels without mutating recordings', () => {
+  for (const [legacy, current] of [['Research', 'Advance'], ['Build', 'Construct'], ['Build wonder', 'Construct wonder']]) {
+    for (const title of [legacy, current]) {
+      const frame = { cursor: 1, actor: 0, title, tiles: [], players: [{ id: 0, civilization: 'Rome', cities: [], units: [] }] } as unknown as BoardFrame;
+      assert.equal(frameDetails(undefined, frame).caption, `Rome · ${current}`);
+      assert.equal(frame.title, title);
+      assert.equal(frameHasContent({ log: [], log_index: 0 } as unknown as Game, undefined, frame), true);
+    }
+  }
 });

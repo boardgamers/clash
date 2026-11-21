@@ -271,7 +271,7 @@
   <header class="research-header" class:event-ready={eventImminent}>
     <div>
       <h2 id="research-title">
-        {choice ? (choice.endOfAge ? 'Free advance' : choice.name) : 'Research'}
+        {choice ? (choice.endOfAge ? 'Free advance' : choice.name) : 'Advances'}
         {#if reference && player}<span>· {player.civilization}</span>{/if}
         {#if player}<EventMarkers remaining={player.eventTokens} />{/if}
       </h2>
@@ -322,7 +322,7 @@
         onclick={() => selectCategory(group)}><Icon size={15} />{group}</button
       >{/each}
   </nav>
-  <div class="research-tree" class:civilization-only={category === 'Civilization'} aria-label="Research tree">
+  <div class="research-tree" class:civilization-only={category === 'Civilization'} aria-label="Advances">
     {#if player && visibleCivilizationAdvances.length}
       <CivilizationAdvances
         civilization={player.civilization}
@@ -630,7 +630,7 @@
               disabled={!!selectedAqueduct.reason || $session.pending}
               title={selectedAqueduct.reason ? actionReason(selectedAqueduct.reason) : undefined}
               onclick={() => controller.submit(selectedAqueduct!.action)}
-            >Research Sanitation · free action
+            >Advance · Sanitation · free action
               <span>2 <Wheat size={14} /> / <Lightbulb size={14} /> / <Coins size={14} /> · any mix</span>
             </button>
             <small>Aqueduct: pay the normal research cost, or spend 1 action with no resources.</small>
@@ -665,7 +665,7 @@
               ? 'Confirming…'
               : selected.owned
                 ? 'Researched'
-                : early ? 'Queue choice' : `${borrowing ? 'Use' : choice?.advanceMode === 'paid' ? 'Choose' : 'Research'} ${selected.name}`}
+                : early ? 'Queue choice' : borrowing ? `Use ${selected.name}` : choice?.advanceMode === 'paid' ? `Choose ${selected.name}` : `Advance · ${selected.name}`}
             {#if !selected.owned && !early}<span
                 >{#if eventImminent}<ScrollText size={13} aria-hidden="true" />{/if}{#if borrowing}Until end
                   of turn{:else if freeResearch}Free{:else if choice}{selected.costAmount === 0

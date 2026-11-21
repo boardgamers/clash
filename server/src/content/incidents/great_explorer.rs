@@ -184,7 +184,7 @@ fn city_cost(player: &Player, origin: EventOrigin) -> PaymentOptions {
 }
 
 pub(crate) fn action_explore_request(game: &Game, player_index: usize) -> PositionRequest {
-    let setup = get_map_setup(game.human_players_count());
+    let setup = get_map_setup(game.human_players_count(), game.home_layout);
     let free = &setup
         .free_positions
         .into_iter()

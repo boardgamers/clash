@@ -51,7 +51,7 @@ try {
         await page.waitForSelector(`[data-clash-locale="${locale}"]`);
       }
       const open = async (id) => {
-        await page.getByRole('button', { name: t('Research tree'), exact: true }).click();
+        await page.getByRole('button', { name: t('Advances'), exact: true }).click();
         await page.locator(`#research-${id} .research-pick`).click();
       };
       const sent = () => page.evaluate(() => window.sent.map((a) => JSON.parse(a)));
@@ -157,7 +157,7 @@ try {
       assert.equal(await page.locator('.research-alternatives, .research-card-hint').count(), 0);
       game.players[0].action_cards = [122]; game.actions_left = 0;
       await mount(game);
-      await page.getByRole('button', { name: t('Research tree'), exact: true }).click();
+      await page.getByRole('button', { name: t('Advances'), exact: true }).click();
       assert.equal(await page.locator('.research-card-hint').count(), 0);
       assert.deepEqual(errors, []);
       await page.close();

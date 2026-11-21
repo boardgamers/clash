@@ -156,6 +156,7 @@ pub struct Game {
     pub context: GameContext, // transient
     pub options: GameOptions,
     pub asynchronous_combat_from: Option<usize>,
+    pub home_layout: crate::map::HomeLayout,
     pub version: u16, // JSON schema version
     pub state: GameState,
     pub events: Vec<PersistentEventState>,

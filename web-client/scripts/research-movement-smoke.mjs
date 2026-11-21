@@ -85,7 +85,7 @@ try {
       philosophy.players[0].advances = ['Writing', 'Philosophy'];
       state = ser(philosophy);
       await page.evaluate((state) => host.emit('state', state), engine.stripSecret(state, 0));
-      await page.getByRole('button', { name: 'Research tree', exact: true }).click();
+      await page.getByRole('button', { name: 'Advances', exact: true }).click();
       const science = page.locator('#research-Math');
       await science.scrollIntoViewIfNeeded();
       assert.match(await science.locator('.research-effects').innerText(), /Philosophy/);

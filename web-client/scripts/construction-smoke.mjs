@@ -88,6 +88,12 @@ try {
         { state: engine.stripSecret(JSON.stringify(state), 0), dark },
       );
       await page.getByRole('button', { name: 'Manage cities', exact: true }).click();
+      // The toolbar deliberately prefers a fresh city. Select the fixture's
+      // already-activated city explicitly so this exercises repeat activation.
+      const cityPosition = initial.players[0].cities[0].position;
+      await page.getByRole('navigation', { name: 'Choose city', exact: true })
+        .getByRole('button', { name: new RegExp(`^${cityPosition}\\b`) }).click();
+      await page.getByRole('heading', { name: `City ${cityPosition}`, exact: true }).waitFor();
       await page
         .locator('.building-option')
         .filter({ has: page.getByText('Fortress', { exact: true }) })
@@ -104,7 +110,7 @@ try {
       assert.ok(await page.locator('.city-dialog').evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await page.screenshot({ path: `/tmp/clash-build-${name}-${width}.png` });
-      await page.getByRole('button', { name: 'Build Fortress', exact: true }).click();
+      await page.getByRole('button', { name: 'Construct Fortress', exact: true }).click();
       await page.waitForFunction(() => !document.querySelector('.city-confirm'));
       assert.equal(sent, 1);
       assert.equal(state.players[0].cities[0].city_pieces.fortress, 0);

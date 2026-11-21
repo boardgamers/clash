@@ -502,8 +502,24 @@ impl MapSetup {
     }
 }
 
+/// Home assignment format, independent of turn order and schema migrations.
+/// Missing persisted values must always retain the pre-clockwise assignment.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum HomeLayout {
+    #[default]
+    Legacy,
+    ClockwiseV1,
+}
+
+impl HomeLayout {
+    #[must_use]
+    pub fn is_legacy(&self) -> bool {
+        *self == Self::Legacy
+    }
+}
+
 #[must_use]
-pub(crate) fn get_map_setup(player_count: usize) -> MapSetup {
+pub(crate) fn get_map_setup(player_count: usize, layout: HomeLayout) -> MapSetup {
     let setup = vec![
         // 2 players
         MapSetup::new(
@@ -570,14 +586,22 @@ pub(crate) fn get_map_setup(player_count: usize) -> MapSetup {
             ],
         ),
     ];
-    setup
+    let mut setup = setup
         .into_iter()
         .find(|s| s.home_positions.len() == player_count)
-        .expect("No setup for this player count")
+        .expect("No setup for this player count");
+    if layout == HomeLayout::ClockwiseV1 {
+        match player_count {
+            3 => setup.home_positions.swap(1, 2),
+            4 => setup.home_positions.swap(2, 3),
+            _ => {}
+        }
+    }
+    setup
 }
 
 pub(crate) fn capital_city_position(game: &Game, player: &Player) -> Position {
-    let setup = get_map_setup(human_players_including_dropped(game));
+    let setup = get_map_setup(human_players_including_dropped(game), game.home_layout);
     let h = &setup.home_positions[player.index];
     h.block.tiles(&h.position, h.position.rotation)[0].0
 }
@@ -604,7 +628,7 @@ pub(crate) fn block_has_player_city(game: &Game, p: &BlockPosition, player: usiz
 /// Panics if the position is not found in the map setup.
 #[must_use]
 pub fn block_for_position(game: &Game, position: Position) -> (u8, BlockPosition) {
-    let setup = get_map_setup(human_players_including_dropped(game));
+    let setup = get_map_setup(human_players_including_dropped(game), game.home_layout);
     let home = setup.home_positions.len();
     for (i, p) in setup.free_positions.iter().enumerate() {
         if block_tiles(p).contains(&position) {
@@ -657,5 +681,75 @@ mod revealed_distance_tests {
         assert_eq!(map.revealed_distance(a, b), Some(3));
         assert_eq!(map.revealed_distance(a, a), Some(0));
         assert_eq!(map.revealed_distance(a, Position::new(10, 10)), None);
+    }
+}
+
+#[cfg(test)]
+mod home_layout_tests {
+    use super::*;
+
+    #[test]
+    fn clockwise_homes_follow_screen_angles_and_keep_complete_blocks() {
+        for count in 2..=4 {
+            let old = get_map_setup(count, HomeLayout::Legacy);
+            let new = get_map_setup(count, HomeLayout::ClockwiseV1);
+            let legacy_anchors: &[&str] = match count {
+                2 => &["D1", "D7"],
+                3 => &["E3", "A8", "G8"],
+                _ => &["C1", "I1", "C8", "I8"],
+            };
+            assert_eq!(
+                old.home_positions
+                    .iter()
+                    .map(|h| h.position.top_tile.to_string())
+                    .collect::<Vec<_>>(),
+                legacy_anchors,
+            );
+            let permutation: &[usize] = match count {
+                2 => &[0, 1],
+                3 => &[0, 2, 1],
+                _ => &[0, 1, 3, 2],
+            };
+            assert_eq!(new.free_positions, old.free_positions);
+            for (home, &index) in new.home_positions.iter().zip(permutation) {
+                assert_eq!(home.position, old.home_positions[index].position);
+                assert_eq!(home.block, old.home_positions[index].block);
+            }
+            // Native hex_ui::center flips hex2d's y; the web positionXY uses
+            // x=1.5*q, screen-y=sqrt(3)*(r+q/2). Verify both independently.
+            let points: Vec<_> = new
+                .home_positions
+                .iter()
+                .map(|h| {
+                    let p = h.block.tiles(&h.position, h.position.rotation)[0].0;
+                    let (x, y) = p.coordinate().to_pixel(hex2d::Spacing::FlatTop(1.0_f64));
+                    let web = (
+                        1.5 * f64::from(p.q),
+                        3.0_f64.sqrt() * (f64::from(p.r) + f64::from(p.q) / 2.0),
+                    );
+                    assert!((x - web.0).abs() < 1e-9);
+                    assert!((-y - web.1).abs() < 1e-9);
+                    web
+                })
+                .collect();
+            if count > 2 {
+                let center = points.iter().fold((0.0, 0.0), |(x, y), p| {
+                    (x + p.0 / count as f64, y + p.1 / count as f64)
+                });
+                let angles: Vec<_> = points
+                    .iter()
+                    .map(|p| (p.1 - center.1).atan2(p.0 - center.0))
+                    .collect();
+                let turns: f64 = (0..count)
+                    .map(|i| {
+                        (angles[(i + 1) % count] - angles[i]).rem_euclid(std::f64::consts::TAU)
+                    })
+                    .sum();
+                assert!(
+                    (turns - std::f64::consts::TAU).abs() < 1e-9,
+                    "one clockwise circuit"
+                );
+            }
+        }
     }
 }

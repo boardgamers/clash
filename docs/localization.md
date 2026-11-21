@@ -69,3 +69,20 @@ Regression tests use shipped catalogs in all supported languages, current
 continued engine rules (Spy, Mercenaries, wonder leader abilities), complete
 optional captions and composed strategy tooltips. They supplement, rather than
 replace, native-language review of wording and gameplay terminology.
+
+## Printed action terminology
+
+Action controls use **Advance** and **Construct**, while the browsing tree is
+**Advances**. The purchase template is `Advance · {p0}` so it reads as an action
+label followed by an advance name, not an awkward verb phrase. Existing **Use**,
+**Choose**, and **Queue choice** controls keep their distinct meanings. The
+catalogs reuse their existing action/browsing translations and preserve old keys
+for recorded text; ordinary rules prose (such as research costs) is unchanged.
+
+New public board-history titles use Advance / Construct / Construct wonder.
+Playback still recognizes Research / Build / Build wonder in old recordings and
+normalizes their displayed captions without rewriting saved frames or engine
+action identifiers. Journal Advance and legacy Research origins group the same
+advance rewards. Focused coverage lives in `journal.test.ts`, `playback.test.ts`,
+`platform_log_tests.rs`, and the board-history terminology unit test. The
+research-card smoke checks desktop/mobile action labels, tooltips and overflow.

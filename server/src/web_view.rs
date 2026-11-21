@@ -159,7 +159,10 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             None
         }
     });
-    let setup = crate::map::get_map_setup(game.players.iter().filter(|p| p.is_human()).count());
+    let setup = crate::map::get_map_setup(
+        game.players.iter().filter(|p| p.is_human()).count(),
+        game.home_layout,
+    );
     let regions: Vec<Value> = setup
         .home_positions
         .iter()

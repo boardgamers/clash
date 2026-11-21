@@ -143,13 +143,13 @@ fn title(action: &Action) -> String {
         _ => "Action".to_owned(),
     };
     match name.as_str() {
-        "Advance" => "Research",
-        "Construct" => "Build",
+        "Advance" => "Advance",
+        "Construct" => "Construct",
         "EndTurn" => "End turn",
         "FoundCity" => "Found city",
         "IncreaseHappiness" => "Increase happiness",
         "ActionCard" => "Play action card",
-        "WonderCard" => "Build wonder",
+        "WonderCard" => "Construct wonder",
         "InfluenceCultureAttempt" => "Cultural influence",
         "Custom" => "Civilization ability",
         _ => &name,
@@ -482,4 +482,31 @@ fn effects(game: &Game, from: usize) -> Vec<BoardEffect> {
             })
         })
         .collect()
+}
+
+#[cfg(test)]
+mod terminology_tests {
+    use super::*;
+
+    #[test]
+    fn action_titles_use_printed_names_without_renaming_action_variants() {
+        for (value, expected) in [
+            (
+                serde_json::json!({"Playing":{"WonderCard":"Pyramids"}}),
+                "Construct wonder",
+            ),
+            (
+                serde_json::json!({"Playing":{"Advance":{"advance":"Storage","payment":{}}}}),
+                "Advance",
+            ),
+            (
+                serde_json::json!({"Playing":{"Construct":{"city_position":"C2","city_piece":"Academy","payment":{},"port_position":null}}}),
+                "Construct",
+            ),
+        ] {
+            let action: Action = serde_json::from_value(value.clone()).unwrap();
+            assert_eq!(title(&action), expected);
+            assert_eq!(serde_json::to_value(action).unwrap(), value);
+        }
+    }
 }

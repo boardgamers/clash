@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Το κέντρο πόλης στο {p0} καταστράφηκε οριστικά· το όριο πόλεων μειώθηκε σε {p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} στο {p1} καταστράφηκε οριστικά· το συνολικό όριο αυτών των κομματιών μειώθηκε σε {p2}",
   "Razed {p0} because no city centers were available": "Η πόλη {p0} ισοπεδώθηκε επειδή δεν υπήρχαν διαθέσιμα κέντρα πόλης",
-  "Obelisk total piece limit reduced to {p0}": "Το συνολικό όριο οβελίσκων μειώθηκε σε {p0}"
+  "Obelisk total piece limit reduced to {p0}": "Το συνολικό όριο οβελίσκων μειώθηκε σε {p0}",
+  "Advance · {p0}": "Πρόοδος · {p0}",
+  "Advance · Sanitation · free action": "Πρόοδος · Υγιεινή · δωρεάν ενέργεια",
+  "Construct {p0}": "Κατασκευή: {p0}",
+  "Construct {p0} at {p1}": "Κατασκευή {p0} στο {p1}",
+  "Construct / recruit": "Κατασκευή / στρατολόγηση",
+  "Construct Port ·": "Κατασκευή Λιμανιού ·",
+  "Construct Port · {p0}": "Κατασκευή Λιμανιού · {p0}",
+  "Construct wonder": "Κατασκευή θαύματος",
+  "Construct, recruit and improve happiness": "Κατασκευή, στρατολόγηση και αύξηση ευτυχίας",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Κάθε πολιτισμός έχει τις δικές του προόδους. Η Ρώμη αποκτά το Υδραγωγείο όταν ερευνά τη Μηχανική. Άνοιξε τις Προόδους και ερεύνησε τη Μηχανική· το Υδραγωγείο ξεκλειδώνει αυτόματα, χωρίς ξεχωριστή αγορά."
 }

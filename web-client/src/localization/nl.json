@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Stadscentrum bij {p0} permanent vernietigd; stadslimiet verlaagd naar {p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} bij {p1} permanent vernietigd; totale limiet voor deze stukken verlaagd naar {p2}",
   "Razed {p0} because no city centers were available": "{p0} verwoest omdat er geen stadscentra beschikbaar waren",
-  "Obelisk total piece limit reduced to {p0}": "Totale limiet voor obelisken verlaagd naar {p0}"
+  "Obelisk total piece limit reduced to {p0}": "Totale limiet voor obelisken verlaagd naar {p0}",
+  "Advance · {p0}": "Ontwikkeling · {p0}",
+  "Advance · Sanitation · free action": "Ontwikkeling · Sanitatie · gratis actie",
+  "Construct {p0}": "{p0} bouwen",
+  "Construct {p0} at {p1}": "{p0} bouwen op {p1}",
+  "Construct / recruit": "Bouwen / rekruteren",
+  "Construct Port ·": "Haven bouwen ·",
+  "Construct Port · {p0}": "Haven bouwen · {p0}",
+  "Construct wonder": "Wonder bouwen",
+  "Construct, recruit and improve happiness": "Bouwen, rekruteren en tevredenheid verhogen",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Elke beschaving heeft eigen ontwikkelingen. Rome krijgt Aquaduct wanneer het Bouwkunde onderzoekt. Open Ontwikkelingen en onderzoek Bouwkunde; Aquaduct wordt automatisch ontgrendeld, zonder aparte aankoop."
 }

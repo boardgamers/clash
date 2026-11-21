@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Bycenter ved {p0} permanent ødelagt; bygrænse reduceret til {p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} ved {p1} permanent ødelagt; samlet grænse for disse brikker reduceret til {p2}",
   "Razed {p0} because no city centers were available": "{p0} nedbrændt, fordi ingen bycentre var tilgængelige",
-  "Obelisk total piece limit reduced to {p0}": "Samlet grænse for obelisker reduceret til {p0}"
+  "Obelisk total piece limit reduced to {p0}": "Samlet grænse for obelisker reduceret til {p0}",
+  "Advance · {p0}": "Fremskridt · {p0}",
+  "Advance · Sanitation · free action": "Fremskridt · Sanitet · gratis handling",
+  "Construct {p0}": "Byg {p0}",
+  "Construct {p0} at {p1}": "Byg {p0} ved {p1}",
+  "Construct / recruit": "Byg / rekruttér",
+  "Construct Port ·": "Byg Havn ·",
+  "Construct Port · {p0}": "Byg Havn · {p0}",
+  "Construct wonder": "Byg vidunder",
+  "Construct, recruit and improve happiness": "Byg, rekruttér og øg lykken",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Hver civilisation har sine egne fremskridt. Rom får Akvædukt, når den forsker i Ingeniørkunst. Åbn Fremskridt, og forsk i Ingeniørkunst; Akvædukt låses automatisk op uden et separat køb."
 }

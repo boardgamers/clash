@@ -26,6 +26,9 @@ try {
     let state = await fixture('advances/collect_free_economy'),
       seat = 0,
       sent = [];
+    // This smoke keeps collection unsubmitted, then edits a recruit form. The
+    // collection fixture has only 1 food; a Settler legitimately costs 2.
+    state.players[seat].resources.food = 2;
     const page = await browser.newPage({ viewport: { width, height } }),
       errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
@@ -68,7 +71,9 @@ try {
     const restore = page.locator('.restore-mobile-panel');
     await page.getByRole('button', { name: 'Collect resources', exact: true }).click();
     const collect = page.locator('.board-collection');
-    await page.locator('.collect-map-label').first().click();
+    // Select the city's own resource control explicitly: neighboring 3D labels
+    // can overlap at 320px, so DOM order is not a reliable click target.
+    await page.getByRole('button', { name: 'Collect at C2: 1 wood', exact: true }).click();
     const selected = await page.locator('.collect-map-label.selected').count();
     const total = await page.locator('.collect-submit > .resource-amount').innerText();
     await minimize(collect).click();
@@ -101,7 +106,9 @@ try {
     await minimize(city).click();
     assert.equal(await page.locator('dialog:modal').count(), 0);
     assert.equal(await city.count(), 1);
-    await canvas.click({ position: { x: board.width * 0.5, y: board.height * 0.4 } });
+    // Inspect a real map target. A fixed canvas pixel can be covered by a city
+    // label; use that control rather than forcing a click through the overlay.
+    await page.getByRole('button', { name: 'Select Greece city C1 · Angry', exact: true }).click();
     assert.equal(await city.count(), 1, 'Board inspection must not cancel the hidden city form');
     await restore.click();
     assert(await city.evaluate((el) => el.matches(':modal')));
@@ -109,12 +116,15 @@ try {
     assert.equal(await city.locator('.city-content').evaluate((el) => el.scrollTop), scroll);
     await page.screenshot({ path: `/tmp/clash-restored-city-${width}.png` });
     await city.getByRole('button', { name: 'Happiness', exact: true }).click();
+    // Happiness is now a map-selection tray, not a tab in the city modal.
+    const happiness = page.getByRole('region', { name: 'Increase happiness', exact: true });
+    await happiness.waitFor();
     assert(
-      await city.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+      await happiness.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
       'Happiness header fits with minimize',
     );
-    await city.getByRole('button', { name: 'Close city management', exact: true }).click();
-    await page.getByRole('button', { name: 'Research tree', exact: true }).click();
+    await happiness.getByRole('button', { name: 'Close happiness controls', exact: true }).click();
+    await page.getByRole('button', { name: 'Advances', exact: true }).click();
     const research = page.locator('dialog.research-dialog');
     await research.getByRole('textbox', { name: 'Search research', exact: true }).fill('Fishing');
     await minimize(research).click();

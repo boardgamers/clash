@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Centro città in {p0} distrutto permanentemente; limite di città ridotto a {p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} in {p1} distrutto permanentemente; limite totale di questi pezzi ridotto a {p2}",
   "Razed {p0} because no city centers were available": "{p0} rasa al suolo perché non erano disponibili centri città",
-  "Obelisk total piece limit reduced to {p0}": "Limite totale degli obelischi ridotto a {p0}"
+  "Obelisk total piece limit reduced to {p0}": "Limite totale degli obelischi ridotto a {p0}",
+  "Advance · {p0}": "Progresso · {p0}",
+  "Advance · Sanitation · free action": "Progresso · Igiene · azione gratuita",
+  "Construct {p0}": "Costruisci {p0}",
+  "Construct {p0} at {p1}": "Costruisci {p0} a {p1}",
+  "Construct / recruit": "Costruisci / recluta",
+  "Construct Port ·": "Costruisci Porto ·",
+  "Construct Port · {p0}": "Costruisci Porto · {p0}",
+  "Construct wonder": "Costruisci una meraviglia",
+  "Construct, recruit and improve happiness": "Costruisci, recluta e aumenta la felicità",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Ogni civiltà ha i propri progressi. Roma ottiene Acquedotto quando ricerca Ingegneria. Apri Progressi e ricerca Ingegneria; Acquedotto si sblocca automaticamente, senza un acquisto separato."
 }

@@ -103,7 +103,7 @@ try {
     assert.equal(sent, 1);
     for (const [resource, spent] of Object.entries(compact(quote.payment)))
       assert.equal(state.players[seat].resources[resource] ?? 0, resourcesBefore[resource] - spent);
-    await page.getByRole('button', { name: 'Research tree', exact: true }).click();
+    await page.getByRole('button', { name: 'Advances', exact: true }).click();
     await page.getByRole('combobox', { name: 'Filter advances', exact: true }).selectOption('all');
     const protection = page.locator('#research-Totalitarianism');
     await protection.scrollIntoViewIfNeeded();

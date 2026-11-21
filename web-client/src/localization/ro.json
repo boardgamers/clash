@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Centrul orașului de la {p0} distrus permanent; limita de orașe redusă la {p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} de la {p1} distrus permanent; limita totală a acestor piese redusă la {p2}",
   "Razed {p0} because no city centers were available": "{p0} distrus deoarece nu erau disponibile centre de oraș",
-  "Obelisk total piece limit reduced to {p0}": "Limita totală de obeliscuri redusă la {p0}"
+  "Obelisk total piece limit reduced to {p0}": "Limita totală de obeliscuri redusă la {p0}",
+  "Advance · {p0}": "Progres · {p0}",
+  "Advance · Sanitation · free action": "Progres · Salubritate · acțiune gratuită",
+  "Construct {p0}": "Construiește {p0}",
+  "Construct {p0} at {p1}": "Construiește {p0} la {p1}",
+  "Construct / recruit": "Construiește / recrutează",
+  "Construct Port ·": "Construiește Port ·",
+  "Construct Port · {p0}": "Construiește Port · {p0}",
+  "Construct wonder": "Construiește o minune",
+  "Construct, recruit and improve happiness": "Construiește, recrutează și îmbunătățește fericirea",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Fiecare civilizație are propriile progrese. Roma primește Apeduct când cercetează Inginerie. Deschide Progrese și cercetează Inginerie; Apeduct se deblochează automat, fără o achiziție separată."
 }

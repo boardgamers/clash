@@ -5296,5 +5296,15 @@
   "City center at {p0} permanently destroyed; city limit reduced to {p1}": "Центр города в {p0} уничтожен навсегда; предел числа городов снижен до {p1}",
   "{p0} at {p1} permanently destroyed; total piece limit reduced to {p2}": "{p0} в {p1} уничтожено навсегда; общий предел этих элементов снижен до {p2}",
   "Razed {p0} because no city centers were available": "Город {p0} разрушен, так как не было доступных центров городов",
-  "Obelisk total piece limit reduced to {p0}": "Общий предел обелисков снижен до {p0}"
+  "Obelisk total piece limit reduced to {p0}": "Общий предел обелисков снижен до {p0}",
+  "Advance · {p0}": "Достижение · {p0}",
+  "Advance · Sanitation · free action": "Достижение · Санитария · бесплатное действие",
+  "Construct {p0}": "Построить: {p0}",
+  "Construct {p0} at {p1}": "Построить {p0} в {p1}",
+  "Construct / recruit": "Строить / нанимать",
+  "Construct Port ·": "Построить порт ·",
+  "Construct Port · {p0}": "Построить порт · {p0}",
+  "Construct wonder": "Построить чудо",
+  "Construct, recruit and improve happiness": "Строительство, найм и повышение счастья",
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "У каждой цивилизации свои достижения. Рим получает Акведук, когда исследует Инженерию. Откройте «Достижения» и исследуйте Инженерию; Акведук откроется автоматически, без отдельной покупки."
 }

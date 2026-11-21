@@ -158,3 +158,17 @@ fn resource_summary_names_the_actor_and_other_recipients() {
         )
     );
 }
+
+#[test]
+fn advance_action_fallback_uses_printed_action_name_without_changing_replay_data() {
+    let mut game = common::JsonTest::new("advances").load_game("collect_free_economy");
+    let start = log_length(&game);
+    let action = serde_json::json!({"Playing":{"Advance":{"advance":"Storage","payment":{}}}});
+    append(&mut game, serde_json::json!({"player":0,"action":action}));
+    let entries = platform_log_slice(&game, &options(start, None));
+    assert_eq!(
+        entries[0].text,
+        format!("{}: Advance", game.players[0].civilization.name)
+    );
+    assert_eq!(serde_json::to_value(entries[0].action).unwrap(), action);
+}
