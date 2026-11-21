@@ -203,8 +203,27 @@ try {
     await panel.getByRole('button', { name: 'Locate the region being explored', exact: true }).click();
     await page.waitForTimeout(100); // Let the map's resize frame catch up with the tray layout.
     const panelBounds = await panel.boundingBox();
-    const confirmBounds = await panel.getByRole('button', {name:'Confirm',exact:true}).boundingBox();
-    assert(confirmBounds.y + confirmBounds.height <= panelBounds.y + panelBounds.height, 'Exploration confirmation is visible without scrolling');
+    const confirmBounds = await panel.getByRole('button', { name: 'Confirm', exact: true }).boundingBox();
+    assert(
+      confirmBounds.y >= panelBounds.y &&
+        confirmBounds.y + confirmBounds.height <= panelBounds.y + panelBounds.height &&
+        confirmBounds.x >= panelBounds.x &&
+        confirmBounds.x + confirmBounds.width <= panelBounds.x + panelBounds.width,
+      'Exploration confirmation is fully visible without scrolling the panel',
+    );
+    assert(panelBounds.y >= 0 && panelBounds.y + panelBounds.height <= height);
+    const choices = panel.locator('.exploration-choices');
+    assert.equal(await panel.evaluate((el) => el.scrollTop), 0);
+    assert(
+      await choices.evaluate((el) => getComputedStyle(el).overflowY === 'auto'),
+      'Only the placement body scrolls when the mobile panel is constrained',
+    );
+    await choices.evaluate((el) => (el.scrollTop = el.scrollHeight));
+    assert.deepEqual(
+      await panel.getByRole('button', { name: 'Confirm', exact: true }).boundingBox(),
+      confirmBounds,
+      'Scrolling placements leaves confirmation fixed in view',
+    );
     const labelBounds = await page.locator('.map-exploration-label').boundingBox();
     assert(labelBounds.x >= 0 && labelBounds.x + labelBounds.width <= width, 'Explored region stays on screen');
     assert(labelBounds.y + labelBounds.height <= panelBounds.y || labelBounds.x >= panelBounds.x + panelBounds.width, 'Region label remains clear of the orientation panel');

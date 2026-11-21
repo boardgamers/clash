@@ -5340,6 +5340,17 @@ small {
     top: auto;
     bottom: calc(56px + var(--mobile-bottom));
     max-height: 48%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .exploration-panel > :not(.exploration-choices) {
+    flex-shrink: 0;
+  }
+  .exploration-panel > .exploration-choices {
+    /* Scroll placements, not the heading or confirmation, on short screens. */
+    min-height: 0;
+    overflow-y: auto;
   }
   .exploration-choices {
     gap: 8px;
