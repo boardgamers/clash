@@ -1,4 +1,5 @@
 import type { Game, LoggedAction, Pile, View } from './types.ts';
+import { resourceExplanation } from './resource-log.ts';
 import { officialWonderText } from './wonder-names.ts';
 
 type Units = Record<string, number | string>;
@@ -76,25 +77,14 @@ function lines(game: Game, action: LoggedAction, context?: Context): string[] {
       ? source({ ...item, origin: { CivilCard: played } }, context)
       : source(item, context);
     const write = (text: string) => add(item.player, origin, text);
-    // Famine's listener logs the loss, then repeats it as "Lost N food".
-    // Only suppress that adjacent explanation for the same incident and player;
-    // never deduplicate resource records (equal losses can be separate effects).
-    const previous = items[index - 1];
-    const foodLoss = item.Text?.match(/^Lost (\d+) food$/);
-    const repeatedFoodLoss = foodLoss &&
-      item.origin?.Incident !== undefined &&
-      previous?.origin?.Incident === item.origin.Incident &&
-      previous.player === item.player &&
-      previous.Resources?.balance === 'Loss' &&
-      previous.Resources.resources.food === Number(foodLoss[1]) &&
-      Object.entries(previous.Resources.resources).every(([resource, amount]) => resource === 'food' || !amount);
-    if (item.Text !== undefined && !offeredDiscount(item.Text) && !repeatedFoodLoss) {
-      const event = item.Text.match(/^triggers the event (.+)$/);
+    const text = resourceExplanation(item, items[index - 1]);
+    if (text !== undefined && !offeredDiscount(text)) {
+      const event = text.match(/^triggers the event (.+)$/);
       if (event) result.push(`A new game event has been triggered: ${event[1]}`);
-      else if (item.Text === 'wins the battle')
+      else if (text === 'wins the battle')
         result.push(item.player === attacker ? 'Attacker wins' : 'Defender wins');
-      else if (item.Text === 'ends the battle in a draw') result.push('Battle ends in a draw');
-      else write(item.Text);
+      else if (text === 'ends the battle in a draw') result.push('Battle ends in a draw');
+      else write(text);
     }
     if (item.Resources && (item.Resources.balance !== 'Pay' || Object.values(item.Resources.resources).some(Boolean)))
       write(

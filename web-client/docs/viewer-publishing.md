@@ -1694,3 +1694,18 @@ Require green main-commit Check and Web viewer CI before BGS publication.
 Preserve revision-8 catalog (46 definitions), revision-4 artwork, 60 named assets,
 gallery, Standard settings/preferences and all unrelated metadata. No production
 moves, rewinds, backfill, migration or history changes.
+
+# Viewer 0.1.232 — resource journal prose echoes (engine unchanged)
+
+Normalize only a trailing resource prose echo beside its structured transaction in
+one action, with the same player, nonempty origin and complete normalized pile.
+Pay/Lose compatibility is limited to the audited Pandemics (49) and Viking Raids
+listeners. Structured transactions are never merged: two real equal payments
+still show twice. Preserve legacy text-only history, collection bundles, objective
+context and explanatory notes; recognize Paid/Gained and captive badges.
+
+This is display-only: no resource charges, balances, rules or saved history change.
+Publish viewer only, retaining engine 0.4.163, achievement catalog revision 8 (46
+entries), artwork revision 4 and all 60 named assets. The Web viewer CI runs both
+the resource-echo and Famine offline built-viewer regressions on desktop/mobile,
+in addition to the complete frontend suite and WASM regressions.

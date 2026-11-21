@@ -12,6 +12,8 @@ const resourceIcons: Record<string, Resource | 'action'> = {
   idea: 'ideas',
   ideas: 'ideas',
   gold: 'gold',
+  captive: 'captives',
+  captives: 'captives',
   'mood token': 'mood_tokens',
   'mood tokens': 'mood_tokens',
   'culture token': 'culture_tokens',
@@ -142,20 +144,20 @@ function confirmPayments(action: LoggedAction, payments: PaymentLog[], entries: 
 }
 
 function addClause(entry: JournalEntry, clause: string, payments: PaymentLog[]): void {
-  let match = clause.match(/^(Pay|Gain|Added|Lose|Lost) (.+?)(?: with (.+))?$/);
+  let match = clause.match(/^(Pay|Paid|Gain|Gained|Added|Lose|Lost) (.+?)(?: with (.+))?$/);
   if (match) {
-    const sign = match[1] === 'Gain' || match[1] === 'Added' ? 1 : -1;
+    const sign = match[1] === 'Gain' || match[1] === 'Gained' || match[1] === 'Added' ? 1 : -1;
     const quantities = match[2]
       .split(/,\s*(?:and\s+)?|\s+and\s+|\s*\+\s*/)
       .map((part) =>
-        part.match(/^(\d+(?:\.\d+)?) (food|wood|ore|ideas?|gold|mood tokens?|culture tokens?|actions?)$/),
+        part.match(/^(\d+(?:\.\d+)?) (food|wood|ore|ideas?|gold|captives?|mood tokens?|culture tokens?|actions?)$/),
       );
     if (quantities.every((q) => q)) {
       const tokens = quantities.map((q) => delta(sign * Number(q![1]), q![2], resourceIcons[q![2]], true));
       entry.tokens.push(...tokens);
       const note = match[3] ? `With ${match[3]}` : undefined;
       if (note) entry.notes.push(note);
-      if (match[1] === 'Pay' && tokens.every((token) => token.icon !== 'action')) {
+      if (['Pay', 'Paid'].includes(match[1]) && tokens.every((token) => token.icon !== 'action')) {
         const pile: Pile = {};
         for (const q of quantities) {
           const resource = resourceIcons[q![2]] as Resource;

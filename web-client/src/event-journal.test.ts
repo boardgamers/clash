@@ -499,7 +499,7 @@ test('food explanations are suppressed only beside their matching incident resou
   assert.equal(count([{ items: [loss, { ...text, Text: 'Lost 2 food' }] }]), 2);
   assert.equal(count([{ items: [loss, { ...text, Text: 'A separate effect' }, text] }]), 2);
   assert.equal(count([{ items: [text, loss] }]), 2, 'prose before a loss is not its trailing explanation');
-  assert.equal(count([{ items: [{ ...loss, origin: { Advance: 'Storage' } }, { ...text, origin: { Advance: 'Storage' } }] }]), 2);
+  assert.equal(count([{ items: [{ ...loss, origin: { Advance: 'Storage' } }, { ...text, origin: { Advance: 'Storage' } }] }]), 1);
   assert.equal(count([{ items: [{ ...loss, Resources: { balance: 'Gain', resources: { food: 1 } } }, text] }]), 2);
   assert.equal(count([{ items: [{ ...loss, Resources: { balance: 'Loss', resources: { food: 1, wood: 1 } } }, text] }]), 2);
   for (const origin of [undefined, { Incident: 52 }]) {
