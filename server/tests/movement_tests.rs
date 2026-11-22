@@ -433,3 +433,139 @@ fn exhaustion_still_blocks_collection_and_founding() {
         );
     }
 }
+
+#[test]
+fn fleet_boarding_assignments_are_atomic_and_share_a_movement_group() {
+    use server::{
+        action::try_execute_action,
+        advance::Advance,
+        game::GameState,
+        map::Terrain,
+        unit::{Unit, UnitType},
+    };
+    for pirates in [false, true] {
+        for split in [false, true] {
+            for count in [2, 4] {
+                let mut game = JSON.load_game("movement");
+                game.state = GameState::Playing;
+                game.actions_left = 3;
+                let start = Position::from_offset("C8");
+                let sea = Position::from_offset("D8");
+                game.map.tiles.clear();
+                game.map.tiles.insert(start, Terrain::Barren);
+                game.map.tiles.insert(sea, Terrain::Water);
+                game.map
+                    .tiles
+                    .insert(Position::from_offset("E8"), Terrain::Water);
+                for p in &mut game.players {
+                    p.units.clear();
+                    p.cities.clear();
+                }
+                game.player_mut(0).advances.insert(Advance::Tactics);
+                for id in 0..count {
+                    game.player_mut(0).units.push(Unit::new(
+                        0,
+                        start,
+                        if id < 2 {
+                            UnitType::Infantry
+                        } else {
+                            UnitType::Elephant
+                        },
+                        id,
+                    ));
+                }
+                game.player_mut(0).next_unit_id = 22;
+                if pirates {
+                    game.player_mut(0).civilization = game.cache.get_civilization("Carthage");
+                    game.player_mut(0).advances.insert(Advance::Navigation);
+                    game.players.push(server::player::Player::new(
+                        game.cache.get_civilization("Pirates"),
+                        2,
+                    ));
+                    game.player_mut(0)
+                        .special_advances
+                        .insert(serde_json::from_value(serde_json::json!("PirateAllies")).unwrap());
+                    let owner = game
+                        .players
+                        .iter()
+                        .position(|p| p.civilization.name == "Pirates")
+                        .unwrap();
+                    for id in [2, 3] {
+                        game.player_mut(owner).units.push(Unit::new(
+                            owner,
+                            sea,
+                            UnitType::Ship,
+                            id,
+                        ));
+                    }
+                } else {
+                    for id in [10, 11] {
+                        game.player_mut(0)
+                            .units
+                            .push(Unit::new(0, sea, UnitType::Ship, id));
+                    }
+                }
+                let mut m = MoveUnits::new((0..count).collect(), sea, None, ResourcePile::empty());
+                let first = if split { vec![0] } else { vec![0, 1] };
+                let second: Vec<_> = (0..count).filter(|id| !first.contains(id)).collect();
+                m.boarding.push(MoveUnits::new(
+                    first.clone(),
+                    sea,
+                    Some(10),
+                    ResourcePile::empty(),
+                ));
+                if !second.is_empty() {
+                    m.boarding.push(MoveUnits::new(
+                        second.clone(),
+                        sea,
+                        Some(11),
+                        ResourcePile::empty(),
+                    ));
+                }
+                if pirates {
+                    for group in &mut m.boarding {
+                        group.embark_pirate = group.embark_carrier_id.take().map(|id| id - 8);
+                    }
+                }
+                let before = serde_json::to_value(game.clone().data()).unwrap();
+                let result = try_execute_action(game.clone(), Action::Movement(Move(m.clone())), 0);
+                if count == 4 && split {
+                    assert!(result.is_err());
+                    assert_eq!(serde_json::to_value(game.clone().data()).unwrap(), before);
+                    continue;
+                }
+                game = result.unwrap();
+                assert_eq!(game.actions_left, 2);
+                for id in first {
+                    assert_eq!(
+                        game.player(0).get_unit(id).carrier_id,
+                        Some(if pirates { 22 } else { 10 })
+                    );
+                }
+                for id in second {
+                    assert_eq!(
+                        game.player(0).get_unit(id).carrier_id,
+                        Some(if pirates { 23 } else { 11 })
+                    );
+                }
+                if let GameState::Movement(state) = &game.state {
+                    assert_eq!(state.movement_actions_left, 2);
+                } else {
+                    panic!("expected movement");
+                }
+                // A repeated assignment cannot transfer passengers at sea or charge again.
+                let before = serde_json::to_value(game.clone().data()).unwrap();
+                assert!(try_execute_action(game.clone(), Action::Movement(Move(m)), 0).is_err());
+                assert_eq!(serde_json::to_value(game.clone().data()).unwrap(), before);
+            }
+        }
+    }
+}
+
+#[test]
+fn legacy_move_payload_omits_optional_fleet_assignment() {
+    let legacy = serde_json::json!({"units":[1],"destination":"D8","embark_carrier_id":10});
+    let action: MoveUnits = serde_json::from_value(legacy.clone()).unwrap();
+    assert!(action.boarding.is_empty());
+    assert_eq!(serde_json::to_value(action).unwrap(), legacy);
+}

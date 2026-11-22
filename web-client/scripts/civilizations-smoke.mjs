@@ -125,7 +125,7 @@ try {
     az.players[enemy].held_units = { infantry: 2 };
     app = await load(width, dark, az);
     page = app.page;
-    await page.getByRole('button', { name: 'Abilities and cultural influence', exact: true }).click();
+    await page.getByRole('button', { name: 'Abilities', exact: true }).click();
     await page.getByRole('button', { name: /Use Human Sacrifice/ }).click();
     const decision = page.getByRole('region', { name: 'Human Sacrifice', exact: true });
     await decision.waitFor();

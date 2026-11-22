@@ -5306,5 +5306,7 @@
   "Construct Port · {p0}": "ساخت بندر · {p0}",
   "Construct wonder": "ساخت شگفتی",
   "Construct, recruit and improve happiness": "ساخت، جذب نیرو و افزایش شادی",
-  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "هر تمدن پیشرفت‌های مخصوص خود را دارد. روم با پژوهش مهندسی، آب‌گذر را به دست می‌آورد. پیشرفت‌ها را باز کنید و مهندسی را پژوهش کنید؛ آب‌گذر خودکار و بدون خرید جداگانه باز می‌شود."
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "هر تمدن پیشرفت‌های مخصوص خود را دارد. روم با پژوهش مهندسی، آب‌گذر را به دست می‌آورد. پیشرفت‌ها را باز کنید و مهندسی را پژوهش کنید؛ آب‌گذر خودکار و بدون خرید جداگانه باز می‌شود.",
+  "Invalid fleet boarding assignment": "تخصیص نامعتبر برای سوار شدن به ناوگان",
+  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})"
 }

@@ -5306,5 +5306,7 @@
   "Construct Port · {p0}": "Κατασκευή Λιμανιού · {p0}",
   "Construct wonder": "Κατασκευή θαύματος",
   "Construct, recruit and improve happiness": "Κατασκευή, στρατολόγηση και αύξηση ευτυχίας",
-  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Κάθε πολιτισμός έχει τις δικές του προόδους. Η Ρώμη αποκτά το Υδραγωγείο όταν ερευνά τη Μηχανική. Άνοιξε τις Προόδους και ερεύνησε τη Μηχανική· το Υδραγωγείο ξεκλειδώνει αυτόματα, χωρίς ξεχωριστή αγορά."
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Κάθε πολιτισμός έχει τις δικές του προόδους. Η Ρώμη αποκτά το Υδραγωγείο όταν ερευνά τη Μηχανική. Άνοιξε τις Προόδους και ερεύνησε τη Μηχανική· το Υδραγωγείο ξεκλειδώνει αυτόματα, χωρίς ξεχωριστή αγορά.",
+  "Invalid fleet boarding assignment": "Μη έγκυρη ανάθεση επιβίβασης στον στόλο",
+  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})"
 }

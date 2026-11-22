@@ -5306,5 +5306,7 @@
   "Construct Port · {p0}": "항구 건설 · {p0}",
   "Construct wonder": "불가사의 건설",
   "Construct, recruit and improve happiness": "건설·모집·행복 개선",
-  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "문명마다 고유 발전이 있습니다. 로마는 공학을 연구하면 수로를 얻습니다. 발전을 열고 공학을 연구하세요. 수로는 따로 구매하지 않아도 자동으로 해금됩니다."
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "문명마다 고유 발전이 있습니다. 로마는 공학을 연구하면 수로를 얻습니다. 발전을 열고 공학을 연구하세요. 수로는 따로 구매하지 않아도 자동으로 해금됩니다.",
+  "Invalid fleet boarding assignment": "함대 승선 배정이 유효하지 않습니다",
+  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})"
 }

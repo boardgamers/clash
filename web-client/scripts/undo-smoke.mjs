@@ -12,11 +12,18 @@ const input = JSON.parse(
     'utf8',
   ),
 );
+// Old native fixture predates the always-present NPC seats. Do not rewrite
+// optional exported saves: only complete this local test fixture.
+if (!process.argv[2]) {
+  const npcs = JSON.parse(await engine.init(2, [], {}, 'undo-smoke', {})).players.slice(2);
+  for (const npc of npcs) if (!input.players.some(p => p.civilization === npc.civilization))
+    input.players.push({ ...npc, id: input.players.length });
+}
 const initial = input.data ?? JSON.stringify(input);
 const seat = engine.currentPlayer(initial);
 const view = (state) => JSON.parse(engine.webView(state, seat));
 const freeEconomy = (state) =>
-  view(state).collectActions.some((a) => a.value?.Custom === 'FreeEconomyCollect');
+  view(state).collectActions.some((a) => a.value?.Special?.Modifier === 'FreeEconomyCollect');
 assert(freeEconomy(initial), 'Free Economy must be available after undo');
 const city = view(initial).cities.find((c) => c.canActivate && c.choices.length);
 const choice = city.choices[0];
@@ -41,7 +48,12 @@ const redone = advance(undone, 'Redo');
 assert.equal(engine.logLength(redone), engine.logLength(collected));
 assert.deepEqual(engine.logSlice(redone, { start: 0 }), engine.logSlice(collected, { start: 0 }));
 const rewound = advance(redone, 'Undo');
-let free = advance(rewound, collect({ Custom: 'FreeEconomyCollect' }));
+const freeVariant = view(rewound).collectActions.find(a => a.free);
+const freeAction = JSON.parse(engine.webQuery(engine.stripSecret(rewound,seat),seat,JSON.stringify({
+  kind:'collect',city:city.position,variant:freeVariant.value,
+  selections:[{position:choice.position,pile:choice.pile,times:1}],
+}))).action;
+let free = advance(rewound, freeAction);
 free = advance(free, { Response: { Payment: [{ mood_tokens: 1 }] } });
 assert.equal(JSON.parse(free).actions_left, JSON.parse(initial).actions_left);
 assert.equal(
@@ -119,9 +131,11 @@ try {
       (before) => document.querySelector('[aria-label="Journal"]').innerText === before,
       baseline,
     );
-    await page.getByRole('button', { name: 'Close table activity', exact: true }).click();
+    const closeActivity = page.getByRole('button', { name: 'Close table activity', exact: true });
+    if (width < 600) { await closeActivity.focus(); await closeActivity.press('Enter'); }
+    else await closeActivity.click();
     await page.getByRole('button', { name: 'Collect resources', exact: true }).click();
-    const freeButton = page.getByRole('button', { name: 'Free Economy', exact: true });
+    const freeButton = page.locator('.variant-picker button').filter({ hasText: 'Free Economy' });
     await freeButton.click();
     assert.equal(await freeButton.getAttribute('aria-pressed'), 'true');
     await page.screenshot({ path: '/tmp/clash-undo-free-economy-' + width + '.png' });

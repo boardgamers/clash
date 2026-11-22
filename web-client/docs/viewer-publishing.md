@@ -1740,3 +1740,26 @@ Preserve catalog revision 8 (46 definitions), artwork revision 4, all 60 named
 asset bytes, gallery, preferences/settings and Standard options. The faction
 artwork manifest's lockfile integrity hash changes only for the viewer version
 bump; no artwork is republished. No production moves, history edits or rewinds.
+
+# Viewer 0.1.234 / engine 0.4.165 — local multi-carrier boarding
+
+Adds an optional, backward-compatible `MoveUnits.boarding` assignment list. A
+single confirmed move boards one land group onto multiple adjacent co-located
+ships, validating atomically on a cloned game before committing. Pirate IDs map
+into the owned namespace only during successful all-space claims. Existing cargo,
+Longships, Tactics, Navigator, movement allocations and pirate ship limits remain
+validated. The old sequential client queue is removed; the normal movement panel
+shows passenger selectors and requires **Board ship** confirmation.
+
+See [fleet boarding](../../docs/fleet-boarding.md) for payload constraints and
+regression coverage. Web viewer CI runs the durable WASM suite and desktop/mobile
+physical-click boarding, existing embark and landing smokes. The civilization
+smoke uses the current `Abilities` control label rather than its obsolete name.
+
+Release gate: push matching source to main and require green Check and Web viewer
+CI **before** BGS publication. Verify all hosted viewer files and downloaded engine
+bytes, run boarding on those actual artifacts, and preserve catalog revision 8 /
+46 definitions, artwork revision 4, all 60 named assets and gallery/settings/
+preferences/Standard options. Only the frozen artwork manifest's lockfile integrity
+pin changes for the viewer version bump; no artwork or catalog is republished.
+No production moves, migrations, history edits or rewinds are involved.

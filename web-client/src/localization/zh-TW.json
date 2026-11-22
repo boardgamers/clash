@@ -5306,5 +5306,7 @@
   "Construct Port · {p0}": "建造港口 · {p0}",
   "Construct wonder": "建造奇觀",
   "Construct, recruit and improve happiness": "建造、招募與提升幸福",
-  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "每個文明都有專屬科技。羅馬研究工程學時獲得水道橋。開啟科技並研究工程學；水道橋會自動解鎖，不需要另行購買。"
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "每個文明都有專屬科技。羅馬研究工程學時獲得水道橋。開啟科技並研究工程學；水道橋會自動解鎖，不需要另行購買。",
+  "Invalid fleet boarding assignment": "艦隊登船分配無效",
+  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})"
 }

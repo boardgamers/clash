@@ -29,6 +29,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct MoveUnits {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub boarding: Vec<MoveUnits>,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub attack_pirates: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -54,6 +56,7 @@ impl MoveUnits {
         payment: ResourcePile,
     ) -> Self {
         Self {
+            boarding: vec![],
             city: None,
             attack_pirates: false,
             embark_pirate: None,
@@ -345,6 +348,11 @@ pub(crate) fn execute_movement_action(
     action: MovementAction,
     player_index: usize,
 ) -> Result<(), String> {
+    if let Move(m) = &action {
+        if !m.boarding.is_empty() {
+            return execute_boarding(game, player_index, m);
+        }
+    }
     let player = EventPlayer::new(player_index, move_event_origin());
     match &action {
         Move(m) if m.city.is_some() => player.log(
@@ -411,6 +419,108 @@ fn has_any_moves_left(game: &mut Game) -> bool {
     } else {
         false
     }
+}
+
+// Validate and execute on a disposable state: no payment, claims or partial loads
+// survive a rejected fleet assignment. Carrier namespaces remain distinct.
+fn execute_boarding(game: &mut Game, player: usize, m: &MoveUnits) -> Result<(), String> {
+    let invalid = || "Invalid fleet boarding assignment".to_string();
+    if m.city.is_some()
+        || m.attack_pirates
+        || m.embark_pirate.is_some()
+        || m.embark_carrier_id.is_some()
+        || !m.payment.is_empty()
+        || m.units.is_empty()
+    {
+        return Err(invalid());
+    }
+    let p = game.player(player);
+    let start = p.try_get_unit(m.units[0]).ok_or_else(invalid)?.position;
+    if !game.map.is_land(start)
+        || !game.map.is_sea(m.destination)
+        || !start.is_neighbor(m.destination)
+    {
+        return Err(invalid());
+    }
+    let mut seen = HashSet::new();
+    for group in &m.boarding {
+        if !group.boarding.is_empty()
+            || group.city.is_some()
+            || group.attack_pirates
+            || !group.payment.is_empty()
+            || group.destination != m.destination
+            || group.units.is_empty()
+            || (group.embark_carrier_id.is_some() == group.embark_pirate.is_some())
+        {
+            return Err(invalid());
+        }
+        for id in &group.units {
+            let u = p.try_get_unit(*id).ok_or_else(invalid)?;
+            if !seen.insert(*id)
+                || !u.is_land_based()
+                || u.carrier_id.is_some()
+                || u.position != start
+            {
+                return Err(invalid());
+            }
+        }
+        if let Some(id) = group.embark_carrier_id {
+            let ship = p.try_get_unit(id).ok_or_else(invalid)?;
+            if !ship.is_ship() || ship.position != m.destination {
+                return Err(invalid());
+            }
+        }
+    }
+    if seen.len() != m.units.len() || m.units.iter().any(|id| !seen.remove(id)) {
+        return Err(invalid());
+    }
+    let mut preview = game.clone();
+    let mut claimed = std::collections::HashMap::new();
+    if m.boarding.iter().any(|g| g.embark_pirate.is_some()) {
+        if !p.has_special_advance(SpecialAdvance::PirateAllies) {
+            return Err(invalid());
+        }
+        let pirates = crate::content::civilizations::carthage::pirate_player(game);
+        let ships: Vec<_> = game
+            .player(pirates)
+            .units
+            .iter()
+            .filter(|u| u.is_ship() && u.position == m.destination)
+            .map(|u| u.id)
+            .collect();
+        if m.boarding
+            .iter()
+            .filter_map(|g| g.embark_pirate)
+            .any(|id| !ships.contains(&id))
+        {
+            return Err(invalid());
+        }
+        if p.units.iter().filter(|u| u.is_ship()).count() + ships.len() > 8
+            || p.units
+                .iter()
+                .filter(|u| u.is_ship() && u.position == m.destination)
+                .count()
+                + ships.len()
+                > 4
+        {
+            return Err(invalid());
+        }
+        for id in ships {
+            claimed.insert(
+                id,
+                crate::content::civilizations::carthage::claim_pirate(&mut preview, player, id),
+            );
+        }
+    }
+    for group in &m.boarding {
+        let mut group = group.clone();
+        if let Some(id) = group.embark_pirate.take() {
+            group.embark_carrier_id = Some(claimed[&id]);
+        }
+        execute_movement_action(&mut preview, Move(group), player)?;
+    }
+    *game = preview;
+    Ok(())
 }
 
 fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> Result<(), String> {

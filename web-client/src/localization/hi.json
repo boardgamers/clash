@@ -5306,5 +5306,7 @@
   "Construct Port · {p0}": "बंदरगाह बनाएँ · {p0}",
   "Construct wonder": "अजूबा बनाएँ",
   "Construct, recruit and improve happiness": "निर्माण करें, भर्ती करें और खुशहाली बढ़ाएँ",
-  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "हर सभ्यता की अपनी उन्नतियाँ होती हैं। रोम अभियांत्रिकी पर शोध करने पर जलसेतु पाता है। उन्नतियाँ खोलें और अभियांत्रिकी पर शोध करें; जलसेतु अलग खरीद के बिना अपने-आप खुल जाता है।"
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "हर सभ्यता की अपनी उन्नतियाँ होती हैं। रोम अभियांत्रिकी पर शोध करने पर जलसेतु पाता है। उन्नतियाँ खोलें और अभियांत्रिकी पर शोध करें; जलसेतु अलग खरीद के बिना अपने-आप खुल जाता है।",
+  "Invalid fleet boarding assignment": "बेड़े पर चढ़ने का अमान्य आवंटन",
+  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})"
 }

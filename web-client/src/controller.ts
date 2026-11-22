@@ -2,7 +2,7 @@ import { ActionQueue } from './action-queue';
 import { liveActionMessages } from './live-actions';
 import { eventNotices, liveEventNotices } from './event-notices';
 import { publicActions } from './replay-actions';
-import { boardingPlan, type BoardingGroup } from './boarding';
+import { boardingCarrier, boardingPlan } from './boarding';
 import { activeInfluence, influenceKey, influenceDestinationKey, influenceDestinations, influenceMapPick, influencePaymentMatches } from './influence';
 import { defaultCity, type CollectionPotential } from './default-city';
 import { nextCollectionSelection } from './collection-yield';
@@ -138,7 +138,6 @@ export class Controller {
   private migratedSkipRaze = false;
   private keepCitiesRequest: { seat: number; raw: string } | null = null;
   private movePreviewSelection: string | null = null;
-  private boardingQueue: { position: string; group: BoardingGroup }[] = [];
   private moveCache = new Map<string, Session['moveDestinations']>();
   private engine: Bridge | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -287,7 +286,6 @@ export class Controller {
     clearTimeout(this.refreshTimer);
     // A rejected move invalidates its prediction and every move queued behind it.
     this.outbox = [];
-    this.boardingQueue = [];
     this.showConfirmed();
     this.keepCitiesRequest = null;
     this.cardContinuation = null;
@@ -667,7 +665,6 @@ export class Controller {
       this.migrateRazeSetting();
     }
     if (automaticPayment) this.submit(automaticPayment);
-    else if (!quiet) this.continueBoarding();
   }
   private seenKey() {
     const s = get(this.session);
@@ -1320,7 +1317,6 @@ export class Controller {
     if (!destination) return;
     if (destination.boarding) {
       this.patch({ moveTarget: destination.position, moveDestination: index });
-      this.boardSelectedUnits();
       return;
     }
     const selection = this.raw + JSON.stringify(destination.action);
@@ -1355,35 +1351,35 @@ export class Controller {
   movementDestinations(ids: number[], city: string | null = null) {
     const destinations = this.rawMovementDestinations(ids, city);
     const s = get(this.session);
-    if (city || !ids.length || ids.some(id => s.view?.units?.find(u => u.id === id)?.type === 'Ship')) return destinations;
-    const positions = new Set(this.rawMovementDestinations([ids[0]]).filter(d => d.carrier != null).map(d => d.position));
+    if (city || !ids.length || ids.some(id => { const u = s.view?.units?.find(u => u.id === id); return !u || u.type === 'Ship' || u.carrier != null; })) return destinations;
+    const positions = new Set(this.rawMovementDestinations([ids[0]]).filter(d => boardingCarrier(d) != null).map(d => d.position));
     const extra: Session['moveDestinations'] = [];
     for (const position of positions) {
-      const ships = s.view?.units?.filter(u => u.type === 'Ship' && u.position === position) ?? [];
+      const ships = this.rawMovementDestinations([ids[0]]).filter(d => d.position === position && boardingCarrier(d) != null);
       if (ships.length < 2) continue;
       const boarding = boardingPlan(ids, position, units => this.rawMovementDestinations(units));
-      const offer = this.rawMovementDestinations([ids[0]]).find(d => d.position === position && d.carrier != null);
+      const offer = this.rawMovementDestinations([ids[0]]).find(d => d.position === position && boardingCarrier(d) != null);
       if (boarding && offer) extra.push({ ...offer, boarding, carrier: null });
     }
-    return [...destinations.filter(d => !(d.carrier != null && extra.some(e => e.position === d.position))), ...extra];
+    return [...destinations.filter(d => !(boardingCarrier(d) != null && extra.some(e => e.position === d.position))), ...extra];
   }
-  private boardSelectedUnits() {
+  boardingOptions(unit: number, position: string) {
+    return this.rawMovementDestinations([unit]).filter(d => d.position === position && boardingCarrier(d) != null);
+  }
+  assignPassenger(unit: number, carrier: number) {
+    const s = get(this.session), index = s.moveDestination;
+    if (s.pending || s.playback || index == null) return;
+    const destination = s.moveDestinations[index];
+    const ids = destination.boarding?.flatMap(g => g.units) ?? [];
+    const boarding = boardingPlan(ids, destination.position, units => this.rawMovementDestinations(units), {unit, carrier}, destination.boarding);
+    if (boarding) this.patch({moveDestinations: s.moveDestinations.map((d,i) => i === index ? {...d, boarding} : d)});
+  }
+  boardSelectedUnits() {
     const s = get(this.session), destination = s.moveDestination == null ? null : s.moveDestinations[s.moveDestination];
     if (s.pending || s.playback || !destination?.boarding) return;
-    this.boardingQueue = destination.boarding.map(group => ({position: destination.position, group}));
-    this.continueBoarding();
-  }
-  private continueBoarding() {
-    const s = get(this.session);
-    if (s.pending || !this.boardingQueue.length) return;
-    const next = this.boardingQueue.shift()!;
-    const offer = this.rawMovementDestinations(next.group.units).find(d => d.position === next.position && d.carrier === next.group.carrier);
-    if (!offer) {
-      this.boardingQueue = [];
-      this.patch({error: 'Boarding stopped because the remaining units can no longer board. Select them again.'});
-      return;
-    }
-    this.submit(offer.action);
+    const boarding = destination.boarding.map(g => ({units: g.units, destination: destination.position,
+      ...(g.carrier < 0 ? {embark_pirate: -g.carrier - 1} : {embark_carrier_id: g.carrier})}));
+    this.submit({Movement: {Move: {units: boarding.flatMap(g => g.units), destination: destination.position, boarding}}});
   }
   moveOrigins(position: string) {
     const s = get(this.session);

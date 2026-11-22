@@ -5306,5 +5306,7 @@
   "Construct Port · {p0}": "Построить порт · {p0}",
   "Construct wonder": "Построить чудо",
   "Construct, recruit and improve happiness": "Строительство, найм и повышение счастья",
-  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "У каждой цивилизации свои достижения. Рим получает Акведук, когда исследует Инженерию. Откройте «Достижения» и исследуйте Инженерию; Акведук откроется автоматически, без отдельной покупки."
+  "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "У каждой цивилизации свои достижения. Рим получает Акведук, когда исследует Инженерию. Откройте «Достижения» и исследуйте Инженерию; Акведук откроется автоматически, без отдельной покупки.",
+  "Invalid fleet boarding assignment": "Недопустимое распределение при посадке на корабли",
+  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})"
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { boardingCarrier } from './boarding';
   import CombatEstimate from './CombatEstimate.svelte';
   import { onDestroy } from 'svelte';
   import {
@@ -258,20 +259,40 @@
   {#if settler && !$session.game?.players.some((p) => p.cities?.some((c) => c.position === settler.position))}
     <FoundCityAction {controller} {settler} />
   {/if}
+  {#if destination?.boarding}
+    <div class="boarding-assignment">
+      {#each destination.boarding.flatMap(g => g.units) as id (id)}
+        <label>
+          {units.find(u => u.id === id)?.type} #{id}
+          <select disabled={$session.pending || !!$session.playback}
+            value={destination.boarding.find(g => g.units.includes(id))?.carrier}
+            onchange={e => controller.assignPassenger(id, Number(e.currentTarget.value))}>
+            {#each controller.boardingOptions(id, destination.position) as offer}
+              {@const carrier = boardingCarrier(offer)!}
+              <option value={carrier}>
+                {carrier < 0 ? 'Allied pirate' : 'Board ship'} #{carrier < 0 ? -carrier - 1 : carrier}
+                ({units.filter(u => u.carrier === carrier).length} + {destination.boarding.find(g => g.carrier === carrier)?.units.length ?? 0} / {offer.carrierCapacity ?? 2})
+              </option>
+            {/each}
+          </select>
+        </label>
+      {/each}
+    </div>
+  {/if}
   {#if !units.length && !$session.view?.nomadCities?.length}<p>Recruit units in a city to explore.</p>{/if}
   {#if $session.error}<p class="inline-error" role="alert">{$session.error}</p>{/if}
   </div>
-  {#if destination && !destination.boarding && destination.terrain !== 'Unexplored'}<div class="settler-confirm">
+  {#if destination && destination.terrain !== 'Unexplored'}<div class="settler-confirm">
       <button
         class="primary wide"
         disabled={!!$session.playback || $session.pending}
-        onclick={() => controller.submit(destination.action)}
+        onclick={() => destination.boarding ? controller.boardSelectedUnits() : controller.submit(destination.action)}
       >
         {destination.breaksDiplomacy
           ? 'Break agreement & attack'
           : destination.attack
             ? 'Attack'
-            : destination.carrier != null || destination.pirateCarrier != null
+            : destination.boarding || destination.carrier != null || destination.pirateCarrier != null
               ? 'Board ship'
               : disembarking
                 ? 'Disembark'
@@ -285,6 +306,9 @@
 </section>
 
 <style>
+  .boarding-assignment { display: grid; gap: .5rem; margin: .5rem 0; }
+  .boarding-assignment label { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem; }
+  .boarding-assignment select { max-width: 100%; padding: .4rem; }
   .movement-body { min-height: 0; overflow-y: auto; }
   .movement-heading, .settler-confirm { flex-shrink: 0; }
   .settler-confirm { border-top: 1px solid var(--line); padding-top: 0.5rem; }

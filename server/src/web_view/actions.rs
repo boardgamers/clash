@@ -297,7 +297,7 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
                         .contains(&crate::events::EventOrigin::Incident(
                             crate::content::incidents::great_diplomat::DIPLOMAT_ID,
                         ));
-                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":if route.ignore_terrain_movement_restrictions { vec!["Roads: ignores Mountain and Forest penalties. These units can move again in a new Move action unless they fight a battle."] } else { terrain_notes(game,p,&units,route.destination) },"payment":payment,"carrier":carrier,"attack":game.enemy_player(seat,route.destination).is_some(),"breaksDiplomacy":breaks_diplomacy,
+                let offer = json!({"position":route.destination,"terrain":game.map.get(route.destination),"terrainNotes":if route.ignore_terrain_movement_restrictions { vec!["Roads: ignores Mountain and Forest penalties. These units can move again in a new Move action unless they fight a battle."] } else { terrain_notes(game,p,&units,route.destination) },"payment":payment,"carrier":carrier,"carrierCapacity":crate::unit::ship_capacity(p),"attack":game.enemy_player(seat,route.destination).is_some(),"breaksDiplomacy":breaks_diplomacy,
                     "action":Action::Movement(MovementAction::Move(MoveUnits::new(units.clone(),route.destination,carrier,payment)))});
                 let mut offer = offer;
                 if carrier.is_none()
@@ -343,7 +343,7 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
                         let mut action =
                             MoveUnits::new(units.clone(), route.destination, None, payment.clone());
                         action.embark_pirate = Some(ship.id);
-                        destinations.push(json!({"position":route.destination,"terrain":game.map.get(route.destination),"payment":payment,"carrier":null,"pirateCarrier":ship.id,"label":"Board allied pirate","attack":false,"action":Action::Movement(MovementAction::Move(action))}));
+                        destinations.push(json!({"position":route.destination,"terrain":game.map.get(route.destination),"payment":payment,"carrier":null,"pirateCarrier":ship.id,"carrierCapacity":crate::unit::ship_capacity(p),"label":"Board allied pirate","attack":false,"action":Action::Movement(MovementAction::Move(action))}));
                     }
                 }
             }

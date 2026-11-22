@@ -48,8 +48,10 @@ try {
   assert.match(await panel.innerText(), /3 selected/);
   await tap('C3');
   assert.equal(await panel.getByRole('button',{name:/Board all/}).count(),0);
+  assert.equal(await page.evaluate(() => sent.length),0,'destination only opens passenger assignments');
+  await panel.getByRole('button',{name:/^Board ship/}).click();
   let raw=JSON.stringify(state);
-  for(let i=0;i<2;i++) {
+  for(let i=0;i<1;i++) {
     await page.waitForFunction(i=>sent.length>i,i);
     const action=await page.evaluate(i=>sent[i],i);
     raw=engine.tryMove(raw,typeof action==='string'?action:JSON.stringify(action),0);

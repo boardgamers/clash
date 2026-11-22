@@ -108,6 +108,11 @@ function excluded(raw: string, move: unknown, seat: number) {
   return (game.players ?? []).some(
     (player: Json) =>
       player.id !== seat &&
+      // Explicit peaceful fleet boarding claims allied pirates without combat.
+      // The engine still validates Pirate Allies, every assignment and capacity
+      // in both hidden-state samples; other opponents remain excluded.
+      !(player.civilization === 'Pirates' &&
+        (move as Json).Movement?.Move?.boarding?.some((group: Json) => group.embark_pirate !== undefined)) &&
       player.units?.some((unit: Json) => unit.position === destination && unit.unit_type !== 'Settler'),
   );
 }

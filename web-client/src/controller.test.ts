@@ -2659,12 +2659,13 @@ for (const predictions of [true, false]) test(`boarding across two ships spends 
     assert(destination?.boarding);
     assert.equal(destination.boarding.length,2);
     c.chooseMoveDestination('C3');
-    assert.equal(app.sent.length,1,'Clicking the fleet starts boarding immediately');
-    for (let i=0; i<2; i++) {
-      assert(app.sent[i], 'Boarding continues after server acknowledgement');
-      raw = engine.tryMove(raw,app.sent[i],0);
-      await c.load(engine.stripSecret(raw,0));
-    }
+    assert.equal(app.sent.length,0,'Destination opens assignment before the existing confirmation');
+    c.assignPassenger(0,8);
+    c.boardSelectedUnits();
+    assert.equal(app.sent.length,1,'The whole fleet is submitted atomically');
+    raw = engine.tryMove(raw,app.sent[0],0);
+    await c.load(engine.stripSecret(raw,0));
+    assert.equal(app.sent.length,1,'No queued follow-up with stale carrier IDs');
     const after = JSON.parse(raw);
     assert.equal(after.state.Movement.movement_actions_left,g.state.Movement.movement_actions_left-1);
     assert.equal(after.players[0].units.filter((u:any) => u.unit_type==='Ship').flatMap((u:any)=>u.carried_units??[]).length,3);
