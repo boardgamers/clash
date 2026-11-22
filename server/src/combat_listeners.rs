@@ -74,6 +74,8 @@ pub enum CombatEventPhase {
     RevealTacticsCard,
     TacticsCard,
     Retreat,
+    RoundEndModifiers,
+    RoundEndFinalize,
     Done,
 }
 
@@ -307,7 +309,10 @@ pub(crate) fn combat_round_start(
             CombatEventPhase::Default => |e| &mut e.combat_round_start,
             CombatEventPhase::RevealTacticsCard => |e| &mut e.combat_round_start_reveal_tactics,
             CombatEventPhase::TacticsCard => |e| &mut e.combat_round_start_tactics,
-            CombatEventPhase::Retreat | CombatEventPhase::Done => panic!("Invalid round type"),
+            CombatEventPhase::Retreat
+            | CombatEventPhase::RoundEndModifiers
+            | CombatEventPhase::RoundEndFinalize
+            | CombatEventPhase::Done => panic!("Invalid round type"),
         },
         |s| &mut s.phase,
         |s| &s.combat,
@@ -400,14 +405,36 @@ const ROUND_END_TYPES: &[CombatEventPhase; 3] = &[
     CombatEventPhase::Retreat,
 ];
 
+// Round-end priorities above 10 are hit modifiers; priorities <= 10 consume
+// finalized hits (Solar Eclipse, pirate rewards, casualties, legacy retreat, Dido).
+// Keep the original event intact for old battles and their saved response cursors.
+const FINALIZED_ROUND_END_TYPES: &[CombatEventPhase] = &[
+    CombatEventPhase::TacticsCard,
+    CombatEventPhase::RoundEndModifiers,
+    CombatEventPhase::RoundEndFinalize,
+    CombatEventPhase::Retreat,
+];
+
 pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Combat> {
+    let phases = if r.combat.finalized_round_end {
+        for player in r.combat.players() {
+            let events = &mut game.player_mut(player).events.persistent;
+            events.combat_round_end_modifiers = events.combat_round_end.priority_band(|p| p > 10);
+            events.combat_round_end_finalize = events.combat_round_end.priority_band(|p| p <= 10);
+        }
+        FINALIZED_ROUND_END_TYPES
+    } else {
+        ROUND_END_TYPES
+    };
     let e = event_with_tactics(
         game,
         r,
         PersistentEventType::CombatRoundEnd,
-        ROUND_END_TYPES,
+        phases,
         |phase| match phase {
             CombatEventPhase::Default => |e| &mut e.combat_round_end,
+            CombatEventPhase::RoundEndModifiers => |e| &mut e.combat_round_end_modifiers,
+            CombatEventPhase::RoundEndFinalize => |e| &mut e.combat_round_end_finalize,
             CombatEventPhase::TacticsCard => |e| &mut e.combat_round_end_tactics,
             CombatEventPhase::Retreat => |e| &mut e.combat_retreat,
             _ => panic!("Invalid round type"),
@@ -564,7 +591,9 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
         event_type = (match t {
             CombatEventPhase::Default
             | CombatEventPhase::AllowTacticsCard
-            | CombatEventPhase::Retreat => game.trigger_persistent_event(
+            | CombatEventPhase::Retreat
+            | CombatEventPhase::RoundEndModifiers
+            | CombatEventPhase::RoundEndFinalize => game.trigger_persistent_event(
                 &get_combat(&event_type).players(),
                 event,
                 event_type,
@@ -690,6 +719,18 @@ fn add_tactics_listener(
 
 pub(crate) fn choose_fighter_casualties() -> Ability {
     Ability::builder("Choose Casualties", "Choose which carried units to remove.")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_round_end,
+            9,
+            |game, player, r| {
+                if r.combat.finalized_round_end && r.role(player.index).is_attacker() {
+                    // Publish both finalized totals before either casualty prompt,
+                    // even if the attacker must choose among different unit types.
+                    r.attacker.report(game, r.combat.attacker());
+                    r.defender.report(game, r.combat.defender());
+                }
+            },
+        )
         .add_units_request(
             |event| &mut event.combat_round_end,
             1,
@@ -703,12 +744,14 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                 } else {
                     "defending"
                 };
-                // All hit-changing tactics and abilities have resolved before this
-                // listener. Report even zero losses, before any casualty prompt.
-                if role.is_attacker() {
-                    r.defender.report(game, r.combat.defender());
-                } else {
-                    r.attacker.report(game, r.combat.attacker());
+                // Preserve legacy reporting order for old saved battles. New
+                // battles published both totals before either casualty prompt.
+                if !r.combat.finalized_round_end {
+                    if role.is_attacker() {
+                        r.defender.report(game, r.combat.defender());
+                    } else {
+                        r.attacker.report(game, r.combat.attacker());
+                    }
                 }
                 let casualties = r.losses(role);
                 if casualties == 0 {

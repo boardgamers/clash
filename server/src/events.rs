@@ -210,6 +210,17 @@ where
         self.listeners.reverse();
     }
 
+    /// Copy a priority band without changing listener identity or saved response priorities.
+    pub(crate) fn priority_band(&self, include: impl Fn(i32) -> bool) -> Self
+    where
+        U: Clone,
+        V: Clone,
+    {
+        let mut event = self.clone();
+        event.listeners.retain(|l| include(l.priority));
+        event
+    }
+
     pub(crate) fn remove_listener_mut_by_key(&mut self, key: &EventOrigin) {
         let _ = self.listeners.remove(
             self.listeners

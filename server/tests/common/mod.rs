@@ -146,6 +146,12 @@ fn clean_json(expected: &str) -> String {
             .unwrap()
             .remove("asynchronous_combat_from");
     }
+    if value["finalized_combat_from"] == serde_json::json!(usize::MAX) {
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("finalized_combat_from");
+    }
     // Only public action-log items qualify, never arbitrary arrays or game state.
     if let Some(ages) = value
         .get_mut("log")
@@ -472,6 +478,9 @@ pub fn load_game(path: &GamePath) -> Game {
     let mut game = Game::from_data(game_data, cache, GameContext::Play);
     // These golden histories record the legacy battle response order. Exercise
     // that compatibility path; new sequencing has dedicated preparation tests.
+    if game.finalized_combat_from.is_none() {
+        game.finalized_combat_from = Some(usize::MAX);
+    }
     if game.asynchronous_combat_from.is_none() {
         game.asynchronous_combat_from = Some(usize::MAX);
     }

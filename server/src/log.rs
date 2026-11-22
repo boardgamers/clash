@@ -457,6 +457,7 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
         // must retain the recorded format boundary for deterministic history.
         let next = crate::game_api::log_length(game).saturating_add(1);
         game.asynchronous_combat_from = game.asynchronous_combat_from.map(|from| from.min(next));
+        game.finalized_combat_from = game.finalized_combat_from.map(|from| from.min(next));
     }
     let l = &mut current_turn_log_mut(game).actions;
     remove_redo_actions(l, i);

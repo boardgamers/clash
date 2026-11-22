@@ -39,6 +39,8 @@ pub struct GameData {
     version: u16,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     asynchronous_combat_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    finalized_combat_from: Option<usize>,
     #[serde(default, skip_serializing_if = "crate::map::HomeLayout::is_legacy")]
     home_layout: crate::map::HomeLayout,
     #[serde(default)]
@@ -155,6 +157,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         options: data.options,
         version: data.version,
         asynchronous_combat_from: data.asynchronous_combat_from,
+        finalized_combat_from: data.finalized_combat_from,
         home_layout: data.home_layout,
         state: data.state,
         players: Vec::new(),
@@ -217,6 +220,7 @@ pub fn data(game: Game) -> GameData {
         options: game.options,
         version: game.version,
         asynchronous_combat_from: game.asynchronous_combat_from,
+        finalized_combat_from: game.finalized_combat_from,
         home_layout: game.home_layout,
         state: game.state,
         events: game.events,
@@ -265,6 +269,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         options: game.options.clone(),
         version: game.version,
         asynchronous_combat_from: game.asynchronous_combat_from,
+        finalized_combat_from: game.finalized_combat_from,
         home_layout: game.home_layout,
         state: game.state.clone(),
         events: game.events.clone(),

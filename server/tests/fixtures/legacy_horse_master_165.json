@@ -1,0 +1,5797 @@
+{
+  "engine": "0.4.165",
+  "pending": {
+    "asynchronous_combat_from": 1,
+    "state": "Playing",
+    "events": [
+      {
+        "event_type": {
+          "CombatRoundEnd": {
+            "attacker": {
+              "tactics_card": 31,
+              "opponent_fighters": 2,
+              "combat_value": 12
+            },
+            "defender": {
+              "horse_master_value": 4,
+              "tactics_card": 9,
+              "opponent_fighters": 2,
+              "combat_value": 12
+            },
+            "final_result": "Draw",
+            "combat": {
+              "asynchronous_preparation": true,
+              "attackers": [],
+              "retreat": "CanRetreat",
+              "modifiers": [
+                "SteelWeaponsDefender"
+              ],
+              "stats": {
+                "round": 1,
+                "battleground": "City",
+                "attacker": {
+                  "position": "C2",
+                  "player": 0,
+                  "present": {
+                    "infantry": 2
+                  },
+                  "losses": {
+                    "infantry": 2
+                  }
+                },
+                "defender": {
+                  "position": "C1",
+                  "player": 1,
+                  "present": {
+                    "cavalry": 1,
+                    "leader": "Attila"
+                  }
+                },
+                "city_mood": "Angry"
+              }
+            }
+          }
+        },
+        "players_used": [
+          0
+        ],
+        "player": 1,
+        "last_priority_used": 99,
+        "handler": {
+          "priority": 99,
+          "request": {
+            "BoolRequest": "Horse Master · Cancel 1 incoming hit instead of 4 combat value?"
+          },
+          "origin": {
+            "LeaderAbility": "Horse Master"
+          }
+        }
+      }
+    ],
+    "players": [
+      {
+        "id": 0,
+        "resources": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 5,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Happy",
+            "position": "A1"
+          },
+          {
+            "mood_state": "Neutral",
+            "activations": 8,
+            "position": "C2"
+          }
+        ],
+        "civilization": "India",
+        "advances": [
+          "Farming",
+          "Mining",
+          "Tactics"
+        ],
+        "incident_tokens": 2,
+        "next_unit_id": 2
+      },
+      {
+        "id": 1,
+        "resources": {
+          "food": 2,
+          "wood": 7,
+          "ore": 6,
+          "ideas": 7,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Angry",
+            "activations": 2,
+            "position": "C1"
+          }
+        ],
+        "units": [
+          {
+            "position": "C1",
+            "unit_type": {
+              "Leader": "Attila"
+            },
+            "id": 0
+          },
+          {
+            "position": "C1",
+            "unit_type": "Cavalry",
+            "id": 1
+          }
+        ],
+        "civilization": "Huns",
+        "advances": [
+          "Farming",
+          "Mining",
+          "SteelWeapons",
+          "Tactics"
+        ],
+        "incident_tokens": 3,
+        "next_unit_id": 2
+      },
+      {
+        "id": 2,
+        "civilization": "Barbarians",
+        "next_unit_id": 0
+      },
+      {
+        "id": 3,
+        "civilization": "Pirates",
+        "next_unit_id": 0
+      }
+    ],
+    "map": {
+      "tiles": [
+        [
+          "A1",
+          "Fertile"
+        ],
+        [
+          "A2",
+          "Water"
+        ],
+        [
+          "A3",
+          {
+            "Exhausted": "Forest"
+          }
+        ],
+        [
+          "B1",
+          "Mountain"
+        ],
+        [
+          "B2",
+          "Forest"
+        ],
+        [
+          "B3",
+          "Fertile"
+        ],
+        [
+          "C1",
+          "Barren"
+        ],
+        [
+          "C2",
+          "Forest"
+        ],
+        [
+          "C3",
+          "Water"
+        ],
+        [
+          "D2",
+          "Water"
+        ]
+      ]
+    },
+    "starting_player_index": 0,
+    "current_player_index": 0,
+    "log": [
+      {
+        "age": 1,
+        "rounds": [
+          {
+            "round": 1,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Movement": {
+                        "Move": {
+                          "units": [
+                            0,
+                            1
+                          ],
+                          "destination": "C1"
+                        }
+                      }
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "Move"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Move": {
+                          "units": {
+                            "infantry": 2
+                          },
+                          "start": "C2",
+                          "destination": "C1"
+                        },
+                        "origin": {
+                          "Ability": "Move"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "CombatRound": {
+                          "attackers": {
+                            "infantry": 2
+                          },
+                          "defending_player": 1,
+                          "defenders": {
+                            "cavalry": 1,
+                            "leader": "Attila"
+                          },
+                          "round": 1
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectHandCards": [
+                          {
+                            "ActionCard": 31
+                          }
+                        ]
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 31
+                          },
+                          "from": {
+                            "Hand": 0
+                          },
+                          "to": "PlayToDiscardFaceDown"
+                        },
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "Payment": [
+                          {
+                            "ore": 1
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "ore": 1
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Advance": "SteelWeapons"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectHandCards": [
+                          {
+                            "ActionCard": 9
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 9
+                          },
+                          "from": {
+                            "Hand": 1
+                          },
+                          "to": "PlayToDiscardFaceDown"
+                        },
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Text": "Reveal Tactics Card Flanking",
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "Reveal Tactics Card High Ground",
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "CombatRoll": {
+                          "rolls": [
+                            {
+                              "value": 5,
+                              "unit_type": "Infantry",
+                              "bonus": false
+                            },
+                            {
+                              "value": 2,
+                              "unit_type": "Elephant",
+                              "bonus": false
+                            },
+                            {
+                              "value": 5,
+                              "unit_type": "Infantry",
+                              "bonus": false
+                            }
+                          ],
+                          "combat_value": 12,
+                          "hits": 2,
+                          "combat_modifiers": [
+                            "Flanking added 1 extra die",
+                            "High Ground prevents opponent from using dice-symbol abilities"
+                          ]
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "CombatHitReport": {
+                          "combat_value": 12,
+                          "hit_cancels": 0,
+                          "extra_hits": 0,
+                          "casualties": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "CombatRoll": {
+                          "rolls": [
+                            {
+                              "value": 2,
+                              "unit_type": "Cavalry",
+                              "bonus": true
+                            },
+                            {
+                              "value": 6,
+                              "unit_type": "Infantry",
+                              "bonus": false
+                            }
+                          ],
+                          "combat_value": 12,
+                          "hits": 2,
+                          "combat_modifiers": [
+                            "steel weapons added 2 combat value"
+                          ]
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "CombatHitReport": {
+                          "combat_value": 12,
+                          "hit_cancels": 0,
+                          "extra_hits": 0,
+                          "casualties": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "CombatHitReport": {
+                          "combat_value": 12,
+                          "hit_cancels": 0,
+                          "extra_hits": 0,
+                          "casualties": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Text": "Remove all attacking units",
+                        "origin": {
+                          "Ability": "Choose Casualties"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Units": {
+                          "units": {
+                            "infantry": 2
+                          },
+                          "balance": "Loss",
+                          "position": "C2"
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "board_history": {
+      "id": "9e86bec6ee4c0d9c03010087d8e68152087f3a9a657884a24c13cfb57b1baa33",
+      "frames": [
+        {
+          "cursor": 0,
+          "actor": null,
+          "ended_turn": false,
+          "title": "Earlier position",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 1,
+          "actor": 0,
+          "ended_turn": false,
+          "title": "Move",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 2,
+          "actor": 0,
+          "ended_turn": false,
+          "title": "Tactics",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 3,
+          "actor": 1,
+          "ended_turn": false,
+          "title": "Steel Weapons",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 4,
+          "actor": 1,
+          "ended_turn": false,
+          "title": "Tactics",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": []
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        }
+      ]
+    },
+    "time_increments": [
+      1,
+      1
+    ],
+    "log_index": 4,
+    "undo_limit": 4,
+    "actions_left": 1,
+    "round": 1,
+    "age": 1,
+    "messages": [
+      "The game has started"
+    ],
+    "dice_roll_log": [
+      9,
+      3,
+      9,
+      2,
+      10
+    ],
+    "wonders_left": [
+      "Pyramids"
+    ],
+    "action_cards_discarded": [
+      31,
+      9
+    ]
+  },
+  "accepted": {
+    "asynchronous_combat_from": 1,
+    "state": "Playing",
+    "events": [
+      {
+        "event_type": {
+          "CombatRoundEnd": {
+            "attacker": {
+              "tactics_card": 31,
+              "opponent_hit_cancels": 1,
+              "opponent_fighters": 2,
+              "combat_value": 12
+            },
+            "defender": {
+              "horse_master_value": 4,
+              "tactics_card": 9,
+              "opponent_fighters": 2,
+              "combat_value": 8
+            },
+            "combat": {
+              "asynchronous_preparation": true,
+              "attackers": [],
+              "retreat": "CanRetreat",
+              "modifiers": [
+                "SteelWeaponsDefender"
+              ],
+              "stats": {
+                "round": 1,
+                "battleground": "City",
+                "attacker": {
+                  "position": "C2",
+                  "player": 0,
+                  "present": {
+                    "infantry": 2
+                  },
+                  "losses": {
+                    "infantry": 2
+                  }
+                },
+                "defender": {
+                  "position": "C1",
+                  "player": 1,
+                  "present": {
+                    "cavalry": 1,
+                    "leader": "Attila"
+                  }
+                },
+                "city_mood": "Angry"
+              }
+            }
+          }
+        },
+        "players_used": [
+          0
+        ],
+        "player": 1,
+        "last_priority_used": 1,
+        "handler": {
+          "priority": 1,
+          "request": {
+            "SelectUnits": {
+              "player": 1,
+              "choices": [
+                0,
+                1
+              ],
+              "needed": {
+                "start": 1,
+                "end": 1
+              },
+              "description": "Remove 1 defending units"
+            }
+          },
+          "origin": {
+            "Ability": "Choose Casualties"
+          }
+        }
+      }
+    ],
+    "players": [
+      {
+        "id": 0,
+        "resources": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 5,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Happy",
+            "position": "A1"
+          },
+          {
+            "mood_state": "Neutral",
+            "activations": 8,
+            "position": "C2"
+          }
+        ],
+        "civilization": "India",
+        "advances": [
+          "Farming",
+          "Mining",
+          "Tactics"
+        ],
+        "incident_tokens": 2,
+        "next_unit_id": 2
+      },
+      {
+        "id": 1,
+        "resources": {
+          "food": 2,
+          "wood": 7,
+          "ore": 6,
+          "ideas": 7,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7,
+          "mood_tokens": 7,
+          "culture_tokens": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Angry",
+            "activations": 2,
+            "position": "C1"
+          }
+        ],
+        "units": [
+          {
+            "position": "C1",
+            "unit_type": {
+              "Leader": "Attila"
+            },
+            "id": 0
+          },
+          {
+            "position": "C1",
+            "unit_type": "Cavalry",
+            "id": 1
+          }
+        ],
+        "civilization": "Huns",
+        "advances": [
+          "Farming",
+          "Mining",
+          "SteelWeapons",
+          "Tactics"
+        ],
+        "incident_tokens": 3,
+        "next_unit_id": 2
+      },
+      {
+        "id": 2,
+        "civilization": "Barbarians",
+        "next_unit_id": 0
+      },
+      {
+        "id": 3,
+        "civilization": "Pirates",
+        "next_unit_id": 0
+      }
+    ],
+    "map": {
+      "tiles": [
+        [
+          "A1",
+          "Fertile"
+        ],
+        [
+          "A2",
+          "Water"
+        ],
+        [
+          "A3",
+          {
+            "Exhausted": "Forest"
+          }
+        ],
+        [
+          "B1",
+          "Mountain"
+        ],
+        [
+          "B2",
+          "Forest"
+        ],
+        [
+          "B3",
+          "Fertile"
+        ],
+        [
+          "C1",
+          "Barren"
+        ],
+        [
+          "C2",
+          "Forest"
+        ],
+        [
+          "C3",
+          "Water"
+        ],
+        [
+          "D2",
+          "Water"
+        ]
+      ]
+    },
+    "starting_player_index": 0,
+    "current_player_index": 0,
+    "log": [
+      {
+        "age": 1,
+        "rounds": [
+          {
+            "round": 1,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Movement": {
+                        "Move": {
+                          "units": [
+                            0,
+                            1
+                          ],
+                          "destination": "C1"
+                        }
+                      }
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "Move"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Move": {
+                          "units": {
+                            "infantry": 2
+                          },
+                          "start": "C2",
+                          "destination": "C1"
+                        },
+                        "origin": {
+                          "Ability": "Move"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "CombatRound": {
+                          "attackers": {
+                            "infantry": 2
+                          },
+                          "defending_player": 1,
+                          "defenders": {
+                            "cavalry": 1,
+                            "leader": "Attila"
+                          },
+                          "round": 1
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectHandCards": [
+                          {
+                            "ActionCard": 31
+                          }
+                        ]
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 31
+                          },
+                          "from": {
+                            "Hand": 0
+                          },
+                          "to": "PlayToDiscardFaceDown"
+                        },
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "Payment": [
+                          {
+                            "ore": 1
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "ore": 1
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Advance": "SteelWeapons"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectHandCards": [
+                          {
+                            "ActionCard": 9
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 9
+                          },
+                          "from": {
+                            "Hand": 1
+                          },
+                          "to": "PlayToDiscardFaceDown"
+                        },
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Text": "Reveal Tactics Card Flanking",
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "Reveal Tactics Card High Ground",
+                        "origin": {
+                          "Advance": "Tactics"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "CombatRoll": {
+                          "rolls": [
+                            {
+                              "value": 5,
+                              "unit_type": "Infantry",
+                              "bonus": false
+                            },
+                            {
+                              "value": 2,
+                              "unit_type": "Elephant",
+                              "bonus": false
+                            },
+                            {
+                              "value": 5,
+                              "unit_type": "Infantry",
+                              "bonus": false
+                            }
+                          ],
+                          "combat_value": 12,
+                          "hits": 2,
+                          "combat_modifiers": [
+                            "Flanking added 1 extra die",
+                            "High Ground prevents opponent from using dice-symbol abilities"
+                          ]
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "CombatHitReport": {
+                          "combat_value": 12,
+                          "hit_cancels": 0,
+                          "extra_hits": 0,
+                          "casualties": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "CombatRoll": {
+                          "rolls": [
+                            {
+                              "value": 2,
+                              "unit_type": "Cavalry",
+                              "bonus": true
+                            },
+                            {
+                              "value": 6,
+                              "unit_type": "Infantry",
+                              "bonus": false
+                            }
+                          ],
+                          "combat_value": 12,
+                          "hits": 2,
+                          "combat_modifiers": [
+                            "steel weapons added 2 combat value"
+                          ]
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "CombatHitReport": {
+                          "combat_value": 12,
+                          "hit_cancels": 0,
+                          "extra_hits": 0,
+                          "casualties": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "CombatHitReport": {
+                          "combat_value": 12,
+                          "hit_cancels": 0,
+                          "extra_hits": 0,
+                          "casualties": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Text": "Remove all attacking units",
+                        "origin": {
+                          "Ability": "Choose Casualties"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Units": {
+                          "units": {
+                            "infantry": 2
+                          },
+                          "balance": "Loss",
+                          "position": "C2"
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "Bool": true
+                      }
+                    },
+                    "player": 1,
+                    "undo": [
+                      {
+                        "op": "remove",
+                        "path": "/events/0/event_type/CombatRoundEnd/attacker/opponent_hit_cancels"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/events/0/event_type/CombatRoundEnd/defender/combat_value",
+                        "value": 12
+                      },
+                      {
+                        "op": "add",
+                        "path": "/events/0/event_type/CombatRoundEnd/final_result",
+                        "value": "Draw"
+                      },
+                      {
+                        "op": "add",
+                        "path": "/events/0/handler/origin/LeaderAbility",
+                        "value": "Horse Master"
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/events/0/handler/origin/Ability"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/events/0/handler/priority",
+                        "value": 99
+                      },
+                      {
+                        "op": "add",
+                        "path": "/events/0/handler/request/BoolRequest",
+                        "value": "Horse Master · Cancel 1 incoming hit instead of 4 combat value?"
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/events/0/handler/request/SelectUnits"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/events/0/last_priority_used",
+                        "value": 99
+                      }
+                    ],
+                    "items": [
+                      {
+                        "player": 1,
+                        "Text": "Horse Master · Sacrificed 4 combat value to cancel 1 hit",
+                        "origin": {
+                          "LeaderAbility": "Horse Master"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "CombatHitReport": {
+                          "combat_value": 12,
+                          "hit_cancels": 1,
+                          "extra_hits": 0,
+                          "casualties": 1
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "Remove 1 of their defending units",
+                        "origin": {
+                          "Ability": "Choose Casualties"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "board_history": {
+      "id": "9e86bec6ee4c0d9c03010087d8e68152087f3a9a657884a24c13cfb57b1baa33",
+      "frames": [
+        {
+          "cursor": 0,
+          "actor": null,
+          "ended_turn": false,
+          "title": "Earlier position",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 1,
+          "actor": 0,
+          "ended_turn": false,
+          "title": "Move",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 2,
+          "actor": 0,
+          "ended_turn": false,
+          "title": "Tactics",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 3,
+          "actor": 1,
+          "ended_turn": false,
+          "title": "Steel Weapons",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 0
+                },
+                {
+                  "position": "C2",
+                  "unit_type": "Infantry",
+                  "movement_restrictions": [
+                    "Battle"
+                  ],
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 4,
+          "actor": 1,
+          "ended_turn": false,
+          "title": "Tactics",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": []
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "combat": {
+            "round": 1,
+            "attacker": {
+              "player": 0,
+              "position": "C2"
+            },
+            "defender": {
+              "player": 1,
+              "position": "C1"
+            }
+          },
+          "cursor": 5,
+          "actor": 1,
+          "ended_turn": false,
+          "title": "Horse Master",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A1",
+              "Fertile"
+            ],
+            [
+              "A2",
+              "Water"
+            ],
+            [
+              "A3",
+              {
+                "Exhausted": "Forest"
+              }
+            ],
+            [
+              "B1",
+              "Mountain"
+            ],
+            [
+              "B2",
+              "Forest"
+            ],
+            [
+              "B3",
+              "Fertile"
+            ],
+            [
+              "C1",
+              "Barren"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Water"
+            ],
+            [
+              "D2",
+              "Water"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "India",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "A1"
+                },
+                {
+                  "mood_state": "Neutral",
+                  "activations": 8,
+                  "position": "C2"
+                }
+              ],
+              "units": []
+            },
+            {
+              "id": 1,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Angry",
+                  "activations": 2,
+                  "position": "C1"
+                }
+              ],
+              "units": [
+                {
+                  "position": "C1",
+                  "unit_type": {
+                    "Leader": "Attila"
+                  },
+                  "id": 0
+                },
+                {
+                  "position": "C1",
+                  "unit_type": "Cavalry",
+                  "id": 1
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        }
+      ]
+    },
+    "time_increments": [
+      1,
+      1
+    ],
+    "log_index": 5,
+    "undo_limit": 4,
+    "actions_left": 1,
+    "round": 1,
+    "age": 1,
+    "messages": [
+      "The game has started"
+    ],
+    "dice_roll_log": [
+      9,
+      3,
+      9,
+      2,
+      10
+    ],
+    "wonders_left": [
+      "Pyramids"
+    ],
+    "action_cards_discarded": [
+      31,
+      9
+    ]
+  },
+  "history": {
+    "version": 2,
+    "asynchronous_combat_from": 0,
+    "home_layout": "ClockwiseV1",
+    "seed": "legacy-finalization-165",
+    "state": "Playing",
+    "players": [
+      {
+        "id": 0,
+        "resources": {
+          "food": 2
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Happy",
+            "position": "D2"
+          }
+        ],
+        "units": [
+          {
+            "position": "D2",
+            "unit_type": "Settler",
+            "id": 0
+          }
+        ],
+        "civilization": "Huns",
+        "available_leaders": [
+          "Attila",
+          "Bleda",
+          "Rugila"
+        ],
+        "advances": [
+          "Farming",
+          "Mining"
+        ],
+        "incident_tokens": 3,
+        "action_cards": [
+          4
+        ],
+        "objective_cards": [
+          36
+        ],
+        "next_unit_id": 1
+      },
+      {
+        "id": 1,
+        "resources": {
+          "food": 2
+        },
+        "resource_limit": {
+          "food": 2,
+          "wood": 7,
+          "ore": 7,
+          "ideas": 7,
+          "gold": 7
+        },
+        "cities": [
+          {
+            "mood_state": "Happy",
+            "position": "D7"
+          }
+        ],
+        "units": [
+          {
+            "position": "D7",
+            "unit_type": "Settler",
+            "id": 0
+          }
+        ],
+        "civilization": "Celts",
+        "available_leaders": [
+          "Viriatus",
+          "Vercingetorix",
+          "Boudica"
+        ],
+        "advances": [
+          "Farming",
+          "Mining"
+        ],
+        "incident_tokens": 3,
+        "action_cards": [
+          31
+        ],
+        "objective_cards": [
+          35
+        ],
+        "next_unit_id": 1
+      },
+      {
+        "id": 2,
+        "civilization": "Barbarians",
+        "next_unit_id": 0
+      },
+      {
+        "id": 3,
+        "civilization": "Pirates",
+        "next_unit_id": 0
+      }
+    ],
+    "map": {
+      "tiles": [
+        [
+          "A3",
+          "Unexplored"
+        ],
+        [
+          "A5",
+          "Unexplored"
+        ],
+        [
+          "A7",
+          "Unexplored"
+        ],
+        [
+          "B2",
+          "Unexplored"
+        ],
+        [
+          "B3",
+          "Unexplored"
+        ],
+        [
+          "B4",
+          "Unexplored"
+        ],
+        [
+          "B5",
+          "Unexplored"
+        ],
+        [
+          "B6",
+          "Unexplored"
+        ],
+        [
+          "B7",
+          "Unexplored"
+        ],
+        [
+          "C2",
+          "Forest"
+        ],
+        [
+          "C3",
+          "Unexplored"
+        ],
+        [
+          "C4",
+          "Unexplored"
+        ],
+        [
+          "C5",
+          "Unexplored"
+        ],
+        [
+          "C6",
+          "Unexplored"
+        ],
+        [
+          "C7",
+          "Unexplored"
+        ],
+        [
+          "C8",
+          "Mountain"
+        ],
+        [
+          "D1",
+          "Barren"
+        ],
+        [
+          "D2",
+          "Fertile"
+        ],
+        [
+          "D3",
+          "Unexplored"
+        ],
+        [
+          "D4",
+          "Unexplored"
+        ],
+        [
+          "D5",
+          "Unexplored"
+        ],
+        [
+          "D6",
+          "Unexplored"
+        ],
+        [
+          "D7",
+          "Fertile"
+        ],
+        [
+          "D8",
+          "Barren"
+        ],
+        [
+          "E2",
+          "Mountain"
+        ],
+        [
+          "E3",
+          "Unexplored"
+        ],
+        [
+          "E4",
+          "Unexplored"
+        ],
+        [
+          "E5",
+          "Unexplored"
+        ],
+        [
+          "E6",
+          "Unexplored"
+        ],
+        [
+          "E7",
+          "Unexplored"
+        ],
+        [
+          "E8",
+          "Forest"
+        ],
+        [
+          "F2",
+          "Unexplored"
+        ],
+        [
+          "F3",
+          "Unexplored"
+        ],
+        [
+          "F4",
+          "Unexplored"
+        ],
+        [
+          "F5",
+          "Unexplored"
+        ],
+        [
+          "F6",
+          "Unexplored"
+        ],
+        [
+          "F7",
+          "Unexplored"
+        ],
+        [
+          "G3",
+          "Unexplored"
+        ],
+        [
+          "G5",
+          "Unexplored"
+        ],
+        [
+          "G7",
+          "Unexplored"
+        ]
+      ],
+      "unexplored_blocks": [
+        {
+          "position": {
+            "top_tile": "B2",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Forest",
+              "Water",
+              "Fertile",
+              "Forest"
+            ]
+          }
+        },
+        {
+          "position": {
+            "top_tile": "B4",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Water",
+              "Mountain",
+              "Water",
+              "Mountain"
+            ]
+          }
+        },
+        {
+          "position": {
+            "top_tile": "B6",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Water",
+              "Mountain",
+              "Mountain",
+              "Forest"
+            ]
+          }
+        },
+        {
+          "position": {
+            "top_tile": "D3",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Water",
+              "Fertile",
+              "Forest",
+              "Mountain"
+            ]
+          }
+        },
+        {
+          "position": {
+            "top_tile": "D5",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Fertile",
+              "Water",
+              "Barren",
+              "Mountain"
+            ]
+          }
+        },
+        {
+          "position": {
+            "top_tile": "F2",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Mountain",
+              "Water",
+              "Fertile",
+              "Mountain"
+            ]
+          }
+        },
+        {
+          "position": {
+            "top_tile": "F4",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Mountain",
+              "Forest",
+              "Mountain",
+              "Barren"
+            ]
+          }
+        },
+        {
+          "position": {
+            "top_tile": "F6",
+            "rotation": 0
+          },
+          "block": {
+            "terrain": [
+              "Fertile",
+              "Fertile",
+              "Fertile",
+              "Forest"
+            ]
+          }
+        }
+      ]
+    },
+    "starting_player_index": 1,
+    "current_player_index": 1,
+    "log": [
+      {
+        "age": 0,
+        "rounds": [
+          {
+            "round": 0,
+            "turns": [
+              {
+                "turn_type": {
+                  "Setup": {
+                    "player": 0,
+                    "civilization": "Huns"
+                  }
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Advance": {
+                          "advance": "Farming",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Advance": {
+                          "advance": "Mining",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 4
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 36
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Structure": {
+                          "structure": "CityCenter",
+                          "balance": "Gain",
+                          "position": "D2",
+                          "port_position": null
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "MoodChange": {
+                          "city": "D2",
+                          "mood": "Happy"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Units": {
+                          "units": {
+                            "settlers": 1
+                          },
+                          "balance": "Gain",
+                          "position": "D2"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Setup": {
+                    "player": 1,
+                    "civilization": "Celts"
+                  }
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Farming",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Mining",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 31
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 35
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Structure": {
+                          "structure": "CityCenter",
+                          "balance": "Gain",
+                          "position": "D7",
+                          "port_position": null
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "MoodChange": {
+                          "city": "D7",
+                          "mood": "Happy"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Units": {
+                          "units": {
+                            "settlers": 1
+                          },
+                          "balance": "Gain",
+                          "position": "D7"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "age": 1,
+        "rounds": [
+          {
+            "round": 1,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 2,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "board_history": {
+      "id": "7908424071e0e582e24c7681efc77f8e73cf26e6785efce5619065979ec5cf05",
+      "frames": [
+        {
+          "cursor": 2,
+          "actor": null,
+          "ended_turn": false,
+          "title": "Earlier position",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A3",
+              "Unexplored"
+            ],
+            [
+              "A5",
+              "Unexplored"
+            ],
+            [
+              "A7",
+              "Unexplored"
+            ],
+            [
+              "B2",
+              "Unexplored"
+            ],
+            [
+              "B3",
+              "Unexplored"
+            ],
+            [
+              "B4",
+              "Unexplored"
+            ],
+            [
+              "B5",
+              "Unexplored"
+            ],
+            [
+              "B6",
+              "Unexplored"
+            ],
+            [
+              "B7",
+              "Unexplored"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Unexplored"
+            ],
+            [
+              "C4",
+              "Unexplored"
+            ],
+            [
+              "C5",
+              "Unexplored"
+            ],
+            [
+              "C6",
+              "Unexplored"
+            ],
+            [
+              "C7",
+              "Unexplored"
+            ],
+            [
+              "C8",
+              "Mountain"
+            ],
+            [
+              "D1",
+              "Barren"
+            ],
+            [
+              "D2",
+              "Fertile"
+            ],
+            [
+              "D3",
+              "Unexplored"
+            ],
+            [
+              "D4",
+              "Unexplored"
+            ],
+            [
+              "D5",
+              "Unexplored"
+            ],
+            [
+              "D6",
+              "Unexplored"
+            ],
+            [
+              "D7",
+              "Fertile"
+            ],
+            [
+              "D8",
+              "Barren"
+            ],
+            [
+              "E2",
+              "Mountain"
+            ],
+            [
+              "E3",
+              "Unexplored"
+            ],
+            [
+              "E4",
+              "Unexplored"
+            ],
+            [
+              "E5",
+              "Unexplored"
+            ],
+            [
+              "E6",
+              "Unexplored"
+            ],
+            [
+              "E7",
+              "Unexplored"
+            ],
+            [
+              "E8",
+              "Forest"
+            ],
+            [
+              "F2",
+              "Unexplored"
+            ],
+            [
+              "F3",
+              "Unexplored"
+            ],
+            [
+              "F4",
+              "Unexplored"
+            ],
+            [
+              "F5",
+              "Unexplored"
+            ],
+            [
+              "F6",
+              "Unexplored"
+            ],
+            [
+              "F7",
+              "Unexplored"
+            ],
+            [
+              "G3",
+              "Unexplored"
+            ],
+            [
+              "G5",
+              "Unexplored"
+            ],
+            [
+              "G7",
+              "Unexplored"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "D2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "D2",
+                  "unit_type": "Settler",
+                  "id": 0
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Celts",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "D7"
+                }
+              ],
+              "units": [
+                {
+                  "position": "D7",
+                  "unit_type": "Settler",
+                  "id": 0
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "cursor": 3,
+          "actor": 1,
+          "ended_turn": true,
+          "title": "End turn",
+          "age": 1,
+          "round": 1,
+          "tiles": [
+            [
+              "A3",
+              "Unexplored"
+            ],
+            [
+              "A5",
+              "Unexplored"
+            ],
+            [
+              "A7",
+              "Unexplored"
+            ],
+            [
+              "B2",
+              "Unexplored"
+            ],
+            [
+              "B3",
+              "Unexplored"
+            ],
+            [
+              "B4",
+              "Unexplored"
+            ],
+            [
+              "B5",
+              "Unexplored"
+            ],
+            [
+              "B6",
+              "Unexplored"
+            ],
+            [
+              "B7",
+              "Unexplored"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Unexplored"
+            ],
+            [
+              "C4",
+              "Unexplored"
+            ],
+            [
+              "C5",
+              "Unexplored"
+            ],
+            [
+              "C6",
+              "Unexplored"
+            ],
+            [
+              "C7",
+              "Unexplored"
+            ],
+            [
+              "C8",
+              "Mountain"
+            ],
+            [
+              "D1",
+              "Barren"
+            ],
+            [
+              "D2",
+              "Fertile"
+            ],
+            [
+              "D3",
+              "Unexplored"
+            ],
+            [
+              "D4",
+              "Unexplored"
+            ],
+            [
+              "D5",
+              "Unexplored"
+            ],
+            [
+              "D6",
+              "Unexplored"
+            ],
+            [
+              "D7",
+              "Fertile"
+            ],
+            [
+              "D8",
+              "Barren"
+            ],
+            [
+              "E2",
+              "Mountain"
+            ],
+            [
+              "E3",
+              "Unexplored"
+            ],
+            [
+              "E4",
+              "Unexplored"
+            ],
+            [
+              "E5",
+              "Unexplored"
+            ],
+            [
+              "E6",
+              "Unexplored"
+            ],
+            [
+              "E7",
+              "Unexplored"
+            ],
+            [
+              "E8",
+              "Forest"
+            ],
+            [
+              "F2",
+              "Unexplored"
+            ],
+            [
+              "F3",
+              "Unexplored"
+            ],
+            [
+              "F4",
+              "Unexplored"
+            ],
+            [
+              "F5",
+              "Unexplored"
+            ],
+            [
+              "F6",
+              "Unexplored"
+            ],
+            [
+              "F7",
+              "Unexplored"
+            ],
+            [
+              "G3",
+              "Unexplored"
+            ],
+            [
+              "G5",
+              "Unexplored"
+            ],
+            [
+              "G7",
+              "Unexplored"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "D2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "D2",
+                  "unit_type": "Settler",
+                  "id": 0
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Celts",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "D7"
+                }
+              ],
+              "units": [
+                {
+                  "position": "D7",
+                  "unit_type": "Settler",
+                  "id": 0
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        },
+        {
+          "cursor": 4,
+          "actor": 0,
+          "ended_turn": true,
+          "title": "End turn",
+          "age": 1,
+          "round": 2,
+          "tiles": [
+            [
+              "A3",
+              "Unexplored"
+            ],
+            [
+              "A5",
+              "Unexplored"
+            ],
+            [
+              "A7",
+              "Unexplored"
+            ],
+            [
+              "B2",
+              "Unexplored"
+            ],
+            [
+              "B3",
+              "Unexplored"
+            ],
+            [
+              "B4",
+              "Unexplored"
+            ],
+            [
+              "B5",
+              "Unexplored"
+            ],
+            [
+              "B6",
+              "Unexplored"
+            ],
+            [
+              "B7",
+              "Unexplored"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Unexplored"
+            ],
+            [
+              "C4",
+              "Unexplored"
+            ],
+            [
+              "C5",
+              "Unexplored"
+            ],
+            [
+              "C6",
+              "Unexplored"
+            ],
+            [
+              "C7",
+              "Unexplored"
+            ],
+            [
+              "C8",
+              "Mountain"
+            ],
+            [
+              "D1",
+              "Barren"
+            ],
+            [
+              "D2",
+              "Fertile"
+            ],
+            [
+              "D3",
+              "Unexplored"
+            ],
+            [
+              "D4",
+              "Unexplored"
+            ],
+            [
+              "D5",
+              "Unexplored"
+            ],
+            [
+              "D6",
+              "Unexplored"
+            ],
+            [
+              "D7",
+              "Fertile"
+            ],
+            [
+              "D8",
+              "Barren"
+            ],
+            [
+              "E2",
+              "Mountain"
+            ],
+            [
+              "E3",
+              "Unexplored"
+            ],
+            [
+              "E4",
+              "Unexplored"
+            ],
+            [
+              "E5",
+              "Unexplored"
+            ],
+            [
+              "E6",
+              "Unexplored"
+            ],
+            [
+              "E7",
+              "Unexplored"
+            ],
+            [
+              "E8",
+              "Forest"
+            ],
+            [
+              "F2",
+              "Unexplored"
+            ],
+            [
+              "F3",
+              "Unexplored"
+            ],
+            [
+              "F4",
+              "Unexplored"
+            ],
+            [
+              "F5",
+              "Unexplored"
+            ],
+            [
+              "F6",
+              "Unexplored"
+            ],
+            [
+              "F7",
+              "Unexplored"
+            ],
+            [
+              "G3",
+              "Unexplored"
+            ],
+            [
+              "G5",
+              "Unexplored"
+            ],
+            [
+              "G7",
+              "Unexplored"
+            ]
+          ],
+          "players": [
+            {
+              "id": 0,
+              "civilization": "Huns",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "D2"
+                }
+              ],
+              "units": [
+                {
+                  "position": "D2",
+                  "unit_type": "Settler",
+                  "id": 0
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "civilization": "Celts",
+              "cities": [
+                {
+                  "mood_state": "Happy",
+                  "position": "D7"
+                }
+              ],
+              "units": [
+                {
+                  "position": "D7",
+                  "unit_type": "Settler",
+                  "id": 0
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "civilization": "Barbarians",
+              "cities": [],
+              "units": []
+            },
+            {
+              "id": 3,
+              "civilization": "Pirates",
+              "cities": [],
+              "units": []
+            }
+          ]
+        }
+      ]
+    },
+    "time_increments": [
+      1,
+      1
+    ],
+    "log_index": 0,
+    "undo_limit": 0,
+    "actions_left": 3,
+    "round": 2,
+    "age": 1,
+    "messages": [
+      "Age 1 has started"
+    ],
+    "rng": "301895415523900110436783310451638294041",
+    "wonders_left": [
+      "GreatGardens",
+      "GreatStatue",
+      "Colosseum",
+      "GreatLighthouse",
+      "GreatMausoleum",
+      "GreatLibrary",
+      "GreatWall",
+      "Pyramids"
+    ],
+    "action_cards_left": [
+      38,
+      6,
+      10,
+      11,
+      40,
+      36,
+      41,
+      12,
+      34,
+      33,
+      42,
+      20,
+      5,
+      25,
+      14,
+      1,
+      28,
+      9,
+      27,
+      8,
+      7,
+      24,
+      23,
+      16,
+      29,
+      13,
+      30,
+      22,
+      26,
+      37,
+      19,
+      39,
+      21,
+      2,
+      3,
+      15,
+      32,
+      35,
+      18,
+      17
+    ],
+    "objective_cards_left": [
+      23,
+      29,
+      38,
+      32,
+      12,
+      5,
+      26,
+      28,
+      27,
+      9,
+      21,
+      19,
+      6,
+      37,
+      17,
+      13,
+      20,
+      16,
+      10,
+      33,
+      24,
+      2,
+      3,
+      34,
+      30,
+      31,
+      14,
+      15,
+      18,
+      4,
+      7,
+      11,
+      8,
+      22,
+      1,
+      25
+    ],
+    "incidents_left": [
+      5,
+      52,
+      56,
+      46,
+      19,
+      35,
+      21,
+      20,
+      18,
+      25,
+      7,
+      22,
+      33,
+      36,
+      27,
+      2,
+      50,
+      16,
+      8,
+      15,
+      14,
+      54,
+      4,
+      47,
+      3,
+      32,
+      41,
+      10,
+      23,
+      12,
+      29,
+      24,
+      1,
+      26,
+      39,
+      58,
+      30,
+      13,
+      55,
+      40,
+      45,
+      6,
+      9,
+      48,
+      49,
+      37,
+      28,
+      53,
+      43,
+      44,
+      57,
+      31,
+      17,
+      11,
+      38,
+      34,
+      42,
+      51
+    ]
+  },
+  "cursors": [
+    {
+      "to": 3,
+      "state": {
+        "version": 2,
+        "asynchronous_combat_from": 0,
+        "home_layout": "ClockwiseV1",
+        "seed": "legacy-finalization-165",
+        "state": "Playing",
+        "players": [
+          {
+            "id": 0,
+            "resources": {
+              "food": 2
+            },
+            "resource_limit": {
+              "food": 2,
+              "wood": 7,
+              "ore": 7,
+              "ideas": 7,
+              "gold": 7
+            },
+            "cities": [
+              {
+                "mood_state": "Happy",
+                "position": "D2"
+              }
+            ],
+            "units": [
+              {
+                "position": "D2",
+                "unit_type": "Settler",
+                "id": 0
+              }
+            ],
+            "civilization": "Huns",
+            "available_leaders": [
+              "Attila",
+              "Bleda",
+              "Rugila"
+            ],
+            "advances": [
+              "Farming",
+              "Mining"
+            ],
+            "incident_tokens": 3,
+            "action_cards": [
+              4
+            ],
+            "objective_cards": [
+              36
+            ],
+            "next_unit_id": 1
+          },
+          {
+            "id": 1,
+            "resources": {
+              "food": 2
+            },
+            "resource_limit": {
+              "food": 2,
+              "wood": 7,
+              "ore": 7,
+              "ideas": 7,
+              "gold": 7
+            },
+            "cities": [
+              {
+                "mood_state": "Happy",
+                "position": "D7"
+              }
+            ],
+            "units": [
+              {
+                "position": "D7",
+                "unit_type": "Settler",
+                "id": 0
+              }
+            ],
+            "civilization": "Celts",
+            "available_leaders": [
+              "Viriatus",
+              "Vercingetorix",
+              "Boudica"
+            ],
+            "advances": [
+              "Farming",
+              "Mining"
+            ],
+            "incident_tokens": 3,
+            "action_cards": [
+              31
+            ],
+            "objective_cards": [
+              35
+            ],
+            "next_unit_id": 1
+          },
+          {
+            "id": 2,
+            "civilization": "Barbarians",
+            "next_unit_id": 0
+          },
+          {
+            "id": 3,
+            "civilization": "Pirates",
+            "next_unit_id": 0
+          }
+        ],
+        "map": {
+          "tiles": [
+            [
+              "A3",
+              "Unexplored"
+            ],
+            [
+              "A5",
+              "Unexplored"
+            ],
+            [
+              "A7",
+              "Unexplored"
+            ],
+            [
+              "B2",
+              "Unexplored"
+            ],
+            [
+              "B3",
+              "Unexplored"
+            ],
+            [
+              "B4",
+              "Unexplored"
+            ],
+            [
+              "B5",
+              "Unexplored"
+            ],
+            [
+              "B6",
+              "Unexplored"
+            ],
+            [
+              "B7",
+              "Unexplored"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Unexplored"
+            ],
+            [
+              "C4",
+              "Unexplored"
+            ],
+            [
+              "C5",
+              "Unexplored"
+            ],
+            [
+              "C6",
+              "Unexplored"
+            ],
+            [
+              "C7",
+              "Unexplored"
+            ],
+            [
+              "C8",
+              "Mountain"
+            ],
+            [
+              "D1",
+              "Barren"
+            ],
+            [
+              "D2",
+              "Fertile"
+            ],
+            [
+              "D3",
+              "Unexplored"
+            ],
+            [
+              "D4",
+              "Unexplored"
+            ],
+            [
+              "D5",
+              "Unexplored"
+            ],
+            [
+              "D6",
+              "Unexplored"
+            ],
+            [
+              "D7",
+              "Fertile"
+            ],
+            [
+              "D8",
+              "Barren"
+            ],
+            [
+              "E2",
+              "Mountain"
+            ],
+            [
+              "E3",
+              "Unexplored"
+            ],
+            [
+              "E4",
+              "Unexplored"
+            ],
+            [
+              "E5",
+              "Unexplored"
+            ],
+            [
+              "E6",
+              "Unexplored"
+            ],
+            [
+              "E7",
+              "Unexplored"
+            ],
+            [
+              "E8",
+              "Forest"
+            ],
+            [
+              "F2",
+              "Unexplored"
+            ],
+            [
+              "F3",
+              "Unexplored"
+            ],
+            [
+              "F4",
+              "Unexplored"
+            ],
+            [
+              "F5",
+              "Unexplored"
+            ],
+            [
+              "F6",
+              "Unexplored"
+            ],
+            [
+              "F7",
+              "Unexplored"
+            ],
+            [
+              "G3",
+              "Unexplored"
+            ],
+            [
+              "G5",
+              "Unexplored"
+            ],
+            [
+              "G7",
+              "Unexplored"
+            ]
+          ],
+          "unexplored_blocks": [
+            {
+              "position": {
+                "top_tile": "B2",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Forest",
+                  "Water",
+                  "Fertile",
+                  "Forest"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "B4",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Water",
+                  "Mountain",
+                  "Water",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "B6",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Water",
+                  "Mountain",
+                  "Mountain",
+                  "Forest"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "D3",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Water",
+                  "Fertile",
+                  "Forest",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "D5",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Fertile",
+                  "Water",
+                  "Barren",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "F2",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Mountain",
+                  "Water",
+                  "Fertile",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "F4",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Mountain",
+                  "Forest",
+                  "Mountain",
+                  "Barren"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "F6",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Fertile",
+                  "Fertile",
+                  "Fertile",
+                  "Forest"
+                ]
+              }
+            }
+          ]
+        },
+        "starting_player_index": 1,
+        "current_player_index": 0,
+        "log": [
+          {
+            "age": 0,
+            "rounds": [
+              {
+                "round": 0,
+                "turns": [
+                  {
+                    "turn_type": {
+                      "Setup": {
+                        "player": 0,
+                        "civilization": "Huns"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "action": "StartTurn",
+                        "player": 0,
+                        "items": [
+                          {
+                            "player": 0,
+                            "Resources": {
+                              "resources": {
+                                "food": 2
+                              },
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Advance": {
+                              "advance": "Farming",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Advance": {
+                              "advance": "Mining",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "HandCard": {
+                              "card": {
+                                "ActionCard": 4
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 0
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "HandCard": {
+                              "card": {
+                                "ObjectiveCard": 36
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 0
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Structure": {
+                              "structure": "CityCenter",
+                              "balance": "Gain",
+                              "position": "D2",
+                              "port_position": null
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "MoodChange": {
+                              "city": "D2",
+                              "mood": "Happy"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Units": {
+                              "units": {
+                                "settlers": 1
+                              },
+                              "balance": "Gain",
+                              "position": "D2"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "turn_type": {
+                      "Setup": {
+                        "player": 1,
+                        "civilization": "Celts"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "action": "StartTurn",
+                        "player": 1,
+                        "items": [
+                          {
+                            "player": 1,
+                            "Resources": {
+                              "resources": {
+                                "food": 2
+                              },
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Advance": {
+                              "advance": "Farming",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Advance": {
+                              "advance": "Mining",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "HandCard": {
+                              "card": {
+                                "ActionCard": 31
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 1
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "HandCard": {
+                              "card": {
+                                "ObjectiveCard": 35
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 1
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Structure": {
+                              "structure": "CityCenter",
+                              "balance": "Gain",
+                              "position": "D7",
+                              "port_position": null
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "MoodChange": {
+                              "city": "D7",
+                              "mood": "Happy"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Units": {
+                              "units": {
+                                "settlers": 1
+                              },
+                              "balance": "Gain",
+                              "position": "D7"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "age": 1,
+            "rounds": [
+              {
+                "round": 1,
+                "turns": [
+                  {
+                    "turn_type": {
+                      "Player": 1
+                    },
+                    "actions": [
+                      {
+                        "action": {
+                          "Playing": "EndTurn"
+                        },
+                        "player": 1,
+                        "origin": {
+                          "Ability": "End Turn"
+                        },
+                        "items": [
+                          {
+                            "player": 1,
+                            "Action": {
+                              "balance": "Loss",
+                              "amount": 3
+                            },
+                            "origin": {
+                              "Ability": "End Turn"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "turn_type": {
+                      "Player": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "time_increments": [
+          0,
+          1
+        ],
+        "log_index": 0,
+        "undo_limit": 0,
+        "actions_left": 3,
+        "round": 1,
+        "age": 1,
+        "messages": [
+          "Age 1 has started"
+        ],
+        "rng": "301895415523900110436783310451638294041",
+        "wonders_left": [
+          "GreatGardens",
+          "GreatStatue",
+          "Colosseum",
+          "GreatLighthouse",
+          "GreatMausoleum",
+          "GreatLibrary",
+          "GreatWall",
+          "Pyramids"
+        ],
+        "action_cards_left": [
+          38,
+          6,
+          10,
+          11,
+          40,
+          36,
+          41,
+          12,
+          34,
+          33,
+          42,
+          20,
+          5,
+          25,
+          14,
+          1,
+          28,
+          9,
+          27,
+          8,
+          7,
+          24,
+          23,
+          16,
+          29,
+          13,
+          30,
+          22,
+          26,
+          37,
+          19,
+          39,
+          21,
+          2,
+          3,
+          15,
+          32,
+          35,
+          18,
+          17
+        ],
+        "objective_cards_left": [
+          23,
+          29,
+          38,
+          32,
+          12,
+          5,
+          26,
+          28,
+          27,
+          9,
+          21,
+          19,
+          6,
+          37,
+          17,
+          13,
+          20,
+          16,
+          10,
+          33,
+          24,
+          2,
+          3,
+          34,
+          30,
+          31,
+          14,
+          15,
+          18,
+          4,
+          7,
+          11,
+          8,
+          22,
+          1,
+          25
+        ],
+        "incidents_left": [
+          5,
+          52,
+          56,
+          46,
+          19,
+          35,
+          21,
+          20,
+          18,
+          25,
+          7,
+          22,
+          33,
+          36,
+          27,
+          2,
+          50,
+          16,
+          8,
+          15,
+          14,
+          54,
+          4,
+          47,
+          3,
+          32,
+          41,
+          10,
+          23,
+          12,
+          29,
+          24,
+          1,
+          26,
+          39,
+          58,
+          30,
+          13,
+          55,
+          40,
+          45,
+          6,
+          9,
+          48,
+          49,
+          37,
+          28,
+          53,
+          43,
+          44,
+          57,
+          31,
+          17,
+          11,
+          38,
+          34,
+          42,
+          51
+        ]
+      }
+    },
+    {
+      "to": 4,
+      "state": {
+        "version": 2,
+        "asynchronous_combat_from": 0,
+        "home_layout": "ClockwiseV1",
+        "seed": "legacy-finalization-165",
+        "state": "Playing",
+        "players": [
+          {
+            "id": 0,
+            "resources": {
+              "food": 2
+            },
+            "resource_limit": {
+              "food": 2,
+              "wood": 7,
+              "ore": 7,
+              "ideas": 7,
+              "gold": 7
+            },
+            "cities": [
+              {
+                "mood_state": "Happy",
+                "position": "D2"
+              }
+            ],
+            "units": [
+              {
+                "position": "D2",
+                "unit_type": "Settler",
+                "id": 0
+              }
+            ],
+            "civilization": "Huns",
+            "available_leaders": [
+              "Attila",
+              "Bleda",
+              "Rugila"
+            ],
+            "advances": [
+              "Farming",
+              "Mining"
+            ],
+            "incident_tokens": 3,
+            "action_cards": [
+              4
+            ],
+            "objective_cards": [
+              36
+            ],
+            "next_unit_id": 1
+          },
+          {
+            "id": 1,
+            "resources": {
+              "food": 2
+            },
+            "resource_limit": {
+              "food": 2,
+              "wood": 7,
+              "ore": 7,
+              "ideas": 7,
+              "gold": 7
+            },
+            "cities": [
+              {
+                "mood_state": "Happy",
+                "position": "D7"
+              }
+            ],
+            "units": [
+              {
+                "position": "D7",
+                "unit_type": "Settler",
+                "id": 0
+              }
+            ],
+            "civilization": "Celts",
+            "available_leaders": [
+              "Viriatus",
+              "Vercingetorix",
+              "Boudica"
+            ],
+            "advances": [
+              "Farming",
+              "Mining"
+            ],
+            "incident_tokens": 3,
+            "action_cards": [
+              31
+            ],
+            "objective_cards": [
+              35
+            ],
+            "next_unit_id": 1
+          },
+          {
+            "id": 2,
+            "civilization": "Barbarians",
+            "next_unit_id": 0
+          },
+          {
+            "id": 3,
+            "civilization": "Pirates",
+            "next_unit_id": 0
+          }
+        ],
+        "map": {
+          "tiles": [
+            [
+              "A3",
+              "Unexplored"
+            ],
+            [
+              "A5",
+              "Unexplored"
+            ],
+            [
+              "A7",
+              "Unexplored"
+            ],
+            [
+              "B2",
+              "Unexplored"
+            ],
+            [
+              "B3",
+              "Unexplored"
+            ],
+            [
+              "B4",
+              "Unexplored"
+            ],
+            [
+              "B5",
+              "Unexplored"
+            ],
+            [
+              "B6",
+              "Unexplored"
+            ],
+            [
+              "B7",
+              "Unexplored"
+            ],
+            [
+              "C2",
+              "Forest"
+            ],
+            [
+              "C3",
+              "Unexplored"
+            ],
+            [
+              "C4",
+              "Unexplored"
+            ],
+            [
+              "C5",
+              "Unexplored"
+            ],
+            [
+              "C6",
+              "Unexplored"
+            ],
+            [
+              "C7",
+              "Unexplored"
+            ],
+            [
+              "C8",
+              "Mountain"
+            ],
+            [
+              "D1",
+              "Barren"
+            ],
+            [
+              "D2",
+              "Fertile"
+            ],
+            [
+              "D3",
+              "Unexplored"
+            ],
+            [
+              "D4",
+              "Unexplored"
+            ],
+            [
+              "D5",
+              "Unexplored"
+            ],
+            [
+              "D6",
+              "Unexplored"
+            ],
+            [
+              "D7",
+              "Fertile"
+            ],
+            [
+              "D8",
+              "Barren"
+            ],
+            [
+              "E2",
+              "Mountain"
+            ],
+            [
+              "E3",
+              "Unexplored"
+            ],
+            [
+              "E4",
+              "Unexplored"
+            ],
+            [
+              "E5",
+              "Unexplored"
+            ],
+            [
+              "E6",
+              "Unexplored"
+            ],
+            [
+              "E7",
+              "Unexplored"
+            ],
+            [
+              "E8",
+              "Forest"
+            ],
+            [
+              "F2",
+              "Unexplored"
+            ],
+            [
+              "F3",
+              "Unexplored"
+            ],
+            [
+              "F4",
+              "Unexplored"
+            ],
+            [
+              "F5",
+              "Unexplored"
+            ],
+            [
+              "F6",
+              "Unexplored"
+            ],
+            [
+              "F7",
+              "Unexplored"
+            ],
+            [
+              "G3",
+              "Unexplored"
+            ],
+            [
+              "G5",
+              "Unexplored"
+            ],
+            [
+              "G7",
+              "Unexplored"
+            ]
+          ],
+          "unexplored_blocks": [
+            {
+              "position": {
+                "top_tile": "B2",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Forest",
+                  "Water",
+                  "Fertile",
+                  "Forest"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "B4",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Water",
+                  "Mountain",
+                  "Water",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "B6",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Water",
+                  "Mountain",
+                  "Mountain",
+                  "Forest"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "D3",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Water",
+                  "Fertile",
+                  "Forest",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "D5",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Fertile",
+                  "Water",
+                  "Barren",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "F2",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Mountain",
+                  "Water",
+                  "Fertile",
+                  "Mountain"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "F4",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Mountain",
+                  "Forest",
+                  "Mountain",
+                  "Barren"
+                ]
+              }
+            },
+            {
+              "position": {
+                "top_tile": "F6",
+                "rotation": 0
+              },
+              "block": {
+                "terrain": [
+                  "Fertile",
+                  "Fertile",
+                  "Fertile",
+                  "Forest"
+                ]
+              }
+            }
+          ]
+        },
+        "starting_player_index": 1,
+        "current_player_index": 1,
+        "log": [
+          {
+            "age": 0,
+            "rounds": [
+              {
+                "round": 0,
+                "turns": [
+                  {
+                    "turn_type": {
+                      "Setup": {
+                        "player": 0,
+                        "civilization": "Huns"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "action": "StartTurn",
+                        "player": 0,
+                        "items": [
+                          {
+                            "player": 0,
+                            "Resources": {
+                              "resources": {
+                                "food": 2
+                              },
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Advance": {
+                              "advance": "Farming",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Advance": {
+                              "advance": "Mining",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "HandCard": {
+                              "card": {
+                                "ActionCard": 4
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 0
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "HandCard": {
+                              "card": {
+                                "ObjectiveCard": 36
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 0
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Structure": {
+                              "structure": "CityCenter",
+                              "balance": "Gain",
+                              "position": "D2",
+                              "port_position": null
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "MoodChange": {
+                              "city": "D2",
+                              "mood": "Happy"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 0,
+                            "Units": {
+                              "units": {
+                                "settlers": 1
+                              },
+                              "balance": "Gain",
+                              "position": "D2"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "turn_type": {
+                      "Setup": {
+                        "player": 1,
+                        "civilization": "Celts"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "action": "StartTurn",
+                        "player": 1,
+                        "items": [
+                          {
+                            "player": 1,
+                            "Resources": {
+                              "resources": {
+                                "food": 2
+                              },
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Advance": {
+                              "advance": "Farming",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Advance": {
+                              "advance": "Mining",
+                              "incident_token": "NoChange",
+                              "balance": "Gain"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "HandCard": {
+                              "card": {
+                                "ActionCard": 31
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 1
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "HandCard": {
+                              "card": {
+                                "ObjectiveCard": 35
+                              },
+                              "from": "DrawPile",
+                              "to": {
+                                "Hand": 1
+                              }
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Structure": {
+                              "structure": "CityCenter",
+                              "balance": "Gain",
+                              "position": "D7",
+                              "port_position": null
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "MoodChange": {
+                              "city": "D7",
+                              "mood": "Happy"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          },
+                          {
+                            "player": 1,
+                            "Units": {
+                              "units": {
+                                "settlers": 1
+                              },
+                              "balance": "Gain",
+                              "position": "D7"
+                            },
+                            "origin": {
+                              "Ability": "Setup"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "age": 1,
+            "rounds": [
+              {
+                "round": 1,
+                "turns": [
+                  {
+                    "turn_type": {
+                      "Player": 1
+                    },
+                    "actions": [
+                      {
+                        "action": {
+                          "Playing": "EndTurn"
+                        },
+                        "player": 1,
+                        "origin": {
+                          "Ability": "End Turn"
+                        },
+                        "items": [
+                          {
+                            "player": 1,
+                            "Action": {
+                              "balance": "Loss",
+                              "amount": 3
+                            },
+                            "origin": {
+                              "Ability": "End Turn"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "turn_type": {
+                      "Player": 0
+                    },
+                    "actions": [
+                      {
+                        "action": {
+                          "Playing": "EndTurn"
+                        },
+                        "player": 0,
+                        "origin": {
+                          "Ability": "End Turn"
+                        },
+                        "items": [
+                          {
+                            "player": 0,
+                            "Action": {
+                              "balance": "Loss",
+                              "amount": 3
+                            },
+                            "origin": {
+                              "Ability": "End Turn"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "round": 2,
+                "turns": [
+                  {
+                    "turn_type": {
+                      "Player": 1
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "time_increments": [
+          1,
+          1
+        ],
+        "log_index": 0,
+        "undo_limit": 0,
+        "actions_left": 3,
+        "round": 2,
+        "age": 1,
+        "messages": [
+          "Age 1 has started"
+        ],
+        "rng": "301895415523900110436783310451638294041",
+        "wonders_left": [
+          "GreatGardens",
+          "GreatStatue",
+          "Colosseum",
+          "GreatLighthouse",
+          "GreatMausoleum",
+          "GreatLibrary",
+          "GreatWall",
+          "Pyramids"
+        ],
+        "action_cards_left": [
+          38,
+          6,
+          10,
+          11,
+          40,
+          36,
+          41,
+          12,
+          34,
+          33,
+          42,
+          20,
+          5,
+          25,
+          14,
+          1,
+          28,
+          9,
+          27,
+          8,
+          7,
+          24,
+          23,
+          16,
+          29,
+          13,
+          30,
+          22,
+          26,
+          37,
+          19,
+          39,
+          21,
+          2,
+          3,
+          15,
+          32,
+          35,
+          18,
+          17
+        ],
+        "objective_cards_left": [
+          23,
+          29,
+          38,
+          32,
+          12,
+          5,
+          26,
+          28,
+          27,
+          9,
+          21,
+          19,
+          6,
+          37,
+          17,
+          13,
+          20,
+          16,
+          10,
+          33,
+          24,
+          2,
+          3,
+          34,
+          30,
+          31,
+          14,
+          15,
+          18,
+          4,
+          7,
+          11,
+          8,
+          22,
+          1,
+          25
+        ],
+        "incidents_left": [
+          5,
+          52,
+          56,
+          46,
+          19,
+          35,
+          21,
+          20,
+          18,
+          25,
+          7,
+          22,
+          33,
+          36,
+          27,
+          2,
+          50,
+          16,
+          8,
+          15,
+          14,
+          54,
+          4,
+          47,
+          3,
+          32,
+          41,
+          10,
+          23,
+          12,
+          29,
+          24,
+          1,
+          26,
+          39,
+          58,
+          30,
+          13,
+          55,
+          40,
+          45,
+          6,
+          9,
+          48,
+          49,
+          37,
+          28,
+          53,
+          43,
+          44,
+          57,
+          31,
+          17,
+          11,
+          38,
+          34,
+          42,
+          51
+        ]
+      }
+    }
+  ]
+}

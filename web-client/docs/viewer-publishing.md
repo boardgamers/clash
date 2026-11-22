@@ -1763,3 +1763,16 @@ bytes, run boarding on those actual artifacts, and preserve catalog revision 8 /
 preferences/Standard options. Only the frozen artwork manifest's lockfile integrity
 pin changes for the viewer version bump; no artwork or catalog is republished.
 No production moves, migrations, history edits or rewinds are involved.
+
+
+# Viewer 0.1.235 / engine 0.4.166 — finalized combat rounds
+
+Both sides now finish Horse Master and other hit-changing round-end abilities
+before final hit reports, casualty choices and casualty-dependent rewards.
+Attila's activated Cavalry conversion retains the original dice and displays
+adjusted CV without a fake reroll. Existing open battles and historical outcomes
+keep legacy timing; no losses are repaired or saves backfilled. Replay branches
+adopt finalized timing only for new battles. See `docs/combat-round-finalization.md`
+for the listener audit and regression coverage. Publish matching viewer and engine
+only after the source push and green CI. Achievement catalog 8 / 46 entries,
+nonfaction art revision 4 and the 60 registered assets are unchanged.

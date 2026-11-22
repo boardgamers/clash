@@ -51,6 +51,8 @@ pub enum CombatRetreatState {
 pub struct Combat {
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub asynchronous_preparation: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub finalized_round_end: bool,
     pub attackers: Vec<u32>,
     pub retreat: CombatRetreatState,
     #[serde(default)]
@@ -64,6 +66,7 @@ impl Combat {
     pub fn new(attackers: Vec<u32>, can_retreat: bool, stats: CombatStats) -> Self {
         Self {
             asynchronous_preparation: false,
+            finalized_round_end: false,
             attackers,
             modifiers: vec![],
             retreat: if can_retreat {
@@ -227,6 +230,8 @@ pub fn initiate_combat(
     let index = crate::game_api::log_length(game);
     let from = *game.asynchronous_combat_from.get_or_insert(index);
     combat.asynchronous_preparation = index >= from;
+    let from = *game.finalized_combat_from.get_or_insert(index);
+    combat.finalized_round_end = index >= from;
     log_round(game, &combat);
     start_combat(game, combat);
 }
@@ -351,7 +356,13 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
                 c,
             );
             round_end.final_result = Some(result);
-            round_end.phase = CombatEventPhase::Default;
+            // A reveal-time battle result skips round-end tactics, but must still
+            // enter the correct ability/finalization pipeline for this battle.
+            round_end.phase = if round_end.combat.finalized_round_end {
+                CombatEventPhase::RoundEndModifiers
+            } else {
+                CombatEventPhase::Default
+            };
             round_end
         } else {
             let mut a = CombatRoundStats::roll(c.attacker(), &c, game, s.attacker_strength);

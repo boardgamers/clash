@@ -328,6 +328,72 @@ mod hit_reporting_tests {
     use super::*;
 
     #[test]
+    fn horse_master_tracks_one_activated_cavalry_face_and_actual_capped_bonus() {
+        use crate::{cache::Cache, game::GameContext, game_data::GameData};
+        let data: GameData =
+            serde_json::from_str(include_str!("../tests/test_games/combat/retreat.json")).unwrap();
+        let cache = Cache::new(&data.options);
+        let mut game = Game::from_data(data, cache, GameContext::Play);
+        crate::log::add_log_action(
+            &mut game,
+            crate::action::Action::Response(
+                crate::content::persistent_events::EventResponse::Bool(false),
+            ),
+        );
+        // One cavalry: a second cavalry icon is a plain face, not another activation.
+        for (dice, deny, cap, extra, expected_value, converted) in [
+            (vec![6, 2], false, false, 0, 8, Some(4)),
+            (vec![4, 6], false, false, 0, 9, Some(6)),
+            (vec![4, 8], false, false, 0, 10, Some(7)),
+            (vec![6, 2], true, false, 0, 6, None),
+            (vec![10, 9], false, false, 0, 11, None),
+            (vec![6, 2], false, true, 2, 8, Some(2)),
+            (vec![6, 2], false, true, 0, 8, Some(4)),
+            (vec![6, 2], false, false, 2, 10, Some(4)),
+        ] {
+            game.dice_roll_outcomes = dice;
+            // Only unit 1 is fighting (the fixture's cavalry), plus an extra die.
+            let result = roll(
+                &mut game,
+                0,
+                &vec![1],
+                1,
+                extra,
+                deny,
+                cap,
+                false,
+                &mut vec![],
+            );
+            assert_eq!(result.combat_value, expected_value);
+            assert_eq!(result.horse_master_value, converted);
+        }
+        game.player_mut(0)
+            .units
+            .iter_mut()
+            .find(|u| u.id == 0)
+            .unwrap()
+            .unit_type = Cavalry;
+        game.dice_roll_outcomes = vec![6, 2];
+        let result = roll(
+            &mut game,
+            0,
+            &vec![0, 1],
+            0,
+            0,
+            false,
+            false,
+            false,
+            &mut vec![],
+        );
+        assert_eq!(result.combat_value, 10);
+        assert_eq!(
+            result.horse_master_value,
+            Some(4),
+            "only one of two activated cavalry converts"
+        );
+    }
+
+    #[test]
     fn hit_reports_preserve_uncapped_arithmetic_without_changing_casualties() {
         for (value, cancels, extra, fighters, casualties) in [
             (29, 1, 0, 3, 3),

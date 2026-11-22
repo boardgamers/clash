@@ -222,11 +222,14 @@ fn replay_format_boundary_is_explicit_and_absent_in_historical_records() {
     let replayed =
         server::replay::replay(serde_json::from_value(v.clone()).unwrap(), None).unwrap();
     assert_eq!(replayed.asynchronous_combat_from, Some(0));
+    assert_eq!(replayed.finalized_combat_from, Some(0));
+    v.as_object_mut().unwrap().remove("finalized_combat_from");
     v.as_object_mut()
         .unwrap()
         .remove("asynchronous_combat_from");
     let legacy = server::replay::replay(serde_json::from_value(v).unwrap(), None).unwrap();
     assert!(legacy.asynchronous_combat_from.unwrap() > server::game_api::log_length(&legacy));
+    assert!(legacy.finalized_combat_from.unwrap() > server::game_api::log_length(&legacy));
 }
 
 #[test]
@@ -290,8 +293,11 @@ fn historical_combat_replay_branches_enable_new_battles() {
     let round = &data(&open)["events"][0]["event_type"]["CombatRoundStart"];
     assert_eq!(round["combat"]["asynchronous_preparation"], Value::Null);
     assert_eq!(open.asynchronous_combat_from, Some(218));
+    assert_eq!(open.finalized_combat_from, Some(218));
+    assert_eq!(round["combat"]["finalized_round_end"], Value::Null);
     let before = historical_replay(216);
     assert_eq!(before.asynchronous_combat_from, Some(217));
+    assert_eq!(before.finalized_combat_from, Some(217));
     let next = play(
         before,
         0,
@@ -299,6 +305,7 @@ fn historical_combat_replay_branches_enable_new_battles() {
     );
     let round = &data(&next)["events"][0]["event_type"]["CombatRoundStart"];
     assert_eq!(round["combat"]["asynchronous_preparation"], json!(true));
+    assert_eq!(round["combat"]["finalized_round_end"], json!(true));
     // The newly recorded switch survives replay of the branched history.
     let again = server::replay::replay(serde_json::from_value(data(&next)).unwrap(), None).unwrap();
     assert_eq!(data(&again)["events"], data(&next)["events"]);
@@ -332,6 +339,10 @@ fn historical_combat_replay_branches_enable_new_battles() {
         data(&next)["events"][0]["event_type"]["CombatRoundStart"]["combat"]["asynchronous_preparation"],
         json!(true)
     );
+    assert_eq!(
+        data(&next)["events"][0]["event_type"]["CombatRoundStart"]["combat"]["finalized_round_end"],
+        json!(true)
+    );
 
     // A branch earlier than the original history's switch cannot inherit it.
     let earlier = historical_replay(167);
@@ -344,33 +355,44 @@ fn historical_combat_replay_branches_enable_new_battles() {
         data(&next)["events"][0]["event_type"]["CombatRoundStart"]["combat"]["asynchronous_preparation"],
         json!(true)
     );
+    assert_eq!(
+        data(&next)["events"][0]["event_type"]["CombatRoundStart"]["combat"]["finalized_round_end"],
+        json!(true)
+    );
 }
 
 #[test]
 fn undo_redo_preserves_history_boundary_but_replacing_future_clamps_it() {
     let mut g = server::game_api::init(2, "combat-undo-boundary".into(), Default::default());
     g.asynchronous_combat_from = Some(100);
+    g.finalized_combat_from = Some(100);
     let player = g.active_player();
     let action = json!({"Playing":{"Advance":{"advance":"Storage","payment":{"food":2}}}});
     let paid = play(g, player, action.clone());
     let undone = play(paid, player, json!("Undo"));
     assert_eq!(undone.asynchronous_combat_from, Some(100));
+    assert_eq!(undone.finalized_combat_from, Some(100));
     let redone = play(undone, player, json!("Redo"));
     assert_eq!(redone.asynchronous_combat_from, Some(100));
+    assert_eq!(redone.finalized_combat_from, Some(100));
     let undone = play(redone, player, json!("Undo"));
     let next = server::game_api::log_length(&undone) + 1;
     let branched = play(undone, player, action);
     assert_eq!(branched.asynchronous_combat_from, Some(next));
+    assert_eq!(branched.finalized_combat_from, Some(next));
     let undone = play(branched, player, json!("Undo"));
     assert_eq!(undone.asynchronous_combat_from, Some(next));
+    assert_eq!(undone.finalized_combat_from, Some(next));
     let redone = play(undone, player, json!("Redo"));
     assert_eq!(redone.asynchronous_combat_from, Some(next));
+    assert_eq!(redone.finalized_combat_from, Some(next));
 }
 
 #[test]
 fn undo_redo_of_a_branched_battle_keeps_new_preparation() {
     let mut v = fixture("tactics_cards/peltasts");
     v["asynchronous_combat_from"] = json!(100);
+    v["finalized_combat_from"] = json!(100);
     for p in [0, 1] {
         v["players"][p]["advances"]
             .as_array_mut()
@@ -391,11 +413,19 @@ fn undo_redo_of_a_branched_battle_keeps_new_preparation() {
         expected["events"][0]["event_type"]["CombatRoundStart"]["combat"]["asynchronous_preparation"],
         json!(true)
     );
+    assert_eq!(
+        expected["events"][0]["event_type"]["CombatRoundStart"]["combat"]["finalized_round_end"],
+        json!(true)
+    );
     let undone = play(branch, 0, json!("Undo"));
     let redone = play(undone, 0, json!("Redo"));
     assert_eq!(data(&redone)["events"], expected["events"]);
     assert_eq!(
         data(&redone)["asynchronous_combat_from"],
         expected["asynchronous_combat_from"]
+    );
+    assert_eq!(
+        data(&redone)["finalized_combat_from"],
+        expected["finalized_combat_from"]
     );
 }

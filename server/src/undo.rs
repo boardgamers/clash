@@ -5,7 +5,7 @@ use crate::movement::execute_movement_action;
 use json_patch::{PatchOperation, patch};
 use serde_json::Value;
 
-const IGNORE_PATHS: [&str; 8] = [
+const IGNORE_PATHS: [&str; 9] = [
     "/calendar_knowledge",
     "/log/",
     "/log_index",
@@ -17,6 +17,7 @@ const IGNORE_PATHS: [&str; 8] = [
     // Once a new branch replaces old actions, undo must not restore their switch
     // point and accidentally make redo execute a newly recorded battle as legacy.
     "/asynchronous_combat_from",
+    "/finalized_combat_from",
 ];
 
 pub(crate) fn clean_patch(mut patch: Vec<PatchOperation>) -> Vec<PatchOperation> {
