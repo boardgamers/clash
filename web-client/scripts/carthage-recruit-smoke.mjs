@@ -15,19 +15,29 @@ for (const tile of initial.map.tiles) tile[1] = tile[0] === 'D2' ? 'Fertile' : '
 const browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader'] });
 try {
   for (const width of [1400, 390]) {
-    for (const payment of [
-      { food: 1, gold: 2 },
-      { food: 1, gold: 1, mood_tokens: 1 },
-      { food: 1, gold: 1, culture_tokens: 1 },
+    for (const [payment, manual, stock] of [
+      [{ food: 1, gold: 2 }, false],
+      [{ food: 1, gold: 1, mood_tokens: 1 }, false],
+      [{ food: 1, gold: 1, culture_tokens: 1 }, false],
+      [{ food: 1, wood: 2, gold: 1 }, true],
+      [{ culture_tokens: 2, mood_tokens: 1 }, false,
+        { food: 3, wood: 2, gold: 3, culture_tokens: 2, mood_tokens: 2 }],
     ]) {
       const state = structuredClone(initial);
-      // Keep the regular payment available too, so the picker must be used.
-      state.players[seat].resources = { wood: 2, ...payment };
+      // Rich competing stock: regular remains legal, discounted is recommended.
+      state.players[seat].resources = stock ?? { ...payment, wood: 2, gold: 3 };
       const stripped = engine.stripSecret(JSON.stringify(state), seat);
       const offer = JSON.parse(engine.webQuery(stripped, seat, JSON.stringify({
         kind: 'recruit', city: 'D2', units: { elephants: 1, ships: 1 }, replaced: [], payment,
       })));
       assert.deepEqual(offer.payment, payment);
+      const recommended = JSON.parse(engine.webQuery(stripped, seat, JSON.stringify({
+        kind: 'recruit', city: 'D2', units: { elephants: 1, ships: 1 }, replaced: [], includePayments: true,
+      })));
+      const expected = manual ? { food: 1, gold: 2 } : payment;
+      assert.deepEqual(recommended.payment, expected);
+      assert.deepEqual(recommended.action.Playing.Recruit.payment, expected);
+      assert.deepEqual(recommended.payments[0], expected);
       const page = await browser.newPage({ viewport: { width, height: 900 } });
       const errors = [];
       page.on('pageerror', (error) => errors.push(error.message));
@@ -55,15 +65,15 @@ try {
       await city.getByRole('button', { name: 'Add Ship', exact: true }).click();
       const picker = city.getByRole('group', { name: 'Recruitment payment', exact: true });
       await picker.waitFor();
-      if (await picker.locator('select').count()) {
-        await picker.getByLabel('Wood amount for Recruitment payment', { exact: true }).selectOption('0');
+      if (manual && await picker.locator('select').count()) {
+        await picker.getByLabel('Wood amount for Recruitment payment', { exact: true }).selectOption('2');
         if (payment.culture_tokens)
           await picker.getByLabel('Culture amount for Recruitment payment', { exact: true }).selectOption('1');
         if (payment.mood_tokens)
           await picker.getByLabel('Mood amount for Recruitment payment', { exact: true }).selectOption('1');
         await picker.getByLabel('Food amount for Recruitment payment', { exact: true }).selectOption('1');
         await picker.getByLabel('Gold amount for Recruitment payment', { exact: true }).selectOption(String(payment.gold));
-      } else {
+      } else if (manual) {
         const name = 'Pay ' + Object.entries(offer.payment).map(([key, value]) =>
           `${value} ${key === 'mood_tokens' ? 'mood' : key === 'culture_tokens' ? 'culture' : key}`).join(' + ');
         await picker.getByRole('button', { name, exact: true }).click();
@@ -80,7 +90,7 @@ try {
       for (const [key, amount] of Object.entries(payment))
         assert.equal(after.players[seat].resources[key] ?? 0, state.players[seat].resources[key] - amount);
       assert.deepEqual(errors, []);
-      console.log(`${width}px: combined Elephant + Ship ${JSON.stringify(payment)} selected, retained and executed`);
+      console.log(`${width}px: combined Elephant + Ship ${JSON.stringify(payment)} ${manual ? "manual regular" : "automatic discounted"}, retained and executed`);
       await page.close();
     }
   }

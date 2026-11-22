@@ -20,6 +20,18 @@ fn cost(
     liberties: bool,
     leader: bool,
 ) -> PaymentOptions {
+    cost_without_advances(elephants, ships, infantry, market, liberties, leader, &[])
+}
+
+fn cost_without_advances(
+    elephants: u8,
+    ships: u8,
+    infantry: u8,
+    market: bool,
+    liberties: bool,
+    leader: bool,
+    omitted: &[&str],
+) -> PaymentOptions {
     let mut data: serde_json::Value = serde_json::from_str(include_str!(
         "test_games/civilizations/greece/sparta_draft.json"
     ))
@@ -39,6 +51,10 @@ fn cost(
     if market {
         p["cities"][0]["city_pieces"]["market"] = 0.into();
     }
+    p["advances"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|advance| !omitted.contains(&advance.as_str().unwrap()));
     let data: GameData = serde_json::from_value(data).unwrap();
     let cache = Cache::new(&data.options);
     let game = Game::from_data(data, cache, GameContext::Play);
@@ -147,18 +163,129 @@ fn warbeasts_keeps_civil_liberties_mixed_tokens_and_reserved_leader_mood() {
 }
 
 #[test]
-fn ship_only_regular_default_and_elephant_only_remain_unchanged() {
+fn ship_recommends_discount_but_regular_default_and_elephant_only_remain_unchanged() {
     let ship = cost(0, 1, 0, false, false, false);
     assert_eq!(ship.default, R::wood(2));
     legal(&ship, R::gold(1));
     legal(&ship, R::mood_tokens(1));
     assert_eq!(
         ship.first_valid_payment(&(R::wood(2) + R::gold(2))),
-        Some(R::wood(2))
+        Some(R::gold(1))
     );
     let elephant = cost(1, 0, 0, false, false, false);
     assert_eq!(elephant.default, R::food(1) + R::gold(1));
     assert!(elephant.alternatives.is_empty());
     legal(&elephant, R::food(1) + R::culture_tokens(1));
     assert!(!elephant.is_valid_payment(&R::food(2)));
+}
+
+#[test]
+fn rich_stocks_recommend_fewer_items_then_gold_then_native_order() {
+    for market in [false, true] {
+        let cost = cost(1, 1, 0, market, false, false);
+        let regular = cost.default.clone();
+        for (stock, expected) in [
+            (
+                R::food(3) + R::wood(2) + R::gold(3),
+                if market {
+                    R::food(2) + R::gold(1)
+                } else {
+                    R::food(1) + R::gold(2)
+                },
+            ),
+            (
+                R::food(3) + R::wood(2) + R::gold(3) + R::mood_tokens(2),
+                if market {
+                    R::food(2) + R::mood_tokens(1)
+                } else {
+                    R::food(1) + R::gold(1) + R::mood_tokens(1)
+                },
+            ),
+            (
+                R::food(3) + R::wood(2) + R::gold(3) + R::mood_tokens(2) + R::culture_tokens(2),
+                if market {
+                    R::food(2) + R::mood_tokens(1)
+                } else {
+                    R::culture_tokens(2) + R::mood_tokens(1)
+                },
+            ),
+        ] {
+            assert_eq!(cost.first_valid_payment(&stock), Some(expected.clone()));
+            assert!(cost.is_valid_payment(&expected));
+            assert!(
+                cost.is_valid_payment(&regular),
+                "manual regular remains legal"
+            );
+            assert_eq!(cost.default, regular);
+            let mut choices = vec![R::empty(), regular.clone(), expected.clone(), R::empty()];
+            cost.order_paid_choices(&mut choices, &stock);
+            assert_eq!(
+                choices,
+                vec![R::empty(), expected, regular.clone(), R::empty()]
+            );
+            let once = choices.clone();
+            cost.order_paid_choices(&mut choices, &stock);
+            assert_eq!(choices, once);
+        }
+    }
+}
+
+#[test]
+fn liberties_equal_quantity_keeps_native_resources_and_leader_mood_reserved() {
+    let ship = cost(0, 1, 0, false, true, false);
+    let stock = R::wood(2) + R::gold(3) + R::mood_tokens(3) + R::culture_tokens(3);
+    assert_eq!(ship.first_valid_payment(&stock), Some(R::wood(2)));
+    let with_leader = cost(1, 1, 0, false, false, true);
+    let stock = R::food(2) + R::wood(2) + R::gold(4) + R::mood_tokens(3) + R::culture_tokens(3);
+    let chosen = with_leader.first_valid_payment(&stock).unwrap();
+    assert!(with_leader.is_valid_payment(&chosen));
+    assert_eq!(chosen, R::culture_tokens(3) + R::mood_tokens(2));
+    assert_eq!(ship.first_valid_payment(&R::wood(2)), Some(R::wood(2)));
+    assert_eq!(ship.first_valid_payment(&R::food(1)), None);
+}
+
+#[test]
+fn recommendation_metadata_round_trips_and_legacy_defaults_to_native() {
+    use server::payment::PaymentRecommendation;
+    let scoped = cost(0, 1, 0, false, false, false);
+    assert_eq!(scoped.recommendation, PaymentRecommendation::Mercenaries);
+    let mut json = serde_json::to_value(&scoped).unwrap();
+    assert_eq!(
+        serde_json::from_value::<PaymentOptions>(json.clone()).unwrap(),
+        scoped
+    );
+    json.as_object_mut().unwrap().remove("recommendation");
+    let legacy: PaymentOptions = serde_json::from_value(json).unwrap();
+    assert_eq!(legacy.recommendation, PaymentRecommendation::Native);
+    assert!(
+        serde_json::to_value(&legacy)
+            .unwrap()
+            .get("recommendation")
+            .is_none()
+    );
+    assert_eq!(
+        legacy.first_valid_payment(&(R::wood(2) + R::gold(2))),
+        Some(R::wood(2))
+    );
+    assert_eq!(
+        cost(1, 0, 0, false, false, false).recommendation,
+        PaymentRecommendation::Native
+    );
+}
+
+#[test]
+fn absent_mercenaries_keeps_regular_ship_and_tactics_does_not_change_draft_pricing() {
+    use server::payment::PaymentRecommendation;
+    let ship = cost_without_advances(0, 1, 0, false, false, false, &["Draft"]);
+    assert_eq!(ship.recommendation, PaymentRecommendation::Native);
+    assert_eq!(
+        ship.first_valid_payment(&(R::wood(2) + R::gold(3))),
+        Some(R::wood(2))
+    );
+    let infantry = cost_without_advances(0, 0, 1, false, false, false, &["Tactics"]);
+    assert_eq!(infantry, cost(0, 0, 1, false, false, false));
+    assert_eq!(
+        infantry.first_valid_payment(&(R::food(1) + R::ore(1) + R::gold(2))),
+        Some(R::gold(1))
+    );
 }

@@ -1776,3 +1776,14 @@ adopt finalized timing only for new battles. See `docs/combat-round-finalization
 for the listener audit and regression coverage. Publish matching viewer and engine
 only after the source push and green CI. Achievement catalog 8 / 46 entries,
 nonfaction art revision 4 and the 60 registered assets are unchanged.
+
+# Viewer 0.1.236 / engine 0.4.167 — Mercenaries payment recommendations
+
+Eligible Carthaginian Mercenaries recruitment recommends the fewest total items,
+then least gold, then native deterministic conversion order. Printed costs and
+manual legal payments remain unchanged; all other payments retain native policy.
+Old costs without recommendation metadata default to Native. Abundant-token ties
+can recommend 2 culture + 1 mood; no extra token-conservation policy is introduced.
+See `docs/mercenaries-payment-recommendation.md`. Publish matching viewer and engine
+only after both exact-commit Check and Web viewer workflows succeed. No saved-game
+migration, backfill, or live-game writes are required. Catalog and art are unchanged.

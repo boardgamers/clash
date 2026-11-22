@@ -1187,8 +1187,11 @@ test('Warbeasts and Mercenaries offer and execute combined Elephant and Ship pay
     if (market) p.cities[0].city_pieces.market = index;
     const units = { elephants: 1, ships: 1 };
     const offer = query(g, { kind: 'recruit', city: 'D2', units, replaced: [] });
-    assert.deepEqual(offer.payments.map((p: any) => p.gold ?? 0),
-      offer.payments.map((p: any) => p.gold ?? 0).sort((a: number, b: number) => a - b));
+    const ranks = offer.payments.map((payment: Record<string, number>) => [
+      Object.values(payment).reduce((total, amount) => total + amount, 0), payment.gold ?? 0,
+    ]);
+    assert.deepEqual(ranks, [...ranks].sort((a: number[], b: number[]) => a[0] - b[0] || a[1] - b[1]));
+    assert.deepEqual(offer.payments[0], offer.payment, 'Native recommendation wins equal-rank ties');
     for (const payment of offer.payments) {
       const selected = query(g, { kind: 'recruit', city: 'D2', units, replaced: [], payment });
       assert.deepEqual(selected.payment, payment);
@@ -1215,7 +1218,10 @@ test('Warbeasts and Mercenaries offer and execute combined Elephant and Ship pay
         assert.throws(() => query(g, { kind: 'recruit', city: 'D2', units, replaced: [], payment }));
     }
     const ship = query(g, { kind: 'recruit', city: 'D2', units: { ships: 1 }, replaced: [] });
-    assert.deepEqual(ship.payment, { wood: 2 }, 'Do not broaden default-payment discount policy');
+    assert.deepEqual(ship.payment, { mood_tokens: 1 }, 'Mercenaries minimizes items, then gold');
+    const regular = query(g, { kind: 'recruit', city: 'D2', units: { ships: 1 }, replaced: [], payment: { wood: 2 } });
+    assert.deepEqual(regular.payment, { wood: 2 }, 'Explicit regular payment remains unchanged');
+    assert.doesNotThrow(() => move(g, regular.action));
   }
 });
 test('Warbeasts and Mercenaries retain Sanitation for a separately recruited Settler', async () => {

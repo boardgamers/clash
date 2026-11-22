@@ -72,8 +72,25 @@ impl PaymentConversion {
     }
 }
 
+/// Recommendation policy only; never changes printed costs or legal payments.
+#[derive(Serialize, Deserialize, Clone, Copy, Default, PartialEq, Eq, Debug, Hash)]
+pub enum PaymentRecommendation {
+    #[default]
+    Native,
+    Mercenaries,
+}
+
+impl PaymentRecommendation {
+    #[allow(clippy::trivially_copy_pass_by_ref)] // serde's skip predicate takes a reference
+    fn is_native(&self) -> bool {
+        *self == Self::Native
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentOptions {
+    #[serde(default, skip_serializing_if = "PaymentRecommendation::is_native")]
+    pub recommendation: PaymentRecommendation,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub alternatives: Vec<ResourcePile>,
     pub default: ResourcePile,
@@ -100,6 +117,7 @@ impl PaymentOptions {
         origin: EventOrigin,
     ) -> Self {
         PaymentOptions {
+            recommendation: PaymentRecommendation::Native,
             alternatives: Vec::new(),
             default,
             separate_fee: Vec::new(),
@@ -112,17 +130,37 @@ impl PaymentOptions {
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
         let mut payment = self.find_payment(available, false)?;
+        let scoped = self.recommendation == PaymentRecommendation::Mercenaries;
+        let mut budget = u16::MAX;
+        if scoped {
+            let mut lower = 0;
+            let mut upper = payment_amounts(&payment)[8];
+            while lower < upper {
+                let mid = lower + (upper - lower) / 2;
+                if let Some(candidate) = self.find_payment_bounded(available, false, mid) {
+                    upper = payment_amounts(&candidate)[8];
+                    payment = candidate;
+                } else {
+                    lower = mid + 1;
+                }
+            }
+            budget = upper;
+        }
         // The conversion search proves legality, but its first route may mix in
         // gold even when more of the ordinary resources are available (research
         // can take one food, then one gold, before trying two food). Recommend
         // conserving wildcard gold without changing that search's exact-payment
         // semantics or enumerating every possible payment. Keep printed gold.
-        let mut lower = self.default.gold.min(payment.gold);
+        let mut lower = if scoped {
+            0
+        } else {
+            self.default.gold.min(payment.gold)
+        };
         let mut upper = payment.gold;
         let mut limited = available.clone();
         while lower < upper {
             limited.gold = lower + (upper - lower) / 2;
-            if let Some(candidate) = self.find_payment(&limited, false) {
+            if let Some(candidate) = self.find_payment_bounded(&limited, false, budget) {
                 upper = candidate.gold;
                 payment = candidate;
             } else {
@@ -133,7 +171,8 @@ impl PaymentOptions {
     }
 
     /// Order already-enumerated paid choices without changing their membership.
-    /// Conserve gold, then prefer the engine's native recommendation; keep other
+    /// Apply the scoped quantity policy if present, conserve gold, then prefer
+    /// the engine's native recommendation; keep other
     /// ties stable. Empty choices (including optional declines) stay in place.
     /// Callers presenting rewards must retain their original enumeration order.
     pub fn order_paid_choices(&self, choices: &mut [ResourcePile], available: &ResourcePile) {
@@ -143,13 +182,32 @@ impl PaymentOptions {
             .filter(|p| !p.is_empty())
             .cloned()
             .collect::<Vec<_>>();
-        paid.sort_by_key(|payment| (payment.gold, Some(payment) != recommended.as_ref()));
+        paid.sort_by_key(|payment| {
+            (
+                if self.recommendation == PaymentRecommendation::Mercenaries {
+                    payment_amounts(payment)[8]
+                } else {
+                    0
+                },
+                payment.gold,
+                Some(payment) != recommended.as_ref(),
+            )
+        });
         for (choice, payment) in choices.iter_mut().filter(|p| !p.is_empty()).zip(paid) {
             *choice = payment;
         }
     }
 
     fn find_payment(&self, available: &ResourcePile, exact: bool) -> Option<ResourcePile> {
+        self.find_payment_bounded(available, exact, u16::MAX)
+    }
+
+    fn find_payment_bounded(
+        &self,
+        available: &ResourcePile,
+        exact: bool,
+        budget: u16,
+    ) -> Option<ResourcePile> {
         if let Some(default_fee) = self.separate_fee.first() {
             let mut remainder = self.clone();
             remainder.default -= default_fee.clone();
@@ -164,7 +222,11 @@ impl PaymentOptions {
                 let mut remaining = available.clone();
                 remaining -= fee.clone();
                 remainder
-                    .find_payment(&remaining, exact)
+                    .find_payment_bounded(
+                        &remaining,
+                        exact,
+                        budget.checked_sub(payment_amounts(fee)[8])?,
+                    )
                     .map(|payment| payment + fee.clone())
             });
         }
@@ -175,7 +237,7 @@ impl PaymentOptions {
                 .chain(self.alternatives.iter())
                 .find_map(|cost| {
                     option.default = cost.clone();
-                    option.find_payment(available, exact)
+                    option.find_payment_bounded(available, exact, budget)
                 });
         }
         let discount_left = self
@@ -193,7 +255,8 @@ impl PaymentOptions {
                 }
             })
             .sum::<u8>();
-        if discount_left == 0
+        if payment_amounts(&self.default)[8] <= budget
+            && discount_left == 0
             && if exact {
                 available == &self.default
             } else {
@@ -213,7 +276,7 @@ impl PaymentOptions {
             .iter()
             .permutations(self.conversions.len())
             .find_map(|conversions| {
-                find_conversion(
+                find_conversion_bounded(
                     available,
                     &self.default,
                     &conversions,
@@ -221,6 +284,7 @@ impl PaymentOptions {
                     discount_left,
                     may_overpay,
                     exact,
+                    budget,
                 )
             })
     }
@@ -571,6 +635,29 @@ fn find_conversion(
     may_overpay: bool,
     exact: bool,
 ) -> Option<ResourcePile> {
+    find_conversion_bounded(
+        available,
+        current,
+        conversions,
+        skip_from,
+        discount_left,
+        may_overpay,
+        exact,
+        u16::MAX,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn find_conversion_bounded(
+    available: &ResourcePile,
+    current: &ResourcePile,
+    conversions: &[&PaymentConversion],
+    skip_from: usize,
+    discount_left: u8,
+    may_overpay: bool,
+    exact: bool,
+    budget: u16,
+) -> Option<ResourcePile> {
     // Flatten in exactly the old traversal order. Bounds for each suffix are
     // built once, instead of rescanning conversions at every search node.
     let mut steps: Vec<_> = conversions
@@ -600,9 +687,11 @@ fn find_conversion(
         }
         step.bounds = bounds;
     }
+    let mut available_amounts = payment_amounts(available);
+    available_amounts[8] = available_amounts[8].min(budget);
     find_payment_steps(
         available,
-        &payment_amounts(available),
+        &available_amounts,
         current,
         &steps,
         discount_left,
@@ -620,11 +709,13 @@ fn find_payment_steps(
     may_overpay: bool,
     exact: bool,
 ) -> Option<ResourcePile> {
-    if (if exact {
-        available == current
-    } else {
-        available.has_at_least(current)
-    }) && (discount_left == 0 || may_overpay)
+    if payment_amounts(current)[8] <= available_amounts[8]
+        && (if exact {
+            available == current
+        } else {
+            available.has_at_least(current)
+        })
+        && (discount_left == 0 || may_overpay)
     {
         return Some(current.clone());
     }
@@ -705,6 +796,46 @@ pub(crate) fn base_resources() -> Vec<ResourcePile> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn scoped_quantity_budget_covers_conversions_and_separate_fees() {
+        let mut cost = PaymentOptions::fixed_resources(
+            ResourcePile::food(4) + ResourcePile::mood_tokens(1),
+            check_event_origin(),
+        );
+        cost.recommendation = PaymentRecommendation::Mercenaries;
+        cost.separate_fee = vec![
+            ResourcePile::mood_tokens(1),
+            ResourcePile::culture_tokens(1),
+        ];
+        cost.conversions.push(PaymentConversion::limited(
+            ResourcePile::food(2),
+            ResourcePile::gold(1),
+            2,
+        ));
+        let stock = ResourcePile::food(4) + ResourcePile::gold(4) + ResourcePile::culture_tokens(1);
+        assert_eq!(
+            cost.first_valid_payment(&stock),
+            Some(ResourcePile::gold(2) + ResourcePile::culture_tokens(1))
+        );
+        assert!(cost.is_valid_payment(&(ResourcePile::food(4) + ResourcePile::culture_tokens(1))));
+        // The recommendation is not derived from a bounded enumerated choice list.
+        // Exhaust the small exact-payment space independently and compare its optimum.
+        let mut optimum = None;
+        for food in 0..=4 {
+            for gold in 0..=4 {
+                let payment = ResourcePile::food(food)
+                    + ResourcePile::gold(gold)
+                    + ResourcePile::culture_tokens(1);
+                if cost.is_valid_payment(&payment) {
+                    let key = (payment_amounts(&payment)[8], gold);
+                    optimum = Some(optimum.map_or(key, |old| std::cmp::min(old, key)));
+                }
+            }
+        }
+        let chosen = cost.first_valid_payment(&stock).unwrap();
+        assert_eq!(optimum, Some((payment_amounts(&chosen)[8], chosen.gold)));
+    }
+
     #[test]
     fn paid_choice_order_preserves_empty_slots_and_native_research_preference() {
         let cost = payment_options_sum(

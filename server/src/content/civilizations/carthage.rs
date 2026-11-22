@@ -236,6 +236,7 @@ fn mercenaries() -> SpecialAdvanceInfo {
                         alternative += ResourcePile::mood_tokens(draft - gold) + ResourcePile::gold(gold);
                         if !cost.cost.alternatives.contains(&alternative) {
                             cost.cost.alternatives.push(alternative);
+                            cost.cost.recommendation = crate::payment::PaymentRecommendation::Mercenaries;
                         }
                     }
                 }
