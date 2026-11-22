@@ -364,6 +364,7 @@ export interface View {
     player: number;
     enabled: boolean;
     routes: { from: string; to: string; unit: number | null }[];
+    raidedSettlers?: { position: string; unit: number }[];
   }[];
   regions?: { id: number; homePlayer: number | null; tiles: string[] }[];
   seaRoutes?: string[][];

@@ -42,6 +42,9 @@
   const cityMountainStop = $derived(ownCity?.size === 1 && !!publicCity?.nomad_mountain);
   const ownUnits = $derived($session.view?.units?.filter((u) => u.position === position) ?? []);
   const settler = $derived($session.view?.settlers.find((u) => u.position === position));
+  const raided = $derived($session.tradeRoutes && $session.mode === 'overview' &&
+    $session.view?.tradeRoutes?.find(p => p.player === ($session.tradeRoutePlayer ?? $session.seat ?? $session.view?.activePlayer))
+      ?.raidedSettlers?.some(source => source.position === position));
   const canMove = $derived(canMoveOnMap($session.view, $session.game));
   const origins = $derived.by(() => {
     // Recompute when the filtered game state changes, never from hidden state.
@@ -135,6 +138,7 @@
           </button>{/each}
       </div>
     {:else}<TileUnits players={$session.game?.players ?? []} {position} />{/if}
+    {#if raided}<p class="city-rule raided-settlers-note"><UnitIcon type="Settler" size={16} />Settlers blocked by Huns’ Raiders</p>{/if}
     {#if settler && !publicCity}<FoundCityAction {controller} {settler} />{/if}
     {#each $session.view?.players ?? [] as player}
       {#each player.leaders?.filter((l) => l.position === position) ?? [] as leader}

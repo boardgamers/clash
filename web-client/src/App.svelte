@@ -7,6 +7,7 @@
   import CollectionBonusHints from './CollectionBonusHints.svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
   import MapGuide from './MapGuide.svelte';
+  import UnitIcon from './UnitIcon.svelte';
   import CitySiteIcon from './CitySiteIcon.svelte';
   import PlaybackPanel from './PlaybackPanel.svelte';
   import CardReferenceDialog from './CardReferenceDialog.svelte';
@@ -1101,12 +1102,14 @@
               {#if !guide?.enabled}<p>Requires Trade Routes.</p>
               {:else if !guide.routes.length}<p>No eligible trade routes.</p>
               {:else}
-                <p>Current eligible pairings · {guide.routes.length}</p>
                 {#each guide.routes as route}
                   <div><button class="coordinate-link" onclick={() => world?.locateCoordinate(route.from)}>{route.from}</button>
                     → <button class="coordinate-link" onclick={() => world?.locateCoordinate(route.to)}>{route.to}</button></div>
                 {/each}
                 <p>Routes are recalculated at the start of your turn.</p>
+              {/if}
+              {#if guide?.enabled && guide.raidedSettlers?.length}
+                <p class="raided-settlers-guide"><UnitIcon type="Settler" size={16} />Settlers blocked by Huns’ Raiders</p>
               {/if}
             </MapGuide>
           {/if}
@@ -1312,6 +1315,7 @@
           >
         {/if}
       </div>
+      {#if $session.seat !== undefined}
       <nav class="board-actions" aria-label="Actions">
         <button
           class:active={$session.mode === 'collect'}
@@ -1473,6 +1477,7 @@
           }}><Flag size={19} /><span>End turn</span></button
         >
       </nav>
+      {/if}
       {#if queueControls?.pending && !queueControls.waiting && queueControls.seat === 0}
         <div class="concurrent-choice-row">
           <span class="concurrent-choice-copy"><span><strong>{queueControls.other}</strong> · <span>{queueControls.label ?? 'Placing a settler'}</span></span>{#if queueControls.queued}<strong>{queueControls.queued} queued{queueControls.ended ? ' · End turn queued' : ''}</strong>{/if}</span>

@@ -2613,6 +2613,56 @@ test('exploration previews four tiles before a second destination click submits'
   }
 });
 
+test('spectator map guides keep inspection separate from seats, moves and private hands', async () => {
+  const app = paymentController(), c = app.controller;
+  try {
+    c.setPlayer(undefined);
+    const raw = JSON.parse(fixture('advances/trade_routes'));
+    const dealt = JSON.parse(await engine.init(2, [], {}, 'spectator-private', {}));
+    for (const index of [0, 1]) {
+      raw.players[index].action_cards = dealt.players[index].action_cards;
+      raw.players[index].objective_cards = dealt.players[index].objective_cards;
+      assert(raw.players[index].objective_cards.length > 0);
+    }
+    const publicState = engine.stripSecret(JSON.stringify(raw), undefined);
+    await c.load(publicState);
+    const game = app.session().game;
+    const active = app.session().view!.activePlayer;
+    const assertPublic = () => {
+      const s = app.session();
+      assert.equal(s.seat, undefined);
+      assert.equal(s.view!.activePlayer, active);
+      assert.equal(s.view!.canPlay, false);
+      assert.deepEqual(s.view!.cities, []);
+      assert.deepEqual(s.view!.objectiveCards, []);
+      assert.deepEqual(s.view!.wonderCards, []);
+      assert.equal(s.view!.actionCards?.length ?? 0, 0);
+      assert.equal(s.game, game, 'inspection does not reload as the selected player');
+      for (const player of s.game!.players.slice(0, 2)) {
+        assert(player.objective_cards?.every(id => id === 0), 'private objective identities stay stripped');
+      }
+    };
+    for (const player of app.session().view!.players) {
+      c.showTradeRoutes();
+      c.patch({ tradeRoutePlayer: player.index, showRegions: true, regionPlayer: player.index });
+      assertPublic();
+      c.showTradeRoutes(false);
+      c.showTradeRoutes();
+      assert.equal(app.session().tradeRoutePlayer, player.index, 'explicit inspection survives reopening');
+      c.showSeaRoutes();
+      c.showPirateSpawns();
+      c.setPirateSpawnPlayer(player.index);
+      c.showPirateSpawns(true, 'barbarians');
+      c.toggleMapView();
+      c.selectTile('C2');
+      c.submit({ Playing: 'EndTurn' });
+      assertPublic();
+    }
+    assert.deepEqual(app.sent, []);
+    assert.deepEqual(app.settings, []);
+  } finally { app.close(); }
+});
+
 test('trade-route toggle is read-only and exclusive with other map guides', async () => {
   const app = paymentController(),
     c = app.controller;

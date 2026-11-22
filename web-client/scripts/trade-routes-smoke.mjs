@@ -33,7 +33,9 @@ try {
   await page.evaluate(state=>{window.host=clash3d.launch('#app');window.sent=[];host.on('move',a=>sent.push(a));host.emit('player',{index:1});host.emit('theme',{dark:true});host.emit('preferences',{sound:false});host.emit('state',state)},engine.stripSecret(JSON.stringify(state),1));
   await page.getByRole('button',{name:'Show trade routes',exact:true}).click();
   const guide=page.locator('.pirate-spawn-key').filter({has:page.getByRole('combobox',{name:'Trade route player'})});
-  await guide.getByText('Current eligible pairings · 2',{exact:true}).waitFor();
+  await guide.locator('.coordinate-link').first().waitFor();
+  assert.equal(await guide.locator('.coordinate-link').count(),4,'both valid route pairings remain');
+  assert.doesNotMatch(await guide.textContent(),/Current eligible pairings/);
   const box=await guide.boundingBox();assert(box.x>=0 && box.x+box.width<=width+1);
   await page.screenshot({path:`/tmp/clash-trade-guide-${width}.png`});
   await guide.getByRole('combobox').selectOption('0');

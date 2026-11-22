@@ -1427,7 +1427,11 @@ export class Controller {
   showTradeRoutes(show = true) {
     this.closeActivity();
     const s = get(this.session);
-    this.patch({ tradeRoutes: show, tradeRoutePlayer: s.seat ?? s.view?.activePlayer,
+    // Inspection civilization is independent of the viewer seat and turn owner.
+    // Keep an explicit selection when reopening the guide (including spectators).
+    const tradeRoutePlayer = s.view?.players.some(p => p.index === s.tradeRoutePlayer)
+      ? s.tradeRoutePlayer : s.seat ?? s.view?.activePlayer;
+    this.patch({ tradeRoutes: show, tradeRoutePlayer,
       seaRoutes: false, pirateSpawns: false, tilePanel: false, mode: 'overview',
       abilitiesOpen: false, selection: [], preview: null, focus: null, error: '' });
   }

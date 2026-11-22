@@ -27,7 +27,7 @@ import { playerColor, playerSymbol } from './types';
 import { buildingCivilization } from './building-owner';
 import { positionXY } from './model';
 import { terrainInfo } from './terrain';
-import { terrainDisplay } from './terrain-display';
+import { terrainDisplay, tileSurfaceHeight } from './terrain-display';
 import { PieceModels, type BuildingKind } from './piece-models';
 import { MapGesture } from './map-gesture';
 import { SeaOverlay } from './sea-overlay';
@@ -1139,8 +1139,11 @@ export class World {
     const tradePlayer = s.tradeRoutePlayer ?? s.seat ?? s.view?.activePlayer;
     this.tradeOverlay.group.visible = !!s.tradeRoutes && s.mode === 'overview' && !s.playback &&
       !s.view?.decision && !s.view?.choiceDecision && !s.view?.objectiveDecision && !s.view?.explorationDecision;
+    const tradeGuide = s.view?.tradeRoutes?.find(p => p.player === tradePlayer);
     this.tradeOverlay.update(this.tradeOverlay.group.visible
-      ? s.view?.tradeRoutes?.find(p => p.player === tradePlayer)?.routes ?? [] : [], '#f4c86b');
+      ? tradeGuide?.routes ?? [] : [], '#f4c86b',
+      this.tradeOverlay.group.visible && tradeGuide?.enabled
+        ? (tradeGuide.raidedSettlers ?? []).map(source => source.position) : [], s.game.map.tiles);
 
     this.combatOverlay.update(combat);
     if (s.reducedMotion || !battle) this.combatOverlay.stopAnimation();
@@ -1228,7 +1231,7 @@ export class World {
       for (const [position, terrain] of mapTiles) {
         const { kind, exhausted } = terrainDisplay(terrain);
         const [x, z] = positionXY(position);
-        const height = kind === 'Water' ? 0.13 : kind === 'Unexplored' ? 0.27 : 0.43;
+        const height = tileSurfaceHeight(terrain) + 0.12;
         const group = new THREE.Group();
         group.position.set(x, height / 2 - 0.12, z);
         const top = this.material(
@@ -1771,7 +1774,10 @@ export class World {
     const barbarianMoves = barb?.moves ?? [];
     const pirateFirst = s.threatGuide !== 'barbarians' ? (pirateSpawns?.first ?? []) : [];
     const pirateSecond = s.threatGuide !== 'barbarians' ? (pirateSpawns?.second ?? []) : [];
+    const raidedPositions = this.tradeOverlay.group.visible && tradeGuide?.enabled
+      ? (tradeGuide.raidedSettlers ?? []).map(source => source.position) : [];
     const selectionSig = JSON.stringify([
+      raidedPositions,
       selected,
       available,
       pirateFirst,
@@ -1798,6 +1804,7 @@ export class World {
         ...barbarianSpawn,
         ...barbarianReinforce,
       ])) {
+        if (raidedPositions.includes(pos)) continue;
         const [x, z] = positionXY(pos);
         if (barbarianSpawn.includes(pos)) {
           // Draw over terrain decorations; a dark outer edge stays visible without colour cues.

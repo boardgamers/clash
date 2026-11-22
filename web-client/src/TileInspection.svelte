@@ -5,10 +5,14 @@
   import TerrainRules from './TerrainRules.svelte';
   import CityBuildings from './CityBuildings.svelte';
   import TileUnits from './TileUnits.svelte';
+  import UnitIcon from './UnitIcon.svelte';
   import { terrainInfo } from './terrain';
   let { controller }: { controller: Controller } = $props();
   const session = $derived(controller.session);
   const position = $derived($session.focus!);
+  const raided = $derived(!$session.playback && $session.tradeRoutes && $session.mode === 'overview' &&
+    $session.view?.tradeRoutes?.find(p => p.player === ($session.tradeRoutePlayer ?? $session.seat ?? $session.view?.activePlayer))
+      ?.raidedSettlers?.some(source => source.position === position));
   const frame = $derived($session.playback?.frame);
   const players = $derived(frame?.players ?? $session.game?.players ?? []);
   const terrain = $derived(
@@ -36,6 +40,7 @@
         <CityBuildings {city} owner={owner.id} {players} />
       {/if}
       <TileUnits {players} {position} />
+      {#if raided}<p class="city-rule raided-settlers-note"><UnitIcon type="Settler" size={16} />Settlers blocked by Huns’ Raiders</p>{/if}
     {/if}
     <TerrainRules {terrain} />
   </section>

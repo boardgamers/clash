@@ -208,7 +208,13 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             } else {
                 vec![]
             };
-            json!({"player":p.index,"enabled":enabled,"routes":routes})
+            // Use the rules predicate on expanded engine units, including passengers.
+            // This is public board information, independent of whose turn it is.
+            let raided_settlers = p.units.iter()
+                .filter(|unit| crate::content::civilizations::huns::raided_settler(game, unit))
+                .map(|unit| json!({"position":unit.position,"unit":unit.id}))
+                .collect::<Vec<_>>();
+            json!({"player":p.index,"enabled":enabled,"routes":routes,"raidedSettlers":raided_settlers})
         })
         .collect::<Vec<_>>();
     let pirate_spawns = game

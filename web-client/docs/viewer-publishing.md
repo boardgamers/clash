@@ -1787,3 +1787,15 @@ can recommend 2 culture + 1 mood; no extra token-conservation policy is introduc
 See `docs/mercenaries-payment-recommendation.md`. Publish matching viewer and engine
 only after both exact-commit Check and Web viewer workflows succeed. No saved-game
 migration, backfill, or live-game writes are required. Catalog and art are unchanged.
+
+# Viewer 0.1.237 / engine 0.4.168 — Raiders and spectator map controls
+
+Public per-civilization `raidedSettlers` view metadata reuses the existing Huns
+predicate, including passengers; no rules, save schema, replay or private hands
+change. The trade guide and tile inspection show one concise Settler-icon line,
+with grounded orange contours and valid Ship route lines preserved. Spectators
+retain public civilization inspection and an on-screen map toolbar without a
+participant action row or seat mutation. All 17 locales include the label.
+See [Raiders verification](raiders-trade-guide.md). Publish the matching viewer and
+engine together; achievement catalog 8 (46 entries), art 4, all 60 named assets,
+gallery, Standard variant and existing settings/preferences/options remain intact.

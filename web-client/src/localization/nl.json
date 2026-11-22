@@ -5308,5 +5308,6 @@
   "Construct, recruit and improve happiness": "Bouwen, rekruteren en tevredenheid verhogen",
   "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Elke beschaving heeft eigen ontwikkelingen. Rome krijgt Aquaduct wanneer het Bouwkunde onderzoekt. Open Ontwikkelingen en onderzoek Bouwkunde; Aquaduct wordt automatisch ontgrendeld, zonder aparte aankoop.",
   "Invalid fleet boarding assignment": "Ongeldige indeling voor inscheping op de vloot",
-  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})"
+  "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})",
+  "Settlers blocked by Huns’ Raiders": "Kolonisten geblokkeerd door de plunderaars van de Hunnen"
 }
