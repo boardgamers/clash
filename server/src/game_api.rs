@@ -113,6 +113,14 @@ pub fn set_player_name(mut game: Game, player_index: usize, name: String) -> Gam
 
 #[must_use]
 pub fn rankings(game: &Game) -> Vec<u32> {
+    if game.human_players_count() == 0 {
+        return game
+            .players
+            .iter()
+            .filter(|p| p.is_human())
+            .map(|_| 1)
+            .collect();
+    }
     let mut rankings = Vec::new();
     for player in &game.players {
         if !player.is_human() {

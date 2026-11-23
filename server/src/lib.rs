@@ -90,3 +90,5 @@ mod game_length_tests;
 
 #[cfg(test)]
 mod withdrawal_tests;
+
+mod withdrawal;

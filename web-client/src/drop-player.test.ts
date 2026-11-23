@@ -21,7 +21,7 @@ async function bankingFixture() {
   return pending;
 }
 
-test('four-seat Banking withdrawal skips the reward and starts Rome exactly once', async () => {
+test('four-seat Banking withdrawal resolves the mandatory reward and starts Rome exactly once', async () => {
   const g = await bankingFixture();
   const raw = await engine.dropPlayer(JSON.stringify(g), 2);
   const result = JSON.parse(raw);
@@ -29,7 +29,7 @@ test('four-seat Banking withdrawal skips the reward and starts Rome exactly once
   assert.equal(result.actions_left, 2);
   assert.equal(result.round, 2);
   assert.equal(result.events?.length ?? 0, 0);
-  assert.deepEqual(result.players[2].resources, { gold: 1 });
+  assert.deepEqual(result.players[2].resources, { gold: 2 });
   assert.equal(result.players.length, 6);
   assert.equal(await engine.dropPlayer(raw, 2), raw);
   const next = JSON.parse(engine.tryMove(raw, JSON.stringify({ Playing: 'EndTurn' }), 3));
@@ -46,6 +46,8 @@ test('legacy advanced-pointer Banking save normalizes consistently at every engi
   assert.equal(engine.currentPlayer(raw), 3);
   const normalized = await engine.dropPlayer(raw, 2);
   assert.equal(JSON.parse(normalized).actions_left, 2);
+  assert.deepEqual(JSON.parse(normalized).players[2].resources, { gold: 2 });
+  assert.deepEqual(engine.timeIncrements(normalized), engine.timeIncrements(raw));
   assert.equal(await engine.dropPlayer(normalized, 2), normalized);
   const move = JSON.stringify({ Playing: 'EndTurn' });
   assert.equal(engine.tryMove(raw, move, 3), engine.tryMove(normalized, move, 3));

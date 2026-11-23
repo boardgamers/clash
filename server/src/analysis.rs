@@ -99,6 +99,7 @@ pub fn create(mut game: Game, seat: Option<usize>, seed: &str) -> Result<Game, S
     game.dice_roll_outcomes.clear();
     game.dice_roll_log.clear();
     game.dropped_players.clear();
+    game.withdrawals.clear();
     game.custom_ui_elements.clear();
 
     let known = known_hands(&game, seat);

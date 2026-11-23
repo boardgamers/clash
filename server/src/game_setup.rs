@@ -241,6 +241,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         dice_roll_outcomes: Vec::new(),
         dice_roll_log: Vec::new(),
         dropped_players: Vec::new(),
+        withdrawals: Vec::new(),
         wonders_left,
         destroyed_wonders: Vec::new(),
         action_cards_left,

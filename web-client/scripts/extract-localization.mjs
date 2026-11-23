@@ -53,9 +53,10 @@ function rust(directory) {
     const file = path.join(directory, item.name);
     // BGS consumes this catalog as platform metadata, not viewer-localized prose.
     // It has its own revisioned names/descriptions and is never rendered by this viewer.
+    // Timing/withdrawal modules below contain internal diagnostics, not localized rules.
     if (item.name === 'achievements.rs') continue;
     if (item.isDirectory()) rust(file);
-    else if (item.name.endsWith('.rs') && !/(?:^|_)tests?\.rs$/.test(item.name) && item.name !== 'timing.rs') {
+    else if (item.name.endsWith('.rs') && !/(?:^|_)tests?\.rs$/.test(item.name) && !['timing.rs', 'withdrawal.rs'].includes(item.name)) {
       const content = fs.readFileSync(file, 'utf8');
       for (const { value, start } of rustStrings(content)) {
         // Ignore test modules and diagnostics: these are not player-facing rules.

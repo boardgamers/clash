@@ -281,9 +281,68 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
     if history_navigation {
         return Ok(game);
     }
+    settle(game)
+}
+
+/// Shared authoritative boundary for ordinary moves and platform withdrawal.
+/// Queries do not call this: generated actions must be saved with responder metadata.
+pub(crate) fn settle(mut game: Game) -> Result<Game, String> {
+    crate::withdrawal::discard_plans(&mut game);
+    // Old withdrawal code advanced the pointer before resolving the suspended
+    // turn. A still-current player turn log proves its owner; do not infer this
+    // from the responder (who can be a defender or another living participant).
+    if !game.events.is_empty()
+        && !game.log.is_empty()
+        && let crate::log::TurnType::Player(owner) = crate::log::current_turn_log(&game).turn_type
+        && game.dropped_players.contains(&owner)
+        && game.current_player_index != owner
+    {
+        game.current_player_index = owner;
+    }
+    if let Some(event) = game.events.first()
+        && matches!(
+            event.event_type,
+            crate::content::persistent_events::PersistentEventType::TurnStart
+        )
+        && game.dropped_players.contains(&event.player.index)
+        && game.current_player_index != event.player.index
+    {
+        return Err(crate::withdrawal::AMBIGUOUS_OWNER.into());
+    }
     // Save automatic responses as ordinary actions. Replay then reproduces them
     // without needing past settings; undo never immediately replays a skipped choice.
+    let mut steps = 0;
     while game.context == crate::game::GameContext::Play {
+        if matches!(game.state, crate::game::GameState::Finished) || game.finish_after_drop() {
+            break;
+        }
+        steps += 1;
+        if steps > 512 {
+            return Err(crate::withdrawal::CASCADE_LIMIT.into());
+        }
+        if let Some(action) = crate::withdrawal::next_action(&game)? {
+            let player = game.active_player();
+            let before = (
+                game.events.clone(),
+                game.state.clone(),
+                game.current_player_index,
+                game.age,
+                game.round,
+            );
+            game = execute_one(game, action, player)?;
+            let after = (
+                game.events.clone(),
+                game.state.clone(),
+                game.current_player_index,
+                game.age,
+                game.round,
+            );
+            if before == after {
+                return Err(crate::withdrawal::NO_PROGRESS.into());
+            }
+            crate::early_choices::prune_objectives(&mut game);
+            continue;
+        }
         if let Some(response) = crate::early_choices::take_ready(&mut game) {
             let player = game.active_player();
             game = execute_one(game, Action::Response(response), player)?;
@@ -313,7 +372,11 @@ pub fn execute(mut game: Game, action: Action, player: usize) -> Result<Game, St
             player,
         )?;
     }
-    let mut game = crate::action_queue::resume(game);
+    let mut game = if matches!(game.state, crate::game::GameState::Finished) {
+        game
+    } else {
+        crate::action_queue::resume(game)
+    };
     crate::calendar_knowledge::disclose(&mut game);
     Ok(game)
 }

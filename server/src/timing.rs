@@ -59,6 +59,7 @@ pub(crate) fn execute(mut game: Game, action: Action, actor: usize) -> Result<Ga
         revealed || next.active_player() != before_player || next.state == GameState::Finished
     });
     if eligible
+        && !next.dropped_players.contains(&actor)
         && boundary
         && next
             .players

@@ -1799,3 +1799,21 @@ participant action row or seat mutation. All 17 locales include the label.
 See [Raiders verification](raiders-trade-guide.md). Publish the matching viewer and
 engine together; achievement catalog 8 (46 entries), art 4, all 60 named assets,
 gallery, Standard variant and existing settings/preferences/options remain intact.
+
+# Viewer 0.1.238 / engine 0.4.169 — explicit withdrawal progress
+
+Only explicit platform withdrawal authorizes deterministic completion of pending
+mandatory decisions and declining optional commitments for that seat. Living
+responders keep control; normal dropped turns are skipped, not played by an AI.
+Responses are recorded with their actual actor, clock increments are preserved,
+and new withdrawal boundaries reconstruct in replay. See
+[withdrawal policy and limits](../../docs/withdrawal-progress.md) for bounded
+search, old-save limitations and fixture coverage (not universal scenario coverage).
+
+Push matching source and require exact-commit Check and Web viewer CI green
+before publishing the frozen viewer and engine together. Catalog 8 / 46 entries,
+artwork 4, all 60 named assets, gallery, Standard options, settings and preferences
+remain unchanged. The artwork lockfile pin changes only for the viewer version.
+This code release cannot repair BGS responder metadata on already-blocked games;
+no production save reconciliation, batch replay, forced moves or clock edits are
+authorized or performed.

@@ -199,6 +199,7 @@ pub struct Game {
     pub dice_roll_outcomes: Vec<u8>, // for testing
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
+    pub withdrawals: Vec<(usize, usize)>,
     pub wonders_left: Vec<Wonder>,
     /// Public history of wonders removed permanently from this game.
     pub destroyed_wonders: Vec<Wonder>,
@@ -532,10 +533,7 @@ impl Game {
     #[must_use]
     pub fn human_players_sorted(&self, first: usize) -> Vec<usize> {
         let mut all = self.human_player_ids();
-        let i = all
-            .iter()
-            .position(|&p| p == first)
-            .expect("player should exist");
+        let i = all.iter().position(|&p| p >= first).unwrap_or(0);
         all.rotate_left(i);
         all
     }
@@ -563,9 +561,14 @@ impl Game {
             i.undo.clear();
         }
         check_for_waste(self);
+        let withdrawing_first = self.current_player_index == self.starting_player_index
+            && self.dropped_players.contains(&self.current_player_index);
         self.increment_player_index();
         self.skip_dropped_players();
-        if self.current_player_index == self.starting_player_index {
+        if withdrawing_first {
+            self.starting_player_index = self.current_player_index;
+            self.start_turn();
+        } else if self.current_player_index == self.starting_player_index {
             self.next_round();
         } else {
             self.start_turn();
@@ -675,9 +678,8 @@ impl Game {
         true
     }
 
-    /// Cancel only an unsubmitted, standalone Banking reward. Other turn-start
-    /// handlers include mandatory payments and shared effects; they are not safe
-    /// to discard generically, nor are nested persistent-event continuations.
+    /// Recognize only the legacy standalone Banking shape. Other turn-start
+    /// handlers and nested continuations do not qualify for load-time repair.
     fn dropped_banking_player(&self) -> Option<usize> {
         use crate::content::persistent_events::PersistentEventRequest;
         use crate::special_advance::SpecialAdvance;
@@ -699,8 +701,8 @@ impl Game {
 
     /// Repair the old withdrawal shape: the seat pointer advanced, but Banking
     /// still belongs to the departed seat and the successor has not started.
-    /// Removing the event before starting the successor makes repeated load/clone
-    /// idempotent and avoids resuming `TurnStart` with the wrong seat pointer.
+    /// Restore the proven owner before completing the mandatory reward through
+    /// the recorded boundary. Equal owner pointers do not re-enter this repair.
     pub(crate) fn reconcile_dropped_banking(&mut self) {
         let Some(player) = self.dropped_banking_player() else {
             return;
@@ -721,17 +723,11 @@ impl Game {
         {
             return;
         }
-        self.events.clear();
-        self.cleanup_withdrawn_turn(player);
-        self.start_turn();
-    }
-
-    fn cleanup_withdrawn_turn(&mut self, player: usize) {
-        end_turn(self, player);
-        for action in &mut current_turn_log_mut(self).actions {
-            action.undo.clear();
-        }
-        check_for_waste(self);
+        self.current_player_index = player;
+        let clocks = self.time_increments.clone();
+        *self = crate::board_history::settle(self.clone())
+            .expect("could not complete legacy withdrawn Banking reward");
+        self.time_increments = clocks;
     }
 
     /// Remove a player while keeping surviving seat indices and round order stable.
@@ -741,41 +737,59 @@ impl Game {
     pub fn drop_player(&mut self, player_index: usize) {
         if self.civilization_draft.is_some() {
             crate::game_setup::drop_draft_player(self, player_index);
+            crate::withdrawal::discard_plans(self);
+            if self.human_players_count() <= 1 {
+                self.civilization_draft = None;
+                self.finish_after_drop();
+            }
             return;
         }
-        if self.dropped_players.contains(&player_index) {
-            self.reconcile_dropped_banking();
-            self.finish_after_drop();
-            return;
+        assert!(
+            self.players.get(player_index).is_some_and(Player::is_human),
+            "Invalid dropped seat"
+        );
+        if !self.dropped_players.contains(&player_index) {
+            self.withdrawals
+                .push((crate::game_api::log_length(self), player_index));
         }
-        self.dropped_players.push(player_index);
+        self.apply_withdrawal(player_index);
         if self.finish_after_drop() {
             return;
         }
-        self.add_message(&format!(
-            "{} has left the game",
-            self.player_name(player_index)
-        ));
-        let dropped_first = self.starting_player_index == player_index;
-        if dropped_first {
+        // Do not move the turn pointer past a suspended action. Its continuation
+        // may still need the turn owner even when the responder is another seat.
+        let clocks = self.time_increments.clone();
+        *self =
+            crate::board_history::settle(self.clone()).expect("could not settle withdrawn player");
+        // The platform quit transaction preserves all existing deadlines. Even
+        // a living queued plan resumed here must not award quit-time credits.
+        self.time_increments = clocks;
+    }
+
+    /// Apply recorded platform bookkeeping without generating any responses.
+    /// Replay calls this at the saved action boundary before playing the recorded
+    /// automatic responses, so skipped future turns reconstruct identically.
+    pub(crate) fn apply_withdrawal(&mut self, player_index: usize) {
+        if !self.dropped_players.contains(&player_index) {
+            self.dropped_players.push(player_index);
+            self.add_message(&format!(
+                "{} has left the game",
+                self.player_name(player_index)
+            ));
+            if !self.log.is_empty() {
+                self.lock_undo();
+            }
+        }
+        crate::withdrawal::discard_plans(self);
+        if self.human_players_count() > 0
+            && self.dropped_players.contains(&self.starting_player_index)
+            && self.current_player_index != self.starting_player_index
+        {
             let seats = self.players.iter().filter(|p| p.is_human()).count();
             self.starting_player_index = (1..seats)
-                .map(|offset| (player_index + offset) % seats)
+                .map(|offset| (self.starting_player_index + offset) % seats)
                 .find(|p| !self.dropped_players.contains(p))
                 .expect("an active player remains");
-        }
-        if self.current_player_index != player_index {
-            return;
-        }
-        if self.dropped_banking_player() == Some(player_index) {
-            self.events.clear();
-            self.cleanup_withdrawn_turn(player_index);
-        }
-        self.skip_dropped_players();
-        if !dropped_first && self.current_player_index == self.starting_player_index {
-            self.next_round();
-        } else if self.events.is_empty() {
-            self.start_turn();
         }
     }
 

@@ -1,13 +1,13 @@
 {
   "name": "@boardgamers/clash-web-client",
-  "version": "0.1.237",
+  "version": "0.1.238",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 8643",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "node --experimental-strip-types --test src/*.test.ts && node --test scripts/publish-gallery.test.mjs scripts/boarding.test.mjs scripts/raiders.test.mjs && npm run test:achievement-assets && npm run test:locales && node scripts/exhausted-movement-check.mjs && CLASH_WASM=\"$PWD/.engine/server.js\" node --test ../scripts/status-phase-battle.test.cjs ../scripts/postcombat-queue.test.cjs ../scripts/tributes.test.cjs",
+    "test": "node --experimental-strip-types --test src/*.test.ts && node --test scripts/publish-gallery.test.mjs scripts/boarding.test.mjs scripts/raiders.test.mjs && npm run test:achievement-assets && npm run test:locales && node scripts/exhausted-movement-check.mjs && CLASH_WASM=\"$PWD/.engine/server.js\" node --test ../scripts/status-phase-battle.test.cjs ../scripts/postcombat-queue.test.cjs ../scripts/tributes.test.cjs ../scripts/withdrawal.test.cjs",
     "test:boarding": "npm run build:bridge && npm run build && node --test scripts/boarding.test.mjs && node scripts/boarding-smoke.mjs",
     "test:home-orientation": "npm run build && node scripts/home-orientation-smoke.mjs",
     "build:achievement-assets": "node scripts/build-achievement-assets.mjs",

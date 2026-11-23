@@ -20,7 +20,8 @@ pub struct Plan {
 }
 
 pub fn offer(game: &Game, player: usize) -> Option<(String, String)> {
-    if player != game.current_player_index
+    if game.dropped_players.contains(&player)
+        || player != game.current_player_index
         || player == game.active_player()
         || game.round > 3
         || game.events.len() != 1
@@ -283,6 +284,9 @@ pub fn resume(mut game: Game) -> Game {
     let Some(mut plan) = game.action_plan.take() else {
         return game;
     };
+    if game.dropped_players.contains(&plan.player) {
+        return game;
+    }
     if plan.error.is_some() || !game.events.is_empty() || game.active_player() != plan.player {
         game.action_plan = Some(plan);
         return game;

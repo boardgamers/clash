@@ -394,11 +394,18 @@ fn remaining_persistent_event_players(
     players: &[usize],
     state: &PersistentEventState,
 ) -> Vec<usize> {
-    players
+    let mut remaining = players
         .iter()
         .filter(|p| !state.players_used.contains(p))
         .copied()
-        .collect_vec()
+        .collect_vec();
+    // A withdrawal may change the participant list while an event is paused.
+    // Its outstanding response still belongs to the saved actor, never the next
+    // survivor. Finish that transaction before advancing to the remaining list.
+    if state.player.handler.is_some() && !remaining.contains(&state.player.index) {
+        remaining.insert(0, state.player.index);
+    }
+    remaining
 }
 
 #[must_use]
@@ -479,13 +486,20 @@ pub(crate) fn trigger_persistent_event_with_listener<V>(
 where
     V: Clone + PartialEq,
 {
-    for p in players {
+    let mut initialized = players.to_vec();
+    if let Some(state) = game.events.last()
+        && state.player.handler.is_some()
+        && !initialized.contains(&state.player.index)
+    {
+        initialized.push(state.player.index);
+    }
+    for p in &initialized {
         listeners.init(game, *p);
     }
 
     let result = trigger_persistent_event_ext(game, players, event, event_type, store_type, params);
 
-    for p in players {
+    for p in &initialized {
         listeners.deinit(game, *p);
     }
     result

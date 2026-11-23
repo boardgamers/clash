@@ -28,6 +28,8 @@ pub struct ReplayGameData {
     players: Vec<ReplayPlayerData>,
     #[serde(default)]
     dropped_players: Vec<usize>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    withdrawals: Vec<(usize, usize)>,
     #[serde(
         default,
         skip_serializing_if = "Vec::is_empty",
@@ -143,6 +145,11 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         }
     }
     for (i, item) in actions.into_iter().take(to).enumerate() {
+        for &(cursor, player) in &data.withdrawals {
+            if cursor == i {
+                game.apply_withdrawal(player);
+            }
+        }
         if item.action == Action::StartTurn {
             continue;
         }
@@ -180,7 +187,20 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
     for player in data.players {
         game.players[player.id].settings = player.settings;
     }
-    game.dropped_players = data.dropped_players;
+    for &(cursor, player) in &data.withdrawals {
+        if cursor == to {
+            game.apply_withdrawal(player);
+        }
+    }
+    let has_withdrawal_history = !data.withdrawals.is_empty();
+    game.withdrawals = data
+        .withdrawals
+        .into_iter()
+        .filter(|(cursor, _)| *cursor <= to)
+        .collect();
+    if full_replay || !has_withdrawal_history {
+        game.dropped_players = data.dropped_players;
+    }
     // Clock totals belong to the live session, not the historical position.
     // Reconstructing any cursor must neither earn nor revoke existing credits.
     game.time_increments = data.time_increments;

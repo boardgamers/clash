@@ -1,5 +1,4 @@
 use crate::content::effects::PermanentEffect;
-use crate::content::persistent_events::{PersistentEventState, PersistentEventType};
 use crate::game::{Game, GameContext, GameState};
 use crate::game_setup::{GameSetupBuilder, setup_game};
 use crate::resource_pile::ResourcePile;
@@ -56,7 +55,7 @@ fn withdrawal_banking_starts_successor_once_and_preserves_seats() {
         .insert("personal".into(), "stale".into());
     let resources = game.player(2).resources.clone();
     game.drop_player(2);
-    assert_eq!(game.player(2).resources, resources);
+    assert_eq!(game.player(2).resources, resources + ResourcePile::gold(1));
     assert!(game.player(2).event_info.is_empty());
     assert!(game.events.is_empty());
     assert_eq!(game.current_player_index, 3);
@@ -82,7 +81,7 @@ fn withdrawal_banking_legacy_advanced_pointer_recovers_once() {
     assert_eq!(game.current_player_index, 3);
     assert!(game.events.is_empty());
     assert_eq!(game.actions_left, 2);
-    assert_eq!(game.player(2).resources, ResourcePile::gold(1));
+    assert_eq!(game.player(2).resources, ResourcePile::gold(2));
     let saved = snapshot(&game);
     assert_eq!(snapshot(&reload(&game)), saved);
     game.drop_player(2);
@@ -115,25 +114,12 @@ fn withdrawal_banking_round_boundary_and_first_seat() {
 }
 
 #[test]
-fn withdrawal_does_not_discard_nested_or_other_handlers() {
+fn withdrawal_invalid_handler_fails_without_discarding_state() {
     let mut game = banking();
-    game.events.push(PersistentEventState::new(
-        2,
-        PersistentEventType::ChooseActionCard,
-        None,
-    ));
-    let events = game.events.clone();
-    game.drop_player(2);
-    assert_eq!(game.events, events);
-    assert_eq!(reload(&game).events, events);
-
-    let mut game = banking();
-    game.events[0].player.handler.as_mut().unwrap().origin =
-        crate::events::EventOrigin::Ability("Not Banking".into());
-    let events = game.events.clone();
-    game.drop_player(2);
-    assert_eq!(game.events, events);
-    assert_eq!(reload(&game).events, events);
+    game.events.last_mut().unwrap().player.handler = None;
+    let before = snapshot(&game);
+    assert!(crate::withdrawal::response(&game).is_err());
+    assert_eq!(snapshot(&game), before);
 }
 
 #[test]
@@ -156,4 +142,47 @@ fn withdrawal_legacy_does_not_restart_an_already_started_successor() {
     let restored = reload(&old);
     assert_eq!(restored.events, old.events);
     assert_eq!(snapshot(&restored), snapshot(&old));
+}
+
+#[test]
+fn withdrawal_replay_records_drop_boundary_and_skipped_future_turns() {
+    for offset in [0, 1] {
+        replay_withdrawal(offset);
+    }
+}
+
+fn replay_withdrawal(offset: usize) {
+    let mut game = setup_game(
+        &GameSetupBuilder::new(4)
+            .seed("withdraw-replay".into())
+            .assigned_civilizations(vec![
+                "Greece".into(),
+                "China".into(),
+                "Persia".into(),
+                "Rome".into(),
+            ])
+            .build(),
+    );
+    let dropped = (game.current_player_index + offset) % 4;
+    game.drop_player(dropped);
+    for _ in 0..25 {
+        let actor = game.active_player();
+        let action = if game.events.is_empty() {
+            crate::action::Action::Playing(crate::playing_actions::PlayingAction::EndTurn)
+        } else {
+            crate::action::Action::Response(crate::withdrawal::response(&game).unwrap())
+        };
+        game = crate::board_history::execute(game, action, actor).unwrap();
+    }
+    let replay_data =
+        serde_json::from_value(serde_json::to_value(game.cloned_data()).unwrap()).unwrap();
+    let replayed = crate::replay::replay(replay_data, None).unwrap();
+    assert_eq!(replayed.current_player_index, game.current_player_index);
+    assert_eq!(replayed.starting_player_index, game.starting_player_index);
+    assert_eq!(replayed.round, game.round);
+    assert_eq!(replayed.age, game.age);
+    assert_eq!(replayed.events, game.events);
+    assert_eq!(replayed.dropped_players, game.dropped_players);
+    assert_eq!(replayed.withdrawals, game.withdrawals);
+    assert_eq!(replayed.rng.seed, game.rng.seed);
 }
