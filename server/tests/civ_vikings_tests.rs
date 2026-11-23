@@ -151,3 +151,101 @@ fn converting_ship_carries_army_passengers_in_one_group_move() {
         panic!("expected movement");
     }
 }
+
+// Synthetic legal cargo, not a historical save. Exercise both the live callback
+// and a suspended conversion restored across the ordinary save boundary.
+#[test]
+fn converting_ship_unloads_leader_cargo() {
+    use serde_json::json;
+    use server::{
+        cache::Cache,
+        game::{Game, GameContext},
+        game_data::GameData,
+        leader::Leader,
+        unit::UnitType,
+    };
+    fn load(value: serde_json::Value) -> Game {
+        let data: GameData = serde_json::from_value(value).unwrap();
+        let cache = Cache::new(&data.options);
+        Game::from_data(data, cache, GameContext::Play)
+    }
+    for mixed in [false, true] {
+        for settler in [false, true] {
+            for resume in [false, true] {
+                let mut value: serde_json::Value = serde_json::from_str(include_str!(
+                    "test_games/civilizations/vikings/ship_construction.json"
+                ))
+                .unwrap();
+                value["players"].as_array_mut().unwrap().swap(0, 1);
+                value["players"][0]["id"] = json!(0);
+                value["players"][1]["id"] = json!(1);
+                value["current_player_index"] = json!(1);
+                value["starting_player_index"] = json!(1);
+                value["log"][0]["rounds"][0]["turns"][0]["turn_type"]["Player"] = json!(1);
+                let p = &mut value["players"][1];
+                p["recruited_leaders"] = json!(["Ragnar"]);
+                p["units"] = json!([
+                    {"id":3,"position":"D2","unit_type":"Ship"},
+                    {"id":4,"position":"D2","unit_type":{"Leader":"Ragnar"},"carrier_id":3}
+                ]);
+                if mixed {
+                    p["units"].as_array_mut().unwrap().push(
+                        json!({"id":5,"position":"D2","unit_type":"Infantry","carrier_id":3}),
+                    );
+                }
+                let mut game = server::game_api::execute(
+                    load(value),
+                    move_action(vec![3], Position::from_offset("C2")),
+                    1,
+                );
+                assert_eq!(game.player(1).get_unit(4).carrier_id, Some(3));
+                if resume {
+                    game = load(serde_json::to_value(game.cloned_data()).unwrap());
+                }
+                game = server::game_api::execute(
+                    game,
+                    Action::Response(EventResponse::SelectUnits(if settler {
+                        vec![3]
+                    } else {
+                        vec![]
+                    })),
+                    1,
+                );
+                let p = game.player(1);
+                assert_eq!(p.units.len(), if mixed { 3 } else { 2 });
+                assert_eq!(
+                    p.get_unit(3).unit_type,
+                    if settler {
+                        UnitType::Settler
+                    } else {
+                        UnitType::Infantry
+                    }
+                );
+                assert_eq!(p.get_unit(4).unit_type, UnitType::Leader(Leader::Ragnar));
+                if mixed {
+                    assert_eq!(p.get_unit(5).unit_type, UnitType::Infantry);
+                }
+                assert!(
+                    p.units
+                        .iter()
+                        .all(|u| u.position == Position::from_offset("C2")
+                            && u.carrier_id.is_none()
+                            && u.player_index == 1)
+                );
+                if let server::game::GameState::Movement(m) = &game.state {
+                    assert_eq!(m.movement_actions_left, 2);
+                    assert_eq!(m.moved_units, vec![3]);
+                } else {
+                    panic!("expected movement");
+                }
+                let log = serde_json::to_value(game.cloned_data()).unwrap()["log"].to_string();
+                let expected = if mixed {
+                    "Unloaded 1 infantry and Ragnar Lodbrok from ships"
+                } else {
+                    "Unloaded Ragnar Lodbrok from ships"
+                };
+                assert_eq!(log.matches(expected).count(), 1);
+            }
+        }
+    }
+}

@@ -1817,3 +1817,20 @@ remain unchanged. The artwork lockfile pin changes only for the viewer version.
 This code release cannot repair BGS responder metadata on already-blocked games;
 no production save reconciliation, batch replay, forced moves or clock edits are
 authorized or performed.
+
+# Viewer 0.1.239 / engine 0.4.170 — Viking leader cargo logging
+
+Ship Construction supplies game context when printing unloaded cargo, so Ragnar
+and other leaders have readable names instead of panicking after conversion.
+This is a logging-only fix: unit IDs, cargo unloading, Infantry/Settler choices,
+movement accounting and rules are unchanged. Fresh moves and saved pending
+conversion prompts use the same corrected callback; no historical save is rewritten.
+Native tests cover leader-only/mixed cargo, both choices, live/resumed prompts at
+seat 1; four actual WASM regressions and desktop/mobile normal-viewer clicks cover
+both responses and readable, exactly-once unload logging.
+
+Require exact-commit Check and Web viewer CI green before publishing the frozen
+viewer and engine together. Preserve catalog 8 / 46 definitions, artwork 4, all
+60 named assets, gallery, Standard options, settings and preferences. Only the
+artwork manifest's lockfile integrity pin changes; no artwork is republished and
+no production game edits, repairs, backfills or history rewrites are performed.

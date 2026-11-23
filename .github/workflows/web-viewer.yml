@@ -1,7 +1,7 @@
 name: Web viewer
 on:
   pull_request:
-    paths: ['web-client/**', 'server/**', 'scripts/status-phase-battle.test.cjs', 'scripts/postcombat-queue*.cjs', 'scripts/tributes.test.cjs', 'scripts/withdrawal.test.cjs', 'Cargo.*', '.github/workflows/web-viewer.yml']
+    paths: ['web-client/**', 'server/**', 'scripts/status-phase-battle.test.cjs', 'scripts/postcombat-queue*.cjs', 'scripts/tributes.test.cjs', 'scripts/withdrawal.test.cjs', 'scripts/viking-cargo.test.cjs', 'Cargo.*', '.github/workflows/web-viewer.yml']
   push:
     branches: [main, feat/3d-web-viewer]
 jobs:
@@ -28,7 +28,7 @@ jobs:
         working-directory: web-client
       - run: npm run test:boarding && node scripts/embark-smoke.mjs && node scripts/ship-landing-smoke.mjs
         working-directory: web-client
-      - run: node scripts/withdrawal-smoke.mjs && node scripts/horse-master-smoke.mjs && node scripts/carthage-recruit-smoke.mjs && node scripts/payment-defaults-smoke.mjs && node scripts/wonder-payment-perf.mjs
+      - run: node scripts/viking-cargo-smoke.mjs && node scripts/withdrawal-smoke.mjs && node scripts/horse-master-smoke.mjs && node scripts/carthage-recruit-smoke.mjs && node scripts/payment-defaults-smoke.mjs && node scripts/wonder-payment-perf.mjs
         working-directory: web-client
       - run: node scripts/map-guide-smoke.mjs && node scripts/trade-routes-smoke.mjs && node scripts/raiders-smoke.mjs
         working-directory: web-client

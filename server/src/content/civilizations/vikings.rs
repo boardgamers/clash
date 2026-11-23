@@ -99,7 +99,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
             if !unload_units.is_empty() {
                 s.log(
                     game,
-                    &format!("Unloaded {} from ships", unload_units.to_string(None)),
+                    &format!("Unloaded {} from ships", unload_units.to_string(Some(game))),
                 );
             }
             s.log(
