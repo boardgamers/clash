@@ -160,4 +160,4 @@ Also add "script URL" = https://not-fl3.github.io/miniquad-samples/mq_js_bundle.
 
 ## Docs
 
-- [Game API](https://docs.boardgamers.space/guide/engine-api.html)
+- [Game API](https://docs.boardgamers.space/guide/engine-api)
