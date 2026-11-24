@@ -16,6 +16,10 @@ pub struct ReplayGameData {
     asynchronous_combat_from: Option<usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     finalized_combat_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    great_architect_action_cost_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    aggressor_eligibility_from: Option<usize>,
     #[serde(default, skip_serializing_if = "crate::map::HomeLayout::is_legacy")]
     home_layout: crate::map::HomeLayout,
     log: Vec<ActionLogAge>,
@@ -116,13 +120,30 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
             .collect::<Result<Vec<_>, _>>()?;
         builder = builder.assigned_civilizations(civilizations);
     }
-    let mut game = setup_game(&builder.build());
+    let setup = builder.build();
+    let mut game = if data.options.variant == crate::game::GameVariant::Builder
+        && data.aggressor_eligibility_from != Some(0)
+    {
+        let mut cache = crate::cache::Cache::new(&data.options);
+        cache.retain_legacy_builder_aggressor();
+        crate::game_setup::setup_game_with_cache(&setup, cache)
+    } else {
+        setup_game(&setup)
+    };
     game.asynchronous_combat_from = Some(
         data.asynchronous_combat_from
             .unwrap_or(actions.len().saturating_add(1)),
     );
     game.finalized_combat_from = Some(
         data.finalized_combat_from
+            .unwrap_or(actions.len().saturating_add(1)),
+    );
+    game.great_architect_action_cost_from = Some(
+        data.great_architect_action_cost_from
+            .unwrap_or(actions.len().saturating_add(1)),
+    );
+    game.aggressor_eligibility_from = Some(
+        data.aggressor_eligibility_from
             .unwrap_or(actions.len().saturating_add(1)),
     );
     if data.options.civilization == CivSetupOption::DraftThree {
@@ -162,6 +183,13 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         {
             game.context = crate::game::GameContext::Replay;
         }
+        // Availability is queried after the recorded action is appended.
+        if matches!(
+            item.action,
+            Action::Playing(crate::playing_actions::PlayingAction::ActionCard(155))
+        ) {
+            game.context = crate::game::GameContext::Replay;
+        }
         game = try_execute_action(game, item.action.clone(), item.player)
             .map_err(|e| format!("Failed to replay move {}: {e}", i + 1))?;
         game.context = context;
@@ -183,6 +211,12 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         .map(|from| from.min(to.saturating_add(1)));
     game.finalized_combat_from = game
         .finalized_combat_from
+        .map(|from| from.min(to.saturating_add(1)));
+    game.great_architect_action_cost_from = game
+        .great_architect_action_cost_from
+        .map(|from| from.min(to.saturating_add(1)));
+    game.aggressor_eligibility_from = game
+        .aggressor_eligibility_from
         .map(|from| from.min(to.saturating_add(1)));
     for player in data.players {
         game.players[player.id].settings = player.settings;

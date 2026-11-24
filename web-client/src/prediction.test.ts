@@ -947,3 +947,21 @@ test('known local Calendar stays local across an optimistic move acknowledgement
     assert.equal(app.session().view!.canUndo, true);
   } finally { app.close(); }
 });
+
+test('predicted undo preserves all independent persisted rule boundaries', () => {
+  const previous = { log_index: 0, log: [{ rounds: [{ turns: [{ actions: [] }] }] }] };
+  const boundaries = {
+    asynchronous_combat_from: 3,
+    finalized_combat_from: 4,
+    great_architect_action_cost_from: 5,
+    aggressor_eligibility_from: 1,
+  };
+  const current = {
+    ...previous,
+    ...boundaries,
+    log_index: 1,
+    log: [{ rounds: [{ turns: [{ actions: [{ action: ore }] }] }] }],
+  };
+  const undone = JSON.parse(predictUndo(JSON.stringify(previous), JSON.stringify(current))!);
+  for (const [field, value] of Object.entries(boundaries)) assert.equal(undone[field], value);
+});

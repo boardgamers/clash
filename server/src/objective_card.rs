@@ -97,7 +97,7 @@ impl ObjectiveCard {
     }
 
     #[must_use]
-    fn has_objective(&self, name: &str) -> bool {
+    pub(crate) fn has_objective(&self, name: &str) -> bool {
         self.objectives.iter().any(|o| name == o.name)
     }
 

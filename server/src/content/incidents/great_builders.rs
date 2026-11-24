@@ -184,6 +184,255 @@ fn architect_wonder_cost(game: &Game, player: &Player, w: Wonder) -> CostInfo {
     let mut info = wonder_cost(game, player, w);
     info.cost.default.culture_tokens -= 3;
     info.ignore_required_advances = true;
-    info.ignore_action_cost = true; // we already paid for the action with the architect card
+    // The public card is a modifier, not payment for Construct Wonder. Only
+    // recorded legacy plays retain the former action waiver. City-specific
+    // exemptions (wonder experts) still apply in can_construct_wonder.
+    if legacy_architect_play(game) {
+        info.ignore_action_cost = true;
+    }
     info
+}
+
+// A saved card-selection prompt belongs to its original play, even when its
+// response is the first action executed by the updated engine. Later wonder
+// prompts already persist their CostInfo, including the legacy waiver.
+fn legacy_architect_play(game: &Game) -> bool {
+    use crate::action::Action;
+    use crate::content::persistent_events::PersistentEventType;
+    use crate::playing_actions::PlayingAction;
+
+    let pending = game.events.iter().any(|event| {
+        matches!(&event.event_type, PersistentEventType::ActionCard(card) if card.id == 155)
+    });
+    let index = if pending {
+        crate::log::linear_action_entries(game)
+            .iter()
+            .rposition(|entry| {
+                matches!(
+                    entry.action,
+                    Action::Playing(PlayingAction::ActionCard(155))
+                )
+            })
+            .map_or(0, |index| index + 1)
+    } else if game.context == crate::game::GameContext::Replay {
+        crate::game_api::log_length(game)
+    } else {
+        // A live eligibility preview always describes a new branch, even if
+        // an undone legacy future still exists beyond the current cursor.
+        return false;
+    };
+    game.great_architect_action_cost_from
+        .is_some_and(|from| index < from)
+        || (pending && game.great_architect_action_cost_from.is_none())
+}
+
+#[cfg(test)]
+mod architect_tests {
+    use super::*;
+    use crate::action::{Action, try_execute_action};
+    use crate::cache::Cache;
+    use crate::content::persistent_events::EventResponse;
+    use crate::game::GameContext;
+    use crate::game_data::GameData;
+    use crate::playing_actions::PlayingAction;
+    use crate::position::Position;
+
+    fn game() -> Game {
+        let data: GameData = serde_json::from_str(include_str!(
+            "../../../tests/test_games/incidents/great_persons/great_architect.json"
+        ))
+        .expect("valid Architect test fixture");
+        let cache = Cache::new(&data.options);
+        let mut game = Game::from_data(data, cache, GameContext::Play);
+        game.players[0].action_cards = vec![155];
+        game.actions_left = 3;
+        game
+    }
+
+    fn play(game: Game) -> Game {
+        crate::game_api::execute(game, Action::Playing(PlayingAction::ActionCard(155)), 0)
+    }
+
+    fn select(game: Game) -> Game {
+        crate::game_api::execute(
+            game,
+            Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                "A1",
+            )])),
+            0,
+        )
+    }
+
+    #[test]
+    fn architect_charges_construction_once_and_keeps_discounts() {
+        let game = game();
+        let base = wonder_cost(&game, game.player(0), Wonder::Pyramids);
+        let cost = architect_wonder_cost(&game, game.player(0), Wonder::Pyramids);
+        assert_eq!(
+            cost.cost.default.culture_tokens + 3,
+            base.cost.default.culture_tokens
+        );
+        assert!(cost.ignore_required_advances);
+        assert!(!cost.ignore_action_cost);
+        let game = play(game);
+        assert_eq!(game.actions_left, 3); // choosing the public modifier is free
+        let game = select(game);
+        assert_eq!(game.actions_left, 2);
+        let game = crate::game_api::execute(
+            game,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                2, 3, 6, 0, 1, 0, 2,
+            )])),
+            0,
+        );
+        assert_eq!(game.actions_left, 2);
+        assert!(game.players[0].wonders_built.contains(&Wonder::Pyramids));
+        assert!(!game.players[0].action_cards.contains(&155));
+    }
+
+    #[test]
+    fn architect_unavailable_without_action_engineering_or_city() {
+        for condition in 0..3 {
+            let mut game = game();
+            match condition {
+                0 => game.actions_left = 0,
+                1 => {
+                    game.players[0]
+                        .advances
+                        .remove(crate::advance::Advance::Engineering);
+                }
+                _ => {
+                    for city in &mut game.players[0].cities {
+                        city.mood_state = crate::city::MoodState::Angry;
+                    }
+                }
+            }
+            assert!(
+                PlayingActionType::ActionCard(155)
+                    .is_available(&game, 0)
+                    .is_err()
+            );
+            assert!(
+                try_execute_action(
+                    game.clone(),
+                    Action::Playing(PlayingAction::ActionCard(155)),
+                    0
+                )
+                .is_err()
+            );
+            assert!(game.players[0].action_cards.contains(&155));
+        }
+    }
+
+    #[test]
+    fn japan_cannot_use_shogunate_to_make_public_architect_free() {
+        let mut game = game();
+        game.players[0].civilization = game.cache.get_civilization("Japan");
+        game.players[0]
+            .special_advances
+            .insert(crate::special_advance::SpecialAdvance::Shogunate);
+        let mut game = game.clone();
+        game.actions_left = 0;
+        assert!(
+            PlayingActionType::ActionCard(155)
+                .is_available(&game, 0)
+                .is_err()
+        );
+        game.actions_left = 3;
+        let game = select(play(game));
+        assert_eq!(game.actions_left, 2);
+    }
+
+    #[test]
+    fn expert_city_retains_its_own_free_wonder_exemption() {
+        for (civilization, leader) in [
+            ("Babylonia", crate::leader::Leader::Nebuchadnezzar),
+            ("China", crate::leader::Leader::Qin),
+        ] {
+            let mut game = game();
+            game.players[0].civilization = game.cache.get_civilization(civilization);
+            game.players[0].units[0].unit_type = crate::unit::UnitType::Leader(leader);
+            game.players[0].units[0].position = Position::from_offset("A1");
+            game.players[0].recruited_leaders = vec![leader];
+            let mut game = game.clone();
+            game.actions_left = 0;
+            let cities = cities_for_wonder(
+                Wonder::Pyramids,
+                &game,
+                game.player(0),
+                architect_wonder_cost(&game, game.player(0), Wonder::Pyramids),
+            );
+            assert_eq!(cities, vec![Position::from_offset("A1")]);
+            assert!(
+                PlayingActionType::ActionCard(155)
+                    .is_available(&game, 0)
+                    .is_ok()
+            );
+            let game = play(game); // single city is selected automatically
+            assert_eq!(game.actions_left, 0);
+        }
+    }
+
+    #[test]
+    fn saved_multiple_wonder_choices_keep_original_cost_policy() {
+        for legacy in [false, true] {
+            let mut game = game();
+            game.players[0].wonder_cards.push(Wonder::GreatWall);
+            game.players[0].resources = ResourcePile::new(7, 7, 7, 7, 7, 7, 7);
+            if legacy {
+                game.great_architect_action_cost_from = Some(usize::MAX);
+            }
+            let game = play(game);
+            assert_eq!(game.actions_left, 3);
+            let mut value =
+                serde_json::to_value(game.cloned_data()).expect("valid Architect test fixture");
+            if legacy {
+                value
+                    .as_object_mut()
+                    .expect("valid Architect test fixture")
+                    .remove("great_architect_action_cost_from");
+            }
+            let game = Game::from_data(
+                serde_json::from_value(value).expect("valid Architect test fixture"),
+                game.cache.clone(),
+                GameContext::Play,
+            );
+            let game = crate::game_api::execute(
+                game,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::Wonder(
+                    Wonder::Pyramids,
+                )])),
+                0,
+            );
+            assert_eq!(game.actions_left, 3);
+            let game = select(game);
+            assert_eq!(game.actions_left, if legacy { 3 } else { 2 });
+        }
+    }
+
+    #[test]
+    fn legacy_pending_wonder_keeps_waiver_but_new_branch_uses_action() {
+        let mut game = game();
+        game.great_architect_action_cost_from = Some(usize::MAX);
+        let game = play(game);
+        let mut value =
+            serde_json::to_value(game.cloned_data()).expect("valid Architect test fixture");
+        value
+            .as_object_mut()
+            .expect("valid Architect test fixture")
+            .remove("great_architect_action_cost_from");
+        let data = serde_json::from_value(value).expect("valid Architect test fixture");
+        let game = Game::from_data(data, game.cache.clone(), GameContext::Play);
+        let game = select(game);
+        assert_eq!(game.actions_left, 3);
+
+        let mut game = self::game();
+        game.great_architect_action_cost_from = Some(crate::game_api::log_length(&game) + 1);
+        game.actions_left = 0;
+        assert!(
+            PlayingActionType::ActionCard(155)
+                .is_available(&game, 0)
+                .is_err()
+        );
+    }
 }

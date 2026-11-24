@@ -1,0 +1,3347 @@
+{
+  "engine": "0.4.170",
+  "before": 73,
+  "pending": 74,
+  "built": 75,
+  "full": 78,
+  "history": {
+    "seed": "architect-history-35",
+    "options": {
+      "civilization": "ChooseCivilization"
+    },
+    "players": [
+      {
+        "id": 0,
+        "civilization": "Greece"
+      },
+      {
+        "id": 1,
+        "civilization": "Rome"
+      },
+      {
+        "id": 2,
+        "civilization": "Barbarians"
+      },
+      {
+        "id": 3,
+        "civilization": "Pirates"
+      }
+    ],
+    "log": [
+      {
+        "age": 0,
+        "rounds": [
+          {
+            "round": 0,
+            "turns": [
+              {
+                "turn_type": {
+                  "Setup": {
+                    "player": 0
+                  }
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Advance": {
+                          "advance": "Farming",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Advance": {
+                          "advance": "Mining",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 15
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 15
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Structure": {
+                          "structure": "CityCenter",
+                          "balance": "Gain",
+                          "position": "D2",
+                          "port_position": null
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "MoodChange": {
+                          "city": "D2",
+                          "mood": "Happy"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Units": {
+                          "units": {
+                            "settlers": 1
+                          },
+                          "balance": "Gain",
+                          "position": "D2"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Setup": {
+                    "player": 1
+                  }
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Farming",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Mining",
+                          "incident_token": "NoChange",
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 42
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 35
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Structure": {
+                          "structure": "CityCenter",
+                          "balance": "Gain",
+                          "position": "D7",
+                          "port_position": null
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "MoodChange": {
+                          "city": "D7",
+                          "mood": "Happy"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Units": {
+                          "units": {
+                            "settlers": 1
+                          },
+                          "balance": "Gain",
+                          "position": "D7"
+                        },
+                        "origin": {
+                          "Ability": "Setup"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "ChooseCivilization": "Rome"
+                    },
+                    "player": 1
+                  },
+                  {
+                    "action": {
+                      "ChooseCivilization": "Greece"
+                    },
+                    "player": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "age": 1,
+        "rounds": [
+          {
+            "round": 1,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Advance": {
+                          "advance": "Arts",
+                          "payment": {
+                            "food": 2
+                          }
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Advance"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "culture_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Arts"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Arts",
+                          "incident_token": {
+                            "Take": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "C8",
+                              "pile": {
+                                "ore": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1,
+                            "ore": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss"
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 2,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "C8",
+                              "pile": {
+                                "ore": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1,
+                            "ore": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Advance": {
+                          "advance": "Storage",
+                          "payment": {
+                            "food": 2
+                          }
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Advance"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Storage",
+                          "incident_token": {
+                            "Take": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss"
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 3,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "C8",
+                              "pile": {
+                                "ore": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1,
+                            "ore": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 2
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "CompleteObjectives"
+                }
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "FreeAdvance"
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectAdvance": "Engineering"
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "Wonder": "GreatWall"
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Advance": "Engineering"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "unlocks Aqueduct",
+                        "origin": {
+                          "Ability": "Free Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Engineering",
+                          "incident_token": {
+                            "Take": 0
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Free Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "triggers the event Great Architect",
+                        "origin": {
+                          "Advance": "Engineering"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "Base effect: Pirates spawn",
+                        "origin": {
+                          "Incident": 55
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "No valid positions for Pirate Ship",
+                        "origin": {
+                          "Incident": 55
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "Payment": [
+                          {
+                            "culture_tokens": 1
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "culture_tokens": 1
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Incident": 55
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 155
+                          },
+                          "from": "Incident",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Incident": 55
+                        }
+                      }
+                    ],
+                    "active_events": 2
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectAdvance": "Storage"
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Advance": {
+                          "advance": "Storage",
+                          "incident_token": {
+                            "Take": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Free Advance"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "DrawCards"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 13
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 37
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 19
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 33
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "RazeSize1City"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": []
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Text": "Did not raze a city",
+                        "origin": {
+                          "Ability": "Raze city"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": []
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Text": "Did not raze a city",
+                        "origin": {
+                          "Ability": "Raze city"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "ChangeGovernmentType"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "DetermineFirstPlayer"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPlayer": 1
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Text": "Player2 choose  to remain the staring player",
+                        "origin": {
+                          "Ability": "Determine First Player"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "age": 2,
+        "rounds": [
+          {
+            "round": 1,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "C8",
+                              "pile": {
+                                "ore": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1,
+                            "ore": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Advance": {
+                          "advance": "Theaters",
+                          "payment": {
+                            "food": 2
+                          }
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Advance"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Theaters"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Theaters",
+                          "incident_token": {
+                            "Take": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Custom": {
+                          "action": "Theaters"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Advance": "Theaters"
+                    }
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "Payment": [
+                          {
+                            "mood_tokens": 1
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Theaters"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "culture_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Theaters"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss"
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 2,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Custom": {
+                          "action": "Theaters"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Advance": "Theaters"
+                    }
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "Payment": [
+                          {
+                            "mood_tokens": 1
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Theaters"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "culture_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Theaters"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "C8",
+                              "pile": {
+                                "ore": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1,
+                            "ore": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 2
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 3,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "C8",
+                              "pile": {
+                                "ore": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1,
+                            "ore": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 2
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "CompleteObjectives"
+                }
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "FreeAdvance"
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectAdvance": "Sports"
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Sports"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Sports",
+                          "incident_token": {
+                            "Take": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Free Advance"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectAdvance": "Irrigation"
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Irrigation"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Advance": {
+                          "advance": "Irrigation",
+                          "incident_token": {
+                            "Take": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Free Advance"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "DrawCards"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 27
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 13
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 10
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 25
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "RazeSize1City"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": []
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Text": "Did not raze a city",
+                        "origin": {
+                          "Ability": "Raze city"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": []
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Text": "Did not raze a city",
+                        "origin": {
+                          "Ability": "Raze city"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "ChangeGovernmentType"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "DetermineFirstPlayer"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPlayer": 1
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Text": "Player2 choose  to remain the staring player",
+                        "origin": {
+                          "Ability": "Determine First Player"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "age": 3,
+        "rounds": [
+          {
+            "round": 1,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            },
+                            {
+                              "position": "C8",
+                              "pile": {
+                                "ore": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1,
+                            "ore": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 2
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 2,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "E8",
+                              "pile": {
+                                "wood": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "wood": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 2
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 3,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "E8",
+                              "pile": {
+                                "wood": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "wood": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 2
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "CompleteObjectives"
+                }
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "FreeAdvance"
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectAdvance": "Monuments"
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "Wonder": "Colosseum"
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Advance": "Monuments"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "culture_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Monuments"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Monuments",
+                          "incident_token": {
+                            "Take": 0
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Free Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "triggers the event A good year",
+                        "origin": {
+                          "Advance": "Monuments"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Text": "Base effect: Barbarians spawn",
+                        "origin": {
+                          "Incident": 11
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": [
+                          "E8"
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 2,
+                        "Structure": {
+                          "structure": "CityCenter",
+                          "balance": "Gain",
+                          "position": "E8",
+                          "port_position": null
+                        },
+                        "origin": {
+                          "Incident": 11
+                        }
+                      },
+                      {
+                        "player": 2,
+                        "Units": {
+                          "units": {
+                            "infantry": 1
+                          },
+                          "balance": "Gain",
+                          "position": "E8"
+                        },
+                        "origin": {
+                          "Incident": 11
+                        }
+                      }
+                    ],
+                    "active_events": 2
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectUnitType": "Infantry"
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 2,
+                        "Units": {
+                          "units": {
+                            "infantry": 1
+                          },
+                          "balance": "Gain",
+                          "position": "E8"
+                        },
+                        "origin": {
+                          "Incident": 11
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Incident": 11
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Resources": {
+                          "resources": {
+                            "food": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Incident": 11
+                        }
+                      }
+                    ],
+                    "active_events": 2
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectAdvance": "Husbandry"
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Husbandry"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Advance": {
+                          "advance": "Husbandry",
+                          "incident_token": {
+                            "Take": 0
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Free Advance"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Text": "triggers the event An awesome year",
+                        "origin": {
+                          "Advance": "Husbandry"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": [
+                          "E2"
+                        ]
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Text": "Exhausted the land in position E2",
+                        "origin": {
+                          "Incident": 13
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Incident": 13
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Incident": 13
+                        }
+                      }
+                    ],
+                    "active_events": 2
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "DrawCards"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 6
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 3
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 1
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 39
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      },
+                      {
+                        "player": 0,
+                        "HandCard": {
+                          "card": {
+                            "ObjectiveCard": 17
+                          },
+                          "from": "DrawPile",
+                          "to": {
+                            "Hand": 0
+                          }
+                        },
+                        "origin": {
+                          "Ability": "Draw Cards"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "RazeSize1City"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": []
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Text": "Did not raze a city",
+                        "origin": {
+                          "Ability": "Raze city"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPositions": []
+                      }
+                    },
+                    "player": 0,
+                    "items": [
+                      {
+                        "player": 0,
+                        "Text": "Did not raze a city",
+                        "origin": {
+                          "Ability": "Raze city"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "ChangeGovernmentType"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "StatusPhase": "DetermineFirstPlayer"
+                },
+                "actions": [
+                  {
+                    "action": "StartTurn",
+                    "player": 1
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "SelectPlayer": 1
+                      }
+                    },
+                    "player": 1,
+                    "items": [
+                      {
+                        "player": 1,
+                        "Text": "Player2 choose  to remain the staring player",
+                        "origin": {
+                          "Ability": "Determine First Player"
+                        }
+                      }
+                    ],
+                    "active_events": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "age": 4,
+        "rounds": [
+          {
+            "round": 1,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Movement": {
+                        "Move": {
+                          "units": [
+                            0
+                          ],
+                          "destination": "C8"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Move"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Move": {
+                          "units": {
+                            "settlers": 1
+                          },
+                          "start": "D7",
+                          "destination": "C8"
+                        },
+                        "origin": {
+                          "Ability": "Move"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Move"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "FoundCity": {
+                          "settler": 0
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Found City"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Found City"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Units": {
+                          "units": {
+                            "settlers": 1
+                          },
+                          "balance": "Pay",
+                          "position": "C8"
+                        },
+                        "origin": {
+                          "Ability": "Found city"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Structure": {
+                          "structure": "CityCenter",
+                          "balance": "Gain",
+                          "position": "C8",
+                          "port_position": null
+                        },
+                        "origin": {
+                          "Ability": "Found city"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Loss"
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "turn_type": {
+                  "Player": 0
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": "EndTurn"
+                    },
+                    "player": 0,
+                    "origin": {
+                      "Ability": "End Turn"
+                    },
+                    "items": [
+                      {
+                        "player": 0,
+                        "Action": {
+                          "balance": "Loss",
+                          "amount": 3
+                        },
+                        "origin": {
+                          "Ability": "End Turn"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "round": 2,
+            "turns": [
+              {
+                "turn_type": {
+                  "Player": 1
+                },
+                "actions": [
+                  {
+                    "action": {
+                      "Playing": {
+                        "ActionCard": 155
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "CivilCard": 155
+                    },
+                    "undo": [
+                      {
+                        "op": "replace",
+                        "path": "/players/1/action_cards/1",
+                        "value": 155
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/action_cards/2",
+                        "value": 13
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/action_cards/3",
+                        "value": 27
+                      },
+                      {
+                        "op": "add",
+                        "path": "/players/1/action_cards/4",
+                        "value": 6
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/action_cards_discarded"
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/events"
+                      }
+                    ],
+                    "items": [
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "ActionCard": 155
+                          },
+                          "from": {
+                            "Hand": 1
+                          },
+                          "to": "PlayToDiscard"
+                        },
+                        "origin": {
+                          "Ability": "Action Card"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Response": {
+                        "Payment": [
+                          {
+                            "food": 3,
+                            "wood": 2,
+                            "ore": 7,
+                            "culture_tokens": 2
+                          }
+                        ]
+                      }
+                    },
+                    "player": 1,
+                    "undo": [
+                      {
+                        "op": "add",
+                        "path": "/events",
+                        "value": [
+                          {
+                            "event_type": {
+                              "ActionCard": {
+                                "id": 155
+                              }
+                            },
+                            "last_priority_used": 0,
+                            "player": 1
+                          },
+                          {
+                            "event_type": {
+                              "WonderCard": {
+                                "cost": {
+                                  "activate_city": true,
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 2,
+                                      "food": 3,
+                                      "ore": 7,
+                                      "wood": 2
+                                    },
+                                    "origin": {
+                                      "Wonder": "GreatWall"
+                                    }
+                                  },
+                                  "ignore_action_cost": true,
+                                  "ignore_required_advances": true,
+                                  "info": {
+                                    "info": {},
+                                    "log": [],
+                                    "origin": {
+                                      "Wonder": "GreatWall"
+                                    },
+                                    "player": 1
+                                  }
+                                },
+                                "origin": {
+                                  "CivilCard": 155
+                                },
+                                "selected_position": "D7",
+                                "wonder": "GreatWall"
+                              }
+                            },
+                            "handler": {
+                              "origin": {
+                                "Ability": "Build Wonder"
+                              },
+                              "priority": 10,
+                              "request": {
+                                "Payment": [
+                                  {
+                                    "cost": {
+                                      "conversions": [
+                                        {
+                                          "from": [
+                                            {
+                                              "food": 1
+                                            },
+                                            {
+                                              "wood": 1
+                                            },
+                                            {
+                                              "ore": 1
+                                            },
+                                            {
+                                              "ideas": 1
+                                            }
+                                          ],
+                                          "to": {
+                                            "gold": 1
+                                          },
+                                          "type": "Unlimited"
+                                        }
+                                      ],
+                                      "default": {
+                                        "culture_tokens": 2,
+                                        "food": 3,
+                                        "ore": 7,
+                                        "wood": 2
+                                      },
+                                      "origin": {
+                                        "Wonder": "GreatWall"
+                                      }
+                                    },
+                                    "name": "Pay to build wonder",
+                                    "optional": false
+                                  }
+                                ]
+                              }
+                            },
+                            "last_priority_used": 10,
+                            "player": 1
+                          }
+                        ]
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/players/1/cities/0/activations"
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/players/1/cities/0/city_pieces"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/resources/culture_tokens",
+                        "value": 3
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/resources/food",
+                        "value": 6
+                      },
+                      {
+                        "op": "add",
+                        "path": "/players/1/resources/ore",
+                        "value": 7
+                      },
+                      {
+                        "op": "add",
+                        "path": "/players/1/resources/wood",
+                        "value": 2
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/wonder_cards/0",
+                        "value": "GreatWall"
+                      },
+                      {
+                        "op": "add",
+                        "path": "/players/1/wonder_cards/1",
+                        "value": "Colosseum"
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/players/1/wonders_built"
+                      }
+                    ],
+                    "items": [
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 3,
+                            "wood": 2,
+                            "ore": 7,
+                            "culture_tokens": 2
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Wonder": "GreatWall"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "HandCard": {
+                          "card": {
+                            "Wonder": "GreatWall"
+                          },
+                          "from": {
+                            "Hand": 1
+                          },
+                          "to": "PlayToKeep"
+                        },
+                        "origin": {
+                          "CivilCard": 155
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Structure": {
+                          "structure": {
+                            "Wonder": "GreatWall"
+                          },
+                          "balance": "Gain",
+                          "position": "D7",
+                          "port_position": null
+                        },
+                        "origin": {
+                          "CivilCard": 155
+                        }
+                      }
+                    ],
+                    "active_events": 2
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Advance": {
+                          "advance": "Math",
+                          "payment": {
+                            "food": 2
+                          }
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Advance"
+                    },
+                    "undo": [
+                      {
+                        "op": "replace",
+                        "path": "/actions_left",
+                        "value": 3
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/3",
+                        "value": "Mining"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/4",
+                        "value": "Monuments"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/5",
+                        "value": "Sports"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/6",
+                        "value": "Storage"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/7",
+                        "value": "Theaters"
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/players/1/advances/8"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/incident_tokens",
+                        "value": 3
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/resources/culture_tokens",
+                        "value": 1
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/resources/food",
+                        "value": 3
+                      }
+                    ],
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "culture_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Math"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Math",
+                          "incident_token": {
+                            "Take": 2
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Collect": {
+                          "city_position": "D7",
+                          "collections": [
+                            {
+                              "position": "D7",
+                              "pile": {
+                                "food": 1
+                              },
+                              "times": 1
+                            }
+                          ],
+                          "action_type": "Collect"
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Collect"
+                    },
+                    "undo": [
+                      {
+                        "op": "replace",
+                        "path": "/actions_left",
+                        "value": 2
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/cities/0/activations",
+                        "value": 1
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/cities/0/mood_state",
+                        "value": "Happy"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/resources/food",
+                        "value": 1
+                      }
+                    ],
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "MoodChange": {
+                          "city": "D7",
+                          "mood": "Neutral"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "action": {
+                      "Playing": {
+                        "Advance": {
+                          "advance": "Irrigation",
+                          "payment": {
+                            "food": 2
+                          }
+                        }
+                      }
+                    },
+                    "player": 1,
+                    "origin": {
+                      "Ability": "Advance"
+                    },
+                    "undo": [
+                      {
+                        "op": "replace",
+                        "path": "/actions_left",
+                        "value": 1
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/3",
+                        "value": "Math"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/4",
+                        "value": "Mining"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/5",
+                        "value": "Monuments"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/6",
+                        "value": "Sports"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/7",
+                        "value": "Storage"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/advances/8",
+                        "value": "Theaters"
+                      },
+                      {
+                        "op": "remove",
+                        "path": "/players/1/advances/9"
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/incident_tokens",
+                        "value": 2
+                      },
+                      {
+                        "op": "add",
+                        "path": "/players/1/resources/food",
+                        "value": 2
+                      },
+                      {
+                        "op": "replace",
+                        "path": "/players/1/resources/mood_tokens",
+                        "value": 1
+                      }
+                    ],
+                    "items": [
+                      {
+                        "player": 1,
+                        "Action": {
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "food": 2
+                          },
+                          "balance": "Pay"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Resources": {
+                          "resources": {
+                            "mood_tokens": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Advance": "Irrigation"
+                        }
+                      },
+                      {
+                        "player": 1,
+                        "Advance": {
+                          "advance": "Irrigation",
+                          "incident_token": {
+                            "Take": 1
+                          },
+                          "balance": "Gain"
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "log_index": 5,
+    "home_layout": "ClockwiseV1"
+  }
+}

@@ -5,6 +5,8 @@
   "version": 2,
   "asynchronous_combat_from": 0,
   "finalized_combat_from": 0,
+  "great_architect_action_cost_from": 0,
+  "aggressor_eligibility_from": 0,
   "home_layout": "ClockwiseV1",
   "state": "ChooseCivilization",
   "players": [

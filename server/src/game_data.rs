@@ -41,6 +41,10 @@ pub struct GameData {
     asynchronous_combat_from: Option<usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     finalized_combat_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    great_architect_action_cost_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    aggressor_eligibility_from: Option<usize>,
     #[serde(default, skip_serializing_if = "crate::map::HomeLayout::is_legacy")]
     home_layout: crate::map::HomeLayout,
     #[serde(default)]
@@ -142,7 +146,12 @@ pub struct GameData {
 ///
 /// Panics if any wonder does not exist
 #[must_use]
-pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
+pub fn from_data(data: GameData, mut cache: Cache, context: GameContext) -> Game {
+    if data.options.variant == crate::game::GameVariant::Builder
+        && data.aggressor_eligibility_from != Some(0)
+    {
+        cache.retain_legacy_builder_aggressor();
+    }
     let mut game = Game {
         action_plan: data.action_plan,
         early_choices: data
@@ -160,6 +169,8 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         version: data.version,
         asynchronous_combat_from: data.asynchronous_combat_from,
         finalized_combat_from: data.finalized_combat_from,
+        great_architect_action_cost_from: data.great_architect_action_cost_from,
+        aggressor_eligibility_from: data.aggressor_eligibility_from,
         home_layout: data.home_layout,
         state: data.state,
         players: Vec::new(),
@@ -224,6 +235,8 @@ pub fn data(game: Game) -> GameData {
         version: game.version,
         asynchronous_combat_from: game.asynchronous_combat_from,
         finalized_combat_from: game.finalized_combat_from,
+        great_architect_action_cost_from: game.great_architect_action_cost_from,
+        aggressor_eligibility_from: game.aggressor_eligibility_from,
         home_layout: game.home_layout,
         state: game.state,
         events: game.events,
@@ -274,6 +287,8 @@ pub fn cloned_data(game: &Game) -> GameData {
         version: game.version,
         asynchronous_combat_from: game.asynchronous_combat_from,
         finalized_combat_from: game.finalized_combat_from,
+        great_architect_action_cost_from: game.great_architect_action_cost_from,
+        aggressor_eligibility_from: game.aggressor_eligibility_from,
         home_layout: game.home_layout,
         state: game.state.clone(),
         events: game.events.clone(),

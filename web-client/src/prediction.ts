@@ -193,6 +193,17 @@ export function predictUndo(previous: string, current: string): string | null {
   delete undone.combat_stats;
   delete undone.undo;
   before.log = log;
+  // Rule-version boundaries are excluded from native undo patches too. Keep
+  // the current boundary when undoing the first action of an upgraded save.
+  for (const field of [
+    'asynchronous_combat_from',
+    'finalized_combat_from',
+    'great_architect_action_cost_from',
+    'aggressor_eligibility_from',
+  ]) {
+    if (after[field] !== undefined) before[field] = after[field];
+    else delete before[field];
+  }
   delete before.early_choice_update;
   // Calendar may let the triggering action be undone while sealing everything
   // before it, as if the owner had peeked first. Knowledge is not rewound.

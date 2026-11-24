@@ -207,6 +207,8 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         context: GameContext::Play,
         asynchronous_combat_from: Some(0),
         finalized_combat_from: Some(0),
+        great_architect_action_cost_from: Some(0),
+        aggressor_eligibility_from: Some(0),
         version: JSON_SCHEMA_VERSION,
         options: GameOptions {
             legacy_undo: None,

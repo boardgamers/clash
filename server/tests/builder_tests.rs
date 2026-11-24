@@ -174,6 +174,7 @@ fn builder_removes_only_objectives_requiring_player_combat() {
         "Naval Assault",
         "Scavenger",
         "Brutus",
+        "Aggressor",
     ];
     assert_eq!(
         builder.get_objective_cards().len(),

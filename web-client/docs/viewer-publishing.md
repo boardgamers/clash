@@ -1834,3 +1834,23 @@ viewer and engine together. Preserve catalog 8 / 46 definitions, artwork 4, all
 60 named assets, gallery, Standard options, settings and preferences. Only the
 artwork manifest's lockfile integrity pin changes; no artwork is republished and
 no production game edits, repairs, backfills or history rewrites are performed.
+
+# Viewer 0.1.240 / engine 0.4.171 — Aggressor and Great Architect
+
+Aggressor now requires starting a land battle against another human player and
+eliminating at least two army units, without requiring victory. Great Architect
+remains a free public modifier with its three-culture discount and prerequisite
+waiver, but ordinary wonder construction costs one action. Engineering and the
+existing city-specific Nebuchadnezzar/Qin exemptions remain unchanged; Shogunate
+does not waive this construction. Independent persisted boundaries preserve old
+awards, historical replay and already-started Architect operations, while new
+branches adopt the corrections. Legacy Builder caches retain historical Aggressor
+claims without changing seeded deals. Native and web undo retain all four rule
+boundaries. See `docs/aggressor-eligibility.md` and
+`docs/great-architect-action-cost.md` for scope and frozen old-engine evidence.
+
+Require exact-commit Check and Web viewer CI green before publishing matching
+frozen artifacts. Verify 39 viewer files and engine bytes, catalog 8 / 46 entries,
+artwork 4, all 60 named assets and unchanged gallery, Standard options, preferences
+and settings. Only the artwork manifest's lockfile pin changes. No production
+moves, repairs, backfills, point changes or historical save writes are performed.

@@ -152,6 +152,12 @@ fn clean_json(expected: &str) -> String {
             .unwrap()
             .remove("finalized_combat_from");
     }
+    if value["aggressor_eligibility_from"] == serde_json::json!(usize::MAX) {
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("aggressor_eligibility_from");
+    }
     // Only public action-log items qualify, never arbitrary arrays or game state.
     if let Some(ages) = value
         .get_mut("log")
@@ -483,6 +489,9 @@ pub fn load_game(path: &GamePath) -> Game {
     }
     if game.asynchronous_combat_from.is_none() {
         game.asynchronous_combat_from = Some(usize::MAX);
+    }
+    if game.aggressor_eligibility_from.is_none() {
+        game.aggressor_eligibility_from = Some(usize::MAX);
     }
     if update_expected() {
         write_result(&to_json(&game), path);

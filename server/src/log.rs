@@ -448,6 +448,14 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
 }
 
 pub(crate) fn add_log_action(game: &mut Game, item: Action) {
+    let next = crate::game_api::log_length(game).saturating_add(1);
+    if matches!(
+        item,
+        Action::Playing(crate::playing_actions::PlayingAction::ActionCard(155))
+    ) {
+        game.great_architect_action_cost_from.get_or_insert(next);
+    }
+    game.aggressor_eligibility_from.get_or_insert(next);
     let active_events = game.events.len();
     let player = game.active_player();
     let origin = action_origin(&item, game.player(player)).clone();
@@ -458,6 +466,11 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
         let next = crate::game_api::log_length(game).saturating_add(1);
         game.asynchronous_combat_from = game.asynchronous_combat_from.map(|from| from.min(next));
         game.finalized_combat_from = game.finalized_combat_from.map(|from| from.min(next));
+        game.great_architect_action_cost_from = game
+            .great_architect_action_cost_from
+            .map(|from| from.min(next));
+        game.aggressor_eligibility_from =
+            game.aggressor_eligibility_from.map(|from| from.min(next));
     }
     let l = &mut current_turn_log_mut(game).actions;
     remove_redo_actions(l, i);

@@ -1,4 +1,5 @@
 {
+  "great_architect_action_cost_from": 3,
   "state": "Playing",
   "players": [
     {
@@ -373,6 +374,17 @@
                     }
                   },
                   "player": 0,
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Pay"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
+                    }
+                  ],
                   "active_events": 2
                 },
                 {
@@ -448,7 +460,7 @@
   ],
   "log_index": 5,
   "undo_limit": 1,
-  "actions_left": 2,
+  "actions_left": 1,
   "round": 2,
   "age": 1,
   "messages": [

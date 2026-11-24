@@ -272,14 +272,25 @@ pub(crate) fn aggressor() -> Objective {
     let name = "Aggressor";
     Objective::builder(
         name,
-        "You won a land battle as attacker in which you killed at least 2 army units.",
+        "Immediately after eliminating at least 2 army units in a battle you started against another player.",
     )
+    .requires_player_combat()
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         10,
         |game, p, s| {
             let player = p.index;
-            if s.is_winner(player)
+            // The boundary is the action evaluating combat_end, not the battle's
+            // start: an old pending battle completed by a new move uses new rules.
+            let corrected = game.aggressor_eligibility_from.is_some_and(|from| {
+                crate::game_api::log_length(game) >= from
+            });
+            let eligible = if corrected {
+                s.is_attacker(player) && s.opponent_is_human(player, game)
+            } else {
+                s.is_winner(player)
+            };
+            if eligible
                 && s.battleground.is_land()
                 && s.opponent(player).fighter_losses(s.battleground).amount() >= 2
             {
@@ -461,3 +472,7 @@ pub(crate) fn sea_cleansing() -> Objective {
 #[cfg(test)]
 #[path = "resistance_tests.rs"]
 mod resistance_tests;
+
+#[cfg(test)]
+#[path = "aggressor_tests.rs"]
+mod aggressor_tests;

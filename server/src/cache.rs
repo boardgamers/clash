@@ -55,6 +55,31 @@ pub struct Cache {
 }
 
 impl Cache {
+    // Old Builder games could earn Aggressor against barbarians. Keep that
+    // half available to historical listeners and already-persisted claims;
+    // the persisted runtime boundary still blocks new barbarian awards.
+    pub(crate) fn retain_legacy_builder_aggressor(&mut self) {
+        let objective = objectives::combat_objectives::aggressor();
+        for id in [23, 25] {
+            for card in self.all_objective_cards.iter_mut().filter(|c| c.id == id) {
+                if !card.has_objective("Aggressor") {
+                    card.objectives.push(objective.clone());
+                }
+            }
+            if let Some(card) = self.objective_cards_by_id.get_mut(&id)
+                && !card.has_objective("Aggressor")
+            {
+                card.objectives.push(objective.clone());
+            }
+        }
+        if !self.objectives_by_name.contains_key("Aggressor") {
+            self.all_objectives.push(objective.clone());
+            self.all_objectives.sort_by(|a, b| a.name.cmp(&b.name));
+            self.objectives_by_name
+                .insert("Aggressor".into(), objective);
+        }
+    }
+
     #[must_use]
     pub fn new(options: &GameOptions) -> Self {
         Cache {
