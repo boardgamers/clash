@@ -159,6 +159,7 @@ pub struct Game {
     pub finalized_combat_from: Option<usize>,
     pub great_architect_action_cost_from: Option<usize>,
     pub aggressor_eligibility_from: Option<usize>,
+    pub provinces_from: Option<usize>,
     pub home_layout: crate::map::HomeLayout,
     pub version: u16, // JSON schema version
     pub state: GameState,

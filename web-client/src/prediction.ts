@@ -200,6 +200,7 @@ export function predictUndo(previous: string, current: string): string | null {
     'finalized_combat_from',
     'great_architect_action_cost_from',
     'aggressor_eligibility_from',
+    'provinces_from',
   ]) {
     if (after[field] !== undefined) before[field] = after[field];
     else delete before[field];

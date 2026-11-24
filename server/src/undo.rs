@@ -5,7 +5,7 @@ use crate::movement::execute_movement_action;
 use json_patch::{PatchOperation, patch};
 use serde_json::Value;
 
-const IGNORE_PATHS: [&str; 11] = [
+const IGNORE_PATHS: [&str; 12] = [
     "/calendar_knowledge",
     "/log/",
     "/log_index",
@@ -20,6 +20,7 @@ const IGNORE_PATHS: [&str; 11] = [
     "/finalized_combat_from",
     "/great_architect_action_cost_from",
     "/aggressor_eligibility_from",
+    "/provinces_from",
 ];
 
 pub(crate) fn clean_patch(mut patch: Vec<PatchOperation>) -> Vec<PatchOperation> {

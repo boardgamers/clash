@@ -122,9 +122,17 @@ fn provinces() -> SpecialAdvanceInfo {
         |event| &mut event.combat_end,
         21,
         |game, player, s| {
-            (s.captured_city(player.index).is_some()
-                && player.get(game).try_get_city(s.defender.position).is_some())
-                .then_some(vec![PaymentRequest::optional(
+            if s.captured_city(player.index).is_none()
+                || player.get(game).try_get_city(s.defender.position).is_none()
+            {
+                return None;
+            }
+            // The mandatory benefit must run before the optional-payment helper
+            // filters unaffordable requests. Preserve historical captures on replay.
+            if game.provinces_from.is_some_and(|from| crate::game_api::log_length(game) >= from) {
+                set_city_mood(game, s.defender.position, &player.origin, MoodState::Neutral);
+            }
+            Some(vec![PaymentRequest::optional(
                     player
                         .payment_options()
                         .resources(player.get(game), ResourcePile::culture_tokens(1)),
@@ -137,6 +145,13 @@ fn provinces() -> SpecialAdvanceInfo {
             // and finish that obsolete choice without touching a missing city.
             if game.player(c.player_index).try_get_city(s.defender.position).is_none() {
                 c.player().gain_resources(game, c.choice[0].clone());
+                return;
+            }
+            // A legacy pending prompt can still need its Neutral fallback, but
+            // declining an outdated prompt must not downgrade an already Happy city.
+            if c.choice[0].is_empty()
+                && game.player(c.player_index).get_city(s.defender.position).mood_state == MoodState::Happy
+            {
                 return;
             }
             set_city_mood(

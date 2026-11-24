@@ -45,6 +45,8 @@ pub struct GameData {
     great_architect_action_cost_from: Option<usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     aggressor_eligibility_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    provinces_from: Option<usize>,
     #[serde(default, skip_serializing_if = "crate::map::HomeLayout::is_legacy")]
     home_layout: crate::map::HomeLayout,
     #[serde(default)]
@@ -171,6 +173,7 @@ pub fn from_data(data: GameData, mut cache: Cache, context: GameContext) -> Game
         finalized_combat_from: data.finalized_combat_from,
         great_architect_action_cost_from: data.great_architect_action_cost_from,
         aggressor_eligibility_from: data.aggressor_eligibility_from,
+        provinces_from: data.provinces_from,
         home_layout: data.home_layout,
         state: data.state,
         players: Vec::new(),
@@ -237,6 +240,7 @@ pub fn data(game: Game) -> GameData {
         finalized_combat_from: game.finalized_combat_from,
         great_architect_action_cost_from: game.great_architect_action_cost_from,
         aggressor_eligibility_from: game.aggressor_eligibility_from,
+        provinces_from: game.provinces_from,
         home_layout: game.home_layout,
         state: game.state,
         events: game.events,
@@ -289,6 +293,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         finalized_combat_from: game.finalized_combat_from,
         great_architect_action_cost_from: game.great_architect_action_cost_from,
         aggressor_eligibility_from: game.aggressor_eligibility_from,
+        provinces_from: game.provinces_from,
         home_layout: game.home_layout,
         state: game.state.clone(),
         events: game.events.clone(),

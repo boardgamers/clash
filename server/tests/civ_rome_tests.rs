@@ -142,3 +142,189 @@ fn civilizer() {
         )],
     );
 }
+
+fn provinces_capture(culture: u8, corrected: bool) -> server::game::Game {
+    let mut game = JSON.load_game("provinces");
+    game.provinces_from = Some(if corrected { 0 } else { usize::MAX });
+    game = server::game_api::execute(
+        game,
+        advance_action(Advance::Voting, ResourcePile::food(2)),
+        0,
+    );
+    game.players[0].resources.culture_tokens = culture;
+    server::game_api::execute(game, move_action(vec![0], Position::from_offset("B2")), 0)
+}
+
+#[test]
+fn provinces_zero_culture_is_neutral_without_a_prompt() {
+    let game = provinces_capture(0, true);
+    assert_eq!(
+        game.player(0)
+            .get_city(Position::from_offset("B2"))
+            .mood_state,
+        server::city::MoodState::Neutral
+    );
+    assert!(game.events.is_empty());
+}
+
+#[test]
+fn provinces_legacy_capture_retains_angry() {
+    let game = provinces_capture(0, false);
+    assert_eq!(
+        game.player(0)
+            .get_city(Position::from_offset("B2"))
+            .mood_state,
+        server::city::MoodState::Angry
+    );
+}
+
+#[test]
+fn provinces_optional_payment_accept_decline_and_legacy_resume() {
+    for corrected in [false, true] {
+        for accept in [false, true] {
+            let game = provinces_capture(1, corrected);
+            assert_eq!(
+                game.player(0)
+                    .get_city(Position::from_offset("B2"))
+                    .mood_state,
+                if corrected {
+                    server::city::MoodState::Neutral
+                } else {
+                    server::city::MoodState::Angry
+                }
+            );
+            let mut game = server::game::Game::from_data(
+                game.cloned_data(),
+                server::cache::Cache::new(&game.options),
+                server::game::GameContext::Play,
+            );
+            // Existing pending choices remain valid when an old save is upgraded.
+            game.provinces_from = None;
+            let game = server::game_api::execute(
+                game,
+                payment_response(if accept {
+                    ResourcePile::culture_tokens(1)
+                } else {
+                    ResourcePile::empty()
+                }),
+                0,
+            );
+            assert_eq!(
+                game.player(0)
+                    .get_city(Position::from_offset("B2"))
+                    .mood_state,
+                if accept {
+                    server::city::MoodState::Happy
+                } else {
+                    server::city::MoodState::Neutral
+                }
+            );
+            assert_eq!(game.player(0).resources.culture_tokens, u8::from(!accept));
+        }
+    }
+}
+
+#[test]
+fn provinces_obsolete_prompt_refunds_and_does_not_touch_another_owner() {
+    for accept in [false, true] {
+        let mut game = provinces_capture(1, false);
+        let position = Position::from_offset("B2");
+        let index = game.players[0]
+            .cities
+            .iter()
+            .position(|c| c.position == position)
+            .unwrap();
+        let city = game.players[0].cities.remove(index);
+        game.players[1].cities.push(city);
+        let game = server::game_api::execute(
+            game,
+            payment_response(if accept {
+                ResourcePile::culture_tokens(1)
+            } else {
+                ResourcePile::empty()
+            }),
+            0,
+        );
+        assert_eq!(game.player(0).resources.culture_tokens, 1);
+        assert_eq!(
+            game.player(1).get_city(position).mood_state,
+            server::city::MoodState::Angry
+        );
+    }
+    let mut game = provinces_capture(1, false);
+    game.players[0]
+        .cities
+        .iter_mut()
+        .find(|c| c.position == Position::from_offset("B2"))
+        .unwrap()
+        .mood_state = server::city::MoodState::Happy;
+    let game = server::game_api::execute(game, payment_response(ResourcePile::empty()), 0);
+    assert_eq!(
+        game.player(0)
+            .get_city(Position::from_offset("B2"))
+            .mood_state,
+        server::city::MoodState::Happy
+    );
+}
+
+#[test]
+fn provinces_boundary_upgrade_undo_redo_and_branch() {
+    let mut game = JSON.load_game("provinces");
+    game = server::game_api::execute(
+        game,
+        advance_action(Advance::Voting, ResourcePile::food(2)),
+        0,
+    );
+    game.players[0].resources.culture_tokens = 0;
+    game.provinces_from = None;
+    let boundary = server::game_api::log_length(&game) + 1;
+    let action = move_action(vec![0], Position::from_offset("B2"));
+    game = server::game_api::execute(game, action.clone(), 0);
+    assert_eq!(game.provinces_from, Some(boundary));
+    game = server::game_api::execute(game, Action::Undo, 0);
+    assert_eq!(game.provinces_from, Some(boundary));
+    game = server::game_api::execute(game, Action::Redo, 0);
+    assert_eq!(
+        game.player(0)
+            .get_city(Position::from_offset("B2"))
+            .mood_state,
+        server::city::MoodState::Neutral
+    );
+    game = server::game_api::execute(game, Action::Undo, 0);
+    game.provinces_from = Some(usize::MAX);
+    game = server::game_api::execute(game, action, 0);
+    assert_eq!(game.provinces_from, Some(boundary));
+    assert_eq!(
+        game.player(0)
+            .get_city(Position::from_offset("B2"))
+            .mood_state,
+        server::city::MoodState::Neutral
+    );
+}
+
+#[test]
+fn provinces_at_city_limit_automatically_razes_without_prompt() {
+    let mut game = JSON.load_game("provinces");
+    game.provinces_from = Some(0);
+    game = server::game_api::execute(
+        game,
+        advance_action(Advance::Voting, ResourcePile::food(2)),
+        0,
+    );
+    // Use spare cities solely to exhaust the city pieces; capture remains real.
+    while game.players[0].cities.len() < 7 {
+        let city = server::city::City::new(
+            0,
+            Position::from_offset(&format!("G{}", game.players[0].cities.len())),
+        );
+        game.players[0].cities.push(city);
+    }
+    let game =
+        server::game_api::execute(game, move_action(vec![0], Position::from_offset("B2")), 0);
+    assert!(
+        game.player(0)
+            .try_get_city(Position::from_offset("B2"))
+            .is_none()
+    );
+    assert!(game.events.is_empty());
+}

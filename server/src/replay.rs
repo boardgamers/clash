@@ -20,6 +20,8 @@ pub struct ReplayGameData {
     great_architect_action_cost_from: Option<usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     aggressor_eligibility_from: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    provinces_from: Option<usize>,
     #[serde(default, skip_serializing_if = "crate::map::HomeLayout::is_legacy")]
     home_layout: crate::map::HomeLayout,
     log: Vec<ActionLogAge>,
@@ -146,6 +148,10 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         data.aggressor_eligibility_from
             .unwrap_or(actions.len().saturating_add(1)),
     );
+    game.provinces_from = Some(
+        data.provinces_from
+            .unwrap_or(actions.len().saturating_add(1)),
+    );
     if data.options.civilization == CivSetupOption::DraftThree {
         // Draft locks are private and absent from the action log; setup turns
         // record their final choices. Re-deal before locking to preserve the RNG.
@@ -217,6 +223,9 @@ pub fn replay(data: ReplayGameData, to: Option<usize>) -> Result<Game, String> {
         .map(|from| from.min(to.saturating_add(1)));
     game.aggressor_eligibility_from = game
         .aggressor_eligibility_from
+        .map(|from| from.min(to.saturating_add(1)));
+    game.provinces_from = game
+        .provinces_from
         .map(|from| from.min(to.saturating_add(1)));
     for player in data.players {
         game.players[player.id].settings = player.settings;

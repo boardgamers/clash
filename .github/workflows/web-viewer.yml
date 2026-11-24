@@ -1,7 +1,7 @@
 name: Web viewer
 on:
   pull_request:
-    paths: ['web-client/**', 'server/**', 'scripts/status-phase-battle.test.cjs', 'scripts/postcombat-queue*.cjs', 'scripts/tributes.test.cjs', 'scripts/withdrawal.test.cjs', 'scripts/viking-cargo.test.cjs', 'scripts/aggressor.test.cjs', 'scripts/great-architect.test.cjs', 'Cargo.*', '.github/workflows/web-viewer.yml']
+    paths: ['web-client/**', 'server/**', 'scripts/status-phase-battle.test.cjs', 'scripts/postcombat-queue*.cjs', 'scripts/tributes.test.cjs', 'scripts/withdrawal.test.cjs', 'scripts/viking-cargo.test.cjs', 'scripts/aggressor.test.cjs', 'scripts/great-architect.test.cjs', 'scripts/provinces*.cjs', 'Cargo.*', '.github/workflows/web-viewer.yml']
   push:
     branches: [main, feat/3d-web-viewer]
 jobs:
@@ -24,7 +24,7 @@ jobs:
         working-directory: web-client
       - run: npx playwright install --with-deps chromium
         working-directory: web-client
-      - run: node scripts/resource-journal-smoke.mjs && node scripts/famine-journal-smoke.mjs && node scripts/construction-smoke.mjs && node scripts/great-architect-smoke.mjs && node scripts/research-card-smoke.mjs
+      - run: node scripts/resource-journal-smoke.mjs && node scripts/famine-journal-smoke.mjs && node scripts/construction-smoke.mjs && node scripts/great-architect-smoke.mjs && node scripts/provinces-smoke.mjs && node scripts/research-card-smoke.mjs
         working-directory: web-client
       - run: npm run test:boarding && node scripts/embark-smoke.mjs && node scripts/ship-landing-smoke.mjs
         working-directory: web-client

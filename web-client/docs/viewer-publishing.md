@@ -1854,3 +1854,10 @@ frozen artifacts. Verify 39 viewer files and engine bytes, catalog 8 / 46 entrie
 artwork 4, all 60 named assets and unchanged gallery, Standard options, preferences
 and settings. Only the artwork manifest's lockfile pin changes. No production
 moves, repairs, backfills, point changes or historical save writes are performed.
+
+# Viewer 0.1.241 / engine 0.4.172 — Rome Provinces
+
+Provinces makes retained captured cities Neutral even with no culture available;
+optional Happy payment still supports Great Arena. Historical captures retain
+legacy replay behavior through an independent action boundary; existing Angry
+cities are not repaired. See `docs/rome-provinces.md` for scope and regressions.
