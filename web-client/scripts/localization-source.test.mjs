@@ -57,6 +57,13 @@ test('visible Svelte punctuation-prefixed prose is inventoried without admitting
   for (const value of ['button[data-panel-close]', 'action-panel floating-panel', 'Build {p0}{p1}'])
     assert.equal(sourceMessage(value, { visibleText: true }), null, value);
 });
+test('Polish Aqueduct offers the Sanitation advance', () => {
+  const catalog = JSON.parse(fs.readFileSync(new URL('../src/localization/pl.json', import.meta.url), 'utf8'));
+  const description = catalog['You ignore Famine events. Research Sanitation either for 1 action with no resource cost, or for its normal resource cost without spending an action.'];
+  assert.match(description, /Zbadaj Higienę/);
+  assert.doesNotMatch(description, /Kanalizację/);
+  assert.equal(catalog.Sanitation, 'Higiena');
+});
 test('extracts current continued engine rules and omits test/technical noise', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'clash-locales-'));
   try {
