@@ -47,7 +47,7 @@ fn cyrus() -> LeaderInfo {
                     Some(ResourceRewardRequest::new(p.reward_options().tokens(amount), "King of Persia · Regional tribute".into()))
                 }), can_activate_leader_city).build(),
         LeaderAbility::builder("Strategist", "When revealing a tactics card, Cyrus may use +2 combat value instead of the card's effects, even if the opponent cancels the card.")
-            .add_bool_request(|e| &mut e.combat_round_start_reveal_tactics, 100, |game, p, r| {
+            .add_bool_request(|e| &mut e.combat_round_start_reveal_tactics, crate::tactics_card::BEFORE_TACTICS_PRIORITY, |game, p, r| {
                 (r.combat.has_leader(r.combat.role(p.index),game) && get_combat_strength(p.index,r).tactics_card.is_some()).then(|| "Strategist · Replace your tactics card's effects with +2 combat value?".into())
             }, |game,s,r| { if s.choice { r.combat.stats.ignored_tactics_cards.push(get_combat_strength(s.player_index,r).tactics_card.unwrap()); update_combat_strength(game,s.player_index,r,|_,_,strength,_| { strength.extra_combat_value+=2; strength.roll_log.push("Strategist adds +2 combat value".into()); }); } }).build())
 }

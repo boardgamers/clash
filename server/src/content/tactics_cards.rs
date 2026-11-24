@@ -377,6 +377,9 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
         |event| &mut event.combat_round_start_tactics,
         0,
         move |game, p, s| {
+            if !s.is_active(p.index, id, TacticsCardTarget::AllPlayers) {
+                return None;
+            }
             Some(UnitsRequest::new(
                 p.index,
                 s.combat.fighting_units(game, p.index),

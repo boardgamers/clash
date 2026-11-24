@@ -300,7 +300,14 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     if let Some(ref c) = phase.player.handler
                         && let Some(ref action) = c.response
                         && (c.priority == priority
-                            || (c.priority == priority - p.priority_delta && c.origin == p.origin))
+                            || (c.priority == priority - p.priority_delta && c.origin == p.origin)
+                            // A pre-fix saved Strategist decision used 100.
+                            // Match by origin too, never let an attacker card
+                            // consume that response merely because it uses 100.
+                            || (c.priority == 100
+                                && priority == crate::tactics_card::BEFORE_TACTICS_PRIORITY
+                                && c.origin == p.origin
+                                && p.origin == EventOrigin::LeaderAbility("Strategist".into())))
                     {
                         let mut current = phase.clone();
                         current
@@ -1074,6 +1081,12 @@ where
     E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone + Sync + Send,
     F: Fn(&mut T, &U, &V, &mut W, &EventPlayer) + 'static + Clone + Sync + Send,
 {
+    if matches!(setup.get_key(), EventOrigin::TacticsCard(_)) {
+        assert!(
+            (0..crate::tactics_card::TACTICS_PRIORITY_BAND).contains(&priority),
+            "Tactics base priority must fit its reserved band"
+        );
+    }
     let deinitialize_event = event.clone();
     let initializer = move |game: &mut Game, p: &EventPlayer, prio_delta: i32| {
         let e = event(&mut p.get_mut(game).events);

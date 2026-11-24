@@ -702,8 +702,13 @@ fn add_tactics_listener(
     if let Some(card) = card {
         for p in players {
             match role {
-                // avoid clash in priority - and attacker card requests should come first anyway
-                CombatRole::Attacker => card.listeners.init_with_prio_delta(game, *p, 100),
+                // Keep attacker card requests before defender card requests, but
+                // below reveal abilities (see the reserved tactics bands).
+                CombatRole::Attacker => card.listeners.init_with_prio_delta(
+                    game,
+                    *p,
+                    crate::tactics_card::TACTICS_PRIORITY_BAND,
+                ),
                 CombatRole::Defender => card.listeners.init(game, *p),
             }
         }

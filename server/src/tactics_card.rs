@@ -15,6 +15,12 @@ use action_card::discard_action_card;
 use std::fmt::Display;
 use std::sync::Arc;
 
+// Persistent listeners run in descending priority within each participant.
+// Reserve [0, 100) for defender cards and [100, 200) for attacker cards;
+// reveal abilities such as Strategist must run before either card's effects.
+pub(crate) const TACTICS_PRIORITY_BAND: i32 = 100;
+pub(crate) const BEFORE_TACTICS_PRIORITY: i32 = 2 * TACTICS_PRIORITY_BAND;
+
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum TacticsCardTarget {
     ActivePlayer,

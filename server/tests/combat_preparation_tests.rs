@@ -429,3 +429,138 @@ fn undo_redo_of_a_branched_battle_keeps_new_preparation() {
         expected["finalized_combat_from"]
     );
 }
+
+// Real Negotiations (24) has the Martyr tactics half. Its cancellation listener
+// is installed on BOTH combatants, including Cyrus even when he plays no card.
+#[test]
+fn strategist_and_attacking_martyr_have_distinct_reveal_priorities() {
+    for cyrus in [0, 1] {
+        let mut v = fixture("tactics_cards/peltasts");
+        v["players"][cyrus]["civilization"] = json!("Persia");
+        v["players"][cyrus]["units"][0]["unit_type"] = json!({"Leader":"Cyrus"});
+        v["players"][0]["action_cards"] = json!([24]);
+        v["players"][1]["action_cards"] = json!([6]);
+        let g = tactics(attack(v), 0, Some(24));
+        let g = tactics(g, 1, Some(6));
+        assert_eq!(g.active_player(), cyrus);
+        assert!(
+            request(&g).get("BoolRequest").is_some(),
+            "{:?}",
+            request(&g)
+        );
+    }
+}
+
+#[test]
+fn every_leader_and_pair_of_tactics_cards_fit_the_reserved_priority_bands() {
+    let cache = Cache::new(&Default::default());
+    let cards: Vec<_> = cache
+        .get_action_cards()
+        .iter()
+        .filter_map(|c| c.tactics_card.clone())
+        .collect();
+    assert!(cards.iter().any(|card| card.id == 24));
+    assert!(
+        cache
+            .get_civilizations()
+            .iter()
+            .any(|civ| civ.name == "Persia")
+    );
+    for civ in cache.get_civilizations() {
+        for leader in &civ.leaders {
+            let mut v = fixture("tactics_cards/peltasts");
+            v["players"][0]["civilization"] = json!(civ.name);
+            v["players"][0]["units"][0]["unit_type"] = json!({"Leader":leader.leader});
+            let mut g = load(v);
+            for attacker in &cards {
+                for defender in &cards {
+                    if attacker.id == defender.id {
+                        continue;
+                    }
+                    // Production installs BOTH cards on BOTH combatants.
+                    for player in [0, 1] {
+                        attacker.listeners.init_with_prio_delta(&mut g, player, 100);
+                        defender.listeners.init(&mut g, player);
+                    }
+                    for player in [0, 1] {
+                        attacker.listeners.deinit(&mut g, player);
+                        defender.listeners.deinit(&mut g, player);
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn strategist_precedes_martyr_effects_on_first_and_later_rounds_and_resumes_old_priority() {
+    for cyrus in [0, 1] {
+        for round_number in [1, 2] {
+            for replace in [false, true] {
+                let mut v = fixture("tactics_cards/peltasts");
+                v["players"][cyrus]["civilization"] = json!("Persia");
+                v["players"][cyrus]["units"][0]["unit_type"] = json!({"Leader":"Cyrus"});
+                v["players"][0]["action_cards"] = json!([24]);
+                v["players"][1]["action_cards"] = json!([6]);
+                let g = tactics(attack(v), 0, Some(24));
+                let mut v = data(&g);
+                if round_number == 2 {
+                    let r = &mut v["events"][0]["event_type"]["CombatRoundStart"];
+                    r["combat"]["stats"]["round"] = json!(2);
+                    r.as_object_mut().unwrap().remove("preparation");
+                    r["phase"] = json!("Default");
+                    v["events"][0]["players_used"] = json!([0]);
+                }
+                let g = tactics(load(v), 1, Some(6));
+                assert_eq!(g.active_player(), cyrus);
+                assert!(request(&g).get("BoolRequest").is_some());
+                let mut v = data(&g);
+                let round = &v["events"][0]["event_type"]["CombatRoundStart"];
+                assert_eq!(round["phase"], json!("RevealTacticsCard"));
+                assert_eq!(round["attacker_strength"]["tactics_card"], json!(24));
+                assert_eq!(round["defender_strength"]["tactics_card"], json!(6));
+                // Old pending decisions are still consumable by Strategist,
+                // not by the attacker card now occupying priority 100.
+                if round_number == 2 {
+                    v["events"][0]["handler"]["priority"] = json!(100);
+                    v["events"][0]["last_priority_used"] = json!(100);
+                }
+                let g = play(load(v), cyrus, json!({"Response":{"Bool":replace}}));
+                let log = data(&g)["log"].to_string();
+                if replace {
+                    assert!(
+                        data(&g)
+                            .to_string()
+                            .contains("Strategist adds +2 combat value")
+                    );
+                }
+                if replace && cyrus == 0 {
+                    // Replacing Martyr disables cancellation AND sacrifice.
+                    assert!(!log.contains("sacrifices"));
+                    assert!(!request(&g).to_string().contains("sacrifice"));
+                    assert!(
+                        data(&g)
+                            .to_string()
+                            .contains("High Morale added 2 combat value")
+                    );
+                } else {
+                    let v = data(&g);
+                    let round = &v["events"][0]["event_type"]["CombatRoundStart"];
+                    assert_eq!(round["phase"], json!("TacticsCard"));
+                    assert!(round["defender_strength"]["tactics_card"].is_null());
+                    if replace {
+                        assert_eq!(round["defender_strength"]["extra_combat_value"], json!(2));
+                    }
+                    assert!(request(&g).to_string().contains("sacrifice"));
+                    let before = g.player(0).units.len();
+                    let g = play(g, 0, json!({"Response":{"SelectUnits":[2]}}));
+                    assert_eq!(g.player(0).units.len(), before - 1);
+                    assert!(request(&g).to_string().contains("sacrifice"));
+                    assert_eq!(g.active_player(), 1);
+                    let g = play(g, 1, json!({"Response":{"SelectUnits":[1]}}));
+                    assert!(!g.player(1).units.iter().any(|u| u.id == 1));
+                }
+            }
+        }
+    }
+}

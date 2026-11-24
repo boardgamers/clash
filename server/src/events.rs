@@ -191,6 +191,17 @@ where
     ) where
         F: Fn(&mut T, &U, &V, &mut W, &EventPlayer) + 'static + Sync + Send,
     {
+        // Reveal abilities must precede both card bands, never share their
+        // priorities. Keep the ordinary uniqueness check as well: equal
+        // priorities are not interchangeable listener identities on resume.
+        if self.name == "combat_round_start_reveal_tactics"
+            && !matches!(player.origin, EventOrigin::TacticsCard(_))
+        {
+            assert!(
+                priority >= crate::tactics_card::BEFORE_TACTICS_PRIORITY,
+                "Reveal abilities must precede the reserved tactics bands"
+            );
+        }
         // objectives can have the same key, but you still can only fulfill one of them at a time
         let key = &player.origin;
         if let Some(old) = self
