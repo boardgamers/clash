@@ -370,6 +370,9 @@ pub struct ActionCardInfo {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub selected_positions: Vec<Position>,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub moved_units: Vec<u32>,
+    #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_player: Option<usize>,
     #[serde(default)]
@@ -390,6 +393,7 @@ impl ActionCardInfo {
             id,
             selected_position: None,
             selected_positions: Vec::new(),
+            moved_units: Vec::new(),
             selected_player: None,
             selected_advance: None,
             answer: None,

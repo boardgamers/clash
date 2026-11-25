@@ -161,6 +161,12 @@ fn clean_json(expected: &str) -> String {
     if value["provinces_from"] == serde_json::json!(usize::MAX) {
         value.as_object_mut().unwrap().remove("provinces_from");
     }
+    if value["barbarian_movement_from"] == serde_json::json!(usize::MAX) {
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("barbarian_movement_from");
+    }
     // Only public action-log items qualify, never arbitrary arrays or game state.
     if let Some(ages) = value
         .get_mut("log")
@@ -498,6 +504,9 @@ pub fn load_game(path: &GamePath) -> Game {
     }
     if game.provinces_from.is_none() {
         game.provinces_from = Some(usize::MAX);
+    }
+    if game.barbarian_movement_from.is_none() {
+        game.barbarian_movement_from = Some(usize::MAX);
     }
     if update_expected() {
         write_result(&to_json(&game), path);

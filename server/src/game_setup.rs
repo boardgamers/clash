@@ -210,6 +210,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         great_architect_action_cost_from: Some(0),
         aggressor_eligibility_from: Some(0),
         provinces_from: Some(0),
+        barbarian_movement_from: Some(0),
         version: JSON_SCHEMA_VERSION,
         options: GameOptions {
             legacy_undo: None,

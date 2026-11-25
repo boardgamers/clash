@@ -1,6 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::barbarians::{barbarian_reinforcement, get_barbarians_player};
+use crate::action_card::{ActionCard, ActionCardBuilder, ActionCardInfo};
+use crate::barbarians::{
+    barbarian_reinforcement, corrected_barbarian_movement, get_barbarians_player,
+};
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::action_cards::inspiration::player_positions;
@@ -101,11 +103,20 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
         .add_position_request(
             |e| &mut e.play_action_card,
             src_prio,
-            |_game, _player, a| {
+            |game, _player, a| {
                 a.selected_position = None;
+                let choices = if corrected_barbarian_movement(game) {
+                    a.selected_positions
+                        .iter()
+                        .copied()
+                        .filter(|&pos| !unmoved_mercenary_units(game, a, pos).is_empty())
+                        .collect_vec()
+                } else {
+                    a.selected_positions.clone()
+                };
 
                 Some(PositionRequest::new(
-                    a.selected_positions.clone(),
+                    choices,
                     1..=1,
                     "Select Barbarian army to move",
                 ))
@@ -123,7 +134,10 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
             |game, _player, a| {
                 let from = a.selected_position?;
                 let barbarian = get_barbarians_player(game);
-                let units = barbarian.get_units(from).iter().map(|u| u.id).collect_vec();
+                let units = unmoved_mercenary_units(game, a, from);
+                if corrected_barbarian_movement(game) && units.is_empty() {
+                    return None;
+                }
 
                 let destinations = from
                     .neighbors()
@@ -148,10 +162,12 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                 );
 
                 let from = a.selected_position.expect("position not found");
+                let units = unmoved_mercenary_units(game, a, from);
+                if corrected_barbarian_movement(game) {
+                    a.moved_units.extend(units.iter().copied());
+                }
                 let b = get_barbarians_player(game);
                 let barbarian = b.index;
-
-                let units = b.get_units(from).iter().map(|u| u.id).collect_vec();
 
                 let m = MoveUnits::new(units, to, None, ResourcePile::empty());
                 s.player()
@@ -172,6 +188,17 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
         },
         |a| a.selected_position,
     )
+}
+
+fn unmoved_mercenary_units(game: &Game, a: &ActionCardInfo, pos: Position) -> Vec<u32> {
+    let barbarian = get_barbarians_player(game);
+    let corrected = corrected_barbarian_movement(game);
+    barbarian
+        .get_units(pos)
+        .into_iter()
+        .filter(|u| !corrected || !a.moved_units.contains(&u.id))
+        .map(|u| u.id)
+        .collect_vec()
 }
 
 fn barbarian_army_positions_in_range2(

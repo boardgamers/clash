@@ -17,7 +17,7 @@ use crate::player_events::{IncidentInfo, IncidentTarget, PersistentEvent, Persis
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::unit::{UnitType, Units};
+use crate::unit::{Unit, UnitType, Units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -314,21 +314,44 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     )
 }
 
+pub(crate) fn corrected_barbarian_movement(game: &Game) -> bool {
+    game.barbarian_movement_from
+        .is_some_and(|from| crate::game_api::log_length(game) >= from)
+}
+
+fn unmoved_barbarian_units<'a>(
+    game: &'a Game,
+    state: &BarbariansEventState,
+    pos: Position,
+) -> Vec<&'a Unit> {
+    get_barbarians_player(game)
+        .get_units(pos)
+        .into_iter()
+        .filter(|u| !state.moved_units.contains(&u.id))
+        .collect()
+}
+
 pub(crate) fn barbarian_move_destinations(
     game: &Game,
     player: usize,
     state: &BarbariansEventState,
     army: Position,
 ) -> Vec<Position> {
+    let corrected = corrected_barbarian_movement(game);
+    let stack = if corrected {
+        unmoved_barbarian_units(game, state, army).len()
+    } else {
+        get_barbarians_player(game).get_units(army).len()
+    };
     if state.hunnic_tribes {
         let barb = get_barbarians_player(game);
-        let size = barb.get_units(army).len();
         army.neighbors()
             .into_iter()
-            .filter(|to| game.map.is_land(*to) && barb.get_units(*to).len() + size <= STACK_LIMIT)
+            .filter(|to| game.map.is_land(*to) && barb.get_units(*to).len() + stack <= STACK_LIMIT)
             .collect()
     } else {
-        barbarian_march_steps(game, game.player(player), army, 0)
+        let stack_size = if corrected { stack } else { 0 };
+        barbarian_march_steps(game, game.player(player), army, stack_size)
     }
 }
 
@@ -375,10 +398,14 @@ fn execute_barbarian_move(
         .take()
         .expect("selected position should exist");
     let to = s.choice[0];
-    let ids = get_barbarians_player(game).get_units(from);
-    let units: Vec<u32> = ids.iter().map(|u| u.id).collect();
-    state.moved_units.extend(units.iter());
-    let unit_types = ids.iter().map(|u| u.unit_type).collect::<Units>();
+    let moving = if corrected_barbarian_movement(game) {
+        unmoved_barbarian_units(game, state, from)
+    } else {
+        get_barbarians_player(game).get_units(from)
+    };
+    let units: Vec<u32> = moving.iter().map(|u| u.id).collect();
+    let unit_types = moving.iter().map(|u| u.unit_type).collect::<Units>();
+    state.moved_units.extend(units.iter().copied());
     s.log(
         game,
         &format!(

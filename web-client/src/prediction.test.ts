@@ -956,6 +956,7 @@ test('predicted undo preserves all independent persisted rule boundaries', () =>
     great_architect_action_cost_from: 5,
     aggressor_eligibility_from: 1,
     provinces_from: 1,
+    barbarian_movement_from: 2,
   };
   const current = {
     ...previous,
