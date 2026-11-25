@@ -434,7 +434,7 @@ small {
   justify-content: center;
   width: 14px;
   height: 14px;
-  padding: 0 0 0.5px;
+  padding: 0;
   box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: 50%;
@@ -444,6 +444,8 @@ small {
     600 9px / 1 'DM Sans',
     sans-serif;
   font-variant-numeric: tabular-nums;
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
 }
 .player-emblem img {
   width: 32px;
