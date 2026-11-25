@@ -129,7 +129,12 @@ export class Controller {
    * `print` is the predicted state's fingerprint, or null when the result
    * depends on information this seat does not have.
    */
-  private outbox: { move: Move; print: string | null; announced: boolean }[] = [];
+  private outbox: {
+    move: Move;
+    print: string | null;
+    announced: boolean;
+    continuation?: { actionPayment?: Pile; influenceRangePayment?: Pile; freeEducation?: Pile };
+  }[] = [];
   private predictions: boolean;
   private moveAnnounced = false;
   private undoPreview = new UndoPreview();
@@ -359,7 +364,8 @@ export class Controller {
       this.outbox = [];
       this.submittedMove = head.move;
       this.moveAnnounced = head.announced;
-      this.apply(raw);
+      this.restoreContinuation(head.continuation);
+      this.apply(raw, { continuing: !!head.continuation });
       return true;
     }
     // The server disagrees with the prediction (or another player moved first).
@@ -367,11 +373,27 @@ export class Controller {
     // as a regular update so new draws, battles and recap effects are reported.
     this.outbox = [];
     if (this.raw !== base) this.apply(base, { quiet: true });
-    this.apply(raw);
-    this.notify('Game updated.');
+    this.restoreContinuation(head.continuation);
+    this.apply(raw, { continuing: !!head.continuation });
+    if (!get(this.session).automaticPayment && !this.outbox.length) this.notify('Game updated.');
     return true;
   }
-  private apply(raw: string, { predicted = false, quiet = false, local = false } = {}) {
+  private restoreContinuation(continuation?: {
+    actionPayment?: Pile;
+    influenceRangePayment?: Pile;
+    freeEducation?: Pile;
+  }) {
+    if (!continuation) return;
+    this.quotedActionPayment = continuation.actionPayment ? { ...continuation.actionPayment } : null;
+    this.quotedInfluenceRangePayment = continuation.influenceRangePayment
+      ? { ...continuation.influenceRangePayment }
+      : null;
+    this.quotedFreeEducation = continuation.freeEducation ? { ...continuation.freeEducation } : null;
+  }
+  private apply(
+    raw: string,
+    { predicted = false, quiet = false, local = false, continuing = false } = {},
+  ) {
     if (!this.engine) return;
     this.localCalendar = null;
     if (quiet) {
@@ -404,6 +426,7 @@ export class Controller {
     const view = JSON.parse(this.engine.webView(raw, old.seat)) as View;
     if (!local) this.undoPreview.remember(raw, game, view, old.seat);
     if (view.influenceContext) this.influenceAttemptPending = true;
+    const awaitContinuation = old.pending || continuing;
     const quotedPayment = this.quotedActionPayment;
     this.quotedActionPayment = null;
     let automaticPayment: Move | null = null;
@@ -412,7 +435,7 @@ export class Controller {
     // Continue only the exact fee already accepted on the initiating button.
     // Optional purchases, different prices and alternative payments stay visible.
     if (
-      old.pending &&
+      awaitContinuation &&
       changed &&
       quotedPayment &&
       old.seat === view.activePlayer &&
@@ -440,7 +463,7 @@ export class Controller {
       }
     }
     if (
-      old.pending &&
+      awaitContinuation &&
       changed &&
       old.seat === view.activePlayer &&
       influencePaymentMatches(view, this.quotedInfluenceRangePayment)
@@ -455,11 +478,11 @@ export class Controller {
         /* Keep the range controls when a quote is rejected. */
       }
       this.quotedInfluenceRangePayment = null;
-    } else if (!view.influenceContext || !['payment', 'range'].includes(view.influenceContext.stage)) {
+    } else if (old.seat !== view.activePlayer || view.influenceContext?.stage !== 'payment') {
       this.quotedInfluenceRangePayment = null;
     }
     if (
-      old.pending &&
+      awaitContinuation &&
       changed &&
       this.quotedFreeEducation &&
       old.seat === view.activePlayer &&
@@ -479,7 +502,7 @@ export class Controller {
         /* Show the regular dialog if the agreed purchase is no longer legal. */
       }
       this.quotedFreeEducation = null;
-    } else if (old.pending && changed && !automaticPayment) this.quotedFreeEducation = null;
+    } else if (changed && !automaticPayment) this.quotedFreeEducation = null;
     const researchChoice = researchDecision(view);
     const newDecision = changed || JSON.stringify(view.decision) !== JSON.stringify(old.view?.decision);
     const drawn = this.cardDraws.update(old.seat, game, view);
@@ -980,6 +1003,7 @@ export class Controller {
   setPlayer(index?: number) {
     if (get(this.session).seat === index) return;
     this.settleToConfirmed();
+    if (this.outbox[0]) this.outbox[0] = { ...this.outbox[0], continuation: undefined };
     this.undoPreview.clear();
     if (get(this.session).seat !== undefined) this.playerSettings = null;
     this.migratedSkipRaze = false;
@@ -1880,14 +1904,16 @@ export class Controller {
       return { eligible: false, affordable: false };
     }
   }
-  submitResearch(action: Move, buyFreeEducation: boolean) {
+  submitResearch(action: Move, buyFreeEducation: boolean, quotedPayment?: Pile) {
+    const s = get(this.session);
+    if (s.pending || s.playback) return;
     const plan = this.researchPlan(action);
     this.quotedFreeEducation = plan.combined
       ? buyFreeEducation && plan.affordable
         ? { ideas: 1 }
         : {}
       : null;
-    this.submit(action);
+    this.submit(action, quotedPayment);
   }
   submit(move: Move, quotedPayment?: Pile) {
     if (move === 'Undo' && this.backInfluence()) return;
@@ -1951,8 +1977,18 @@ export class Controller {
     this.submittedMove = move;
     this.quotedActionPayment =
       quotedPayment && Object.values(quotedPayment).some(Boolean) ? { ...quotedPayment } : null;
+    const continuation =
+      this.quotedActionPayment || this.quotedInfluenceRangePayment || this.quotedFreeEducation
+        ? {
+            ...(this.quotedActionPayment ? { actionPayment: { ...this.quotedActionPayment } } : {}),
+            ...(this.quotedInfluenceRangePayment
+              ? { influenceRangePayment: { ...this.quotedInfluenceRangePayment } }
+              : {}),
+            ...(this.quotedFreeEducation ? { freeEducation: { ...this.quotedFreeEducation } } : {}),
+          }
+        : undefined;
     const predicted = this.predict(move, s);
-    this.outbox.push({ move, print: predicted?.print ?? null, announced: !!predicted });
+    this.outbox.push({ move, print: predicted?.print ?? null, announced: !!predicted, continuation });
     if (this.outbox.length === 1 && !this.sendHead()) return;
     // Show the result immediately. Queries and follow-up moves use the predicted
     // state; the host still validates every move and its state stays authoritative.

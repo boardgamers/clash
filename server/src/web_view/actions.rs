@@ -394,12 +394,23 @@ pub fn movement(game: &Game, seat: usize, units: Vec<u32>) -> Result<Value, Stri
     Ok(json!({"destinations":destinations}))
 }
 
+fn quoted_payment(
+    options: &crate::payment::PaymentOptions,
+    resources: &crate::resource_pile::ResourcePile,
+) -> crate::resource_pile::ResourcePile {
+    options
+        .first_valid_payment(resources)
+        .unwrap_or_else(|| options.default_payment())
+}
+
 pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
-    game.player(seat).action_cards.iter().filter(|id|**id!=0 && **id != crate::content::incidents::great_diplomat::DIPLOMAT_ID + crate::content::incidents::great_persons::GREAT_PERSON_OFFSET).map(|id| {
+    let p = game.player(seat);
+    p.action_cards.iter().filter(|id|**id!=0 && **id != crate::content::incidents::great_diplomat::DIPLOMAT_ID + crate::content::incidents::great_persons::GREAT_PERSON_OFFSET).map(|id| {
         let c = game.cache.get_action_card(*id);
         let reason = action_reason(game,seat,can_play,PlayingActionType::ActionCard(*id));
+        let cost = quoted_payment(&PlayingActionType::ActionCard(*id).payment_options(game,seat), &p.resources);
         json!({"id":id,"name":c.civil_card.name,"description":c.civil_card.description,"free":PlayingActionType::ActionCard(*id).cost(game,seat).free,
-            "cost":PlayingActionType::ActionCard(*id).payment_options(game,seat).default,
+            "cost":cost,
             "researchAdvances":if reason.is_none() {super::research::card_choices(game, seat, *id)} else {vec![]},
             "freeResearch":super::research::card_is_free_research(*id),
             "tactics":c.tactics_card.as_ref().map(|t|json!({"name":t.name,"description":t.description})),
@@ -409,7 +420,8 @@ pub fn cards(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
 
 pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     use crate::content::custom_actions::{CustomAction, SpecialActionExecution};
-    game.player(seat).special_actions.values().flat_map(|info| {
+    let p = game.player(seat);
+    p.special_actions.values().flat_map(|info| {
         if info.action == crate::content::custom_actions::SpecialAction::Custom(
             crate::content::custom_actions::CustomActionType::EndDiplomaticRelations
         ) && !game.permanent_effects.iter().any(|effect| matches!(effect,
@@ -425,19 +437,20 @@ pub fn special(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
             info.action.playing_action_type().is_available(game, seat).err()
         };
         let mut cities: Vec<Option<Position>> = if info.city_bound().is_some() {
-            game.player(seat).cities.iter().filter(|c|info.is_city_available(game,c)).map(|c|Some(c.position)).collect()
+            p.cities.iter().filter(|c|info.is_city_available(game,c)).map(|c|Some(c.position)).collect()
         } else { vec![None] };
         if cities.is_empty() {
             reason.get_or_insert_with(|| "Custom action cannot be played".to_string());
             cities.push(None);
         }
+        let cost = quoted_payment(&info.cost.cost.payment_options(p, info.event_origin.clone()), &p.resources);
         cities.into_iter().map(|city|json!({"name":info.event_origin.name(game),"description":execution.ability.description,"position":city,"reason":reason,
-            "cost":info.cost.cost.payment_options(game.player(seat),info.event_origin.clone()).default_payment(),
+            "cost":cost,
             "free":info.cost.cost.free,
             "researchAdvances":if reason.is_none() {super::research::ability_choices(game, seat, info.custom_action_type())} else {vec![]},
             "freeResearch":super::research::ability_is_free_research(info.custom_action_type()),
             "activatesCity":(info.custom_action_type() == crate::content::custom_actions::CustomActionType::GoldenAge)
-                .then(|| crate::leader::leader_position(game.player(seat))),
+                .then(|| crate::leader::leader_position(p)),
             "action":Action::Playing(PlayingAction::Custom(CustomAction::new(info.custom_action_type(),city)))})).collect::<Vec<_>>()
     }).collect()
 }
@@ -457,10 +470,13 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
     if !can_play {
         return vec![];
     }
+    let p = game.player(seat);
     let mut offers: Vec<Value> = available_influence_actions(game,seat).into_iter().flat_map(|kind| {
-        available_influence_culture(game,seat,&kind).into_iter().filter_map(|(s,r)| {
+        let action_cost = kind.cost(game, seat);
+        let action_payment = quoted_payment(&action_cost.payment_options(p, kind.origin(p)), &p.resources);
+        available_influence_culture(game,seat,&kind).into_iter().filter_map(move |(s,r)| {
             let info = r.ok()?;
-            let origins = influence_start_positions(game,game.player(seat)).into_iter().map(|(p,_)|p)
+            let origins = influence_start_positions(game,p).into_iter().map(|(pos,_)|pos)
                 .chain(std::iter::once(s.position))
                 .collect::<std::collections::BTreeSet<_>>().into_iter().filter_map(|origin| {
                     let from = influence_culture_boost_cost_from(game,seat,&s,&kind,true,false,game.get_any_city(s.position).player_index,Some(origin)).ok()?;
@@ -469,19 +485,21 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
                     Some(json!({"position":origin,"settlers":game.try_get_any_city(origin).is_none(),
                         "reroll":crate::content::civilizations::india::buddhism_available(game,seat,&from),
                         "successRewards":influence_source_success_rewards(game,seat,from.starting_city_position),
-                        "free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":from.roll_boost,"preventBoost":from.prevent_boost,"payment":from.range_boost_cost.default_payment(),
+                        "free":action_cost.free,"actionPayment":action_payment,"rollBonus":from.roll_boost,"preventBoost":from.prevent_boost,"payment":quoted_payment(&from.range_boost_cost, &p.resources),
                         "action":Action::Playing(PlayingAction::InfluenceCultureAttempt(attempt))}))
                 }).collect::<Vec<_>>();
-            Some(json!({"name":super::decisions::structure_name(&s.structure),"position":s.position,"origin":info.starting_city_position,"variant":kind.origin(game.player(seat)).name(game),"free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":info.roll_boost,"preventBoost":info.prevent_boost,"payment":info.range_boost_cost.default_payment(),
+            Some(json!({"name":super::decisions::structure_name(&s.structure),"position":s.position,"origin":info.starting_city_position,"variant":kind.origin(p).name(game),"free":action_cost.free,"actionPayment":action_payment,"rollBonus":info.roll_boost,"preventBoost":info.prevent_boost,"payment":quoted_payment(&info.range_boost_cost, &p.resources),
                 "origins":origins,
                 "action":Action::Playing(PlayingAction::InfluenceCultureAttempt(InfluenceCultureAttempt::new(s,kind.clone())))}))
         }).collect::<Vec<_>>()
     }).collect();
-    if game
-        .player(seat)
-        .has_special_advance(crate::special_advance::SpecialAdvance::Zoroastrianism)
-    {
+    if p.has_special_advance(crate::special_advance::SpecialAdvance::Zoroastrianism) {
         for kind in available_influence_actions(game, seat) {
+            let action_cost = kind.cost(game, seat);
+            let action_payment = quoted_payment(
+                &action_cost.payment_options(p, kind.origin(p)),
+                &p.resources,
+            );
             for owner in &game.players {
                 for unit in &owner.units {
                     let mut attempt = InfluenceCultureAttempt::new(
@@ -500,14 +518,14 @@ pub fn influence(game: &Game, seat: usize, can_play: bool) -> Vec<Value> {
                     else {
                         continue;
                     };
-                    let origins=influence_start_positions(game,game.player(seat)).into_iter().filter_map(|(pos,_)| {
+                    let origins=influence_start_positions(game,p).into_iter().filter_map(|(pos,_)| {
                     let mut selected=attempt.clone();selected.starting_position=Some(pos);
                     let from=crate::cultural_influence::unit_influence_cost(game,seat,&selected,true).ok()?;
                     Some(json!({"position":pos,"settlers":false,"reroll":false,
                         "successRewards":influence_source_success_rewards(game,seat,from.starting_city_position),
-                        "free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":from.roll_boost,"preventBoost":from.prevent_boost,"payment":from.range_boost_cost.default_payment(),"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(selected))}))
+                        "free":action_cost.free,"actionPayment":action_payment,"rollBonus":from.roll_boost,"preventBoost":from.prevent_boost,"payment":quoted_payment(&from.range_boost_cost, &p.resources),"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(selected))}))
                 }).collect::<Vec<_>>();
-                    offers.push(json!({"name":format!("{} · {} #{}",owner.civilization.name,unit.unit_type.non_leader_name(),unit.id+1),"position":unit.position,"origin":info.starting_city_position,"variant":"Zoroastrianism","free":kind.cost(game,seat).free,"actionPayment":kind.cost(game,seat).payment_options(game.player(seat), kind.origin(game.player(seat))).default_payment(),"rollBonus":info.roll_boost,"preventBoost":info.prevent_boost,"payment":info.range_boost_cost.default_payment(),"origins":origins,"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(attempt))}));
+                    offers.push(json!({"name":format!("{} · {} #{}",owner.civilization.name,unit.unit_type.non_leader_name(),unit.id+1),"position":unit.position,"origin":info.starting_city_position,"variant":"Zoroastrianism","free":action_cost.free,"actionPayment":action_payment,"rollBonus":info.roll_boost,"preventBoost":info.prevent_boost,"payment":quoted_payment(&info.range_boost_cost, &p.resources),"origins":origins,"action":Action::Playing(PlayingAction::InfluenceCultureAttempt(attempt))}));
                 }
             }
         }

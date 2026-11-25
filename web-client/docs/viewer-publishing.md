@@ -1897,3 +1897,21 @@ artwork 4, all 60 named assets, gallery, Standard options, settings and
 preferences. Only the artwork manifest's lockfile integrity pin changes; no
 artwork is republished and no production moves, repairs, backfills or
 historical rewrites are performed.
+
+# Viewer 0.1.244 / engine 0.4.174 — Auto-continuation and Great Arena payment quotes
+
+Engine web-view payment quotes for collect actions, action cards, custom
+abilities, and cultural influence now select the player's first valid payment
+option (falling back to the default payment) so Great Arena substitutions such
+as paying culture for Free Economy or mood for Arts quote an affordable payment
+automatically. The viewer preserves quoted action-fee, cultural-influence range,
+and Free Education continuations across optimistic outbox reconciliation and
+passes upfront action payments from `CityPanel` and `ResearchTree`, while
+clearing continuations on seat switches or mismatched prompts.
+
+Require exact-commit Check and Web viewer CI green before publishing the frozen
+viewer `0.1.244` and engine `0.4.174` together. Preserve catalog 8 / 46
+definitions, artwork 4, all 60 named assets, gallery, Standard options,
+settings, and preferences. Only the artwork manifest's lockfile integrity pin
+changes; no artwork is republished and no production moves, repairs, backfills,
+or historical rewrites are performed.

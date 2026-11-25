@@ -43,7 +43,7 @@
     // Card-request builds select the city first; their payment decision follows.
     const chosen = structuredClone(action) as { Playing?: { Construct: { payment: Pile } } };
     if (buildPayment && chosen.Playing) chosen.Playing.Construct.payment = buildPayment;
-    controller.submit(chosen);
+    controller.submit(chosen, selected?.actionPayment);
   }
   let city = $derived($session.view?.cities.find((c) => c.position === $session.city));
   let options = $derived($session.view?.cityActions.find((c) => c.position === $session.city));

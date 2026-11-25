@@ -448,7 +448,7 @@ pub fn view(game: &Game, seat: Option<usize>) -> Value {
             "leaders":c.leaders.iter().map(|l|json!({"name":l.name,"abilities":l.abilities.iter().map(|a|json!({"name":a.name,"description":a.description})).collect::<Vec<_>>()})).collect::<Vec<_>>(),
             "action":Action::ChooseCivilization(c.name.clone())})).collect::<Vec<_>>(),
         "actionCards":actions::cards(game,seat,can_play), "specialActions":special_actions.iter().filter(|a| a["reason"].is_null()).collect::<Vec<_>>(), "influence":actions::influence(game,seat,can_play),
-        "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|{ let cost = a.cost(game,seat); json!({"value":a,"name":a.origin(p).name(game),"free":cost.free,"payment":cost.payment_options(p,a.origin(p)).default_payment()}) }).collect::<Vec<_>>()} else {vec![]},
+        "collectActions":if can_play {crate::collect::available_collect_actions(game,seat).iter().map(|a|{ let cost = a.cost(game,seat); let options = cost.payment_options(p,a.origin(p)); let payment = options.first_valid_payment(&p.resources).unwrap_or_else(|| options.default_payment()); json!({"value":a,"name":a.origin(p).name(game),"free":cost.free,"payment":payment}) }).collect::<Vec<_>>()} else {vec![]},
         "happinessActions":if can_play {crate::happiness::available_happiness_actions(game,seat).iter().map(|a|json!({"value":a,"name":a.origin(p).name(game),"free":a.cost(game,seat).free,"surcharge":a.payment_options(game,seat).default})).collect::<Vec<_>>()} else {vec![]},
         "units":p.units.iter().map(|u|json!({"id":u.id,"type":u.unit_type,"position":u.position,"carrier":u.carrier_id,"pirate":u.pirate,"movementNotes":movement_notes(game,p,u)})).collect::<Vec<_>>(),
         "nomadCities":p.cities.iter().filter(|c|!crate::content::civilizations::huns::city_destinations(game,p,c.position,&[]).is_empty()).map(|c|c.position).collect::<Vec<_>>(),
@@ -910,6 +910,60 @@ mod tests {
             .units
             .push(Unit::new(seat, site, UnitType::Infantry, 901));
         assert_eq!(reason(&game), Value::Null);
+    }
+    #[test]
+    fn great_arena_quotes_first_valid_payment_for_free_economy_and_arts() {
+        use crate::wonder::Wonder;
+        let mut game = game();
+        let seat = game.active_player();
+        let enemy = 1 - seat;
+        let my_city = game.players[seat].cities[0].position;
+        let near = *game
+            .map
+            .tiles
+            .iter()
+            .find(|(pos, terrain)| {
+                pos.distance(my_city) == 1 && crate::city::is_valid_city_terrain(terrain)
+            })
+            .map(|(pos, _)| pos)
+            .expect("adjacent land tile");
+        game.players[seat].cities[0].mood_state = crate::city::MoodState::Happy;
+        game.players[enemy].cities[0].position = near;
+        game.players[enemy].cities[0].pieces.temple = Some(enemy);
+        game.players[seat].advances.insert(Advance::FreeEconomy);
+        game.players[seat].advances.insert(Advance::Arts);
+        game.players[seat].cities[0]
+            .pieces
+            .wonders
+            .push(Wonder::Colosseum);
+        game.players[seat].wonders_owned.insert(Wonder::Colosseum);
+        let data = game.cloned_data();
+        game = Game::from_data(data, game.cache, crate::game::GameContext::Play);
+
+        // Free Economy defaults to mood, but with 0 mood + 1 culture + Great Arena it quotes culture.
+        game.players[seat].resources = ResourcePile::culture_tokens(1);
+        let v = view(&game, Some(seat));
+        let free_econ = v["collectActions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["free"] == true)
+            .expect("Free Economy collect action");
+        assert_eq!(free_econ["payment"], json!({"culture_tokens": 1}));
+
+        // Arts defaults to culture, but with 0 culture + 7 mood + Great Arena it quotes mood.
+        game.players[seat].resources = ResourcePile::mood_tokens(7);
+        let v = view(&game, Some(seat));
+        let arts = v["influence"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["free"] == true)
+            .expect("Arts influence offer");
+        assert_eq!(arts["actionPayment"], json!({"mood_tokens": 1}));
+        for origin in arts["origins"].as_array().unwrap() {
+            assert_eq!(origin["actionPayment"], json!({"mood_tokens": 1}));
+        }
     }
 }
 

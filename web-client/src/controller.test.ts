@@ -3082,3 +3082,315 @@ test('full collection blocks a dual-choice tile but allows replacement and map d
     assert.deepEqual(app.sent, []);
   } finally { app.close(); }
 });
+
+function mismatchState(raw: string, opponent: number) {
+  const game = JSON.parse(raw);
+  game.players[opponent].resources.wood = (game.players[opponent].resources.wood ?? 0) + 1;
+  return JSON.stringify(game);
+}
+
+test('prediction mismatch preserves Free Education auto-continuation for both opt-in and skip', async () => {
+  for (const buy of [true, false]) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('advances/free_education'));
+      g.players[0].resources.ideas = 6;
+      let raw = JSON.stringify(g);
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(raw, 0));
+      const advance = app.session().view!.advances.find((a) => a.id === 'Irrigation')!;
+      c.submitResearch(advance.action!, buy);
+      assert.equal(app.sent.length, 1);
+      // Authoritative state differs from local prediction (forces head.print !== print).
+      raw = mismatchState(engine.tryMove(raw, app.sent[0], 0), 1);
+      await c.load(engine.stripSecret(raw, 0));
+      assert.equal(app.sent.length, 2, 'Free Education continuation must auto-submit after mismatch');
+      assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [buy ? { ideas: 1 } : {}] } });
+      raw = engine.tryMove(raw, app.sent[1], 0);
+      await c.load(engine.stripSecret(raw, 0));
+      assert.equal(app.session().view!.decision, null);
+      assert.equal(app.session().pending, false);
+      assert.equal(app.session().automaticPayment, false);
+      const p = JSON.parse(raw).players[0];
+      assert.equal(p.resources.mood_tokens, 12 + Number(buy));
+    } finally {
+      app.close();
+    }
+  }
+});
+
+test('prediction mismatch preserves Free Economy auto-payment continuation', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    let raw = await engine.init(2, [], {}, 'free-economy-mismatch', {});
+    const game = JSON.parse(raw),
+      seat = engine.currentPlayer(raw),
+      opponent = 1 - seat;
+    game.players[seat].advances.push('FreeEconomy');
+    game.players[seat].resources.mood_tokens = 2;
+    raw = JSON.stringify(game);
+    c.setPlayer(seat);
+    await c.load(engine.stripSecret(raw, seat));
+    const freeEconomy = app.session().view!.collectActions!.find((a) => a.free)!;
+    c.beginCollect(game.players[seat].cities[0].position);
+    c.switchCollectVariant(freeEconomy.value);
+    c.toggleChoice(app.session().view!.cities[0].choices[0]);
+    c.collect();
+    assert.equal(app.sent.length, 1);
+    raw = mismatchState(engine.tryMove(raw, app.sent[0], seat), opponent);
+    await c.load(engine.stripSecret(raw, seat));
+    assert.equal(app.sent.length, 2, 'Free Economy payment must auto-submit after mismatch');
+    assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [{ mood_tokens: 1 }] } });
+    raw = engine.tryMove(raw, app.sent[1], seat);
+    await c.load(engine.stripSecret(raw, seat));
+    assert.equal(app.session().view!.decision, null);
+    assert.equal(app.session().pending, false);
+    assert.equal(JSON.parse(raw).players[seat].resources.mood_tokens, 1);
+  } finally {
+    app.close();
+  }
+});
+
+test('prediction mismatch preserves 3-step Arts + range auto-payment continuation on step 1 and step 2', async () => {
+  for (const mismatchStep of [0, 1]) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('base/cultural_influence_instant'));
+      g.dice_roll_outcomes = [0];
+      g.current_player_index = 0;
+      g.players[1].cities[0].city_pieces = { temple: 1 };
+      g.players[0].cities = [{ position: 'A1', mood_state: 'Happy' }];
+      g.players[0].civilization = 'Rome';
+      g.players[0].resources.culture_tokens = 7;
+      g.players[0].advances = [...new Set([...g.players[0].advances, 'Arts', 'Theaters'])];
+      c.setPlayer(0);
+      let raw = JSON.stringify(g);
+      await c.load(engine.stripSecret(raw, 0));
+      const target = app
+        .session()
+        .view!.influence!.find((t) => t.position === 'C1' && t.name === 'Temple' && !!t.free)!;
+      const origin = target.origins!.find((o) => o.position === target.origin)!;
+      c.startInfluence(origin.action, origin.actionPayment!, origin.payment);
+      for (let i = 0; i < app.sent.length; i++) {
+        assert.ok(i < 3, 'only Arts initiation, action fee, and range fee auto-submit');
+        raw = engine.tryMove(raw, app.sent[i], 0);
+        if (i === mismatchStep) raw = mismatchState(raw, 1);
+        await c.load(engine.stripSecret(raw, 0));
+      }
+      assert.equal(app.sent.length, 3);
+      assert.equal(app.session().view!.influenceContext!.stage, 'boost');
+      assert.equal(app.session().pending, false);
+      assert.equal(app.session().automaticPayment, false);
+    } finally {
+      app.close();
+    }
+  }
+});
+
+test('settleToConfirmed while outbox[0] is in flight still fires continuation on reconcile', async () => {
+  const app = paymentController(),
+    c = app.controller;
+  try {
+    const g = JSON.parse(fixture('advances/free_education'));
+    g.players[0].resources.ideas = 6;
+    let raw = JSON.stringify(g);
+    c.setPlayer(0);
+    await c.load(engine.stripSecret(raw, 0));
+    const advance = app.session().view!.advances.find((a) => a.id === 'Irrigation')!;
+    c.submitResearch(advance.action!, true);
+    assert.equal(app.sent.length, 1);
+    (c as unknown as { settleToConfirmed(): void }).settleToConfirmed();
+    assert.equal(app.session().pending, true);
+    raw = engine.tryMove(raw, app.sent[0], 0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.sent.length, 2, 'continuation must still auto-submit after settleToConfirmed');
+    assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [{ ideas: 1 }] } });
+    raw = engine.tryMove(raw, app.sent[1], 0);
+    await c.load(engine.stripSecret(raw, 0));
+    assert.equal(app.session().view!.decision, null);
+    assert.equal(app.session().pending, false);
+  } finally {
+    app.close();
+  }
+});
+
+test('continuation is discarded cleanly on rejection, unexpected state, or opponent turn', async () => {
+  for (const mode of ['rejected', 'opponent-turn', 'unexpected-state'] as const) {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('advances/free_education'));
+      g.players[0].resources.ideas = 6;
+      const raw = JSON.stringify(g);
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(raw, 0));
+      const advance = app.session().view!.advances.find((a) => a.id === 'Irrigation')!;
+      c.submitResearch(advance.action!, true);
+      assert.equal(app.sent.length, 1);
+      if (mode === 'rejected') {
+        c.moveResult({ move: app.sent[0], ok: false, error: 'Rejected by server' });
+        const after = engine.tryMove(raw, app.sent[0], 0);
+        await c.load(engine.stripSecret(after, 0));
+        assert.equal(app.sent.length, 1);
+        assert.equal(app.session().view!.decision!.origin!.Advance, 'FreeEducation');
+      } else if (mode === 'opponent-turn') {
+        const otherTurn = JSON.parse(raw);
+        otherTurn.current_player_index = 1;
+        await c.load(engine.stripSecret(JSON.stringify(otherTurn), 0));
+        assert.equal(app.sent.length, 1);
+        assert.equal(app.session().automaticPayment, false);
+      } else {
+        const endTurn = engine.tryMove(raw, JSON.stringify({ Playing: 'EndTurn' }), 0);
+        await c.load(engine.stripSecret(endTurn, 0));
+        assert.equal(app.sent.length, 1);
+        assert.equal(app.session().automaticPayment, false);
+      }
+    } finally {
+      app.close();
+    }
+  }
+});
+
+test('Great Arena auto-pays single-option Free Economy and Arts quotes and keeps 2-option choice dialog', async () => {
+  // 1. Free Economy + Great Arena + 0 mood + 1 culture -> quotes culture & auto-pays.
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      let raw = await engine.init(2, [], {}, 'great-arena-free-econ-single', {});
+      const game = JSON.parse(raw),
+        seat = engine.currentPlayer(raw);
+      game.players[seat].advances.push('FreeEconomy');
+      game.players[seat].cities[0].city_pieces = { ...game.players[seat].cities[0].city_pieces, wonders: ['Colosseum'] };
+      game.players[seat].wonders_owned = ['Colosseum'];
+      game.players[seat].resources.mood_tokens = 0;
+      game.players[seat].resources.culture_tokens = 1;
+      raw = JSON.stringify(game);
+      c.setPlayer(seat);
+      await c.load(engine.stripSecret(raw, seat));
+      const freeEconomy = app.session().view!.collectActions!.find((a) => a.free)!;
+      assert.deepEqual(freeEconomy.payment, { culture_tokens: 1 });
+      c.beginCollect(game.players[seat].cities[0].position);
+      c.switchCollectVariant(freeEconomy.value);
+      c.toggleChoice(app.session().view!.cities[0].choices[0]);
+      c.collect();
+      for (let i = 0; i < app.sent.length; i++) {
+        assert.ok(i < 2);
+        raw = engine.tryMove(raw, app.sent[i], seat);
+        await c.load(engine.stripSecret(raw, seat));
+      }
+      assert.equal(app.sent.length, 2);
+      assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [{ culture_tokens: 1 }] } });
+      assert.equal(app.session().view!.decision, null);
+    } finally {
+      app.close();
+    }
+  }
+
+  // 2. Free Economy + Great Arena + BOTH mood and culture -> keeps 2-option choice dialog.
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      let raw = await engine.init(2, [], {}, 'great-arena-free-econ-both', {});
+      const game = JSON.parse(raw),
+        seat = engine.currentPlayer(raw);
+      game.players[seat].advances.push('FreeEconomy');
+      game.players[seat].cities[0].city_pieces = { ...game.players[seat].cities[0].city_pieces, wonders: ['Colosseum'] };
+      game.players[seat].wonders_owned = ['Colosseum'];
+      game.players[seat].resources.mood_tokens = 1;
+      game.players[seat].resources.culture_tokens = 1;
+      raw = JSON.stringify(game);
+      c.setPlayer(seat);
+      await c.load(engine.stripSecret(raw, seat));
+      const freeEconomy = app.session().view!.collectActions!.find((a) => a.free)!;
+      c.beginCollect(game.players[seat].cities[0].position);
+      c.switchCollectVariant(freeEconomy.value);
+      c.toggleChoice(app.session().view!.cities[0].choices[0]);
+      c.collect();
+      raw = engine.tryMove(raw, app.sent[0], seat);
+      await c.load(engine.stripSecret(raw, seat));
+      assert.equal(app.sent.length, 1);
+      assert.equal(app.session().view!.decision!.name, 'Pay for action');
+      assert.equal(app.session().view!.decision!.fields[0].choices!.length, 2);
+      assert.equal(app.session().automaticPayment, false);
+    } finally {
+      app.close();
+    }
+  }
+
+  // 3. Arts + Great Arena + 0 culture + mood -> quotes mood & auto-pays.
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('base/cultural_influence_instant'));
+      g.dice_roll_outcomes = [0];
+      g.current_player_index = 0;
+      g.players[1].cities[0].city_pieces = { temple: 1 };
+      g.players[0].cities = [{ position: 'A1', mood_state: 'Happy', city_pieces: { wonders: ['Colosseum'] } }];
+      g.players[0].wonders_owned = ['Colosseum'];
+      g.players[0].civilization = 'Rome';
+      g.players[0].resources.culture_tokens = 0;
+      g.players[0].resources.mood_tokens = 7;
+      g.players[0].advances = [...new Set([...g.players[0].advances, 'Arts', 'Theaters'])];
+      c.setPlayer(0);
+      let raw = JSON.stringify(g);
+      await c.load(engine.stripSecret(raw, 0));
+      const target = app
+        .session()
+        .view!.influence!.find((t) => t.position === 'C1' && t.name === 'Temple' && !!t.free)!;
+      const origin = target.origins!.find((o) => o.position === target.origin)!;
+      assert.deepEqual(origin.actionPayment, { mood_tokens: 1 });
+      c.startInfluence(origin.action, origin.actionPayment!, origin.payment);
+      for (let i = 0; i < app.sent.length; i++) {
+        assert.ok(i < 3);
+        raw = engine.tryMove(raw, app.sent[i], 0);
+        await c.load(engine.stripSecret(raw, 0));
+      }
+      const expectedSteps = Object.values(origin.payment).some(Boolean) ? 3 : 2;
+      assert.equal(app.sent.length, expectedSteps);
+      assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [{ mood_tokens: 1 }] } });
+      assert.equal(app.session().view!.influenceContext!.stage, 'boost');
+    } finally {
+      app.close();
+    }
+  }
+
+  // 4. Arts + Great Arena + BOTH mood and culture -> keeps 2-option choice dialog.
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const g = JSON.parse(fixture('base/cultural_influence_instant'));
+      g.dice_roll_outcomes = [0];
+      g.current_player_index = 0;
+      g.players[1].cities[0].city_pieces = { temple: 1 };
+      g.players[0].cities = [{ position: 'A1', mood_state: 'Happy', city_pieces: { wonders: ['Colosseum'] } }];
+      g.players[0].wonders_owned = ['Colosseum'];
+      g.players[0].civilization = 'Rome';
+      g.players[0].resources.culture_tokens = 2;
+      g.players[0].resources.mood_tokens = 2;
+      g.players[0].advances = [...new Set([...g.players[0].advances, 'Arts', 'Theaters'])];
+      c.setPlayer(0);
+      let raw = JSON.stringify(g);
+      await c.load(engine.stripSecret(raw, 0));
+      const target = app
+        .session()
+        .view!.influence!.find((t) => t.position === 'C1' && t.name === 'Temple' && !!t.free)!;
+      const origin = target.origins!.find((o) => o.position === target.origin)!;
+      c.startInfluence(origin.action, origin.actionPayment!, origin.payment);
+      raw = engine.tryMove(raw, app.sent[0], 0);
+      await c.load(engine.stripSecret(raw, 0));
+      assert.equal(app.sent.length, 1);
+      assert.equal(app.session().view!.decision!.name, 'Pay for action');
+      assert.equal(app.session().view!.decision!.fields[0].choices!.length, 2);
+      assert.equal(app.session().automaticPayment, false);
+    } finally {
+      app.close();
+    }
+  }
+});

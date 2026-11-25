@@ -203,6 +203,7 @@ export interface AdvanceView extends PublicAdvance {
   owned: boolean;
   reason: string | null;
   payment: Pile;
+  actionPayment?: Pile;
   costAmount: number;
   costResources: Resource[];
   costGroups?: { amount: number; resources: Resource[] }[];
@@ -463,6 +464,7 @@ export interface CityActions {
     owned: boolean;
     required: string;
     payment: Pile;
+    actionPayment?: Pile;
     payments?: Pile[] | null;
     reason: string | null;
     free?: boolean;

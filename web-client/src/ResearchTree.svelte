@@ -629,7 +629,7 @@
               class="secondary"
               disabled={!!selectedAqueduct.reason || $session.pending}
               title={selectedAqueduct.reason ? actionReason(selectedAqueduct.reason) : undefined}
-              onclick={() => controller.submit(selectedAqueduct!.action)}
+              onclick={() => controller.submit(selectedAqueduct!.action, selectedAqueduct!.cost)}
             >Advance · Sanitation · free action
               <span>2 <Wheat size={14} /> / <Lightbulb size={14} /> / <Coins size={14} /> · any mix</span>
             </button>
@@ -658,7 +658,7 @@
             onclick={() =>
               selectedAction &&
               (!choice
-                ? controller.submitResearch(selectedAction, buyFreeEducation)
+                ? controller.submitResearch(selectedAction, buyFreeEducation, selected?.actionPayment)
                 : (controller.submit(selectedAction), early && controller.patch({ mode: 'overview' })))}
           >
             {$session.pending
