@@ -1861,3 +1861,20 @@ Provinces makes retained captured cities Neutral even with no culture available;
 optional Happy payment still supports Great Arena. Historical captures retain
 legacy replay behavior through an independent action boundary; existing Angry
 cities are not repaired. See `docs/rome-provinces.md` for scope and regressions.
+
+# Viewer 0.1.242 / engine 0.4.173 — Barbarian movement and disembarkation
+
+Barbarian incidents and Mercenaries now move only units that have not already
+moved, and destination previews use the unmoved stack size when enforcing the
+four-unit limit. New Barbarian movement has an independent replay boundary;
+historical saves retain their legacy behavior. Disembarking army groups now
+enforce the destination stacking limit, while Xerxes's five-unit allowance,
+Settlers, and legacy replay behavior remain intact.
+
+The Polish Aqueduct translation now correctly says Higienę for Sanitation, with
+localization regression coverage. Require exact-commit Check and Web viewer CI
+green before publishing the frozen viewer and engine together. Preserve catalog
+8 / 46 definitions, artwork 4, all 60 named assets, gallery, Standard options,
+settings and preferences. Only the artwork manifest's lockfile integrity pin
+changes; no artwork is republished and no production moves, repairs, backfills
+or historical rewrites are performed.
