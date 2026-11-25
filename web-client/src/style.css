@@ -429,10 +429,13 @@ small {
   position: absolute;
   right: -3px;
   bottom: -3px;
-  display: grid;
-  place-items: center;
-  min-width: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
   height: 14px;
+  padding: 0 0 0.5px;
+  box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: 50%;
   background: var(--paper);
@@ -440,6 +443,7 @@ small {
   font:
     600 9px / 1 'DM Sans',
     sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 .player-emblem img {
   width: 32px;
@@ -814,8 +818,8 @@ small {
   align-items: center;
   justify-content: center;
   background: #fff8e8;
-  color: #1f2e2b;
-  border: 1px solid #23332f48;
+  color: var(--medallion-bg, #1f2e2b);
+  border: 1px solid color-mix(in srgb, var(--medallion-bg, #23332f) 65%, #23332f);
   font:
     700 7px/1 'DM Sans',
     sans-serif;

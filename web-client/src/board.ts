@@ -863,18 +863,19 @@ export class World {
       }
     }
   }
-  private ownershipBadge(index: number, symbols?: string[], barbarian = false) {
+  private ownershipBadge(index: number, symbols?: string[], barbarian = false, color = '#25372e') {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 64;
     const context = canvas.getContext('2d')!;
+    const ink = barbarian ? '#25372e' : color;
     context.fillStyle = '#fff7e6';
-    context.strokeStyle = '#2d392f';
-    context.lineWidth = 3;
+    context.strokeStyle = barbarian ? '#2d392f' : color;
+    context.lineWidth = 3.5;
     context.beginPath();
     context.arc(32, 32, 29, 0, Math.PI * 2);
     context.fill();
     context.stroke();
-    context.fillStyle = '#25372e';
+    context.fillStyle = ink;
     context.font = 'bold 42px system-ui';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
@@ -1400,6 +1401,7 @@ export class World {
                 player.id,
                 s.playerSymbols,
                 player.civilization === 'Barbarians',
+                playerColor(player.id, s.colorBlind, s.playerColors),
               );
               badge.position.set(markers.badge.x, markers.badge.y, markers.pole.z);
               cityModel.add(badge);
