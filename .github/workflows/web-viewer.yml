@@ -4,35 +4,120 @@ on:
     paths: ['web-client/**', 'server/**', 'scripts/status-phase-battle.test.cjs', 'scripts/postcombat-queue*.cjs', 'scripts/tributes.test.cjs', 'scripts/withdrawal.test.cjs', 'scripts/viking-cargo.test.cjs', 'scripts/aggressor.test.cjs', 'scripts/great-architect.test.cjs', 'scripts/provinces*.cjs', 'scripts/barbarian-movement.test.cjs', 'scripts/disembark-stack-limit.test.cjs', 'Cargo.*', '.github/workflows/web-viewer.yml']
   push:
     branches: [main, feat/3d-web-viewer]
+concurrency:
+  group: web-viewer-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3
-        with:
-          version: 2025.12.13
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: web-client/package-lock.json
+      - name: Cache WASM bridge
+        id: wasm-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            web-client/.bridge
+            web-client/.engine
+          key: wasm-bridge-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'server/**', 'mise.toml', 'web-client/scripts/build-bridge.sh') }}
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3
+        if: steps.wasm-cache.outputs.cache-hit != 'true'
+        with:
+          version: 2025.12.13
+      - uses: Swatinem/rust-cache@v2
+        if: steps.wasm-cache.outputs.cache-hit != 'true'
+        with:
+          key: web-viewer-wasm-${{ hashFiles('mise.toml') }}
       - run: rustup target add wasm32-unknown-unknown
+        if: steps.wasm-cache.outputs.cache-hit != 'true'
       - run: npm ci
         working-directory: web-client
-      - run: npm run build:bridge && npm run check && npm test && npm run build
+      - run: npm run build:bridge
+        if: steps.wasm-cache.outputs.cache-hit != 'true'
         working-directory: web-client
-      - run: npx playwright install --with-deps chromium
-        working-directory: web-client
-      - run: node scripts/resource-journal-smoke.mjs && node scripts/famine-journal-smoke.mjs && node scripts/construction-smoke.mjs && node scripts/great-architect-smoke.mjs && node scripts/provinces-smoke.mjs && node scripts/research-card-smoke.mjs
-        working-directory: web-client
-      - run: npm run test:boarding && node scripts/embark-smoke.mjs && node scripts/ship-landing-smoke.mjs
-        working-directory: web-client
-      - run: node scripts/viking-cargo-smoke.mjs && node scripts/withdrawal-smoke.mjs && node scripts/horse-master-smoke.mjs && node scripts/carthage-recruit-smoke.mjs && node scripts/payment-defaults-smoke.mjs && node scripts/wonder-payment-perf.mjs
-        working-directory: web-client
-      - run: node scripts/map-guide-smoke.mjs && node scripts/trade-routes-smoke.mjs && node scripts/raiders-smoke.mjs && node scripts/influence-bubble-smoke.mjs
+      - run: npm run check && npm test && npm run build
         working-directory: web-client
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: clash-viewer
           path: web-client/dist/
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: clash-smoke-inputs
+          retention-days: 1
+          include-hidden-files: true
+          path: |
+            web-client/.bridge/
+            web-client/.engine/
+            web-client/dist/
+
+  smoke:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: journal-construction
+            cmd: >-
+              node scripts/resource-journal-smoke.mjs &&
+              node scripts/famine-journal-smoke.mjs &&
+              node scripts/construction-smoke.mjs &&
+              node scripts/great-architect-smoke.mjs &&
+              node scripts/provinces-smoke.mjs
+          - shard: cards-ships
+            cmd: >-
+              node scripts/research-card-smoke.mjs &&
+              node scripts/boarding-smoke.mjs &&
+              node scripts/embark-smoke.mjs &&
+              node scripts/ship-landing-smoke.mjs &&
+              node scripts/viking-cargo-smoke.mjs
+          - shard: combat-payments
+            cmd: >-
+              node scripts/withdrawal-smoke.mjs &&
+              node scripts/horse-master-smoke.mjs &&
+              node scripts/carthage-recruit-smoke.mjs &&
+              node scripts/payment-defaults-smoke.mjs &&
+              node scripts/wonder-payment-perf.mjs
+          - shard: map-overlays
+            cmd: >-
+              node scripts/map-guide-smoke.mjs &&
+              node scripts/trade-routes-smoke.mjs &&
+              node scripts/raiders-smoke.mjs &&
+              node scripts/influence-bubble-smoke.mjs
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web-client/package-lock.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: clash-smoke-inputs
+          path: web-client
+      - run: npm ci
+        working-directory: web-client
+      - name: Cache Playwright Chromium
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('web-client/package-lock.json') }}
+      - name: Install Playwright Chromium
+        working-directory: web-client
+        run: |
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+      - name: Run ${{ matrix.shard }} browser smokes
+        working-directory: web-client
+        run: ${{ matrix.cmd }}
