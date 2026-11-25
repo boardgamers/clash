@@ -791,7 +791,8 @@ fn move_route_result(
             return Err("Carthage may have at most 4 Ships in one space".into());
         }
     }
-    if game.map.is_land(start)
+    if (game.map.is_land(start) || (!game.map.is_sea(dest) && game.context != GameContext::Replay))
+        && stack_size > 0
         && player
             .get_units(dest)
             .iter()

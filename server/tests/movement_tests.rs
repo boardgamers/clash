@@ -569,3 +569,271 @@ fn legacy_move_payload_omits_optional_fleet_assignment() {
     assert!(action.boarding.is_empty());
     assert_eq!(serde_json::to_value(action).unwrap(), legacy);
 }
+
+fn setup_disembark_game(
+    dest_terrain: server::map::Terrain,
+    carried: &[server::unit::UnitType],
+    friendly_on_dest: &[server::unit::UnitType],
+    enemy_on_dest: &[server::unit::UnitType],
+) -> (Game, Position, Position, Vec<u32>) {
+    use server::{
+        advance::Advance,
+        game::GameState,
+        map::Terrain,
+        unit::{Unit, UnitType},
+    };
+
+    let mut game = JSON.load_game("movement");
+    game.state = GameState::Playing;
+    game.actions_left = 3;
+    let sea = Position::from_offset("D8");
+    let land = Position::from_offset("C8");
+    game.map.tiles.clear();
+    game.map.tiles.insert(sea, Terrain::Water);
+    game.map.tiles.insert(land, dest_terrain);
+    for p in &mut game.players {
+        p.units.clear();
+        p.cities.clear();
+    }
+    game.player_mut(0).advances.insert(Advance::Tactics);
+
+    let ships_needed = carried.len().div_ceil(2).max(1) as u32;
+    for s in 0..ships_needed {
+        game.player_mut(0)
+            .units
+            .push(Unit::new(0, sea, UnitType::Ship, 100 + s));
+    }
+
+    let mut carried_ids = Vec::with_capacity(carried.len());
+    for (idx, &unit_type) in carried.iter().enumerate() {
+        let id = idx as u32;
+        let mut unit = Unit::new(0, sea, unit_type, id);
+        unit.carrier_id = Some(100 + (idx / 2) as u32);
+        game.player_mut(0).units.push(unit);
+        carried_ids.push(id);
+    }
+
+    for (idx, &unit_type) in friendly_on_dest.iter().enumerate() {
+        let id = 200 + idx as u32;
+        game.player_mut(0)
+            .units
+            .push(Unit::new(0, land, unit_type, id));
+    }
+
+    for (idx, &unit_type) in enemy_on_dest.iter().enumerate() {
+        let id = 300 + idx as u32;
+        game.player_mut(1)
+            .units
+            .push(Unit::new(1, land, unit_type, id));
+    }
+
+    game.player_mut(0).next_unit_id = 400;
+    game.player_mut(1).next_unit_id = 400;
+    (game, sea, land, carried_ids)
+}
+
+#[test]
+fn disembark_enforces_stack_limit_on_empty_and_enemy_land() {
+    use server::{action::try_execute_action, leader::Leader, map::Terrain, unit::UnitType};
+
+    let five_army_plus_settler = [
+        UnitType::Infantry,
+        UnitType::Infantry,
+        UnitType::Infantry,
+        UnitType::Infantry,
+        UnitType::Leader(Leader::Alexander),
+        UnitType::Settler,
+    ];
+
+    for enemy in [&[][..], &[UnitType::Infantry][..]] {
+        let (game, sea, land, ids) =
+            setup_disembark_game(Terrain::Barren, &five_army_plus_settler, &[], enemy);
+        let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+        assert!(
+            !routes.iter().any(|r| r.destination == land),
+            "5 army units + settler must not be able to disembark onto {enemy:?}"
+        );
+        assert!(
+            try_execute_action(game, move_action(ids, land), 0).is_err(),
+            "disembarking 5 army units + settler must be rejected"
+        );
+    }
+
+    // 4 Infantry + 1 Settler succeeds
+    let (game, sea, land, ids) = setup_disembark_game(
+        Terrain::Barren,
+        &[
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Settler,
+        ],
+        &[],
+        &[],
+    );
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(routes.iter().any(|r| r.destination == land));
+    let after = try_execute_action(game, move_action(ids.clone(), land), 0).unwrap();
+    for id in ids {
+        assert_eq!(after.player(0).get_unit(id).position, land);
+        assert_eq!(after.player(0).get_unit(id).carrier_id, None);
+    }
+
+    // 3 Infantry + non-Xerxes Leader + 1 Settler succeeds
+    let (game, sea, land, ids) = setup_disembark_game(
+        Terrain::Barren,
+        &[
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Leader(Leader::Alexander),
+            UnitType::Settler,
+        ],
+        &[],
+        &[],
+    );
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(routes.iter().any(|r| r.destination == land));
+    let after = try_execute_action(game, move_action(ids.clone(), land), 0).unwrap();
+    for id in ids {
+        assert_eq!(after.player(0).get_unit(id).position, land);
+        assert_eq!(after.player(0).get_unit(id).carrier_id, None);
+    }
+}
+
+#[test]
+fn disembark_enforces_stack_limit_with_existing_friendly_units_and_allows_settlers() {
+    use server::{action::try_execute_action, map::Terrain, unit::UnitType};
+
+    // 2 Infantry disembarking onto 3 existing army units (5 > 4) is rejected
+    let (game, sea, land, ids) = setup_disembark_game(
+        Terrain::Barren,
+        &[UnitType::Infantry, UnitType::Infantry],
+        &[UnitType::Infantry, UnitType::Infantry, UnitType::Infantry],
+        &[],
+    );
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(!routes.iter().any(|r| r.destination == land));
+    assert!(try_execute_action(game, move_action(ids, land), 0).is_err());
+
+    // 1 Infantry disembarking onto 3 existing army units (4 <= 4) succeeds
+    let (game, sea, land, ids) = setup_disembark_game(
+        Terrain::Barren,
+        &[UnitType::Infantry],
+        &[UnitType::Infantry, UnitType::Infantry, UnitType::Infantry],
+        &[],
+    );
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(routes.iter().any(|r| r.destination == land));
+    let after = try_execute_action(game, move_action(ids.clone(), land), 0).unwrap();
+    assert_eq!(after.player(0).get_unit(ids[0]).position, land);
+
+    // 1 Settler disembarking onto 4 or legacy 5 existing army units succeeds
+    for existing_count in [4, 5] {
+        let existing = vec![UnitType::Infantry; existing_count];
+        let (game, sea, land, ids) =
+            setup_disembark_game(Terrain::Barren, &[UnitType::Settler], &existing, &[]);
+        let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+        assert!(
+            routes.iter().any(|r| r.destination == land),
+            "settler should disembark onto {existing_count} existing army units"
+        );
+        let after = try_execute_action(game, move_action(ids.clone(), land), 0).unwrap();
+        assert_eq!(after.player(0).get_unit(ids[0]).position, land);
+    }
+}
+
+#[test]
+fn disembark_respects_xerxes_stack_limit() {
+    use server::{action::try_execute_action, leader::Leader, map::Terrain, unit::UnitType};
+
+    // Xerxes + 4 Infantry (5) succeeds
+    let (game, sea, land, ids) = setup_disembark_game(
+        Terrain::Barren,
+        &[
+            UnitType::Leader(Leader::Xerxes),
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+        ],
+        &[],
+        &[],
+    );
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(routes.iter().any(|r| r.destination == land));
+    let after = try_execute_action(game, move_action(ids.clone(), land), 0).unwrap();
+    for id in ids {
+        assert_eq!(after.player(0).get_unit(id).position, land);
+    }
+
+    // Xerxes + 5 Infantry (6) is rejected
+    let (game, sea, land, ids) = setup_disembark_game(
+        Terrain::Barren,
+        &[
+            UnitType::Leader(Leader::Xerxes),
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+        ],
+        &[],
+        &[],
+    );
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(!routes.iter().any(|r| r.destination == land));
+    assert!(try_execute_action(game, move_action(ids, land), 0).is_err());
+}
+
+#[test]
+fn disembark_enforces_stack_limit_on_unexplored_tile() {
+    use server::{action::try_execute_action, map::Terrain, unit::UnitType};
+
+    let (game, sea, land, ids) = setup_disembark_game(
+        Terrain::Unexplored,
+        &[
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+        ],
+        &[],
+        &[],
+    );
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(!routes.iter().any(|r| r.destination == land));
+    assert!(try_execute_action(game, move_action(ids, land), 0).is_err());
+}
+
+#[test]
+fn disembark_allows_legacy_overstack_during_replay() {
+    use server::{
+        action::try_execute_action, game::GameContext, leader::Leader, map::Terrain, unit::UnitType,
+    };
+
+    let (mut game, sea, land, ids) = setup_disembark_game(
+        Terrain::Barren,
+        &[
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Infantry,
+            UnitType::Leader(Leader::Alexander),
+            UnitType::Settler,
+        ],
+        &[],
+        &[],
+    );
+    game.context = GameContext::Replay;
+
+    let routes = possible_move_routes(game.player(0), &game, &ids, sea, None).unwrap();
+    assert!(routes.iter().any(|r| r.destination == land));
+    let after = try_execute_action(game, move_action(ids.clone(), land), 0).unwrap();
+    for id in ids {
+        assert_eq!(after.player(0).get_unit(id).position, land);
+        assert_eq!(after.player(0).get_unit(id).carrier_id, None);
+    }
+}
