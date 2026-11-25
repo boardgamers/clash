@@ -5309,5 +5309,7 @@
   "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "各文明都有专属进步。罗马研究工程学时获得引水渠。打开进步并研究工程学，引水渠自动解锁，无需单独购买。",
   "Invalid fleet boarding assignment": "舰队登船分配无效",
   "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})",
-  "Settlers blocked by Huns’ Raiders": "定居者被匈人的掠夺者阻止"
+  "Settlers blocked by Huns’ Raiders": "定居者被匈人的掠夺者阻止",
+  "Influenced by {p0}": "受到{p0}影响",
+  "{p0} ({p1})": "{p0} ({p1})"
 }

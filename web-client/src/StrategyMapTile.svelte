@@ -1,7 +1,9 @@
 <script lang="ts">
   import { Swords, Ship, Footprints, Landmark, Shield, Skull, Smile, Meh, Frown } from 'lucide-svelte';
-  import { buildingInfo } from './city';
+  import { cityInfluenceSummary } from './building-owner';
   import BarbarianIcon from './BarbarianIcon.svelte';
+  import CityInfluenceBubble from './CityInfluenceBubble.svelte';
+  import OwnershipSymbol from './OwnershipSymbol.svelte';
   import TerrainIcon from './TerrainIcon.svelte';
   import { terrainDisplay } from './terrain-display';
   import { playerColor, playerSymbol } from './types';
@@ -23,9 +25,10 @@
 >
 {#each tile.occupants as occupant}
   <span class="strategy-owner" style={`--owner:${playerColor(occupant.player.id, colorBlind, playerColors)}`}>
-    {#if colorBlind && !['Barbarians', 'Pirates'].includes(occupant.player.civilization)}<span
-        class="strategy-symbol">{playerSymbol(occupant.player.id, playerSymbols)}</span
-      >{/if}
+    {#if colorBlind && !['Barbarians', 'Pirates'].includes(occupant.player.civilization)}{@const symbol = playerSymbol(
+        occupant.player.id,
+        playerSymbols,
+      )}<span class="strategy-symbol" data-symbol={symbol}><OwnershipSymbol {symbol} size={13} /></span>{/if}
     {#if occupant.city}<span class="strategy-city"
         >{#if occupant.player.civilization === 'Barbarians'}<BarbarianIcon size={17} />{:else}<Landmark
             size={17}
@@ -42,15 +45,16 @@
             title={occupant.city.mood_state}><Mood size={17} aria-hidden="true" /></span
           >{/if}</span
       >{/if}
-    {#if occupant.city}
-      {#each Object.entries(occupant.city.city_pieces ?? {}) as [building, owner]}
-        {@const info = buildingInfo[building[0].toUpperCase() + building.slice(1)]}
-        {#if typeof owner === 'number' && owner !== occupant.player.id && info}
-          <span class="foreign-building-icon" style={`color:${playerColor(owner, colorBlind, playerColors)}`}>
-            <info.icon size={17} />
-          </span>
-        {/if}
-      {/each}
+    {#if occupant.influencers.length}
+      <span class="strategy-influence-bubble" title={cityInfluenceSummary(occupant.influencers)}>
+        <CityInfluenceBubble
+          influencers={occupant.influencers}
+          {colorBlind}
+          {playerColors}
+          {playerSymbols}
+          compact
+        />
+      </span>
     {/if}
     {#if occupant.army || occupant.ships || occupant.settlers}<span class="strategy-forces">
         {#if occupant.army - occupant.aboard > 0}<span

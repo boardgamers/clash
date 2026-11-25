@@ -30,7 +30,7 @@ jobs:
         working-directory: web-client
       - run: node scripts/viking-cargo-smoke.mjs && node scripts/withdrawal-smoke.mjs && node scripts/horse-master-smoke.mjs && node scripts/carthage-recruit-smoke.mjs && node scripts/payment-defaults-smoke.mjs && node scripts/wonder-payment-perf.mjs
         working-directory: web-client
-      - run: node scripts/map-guide-smoke.mjs && node scripts/trade-routes-smoke.mjs && node scripts/raiders-smoke.mjs
+      - run: node scripts/map-guide-smoke.mjs && node scripts/trade-routes-smoke.mjs && node scripts/raiders-smoke.mjs && node scripts/influence-bubble-smoke.mjs
         working-directory: web-client
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

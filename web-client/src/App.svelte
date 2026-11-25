@@ -6,6 +6,7 @@
   import UndoControl from './UndoControl.svelte';
   import CollectionBonusHints from './CollectionBonusHints.svelte';
   import BarbarianIcon from './BarbarianIcon.svelte';
+  import OwnershipSymbol from './OwnershipSymbol.svelte';
   import MapGuide from './MapGuide.svelte';
   import UnitIcon from './UnitIcon.svelte';
   import CitySiteIcon from './CitySiteIcon.svelte';
@@ -953,8 +954,10 @@
               ><CivilizationEmblem civilization={player.civilization} size={64} /></span
             >
             <span class="player-emblem"
-              >{#if $session.colorBlind}<span class="ownership-symbol" aria-hidden="true"
-                  >{playerSymbol(player.index, $session.playerSymbols)}</span
+              >{#if $session.colorBlind}{@const symbol = playerSymbol(player.index, $session.playerSymbols)}<span
+                  class="ownership-symbol"
+                  data-symbol={symbol}
+                  aria-hidden="true"><OwnershipSymbol {symbol} size={18} /></span
                 >{:else}<CivilizationEmblem
                   civilization={player.civilization}
                   size={24}

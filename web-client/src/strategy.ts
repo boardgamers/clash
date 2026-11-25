@@ -1,3 +1,4 @@
+import { cityInfluencers, cityInfluenceSummary } from './building-owner.ts';
 import type { Game, Player } from './types.ts';
 
 export function militarySummary(player: Player, position?: string) {
@@ -39,7 +40,8 @@ export function strategyTiles(game: Pick<Game, 'map' | 'players'>) {
               0,
             )
           : 0;
-        return [{ player, city, size, ...forces }];
+        const influencers = city ? cityInfluencers(city, player.id, game.players) : [];
+        return [{ player, city, size, influencers, ...forces }];
       });
       return { position, terrain, occupants };
     });
@@ -56,6 +58,7 @@ export function strategyDescription(tile: StrategyTile) {
         o.player.civilization,
         o.city ? (o.city.city_pieces?.fortress != null ? `city size ${o.size}, Fortress` : `city size ${o.size}`) : '',
         o.city?.mood_state ?? '',
+        cityInfluenceSummary(o.influencers),
         o.army ? (o.aboard ? `${o.army} army (${o.aboard} aboard)` : `${o.army} army`) : '',
         o.ships ? `${o.ships} ships` : '',
         o.settlers ? `${o.settlers} settlers` : '',

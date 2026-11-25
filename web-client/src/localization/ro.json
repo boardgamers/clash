@@ -5309,5 +5309,7 @@
   "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Fiecare civilizație are propriile progrese. Roma primește Apeduct când cercetează Inginerie. Deschide Progrese și cercetează Inginerie; Apeduct se deblochează automat, fără o achiziție separată.",
   "Invalid fleet boarding assignment": "Repartizare nevalidă pentru îmbarcare",
   "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})",
-  "Settlers blocked by Huns’ Raiders": "Coloniști blocați de Jefuitorii hunilor"
+  "Settlers blocked by Huns’ Raiders": "Coloniști blocați de Jefuitorii hunilor",
+  "Influenced by {p0}": "Influențat de {p0}",
+  "{p0} ({p1})": "{p0} ({p1})"
 }

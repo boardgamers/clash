@@ -5309,5 +5309,7 @@
   "Each civilization has its own advances. Rome gains Aqueduct when it researches Engineering. Open Advances and research Engineering; Aqueduct unlocks automatically, without a separate purchase.": "Ogni civiltà ha i propri progressi. Roma ottiene Acquedotto quando ricerca Ingegneria. Apri Progressi e ricerca Ingegneria; Acquedotto si sblocca automaticamente, senza un acquisto separato.",
   "Invalid fleet boarding assignment": "Assegnazione di imbarco sulla flotta non valida",
   "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})",
-  "Settlers blocked by Huns’ Raiders": "Coloni bloccati dai Razziatori degli Unni"
+  "Settlers blocked by Huns’ Raiders": "Coloni bloccati dai Razziatori degli Unni",
+  "Influenced by {p0}": "Influenzata da {p0}",
+  "{p0} ({p1})": "{p0} ({p1})"
 }

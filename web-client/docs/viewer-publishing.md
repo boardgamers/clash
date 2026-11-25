@@ -1878,3 +1878,22 @@ green before publishing the frozen viewer and engine together. Preserve catalog
 settings and preferences. Only the artwork manifest's lockfile integrity pin
 changes; no artwork is republished and no production moves, repairs, backfills
 or historical rewrites are performed.
+
+# Viewer 0.1.243 / engine 0.4.173 — Cultural influence thought bubbles and centered color-blind symbols
+
+Cities with foreign buildings now display a compact cultural-influence thought
+bubble in both 3D and Strategy views showing each influencing civilization's
+color-coded emblem medallion, a count pip when a civilization holds multiple
+foreign buildings, and an accessible hover/screen-reader summary without placing
+civilization text labels on the board. Color-blind ownership symbols (`●`, `▲`,
+`■`, `◆`, `✚`, `✕`) now render via dead-center geometric paths/SVGs across 3D
+flag badges, thought-bubble symbol pills, Strategy badges, and player cards
+(with bounding-box centering fallback for custom symbols).
+
+Engine 0.4.173 is unchanged since 0.1.242 and publishes alongside viewer
+0.1.243. Require exact-commit Check and Web viewer CI green before publishing
+the frozen viewer and engine together. Preserve catalog 8 / 46 definitions,
+artwork 4, all 60 named assets, gallery, Standard options, settings and
+preferences. Only the artwork manifest's lockfile integrity pin changes; no
+artwork is republished and no production moves, repairs, backfills or
+historical rewrites are performed.

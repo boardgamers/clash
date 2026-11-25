@@ -24,7 +24,9 @@ import { explorationPreview } from './exploration-preview';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Session, Terrain } from './types';
 import { playerColor, playerSymbol } from './types';
-import { buildingCivilization } from './building-owner';
+import { drawOwnershipSymbol } from './ownership-symbol';
+import { buildingCivilization, cityInfluencers, cityInfluenceSummary } from './building-owner';
+import CityInfluenceBubble from './CityInfluenceBubble.svelte';
 import { positionXY } from './model';
 import { terrainInfo } from './terrain';
 import { terrainDisplay, tileSurfaceHeight } from './terrain-display';
@@ -198,7 +200,7 @@ export class World {
     position: string;
     at: THREE.Vector3;
     node: HTMLButtonElement;
-    kind: 'city' | 'units' | 'destination' | 'collection' | 'strategy' | 'barbarian-city';
+    kind: 'city' | 'city-influence' | 'units' | 'destination' | 'collection' | 'strategy' | 'barbarian-city';
     offsetX?: number;
     offsetY?: number;
     ownershipBounds?: THREE.Vector3[];
@@ -548,11 +550,18 @@ export class World {
         let x = ((v.x + 1) * w) / 2 + (label.offsetX ?? 0);
         const y = ((-v.y + 1) * h) / 2 + (label.offsetY ?? 0);
         if (label.ownershipBounds) {
-          const flagLeft = Math.min(
-            ...label.ownershipBounds.map((point) => ((point.clone().project(this.camera).x + 1) * w) / 2),
+          const projectedX = label.ownershipBounds.map(
+            (point) => ((point.clone().project(this.camera).x + 1) * w) / 2,
           );
-          // Screen-space clearance keeps the mood clear of flags at every zoom and rotation.
-          x = Math.min(x - 14, flagLeft - (this.topDown ? 9 : 11) - 4);
+          if (label.kind === 'city-influence') {
+            const flagRight = Math.max(...projectedX);
+            // Anchor by left edge so single- or multi-civ bubbles clear flags at every zoom and rotation.
+            x = Math.max(x + 14, flagRight + (this.topDown ? 8 : 11));
+          } else {
+            const flagLeft = Math.min(...projectedX);
+            // Screen-space clearance keeps the mood clear of flags at every zoom and rotation.
+            x = Math.min(x - 14, flagLeft - (this.topDown ? 9 : 11) - 4);
+          }
         }
         const edge = label.at
           .clone()
@@ -562,7 +571,10 @@ export class World {
           label.kind === 'strategy'
             ? Math.min(1.4, Math.hypot((edge.x - v.x) * w, (edge.y - v.y) * h) / 2 / 96)
             : 1;
-        label.node.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px) scale(${scale})`;
+        label.node.style.transform =
+          label.kind === 'city-influence'
+            ? `translate(${x}px,${y}px)`
+            : `translate(-50%, -50%) translate(${x}px,${y}px) scale(${scale})`;
         label.node.style.display = v.z > 1 || v.z < -1 ? 'none' : '';
         if (label.kind === 'strategy') label.node.style.visibility = 'visible';
       }
@@ -878,7 +890,7 @@ export class World {
         ),
       );
       context.restore();
-    } else context.fillText(playerSymbol(index, symbols), 32, 33);
+    } else drawOwnershipSymbol(context, playerSymbol(index, symbols), 32, 14);
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     this.textures.add(texture);
@@ -1496,18 +1508,52 @@ export class World {
               if (this.canPick(city.position)) this.pick(city.position, { kind: 'city', player: player.id });
             };
             this.bindTileHover(label, city.position);
+            const ownershipBounds = [ownership.min.x, ownership.max.x].flatMap((bx) =>
+              [ownership.min.y, ownership.max.y].flatMap((by) =>
+                [ownership.min.z, ownership.max.z].map((bz) => new THREE.Vector3(bx, by, bz)),
+              ),
+            );
             this.labelHost.append(label);
             this.labelPositions.push({
               position: city.position,
               at: new THREE.Vector3(x, 1.4, z),
               node: label,
               kind: 'city',
-              ownershipBounds: [ownership.min.x, ownership.max.x].flatMap((x) =>
-                [ownership.min.y, ownership.max.y].flatMap((y) =>
-                  [ownership.min.z, ownership.max.z].map((z) => new THREE.Vector3(x, y, z)),
-                ),
-              ),
+              ownershipBounds,
             });
+            const influencers = cityInfluencers(city, player.id, s.game.players);
+            if (influencers.length) {
+              const bubble = document.createElement('button');
+              bubble.type = 'button';
+              bubble.className = 'city-influence-bubble';
+              bubble.dataset.position = city.position;
+              const summary = cityInfluenceSummary(influencers);
+              bubble.setAttribute('aria-label', summary);
+              bubble.title = summary;
+              this.unitBadges.push(
+                mount(CityInfluenceBubble, {
+                  target: bubble,
+                  props: {
+                    influencers,
+                    colorBlind: s.colorBlind,
+                    playerColors: s.playerColors ?? [],
+                    playerSymbols: s.playerSymbols ?? [],
+                  },
+                }),
+              );
+              bubble.onclick = () => {
+                if (this.canPick(city.position)) this.pick(city.position, { kind: 'city', player: player.id });
+              };
+              this.bindTileHover(bubble, city.position);
+              this.labelHost.append(bubble);
+              this.labelPositions.push({
+                position: city.position,
+                at: new THREE.Vector3(x, 1.4, z),
+                node: bubble,
+                kind: 'city-influence',
+                ownershipBounds,
+              });
+            }
           }
           for (const unit of renderedUnits.get(player.id)!) {
             const [x, z] = positionXY(unit.position);

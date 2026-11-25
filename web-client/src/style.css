@@ -685,6 +685,150 @@ small {
     0 0 0 2px #b5925570,
     0 1px 5px #28483d30;
 }
+.city-influence-bubble,
+.city-influence-bubble:disabled {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: 0 -58%;
+  pointer-events: auto;
+  opacity: 1;
+  display: inline-flex;
+  align-items: center;
+  padding: 2.5px 3.5px;
+  border: 1px solid #bfac88;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffaf0f8 0%, #f5eeddf6 100%);
+  box-shadow:
+    0 2px 6px #1e332b3d,
+    0 1px 0 #ffffffd8 inset;
+  transition:
+    box-shadow 0.12s,
+    background 0.12s;
+  line-height: 0;
+  overflow: visible;
+}
+.city-influence-bubble::before,
+.city-influence-bubble::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: #fbf4e4;
+  border: 1px solid #bfac88;
+  box-shadow: 0 1px 2px #1e332b36;
+  pointer-events: none;
+}
+.city-influence-bubble::before {
+  width: 5.5px;
+  height: 5.5px;
+  left: -5.5px;
+  bottom: 2.5px;
+}
+.city-influence-bubble::after {
+  width: 3.5px;
+  height: 3.5px;
+  left: -10px;
+  bottom: -0.5px;
+}
+.city-influence-bubble:disabled {
+  pointer-events: none;
+  cursor: default;
+}
+.city-influence-bubble:hover:not(:disabled) {
+  background: #fffdf7;
+  border-color: #b59255;
+  box-shadow:
+    0 2px 8px #1e332b45,
+    0 0 0 1px #b5925544;
+}
+.city-influence-bubble.selected {
+  box-shadow:
+    0 0 0 2px #b5925578,
+    0 2px 6px #1e332b38;
+}
+.influence-medallions {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 0;
+}
+.influence-medallions.compact {
+  gap: 2px;
+}
+.influence-medallion {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--medallion-bg);
+  color: var(--medallion-ink);
+  box-shadow:
+    inset 0 0 0 1px #0000001f,
+    0 0.5px 1px #00000024;
+  flex-shrink: 0;
+}
+.influence-medallions.compact .influence-medallion {
+  width: 15px;
+  height: 15px;
+}
+.influence-medallion svg {
+  stroke-width: 2.3;
+}
+.influence-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 11px;
+  height: 11px;
+  padding: 0 2px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #23332f;
+  color: #fff8e8;
+  border: 1px solid #fff8e8;
+  font:
+    700 8px/1 'DM Sans',
+    sans-serif;
+  letter-spacing: -0.02em;
+}
+.influence-medallions.compact .influence-count {
+  top: -3.5px;
+  right: -3.5px;
+  min-width: 10px;
+  height: 10px;
+  font-size: 7.5px;
+}
+.influence-symbol {
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff8e8;
+  color: #1f2e2b;
+  border: 1px solid #23332f48;
+  font:
+    700 7px/1 'DM Sans',
+    sans-serif;
+}
+.influence-medallions.compact .influence-symbol {
+  width: 10px;
+  height: 10px;
+  font-size: 6.5px;
+}
+.ownership-symbol-svg {
+  display: block;
+}
+.ownership-symbol-glyph {
+  display: block;
+  line-height: 1;
+}
 .unit-map-label,
 .unit-map-label:disabled {
   position: absolute;
@@ -1686,8 +1830,9 @@ small {
   border: 2px solid currentColor;
 }
 .ownership-symbol {
-  font: 18px system-ui;
-  line-height: 1;
+  display: grid;
+  place-items: center;
+  font: 18px/1 system-ui;
 }
 @media (min-width: 1550px) {
   .play-layout {
@@ -3147,6 +3292,30 @@ small {
   width: 14px;
   height: 14px;
 }
+.world-labels.top-down .city-influence-bubble {
+  padding: 2px 2.5px;
+}
+.world-labels.top-down .city-influence-bubble::before {
+  width: 4.5px;
+  height: 4.5px;
+  left: -4.5px;
+  bottom: 2px;
+}
+.world-labels.top-down .city-influence-bubble::after {
+  width: 3px;
+  height: 3px;
+  left: -8px;
+  bottom: 0;
+}
+.world-labels.top-down .city-influence-bubble .influence-medallion {
+  width: 15px;
+  height: 15px;
+}
+.world-labels.top-down .city-influence-bubble .influence-medallion > .civilization-emblem,
+.world-labels.top-down .city-influence-bubble .influence-medallion > svg {
+  width: 11px !important;
+  height: 11px !important;
+}
 
 .map-control-help {
   display: flex;
@@ -3850,7 +4019,7 @@ small {
   margin-left: auto;
   white-space: nowrap;
 }
-.world-labels.collecting :is(.city-map-label:not(.collection-city), .unit-map-label) {
+.world-labels.collecting :is(.city-map-label:not(.collection-city), .city-influence-bubble, .unit-map-label) {
   display: none !important;
 }
 
@@ -4234,6 +4403,9 @@ small {
 }
 /* Card effects and casualties often hinge on mood: keep faces visible, but never intercept unit picks. */
 .world-labels.choosing-pieces .city-map-label {
+  pointer-events: none;
+}
+.world-labels.choosing-pieces .city-influence-bubble {
   pointer-events: none;
 }
 
@@ -5860,6 +6032,40 @@ small {
 .strategy-city {
   font-size: 15px;
 }
+.strategy-influence-bubble {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin: 3px 0 0 6px;
+  padding: 1.5px 3px;
+  border: 1px solid #bfac88;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffaf0 0%, #f5eedd 100%);
+  box-shadow: 0 1px 2px #1e332b28;
+  line-height: 0;
+  max-width: calc(100% - 6px);
+}
+.strategy-influence-bubble::before,
+.strategy-influence-bubble::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: #fbf4e4;
+  border: 1px solid #bfac88;
+  pointer-events: none;
+}
+.strategy-influence-bubble::before {
+  width: 3.5px;
+  height: 3.5px;
+  left: -4px;
+  bottom: 2px;
+}
+.strategy-influence-bubble::after {
+  width: 2.5px;
+  height: 2.5px;
+  left: -6.5px;
+  bottom: 0;
+}
 .strategy-forces {
   flex-wrap: wrap;
 }
@@ -5874,7 +6080,10 @@ small {
   font-size: 10px;
 }
 .strategy-symbol {
+  display: inline-grid;
+  place-items: center;
   font-size: 14px;
+  line-height: 1;
 }
 .strategy-player-forces {
   display: flex;
