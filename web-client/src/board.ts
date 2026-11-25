@@ -890,7 +890,7 @@ export class World {
         ),
       );
       context.restore();
-    } else drawOwnershipSymbol(context, playerSymbol(index, symbols), 32, 14);
+    } else drawOwnershipSymbol(context, playerSymbol(index, symbols), 32, 19);
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     this.textures.add(texture);

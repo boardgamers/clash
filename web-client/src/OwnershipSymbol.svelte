@@ -4,31 +4,31 @@
 
 {#if symbol === '●'}
   <svg class="ownership-symbol-svg" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
-    <circle cx="8" cy="8" r="5.2" fill="currentColor" />
+    <circle cx="8" cy="8" r="6.2" fill="currentColor" />
   </svg>
 {:else if symbol === '▲'}
   <svg class="ownership-symbol-svg" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
-    <polygon points="8,2.6 13.4,11.9 2.6,11.9" fill="currentColor" />
+    <polygon points="8,2 14.2,13.2 1.8,13.2" fill="currentColor" />
   </svg>
 {:else if symbol === '■'}
   <svg class="ownership-symbol-svg" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
-    <rect x="3.4" y="3.4" width="9.2" height="9.2" fill="currentColor" />
+    <rect x="2.2" y="2.2" width="11.6" height="11.6" fill="currentColor" />
   </svg>
 {:else if symbol === '◆'}
   <svg class="ownership-symbol-svg" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
-    <polygon points="8,2.2 13.8,8 8,13.8 2.2,8" fill="currentColor" />
+    <polygon points="8,1.4 14.6,8 8,14.6 1.4,8" fill="currentColor" />
   </svg>
 {:else if symbol === '✚'}
   <svg class="ownership-symbol-svg" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
-    <rect x="2.6" y="6.1" width="10.8" height="3.8" fill="currentColor" />
-    <rect x="6.1" y="2.6" width="3.8" height="10.8" fill="currentColor" />
+    <rect x="1.8" y="5.8" width="12.4" height="4.4" fill="currentColor" />
+    <rect x="5.8" y="1.8" width="4.4" height="12.4" fill="currentColor" />
   </svg>
 {:else if symbol === '✕'}
   <svg class="ownership-symbol-svg" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
     <path
-      d="M3.8 3.8L12.2 12.2M12.2 3.8L3.8 12.2"
+      d="M3 3L13 13M13 3L3 13"
       stroke="currentColor"
-      stroke-width="2.8"
+      stroke-width="3.2"
       stroke-linecap="round"
     />
   </svg>

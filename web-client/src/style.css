@@ -805,11 +805,14 @@ small {
   position: absolute;
   bottom: -4px;
   left: -4px;
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  box-sizing: border-box;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #fff8e8;
   color: #1f2e2b;
   border: 1px solid #23332f48;

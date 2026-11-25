@@ -38,7 +38,7 @@ export function drawOwnershipSymbol(
   context: OwnershipSymbolCanvas,
   symbol: string,
   center = 32,
-  radius = 14,
+  radius = 19,
 ): void {
   switch (symbol) {
     case '●': {
@@ -49,9 +49,9 @@ export function drawOwnershipSymbol(
     }
     case '▲': {
       context.beginPath();
-      context.moveTo(center, center - radius);
-      context.lineTo(center + radius, center + radius * 0.72);
-      context.lineTo(center - radius, center + radius * 0.72);
+      context.moveTo(center, center - radius * 0.92);
+      context.lineTo(center + radius, center + radius * 0.84);
+      context.lineTo(center - radius, center + radius * 0.84);
       context.closePath();
       context.fill();
       return;

@@ -28,7 +28,7 @@
       {#if colorBlind && !['Barbarians', 'Pirates'].includes(influencer.civilization)}
         {@const symbol = playerSymbol(influencer.owner, playerSymbols)}
         <span class="influence-symbol" data-symbol={symbol}>
-          <OwnershipSymbol {symbol} size={compact ? 7 : 8} />
+          <OwnershipSymbol {symbol} size={compact ? 6 : 8} />
         </span>
       {/if}
       {#if influencer.count > 1}
