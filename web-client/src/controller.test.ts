@@ -3394,3 +3394,187 @@ test('Great Arena auto-pays single-option Free Economy and Arts quotes and keeps
     }
   }
 });
+
+function metallurgyCollectSetup(freeEconomy = false) {
+  const game = JSON.parse(fixture('base/new_game'));
+  game.state = 'Playing';
+  game.current_player_index = 0;
+  game.starting_player_index = 0;
+  game.actions_left = 3;
+  game.players[0].civilization = 'Rome';
+  game.players[1].civilization = 'Greece';
+  const cityPos = game.players[0].cities[0].position;
+  game.players[0].cities[0].size = 2;
+  game.players[0].cities[0].mood_state = 'Happy';
+  game.players[0].advances = ['Farming', 'Mining', 'Metallurgy', ...(freeEconomy ? ['FreeEconomy'] : [])];
+  game.players[0].resources = { food: 2, wood: 2, ore: 0, ideas: 0, gold: 0, mood_tokens: freeEconomy ? 1 : 0, culture_tokens: 0 };
+  game.map.tiles = game.map.tiles.map(([pos, terrain]: [string, string]) => [
+    pos,
+    pos === cityPos ? terrain : 'Mountain',
+  ]);
+  return JSON.stringify(game);
+}
+
+test('Metallurgy queued Response survives outbox prediction mismatch on Collect and Free Economy Collect', async () => {
+  // 1. Normal Collect >= 2 ore with Metallurgy
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      let raw = metallurgyCollectSetup(false);
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(raw, 0));
+      c.beginCollect(app.session().view!.cities[0].position);
+      const oreChoices = app
+        .session()
+        .view!.cities[0].choices.filter((ch) => (ch.pile.ore ?? 0) >= 1)
+        .slice(0, 2);
+      assert.equal(oreChoices.length, 2, 'expected two ore tiles adjacent to capital');
+      for (const ch of oreChoices) c.toggleChoice(ch);
+      c.collect();
+      assert.equal(app.sent.length, 1);
+      assert.match(app.session().view!.choiceDecision?.name ?? '', /convert 1 ore to 1 gold/i);
+      // User clicks Metallurgy "Yes" ({ Response: { Bool: true } }) while Collect is still in flight.
+      const convert = app.session().view!.choiceDecision!.choices.find(
+        (ch) => JSON.stringify(ch.action) === JSON.stringify({ Response: { Bool: true } }),
+      )!;
+      assert.ok(convert);
+      c.submit(convert.action);
+      assert.equal(app.sent.length, 1, 'Response waits behind in-flight Collect');
+      assert.equal(app.session().view!.choiceDecision ?? null, null, 'Metallurgy popup closed locally');
+
+      // Server confirms Collect, but with a mismatched fingerprint while Metallurgy is still pending.
+      raw = engine.tryMove(raw, app.sent[0], 0);
+      const mismatched = JSON.parse(raw);
+      mismatched.players[1].resources.food = (mismatched.players[1].resources.food ?? 0) + 1;
+      raw = JSON.stringify(mismatched);
+      await c.load(engine.stripSecret(raw, 0));
+
+      assert.equal(app.sent.length, 2, 'queued Metallurgy Response must be automatically re-submitted');
+      assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Bool: true } });
+      assert.equal(app.session().view!.choiceDecision ?? null, null, 'Metallurgy popup must not reopen');
+
+      // Server confirms the Metallurgy Response.
+      raw = engine.tryMove(raw, app.sent[1], 0);
+      await c.load(engine.stripSecret(raw, 0));
+      assert.equal(app.session().view!.choiceDecision ?? null, null);
+      assert.ok((app.session().game!.players[0].resources?.gold ?? 0) >= 1);
+    } finally {
+      app.close();
+    }
+  }
+
+  // 2. Free Economy Collect >= 2 ore with Metallurgy
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      let raw = metallurgyCollectSetup(true);
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(raw, 0));
+      const freeOffer = app.session().view!.collectActions!.find((a) => a.free)!;
+      assert.ok(freeOffer);
+      c.beginCollect(app.session().view!.cities[0].position);
+      c.switchCollectVariant(freeOffer.value);
+      const oreChoices = app
+        .session()
+        .view!.cities[0].choices.filter((ch) => (ch.pile.ore ?? 0) >= 1)
+        .slice(0, 2);
+      for (const ch of oreChoices) c.toggleChoice(ch);
+      c.collect();
+      assert.equal(app.sent.length, 1);
+      // Local prediction auto-paid the Free Economy fee and landed on Metallurgy.
+      assert.match(app.session().view!.choiceDecision?.name ?? '', /convert 1 ore to 1 gold/i);
+      c.submit({ Response: { Bool: true } });
+      assert.equal(app.sent.length, 1);
+      assert.equal(app.session().view!.choiceDecision ?? null, null);
+
+      // Server confirms Free Economy Collect with a mismatched fingerprint (Pay for action pending).
+      raw = engine.tryMove(raw, app.sent[0], 0);
+      const mismatched = JSON.parse(raw);
+      mismatched.players[1].resources.food = (mismatched.players[1].resources.food ?? 0) + 1;
+      raw = JSON.stringify(mismatched);
+      await c.load(engine.stripSecret(raw, 0));
+
+      // Automatic payment for Free Economy is sent first, and Metallurgy stays answered (popup stays closed).
+      assert.equal(app.sent.length, 2);
+      assert.deepEqual(JSON.parse(app.sent[1]), { Response: { Payment: [{ mood_tokens: 1 }] } });
+      assert.equal(app.session().view!.choiceDecision ?? null, null, 'Metallurgy popup must not reopen');
+
+      // Server confirms the Free Economy payment -> queued Metallurgy Response is sent next.
+      raw = engine.tryMove(raw, app.sent[1], 0);
+      await c.load(engine.stripSecret(raw, 0));
+      assert.equal(app.sent.length, 3);
+      assert.deepEqual(JSON.parse(app.sent[2]), { Response: { Bool: true } });
+      assert.equal(app.session().view!.choiceDecision ?? null, null);
+    } finally {
+      app.close();
+    }
+  }
+});
+
+test('queued Response is discarded on outbox mismatch when server has a different decision or no prompt', async () => {
+  // 1. No pending decision / opponent turn
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const raw = metallurgyCollectSetup(false);
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(raw, 0));
+      c.beginCollect(app.session().view!.cities[0].position);
+      const oreChoices = app
+        .session()
+        .view!.cities[0].choices.filter((ch) => (ch.pile.ore ?? 0) >= 1)
+        .slice(0, 2);
+      for (const ch of oreChoices) c.toggleChoice(ch);
+      c.collect();
+      assert.match(app.session().view!.choiceDecision?.name ?? '', /convert 1 ore to 1 gold/i);
+      c.submit({ Response: { Bool: true } });
+      assert.equal(app.sent.length, 1);
+
+      // Authoritative state has moved to opponent's turn with no pending prompt.
+      const opponentTurn = JSON.parse(raw);
+      opponentTurn.current_player_index = 1;
+      await c.load(engine.stripSecret(JSON.stringify(opponentTurn), 0));
+      assert.equal(app.sent.length, 1, 'must NOT submit queued Response on opponent turn / no prompt');
+    } finally {
+      app.close();
+    }
+  }
+
+  // 2. Different pending decision (same player, but Pay for action instead of Metallurgy)
+  {
+    const app = paymentController(),
+      c = app.controller;
+    try {
+      const raw = metallurgyCollectSetup(true);
+      c.setPlayer(0);
+      await c.load(engine.stripSecret(raw, 0));
+      c.beginCollect(app.session().view!.cities[0].position);
+      // Use normal Collect (not Free Economy) so local prediction lands on Metallurgy.
+      const normalOffer = app.session().view!.collectActions!.find((a) => !a.free)!;
+      c.switchCollectVariant(normalOffer.value);
+      const oreChoices = app
+        .session()
+        .view!.cities[0].choices.filter((ch) => (ch.pile.ore ?? 0) >= 1)
+        .slice(0, 2);
+      for (const ch of oreChoices) c.toggleChoice(ch);
+      c.collect();
+      assert.match(app.session().view!.choiceDecision?.name ?? '', /convert 1 ore to 1 gold/i);
+      c.submit({ Response: { Bool: true } });
+      assert.equal(app.sent.length, 1);
+
+      // Authoritative state instead presents a Free Economy payment decision (different prompt).
+      const freeOffer = JSON.parse(engine.webView(raw, 0)).collectActions.find((a: { free?: boolean }) => a.free);
+      const altCollect = structuredClone(JSON.parse(app.sent[0]));
+      altCollect.Playing.Collect.action_type = freeOffer.value;
+      const diffDecisionRaw = engine.tryMove(raw, JSON.stringify(altCollect), 0);
+      await c.load(engine.stripSecret(diffDecisionRaw, 0));
+      assert.equal(app.sent.length, 1, 'must NOT submit queued Metallurgy Response to a different decision');
+      assert.equal(app.session().view!.decision?.name, 'Pay for action');
+    } finally {
+      app.close();
+    }
+  }
+});

@@ -1,7 +1,7 @@
 name: Web viewer
 on:
   pull_request:
-    paths: ['web-client/**', 'server/**', 'scripts/status-phase-battle.test.cjs', 'scripts/postcombat-queue*.cjs', 'scripts/tributes.test.cjs', 'scripts/withdrawal.test.cjs', 'scripts/viking-cargo.test.cjs', 'scripts/aggressor.test.cjs', 'scripts/great-architect.test.cjs', 'scripts/provinces*.cjs', 'scripts/barbarian-movement.test.cjs', 'scripts/disembark-stack-limit.test.cjs', 'Cargo.*', '.github/workflows/web-viewer.yml']
+    paths: ['web-client/**', 'server/**', 'scripts/status-phase-battle.test.cjs', 'scripts/postcombat-queue*.cjs', 'scripts/tributes.test.cjs', 'scripts/withdrawal.test.cjs', 'scripts/viking-cargo.test.cjs', 'scripts/aggressor.test.cjs', 'scripts/great-architect.test.cjs', 'scripts/provinces*.cjs', 'scripts/barbarian-movement.test.cjs', 'scripts/disembark-stack-limit.test.cjs', 'scripts/wonderful-objective.test.cjs', 'Cargo.*', '.github/workflows/web-viewer.yml']
   push:
     branches: [main, feat/3d-web-viewer]
 concurrency:

@@ -134,6 +134,7 @@ export class Controller {
     print: string | null;
     announced: boolean;
     continuation?: { actionPayment?: Pile; influenceRangePayment?: Pile; freeEducation?: Pile };
+    responseDecision?: string;
   }[] = [];
   private predictions: boolean;
   private moveAnnounced = false;
@@ -371,12 +372,93 @@ export class Controller {
     // The server disagrees with the prediction (or another player moved first).
     // Rewind to the last confirmed position quietly, then show the server's state
     // as a regular update so new draws, battles and recap effects are reported.
+    const tail = this.outbox.slice(1);
     this.outbox = [];
     if (this.raw !== base) this.apply(base, { quiet: true });
     this.restoreContinuation(head.continuation);
     this.apply(raw, { continuing: !!head.continuation });
+    // If the user already answered a pending prompt (e.g. Metallurgy) while an
+    // earlier move was in flight and the authoritative state still presents the
+    // exact same prompt for the same player, re-submit their Response cleanly
+    // instead of dropping it and reopening the popup.
+    const recovered =
+      this.outbox.length === 1 &&
+      tail[0] &&
+      JSON.stringify(tail[0].move) === JSON.stringify(this.outbox[0].move)
+        ? tail[1]
+        : this.outbox.length === 0
+          ? tail[0]
+          : undefined;
+    const after = get(this.session);
+    if (
+      recovered?.responseDecision &&
+      !after.error &&
+      recovered.responseDecision === this.pendingDecisionKey(after.view, after.seat) &&
+      this.canSubmitRecoveredResponse(recovered.move, after)
+    ) {
+      this.submit(recovered.move);
+    }
     if (!get(this.session).automaticPayment && !this.outbox.length) this.notify('Game updated.');
     return true;
+  }
+  private pendingDecisionKey(view: View | null | undefined, seat: number | undefined): string | undefined {
+    if (seat === undefined || !view || !(view.activePlayers ?? [view.activePlayer]).includes(seat))
+      return undefined;
+    if (view.choiceDecision) {
+      return JSON.stringify({
+        kind: 'choice',
+        seat,
+        name: view.choiceDecision.name,
+        binary: !!view.choiceDecision.binary,
+        choices: view.choiceDecision.choices.map((c) => ({ name: c.name, action: c.action })),
+      });
+    }
+    if (view.decision) {
+      return JSON.stringify({
+        kind: 'decision',
+        seat,
+        name: view.decision.name,
+        origin: view.decision.origin ?? null,
+        reward: !!view.decision.reward,
+        min: view.decision.min ?? null,
+        max: view.decision.max ?? null,
+        options: view.decision.options.map((o) => ({ value: o.value, name: o.name })),
+        fields: view.decision.fields.map((f) => ({
+          name: f.name,
+          optional: !!f.optional,
+          choices: f.choices ?? null,
+        })),
+      });
+    }
+    if (view.objectiveDecision) {
+      return JSON.stringify({
+        kind: 'objective',
+        seat,
+        name: view.objectiveDecision.name,
+        cards: view.objectiveDecision.cards.map((c) => c.id),
+        skip: view.objectiveDecision.skip,
+      });
+    }
+    if (view.explorationDecision) {
+      return JSON.stringify({
+        kind: 'exploration',
+        seat,
+        start: view.explorationDecision.start,
+        destination: view.explorationDecision.destination,
+        choices: view.explorationDecision.choices.map((c) => ({ rotation: c.rotation, action: c.action })),
+      });
+    }
+    return undefined;
+  }
+  private canSubmitRecoveredResponse(move: Move, s: Session): boolean {
+    if (s.pending || s.playback || s.analysis || s.seat === undefined) return false;
+    if (!this.engine?.tryMove || !this.raw) return true;
+    try {
+      this.engine.tryMove(this.raw, JSON.stringify(move), s.seat);
+      return true;
+    } catch {
+      return false;
+    }
   }
   private restoreContinuation(continuation?: {
     actionPayment?: Pile;
@@ -1987,8 +2069,18 @@ export class Controller {
             ...(this.quotedFreeEducation ? { freeEducation: { ...this.quotedFreeEducation } } : {}),
           }
         : undefined;
+    const responseDecision =
+      typeof move === 'object' && move !== null && 'Response' in move
+        ? this.pendingDecisionKey(s.view, s.seat)
+        : undefined;
     const predicted = this.predict(move, s);
-    this.outbox.push({ move, print: predicted?.print ?? null, announced: !!predicted, continuation });
+    this.outbox.push({
+      move,
+      print: predicted?.print ?? null,
+      announced: !!predicted,
+      continuation,
+      responseDecision,
+    });
     if (this.outbox.length === 1 && !this.sendHead()) return;
     // Show the result immediately. Queries and follow-up moves use the predicted
     // state; the host still validates every move and its state stays authoritative.

@@ -9,6 +9,7 @@
   "aggressor_eligibility_from": 0,
   "provinces_from": 0,
   "barbarian_movement_from": 0,
+  "wonderful_eligibility_from": 0,
   "home_layout": "ClockwiseV1",
   "state": "ChooseCivilization",
   "players": [

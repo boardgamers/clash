@@ -76,25 +76,58 @@ pub(crate) fn magnificent_culture() -> Objective {
     let name = "Magnificent Culture";
     Objective::builder(
         name,
-        "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders in the last round.",
+        "Immediately after constructing the first Wonder in the game, or during the Status Phase if you were the only player to construct Wonders this Age.",
     )
     .status_phase_check(|game, player| {
-        let builders = wonder_builders(last_round(game).into_iter().flat_map(|turn| &turn.actions));
+        let builders = if wonderful_corrected(game) {
+            wonder_builders(current_age_actions(game).into_iter())
+        } else {
+            wonder_builders(last_round(game).into_iter().flat_map(|turn| &turn.actions))
+        };
         !builders.is_empty() && builders.iter().all(|p| *p == player.index)
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.play_wonder_card,
         0,
         |game, player, _| {
-            let builders = wonder_builders(
-                crate::log::linear_action_entries(game).into_iter(),
-            );
-            if builders == [player.index] {
+            let builders = wonder_builders(crate::log::linear_action_entries(game).into_iter());
+            let qualifies = if wonderful_corrected(game) {
+                !builders.is_empty() && builders.iter().all(|p| *p == player.index)
+            } else {
+                builders == [player.index]
+            };
+            if qualifies {
                 objective_is_ready(player.get_mut(game), name);
             }
         },
     )
     .build()
+}
+
+fn wonderful_corrected(game: &Game) -> bool {
+    game.wonderful_eligibility_from
+        .is_some_and(|from| crate::game_api::log_length(game) >= from)
+}
+
+fn current_age_actions(game: &Game) -> Vec<&ActionLogAction> {
+    let turns: Vec<_> = game
+        .log
+        .last()
+        .into_iter()
+        .flat_map(|age| age.rounds.iter().flat_map(|round| &round.turns))
+        .collect();
+    turns
+        .iter()
+        .enumerate()
+        .flat_map(|(i, turn)| {
+            let limit = if i + 1 == turns.len() {
+                game.log_index
+            } else {
+                turn.actions.len()
+            };
+            turn.actions.iter().take(limit)
+        })
+        .collect()
 }
 
 // Construction history remains valid even after a Wonder is captured or destroyed.

@@ -458,6 +458,7 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
     game.aggressor_eligibility_from.get_or_insert(next);
     game.provinces_from.get_or_insert(next);
     game.barbarian_movement_from.get_or_insert(next);
+    game.wonderful_eligibility_from.get_or_insert(next);
     let active_events = game.events.len();
     let player = game.active_player();
     let origin = action_origin(&item, game.player(player)).clone();
@@ -475,6 +476,8 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
             game.aggressor_eligibility_from.map(|from| from.min(next));
         game.provinces_from = game.provinces_from.map(|from| from.min(next));
         game.barbarian_movement_from = game.barbarian_movement_from.map(|from| from.min(next));
+        game.wonderful_eligibility_from =
+            game.wonderful_eligibility_from.map(|from| from.min(next));
     }
     let l = &mut current_turn_log_mut(game).actions;
     remove_redo_actions(l, i);

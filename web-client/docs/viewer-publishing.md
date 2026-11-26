@@ -1915,3 +1915,25 @@ definitions, artwork 4, all 60 named assets, gallery, Standard options,
 settings, and preferences. Only the artwork manifest's lockfile integrity pin
 changes; no artwork is republished and no production moves, repairs, backfills,
 or historical rewrites are performed.
+
+# Viewer 0.1.245 / engine 0.4.175 — Wonderful objective and queued response recovery
+
+Engine objective `Wonderful` (`O32`, internal `"Magnificent Culture"`) now uses
+an independent `wonderful_eligibility_from` rule boundary so new and upgraded
+games evaluate the Status Phase across the whole current Age (excluding undone
+redo-buffer entries) and allow immediate completion whenever the constructing
+player is the sole Wonder builder in the game, while preserving legacy replay
+determinism. All 17 viewer localization catalogs are updated to match `"this Age"`.
+The viewer controller records pending decision identity on queued `Response`
+outbox entries and safely re-submits a matching user response (such as
+Metallurgy after Collect or Free Economy Collect) across an outbox prediction
+mismatch instead of dropping it and reopening the popup, while discarding queued
+responses whenever the authoritative state presents a different decision or no
+matching prompt.
+
+Require exact-commit Check and Web viewer CI green before publishing the frozen
+viewer `0.1.245` and engine `0.4.175` together. Preserve catalog 8 / 46
+definitions, artwork 4, all 60 named assets, gallery, Standard options,
+settings, and preferences. Only the artwork manifest's lockfile integrity pin
+changes; no artwork is republished and no production moves, repairs, backfills,
+or historical rewrites are performed.

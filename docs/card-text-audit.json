@@ -1685,11 +1685,6 @@
       "printed_sources_now_available": true
     },
     {
-      "name": "Magnificent Culture",
-      "issue": "The status-phase predicate does not check that no other Wonder was built. Verify Monumental Edition wording before changing the condition.",
-      "printed_sources_now_available": true
-    },
-    {
       "name": "Mercenaries",
       "issue": "Description names cities/army units for range; the code uses all owned units. Printed English wording is needed to resolve the difference.",
       "printed_sources_now_available": true

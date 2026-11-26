@@ -957,6 +957,7 @@ test('predicted undo preserves all independent persisted rule boundaries', () =>
     aggressor_eligibility_from: 1,
     provinces_from: 1,
     barbarian_movement_from: 2,
+    wonderful_eligibility_from: 6,
   };
   const current = {
     ...previous,

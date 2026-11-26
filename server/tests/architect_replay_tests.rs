@@ -157,6 +157,30 @@ fn independent_barbarian_movement_boundary_survives_full_partial_and_new_history
 }
 
 #[test]
+fn independent_wonderful_boundary_survives_full_partial_and_new_history_replay() {
+    let fixture = fixture();
+    let before = fixture["before"].as_u64().unwrap() as usize;
+    for boundary in [0, before, before + 4] {
+        let mut history = fixture["history"].clone();
+        history["wonderful_eligibility_from"] = json!(boundary);
+        let partial = replay(
+            serde_json::from_value(history.clone()).unwrap(),
+            Some(before),
+        )
+        .unwrap();
+        assert_eq!(
+            partial.wonderful_eligibility_from,
+            Some(boundary.min(before + 1))
+        );
+        let full = replay(serde_json::from_value(history).unwrap(), None).unwrap();
+        assert_eq!(full.wonderful_eligibility_from, Some(boundary));
+        let saved = serde_json::to_value(full.cloned_data()).unwrap();
+        let replayed = replay(serde_json::from_value(saved).unwrap(), None).unwrap();
+        assert_eq!(replayed.wonderful_eligibility_from, Some(boundary));
+    }
+}
+
+#[test]
 fn architect_redo_keeps_recorded_cost_policy_but_replacing_future_charges() {
     let fixture = fixture();
     let history = || serde_json::from_value(fixture["history"].clone()).unwrap();
