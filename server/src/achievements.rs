@@ -206,6 +206,9 @@ pub fn definitions() -> Manifest {
 
 /// Evaluate only authoritative finished games, without modifying game state.
 /// Dropped seats and non-human civilizations never receive awards or affect wins.
+/// Early withdrawal victories (all opponents dropped before the final age) still award
+/// earned board-state feats and wonders to the surviving seat, while withholding
+/// completion, length-win, builder-completion, and faction-win awards.
 ///
 /// # Panics
 /// Panics if a game length is added without a corresponding catalog entry.
@@ -223,14 +226,19 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
         .iter()
         .find(|(length, _, _)| *length == game.options.length)
         .expect("all game lengths have achievement IDs");
+    let in_final_age = game.age >= game.options.length.ages() || game.variable_end.is_some();
+    let early_withdrawal = !game.dropped_players.is_empty() && players.len() == 1 && !in_final_age;
     players
         .iter()
         .map(|p| {
-            let mut awards = vec![format!("complete-{length}")];
-            if players.iter().all(|other| {
-                p.index == other.index || compare_score(p, other, game) == Ordering::Greater
-            }) {
-                awards.push(format!("win-{length}"));
+            let mut awards = Vec::new();
+            if !early_withdrawal {
+                awards.push(format!("complete-{length}"));
+                if players.iter().all(|other| {
+                    p.index == other.index || compare_score(p, other, game) == Ordering::Greater
+                }) {
+                    awards.push(format!("win-{length}"));
+                }
             }
             let score = p.victory_points(game);
             let predicates = [
@@ -269,15 +277,17 @@ pub fn achievements(game: &Game) -> Vec<SeatAchievements> {
             } else {
                 "win"
             };
-            if game.options.variant == GameVariant::Builder {
-                awards.push("complete-builder".into());
-            }
-            if outcome == "win"
-                && let Some((_, slug)) = FACTIONS
-                    .iter()
-                    .find(|(name, _)| *name == p.civilization.name)
-            {
-                awards.push(format!("win-{slug}"));
+            if !early_withdrawal {
+                if game.options.variant == GameVariant::Builder {
+                    awards.push("complete-builder".into());
+                }
+                if outcome == "win"
+                    && let Some((_, slug)) = FACTIONS
+                        .iter()
+                        .find(|(name, _)| *name == p.civilization.name)
+                {
+                    awards.push(format!("win-{slug}"));
+                }
             }
             SeatAchievements {
                 seat: p.index,
@@ -914,5 +924,177 @@ mod tests {
         let json = serde_json::to_value(&awards).expect("serialize awards");
         assert_eq!(json[0]["seat"], 0);
         assert!(json[0]["earned"].is_array());
+    }
+
+    #[test]
+    fn early_withdrawal_withholds_win_and_completion_but_keeps_feats_and_wonders() {
+        for (length, length_id, _) in LENGTHS {
+            for variant in [GameVariant::Standard, GameVariant::Builder] {
+                // Turn-1 withdrawal: no feats or wonders earned, no win/completion farming.
+                let mut turn1 = setup_variant(length.clone(), variant.clone());
+                turn1.age = 1;
+                turn1.round = 1;
+                turn1.drop_player(1);
+                assert_eq!(turn1.state, GameState::Finished);
+                let turn1_results = achievements(&turn1);
+                assert_eq!(turn1_results.len(), 1);
+                assert_eq!(turn1_results[0].seat, 0);
+                assert_eq!(turn1_results[0].outcome, "win");
+                assert!(
+                    turn1_results[0].earned.is_empty(),
+                    "turn-1 drop should not earn awards for {length_id}: {:?}",
+                    turn1_results[0].earned
+                );
+
+                // Mid-game withdrawal (just before final age) with earned feats and wonders.
+                let mut game = setup_variant(length.clone(), variant.clone());
+                game.age = length.ages() - 1;
+                game.round = 3;
+                let positions: Vec<_> = game.map.tiles.keys().copied().take(7).collect();
+                {
+                    let p = game.player_mut(0);
+                    p.cities = positions.iter().map(|pos| City::new(0, *pos)).collect();
+                    p.advances = EnumSet::<Advance>::all().iter().take(30).collect();
+                    p.completed_objectives = (0..7)
+                        .map(|i| CompletedObjective {
+                            card: i as u8,
+                            name: format!("test {i}"),
+                        })
+                        .collect();
+                    p.wonders_built = vec![Wonder::Pyramids, Wonder::Colosseum];
+                    p.captured_leaders = vec![Leader::Alexander];
+                }
+                set_score(&mut game, 0, 60.0);
+                // Give dropped seat feats too to verify dropped seats still get nothing.
+                game.player_mut(1).wonders_built = vec![Wonder::GreatWall];
+                set_score(&mut game, 1, 100.0);
+
+                game.drop_player(1);
+                assert_eq!(game.state, GameState::Finished);
+                let results = achievements(&game);
+                assert_eq!(results.len(), 1);
+                assert_eq!(results[0].seat, 0);
+                assert_eq!(results[0].outcome, "win");
+                for withheld in [
+                    format!("complete-{length_id}"),
+                    format!("win-{length_id}"),
+                    "complete-builder".to_string(),
+                    "win-rome".to_string(),
+                ] {
+                    assert!(
+                        !has(&game, 0, &withheld),
+                        "should withhold {withheld} on early withdrawal ({length_id})"
+                    );
+                }
+                for kept in [
+                    "score-30",
+                    "score-40",
+                    "score-50",
+                    "score-60",
+                    "seven-cities",
+                    "twenty-advances",
+                    "thirty-advances",
+                    "three-objectives",
+                    "five-objectives",
+                    "seven-objectives",
+                    "two-wonders-built",
+                    "captured-leader",
+                    "built-great-pyramids",
+                    "built-great-arena",
+                ] {
+                    assert!(
+                        has(&game, 0, kept),
+                        "should still award {kept} on early withdrawal ({length_id})"
+                    );
+                }
+                assert!(!has(&game, 1, "built-great-wall"));
+                assert!(!has(&game, 1, "score-60"));
+            }
+        }
+    }
+
+    #[test]
+    fn final_age_and_variable_end_withdrawals_award_win_and_completion() {
+        for (length, length_id, _) in LENGTHS {
+            for variant in [GameVariant::Standard, GameVariant::Builder] {
+                let mut game = setup_variant(length.clone(), variant.clone());
+                game.age = length.ages();
+                game.round = 1;
+                game.drop_player(1);
+                assert_eq!(game.state, GameState::Finished);
+                let results = achievements(&game);
+                assert_eq!(results.len(), 1);
+                assert_eq!(results[0].seat, 0);
+                assert_eq!(results[0].outcome, "win");
+                assert!(has(&game, 0, &format!("complete-{length_id}")));
+                assert!(has(&game, 0, &format!("win-{length_id}")));
+                assert!(has(&game, 0, "win-rome"));
+                assert_eq!(
+                    has(&game, 0, "complete-builder"),
+                    variant == GameVariant::Builder
+                );
+            }
+        }
+
+        // Variable-end games triggered in age 6 count as final-age end-of-game.
+        for (length, length_id, variable_end) in [
+            (
+                GameLength::RollToEnd,
+                "roll-to-end",
+                crate::game::VariableEnd::RollToEnd,
+            ),
+            (
+                GameLength::WonderfulEnding,
+                "wonderful-ending",
+                crate::game::VariableEnd::WonderfulEnding,
+            ),
+        ] {
+            let mut game = setup(length);
+            game.age = 6;
+            game.round = 2;
+            game.variable_end = Some(variable_end);
+            game.drop_player(1);
+            assert_eq!(game.state, GameState::Finished);
+            assert!(has(&game, 0, &format!("complete-{length_id}")));
+            assert!(has(&game, 0, &format!("win-{length_id}")));
+            assert!(has(&game, 0, "win-rome"));
+        }
+    }
+
+    #[test]
+    fn multiplayer_partial_drop_before_final_age_does_not_block_remaining_players() {
+        let mut game = setup_game(
+            &GameSetupBuilder::new(3)
+                .seed("achievements-3p-drop".into())
+                .assigned_civilizations(vec!["Rome".into(), "Greece".into(), "Egypt".into()])
+                .build(),
+        );
+        game.age = 2;
+        game.round = 1;
+        // Seat 2 drops early, leaving seats 0 and 1 to finish the game.
+        game.dropped_players.push(2);
+        game.state = GameState::Finished;
+        set_score(&mut game, 0, 35.0);
+        set_score(&mut game, 1, 20.0);
+        set_score(&mut game, 2, 100.0);
+        let results = achievements(&game);
+        assert_eq!(results.len(), 2);
+        assert!(has(&game, 0, "complete-standard"));
+        assert!(has(&game, 0, "win-standard"));
+        assert!(has(&game, 0, "win-rome"));
+        assert!(has(&game, 1, "complete-standard"));
+        assert!(!has(&game, 1, "win-standard"));
+        assert!(results.iter().all(|r| r.seat != 2));
+
+        // If seat 1 also drops before the final age, only seat 0 remains -> early withdrawal.
+        game.dropped_players.push(1);
+        let results = achievements(&game);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].seat, 0);
+        assert_eq!(results[0].outcome, "win");
+        assert!(has(&game, 0, "score-30"));
+        assert!(!has(&game, 0, "complete-standard"));
+        assert!(!has(&game, 0, "win-standard"));
+        assert!(!has(&game, 0, "win-rome"));
     }
 }
