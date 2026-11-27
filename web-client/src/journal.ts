@@ -4,6 +4,7 @@ import type { Game, JournalEntry, JournalToken, LoggedAction, Pile, Player, Reso
 import type { View } from './types.ts';
 import { explainEvents } from './event-journal.ts';
 import { collectionCities, explainCollection } from './collection-journal.ts';
+import { formatRollToEndNote } from './game-length.ts';
 
 const resourceIcons: Record<string, Resource | 'action'> = {
   food: 'food',
@@ -231,6 +232,10 @@ function addClause(entry: JournalEntry, clause: string, payments: PaymentLog[]):
     return;
   }
   if (entry.kind === 'end-turn' && clause === '0 actions left') return;
+  if (entry.title === 'Roll to End') {
+    entry.notes.push(formatRollToEndNote(clause));
+    return;
+  }
   // Unrecognized rules, combat details, and named/private card text remain intact.
   entry.notes.push(clause);
 }

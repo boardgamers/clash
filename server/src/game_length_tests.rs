@@ -168,6 +168,27 @@ fn every_roll_boundary_precedes_turn_start_and_cannot_be_undone() {
                 1,
             );
             assert_eq!(game.dice_roll_log.last(), Some(&((roll - 1) * 2)));
+            let expected_log = if threshold == 6 {
+                format!("Roll to End: {roll} (end on 6)")
+            } else {
+                format!("Roll to End: {roll} (end on {threshold}–6)")
+            };
+            let logged_roll = game
+                .log
+                .iter()
+                .flat_map(|a| &a.rounds)
+                .flat_map(|r| &r.turns)
+                .flat_map(|t| &t.actions)
+                .flat_map(|a| &a.items)
+                .find_map(|item| match &item.entry {
+                    crate::log::ActionLogEntry::Text(text)
+                        if matches!(&item.origin, EventOrigin::Ability(name) if name == "Roll to End") =>
+                    {
+                        Some(text.as_str())
+                    }
+                    _ => None,
+                });
+            assert_eq!(logged_roll, Some(expected_log.as_str()));
             assert_eq!(matches!(game.state, GameState::Finished), roll >= threshold);
             assert_eq!(game.variable_end.is_some(), roll >= threshold);
             assert!(!game.can_undo());

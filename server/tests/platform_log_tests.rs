@@ -172,3 +172,27 @@ fn advance_action_fallback_uses_printed_action_name_without_changing_replay_data
     );
     assert_eq!(serde_json::to_value(entries[0].action).unwrap(), action);
 }
+
+#[test]
+fn roll_to_end_summary_shows_roll_result_instead_of_started_turn() {
+    let mut game = common::JsonTest::new("advances").load_game("collect_free_economy");
+    let start = log_length(&game);
+    append(
+        &mut game,
+        serde_json::json!({
+            "player": 0,
+            "action": "StartTurn",
+            "items": [
+                {"player": 0, "origin": {"Ability": "Roll to End"}, "Text": "Roll to End: 2 (end on 6)"}
+            ]
+        }),
+    );
+    let entries = platform_log_slice(&game, &options(start, None));
+    assert_eq!(
+        entries[0].text,
+        format!(
+            "{}: Roll to End: 2 (end on 6)",
+            game.players[0].civilization.name
+        )
+    );
+}

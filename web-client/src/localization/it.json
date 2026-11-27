@@ -5311,5 +5311,8 @@
   "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})",
   "Settlers blocked by Huns’ Raiders": "Coloni bloccati dai Razziatori degli Unni",
   "Influenced by {p0}": "Influenzata da {p0}",
-  "{p0} ({p1})": "{p0} ({p1})"
+  "{p0} ({p1})": "{p0} ({p1})",
+  "Roll to End: {p0} (end on 6)": "Fine con il dado: {p0} (fine con 6)",
+  "{p0} (end on 6)": "{p0} (fine con 6)",
+  "{p0} (end on {p1}–6)": "{p0} (fine con {p1}–6)"
 }

@@ -1,8 +1,18 @@
 <script lang="ts">
-  import { Dice5, Landmark, Info, X } from 'lucide-svelte';
+  import { Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, Landmark, Info, X } from 'lucide-svelte';
   import type { Game } from './types';
-  import { ageCount, ageLabel, lengthRule, lengthName, variableEndThreshold } from './game-length';
+  import {
+    ageCount,
+    ageLabel,
+    currentRollToEnd,
+    formatRollToEnd,
+    lengthName,
+    lengthRule,
+    rollToEndRolls,
+    variableEndThreshold,
+  } from './game-length';
   import { currentLocale, translateText } from './localization';
+  const dieIcons = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6] as const;
   let {
     game,
     age,
@@ -16,7 +26,15 @@
   const mode = $derived(game?.options?.length ?? 'Standard');
   const variable = $derived(mode === 'RollToEnd' || mode === 'WonderfulEnding');
   const threshold = $derived(variableEndThreshold(age, round));
+  const rolls = $derived(mode === 'RollToEnd' ? rollToEndRolls(game) : []);
+  const rollsByRound = $derived(
+    new Map(rolls.map((entry) => [`${entry.age}:${entry.round}`, entry])),
+  );
+  const currentRoll = $derived(mode === 'RollToEnd' ? currentRollToEnd(game, age, round) : null);
   const triggered = $derived(game?.variable_end === 'WonderfulEnding' && game?.state !== 'Finished');
+  function formatThreshold(value: number) {
+    return value === 6 ? '6' : `${value}–6`;
+  }
   function toggle(value: number, event: MouseEvent) {
     opener = event.currentTarget as HTMLButtonElement;
     selected = selected === value ? null : value;
@@ -55,7 +73,11 @@
       >
         {ageLabel(step)}
         {#if variable && step >= 6}
-          <span class="age-end-icon" class:inactive={step === age && threshold === null} aria-hidden="true">
+          <span
+            class="age-end-icon"
+            class:inactive={step === age && threshold === null && currentRoll === null}
+            aria-hidden="true"
+          >
             {#if mode === 'RollToEnd'}<Dice5 size={14} />{:else}<Landmark size={12} />{/if}
           </span>
         {:else if step === ageCount(game)}<span class="age-end-icon" aria-hidden="true"
@@ -77,6 +99,21 @@
         aria-controls="age-length-details"
         ><Landmark size={12} />{t(triggered ? 'Ends this round' : 'Wonder to end')}</button
       >
+    {:else if mode === 'RollToEnd' && currentRoll !== null}
+      {@const DieIcon = dieIcons[currentRoll.roll - 1] ?? Dice5}
+      {@const rollLabel = t(formatRollToEnd(currentRoll.roll, currentRoll.threshold))}
+      <button
+        class="age-phase"
+        class:ended={currentRoll.ended}
+        onclick={(event) => toggle(currentRoll.age, event)}
+        aria-label={rollLabel}
+        title={rollLabel}
+        aria-expanded={selected !== null}
+        aria-controls="age-length-details"
+        ><DieIcon size={14} /><span class="age-roll-value">{currentRoll.roll}</span><span
+          class="age-roll-threshold">/ {formatThreshold(currentRoll.threshold)}</span
+        ></button
+      >
     {:else if mode === 'RollToEnd' && threshold !== null}
       <button
         class="age-phase"
@@ -85,7 +122,7 @@
         title={t(lengthRule(game))}
         aria-expanded={selected !== null}
         aria-controls="age-length-details"
-        ><Dice5 size={14} />{threshold === 6 ? '6' : `${threshold}–6`}</button
+        ><Dice5 size={14} />{formatThreshold(threshold)}</button
       >
     {/if}
   </small>
@@ -101,17 +138,25 @@
             ><tr
               ><th scope="col">{t('Age')}</th><th scope="col">{t('Round')}</th><th scope="col"
                 >{t('End on')}</th
-              ></tr
+              ><th scope="col">{t('Roll')}</th></tr
             ></thead
           >
           <tbody>
             {#each [[6, 2, 6], [6, 3, 5], [7, 1, 4], [7, 2, 3], [7, 3, 2]] as [endAge, endRound, endThreshold]}
+              {@const rowRoll = rollsByRound.get(`${endAge}:${endRound}`) ?? null}
               <tr
                 class:current={age === endAge && round === endRound}
+                class:ended={rowRoll?.ended}
                 aria-current={age === endAge && round === endRound ? 'step' : undefined}
               >
                 <td>{ageLabel(endAge)}</td><td>{endRound}</td><td
-                  >{endThreshold === 6 ? '6' : `${endThreshold}–6`}</td
+                  >{formatThreshold(endThreshold)}</td
+                ><td class="age-roll-cell"
+                  >{#if rowRoll}{@const RowDie = dieIcons[rowRoll.roll - 1] ?? Dice5}<span
+                      class="age-roll-result"
+                      class:ended={rowRoll.ended}
+                      ><RowDie size={13} aria-hidden="true" />{rowRoll.roll}</span
+                    >{:else}<span class="age-roll-empty">—</span>{/if}</td
                 >
               </tr>
             {/each}

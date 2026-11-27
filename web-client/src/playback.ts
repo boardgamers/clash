@@ -5,6 +5,7 @@ import { influenceRecap } from './influence-recap.ts';
 import { activeHistory } from './active-history.ts';
 import { officialWonderText, wonderName } from './wonder-names.ts';
 import { printedCardName, printedCardText } from './card-names.ts';
+import { normalizeRollToEndText } from './game-length.ts';
 
 export function recapStart(game: Game, seat: number | undefined, seen = 0): number | null {
   if (game.state === 'Finished') return null;
@@ -323,6 +324,12 @@ export function frameDetails(
       const prefix = gain.player === frame.actor ? '' : `${player ?? 'Player'}: `;
       if (gained) details.push(`${prefix}${frame.title === 'Collect' ? 'collected' : 'gained'} ${gained}`);
       if (waste) details.push(`${prefix}${waste} not stored`);
+    }
+    for (const item of items) {
+      if (item.origin?.Ability === 'Roll to End' && typeof item.Text === 'string') {
+        const text = normalizeRollToEndText(item.Text);
+        if (!details.includes(text)) details.push(text);
+      }
     }
     if (generic && !details.length) {
       const result = items

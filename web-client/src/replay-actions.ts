@@ -39,7 +39,9 @@ export function frameHasContent(game: Game, before: BoardFrame | undefined, fram
             (key) =>
               !['player', 'origin', 'Text'].includes(key) &&
               (key !== 'Resources' || Object.values(item.Resources?.resources ?? {}).some(Boolean)),
-          ) || item.Text?.startsWith('triggers the event '),
+          ) ||
+          item.Text?.startsWith('triggers the event ') ||
+          item.origin?.Ability === 'Roll to End',
       ),
     )
   )

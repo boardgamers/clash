@@ -607,3 +607,58 @@ test('legacy and current action frame titles share display labels without mutati
     }
   }
 });
+
+test('recap keeps Roll to End frames across turn boundaries and normalizes legacy 6–6 captions', () => {
+  for (const [raw, expected] of [
+    ['Roll to End: 2 (end on 6–6)', 'Roll to End: 2 (end on 6)'],
+    ['Roll to End: 6 (end on 6)', 'Roll to End: 6 (end on 6)'],
+    ['Roll to End: 3 (end on 5–6)', 'Roll to End: 3 (end on 5–6)'],
+  ]) {
+    const before = {
+      cursor: 1,
+      actor: 0,
+      title: 'Action',
+      tiles: [],
+      players: [{ id: 0, civilization: 'Rome', cities: [], units: [] }],
+    } as unknown as BoardFrame;
+    const after = {
+      cursor: 3,
+      actor: 0,
+      ended_turn: true,
+      title: 'End turn',
+      tiles: [],
+      players: [{ id: 0, civilization: 'Rome', cities: [], units: [] }],
+    } as unknown as BoardFrame;
+    const rollGame = {
+      log_index: 2,
+      log: [
+        {
+          age: 6,
+          rounds: [
+            {
+              round: 1,
+              turns: [{ turn_type: { Player: 0 }, actions: [{ action: { Playing: 'EndTurn' }, items: [] }] }],
+            },
+            {
+              round: 2,
+              turns: [
+                {
+                  turn_type: { Player: 0 },
+                  actions: [
+                    { action: { Playing: 'EndTurn' }, items: [] },
+                    {
+                      action: 'StartTurn',
+                      items: [{ player: 0, origin: { Ability: 'Roll to End' }, Text: raw }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as unknown as Game;
+    assert.equal(frameHasContent(rollGame, before, after), true);
+    assert.equal(frameDetails(before, after, rollGame).caption, `Rome · End turn · ${expected}`);
+  }
+});

@@ -6818,11 +6818,31 @@ button.age-step.current {
   font: inherit;
   color: var(--ink);
   background: transparent;
-  padding: 2px;
-  border: 0;
+  padding: 1px 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   cursor: pointer;
+  white-space: nowrap;
   text-decoration: underline dotted;
   text-underline-offset: 3px;
+}
+.age-phase.ended {
+  padding: 1px 7px;
+  border-color: color-mix(in srgb, var(--gold) 58%, var(--line));
+  background: color-mix(in srgb, var(--gold) 22%, var(--paper));
+  text-decoration: none;
+}
+.age-roll-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.age-roll-threshold {
+  color: var(--muted);
+  font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
+}
+.age-phase.ended .age-roll-threshold {
+  color: color-mix(in srgb, var(--ink) 72%, var(--muted));
 }
 .age-length-details {
   position: absolute;
@@ -6870,6 +6890,26 @@ button.age-step.current {
 .age-end-thresholds tr.current {
   background: color-mix(in srgb, var(--ink) 9%, var(--paper));
   font-weight: bold;
+}
+.age-roll-cell {
+  white-space: nowrap;
+}
+.age-roll-result {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-weight: 600;
+}
+.age-roll-result.ended {
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--gold) 58%, var(--line));
+  background: color-mix(in srgb, var(--gold) 22%, var(--paper));
+  font-weight: 700;
+}
+.age-roll-empty {
+  color: var(--muted);
 }
 
 .age-details-close {

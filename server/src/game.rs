@@ -599,10 +599,15 @@ impl Game {
             add_turn_log(self, TurnType::Player(self.current_player_index));
             add_start_turn_action_if_needed(self, self.current_player_index);
             let roll = self.next_dice_roll().value;
+            let text = if threshold == 6 {
+                format!("Roll to End: {roll} (end on 6)")
+            } else {
+                format!("Roll to End: {roll} (end on {threshold}–6)")
+            };
             self.log(
                 self.current_player_index,
                 &EventOrigin::Ability("Roll to End".into()),
-                &format!("Roll to End: {roll} (end on {threshold}–6)"),
+                &text,
             );
             if roll >= threshold {
                 self.variable_end = Some(VariableEnd::RollToEnd);

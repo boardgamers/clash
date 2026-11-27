@@ -2,7 +2,18 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { ageCount, ageLabel, lengthRule, lengthName, variableEndThreshold } from './game-length.ts';
+import {
+  ageCount,
+  ageLabel,
+  currentRollToEnd,
+  formatRollToEnd,
+  formatRollToEndNote,
+  lengthName,
+  lengthRule,
+  normalizeRollToEndText,
+  rollToEndRolls,
+  variableEndThreshold,
+} from './game-length.ts';
 import type { Game } from './types.ts';
 
 const engine = createRequire(import.meta.url)(process.env.CLASH_TEST_ENGINE ?? '../.engine/server.js');
@@ -149,6 +160,7 @@ test('age-track captions exist in all 17 catalogs', () => {
       'Age',
       'Round',
       'End on',
+      'Roll',
       'Wonder to end',
       'Ends this round',
     ]) {
@@ -162,4 +174,157 @@ test('wonder rule starts at a human-readable age and round', () => {
     lengthRule({ options: { length: 'WonderfulEnding' } } as Game),
     'Starting from age 6, round 2, building a wonder ends the game after that round. Then complete objectives.',
   );
+});
+
+function rollAction(text: string, ability = 'Roll to End') {
+  return {
+    player: 0,
+    action: 'StartTurn',
+    items: [{ player: 0, origin: { Ability: ability }, Text: text }],
+  };
+}
+
+test('rollToEndRolls parses 6–6 and 6 formats across ages and marks ending rolls', () => {
+  assert.deepEqual(rollToEndRolls(null), []);
+  const game = {
+    options: { length: 'RollToEnd' },
+    log_index: 2,
+    log: [
+      {
+        age: 6,
+        rounds: [
+          {
+            round: 2,
+            turns: [
+              {
+                turn_type: { Player: 0 },
+                actions: [
+                  rollAction('Roll to End: 2 (end on 6–6)'),
+                  rollAction('Roll to End: 4 (end on 6)', 'OtherAbility'),
+                  rollAction('Unrelated text'),
+                ],
+              },
+            ],
+          },
+          {
+            round: 3,
+            turns: [{ turn_type: { Player: 0 }, actions: [rollAction('Roll to End: 3 (end on 5–6)')] }],
+          },
+        ],
+      },
+      {
+        age: 7,
+        rounds: [
+          {
+            round: 1,
+            turns: [
+              {
+                turn_type: { Player: 0 },
+                actions: [
+                  rollAction('Roll to End: 4 (end on 6)'),
+                  rollAction('Roll to End: 5 (end on 4–6)'),
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as unknown as Game;
+
+  assert.deepEqual(rollToEndRolls(game), [
+    { age: 6, round: 2, roll: 2, threshold: 6, ended: false },
+    { age: 6, round: 3, roll: 3, threshold: 5, ended: false },
+    { age: 7, round: 1, roll: 4, threshold: 6, ended: false },
+    { age: 7, round: 1, roll: 5, threshold: 4, ended: true },
+  ]);
+});
+
+test('rollToEndRolls ignores undone actions past log_index', () => {
+  const game = {
+    options: { length: 'RollToEnd' },
+    log_index: 1,
+    log: [
+      {
+        age: 6,
+        rounds: [
+          {
+            round: 2,
+            turns: [
+              {
+                turn_type: { Player: 0 },
+                actions: [
+                  rollAction('Roll to End: 2 (end on 6–6)'),
+                  rollAction('Roll to End: 6 (end on 6–6)'),
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as unknown as Game;
+
+  assert.deepEqual(rollToEndRolls(game), [{ age: 6, round: 2, roll: 2, threshold: 6, ended: false }]);
+});
+
+test('currentRollToEnd returns current round roll or falls back to ending roll in final status/finished state', () => {
+  const game = {
+    options: { length: 'RollToEnd' },
+    variable_end: 'RollToEnd',
+    log_index: 1,
+    log: [
+      {
+        age: 6,
+        rounds: [
+          { round: 2, turns: [{ turn_type: { Player: 0 }, actions: [rollAction('Roll to End: 2 (end on 6–6)')] }] },
+          { round: 3, turns: [{ turn_type: { Player: 0 }, actions: [rollAction('Roll to End: 3 (end on 5–6)')] }] },
+        ],
+      },
+      {
+        age: 7,
+        rounds: [
+          { round: 1, turns: [{ turn_type: { Player: 0 }, actions: [rollAction('Roll to End: 5 (end on 4–6)')] }] },
+        ],
+      },
+    ],
+  } as unknown as Game;
+
+  assert.deepEqual(currentRollToEnd(game, 6, 3), {
+    age: 6,
+    round: 3,
+    roll: 3,
+    threshold: 5,
+    ended: false,
+  });
+  assert.deepEqual(currentRollToEnd(game, 7, 1), {
+    age: 7,
+    round: 1,
+    roll: 5,
+    threshold: 4,
+    ended: true,
+  });
+  // Status phase / Finished fallback to latest ending roll
+  assert.deepEqual(currentRollToEnd(game, 7, 4), {
+    age: 7,
+    round: 1,
+    roll: 5,
+    threshold: 4,
+    ended: true,
+  });
+
+  // Without variable_end, a round with no roll returns null
+  const activeGame = { ...game, variable_end: undefined } as unknown as Game;
+  assert.equal(currentRollToEnd(activeGame, 7, 2), null);
+});
+
+test('Roll to End formatters use end on 6 and normalize legacy end on 6–6', () => {
+  assert.equal(formatRollToEnd(2, 6), 'Roll to End: 2 (end on 6)');
+  assert.equal(formatRollToEnd(5, 4), 'Roll to End: 5 (end on 4–6)');
+  assert.equal(normalizeRollToEndText('Roll to End: 2 (end on 6–6)'), 'Roll to End: 2 (end on 6)');
+  assert.equal(normalizeRollToEndText('Roll to End: 2 (end on 6)'), 'Roll to End: 2 (end on 6)');
+  assert.equal(normalizeRollToEndText('Roll to End: 3 (end on 5–6)'), 'Roll to End: 3 (end on 5–6)');
+  assert.equal(formatRollToEndNote('Roll to End: 2 (end on 6–6)'), '2 (end on 6)');
+  assert.equal(formatRollToEndNote('Roll to End: 2 (end on 6)'), '2 (end on 6)');
+  assert.equal(formatRollToEndNote('Roll to End: 3 (end on 5–6)'), '3 (end on 5–6)');
 });

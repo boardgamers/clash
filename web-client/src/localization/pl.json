@@ -5311,5 +5311,8 @@
   "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})",
   "Settlers blocked by Huns’ Raiders": "Osadnicy zablokowani przez najeźdźców Hunów",
   "Influenced by {p0}": "Pod wpływem: {p0}",
-  "{p0} ({p1})": "{p0} ({p1})"
+  "{p0} ({p1})": "{p0} ({p1})",
+  "Roll to End: {p0} (end on 6)": "Koniec po rzucie: {p0} (koniec przy 6)",
+  "{p0} (end on 6)": "{p0} (koniec przy 6)",
+  "{p0} (end on {p1}–6)": "{p0} (koniec przy {p1}–6)"
 }

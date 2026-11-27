@@ -1,6 +1,7 @@
 //! Short public outcomes for the platform's last-move chip, independent of viewer state.
 use crate::action::Action;
 use crate::card::HandCardLocation;
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::{ActionLogAction, ActionLogBalance, ActionLogEntry};
 use crate::playing_actions::PlayingAction;
@@ -115,6 +116,9 @@ pub(crate) fn summary(game: &Game, entry: &ActionLogAction) -> String {
                 "Rolled {} combat value, {} hits",
                 r.combat_value, r.hits
             )),
+            ActionLogEntry::Text(text) if matches!(&item.origin, EventOrigin::Ability(name) if name == "Roll to End") => {
+                Some(text.clone())
+            }
             _ => None,
         };
         if let Some(text) = text {

@@ -426,3 +426,28 @@ test('legacy research log origins and current advance origins group the same car
     assert.equal(entries[0].title, 'Advance');
   }
 });
+
+test('Roll to End journal entries avoid duplicating the prefix and normalize legacy 6–6', () => {
+  const entries = journal(
+    game([
+      {
+        action: 'StartTurn',
+        items: [{ player: 0, origin: { Ability: 'Roll to End' }, Text: 'Roll to End: 2 (end on 6–6)' }],
+      },
+      {
+        action: 'StartTurn',
+        items: [{ player: 0, origin: { Ability: 'Roll to End' }, Text: 'Roll to End: 6 (end on 6)' }],
+      },
+      {
+        action: 'StartTurn',
+        items: [{ player: 0, origin: { Ability: 'Roll to End' }, Text: 'Roll to End: 3 (end on 5–6)' }],
+      },
+    ]),
+  );
+  assert.equal(entries.length, 3);
+  assert.equal(entries[0].title, 'Roll to End');
+  assert.deepEqual(entries[0].notes, ['2 (end on 6)']);
+  assert.equal(entries[0].text, 'Vikings · Roll to End · 2 (end on 6)');
+  assert.deepEqual(entries[1].notes, ['6 (end on 6)']);
+  assert.deepEqual(entries[2].notes, ['3 (end on 5–6)']);
+});

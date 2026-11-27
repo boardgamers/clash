@@ -1937,3 +1937,21 @@ definitions, artwork 4, all 60 named assets, gallery, Standard options,
 settings, and preferences. Only the artwork manifest's lockfile integrity pin
 changes; no artwork is republished and no production moves, repairs, backfills,
 or historical rewrites are performed.
+
+# Viewer 0.1.246 / engine 0.4.177 — Roll-to-End visibility and log polish
+
+Engine `0.4.177` logs Roll-to-End threshold-6 rolls as `Roll to End: {roll} (end on 6)`
+instead of `6–6`, exposes Roll-to-End results in `platform_log_slice` instead of
+falling back to `Started turn`, and builds on the early-withdrawal achievement
+withholding shipped in `0.4.176`. The viewer displays the current Roll-to-End
+result pill and per-round roll history table in the Age Track, keeps Roll-to-End
+frames in "Since your last turn" recap and playback captions (normalizing legacy
+`6–6` to `6`), avoids duplicating the `Roll to End:` prefix in Journal notes, and
+updates all 17 localization catalogs.
+
+Require exact-commit Check and Web viewer CI green before publishing the frozen
+viewer `0.1.246` and engine `0.4.177` together. Preserve catalog 8 / 46
+definitions, artwork 4, all 60 named assets, gallery, Standard options,
+settings, and preferences. Only the artwork manifest's lockfile integrity pin
+changes; no artwork is republished and no production moves, repairs, backfills,
+or historical rewrites are performed.

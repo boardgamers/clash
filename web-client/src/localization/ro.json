@@ -5311,5 +5311,8 @@
   "{p0} #{p1} ({p2} + {p3} / {p4})": "{p0} #{p1} ({p2} + {p3} / {p4})",
   "Settlers blocked by Huns’ Raiders": "Coloniști blocați de Jefuitorii hunilor",
   "Influenced by {p0}": "Influențat de {p0}",
-  "{p0} ({p1})": "{p0} ({p1})"
+  "{p0} ({p1})": "{p0} ({p1})",
+  "Roll to End: {p0} (end on 6)": "Final prin zar: {p0} (final la 6)",
+  "{p0} (end on 6)": "{p0} (final la 6)",
+  "{p0} (end on {p1}–6)": "{p0} (final la {p1}–6)"
 }
